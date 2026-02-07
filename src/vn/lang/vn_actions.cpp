@@ -817,11 +817,11 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 
 // Productions using 【 】: 
-// - Default away the CPPTree:: (it's sugar, but the bulkiness of these is affecting my decisions!)
 // - Try again at TypeOf->TypeIs etc
 // - AFTER adding C mixture, try using () and making things look like printf etc
 
 // Try c-style cast again, this time at a strictly lower precedence than the other prefix ops, per https://alx71hub.github.io/hcb/#statement
+// Depends on whether we allow () on types. Not C, but avoids heavy reliance on designations
 
 // NOTE ON CONSTRUCTORS
 // Since VN uses "bound" C++, we will always need to specify which of possibly overloaded constructors we are
@@ -834,11 +834,10 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // - There are other interesting things here, like assign and ?: are not merged, ?: is higher and some RValue-like cases go straight to ?:, excluding assign - reproduce in parser and renderer, don't accept what C++ doesn't!
 // - I think norm_/normal can become expr_
 // - Labels will need their own "stuff" I think, otherwise it will be too hard to disambiguate with things like : and && hanging around
+// Organisation: blend norm_paren into norm_primary and other stuff from the C++ BNF
 
 // {} is always an explicit Compound
 // and ({}) is StatementExpression so {} should be available wherever () is
-
-// Organisation: blend norm_paren into norm_primary and other stuff from the C++ BNF
 
 // Note: ▲⯈ stays at low prec so we can have ꩜⩨▲ uninterupted. Luckily both () and {} are lower and can be used directly, 
 // each booting the parser so we can put a wide range of stuff in them.
