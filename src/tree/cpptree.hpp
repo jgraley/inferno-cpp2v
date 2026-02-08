@@ -76,6 +76,11 @@ struct Type : virtual Node
 
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
 
+
+	virtual string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                               Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                               bool constant );
+
     // Render a simple type only, no declarators
 	virtual string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy );    
 };
@@ -588,6 +593,7 @@ struct CallableParams : Callable, Scope
     NODE_FUNCTIONS
     Collection<Declaration> params; // TODO be Parameter #803
     virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
+    string GetRenderParams(VN::RendererInterface *renderer, Policy policy);
 };
 
 /// Anything that can be called and has parameters and return value
@@ -625,10 +631,24 @@ struct Function : CallableParamsReturn
  * that returns void. Similar for destructor. We're just allowing a non-constructed state 
  * for the object.
  */
-struct Constructor : Procedure { NODE_FUNCTIONS_FINAL };
+struct Constructor : Procedure 
+{ 
+	NODE_FUNCTIONS_FINAL 
+
+	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       bool constant ) final;
+};
 
 /// A C++ destructor
-struct Destructor : Subroutine { NODE_FUNCTIONS_FINAL };
+struct Destructor : Subroutine 
+{ 
+	NODE_FUNCTIONS_FINAL 
+
+	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       bool constant ) final;
+};
 
 /// This is the type of an array that contains the specified number of elements of the specified type.
 struct Array : Type
@@ -697,6 +717,9 @@ struct Integral : Numeric
 
 	struct UnimplemetedIntegralType : Unimplemented {};
 
+	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       bool constant ) final;
 	string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy ) override;
 	virtual bool IsSigned() { throw Unimplemented(); }
 };

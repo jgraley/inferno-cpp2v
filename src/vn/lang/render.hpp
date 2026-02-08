@@ -47,6 +47,18 @@ public:
 	string RenderScopeResolvingPrefix( TreePtr<Node> id ) override;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const override;
 
+    string DoRenderTypeAndDeclarator( TreePtr<Node> type, string declarator, 
+                                      Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                      bool constant=false ) final;
+    string AccomodateBootTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
+                                            Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                            bool constant );
+	virtual string DispatchTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
+                                              Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                              bool constant );
+	string CombineTypeDeclarator( string type, string declarator, bool constant ) const;
+	
+
 	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const;						 
 	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<Node> node ) const;
 	bool IsDeclared( TreePtr<CPPTree::Identifier> id );

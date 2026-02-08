@@ -152,7 +152,8 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
 {
 	if( !ascii )	
-		return;
+		throw YY::VNLangParser::syntax_error( loc,
+	        SSPrintf("Unrecognised non-ASCII %s %s", DiagQuote(text).c_str(), GetContextText().c_str()) );;
 		
 	// Determine the current scope from our weak gnomons
 	const AvailableNodeData::NamespaceBlock *namespace_block = AvailableNodeData().GetNodeNamesRoot();
@@ -189,7 +190,9 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstr
 	if( default_namespace )
 	{
 		// Try the default
-		namespace_block = namespace_block->sub_blocks.at(DEFAULT_NODE_NAMESPACE).get();
+		const AvailableNodeData::Block *default_block = namespace_block->sub_blocks.at(DEFAULT_NODE_NAMESPACE).get();
+		namespace_block = dynamic_cast<const AvailableNodeData::NamespaceBlock *>(default_block);
+		ASSERT( namespace_block ); // Internal error: default block is not a namespace block
 		if( namespace_block && namespace_block->sub_blocks.count(ToASCII(text)) > 0 )
 		{
 			const AvailableNodeData::Block *sub_block = namespace_block->sub_blocks.at(ToASCII(text)).get();

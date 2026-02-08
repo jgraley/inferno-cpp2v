@@ -104,6 +104,10 @@ namespace VN
 		virtual string DoRender( TreePtr<Node> node, 
 		                         Syntax::Production surround_prod, 
 		                         Syntax::Policy policy ) = 0;
+		virtual string DoRenderTypeAndDeclarator( TreePtr<Node> type, string declarator, 
+                                                  Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+												  bool constant=false ) = 0;
+
 		virtual string RenderScopeResolvingPrefix( TreePtr<Node> id ) = 0;
 		virtual string GetUniqueIdentifierName( TreePtr<Node> id ) const = 0;
 		virtual string RenderNodeExplicit( shared_ptr<const Node> node, 

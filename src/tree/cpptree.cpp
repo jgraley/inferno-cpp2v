@@ -36,6 +36,12 @@ string Type::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	return GetRenderSimpleType( renderer, policy ); // TODO eventually should be type-and-anonymous-declarator
 }
 
+string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *, string, 
+                                         Syntax::Production, Syntax::Production, Syntax::Policy,
+                                         bool )
+{
+	throw Unimplemented();
+}                                           
 
 string Type::GetRenderSimpleType( VN::RendererInterface *, Policy )
 {
@@ -557,6 +563,56 @@ Syntax::Production Callable::GetOperandInDeclaratorProduction() const
 	return Production::POSTFIX; // eg int a();
 }
 
+
+//////////////////////////// CallableParams //////////////////////////////
+
+string CallableParams::GetRenderParams(VN::RendererInterface *renderer, Policy policy)
+{
+	TRACE();
+    Sequence<Declaration> sorted;
+    for( auto param : params )
+        sorted.push_back(param); // no sorting required
+                
+    string s;   
+    bool first = true;
+    for( TreePtr<Declaration> d : sorted )
+    {
+        if( !first )
+            s += ", ";
+        
+        auto o = TreePtr<Instance>::DynamicCast(d);
+        if( !o )
+        {
+            s += renderer->RenderNodeExplicit( d, Syntax::Production::BARE_DECLARATION, policy );
+            continue;
+        }
+        Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
+        string name = renderer->DoRender( o->identifier, starting_declarator_prod);
+        s += renderer->DoRenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, policy, false );
+            
+        first = false;
+    }
+    return s;
+}
+
+//////////////////////////// Constructor //////////////////////////////
+
+string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+												Syntax::Production , Syntax::Production , Syntax::Policy policy,
+												bool )
+{
+	return declarator + "(" + GetRenderParams(renderer, policy) + ")";
+}
+
+//////////////////////////// Destructor //////////////////////////////
+
+string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *, string declarator, 
+											   Syntax::Production , Syntax::Production , Syntax::Policy,
+											   bool  )
+{
+	return declarator + "()";
+}
+
 //////////////////////////// Array //////////////////////////////
 
 Syntax::Production Array::GetMyProductionTerminal() const
@@ -616,6 +672,39 @@ Syntax::Production Numeric::GetMyProductionTerminal() const
 }
 
 //////////////////////////// Integral ///////////////////////////////
+
+string Integral::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                             Syntax::Production, Syntax::Production, Syntax::Policy policy,
+                                             bool constant)
+{
+    int64_t width_val;
+    auto ic = DynamicTreePtrCast<SpecificInteger>( width );
+    ASSERT(ic)("width must be integer");
+    width_val = ic->GetInt64();
+
+    TRACE("width %" PRId64 "\n", width_val);
+
+	string s = GetRenderSimpleType( renderer, policy ); // TODO could we not recurse via DoRenderTypeAndDeclarator() - once we've made the declarator string?
+
+    s += " " + declarator;
+
+    // Fix the width
+    bool bitfield = !( width_val == TypeDb::char_bits ||
+                       width_val == TypeDb::integral_bits[clang::DeclSpec::TSW_short] ||
+                       width_val == TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ||
+                       width_val == TypeDb::integral_bits[clang::DeclSpec::TSW_long] ||
+                       width_val == TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] );
+
+    if( bitfield )
+    {
+		// This function only exists to provide bitfields in member declarations that use declarators.
+		// RenderSimpleTypeIntegral() can provide the pure types directly, without bitfields.
+		s += SSPrintf(":%" PRId64, width_val);
+    }
+
+	return (constant?"const ":"") + s;
+}
+
 
 string Integral::GetRenderSimpleType( VN::RendererInterface *, Policy )
 {

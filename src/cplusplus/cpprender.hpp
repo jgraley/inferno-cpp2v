@@ -24,13 +24,12 @@ private:
     string RenderScopeResolvingPrefix( TreePtr<Node> node ) final;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const final;
     string RenderIdentifier( TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
-    string RenderIntegralTypeAndDeclarator( TreePtr<CPPTree::Integral> type, string declarator, Syntax::Policy policy );
-    string DoRenderTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
+    string DispatchTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                      bool constant=false );
-    string RenderTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
+                                      bool constant ) final;
+    string DispatchInternalTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
                                     Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                    bool constant=false );
+                                    bool constant );
 	string RenderSimpleType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy );
     string Sanitise( string s );

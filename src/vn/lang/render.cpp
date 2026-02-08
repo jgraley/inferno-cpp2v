@@ -478,6 +478,58 @@ string Render::GetUniqueIdentifierName( TreePtr<Node> ) const
 }
 
 
+string Render::DoRenderTypeAndDeclarator( TreePtr<Node> type, string declarator, 
+                                          Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                          bool constant ) 
+{
+	auto type_type = TreePtr<CPPTree::Type>::DynamicCast(type);
+	ASSERT( type_type ); // Must supply a type
+	return AccomodateBootTypeAndDeclarator(type_type, declarator, declarator_prod, surround_prod, policy, constant);
+}
+
+
+string Render::AccomodateBootTypeAndDeclarator( TreePtr<Type> type, string declarator, 
+                                                Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                                bool constant ) 
+{
+	ASSERT(type);
+    // Production passed in here comes from the current value of the delcarator string, not surrounding production.
+    Syntax::Production prod_surrounding_declarator = type->GetOperandInDeclaratorProduction();
+    ASSERT( Syntax::GetPrecedence(prod_surrounding_declarator) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) ); // Can't satisfy this production's precedence demand using parentheses
+    ASSERT( Syntax::GetPrecedence(declarator_prod) >= Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) ); // Can't put this node into parentheses
+    bool parenthesise = Syntax::GetPrecedence(declarator_prod) < Syntax::GetPrecedence(prod_surrounding_declarator);  
+    // Apply to object rather than recursing, because this is declarator    
+    if( parenthesise )
+        declarator = "(" + declarator + ")";
+        
+    return DispatchTypeAndDeclarator( type, declarator, declarator_prod, surround_prod, policy, constant );
+}
+
+
+string Render::DispatchTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
+                                          Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                          bool constant )
+{
+	(void)type;
+	(void)declarator;
+	(void)object_prod;
+	(void)surround_prod;
+	(void)policy;
+	(void)constant;
+	/* const Agent *type_agent = Agent::TryAsAgentConst(type) */
+
+	ASSERTFAIL();
+}                                          
+
+                
+string Render::CombineTypeDeclarator( string type, string declarator, bool constant ) const
+{
+	return (constant?"const ":"") + 
+	       type + 
+	       (declarator != "" ? " "+declarator : "");
+}
+
+
 Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	if( !node )
@@ -504,6 +556,9 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 										 Syntax::Policy ) final { return "fake"; } 
 			string RenderScopeResolvingPrefix( TreePtr<Node> ) final { return ""; } 
 			string GetUniqueIdentifierName( TreePtr<Node> ) const final { return "fake"; }
+			string DoRenderTypeAndDeclarator( TreePtr<Node>, string, 
+											  Syntax::Production, Syntax::Production, Syntax::Policy,
+										      bool ) final { return "fake"; }
 		    string RenderNodeExplicit( shared_ptr<const Node>, 
 									   Syntax::Production, 
 		                               Syntax::Policy ) final { return "fake"; } 	

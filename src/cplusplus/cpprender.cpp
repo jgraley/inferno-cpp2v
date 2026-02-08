@@ -211,66 +211,23 @@ string CppRender::GetUniqueIdentifierName( TreePtr<Node> id ) const
 }
 
 
-string CppRender::RenderIntegralTypeAndDeclarator( TreePtr<Integral> type, string declarator, Syntax::Policy policy ) try
-{
-    int64_t width;
-    auto ic = DynamicTreePtrCast<SpecificInteger>( type->width );
-    ASSERT(ic)("width must be integer");
-    width = ic->GetInt64();
-
-    TRACE("width %" PRId64 "\n", width);
-
-	string s = RenderSimpleType( type, Syntax::Production::SPACE_SEP_DECLARATION, policy );
-
-    s += " " + declarator;
-
-    // Fix the width
-    bool bitfield = !( width == TypeDb::char_bits ||
-                       width == TypeDb::integral_bits[clang::DeclSpec::TSW_short] ||
-                       width == TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ||
-                       width == TypeDb::integral_bits[clang::DeclSpec::TSW_long] ||
-                       width == TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] );
-
-    if( bitfield )
-    {
-		// This function only exists to provide bitfields in member declarations that use declarators.
-		// RenderSimpleTypeIntegral() can provide the pure types directly, without bitfields.
-		ASSERT(!declarator.empty())("I don't think bitfields can be used in anonymous types");
-		char b[100];
-		sprintf(b, ":%" PRId64, width);
-		s += b;
-    }
-
-    return s;
-}
-DEFAULT_CATCH_CLAUSE
-
-
-string CppRender::DoRenderTypeAndDeclarator( TreePtr<Type> type, string declarator, 
+string CppRender::DispatchTypeAndDeclarator( TreePtr<Type> type, string declarator, 
                                              Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                             bool constant ) 
-{
-	ASSERT(type);
-    // Production passed in here comes from the current value of the delcarator string, not surrounding production.
-    Syntax::Production prod_surrounding_declarator = type->GetOperandInDeclaratorProduction();
-    ASSERT( Syntax::GetPrecedence(prod_surrounding_declarator) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) ); // Can't satisfy this production's precedence demand using parentheses
-    ASSERT( Syntax::GetPrecedence(declarator_prod) >= Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) ); // Can't put this node into parentheses
-    bool parenthesise = Syntax::GetPrecedence(declarator_prod) < Syntax::GetPrecedence(prod_surrounding_declarator);  
-    // Apply to object rather than recursing, because this is declarator    
-    if( parenthesise )
-        declarator = "(" + declarator + ")";
-        
-    return RenderTypeAndDeclarator( type, declarator, declarator_prod, surround_prod, policy, constant );
+                                             bool constant ) try 
+{ 		
+	return type->GetRenderTypeAndDeclarator( this, declarator, declarator_prod, surround_prod, policy, constant );		
+}
+catch( Syntax::Refusal & ) 
+{	
+	return DispatchInternalTypeAndDeclarator( type, declarator, declarator_prod, surround_prod, policy, constant );
 }
 
-                
-string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator, 
+
+string CppRender::DispatchInternalTypeAndDeclarator( TreePtr<Type> type, string declarator, 
                                            Syntax::Production, Syntax::Production surround_prod, Syntax::Policy policy,
                                            bool constant ) 
 {
-    if( TreePtr<Integral> i = DynamicTreePtrCast< Integral >(type) )
-        return (constant?"const ":"") + RenderIntegralTypeAndDeclarator( i, declarator, policy );        
-    else if( TreePtr<Constructor> c = DynamicTreePtrCast< Constructor >(type) )
+    if( TreePtr<Constructor> c = DynamicTreePtrCast< Constructor >(type) )
         return declarator + "(" + RenderParams(c) + ")";
     else if( TreePtr<Destructor> f = DynamicTreePtrCast< Destructor >(type) )
         return declarator + "()";
@@ -296,9 +253,7 @@ string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator
 		bool abstract = (declarator == "");
 		Syntax::Production type_prod = abstract ? surround_prod  
                                                 : Syntax::Production::SPACE_SEP_DECLARATION;
-		return (constant?"const ":"") + 
-		       RenderSimpleType( type, type_prod, policy ) + 
-		       (declarator != "" ? " "+declarator : "");
+		return CombineTypeDeclarator( RenderSimpleType( type, type_prod, policy ), declarator, constant);
 	}
 }
 
