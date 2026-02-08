@@ -623,6 +623,10 @@ struct Procedure : CallableParams
 struct Function : CallableParamsReturn
 {
     NODE_FUNCTIONS_FINAL
+
+	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       bool constant ) final;
 };
 
 /// A C++ constructor. The init list is just zero or more calls to constructors in the body
@@ -631,7 +635,7 @@ struct Function : CallableParamsReturn
  * that returns void. Similar for destructor. We're just allowing a non-constructed state 
  * for the object.
  */
-struct Constructor : Procedure 
+struct Constructor : Procedure // TODO be CallableParams
 { 
 	NODE_FUNCTIONS_FINAL 
 
@@ -641,7 +645,7 @@ struct Constructor : Procedure
 };
 
 /// A C++ destructor
-struct Destructor : Subroutine 
+struct Destructor : Subroutine // TODO be Callable
 { 
 	NODE_FUNCTIONS_FINAL 
 

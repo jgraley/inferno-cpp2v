@@ -227,11 +227,7 @@ string CppRender::DispatchInternalTypeAndDeclarator( TreePtr<Type> type, string 
                                            Syntax::Production, Syntax::Production surround_prod, Syntax::Policy policy,
                                            bool constant ) 
 {
-    if( TreePtr<Constructor> c = DynamicTreePtrCast< Constructor >(type) )
-        return declarator + "(" + RenderParams(c) + ")";
-    else if( TreePtr<Destructor> f = DynamicTreePtrCast< Destructor >(type) )
-        return declarator + "()";
-    else if( TreePtr<Function> f = DynamicTreePtrCast< Function >(type) )
+	if( TreePtr<Function> f = DynamicTreePtrCast< Function >(type) )
         return DoRenderTypeAndDeclarator( f->return_type, declarator + "(" + RenderParams(f) + ")" + (constant?" const":""), 
                                         Syntax::Production::POSTFIX, surround_prod, policy );
     else if( TreePtr<Pointer> p = DynamicTreePtrCast< Pointer >(type) )

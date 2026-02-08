@@ -595,6 +595,24 @@ string CallableParams::GetRenderParams(VN::RendererInterface *renderer, Policy p
     return s;
 }
 
+//////////////////////////// Function //////////////////////////////
+
+string Function::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+											 Syntax::Production , Syntax::Production surround_prod, Syntax::Policy policy,
+											 bool constant )
+{
+	string d2 = declarator + 
+	            "(" + 
+	            GetRenderParams(renderer, policy) +
+	            ")" + 
+	            (constant?" const":"");
+    return renderer->DoRenderTypeAndDeclarator( return_type, 
+                                                d2,
+                                                Syntax::Production::POSTFIX, 
+                                                surround_prod, 
+                                                policy );
+}
+
 //////////////////////////// Constructor //////////////////////////////
 
 string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
@@ -608,7 +626,7 @@ string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer,
 
 string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *, string declarator, 
 											   Syntax::Production , Syntax::Production , Syntax::Policy,
-											   bool  )
+											   bool )
 {
 	return declarator + "()";
 }
