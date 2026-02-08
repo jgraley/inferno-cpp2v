@@ -25,6 +25,9 @@ private:
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const final;
     string RenderIdentifier( TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string RenderIntegralTypeAndDeclarator( TreePtr<CPPTree::Integral> type, string declarator, Syntax::Policy policy );
+    string DoRenderTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
+                                      Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                      bool constant=false );
     string RenderTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
                                     Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                     bool constant=false );

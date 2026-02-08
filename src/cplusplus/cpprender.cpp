@@ -246,20 +246,11 @@ string CppRender::RenderIntegralTypeAndDeclarator( TreePtr<Integral> type, strin
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator, 
-                                           Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                           bool constant ) try
+string CppRender::DoRenderTypeAndDeclarator( TreePtr<Type> type, string declarator, 
+                                             Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                             bool constant ) 
 {
-    string const_str = constant?"const ":"";
-    bool pure_type = (declarator == "");
-    string sdeclarator;
-    if( !pure_type )
-        sdeclarator = " " + declarator;
-    Syntax::Production type_prod = pure_type ? surround_prod  
-                                             : Syntax::Production::SPACE_SEP_DECLARATION;
-	if( !type )
-        return const_str + DoRender( type, type_prod ) + sdeclarator;
-
+	ASSERT(type);
     // Production passed in here comes from the current value of the delcarator string, not surrounding production.
     Syntax::Production prod_surrounding_declarator = type->GetOperandInDeclaratorProduction();
     ASSERT( Syntax::GetPrecedence(prod_surrounding_declarator) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) ); // Can't satisfy this production's precedence demand using parentheses
@@ -268,25 +259,32 @@ string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator
     // Apply to object rather than recursing, because this is declarator    
     if( parenthesise )
         declarator = "(" + declarator + ")";
+        
+    return RenderTypeAndDeclarator( type, declarator, declarator_prod, surround_prod, policy, constant );
+}
+
                 
-    TRACE();
+string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator, 
+                                           Syntax::Production, Syntax::Production surround_prod, Syntax::Policy policy,
+                                           bool constant ) 
+{
     if( TreePtr<Integral> i = DynamicTreePtrCast< Integral >(type) )
-        return const_str + RenderIntegralTypeAndDeclarator( i, declarator, policy );        
+        return (constant?"const ":"") + RenderIntegralTypeAndDeclarator( i, declarator, policy );        
     else if( TreePtr<Constructor> c = DynamicTreePtrCast< Constructor >(type) )
-        return declarator + "(" + RenderParams(c) + ")" + const_str;
+        return declarator + "(" + RenderParams(c) + ")";
     else if( TreePtr<Destructor> f = DynamicTreePtrCast< Destructor >(type) )
-        return declarator + "()" + const_str;
+        return declarator + "()";
     else if( TreePtr<Function> f = DynamicTreePtrCast< Function >(type) )
-        return RenderTypeAndDeclarator( f->return_type, declarator + "(" + RenderParams(f) + ")" + const_str, 
+        return DoRenderTypeAndDeclarator( f->return_type, declarator + "(" + RenderParams(f) + ")" + (constant?" const":""), 
                                         Syntax::Production::POSTFIX, surround_prod, policy );
     else if( TreePtr<Pointer> p = DynamicTreePtrCast< Pointer >(type) )
-        return RenderTypeAndDeclarator( p->destination, string(DynamicTreePtrCast<Const>(p->constancy)?"const ":"") + "*" + const_str + declarator, 
-                                        Syntax::Production::PREFIX, surround_prod, policy, false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderTypeAndDeclarator
+        return DoRenderTypeAndDeclarator( p->destination, string(DynamicTreePtrCast<Const>(p->constancy)?"const ":"") + "*" + (constant?" const ":"") + declarator, 
+                                        Syntax::Production::PREFIX, surround_prod, policy, false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to DoRenderTypeAndDeclarator
     else if( TreePtr<Reference> r = DynamicTreePtrCast< Reference >(type) )
-        return RenderTypeAndDeclarator( r->destination, string(DynamicTreePtrCast<Const>(p->constancy)?"const ":"") + "&" + const_str + declarator, 
+        return DoRenderTypeAndDeclarator( r->destination, string(DynamicTreePtrCast<Const>(p->constancy)?"const ":"") + "&" + (constant?" const ":"") + declarator, 
                                         Syntax::Production::PREFIX, surround_prod, policy );
     else if( TreePtr<Array> a = DynamicTreePtrCast< Array >(type) )
-        return RenderTypeAndDeclarator( 
+        return DoRenderTypeAndDeclarator( 
                            a->element, 
                            declarator + "[" + DoRender( a->size, Syntax::Production::BOTTOM_EXPR) + "]", 
                            Syntax::Production::POSTFIX,
@@ -294,9 +292,15 @@ string CppRender::RenderTypeAndDeclarator( TreePtr<Type> type, string declarator
                            policy,
                            constant );
     else 
-		return const_str + RenderSimpleType( type, type_prod, policy ) + sdeclarator;
+    {
+		bool abstract = (declarator == "");
+		Syntax::Production type_prod = abstract ? surround_prod  
+                                                : Syntax::Production::SPACE_SEP_DECLARATION;
+		return (constant?"const ":"") + 
+		       RenderSimpleType( type, type_prod, policy ) + 
+		       (declarator != "" ? " "+declarator : "");
+	}
 }
-DEFAULT_CATCH_CLAUSE
 
 
 string CppRender::RenderSimpleType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy )
@@ -317,7 +321,7 @@ string CppRender::RenderSimpleType( TreePtr<CPPTree::Type> type, Syntax::Product
 string CppRender::RenderType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	// Production ANONYMOUS relates to the fact that we've provided an empty string for the initial declarator.
-	return RenderTypeAndDeclarator( type, "", Syntax::Production::ANONYMOUS, surround_prod, policy, false ); 
+	return DoRenderTypeAndDeclarator( type, "", Syntax::Production::ANONYMOUS, surround_prod, policy, false ); 
 }
 
 
@@ -608,7 +612,7 @@ string CppRender::RenderInstanceProto( TreePtr<Instance> o, Syntax::Production s
         name += DoRender( o->identifier, starting_declarator_prod);
     }
 
-    s += RenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, default_policy, constant );
+    s += DoRenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, default_policy, constant );
 
     return s;
 } 
@@ -831,7 +835,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
     {
         Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
         auto id = DoRender( t->identifier, starting_declarator_prod);
-        return "typedef " + RenderTypeAndDeclarator( t->type, id, starting_declarator_prod, Syntax::Production::SPACE_SEP_DECLARATION, policy );
+        return "typedef " + DoRenderTypeAndDeclarator( t->type, id, starting_declarator_prod, Syntax::Production::SPACE_SEP_DECLARATION, policy );
     }
     else if( TreePtr<Record> record = DynamicTreePtrCast< Record >(declaration) )
     {
@@ -1008,7 +1012,7 @@ string CppRender::RenderParams( TreePtr<CallableParams> key ) try
         }
         Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
         string name = DoRender( o->identifier, starting_declarator_prod);
-        s += RenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, default_policy, false );
+        s += DoRenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, default_policy, false );
             
         first = false;
     }
