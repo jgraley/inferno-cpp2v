@@ -31,9 +31,10 @@ Syntax::Production Type::GetOperandInDeclaratorProduction() const
 }
 
 
-string Type::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string Type::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {	
-	return GetRenderSimpleType( renderer, policy ); // TODO eventually should be type-and-anonymous-declarator
+	// This would be a type-id in https://alx71hub.github.io/hcb/ 
+	return GetRenderTypeAndDeclarator( renderer, "", Syntax::Production::ANONYMOUS, surround_prod, policy, false ); 
 }
 
 
@@ -45,13 +46,14 @@ string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string
 	Syntax::Production type_prod = abstract ? surround_prod  
                                                : Syntax::Production::SPACE_SEP_DECLARATION;
 	return (constant?"const ":"") + 
-	       GetRenderSimpleType( renderer, policy ) + 
+	       GetRenderTypeSpecSeq( renderer, policy ) + 
 	       (declarator != "" ? " "+declarator : "");
 }                                           
 
 
-string Type::GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy )
+string Type::GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy )
 {
+	// This would be a type-specifier-seq in https://alx71hub.github.io/hcb/ 
 	return renderer->RenderNodeExplicit(shared_from_this(), Syntax::Production::EXPLICIT_NODE, policy);
 }
 
@@ -219,7 +221,7 @@ string SpecificTypeIdentifier::GetRender( VN::RendererInterface *renderer, Produ
 }
 
 
-string SpecificTypeIdentifier::GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy )
+string SpecificTypeIdentifier::GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy )
 {
 	// Yes to scope resolution, otherwise we drop scope reolution on type usages
 	return SpecificIdentifier::GetRender(renderer, Production::RESOLVER, policy);
@@ -720,7 +722,7 @@ Syntax::Production Void::GetMyProductionTerminal() const
 }
 
 
-string Void::GetRenderSimpleType( VN::RendererInterface *, Policy )
+string Void::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
 {
 	return "void";
 }
@@ -732,7 +734,7 @@ Syntax::Production Boolean::GetMyProductionTerminal() const
 	return Production::PRIMARY_TYPE; // eg auto a = new bool;
 }
 
-string Boolean::GetRenderSimpleType( VN::RendererInterface *, Policy )
+string Boolean::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
 {
 	return "bool";
 }
@@ -757,7 +759,7 @@ string Integral::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
 
     TRACE("width %" PRId64 "\n", width_val);
 
-	string s = GetRenderSimpleType( renderer, policy ); // TODO could we not recurse via DoRenderTypeAndDeclarator() - once we've made the declarator string?
+	string s = GetRenderTypeSpecSeq( renderer, policy ); // TODO could we not recurse via DoRenderTypeAndDeclarator() - once we've made the declarator string?
 
     s += " " + declarator;
 
@@ -779,7 +781,7 @@ string Integral::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
 }
 
 
-string Integral::GetRenderSimpleType( VN::RendererInterface *, Policy )
+string Integral::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
 {
     bool ds;
     int64_t width_bits;
@@ -875,7 +877,7 @@ SpecificFloatSemantics::operator const llvm::fltSemantics &() const
 
 //////////////////////////// Floating ///////////////////////////////
 
-string Floating::GetRenderSimpleType( VN::RendererInterface *, Policy )
+string Floating::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
 {
     string s;
     TreePtr<SpecificFloatSemantics> sem = DynamicTreePtrCast<SpecificFloatSemantics>(semantics);
@@ -900,11 +902,11 @@ Syntax::Production Labeley::GetMyProductionTerminal() const
 	return Production::POSTFIX; // renders as void *
 }
 
-string Labeley::GetRenderSimpleType( VN::RendererInterface *, Policy policy )
+string Labeley::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 {
 	if( policy.refuse_local_node_types ) 
 		throw RefuseDueLocal(); 
-	return "const void *";
+	return "const void *"; // TODO lower Labely to const void * in a lowering pass
 }
 
 //////////////////////////// Typedef ///////////////////////////////

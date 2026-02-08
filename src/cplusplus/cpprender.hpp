@@ -27,7 +27,6 @@ private:
     string DispatchTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                       bool constant ) final;
-    string RenderType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy );
     string Sanitise( string s );
     string RenderOperator( TreePtr<CPPTree::Operator> op, Syntax::Production surround_prod );
     string RenderMapArgs( TreePtr<CPPTree::Type> callee_type, TreePtr<CPPTree::MapArgumentation> map_argumentation );

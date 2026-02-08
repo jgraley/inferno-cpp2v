@@ -120,8 +120,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return RenderProgram( program, surround_prod );
     else if( auto access = TreePtr<AccessSpec>::DynamicCast(node) ) // Identifier can be a kind of type or expression
         return RenderAccessSpec( access, surround_prod, policy );
-    else if( auto type = TreePtr<Type>::DynamicCast(node) )  // Type is a kind of Operator
-        return RenderType( type, surround_prod, policy );
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
         return RenderLiteral( literal, surround_prod );
     else if( auto call = TreePtr<Call>::DynamicCast(node) )
@@ -216,13 +214,6 @@ string CppRender::DispatchTypeAndDeclarator( TreePtr<Type> type, string declarat
                                              bool constant )
 { 		
 	return type->GetRenderTypeAndDeclarator( this, declarator, declarator_prod, surround_prod, policy, constant );		
-}
-
-
-string CppRender::RenderType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy )
-{
-	// Production ANONYMOUS relates to the fact that we've provided an empty string for the initial declarator.
-	return DoRenderTypeAndDeclarator( type, "", Syntax::Production::ANONYMOUS, surround_prod, policy, false ); 
 }
 
 

@@ -82,7 +82,7 @@ struct Type : virtual Node
                                                bool constant );
 
     // Render a simple type only, no declarators
-	virtual string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy );    
+	virtual string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy );    
 };
 
 /// A declaration specifies the creation of a TypeDeclaration or an Instance. 
@@ -208,7 +208,7 @@ struct SpecificTypeIdentifier : TypeIdentifier,
     NODE_FUNCTIONS_FINAL
 
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) final;
-	string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy ) final;
+	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) final;
 };
 
 
@@ -705,7 +705,7 @@ struct Void : Type
 	NODE_FUNCTIONS_FINAL 
 
 	Production GetMyProductionTerminal() const override;
-	string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy ) override;
+	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
 };
 
 /// Boolean type. 
@@ -718,7 +718,7 @@ struct Boolean : Type
 	NODE_FUNCTIONS_FINAL 
 	
 	Production GetMyProductionTerminal() const override;	
-	string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy ) override;
+	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
 };
 
 /// Intermediate for any type that represents a number that you can eg add and subtract. 
@@ -741,7 +741,7 @@ struct Integral : Numeric
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                        bool constant ) final;
-	string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy ) override;
+	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
 	virtual bool IsSigned() { throw Unimplemented(); }
 };
 
@@ -785,7 +785,7 @@ struct Floating : Numeric
 
 	struct UnimplemetedFloatingType : Unimplemented {};
 
-	string GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy ) override;
+	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
 }; 
 
 /// Type of a variable that can hold a label. Similar to the GCC extension
@@ -797,7 +797,7 @@ struct Labeley : Type
     NODE_FUNCTIONS_FINAL   
     
 	Production GetMyProductionTerminal() const override;	    
-	string GetRenderSimpleType( VN::RendererInterface *, Policy ) final;
+	string GetRenderTypeSpecSeq( VN::RendererInterface *, Policy ) final;
 };
 
 //////////////////////////// User-defined Types ////////////////////////////
