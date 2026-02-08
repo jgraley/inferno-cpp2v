@@ -657,6 +657,37 @@ Syntax::Production Indirection::GetOperandInDeclaratorProduction() const
 	return Production::PREFIX; // eg int *a;
 }
 
+//////////////////////////// Pointer //////////////////////////////
+
+string Pointer::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+											Syntax::Production, Syntax::Production surround_prod, Syntax::Policy policy,
+											bool constant )
+{
+	// TODO Pointer node to indicate constancy of pointed-to object - would go into this call to DoRenderTypeAndDeclarator
+	string d2 = string(DynamicTreePtrCast<Const>(constancy)?"const ":"") + "*" + (constant?" const ":"") + declarator;
+    return renderer->DoRenderTypeAndDeclarator( destination, 
+											    d2,
+											    Syntax::Production::PREFIX, 
+											    surround_prod, 
+											    policy, 
+											    false ); 
+}                                       
+
+//////////////////////////// Reference //////////////////////////////
+
+string Reference::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+											Syntax::Production, Syntax::Production surround_prod, Syntax::Policy policy,
+											bool constant )
+{
+	string d2 = string(DynamicTreePtrCast<Const>(constancy)?"const ":"") + "&" + (constant?" const ":"") + declarator;
+    return renderer->DoRenderTypeAndDeclarator( destination, 
+											    d2,
+											    Syntax::Production::PREFIX, 
+											    surround_prod, 
+											    policy, 
+											    false ); 
+}                                       
+
 //////////////////////////// Void ///////////////////////////////
 
 Syntax::Production Void::GetMyProductionTerminal() const

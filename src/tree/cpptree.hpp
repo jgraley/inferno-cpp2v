@@ -677,10 +677,24 @@ struct Indirection : Type
 };
 
 /// A C/C++ pointer
-struct Pointer : Indirection { NODE_FUNCTIONS_FINAL };
+struct Pointer : Indirection 
+{ 
+	NODE_FUNCTIONS_FINAL
+
+	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       bool constant ) final;
+};
 
 /// A C++ reference
-struct Reference : Indirection { NODE_FUNCTIONS_FINAL };
+struct Reference : Indirection 
+{ 
+	NODE_FUNCTIONS_FINAL 
+
+	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       bool constant ) final;
+};
 
 /// The pseudo-type void, disallowed in some circumstances as per C.
 struct Void : Type 

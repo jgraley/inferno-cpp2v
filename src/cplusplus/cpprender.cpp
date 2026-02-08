@@ -227,10 +227,7 @@ string CppRender::DispatchInternalTypeAndDeclarator( TreePtr<Type> type, string 
                                            Syntax::Production, Syntax::Production surround_prod, Syntax::Policy policy,
                                            bool constant ) 
 {
-	if( TreePtr<Function> f = DynamicTreePtrCast< Function >(type) )
-        return DoRenderTypeAndDeclarator( f->return_type, declarator + "(" + RenderParams(f) + ")" + (constant?" const":""), 
-                                        Syntax::Production::POSTFIX, surround_prod, policy );
-    else if( TreePtr<Pointer> p = DynamicTreePtrCast< Pointer >(type) )
+	if( TreePtr<Pointer> p = DynamicTreePtrCast< Pointer >(type) )
         return DoRenderTypeAndDeclarator( p->destination, string(DynamicTreePtrCast<Const>(p->constancy)?"const ":"") + "*" + (constant?" const ":"") + declarator, 
                                         Syntax::Production::PREFIX, surround_prod, policy, false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to DoRenderTypeAndDeclarator
     else if( TreePtr<Reference> r = DynamicTreePtrCast< Reference >(type) )
@@ -940,33 +937,3 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
 }
 DEFAULT_CATCH_CLAUSE
 
-
-string CppRender::RenderParams( TreePtr<CallableParams> key ) try
-{
-    TRACE();
-    Sequence<Declaration> sorted;
-    for( auto param : key->params )
-        sorted.push_back(param); // no sorting required
-                
-    string s;   
-    bool first = true;
-    for( TreePtr<Declaration> d : sorted )
-    {
-        if( !first )
-            s += ", ";
-        
-        auto o = TreePtr<Instance>::DynamicCast(d);
-        if( !o )
-        {
-            s += RenderNodeExplicit( d, Syntax::Production::BARE_DECLARATION, default_policy );
-            continue;
-        }
-        Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
-        string name = DoRender( o->identifier, starting_declarator_prod);
-        s += DoRenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, default_policy, false );
-            
-        first = false;
-    }
-    return s;
-}
-DEFAULT_CATCH_CLAUSE

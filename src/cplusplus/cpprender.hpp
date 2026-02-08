@@ -66,8 +66,6 @@ private:
     string RenderDeclScope( TreePtr<CPPTree::DeclScope> decl_scope,
 							type_index init_access = Syntax::DefaultAccess );
 
-	string RenderParams( TreePtr<CPPTree::CallableParams> key);
-
 	UniquifyNames::NodeToNameMap unique_identifier_names;
 };
 
