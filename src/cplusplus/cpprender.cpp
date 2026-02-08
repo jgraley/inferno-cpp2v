@@ -213,58 +213,11 @@ string CppRender::GetUniqueIdentifierName( TreePtr<Node> id ) const
 
 string CppRender::DispatchTypeAndDeclarator( TreePtr<Type> type, string declarator, 
                                              Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                             bool constant ) try 
+                                             bool constant )
 { 		
 	return type->GetRenderTypeAndDeclarator( this, declarator, declarator_prod, surround_prod, policy, constant );		
 }
-catch( Syntax::Refusal & ) 
-{	
-	return DispatchInternalTypeAndDeclarator( type, declarator, declarator_prod, surround_prod, policy, constant );
-}
 
-
-string CppRender::DispatchInternalTypeAndDeclarator( TreePtr<Type> type, string declarator, 
-                                           Syntax::Production, Syntax::Production surround_prod, Syntax::Policy policy,
-                                           bool constant ) 
-{
-	if( TreePtr<Pointer> p = DynamicTreePtrCast< Pointer >(type) )
-        return DoRenderTypeAndDeclarator( p->destination, string(DynamicTreePtrCast<Const>(p->constancy)?"const ":"") + "*" + (constant?" const ":"") + declarator, 
-                                        Syntax::Production::PREFIX, surround_prod, policy, false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to DoRenderTypeAndDeclarator
-    else if( TreePtr<Reference> r = DynamicTreePtrCast< Reference >(type) )
-        return DoRenderTypeAndDeclarator( r->destination, string(DynamicTreePtrCast<Const>(p->constancy)?"const ":"") + "&" + (constant?" const ":"") + declarator, 
-                                        Syntax::Production::PREFIX, surround_prod, policy );
-    else if( TreePtr<Array> a = DynamicTreePtrCast< Array >(type) )
-        return DoRenderTypeAndDeclarator( 
-                           a->element, 
-                           declarator + "[" + DoRender( a->size, Syntax::Production::BOTTOM_EXPR) + "]", 
-                           Syntax::Production::POSTFIX,
-                           surround_prod,
-                           policy,
-                           constant );
-    else 
-    {
-		bool abstract = (declarator == "");
-		Syntax::Production type_prod = abstract ? surround_prod  
-                                                : Syntax::Production::SPACE_SEP_DECLARATION;
-		return CombineTypeDeclarator( RenderSimpleType( type, type_prod, policy ), declarator, constant);
-	}
-}
-
-
-string CppRender::RenderSimpleType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy )
-{
-	if( dynamic_pointer_cast<Labeley>(type) )
-        return "const void *"; // Always const - keeping this here because ambiguous with "true" const void *
-                
-    try
-    {
-		return type->GetRenderSimpleType( this, policy );
-	}
-	catch( Syntax::Refusal & ) 
-	{
-        return RenderNodeExplicit( type, surround_prod, policy );
-	}
-}
 
 string CppRender::RenderType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy )
 {

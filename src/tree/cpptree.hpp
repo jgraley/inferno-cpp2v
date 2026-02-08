@@ -663,6 +663,9 @@ struct Array : Type
    
 	Production GetMyProductionTerminal() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
+	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       bool constant ) final;	
 };
 
 /// Intermediate for indirect access to some type as specified
@@ -794,6 +797,7 @@ struct Labeley : Type
     NODE_FUNCTIONS_FINAL   
     
 	Production GetMyProductionTerminal() const override;	    
+	string GetRenderSimpleType( VN::RendererInterface *, Policy ) final;
 };
 
 //////////////////////////// User-defined Types ////////////////////////////

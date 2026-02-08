@@ -36,16 +36,23 @@ string Type::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	return GetRenderSimpleType( renderer, policy ); // TODO eventually should be type-and-anonymous-declarator
 }
 
-string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *, string, 
-                                         Syntax::Production, Syntax::Production, Syntax::Policy,
-                                         bool )
+
+string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                         Syntax::Production, Syntax::Production surround_prod, Syntax::Policy policy,
+                                         bool constant)
 {
-	throw Unimplemented();
+	bool abstract = (declarator == "");
+	Syntax::Production type_prod = abstract ? surround_prod  
+                                               : Syntax::Production::SPACE_SEP_DECLARATION;
+	return (constant?"const ":"") + 
+	       GetRenderSimpleType( renderer, policy ) + 
+	       (declarator != "" ? " "+declarator : "");
 }                                           
 
-string Type::GetRenderSimpleType( VN::RendererInterface *, Policy )
+
+string Type::GetRenderSimpleType( VN::RendererInterface *renderer, Policy policy )
 {
-	throw Unimplemented();
+	return renderer->RenderNodeExplicit(shared_from_this(), Syntax::Production::EXPLICIT_NODE, policy);
 }
 
 //////////////////////////// Declaration ///////////////////////////////
@@ -644,6 +651,23 @@ Syntax::Production Array::GetOperandInDeclaratorProduction() const
 	return Production::POSTFIX; // eg int a[9];
 }
 
+
+string Array::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                   Syntax::Production, Syntax::Production surround_prod, Syntax::Policy policy,
+                                   bool constant )
+{
+	string d2 = declarator + 
+	            "[" + 
+	            renderer->DoRender( size, Syntax::Production::BOTTOM_EXPR) + 
+	            "]";
+    return renderer->DoRenderTypeAndDeclarator( element, 
+												d2, 
+												Syntax::Production::POSTFIX,
+												surround_prod,
+												policy,
+												constant );
+}                                   
+
 //////////////////////////// Indirection //////////////////////////////
 
 Syntax::Production Indirection::GetMyProductionTerminal() const
@@ -874,6 +898,13 @@ string Floating::GetRenderSimpleType( VN::RendererInterface *, Policy )
 Syntax::Production Labeley::GetMyProductionTerminal() const
 {
 	return Production::POSTFIX; // renders as void *
+}
+
+string Labeley::GetRenderSimpleType( VN::RendererInterface *, Policy policy )
+{
+	if( policy.refuse_local_node_types ) 
+		throw RefuseDueLocal(); 
+	return "const void *";
 }
 
 //////////////////////////// Typedef ///////////////////////////////

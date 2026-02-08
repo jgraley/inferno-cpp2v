@@ -27,10 +27,6 @@ private:
     string DispatchTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                       bool constant ) final;
-    string DispatchInternalTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
-                                    Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                    bool constant );
-	string RenderSimpleType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderType( TreePtr<CPPTree::Type> type, Syntax::Production surround_prod, Syntax::Policy policy );
     string Sanitise( string s );
     string RenderOperator( TreePtr<CPPTree::Operator> op, Syntax::Production surround_prod );

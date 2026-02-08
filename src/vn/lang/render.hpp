@@ -55,9 +55,7 @@ public:
                                             bool constant );
 	virtual string DispatchTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
                                               Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                              bool constant );
-	string CombineTypeDeclarator( string type, string declarator, bool constant ) const;
-	
+                                              bool constant );	
 
 	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const;						 
 	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<Node> node ) const;

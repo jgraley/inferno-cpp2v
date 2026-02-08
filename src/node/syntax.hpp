@@ -89,7 +89,7 @@ public:
 		TOP_EXPR, // Highest expression precedence 
 		
 		// ----- Abstract, lexer-ish productions of no particuler kind
-		EXPLICIT_NODE = 100, // Eg ◼CPPTree::MyNode(...)
+		EXPLICIT_NODE = 100, // Eg ⯁MyNode【...】
 		RESOLVER, // :: in C++	
 		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
 		TERMINAL, // Lexer tokens of any kind (other than type or expression)

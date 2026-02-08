@@ -136,7 +136,8 @@ Syntax::Policy Render::GetDefaultPolicy()
 	policy.goto_uses_ref_and_deref = false;
 	
 	// Rendering local node types that don't have their own syntax will just
-	// use the parent class's render which will be parsed back as the parent class.
+	// use the parent class's render which will be parsed back as the parent class,
+	// which is an error. Or, the render is ambiguous in vn files.
 	policy.refuse_local_node_types = true;
 	
 	return policy;
@@ -520,15 +521,7 @@ string Render::DispatchTypeAndDeclarator( TreePtr<CPPTree::Type> type, string de
 
 	ASSERTFAIL();
 }                                          
-
-                
-string Render::CombineTypeDeclarator( string type, string declarator, bool constant ) const
-{
-	return (constant?"const ":"") + 
-	       type + 
-	       (declarator != "" ? " "+declarator : "");
-}
-
+               
 
 Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
