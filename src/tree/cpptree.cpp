@@ -630,6 +630,8 @@ string Constructor::GetRender( VN::RendererInterface *renderer, Production, Poli
 	// TODO obviously the class-being-constructed needs to be added to this syntax, either by
 	// 1 add it to this node, which is a type, so that the type of a constructor includes the type it constructs
 	// 2 pass it in, which requires a new kind of virtual rendering method
+	// 3 vcall back to renderer to get the scope, make sure works in line and out of line
+	// TODO don't render ⨤ in C++. Maybe not at all if can parse VN without.
 	return "⨤(" + GetRenderParams(renderer, policy) + ")";
 }
 
