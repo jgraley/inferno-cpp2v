@@ -1,6 +1,6 @@
-/mnt/data/home/jgraley/inferno-cpp2v/llvm/lib/Support/Debug/ManagedStatic.lo \
- /mnt/data/home/jgraley/inferno-cpp2v/llvm/lib/Support/Debug/ManagedStatic.o \
- /mnt/data/home/jgraley/inferno-cpp2v/llvm/lib/Support/Debug/ManagedStatic.d: \
+/home/jgraley/inferno-cpp2v/llvm/lib/Support/Debug/ManagedStatic.lo \
+ /home/jgraley/inferno-cpp2v/llvm/lib/Support/Debug/ManagedStatic.o \
+ /home/jgraley/inferno-cpp2v/llvm/lib/Support/Debug/ManagedStatic.d: \
  ManagedStatic.cpp \
- /mnt/data/home/jgraley/inferno-cpp2v/llvm/include/llvm/Support/ManagedStatic.h
-/mnt/data/home/jgraley/inferno-cpp2v/llvm/include/llvm/Support/ManagedStatic.h:
+ /home/jgraley/inferno-cpp2v/llvm/include/llvm/Support/ManagedStatic.h
+/home/jgraley/inferno-cpp2v/llvm/include/llvm/Support/ManagedStatic.h:

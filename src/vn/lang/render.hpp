@@ -37,7 +37,7 @@ public:
 	string AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
-	string RenderNullPointer( Syntax::Production surround_prod );
+	string RenderNullPointer();
 
 	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 
@@ -48,13 +48,13 @@ public:
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const override;
 
     string DoRenderTypeAndDeclarator( TreePtr<Node> type, string declarator, 
-                                      Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                      Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                       bool constant=false ) final;
-    string AccomodateBootTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
-                                            Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+    string AccomodateBootTypeAndDeclarator( TreePtr<Node> type, string declarator, 
+                                            Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                             bool constant );
-	virtual string DispatchTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
-                                              Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+	virtual string DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
+                                              Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                               bool constant );	
 
 	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const;						 

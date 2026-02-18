@@ -51,11 +51,13 @@ doxygen       (automated class documentation)
 binutils-gold (installing this makes gcc use the gold linker which speeds up builds)
 valgrind      (profiling and other handy stuff)
 kcachegrind   (GUI for profiles)
+clang-format  (Readability of test renders)
 
 You also need to install SystemC (version 3.1.0) and set up a symlink in this directory pointing to the installation. See docs/program/systemc_installation_notes.txt for more info.
 
 And also RE/flex lexer generator (with unicode support):
  - go to https://github.com/Genivia/RE-flex/releases/tag/v6.0.0
+ - Zip file is https://github.com/Genivia/RE-flex/archive/refs/tags/v6.0.0.zip
  - download the source code .zip and unzip it and go in
  - ./clean.sh
  - ./build.sh

@@ -33,7 +33,8 @@ Syntax::Production Type::GetOperandInDeclaratorProduction() const
 
 string Type::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {	
-	// This would be a type-id in https://alx71hub.github.io/hcb/ 
+	// Declarator may be needed so enter declarator vcall but ask for anonymous by
+	// setting declarator string to "". This corresponds to a type-id in https://alx71hub.github.io/hcb/ 
 	return GetRenderTypeAndDeclarator( renderer, "", Syntax::Production::ANONYMOUS, surround_prod, policy, false ); 
 }
 
@@ -624,20 +625,38 @@ string Function::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
 
 //////////////////////////// Constructor //////////////////////////////
 
+string Constructor::GetRender( VN::RendererInterface *renderer, Production, Policy policy)
+{
+	// TODO obviously the class-being-constructed needs to be added to this syntax, either by
+	// 1 add it to this node, which is a type, so that the type of a constructor includes the type it constructs
+	// 2 pass it in, which requires a new kind of virtual rendering method
+	return "⨤(" + GetRenderParams(renderer, policy) + ")";
+}
+
+
 string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-												Syntax::Production , Syntax::Production , Syntax::Policy policy,
+												Syntax::Production , Syntax::Production surround_prod, Syntax::Policy policy,
 												bool )
 {
-	return declarator + "(" + GetRenderParams(renderer, policy) + ")";
+	ASSERT(declarator.empty()); // must be anonymous
+	return GetRender(renderer, surround_prod, policy);
 }
 
 //////////////////////////// Destructor //////////////////////////////
 
-string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *, string declarator, 
-											   Syntax::Production , Syntax::Production , Syntax::Policy,
+string Destructor::GetRender( VN::RendererInterface *, Production, Policy )
+{
+	// TODO see Constructor::GetRender()
+	return "~()";
+}
+
+
+string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+											   Syntax::Production , Syntax::Production surround_prod, Syntax::Policy policy,
 											   bool )
 {
-	return declarator + "()";
+	ASSERT(declarator.empty()); // must be anonymous
+	return GetRender(renderer, surround_prod, policy);
 }
 
 //////////////////////////// Array //////////////////////////////
@@ -754,7 +773,9 @@ string Integral::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
 {
     int64_t width_val;
     auto ic = DynamicTreePtrCast<SpecificInteger>( width );
-    ASSERT(ic)("width must be integer");
+    if( !ic )
+		throw Unimplemented(); // Cannot render because width was wildcarded (using NULL or Integer node)
+		
     width_val = ic->GetInt64();
 
     TRACE("width %" PRId64 "\n", width_val);

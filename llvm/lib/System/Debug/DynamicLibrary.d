@@ -1,14 +1,14 @@
-/mnt/data/home/jgraley/inferno-cpp2v/llvm/lib/System/Debug/DynamicLibrary.lo \
- /mnt/data/home/jgraley/inferno-cpp2v/llvm/lib/System/Debug/DynamicLibrary.o \
- /mnt/data/home/jgraley/inferno-cpp2v/llvm/lib/System/Debug/DynamicLibrary.d: \
+/home/jgraley/inferno-cpp2v/llvm/lib/System/Debug/DynamicLibrary.lo \
+ /home/jgraley/inferno-cpp2v/llvm/lib/System/Debug/DynamicLibrary.o \
+ /home/jgraley/inferno-cpp2v/llvm/lib/System/Debug/DynamicLibrary.d: \
  DynamicLibrary.cpp \
- /mnt/data/home/jgraley/inferno-cpp2v/llvm/include/llvm/System/DynamicLibrary.h \
- /mnt/data/home/jgraley/inferno-cpp2v/llvm/include/llvm/System/Path.h \
- /mnt/data/home/jgraley/inferno-cpp2v/llvm/include/llvm/System/TimeValue.h \
- /mnt/data/home/jgraley/inferno-cpp2v/llvm/include/llvm/Support/DataTypes.h \
- /mnt/data/home/jgraley/inferno-cpp2v/llvm/include/llvm/Config/config.h
-/mnt/data/home/jgraley/inferno-cpp2v/llvm/include/llvm/System/DynamicLibrary.h:
-/mnt/data/home/jgraley/inferno-cpp2v/llvm/include/llvm/System/Path.h:
-/mnt/data/home/jgraley/inferno-cpp2v/llvm/include/llvm/System/TimeValue.h:
-/mnt/data/home/jgraley/inferno-cpp2v/llvm/include/llvm/Support/DataTypes.h:
-/mnt/data/home/jgraley/inferno-cpp2v/llvm/include/llvm/Config/config.h:
+ /home/jgraley/inferno-cpp2v/llvm/include/llvm/System/DynamicLibrary.h \
+ /home/jgraley/inferno-cpp2v/llvm/include/llvm/System/Path.h \
+ /home/jgraley/inferno-cpp2v/llvm/include/llvm/System/TimeValue.h \
+ /home/jgraley/inferno-cpp2v/llvm/include/llvm/Support/DataTypes.h \
+ /home/jgraley/inferno-cpp2v/llvm/include/llvm/Config/config.h
+/home/jgraley/inferno-cpp2v/llvm/include/llvm/System/DynamicLibrary.h:
+/home/jgraley/inferno-cpp2v/llvm/include/llvm/System/Path.h:
+/home/jgraley/inferno-cpp2v/llvm/include/llvm/System/TimeValue.h:
+/home/jgraley/inferno-cpp2v/llvm/include/llvm/Support/DataTypes.h:
+/home/jgraley/inferno-cpp2v/llvm/include/llvm/Config/config.h:

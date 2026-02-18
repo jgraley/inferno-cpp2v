@@ -323,7 +323,7 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
 string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {   
     if( !node )
-		return RenderNullPointer( surround_prod );	
+		return RenderNullPointer();	
 			
 	const Agent *agent = Agent::TryAsAgentConst(node);
 	if( !agent )
@@ -355,9 +355,8 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 }
 
 
-string Render::RenderNullPointer( Syntax::Production surround_prod )
+string Render::RenderNullPointer()
 {	
-	(void)surround_prod;
 	// Assume NULL means we're in a pattern, and it represents a wildcard
 	// Note same symbol as Stuff nodes etc but this is a terminal not a prefix
 	// so a risk of ambiguity here.
@@ -483,13 +482,17 @@ string Render::DoRenderTypeAndDeclarator( TreePtr<Node> type, string declarator,
                                           Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                           bool constant ) 
 {
-	auto type_type = TreePtr<CPPTree::Type>::DynamicCast(type);
-	ASSERT( type_type ); // Must supply a type
-	return AccomodateBootTypeAndDeclarator(type_type, declarator, declarator_prod, surround_prod, policy, constant);
+	if( !type )
+	{
+		// ☆ would be way too ambiguous, a wild declaration would just be ☆ ☆ for example. So don't render NULL.
+		type = MakeTreeNode<Type>();
+	}
+	
+	return AccomodateBootTypeAndDeclarator(type, declarator, declarator_prod, surround_prod, policy, constant);
 }
 
 
-string Render::AccomodateBootTypeAndDeclarator( TreePtr<Type> type, string declarator, 
+string Render::AccomodateBootTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                                 Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                                 bool constant ) 
 {
@@ -507,19 +510,42 @@ string Render::AccomodateBootTypeAndDeclarator( TreePtr<Type> type, string decla
 }
 
 
-string Render::DispatchTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
-                                          Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
+                                          Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                           bool constant )
 {
-	(void)type;
-	(void)declarator;
-	(void)object_prod;
-	(void)surround_prod;
-	(void)policy;
-	(void)constant;
-	/* const Agent *type_agent = Agent::TryAsAgentConst(type) */
+	bool abstract = (declarator == "");
+	Syntax::Production type_prod = abstract ? surround_prod  
+                                               : Syntax::Production::SPACE_SEP_DECLARATION;
 
-	ASSERTFAIL();
+	try
+	{
+		// Agents refuse in general to deal with declarators so if
+		// there is a pointer etc it'll default into an anonymous type
+		// which may require precdence booting. 
+		if( const Agent *type_agent = Agent::TryAsAgentConst(type) )
+			return (constant?"const ":"") + 
+		   type_agent->GetAgentRender( this, type_prod ) + 
+		   (declarator != "" ? " "+declarator : "");
+		    // return agent->GetAgentRender( this, surround_prod );
+	}
+	catch( Syntax::Refusal & ) {}
+	
+	auto type_as_type = TreePtr<CPPTree::Type>::DynamicCast(type);
+	ASSERT( type_as_type )(type)(" needs to be a Type or an Agent that doesn't refuse");
+	
+	try 
+	{ 
+		return type_as_type->GetRenderTypeAndDeclarator( this, declarator, declarator_prod, surround_prod, policy, constant ); 
+	}
+	catch( Syntax::Refusal & ) {}
+
+	// This part duplicates Type::GetRenderTypeAndDeclarator
+	// We wouln't want to call a virtual on a NULL pointer, so the
+	// common part could be here or a static on Type
+	return (constant?"const ":"") + 
+		   RenderNodeExplicit(type_as_type, type_prod, policy) +
+		   (declarator != "" ? " "+declarator : "");
 }                                          
                
 

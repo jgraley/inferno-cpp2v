@@ -24,7 +24,7 @@ private:
     string RenderScopeResolvingPrefix( TreePtr<Node> node ) final;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const final;
     string RenderIdentifier( TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
-    string DispatchTypeAndDeclarator( TreePtr<CPPTree::Type> type, string declarator, 
+    string DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                       bool constant ) final;
     string Sanitise( string s );
