@@ -58,7 +58,7 @@ public:
                                               bool constant );	
 
 	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const;						 
-	TreePtr<CPPTree::Scope> TryGetScope( TreePtr<Node> node ) const;
+	TreePtr<Node> TryGetScope( TreePtr<Node> node ) const override;
 	bool IsDeclared( TreePtr<CPPTree::Identifier> id );
 							 
 	string RenderMismatchException( string fname, const Mismatch &me );

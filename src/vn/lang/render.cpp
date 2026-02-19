@@ -581,6 +581,8 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 		    string RenderNodeExplicit( shared_ptr<const Node>, 
 									   Syntax::Production, 
 		                               Syntax::Policy ) final { return "fake"; } 	
+		    TreePtr<Node> TryGetScope( TreePtr<Node> ) const final { return nullptr; }
+
 		} fake_renderer;
 		(void)node->GetRender(&fake_renderer, surround_prod, policy);
 		
@@ -592,7 +594,7 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 }
 
 
-TreePtr<Scope> Render::TryGetScope( TreePtr<Node> node ) const
+TreePtr<Node> Render::TryGetScope( TreePtr<Node> node ) const
 {       
     auto id = TreePtr<CPPTree::Identifier>::DynamicCast(node);
     if( !id )

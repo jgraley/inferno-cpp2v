@@ -485,29 +485,8 @@ string CppRender::RenderInstanceProto( TreePtr<Instance> o, Syntax::Production s
         if( DynamicTreePtrCast<Const>(f->constancy) )
             constant = true;
             
-    string name;     
-    TreePtr<Constructor> con = DynamicTreePtrCast<Constructor>(o->type);
-    TreePtr<Destructor> de = DynamicTreePtrCast<Destructor>(o->type);
-    if( con || de )
-    {
-		// Do the scope resolution separately so can insert ~
-		if( starting_declarator_prod < Syntax::Production::PURE_IDENTIFIER )
-			name = RenderScopeResolvingPrefix(o->identifier);
-			
-        // TODO use TryGetRecordDeclaration( Typeof( o->identifier ) ) and leave scopes out of it
-        TreePtr<Record> rec = DynamicTreePtrCast<Record>( TryGetScope( o->identifier ) );
-        ASSERT( rec );        
-        name += (de ? "~" : ""); 
-        starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER; // we already rendered the scope prefix into name
-        name += DoRender( rec->identifier, starting_declarator_prod);
-    }
-    else
-    {
-        //starting_declarator_prod = Syntax::Production::RESOLVER; // TODO only RESOLVER in definitions, otherwise PURE_IDENTIFIER
-        name += DoRender( o->identifier, starting_declarator_prod);
-    }
-
-    s += DoRenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, default_policy, constant );
+    string declarator = DoRender( o->identifier, starting_declarator_prod );
+    s += DoRenderTypeAndDeclarator( o->type, declarator, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, default_policy, constant );
 
     return s;
 } 

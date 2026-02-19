@@ -577,8 +577,17 @@ private:
                 o->identifier = CreateInstanceIdentifier(ID);
                 ident_track.Add(ID, o, S);
             }
-            else
+            else if( TreePtr<Constructor>::DynamicCast(type) )
             {
+				o->identifier = MakeTreeNode<SpecificConstructorIdentifier>();
+			}
+            else if( TreePtr<Destructor>::DynamicCast(type) )
+            {
+				o->identifier = MakeTreeNode<SpecificDestructorIdentifier>();
+			}
+			else
+            {
+				ASSERTFAIL();
                 o->identifier = CreateInstanceIdentifier();
             }
             o->type = type;

@@ -157,7 +157,7 @@ struct SpecificIdentifier : virtual Property
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) override;
     string GetIdentifierName() const override; /// This is relied upon to just return the identifier name 
     string GetDesignationNameHint() const override;
     bool IsDesignationNamedIdentifier() const override;
@@ -165,7 +165,7 @@ struct SpecificIdentifier : virtual Property
     string GetTrace() const override;
 	
     BoundingRole addr_bounding_role;
-    string name;
+    string name; // TODO split this out into NamedIdentifier
 };
 
 /// Identifier for any Instance (variable or object or function)
@@ -185,6 +185,24 @@ struct SpecificInstanceIdentifier : InstanceIdentifier,
     SpecificInstanceIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
     NODE_FUNCTIONS_FINAL
+};
+                            
+
+/// Identifier for a specific Constructor                     
+struct SpecificConstructorIdentifier : InstanceIdentifier,
+                                       SpecificIdentifier
+{
+    NODE_FUNCTIONS_FINAL
+   	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
+};
+                            
+
+/// Identifier for a specific Constructor                     
+struct SpecificDestructorIdentifier : InstanceIdentifier,
+                                      SpecificIdentifier
+{
+    NODE_FUNCTIONS_FINAL
+   	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
 };
                             
 
@@ -593,6 +611,8 @@ struct CallableParams : Callable, Scope
     NODE_FUNCTIONS
     Collection<Declaration> params; // TODO be Parameter #803
     virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
+
+protected:    
     string GetRenderParams(VN::RendererInterface *renderer, Policy policy);
 };
 

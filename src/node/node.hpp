@@ -113,6 +113,7 @@ namespace VN
 		virtual string RenderNodeExplicit( shared_ptr<const Node> node, 
 										   Syntax::Production surround_prod, 
 		                                   Syntax::Policy policy ) = 0;
+		virtual TreePtr<Node> TryGetScope( TreePtr<Node> node ) const = 0;
 	};
 };
 

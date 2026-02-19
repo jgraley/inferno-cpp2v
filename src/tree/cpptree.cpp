@@ -134,24 +134,18 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 
 string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy ) 
 {		
-	// Get rid of all this casting by building the entire rendering subsystem using plain old const pointers.
-	auto id = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
-		
-    if( !id )
-		throw Syntax::Unimplemented();
+	// TODO Get rid of all this casting by building the entire rendering subsystem using plain old const pointers.
+	auto me = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
+	ASSERT(me);	
 
-	auto ii = DynamicTreePtrCast<SpecificIdentifier>( id );
-	if( !ii )
-		throw Syntax::Unimplemented();
-
-	string s = renderer->GetUniqueIdentifierName(ii);          
-    ASSERT(s.size()>0)(*id)(" rendered to an empty string\n");
+	string s = renderer->GetUniqueIdentifierName(me);          
+    ASSERT(s.size()>0)(*me)(" rendered to an empty string\n");
 
     // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
     // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
     // uses are declaring the id, or otherwise can't cope with the :: anyway. 
     if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
-        s = renderer->RenderScopeResolvingPrefix( id ) + s;   
+        s = renderer->RenderScopeResolvingPrefix( me ) + s;   
                                      
     return s;
 }
@@ -204,6 +198,54 @@ string SpecificIdentifier::GetTrace() const
 Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
 { 
 	return Production::PURE_IDENTIFIER; 
+}
+
+
+//////////////////////////// SpecificConstructorIdentifier //////////////////////////////
+
+string SpecificConstructorIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy  )
+{
+	auto me = TreePtr<SpecificConstructorIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
+	ASSERT(me);		
+	
+    // TODO use TryGetRecordDeclaration( Typeof( o->identifier ) ) and leave scopes out of it
+    TreePtr<Record> rec = DynamicTreePtrCast<Record>( renderer->TryGetScope( me ) );
+    if( !rec )
+		throw Unimplemented(); // Constructor must be declared in a record       
+		
+    string s = renderer->DoRender( rec->identifier, Syntax::Production::PURE_IDENTIFIER );	// PURE_IDENTIFIER prevents scope resolution
+	
+    // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
+    // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
+    // uses are declaring the id, or otherwise can't cope with the :: anyway. 
+    if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
+        s = renderer->RenderScopeResolvingPrefix( me ) + s;   
+                                     
+    return s;
+}
+
+//////////////////////////// SpecificDestructorIdentifier //////////////////////////////
+
+string SpecificDestructorIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy  )
+{
+	auto me = TreePtr<SpecificDestructorIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
+	ASSERT(me);		
+	
+    // TODO use TryGetRecordDeclaration( Typeof( o->identifier ) ) and leave scopes out of it
+    TreePtr<Record> rec = DynamicTreePtrCast<Record>( renderer->TryGetScope( me ) );
+    if( !rec )
+		throw Unimplemented(); // Constructor must be declared in a record    
+		   
+    string s = "~" + 
+               renderer->DoRender( rec->identifier, Syntax::Production::PURE_IDENTIFIER );	// PURE_IDENTIFIER prevents scope resolution
+	
+    // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
+    // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
+    // uses are declaring the id, or otherwise can't cope with the :: anyway. 
+    if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
+        s = renderer->RenderScopeResolvingPrefix( me ) + s;   
+                                     
+    return s;
 }
 
 //////////////////////////// TypeIdentifier //////////////////////////////
@@ -637,11 +679,11 @@ string Constructor::GetRender( VN::RendererInterface *renderer, Production, Poli
 
 
 string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-												Syntax::Production , Syntax::Production surround_prod, Syntax::Policy policy,
+												Syntax::Production , Syntax::Production, Syntax::Policy policy,
 												bool )
 {
-	ASSERT(declarator.empty()); // must be anonymous
-	return GetRender(renderer, surround_prod, policy);
+	ASSERT(!declarator.empty()); // must NOT be anonymous
+	return declarator + "(" + GetRenderParams(renderer, policy) + ")";
 }
 
 //////////////////////////// Destructor //////////////////////////////
@@ -653,12 +695,12 @@ string Destructor::GetRender( VN::RendererInterface *, Production, Policy )
 }
 
 
-string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-											   Syntax::Production , Syntax::Production surround_prod, Syntax::Policy policy,
+string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *, string declarator, 
+											   Syntax::Production , Syntax::Production, Syntax::Policy,
 											   bool )
 {
-	ASSERT(declarator.empty()); // must be anonymous
-	return GetRender(renderer, surround_prod, policy);
+	ASSERT(!declarator.empty()); // must NOT be anonymous
+	return declarator + "()";
 }
 
 //////////////////////////// Array //////////////////////////////
