@@ -164,7 +164,7 @@ string Render::DoRender( TreePtr<Node> node, Syntax::Production surround_prod, S
 	if( unique_coupling_names.count(node) > 0 )			
 	{
 		s += unique_coupling_names.at(node);
-		// Does the designation need a swemicolon?
+		// Does the designation need a semicolon?
 		// TODO duplicating AccomodateSemicolon(): resolve by having these act on strings rather than nodes
 		if( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
             Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) )
@@ -549,7 +549,7 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
 }                                          
                
 
-Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const
+Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Production, Syntax::Policy policy ) const
 {
 	if( !node )
 		return Syntax::Production::NULLPTR;
@@ -584,7 +584,6 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 		    TreePtr<Node> TryGetScope( TreePtr<Node> ) const final { return nullptr; }
 
 		} fake_renderer;
-		(void)node->GetRender(&fake_renderer, surround_prod, policy);
 		
 		return node->GetMyProduction(this, policy); 
 	}

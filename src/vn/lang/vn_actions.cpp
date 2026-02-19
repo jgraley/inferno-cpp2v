@@ -597,6 +597,24 @@ TreePtr<Node> VNLangActions::OnDo( TreePtr<Node> body, any body_loc, TreePtr<Nod
 }
 
 
+TreePtr<Node> VNLangActions::OnConstructor( list<TreePtr<Node>> params )
+{
+	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Constructor>>();
+	for( auto p : params )
+		ret->params.insert(p);
+	return ret;
+}
+
+
+TreePtr<Node> VNLangActions::OnDeclaration( TreePtr<Node> type, TreePtr<Node> declarator )
+{
+	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();
+	ret->type = type;
+	ret->identifier = declarator;
+	return ret;
+}
+
+
 TreePtr<Node> VNLangActions::OnIdValuePair( TreePtr<Node> key, any id_loc, TreePtr<Node> value )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::IdValuePair>>();

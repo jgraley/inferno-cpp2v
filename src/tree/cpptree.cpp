@@ -669,40 +669,26 @@ string Function::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
 
 //////////////////////////// Constructor //////////////////////////////
 
-string Constructor::GetRender( VN::RendererInterface *renderer, Production, Policy policy)
-{
-	// TODO obviously the class-being-constructed needs to be added to this syntax, either by
-	// 1 add it to this node, which is a type, so that the type of a constructor includes the type it constructs
-	// 2 pass it in, which requires a new kind of virtual rendering method
-	// 3 vcall back to renderer to get the scope, make sure works in line and out of line
-	// TODO don't render ⨤ in C++. Maybe not at all if can parse VN without.
-	return "⨤(" + GetRenderParams(renderer, policy) + ")";
-}
-
-
 string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 												Syntax::Production , Syntax::Production, Syntax::Policy policy,
 												bool )
 {
-	ASSERT(!declarator.empty()); // must NOT be anonymous
-	return declarator + "(" + GetRenderParams(renderer, policy) + ")";
+	if( declarator.empty() )
+		return "⨤(" + GetRenderParams(renderer, policy) + ")"; // anonymoius
+	else
+		return declarator + "(" + GetRenderParams(renderer, policy) + ")";
 }
 
 //////////////////////////// Destructor //////////////////////////////
-
-string Destructor::GetRender( VN::RendererInterface *, Production, Policy )
-{
-	// TODO see Constructor::GetRender()
-	return "~()";
-}
-
 
 string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *, string declarator, 
 											   Syntax::Production , Syntax::Production, Syntax::Policy,
 											   bool )
 {
-	ASSERT(!declarator.empty()); // must NOT be anonymous
-	return declarator + "()";
+	if( declarator.empty() )
+		return "~()"; // anonymoius
+	else
+		return declarator + "()";
 }
 
 //////////////////////////// Array //////////////////////////////

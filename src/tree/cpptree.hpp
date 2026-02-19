@@ -657,8 +657,6 @@ struct Constructor : Procedure // TODO be CallableParams
 { 
 	NODE_FUNCTIONS_FINAL 
 
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
-
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                        bool constant ) final;
@@ -668,8 +666,6 @@ struct Constructor : Procedure // TODO be CallableParams
 struct Destructor : Subroutine // TODO be Callable
 { 
 	NODE_FUNCTIONS_FINAL 
-
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,

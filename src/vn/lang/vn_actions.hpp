@@ -93,6 +93,9 @@ public:
 	TreePtr<Node> OnWhile( TreePtr<Node> arg, any arg_loc, TreePtr<Node> body, any body_loc );
 	TreePtr<Node> OnDo( TreePtr<Node> body, any body_loc, TreePtr<Node> arg, any arg_loc );
 	
+	TreePtr<Node> OnConstructor( list<TreePtr<Node>> params );	
+	TreePtr<Node> OnDeclaration( TreePtr<Node> type, TreePtr<Node> declarator );	
+	
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );
 	TreePtr<Node> OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );
 	TreePtr<Node> OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );
