@@ -973,7 +973,7 @@ string Labeley::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 {
 	if( policy.refuse_local_node_types ) 
 		throw RefuseDueLocal(); 
-	return "const void *"; // TODO lower Labely to const void * in a lowering pass
+	return "const void *"; // TODO lower Labely to const void * in a lowering step
 }
 
 //////////////////////////// Typedef ///////////////////////////////
