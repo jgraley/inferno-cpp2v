@@ -132,20 +132,20 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 }
 
 
-string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy ) 
+string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy) 
 {		
-	// TODO Get rid of all this casting by building the entire rendering subsystem using plain old const pointers.
-	auto me = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
-	ASSERT(me);	
-
-	string s = renderer->GetUniqueIdentifierName(me);          
-    ASSERT(s.size()>0)(*me)(" rendered to an empty string\n");
+	// Vcall on what kind of id this is
+	string s = GetRenderWithoutScope(renderer, policy);          
 
     // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
     // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
     // uses are declaring the id, or otherwise can't cope with the :: anyway. 
     if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
+    {
+		auto me = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
+		ASSERT(me);			
         s = renderer->RenderScopeResolvingPrefix( me ) + s;   
+	}
                                      
     return s;
 }
@@ -193,6 +193,17 @@ string SpecificIdentifier::GetTrace() const
     return GetName() + "(" + GetGraphName() + ")" + GetSerialString();
 }
 
+
+string SpecificIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy )
+{
+	auto me = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
+	ASSERT(me);	
+
+	string s = renderer->GetUniqueIdentifierName(me);          
+    ASSERT(s.size()>0)(*me)(" rendered to an empty string\n");
+    return s;
+}
+
 //////////////////////////// InstanceIdentifier //////////////////////////////
 
 Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
@@ -203,7 +214,14 @@ Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
 
 //////////////////////////// SpecificConstructorIdentifier //////////////////////////////
 
-string SpecificConstructorIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy  )
+// Constructors and destructors have identifiers because the tree is "resolved" which means
+// we already know exactly which decl a function call should reach. Mediating the relationship via
+// identifiers allows patterns to use couplings to get from usage to decl. These 
+// identifiers render differently: where the name would go you have [Scope::][~]Class
+// TODO we don't want the name we inherit from SpecificIdentifier so split a NamedIdentifier 
+// out and use for named cases, but not these.
+
+string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy )
 {
 	auto me = TreePtr<SpecificConstructorIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
 	ASSERT(me);		
@@ -213,20 +231,12 @@ string SpecificConstructorIdentifier::GetRender( VN::RendererInterface *renderer
     if( !rec )
 		throw Unimplemented(); // Constructor must be declared in a record       
 		
-    string s = renderer->DoRender( rec->identifier, Syntax::Production::PURE_IDENTIFIER );	// PURE_IDENTIFIER prevents scope resolution
-	
-    // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
-    // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
-    // uses are declaring the id, or otherwise can't cope with the :: anyway. 
-    if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
-        s = renderer->RenderScopeResolvingPrefix( me ) + s;   
-                                     
-    return s;
+    return renderer->DoRender( rec->identifier, Syntax::Production::PURE_IDENTIFIER );	// PURE_IDENTIFIER prevents scope resolution
 }
 
 //////////////////////////// SpecificDestructorIdentifier //////////////////////////////
 
-string SpecificDestructorIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy  )
+string SpecificDestructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy )
 {
 	auto me = TreePtr<SpecificDestructorIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
 	ASSERT(me);		
@@ -236,16 +246,8 @@ string SpecificDestructorIdentifier::GetRender( VN::RendererInterface *renderer,
     if( !rec )
 		throw Unimplemented(); // Constructor must be declared in a record    
 		   
-    string s = "~" + 
-               renderer->DoRender( rec->identifier, Syntax::Production::PURE_IDENTIFIER );	// PURE_IDENTIFIER prevents scope resolution
-	
-    // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
-    // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
-    // uses are declaring the id, or otherwise can't cope with the :: anyway. 
-    if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
-        s = renderer->RenderScopeResolvingPrefix( me ) + s;   
-                                     
-    return s;
+    return "~" + 
+           renderer->DoRender( rec->identifier, Syntax::Production::PURE_IDENTIFIER );	// PURE_IDENTIFIER prevents scope resolution
 }
 
 //////////////////////////// TypeIdentifier //////////////////////////////

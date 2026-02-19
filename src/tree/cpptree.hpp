@@ -166,6 +166,9 @@ struct SpecificIdentifier : virtual Property
 	
     BoundingRole addr_bounding_role;
     string name; // TODO split this out into NamedIdentifier
+
+protected:
+	virtual string GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy );
 };
 
 /// Identifier for any Instance (variable or object or function)
@@ -193,7 +196,7 @@ struct SpecificConstructorIdentifier : InstanceIdentifier,
                                        SpecificIdentifier
 {
     NODE_FUNCTIONS_FINAL
-   	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
+	string GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy ) override;
 };
                             
 
@@ -202,7 +205,7 @@ struct SpecificDestructorIdentifier : InstanceIdentifier,
                                       SpecificIdentifier
 {
     NODE_FUNCTIONS_FINAL
-   	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
+	string GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy ) override;
 };
                             
 
