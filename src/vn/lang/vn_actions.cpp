@@ -597,6 +597,16 @@ TreePtr<Node> VNLangActions::OnDo( TreePtr<Node> body, any body_loc, TreePtr<Nod
 }
 
 
+TreePtr<Node> VNLangActions::OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params )
+{
+	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Function>>();
+	for( auto p : params )
+		ret->params.insert(p);
+	ret->return_type = return_type;
+	return ret;
+}
+
+
 TreePtr<Node> VNLangActions::OnConstructor( list<TreePtr<Node>> params )
 {
 	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Constructor>>();

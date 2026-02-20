@@ -447,8 +447,6 @@ string Render::RenderNodeTypeName( shared_ptr<const Node> node ) const
 
 string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Production, Syntax::Policy policy )
 {
-	//bool need_a_type = surround_prod >= Syntax::Production::BOOT_TYPE && 
-	//                   surround_prod <= Syntax::Production::TOP_TYPE;
     string s = "⯁";
     			
     s += RenderNodeTypeName(node);
@@ -514,9 +512,10 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
                                           Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                           bool constant )
 {
+	// high prec forces boot if VN pre- or post-ops present
 	bool abstract = (declarator == "");
 	Syntax::Production type_prod = abstract ? surround_prod  
-                                               : Syntax::Production::SPACE_SEP_DECLARATION;
+                                               : Syntax::Production::SPACE_SEP_TYPE; 
 
 	try
 	{

@@ -48,14 +48,13 @@ public:
 		BARE_STATEMENT = 40, // Statement with no semicolon
 		BARE_DECLARATION, // Actual declaration with no semicolon, eg int i	
 		SPACE_SEP_STATEMENT, // eg throw <here>;
-		SPACE_SEP_DECLARATION, // the type in <here> <declarator>;
+		SPACE_SEP_DECLARATION, // the type in typedef <here>;
 		SPACE_SEP_PRE_PROC,
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
 		TOP_STMT_DECL, // Highest statement precedence
 						
-		// ----- Types. Just this for now.
+		// ----- Used in c-style cast. TODO try BOOT.
 		BOOT_TYPE = 50,
-		TOP_TYPE,
 		
 		// ----- Expressions. There is a precedence scheme, booted using ()
 		BOTTOM_EXPR = 60, // Lowest expression precedence: (), {}, [] etc from the inside		
@@ -63,6 +62,8 @@ public:
 		COMMA_OP, // Must be lowest binop, so we can bypass it when we want comma as separator
 		COMMA_SEP, // Use this for comma-separated lists to force parens for COMMA_OP, including VN
 		COLON_SEP, // Use for map arguments
+
+		DECLARATOR_IN_USE, // A type will be rendered using an abstract declarator, may need booting
 
 		ASSIGN = 70, //C++: assign ops and statement-like keywords eg throw
 		EXPR_CONST,

@@ -40,12 +40,9 @@ string Type::GetRender( VN::RendererInterface *renderer, Production surround_pro
 
 
 string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                         Syntax::Production, Syntax::Production surround_prod, Syntax::Policy policy,
+                                         Syntax::Production, Syntax::Production, Syntax::Policy policy,
                                          bool constant)
 {
-	bool abstract = (declarator == "");
-	Syntax::Production type_prod = abstract ? surround_prod  
-                                               : Syntax::Production::SPACE_SEP_DECLARATION;
 	return (constant?"const ":"") + 
 	       GetRenderTypeSpecSeq( renderer, policy ) + 
 	       (declarator != "" ? " "+declarator : "");
@@ -612,8 +609,17 @@ string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production,
 
 //////////////////////////// Callable //////////////////////////////
 
+
+Syntax::Production Callable::GetMyProductionTerminal() const
+{
+	// Rendering as a type.
+	// We will require an abstract declarator (we'll hit this node first)
+	return Production::DECLARATOR_IN_USE; 
+}
+
 Syntax::Production Callable::GetOperandInDeclaratorProduction() const
 {
+	// Rendering a non-abstract declarator.
 	return Production::POSTFIX; // eg int a();
 }
 
@@ -637,7 +643,7 @@ string CallableParams::GetRenderParams(VN::RendererInterface *renderer, Policy p
         auto o = TreePtr<Instance>::DynamicCast(d);
         if( !o )
         {
-            s += renderer->RenderNodeExplicit( d, Syntax::Production::BARE_DECLARATION, policy );
+            s += renderer->DoRender( d, Syntax::Production::BARE_DECLARATION );
             continue;
         }
         Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
@@ -695,12 +701,15 @@ string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *, string d
 
 Syntax::Production Array::GetMyProductionTerminal() const
 { 
-	return Production::POSTFIX; // eg auto a = new int[9]; (without booting)
+	// Rendering as a type.
+	// We will require an abstract declarator (we'll hit this node first)
+	return Production::DECLARATOR_IN_USE; 
 }
 
 
 Syntax::Production Array::GetOperandInDeclaratorProduction() const
 {
+	// Rendering a non-abstract declarator.
 	return Production::POSTFIX; // eg int a[9];
 }
 
@@ -723,14 +732,17 @@ string Array::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, strin
 
 //////////////////////////// Indirection //////////////////////////////
 
-Syntax::Production Indirection::GetMyProductionTerminal() const
+Syntax::Production Indirection::GetMyProductionTerminal() const 
 { 
-	return Production::POSTFIX; // eg auto a = new int *; (without booting)
+	// Rendering as a type.
+	// We will require an abstract declarator (we'll hit this node first)
+	return Production::DECLARATOR_IN_USE;
 }
 
 
 Syntax::Production Indirection::GetOperandInDeclaratorProduction() const
 {
+	// Rendering a non-abstract declarator.
 	return Production::PREFIX; // eg int *a;
 }
 
@@ -1197,6 +1209,7 @@ string Cast::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 {
 	if( policy.refuse_c_style_cast )
 		throw RefusedByPolicy();
+		
     return "(" + renderer->DoRender( type, Syntax::Production::BOOT_TYPE ) + ")" +
                  renderer->DoRender( operand, Syntax::Production::PREFIX );
 }

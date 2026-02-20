@@ -603,6 +603,7 @@ struct Callable : Type
 {
     NODE_FUNCTIONS
     
+	Production GetMyProductionTerminal() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
 };
 

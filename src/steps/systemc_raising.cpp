@@ -317,7 +317,6 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     s_module->members = (s_cons, decls);
     s_module->bases = (bases);
     s_module->identifier = module_typeid;
-    s_cons->type = MakePatternNode<Constructor>();        
     s_cons->constancy = MakePatternNode<NonConst>();
     s_cons->initialiser = s_comp;
     s_cons->identifier = s_constructor_id;

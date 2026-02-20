@@ -93,6 +93,7 @@ public:
 	TreePtr<Node> OnWhile( TreePtr<Node> arg, any arg_loc, TreePtr<Node> body, any body_loc );
 	TreePtr<Node> OnDo( TreePtr<Node> body, any body_loc, TreePtr<Node> arg, any arg_loc );
 	
+	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
 	TreePtr<Node> OnConstructor( list<TreePtr<Node>> params );	
 	TreePtr<Node> OnDeclaration( TreePtr<Node> type, TreePtr<Node> declarator );	
 	
