@@ -52,6 +52,7 @@ string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string
 string Type::GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy )
 {
 	// This would be a type-specifier-seq in https://alx71hub.github.io/hcb/ 
+	// TODO just throw?
 	return renderer->RenderNodeExplicit(shared_from_this(), Syntax::Production::EXPLICIT_NODE, policy);
 }
 
@@ -626,33 +627,24 @@ Syntax::Production Callable::GetOperandInDeclaratorProduction() const
 
 //////////////////////////// CallableParams //////////////////////////////
 
-string CallableParams::GetRenderParams(VN::RendererInterface *renderer, Policy policy)
+string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy)
 {
-	TRACE();
-    Sequence<Declaration> sorted;
-    for( auto param : params )
-        sorted.push_back(param); // no sorting required
-                
-    string s;   
-    bool first = true;
-    for( TreePtr<Declaration> d : sorted )
-    {
-        if( !first )
-            s += ", ";
-        
-        auto o = TreePtr<Instance>::DynamicCast(d);
-        if( !o )
+    list<string> strings;
+    for( auto d : params )
+	{
+        if( auto o = TreePtr<Instance>::DynamicCast(d) )
         {
-            s += renderer->DoRender( d, Syntax::Production::BARE_DECLARATION );
-            continue;
-        }
-        Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
-        string name = renderer->DoRender( o->identifier, starting_declarator_prod);
-        s += renderer->DoRenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, policy, false );
-            
-        first = false;
-    }
-    return s;
+			Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
+			string name = renderer->DoRender( o->identifier, starting_declarator_prod);
+			strings.push_back( renderer->DoRenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, policy, false ) );
+		}
+		else
+		{
+            strings.push_back( renderer->DoRender( d, Syntax::Production::BARE_DECLARATION ) );
+        }		
+	}					
+
+    return Join( strings, ", ", "(", ")" );
 }
 
 //////////////////////////// Function //////////////////////////////
@@ -662,9 +654,7 @@ string Function::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
 											 bool constant )
 {
 	string d2 = declarator + 
-	            "(" + 
-	            GetRenderParams(renderer, policy) +
-	            ")" + 
+	            GetRenderParameterisation(renderer, policy) +	             
 	            (constant?" const":"");
     return renderer->DoRenderTypeAndDeclarator( return_type, 
                                                 d2,
@@ -680,9 +670,9 @@ string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer,
 												bool )
 {
 	if( declarator.empty() )
-		return "⨤(" + GetRenderParams(renderer, policy) + ")"; // anonymoius
+		return "⨤" + GetRenderParameterisation(renderer, policy); // anonymoius
 	else
-		return declarator + "(" + GetRenderParams(renderer, policy) + ")";
+		return declarator + GetRenderParameterisation(renderer, policy);
 }
 
 //////////////////////////// Destructor //////////////////////////////

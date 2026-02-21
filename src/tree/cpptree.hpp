@@ -617,7 +617,7 @@ struct CallableParams : Callable, Scope
     virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
 
 protected:    
-    string GetRenderParams(VN::RendererInterface *renderer, Policy policy);
+    string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy);
 };
 
 /// Anything that can be called and has parameters and return value

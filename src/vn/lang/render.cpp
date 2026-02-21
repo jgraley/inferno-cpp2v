@@ -158,7 +158,7 @@ string Render::DoRender( TreePtr<Node> node, Syntax::Production surround_prod, S
 	if( ReadArgs::use.count("c") )
 		s += SSPrintf("\n//%s Node %s called from %p\n", 
 				      Tracer::GetPrefix().c_str(), 
-					  Traceable::TypeIdName(*node).c_str(), // No serial numbers because we diff these
+					  node ? Traceable::TypeIdName(*node).c_str() : "NULL", // No serial numbers because we diff these
 					  RETURN_ADDR() );
 
 	if( unique_coupling_names.count(node) > 0 )			
@@ -184,7 +184,7 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_p
 	if( ReadArgs::use.count("c") )
 		s += SSPrintf("\n//%s Node %s, surround prod: %d, node prod: %d\n", 
 					  Tracer::GetPrefix().c_str(), 
-					  Traceable::TypeIdName(*node).c_str(), // No serial numbers because we diff these
+					  node ? Traceable::TypeIdName(*node).c_str() : "NULL", // No serial numbers because we diff these
 					  Syntax::GetPrecedence(surround_prod), 
 					  Syntax::GetPrecedence(node_prod) );		
 
@@ -280,7 +280,11 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
         Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) &&
         Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) &&
         node_prod != Syntax::Production::COMPOUND )
+    {
+		if( ReadArgs::use.count("c") )
+			s += SSPrintf("/* Adding semicolon, reason 1, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
         semicolon = true;
+    }
         
     if( (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) &&
          Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_EXPR)) ||
@@ -289,13 +293,19 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
         if( Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) &&
 			Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) &&
 			node_prod != Syntax::Production::COMPOUND )
-			semicolon = true;       
+		{
+			if( ReadArgs::use.count("c") )
+				s += SSPrintf("/* Adding semicolon, reason 2, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
+			semicolon = true;
+		}			
           
     if( !semicolon )
-         return AccomodatePreRestriction( node, surround_prod, policy );
+    {
+		if( ReadArgs::use.count("c") )
+			s += SSPrintf("/* Not adding semicolon, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
+        return s + AccomodatePreRestriction( node, surround_prod, policy );
+	}
 
-	if( ReadArgs::use.count("c") )
-		s += SSPrintf("// Adding semicolon, surround prod to BARE_STATEMENT\n");
 
 	switch( surround_prod )
 	{
@@ -548,7 +558,8 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
 }                                          
                
 
-Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Production, Syntax::Policy policy ) const
+// We will deal with NULL, Agents and nodes that refuse to render given surround_prod and policy
+Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const 
 {
 	if( !node )
 		return Syntax::Production::NULLPTR;
@@ -558,10 +569,13 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 		if( const Agent *agent = Agent::TryAsAgentConst(node) )
 			return agent->GetAgentProduction();
 	}
-	catch( Syntax::Refusal & ) {}
-		
-	try 
-	{ 
+	catch( Syntax::Refusal & ) 
+	{
+		// Still might work a regular node so fall through
+	}	
+
+	try
+	{
 		// A lot of nodes have GetMyProduction() but not GetRender(). If GetRender() is not
 		// implemented, we'll generate explicit (⯁) form, which is EXPLICIT_NODE.
 		// Passing in the real renderer would cause unwanted side-effects.
@@ -576,19 +590,25 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 			string GetUniqueIdentifierName( TreePtr<Node> ) const final { return "fake"; }
 			string DoRenderTypeAndDeclarator( TreePtr<Node>, string, 
 											  Syntax::Production, Syntax::Production, Syntax::Policy,
-										      bool ) final { return "fake"; }
-		    string RenderNodeExplicit( shared_ptr<const Node>, 
+											  bool ) final { return "fake"; }
+			string RenderNodeExplicit( shared_ptr<const Node>, 
 									   Syntax::Production, 
-		                               Syntax::Policy ) final { return "fake"; } 	
-		    TreePtr<Node> TryGetScope( TreePtr<Node> ) const final { return nullptr; }
+									   Syntax::Policy ) final { return "fake"; } 	
+			TreePtr<Node> TryGetScope( TreePtr<Node> ) const final { return nullptr; }
 
 		} fake_renderer;
+
+		// Can it render?
+		(void)surround_prod;
+		(void) node->GetRender(&fake_renderer, surround_prod, policy); 
 		
 		return node->GetMyProduction(this, policy); 
 	}
-	catch( Syntax::Refusal & ) {}
-
-	return Syntax::Production::EXPLICIT_NODE;     
+	catch( Syntax::Refusal & ) 
+	{
+		// Out of ideas so it will have to render explicitly
+		return Syntax::Production::EXPLICIT_NODE;
+	}	    
 }
 
 
