@@ -103,7 +103,7 @@
 	CONSTRUCTOR								"⨤"
 	<string>	COMMA						_("comma")
 	<string>	C_ASSIGN					"="
-	<string>	C_COMPOUND_ASSIGN			_("C compound assignment operator")
+	<string>	C_COMPOUND_ASSIGN			_("C compound_primary assignment operator")
 	<string>	C_LOGICAL_OR_OP				"||"			
 	<string>	C_LOGICAL_AND_OP			"&&"			
 	<string>	C_BITWISE_OR_OP				"|"
@@ -156,7 +156,7 @@
 %type <TreePtr<Node>> 				unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement statement_nc statement stmt_disjunction stmt_conjunction stmt_primary norm_expr_or_stmt 
 %type <TreePtr<Node>>				bare_declaration cons_or_des declarator
-%type <TreePtr<Node>> 				compound comp_prefix parameter type_id 
+%type <TreePtr<Node>> 				compound_primary compound_prefix parameter type_id 
 %type <TreePtr<Node>> 				declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				ab_declarator ab_declarator_prefix ab_declarator_postfix
 %type <wstring> 					vn_name
@@ -185,6 +185,8 @@
 
 %%
 
+//////////////////////////////////// COMMANDS ///////////////////////////////////////////
+
 vnscript 		: commands 								{ vn->OnVNScript($1); }
      
 // This is to make the ⨟ optional on last command
@@ -208,9 +210,8 @@ script_command	: ENGINE normal   		 		 	{ $$ = make_shared<VN::EngineCommand>($2
 recogniser_command	: vn_name DESIGNATE normal		{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
 					| vn_name DESIGNATE type_specified		{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
 
-
-// This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
-stuff_depth_limit		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
+//////////////////////////////////// ITEMISATION ///////////////////////////////////////////
+// For explicit/built-in nodes mostly
 
 itemisation	: OPEN_VN items_bare CLOSE_VN  			{ $$ = $2; $$.loc = @$; }
 			| OPEN_VN items_sep CLOSE_VN			{ $$ = $2; $$.loc = @$; $$.items.push_back({{}, @3}); }
@@ -229,27 +230,58 @@ item		: item VN_SUB_SEP unified				{ $$ = $1; $$.nodes.push_back($3); $$.loc = @
 unified		: normal
 			| type_id
 
-compound	: '{' VN_SEP '}'                   									{ $$ = vn->OnCompound({}, @2, {}, @3); } 
-			| '{' statements VN_SEP '}'           								{ $$ = vn->OnCompound($2, @2, {}, @4); }
-			| '{' VN_SEP statements '}'           								{ $$ = vn->OnCompound({}, @2, $3, @3); }
-			| '{' statements VN_SEP statements '}'  							{ $$ = vn->OnCompound($2, @2, $4, @4); }
+//////////////////////////////// NORMALS ////////////////////////////////////         
+// Normal is basically anything other than a type
 
-statements	: statement									{ $$.push_back($1); }
-			| statements statement						{ $$ = $1; $$.push_back($2); }
+normal				: norm_disjunction
+
+norm_disjunction	: norm_conjunction
+					| norm_disjunction DISJUNCTION norm_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
+
+norm_conjunction 	: norm_expr_or_stmt
+					| norm_conjunction CONJUNCTION norm_expr_or_stmt				{ $$ = vn->OnConjunction($1, $3); }
+		
+norm_expr_or_stmt	: expr_expression
+					| statement_nc // statements not including Compound, which is expressional from this POV
+					| compound_prefix // Branch off here for compound_primary to avoid conflicts with prefix = (used for inits)
+					| bare_declaration			
+
+//////////////////////////////// STATEMENTS ////////////////////////////////////         
+
+// Because there's no separator in {{code} expr} the prefix ops would conflict with infix that use same symbol,
+// so we'll need to complete a branch of the syntax for compounds with a copy of the unary VN operators (none are postfix).
+compound_prefix : compound_primary 
+				| 			       DELTA normal DELTA_ARROW compound_prefix	{ $$ = vn->OnDelta($2, $4); }
+				| 								   NEGATION compound_prefix	{ $$ = vn->OnNegation($2); }
+				|       				transform_norm_part compound_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
+				| 								 BUILD_SIZE compound_prefix	{ $$ = vn->OnBuildSize($2); }
+				| 								  STRINGIZE compound_prefix	{ $$ = vn->OnStringize($2); }
+				|  									  STUFF compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+				|  STUFF OPEN_VN           unified CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+				|  STUFF OPEN_VN stuff_depth_limit CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+				|                     prerestrict_name_part compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+
+compound_primary	: '{' VN_SEP '}'                   						{ $$ = vn->OnCompound({}, @2, {}, @3); } 
+					| '{' statements VN_SEP '}'           					{ $$ = vn->OnCompound($2, @2, {}, @4); }
+					| '{' VN_SEP statements '}'           					{ $$ = vn->OnCompound({}, @2, $3, @3); }
+					| '{' statements VN_SEP statements '}'  				{ $$ = vn->OnCompound($2, @2, $4, @4); }
+
+statements	: statement														{ $$.push_back($1); }
+			| statements statement											{ $$ = $1; $$.push_back($2); }
          
 statement	: stmt_disjunction
 
 stmt_disjunction	: stmt_conjunction
-					| stmt_disjunction DISJUNCTION stmt_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
+					| stmt_disjunction DISJUNCTION stmt_conjunction			{ $$ = vn->OnDisjunction($1, $3); }
 
 stmt_conjunction 	: stmt_primary
-					| stmt_conjunction CONJUNCTION stmt_primary					{ $$ = vn->OnConjunction($1, $3); }
+					| stmt_conjunction CONJUNCTION stmt_primary				{ $$ = vn->OnConjunction($1, $3); }
 
-stmt_primary: compound 
+stmt_primary: compound_primary 
 			| statement_nc %prec ';'
-			| ';'																{ $$ = vn->OnNop(@1); }      
+			| ';'															{ $$ = vn->OnNop(@1); }      
 					
-// _nc here means "not a compound"						
+// _nc here means "not a compound_primary"						
 statement_nc: bare_statement ';'												{ $$ = $1; }      
 			| ARGS_BODY_STMT_KEYWORD '(' semicolon_args ')' stmt_primary		{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
 			| WHILE_KEYWORD '(' expr_expression ')' stmt_primary 				{ $$ = vn->OnWhile($3, @3, $5, @5); }
@@ -294,81 +326,6 @@ declarator_primary	: norm_primary
                 
 cons_or_des : CONSTRUCTOR parameterisation 		 						{ $$ = vn->OnConstructor($2); } 
          
-//////////////////////////////// TYPES ////////////////////////////////////         
-       
-type_id 			: type_disjunction
-
-type_disjunction	: type_conjunction
-					| type_disjunction DISJUNCTION type_conjunction			{ $$ = vn->OnDisjunction($1, $3); }
-
-type_conjunction 	: type_with_ab
-					| type_conjunction CONJUNCTION type_prefix				{ $$ = vn->OnConjunction($1, $3); }
-                    
-type_with_ab		: type_specified
-					| type_primary ab_declarator
-					
-ab_declarator		: ab_declarator_prefix										    
-
-ab_declarator_prefix	: ab_declarator_postfix
-						|                      						C_AMPERSAND { $$ = nullptr; }  
-						|                           					 C_STAR { $$ = nullptr; } 
-						|                      C_AMPERSAND ab_declarator_prefix { $$ = $2; } 
-						|                           C_STAR ab_declarator_prefix { $$ = $2; } 
-
-ab_declarator_postfix	: parameterisation										{ $$ = vn->OnFunction(nullptr, $1); }       
-						| '[' normal ']'										{ $$ = $2; } 
-                		| ab_declarator_postfix parameterisation				{ $$ = vn->OnFunction($1, $2); }       
-						| ab_declarator_postfix '[' normal ']'					{ $$ = $3; } 
-                					                
-// Not including types that require declarators (except via built-in, designation etc)          
-type_specified		: type_prefix          
-          
-type_prefix : type_postfix
-			| 			 		  DELTA type_id DELTA_ARROW type_prefix	{ $$ = vn->OnDelta($2, $4); }
-			| 									      GRASS type_prefix	{ $$ = vn->OnGrass($2); }
-			| 								     POINTER_IS type_prefix	{ $$ = vn->OnPointerIs($2); }
-			| 								       NEGATION type_prefix	{ $$ = vn->OnNegation($2); }
-			|                 type_prerestrict_name_part unified_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			   
-type_postfix: type_primary		   
-			                                       
-type_primary: type_vn_prim
-			| '(' type_id ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
-			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }			
-									
-type_vn_prim: type_builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, $2); }
-			| DESIGNATED_TYPE     									  			{ $$ = $1.as_designated; }		
-			| type_id_by_name_part OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
-			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
-			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
-			| type_build_id_part OPEN_VN VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
-
-type_builtin_name_part : start_builtin_scope resolved_type_name				{ $$ = $2.as_andata_block; (void)$1; }
-type_prerestrict_name_part : start_prerestrict_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
-type_id_by_name_part 	: start_id_by_name_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
-type_build_id_part 		: start_build_id_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
-
-
-// eg "long unsigned int". VN represents this as a single node. We don't want nodes for its constituent parts.
-// So, this is the level at which we mix in the VN syntax.
-type_specifier_seq	: TYPE_SPECIFIER												{ $$.insert($1); }
-					| TYPE_SPECIFIER type_specifier_seq								{ $$ = $2; $$.insert($1); }
-
-//////////////////////////////// NORMALS ////////////////////////////////////         
-
-normal				: norm_disjunction
-
-norm_disjunction	: norm_conjunction
-					| norm_disjunction DISJUNCTION norm_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
-
-norm_conjunction 	: norm_expr_or_stmt
-					| norm_conjunction CONJUNCTION norm_expr_or_stmt				{ $$ = vn->OnConjunction($1, $3); }
-		
-norm_expr_or_stmt	: expr_expression
-					| statement_nc // statements not including Compound, which is expressional from this POV
-					| comp_prefix // Branch off here for compound to avoid conflicts with prefix = (used for inits)
-					| bare_declaration			
-
 //////////////////////////////// EXPRESSIONS ////////////////////////////////////         
 
 expr_expression		: expr_comma_op
@@ -441,6 +398,9 @@ expr_prefix : expr_postfix
 
 transform_norm_part : start_transform_name_scope TRANSFORM_NAME_NORMAL { $$ = $2.as_ascii; (void)$1; }
 
+// This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
+stuff_depth_limit		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
+
 // Use a prerestriction to disambiguate ⤨【DeclarationOf】...
 unified_prefix	: expr_prefix
 				| type_prefix
@@ -463,7 +423,7 @@ expr_primary: norm_primary
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 			| NORM_TERM_KEYWORD									{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
-			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayLiteral({}); } // ={...} dismbiguates against compound
+			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayLiteral({}); } // ={...} dismbiguates against compound_primary
 			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayLiteral($3); }               
 
 norm_primary: vn_wildcard
@@ -483,19 +443,71 @@ prerestrict_name_part : start_prerestrict_scope resolved_name	{ $$ = $2.as_andat
 id_by_name_part 	: start_id_by_name_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
 build_id_part 		: start_build_id_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
 
+//////////////////////////////// TYPES ////////////////////////////////////         
+       
+type_id 			: type_disjunction
 
-// Because there's no separator in {{code} expr} the prefix ops would conflict with infix that use same symbol,
-// so we'll need to complete a branch of the syntax for compounds with a copy of the unary VN operators (none are postfix).
-comp_prefix : compound 
-			| 			       DELTA normal DELTA_ARROW comp_prefix	{ $$ = vn->OnDelta($2, $4); }
-			| 								   NEGATION comp_prefix	{ $$ = vn->OnNegation($2); }
-			|       				transform_norm_part comp_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
-			| 								 BUILD_SIZE comp_prefix	{ $$ = vn->OnBuildSize($2); }
-			| 								  STRINGIZE comp_prefix	{ $$ = vn->OnStringize($2); }
-			|  									  STUFF comp_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			|  STUFF OPEN_VN           unified CLOSE_VN comp_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			|  STUFF OPEN_VN stuff_depth_limit CLOSE_VN comp_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
-			|                     prerestrict_name_part comp_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+type_disjunction	: type_conjunction
+					| type_disjunction DISJUNCTION type_conjunction			{ $$ = vn->OnDisjunction($1, $3); }
+
+type_conjunction 	: type_with_ab
+					| type_conjunction CONJUNCTION type_prefix				{ $$ = vn->OnConjunction($1, $3); }
+                    
+type_with_ab		: type_specified
+					| type_primary ab_declarator
+					
+ab_declarator		: ab_declarator_prefix										    
+
+ab_declarator_prefix	: ab_declarator_postfix
+						|                      						C_AMPERSAND { $$ = nullptr; }  
+						|                           					 C_STAR { $$ = nullptr; } 
+						|                      C_AMPERSAND ab_declarator_prefix { $$ = $2; } 
+						|                           C_STAR ab_declarator_prefix { $$ = $2; } 
+
+ab_declarator_postfix	: parameterisation										{ $$ = vn->OnFunction(nullptr, $1); }       
+						| '[' normal ']'										{ $$ = $2; } 
+                		| ab_declarator_postfix parameterisation				{ $$ = vn->OnFunction($1, $2); }       
+						| ab_declarator_postfix '[' normal ']'					{ $$ = $3; } 
+                					                
+// Not including types that require declarators (except via built-in, designation etc)          
+type_specified		: type_prefix          
+          
+type_prefix : type_postfix
+			| 			 		  DELTA type_id DELTA_ARROW type_prefix	{ $$ = vn->OnDelta($2, $4); }
+			| 									      GRASS type_prefix	{ $$ = vn->OnGrass($2); }
+			| 								     POINTER_IS type_prefix	{ $$ = vn->OnPointerIs($2); }
+			| 								       NEGATION type_prefix	{ $$ = vn->OnNegation($2); }
+			|                 type_prerestrict_name_part unified_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			   
+type_postfix: type_primary		   
+			                                       
+type_primary: type_vn_prim
+			| '(' type_id ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
+			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }			
+									
+type_vn_prim: type_builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, $2); }
+			| DESIGNATED_TYPE     									  			{ $$ = $1.as_designated; }		
+			| type_id_by_name_part OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
+			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
+			| type_build_id_part OPEN_VN VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
+
+type_builtin_name_part : start_builtin_scope resolved_type_name				{ $$ = $2.as_andata_block; (void)$1; }
+type_prerestrict_name_part : start_prerestrict_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
+type_id_by_name_part 	: start_id_by_name_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
+type_build_id_part 		: start_build_id_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
+
+
+// eg "long unsigned int". VN represents this as a single node. We don't want nodes for its constituent parts.
+// So, this is the level at which we mix in the VN syntax.
+type_specifier_seq	: TYPE_SPECIFIER												{ $$.insert($1); }
+					| TYPE_SPECIFIER type_specifier_seq								{ $$ = $2; $$.insert($1); }
+
+//////////////////////////////////////// RESOLVER GLUE /////////////////////////////////////////////
+// 2 things going on here:
+// - Recogniser can only supply one token, but we can "or" them together using rules.
+// - We create Gnomons and give them to the recogniser - their lifetime indicates scopes.
+
 
 vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 			| ASCII_NAME								{ $$ = $1.as_unicode; }     
@@ -517,6 +529,7 @@ part_resolve	: node_namespace RESOLUTION_OP			{ $$ = make_shared<VN::ResolverGno
     
 node_namespace 	: part_resolve NODE_NAMESPACE			{ $$ = $2; }
 				| NODE_NAMESPACE						{ $$ = $1; }				      
+
 
 start_builtin_scope		: BUILT_IN 			{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 										      recogniser->AddGnomon($$); }

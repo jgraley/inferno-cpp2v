@@ -30,13 +30,12 @@ using namespace reflex;
 
 void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 {
-	PurgeExpiredGnomons();
 	ASSERT( gnomon );
 	
 	if( auto scope_gnomon = dynamic_pointer_cast<const ScopeGnomon>(gnomon) )
-		scope_gnomons.push_front( scope_gnomon ); // front is top
+		scope_gnomons.Push( scope_gnomon ); // front is top
 	else if( auto resolver_gnomon = dynamic_pointer_cast<const ResolverGnomon>(gnomon) )
-		resolver_gnomons.push_front( resolver_gnomon ); // front is top
+		resolver_gnomons.Push( resolver_gnomon ); // front is top
 	else if( auto designation_gnomon = dynamic_pointer_cast<const DesignationGnomon>(gnomon) )
 		designation_gnomons.insert( make_pair( designation_gnomon->name, designation_gnomon ) );
 	else 
@@ -65,18 +64,11 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	metadata.as_andata_block = nullptr;
 	
 	const ScopeGnomon *scope = nullptr;
-	for( weak_ptr<const ScopeGnomon> wpg : scope_gnomons ) // loops from top down
-	{
-		if( auto spg = wpg.lock() )
-		{
-			if( dynamic_cast<const NodeNameScopeGnomon *>(spg.get()) )
-				return ProcessTokenInNodeNameScope(text, ascii, loc, metadata);
-			else if( dynamic_cast<const TransformNameScopeGnomon *>(spg.get()) )
-				return ProcessTokenTransformNameScope(text, ascii, loc, metadata);
-			
-			break; // Only considering innermost for now			
-		}
-	}	
+	shared_ptr<const ScopeGnomon> spg = scope_gnomons.TryLockTop();
+	if( spg && dynamic_cast<const NodeNameScopeGnomon *>(spg.get()) )
+		return ProcessTokenInNodeNameScope(text, ascii, loc, metadata);
+	else if( spg && dynamic_cast<const TransformNameScopeGnomon *>(spg.get()) )
+		return ProcessTokenTransformNameScope(text, ascii, loc, metadata);		
 	
 	shared_ptr<const DesignationGnomon> designation_gnomon;
 	if( designation_gnomons.count(text) > 0 )	
@@ -158,17 +150,14 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstr
 	// Determine the current scope from our weak gnomons
 	const AvailableNodeData::NamespaceBlock *namespace_block = AvailableNodeData().GetNodeNamesRoot();
 	bool default_namespace = true;
-	for( weak_ptr<const ResolverGnomon> wpg : resolver_gnomons )
+	shared_ptr<const ResolverGnomon> spg = resolver_gnomons.TryLockTop();
+	if( spg )
 	{
-		if( auto spg = wpg.lock() )
-		{
-			ASSERT( spg->namespace_block );
-			namespace_block = spg->namespace_block;
-			default_namespace = false;
-			break; // we only need the one at the front, because the names build up
-		}
+		ASSERT( spg->namespace_block );
+		namespace_block = spg->namespace_block;
+		default_namespace = false;
 	}
-		
+
 	// See if we want to supply a block
 	if( namespace_block && namespace_block->sub_blocks.count(ToASCII(text)) > 0 )
 	{
@@ -233,25 +222,14 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenTransformNameScope(w
 }
 
 
-void VNLangRecogniser::PurgeExpiredGnomons()
-{
-	auto expired = [&](weak_ptr<const Gnomon> wpg)
-	{
-		return wpg.expired();
-	};
-	resolver_gnomons.remove_if(expired);
-	scope_gnomons.remove_if(expired);
-}
-
-
 string VNLangRecogniser::GetContextText() const
 {
 	list<string> ls;
-	for( weak_ptr<const ScopeGnomon> wpg : scope_gnomons )
+	scope_gnomons.For( [&](const shared_ptr<const ScopeGnomon> &spg)
 	{
-		if( auto spg = wpg.lock() )
-			ls.push_back("inside "+spg->GetMessageText());
-	}
+		ls.push_back("inside "+spg->GetMessageText());
+	} );
+	
 	return Join( ls, ", " );
 }
 

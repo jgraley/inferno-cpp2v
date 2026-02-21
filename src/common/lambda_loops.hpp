@@ -12,11 +12,6 @@
 #include <type_traits>
 #include <utility>
 
-class BreakException : exception
-{
-};
-
-
 // Break out of one of these loops
 void LLBreak();
 // For "continue", just return out of the lambda

@@ -11,6 +11,12 @@
 #include <type_traits>
 #include <utility>
 
+
+// The hashing algo for pointers MAY just be a simple cast. So, shift out the alignment
+// bits from the address for better hashing.
+#define HASHING_POINTERS_ALIGNMENT_BITS 3 
+
+
 string GetInnermostTemplateParam( string s );
 string RemoveAllTemplateParam( string s );
 string RemoveOneOuterScope( string s );
@@ -743,8 +749,101 @@ public:
     // successful, Clone() for a return value.
 };
 
-// The hashing algo for pointers MAY just be a simple cast. So, shift out the alignment
-// bits from the address for better hashing.
-#define HASHING_POINTERS_ALIGNMENT_BITS 3 
+class BreakException : exception
+{
+};
+
+
+template<typename T>
+class WeakList
+{
+public:		
+	void PushFront( const weak_ptr<T>& w ) // accept shared or weak
+	{
+		if( !w.expired() )
+			storage.push_front(w);		
+	}
+	
+	// Don't use if( !empty() ) front() because not atomic. Use this instead.
+	shared_ptr<T> TryLockFront() const // fails if empty after expiry
+	{
+		for( typename list<weak_ptr<T>>::iterator i = storage.begin();  
+		     i != storage.end();
+		     i = storage.erase(i) ) // erase expireds as we go
+		{
+			auto w = *i;
+			if( auto s = w.lock() )
+				return s;				
+		}
+		return nullptr;
+	}
+	
+	bool TryPopFront()
+	{
+		auto s = TryLockFront();
+		if( !s )
+			return false; // failed
+			
+		// pop while s is in scope, so it doesn't asynchronously expire	
+		storage.pop_front();
+		return true;
+	}
+	
+	// Standard lambda loop. Do break and continue the usual way.
+	void For( function<void(const shared_ptr<T> &x)> func ) const try
+	{
+		typename list<weak_ptr<T>>::iterator i = storage.begin();
+		while( i != storage.end() )
+		{
+			auto w = *i;
+			if( auto s = w.lock() )
+			{
+				func( s );
+				i++;
+			}
+			else
+			{
+				i = storage.erase(i);
+			}
+		}
+	}
+	catch( const BreakException & )
+	{
+	}	
+	
+private:
+	// Mutable is justified because we want to hide the purging of expireds from the user.
+	mutable list<weak_ptr<T>> storage;
+};
+
+
+template<typename T>
+class WeakStack
+{
+public:	
+	void Push( const weak_ptr<T>& w ) // accept shared or weak
+	{
+		wl.PushFront(w);
+	}
+	
+	shared_ptr<T> TryLockTop() const // fails if empty after expiry
+	{
+		return wl.TryLockFront();
+	}
+	
+	bool TryPop()
+	{
+		return wl.TryPopFront();
+	}
+
+	void For( function<void(const shared_ptr<T> &x)> func ) const
+	{
+		wl.For(func);
+	}
+
+private:	
+	WeakList<T> wl;
+};
+
 
 #endif

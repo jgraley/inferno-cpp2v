@@ -139,14 +139,13 @@ public:
 	YY::VNLangParser::symbol_type ProcessTokenTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
 
 private:	
-	void PurgeExpiredGnomons();
 	string GetContextText() const;
 
 	// store with weak_ptr => these will expire when the parser exists the scope
-	list<weak_ptr<const ScopeGnomon>> scope_gnomons;
+	WeakStack<const ScopeGnomon> scope_gnomons;
 
 	// store with weak_ptr => these will expire when the parser exists the resolver production
-	list<weak_ptr<const ResolverGnomon>> resolver_gnomons;
+	WeakStack<const ResolverGnomon> resolver_gnomons;
 	
 	// Store with shared_ptr => these will stick around until we ditch them
 	map<wstring, shared_ptr<const DesignationGnomon>> designation_gnomons;
