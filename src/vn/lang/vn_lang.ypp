@@ -19,7 +19,8 @@
 
 %code requires {
   // Appears high-ish in the generated .hpp file
-  #include "vn_actions.hpp" // TODO we actually only need Item and Itemisation from here
+  #include "vn_actions.hpp" 
+  #include "declarators.hpp" 
   #include "node/tree_ptr.hpp"
   #include "tree/node_names.hpp"
   #include <string>
@@ -459,7 +460,7 @@ type_with_ab		: type_specified
 ab_declarator		: ab_declarator_prefix										    
 
 ab_declarator_prefix	: ab_declarator_postfix
-						|                      						C_AMPERSAND { $$ = nullptr; }  
+						|                      						C_AMPERSAND { $$ = make_shared<Declarators::Reference>(nullptr); }  
 						|                           					 C_STAR { $$ = nullptr; } 
 						|                      C_AMPERSAND ab_declarator_prefix { $$ = $2; } 
 						|                           C_STAR ab_declarator_prefix { $$ = $2; } 

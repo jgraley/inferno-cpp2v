@@ -8,6 +8,16 @@
 
 namespace Declarators {
 
+
+//TODO invent NODE_FUNCTIONS_DELETE and use here for safety 
+// as well as maybe the scaffolding used in tree update.
+// It should fail out with a message that includes the name of the macro.
+// Note: it looks like you have to use make_shared<> not MakeTreePtr<>
+// with such classes, but why do we need MakeTreePtr<> anyway?
+// The benefits of TreePtr are
+// - polymorphic double-indirection (TeeePtrInterface)
+// - Itemisability
+
 // All the declarators will masquerade as identifiers, since they are 
 // found in what would ordinarily be an identifier's place.
 typedef CPPTree::Identifier Base;
@@ -17,7 +27,7 @@ typedef CPPTree::Identifier Base;
 // just the one.
 struct UniDeclarator : Base
 {
-	NODE_FUNCTIONS
+	UniDeclarator(TreePtr<Base> inner_);
 	TreePtr<Base> inner;	// Can be Identifier or another Declarator
 };
 
@@ -25,25 +35,25 @@ struct UniDeclarator : Base
 // not any expression node that just happens to look the same or similar.
 struct Indirection : UniDeclarator
 {
-	NODE_FUNCTIONS
+	using UniDeclarator::UniDeclarator;
 };
 
 
 struct Reference : Indirection   // NOT AddressOf!!!!xs
 {
-	NODE_FUNCTIONS
+	using Indirection::Indirection;
 };
 
 
 struct Pointer : Indirection
 {
-	NODE_FUNCTIONS 
+	using Indirection::Indirection;
 };
 
 
 struct Array : UniDeclarator // NOT a lookup - gives size of array not index
 {
-	NODE_FUNCTIONS
+	Array(TreePtr<Base> inner_, TreePtr<CPPTree::Initialiser> size_);
 
     TreePtr<CPPTree::Initialiser> size; ///< evaluates to the size or Uninitialised if not given eg []
 };
@@ -51,7 +61,7 @@ struct Array : UniDeclarator // NOT a lookup - gives size of array not index
 
 struct Function : UniDeclarator // NOT a Call - has params, not args
 {
-	NODE_FUNCTIONS
+	Function(TreePtr<Base> inner_, Collection<CPPTree::Declaration> params_);
 
 	Collection<CPPTree::Declaration> params; // TODO be Parameter #803
 };    
