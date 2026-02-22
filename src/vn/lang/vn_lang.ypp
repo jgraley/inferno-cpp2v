@@ -459,7 +459,7 @@ type_with_ab		: type_specified
 ab_declarator		: ab_declarator_prefix										    
 
 ab_declarator_prefix	: ab_declarator_postfix
-						|                      						C_AMPERSAND { $$ = nullptr; }  
+						|                      						C_AMPERSAND { $$ = OnAddressOf(nullptr); }  
 						|                           					 C_STAR { $$ = nullptr; } 
 						|                      C_AMPERSAND ab_declarator_prefix { $$ = $2; } 
 						|                           C_STAR ab_declarator_prefix { $$ = $2; } 
