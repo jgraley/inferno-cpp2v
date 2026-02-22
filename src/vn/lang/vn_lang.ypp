@@ -461,9 +461,9 @@ ab_declarator		: ab_declarator_prefix
 
 ab_declarator_prefix	: ab_declarator_postfix
 						|                      						C_AMPERSAND { $$ = make_shared<Declarators::Reference>(nullptr); }  
-						|                           					 C_STAR { $$ = nullptr; } 
-						|                      C_AMPERSAND ab_declarator_prefix { $$ = $2; } 
-						|                           C_STAR ab_declarator_prefix { $$ = $2; } 
+						|                           					 C_STAR { $$ = make_shared<Declarators::Pointer>(nullptr); } 
+						|                      C_AMPERSAND ab_declarator_prefix { $$ = make_shared<Declarators::Reference>($2); } 
+						|                           C_STAR ab_declarator_prefix { $$ = make_shared<Declarators::Pointer>($2); } 
 
 ab_declarator_postfix	: parameterisation										{ $$ = vn->OnFunction(nullptr, $1); }       
 						| '[' normal ']'										{ $$ = $2; } 
