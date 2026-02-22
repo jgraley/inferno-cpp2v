@@ -61,9 +61,9 @@ struct Array : UniDeclarator // NOT a lookup - gives size of array not index
 
 struct Function : UniDeclarator // NOT a Call - has params, not args
 {
-	Function(TreePtr<Base> inner_, Collection<CPPTree::Declaration> params_);
+	Function(TreePtr<Base> inner_, list<TreePtr<Node>> params_);
 
-	Collection<CPPTree::Declaration> params; // TODO be Parameter #803
+	list<TreePtr<Node>> params; 
 };    
 
 };
