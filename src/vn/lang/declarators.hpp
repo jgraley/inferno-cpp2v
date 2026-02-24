@@ -8,7 +8,6 @@
 
 namespace Declarators {
 
-
 //TODO invent NODE_FUNCTIONS_DELETE and use here for safety 
 // as well as maybe the scaffolding used in tree update.
 // It should fail out with a message that includes the name of the macro.
@@ -18,17 +17,21 @@ namespace Declarators {
 // - polymorphic double-indirection (TeeePtrInterface)
 // - Itemisability
 
-// All the declarators will masquerade as identifiers, since they are 
-// found in what would ordinarily be an identifier's place.
-typedef CPPTree::Identifier Base;
+// Declarator node
+struct Declarator : Node
+{
+   	virtual TreePtr<Node> DeclaratorReduce( TreePtr<Node> &type ) const = 0;
+   	static TreePtr<Node> Next( TreePtr<Node> inner, TreePtr<Node> &type );
+};
 
-// You could jsut about imagine a declarator with more than one inner 
+// You could just about imagine a declarator with more than one inner 
 // declarator or identifier, but C doesn't have any. This class is for 
 // just the one.
-struct UniDeclarator : Base
+struct UniDeclarator : Declarator
 {
-	UniDeclarator(TreePtr<Base> inner_);
-	TreePtr<Base> inner;	// Can be Identifier or another Declarator
+	UniDeclarator(TreePtr<Node> inner_);
+	
+	TreePtr<Node> inner;	// Can be Identifier or another Declarator
 };
 
 // Declarator nodes are named for the type nodes they will resolve into
@@ -39,21 +42,27 @@ struct Indirection : UniDeclarator
 };
 
 
-struct Reference : Indirection   // NOT AddressOf!!!!xs
+struct Pointer : Indirection
 {
-	using Indirection::Indirection;
+	using Indirection::Indirection;	
+
+   	TreePtr<Node> DeclaratorReduce( TreePtr<Node> &type ) const override;
 };
 
 
-struct Pointer : Indirection
+struct Reference : Indirection   // NOT AddressOf!!!!xs
 {
 	using Indirection::Indirection;
+
+   	TreePtr<Node> DeclaratorReduce( TreePtr<Node> &type ) const override;
 };
 
 
 struct Array : UniDeclarator // NOT a lookup - gives size of array not index
 {
-	Array(TreePtr<Base> inner_, TreePtr<CPPTree::Initialiser> size_);
+	Array(TreePtr<Node> inner_, TreePtr<Node> size_);
+
+   	TreePtr<Node> DeclaratorReduce( TreePtr<Node> &type ) const override;
 
     TreePtr<CPPTree::Initialiser> size; ///< evaluates to the size or Uninitialised if not given eg []
 };
@@ -61,7 +70,9 @@ struct Array : UniDeclarator // NOT a lookup - gives size of array not index
 
 struct Function : UniDeclarator // NOT a Call - has params, not args
 {
-	Function(TreePtr<Base> inner_, list<TreePtr<Node>> params_);
+	Function(TreePtr<Node> inner_, list<TreePtr<Node>> params_);
+
+   	TreePtr<Node> DeclaratorReduce( TreePtr<Node> &type ) const override;
 
 	list<TreePtr<Node>> params; 
 };    

@@ -616,12 +616,23 @@ TreePtr<Node> VNLangActions::OnConstructor( list<TreePtr<Node>> params )
 }
 
 
-TreePtr<Node> VNLangActions::OnDeclaration( TreePtr<Node> type, TreePtr<Node> declarator )
+TreePtr<Node> VNLangActions::OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<Node> declarator )
 {
-	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();
-	ret->type = type;
-	ret->identifier = declarator;
-	return ret;
+	// Any of analymous type or declaration will come in here.
+	// We can probably differentiate in the parser, but no need since the declarator gives 
+	// away what's happening.
+	TreePtr<Node> innermost = Declarators::Declarator::Next(declarator, type);
+	if( innermost ) // innermost id => a declaration
+	{
+		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();
+		ret->type = type;
+		ret->identifier = innermost;
+		return ret;
+	}
+	else // no innermost id => anonymous type
+	{
+		return type;
+	}
 }
 
 
