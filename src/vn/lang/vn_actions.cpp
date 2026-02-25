@@ -622,17 +622,42 @@ TreePtr<Node> VNLangActions::OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<No
 	// We can probably differentiate in the parser, but no need since the declarator gives 
 	// away what's happening.
 	TreePtr<Node> innermost = Declarators::Declarator::Next(declarator, type);
-	if( innermost ) // innermost id => a declaration
-	{
-		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();
-		ret->type = type;
-		ret->identifier = innermost;
-		return ret;
-	}
-	else // no innermost id => anonymous type
-	{
-		return type;
-	}
+	// NOTE: innermost id == NULL => ☆ (not anonymous type)
+	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();
+	ret->type = type;
+	ret->identifier = innermost;
+	ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?	
+	return ret;
+}
+
+
+TreePtr<Node> VNLangActions::OnTypeAndAnonymousDeclarator( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
+{
+	// Any of analymous type or declaration will come in here.
+	// We can probably differentiate in the parser, but no need since the declarator gives 
+	// away what's happening.
+	TreePtr<Node> innermost = Declarators::Declarator::Next(declarator, type);
+	if( innermost )
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(declarator_loc),
+				"unexpected symbol in anonymous declarator");
+
+	return type;	
+}
+
+
+TreePtr<Node> VNLangActions::OnParameter( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
+{
+	// Any of analymous type or declaration will come in here.
+	// We can probably differentiate in the parser, but no need since the declarator gives 
+	// away what's happening.
+	TreePtr<Node> innermost = Declarators::Declarator::Next(declarator, type);
+	// NOTE: innermost id == NULL => ☆ (not anonymous type)
+	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
+	ret->type = type;
+	ret->identifier = innermost;
+	ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?
+	return ret;
 }
 
 

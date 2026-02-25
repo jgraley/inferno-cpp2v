@@ -1,11 +1,14 @@
 #include "declarators.hpp"
+
+#include "vn/agents/all.hpp"
+
 using namespace Declarators;
 
 // See how this function is used for an example of how it should be used.
 TreePtr<Node> Declarator::Next( TreePtr<Node> inner, TreePtr<Node> &type )
 {
 	if( !inner )
-		return nullptr; // We're done and it's anonymous
+		return nullptr; // We're done and it's anonymous or ☆
 		
 	if( auto declarator = dynamic_cast<const Declarator *>(inner.get()) )
 		return declarator->DeclaratorReduce(type); // We're not done
@@ -22,7 +25,7 @@ UniDeclarator::UniDeclarator(TreePtr<Node> inner_) :
 
 TreePtr<Node> Pointer::DeclaratorReduce( TreePtr<Node> &type ) const
 {
-	auto node = MakeTreeNode<CPPTree::Pointer>();
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Pointer>>();
 	node->destination = type;
 	node->constancy = MakeTreeNode<CPPTree::NonConst>(); // TODO do better
 	type = node;
@@ -32,9 +35,9 @@ TreePtr<Node> Pointer::DeclaratorReduce( TreePtr<Node> &type ) const
 
 TreePtr<Node> Reference::DeclaratorReduce( TreePtr<Node> &type ) const
 {
-	auto node = MakeTreeNode<CPPTree::Reference>();
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Reference>>();
 	node->destination = type;
-	node->constancy = MakeTreeNode<CPPTree::NonConst>(); // TODO do better
+	node->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>(); // TODO do better
 	type = node;
 	return Next(inner, type);
 }
@@ -49,7 +52,7 @@ Array::Array(TreePtr<Node> inner_, TreePtr<Node> size_) :
 
 TreePtr<Node> Array::DeclaratorReduce( TreePtr<Node> &type ) const
 {
-	auto node = MakeTreeNode<CPPTree::Array>();
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Array>>();
 	node->element = type;
 	node->size = size;
 	type = node;
@@ -66,7 +69,7 @@ Function::Function(TreePtr<Node> inner_, list<TreePtr<Node>> params_) :
 
 TreePtr<Node> Function::DeclaratorReduce( TreePtr<Node> &type ) const
 {
-	auto node = MakeTreeNode<CPPTree::Function>();
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Function>>();
 	node->return_type = type;
 	for( auto param : params )
 		node->params.push_back(param);
