@@ -94,7 +94,7 @@ public:
 	TreePtr<Node> OnDo( TreePtr<Node> body, any body_loc, TreePtr<Node> arg, any arg_loc );
 	
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
-	TreePtr<Node> OnConstructor( list<TreePtr<Node>> params );	
+	TreePtr<Node> OnConstructor( TreePtr<Node> identifier, list<TreePtr<Node>> params );	
 	TreePtr<Node> OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<Node> declarator );	
 	
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );

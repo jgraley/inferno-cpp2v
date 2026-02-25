@@ -124,6 +124,8 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	           ToASCII(text)=="double" ||
 	           ToASCII(text)=="void" ) )	           
 		return YY::VNLangParser::make_TYPE_SPECIFIER(ToASCII(text), loc);
+	else if( ascii && ToASCII(text)=="sizeof" )
+		return YY::VNLangParser::make_FUNC_ON_TYPE(metadata, loc);
 		
 	if( designation_gnomon )
 	{

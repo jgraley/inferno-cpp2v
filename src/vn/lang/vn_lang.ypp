@@ -146,6 +146,7 @@
 	<YY::TokenMetadata> WHILE_KEYWORD			_("while")
 	<YY::TokenMetadata> CASE_KEYWORD			_("case")
 	<YY::TokenMetadata> DEFAULT_KEYWORD			_("default")
+	<YY::TokenMetadata> FUNC_ON_TYPE			_("function acting on a type")
 	stmt_low 
 	stmt_high
 	
@@ -156,8 +157,9 @@
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_disjunction type_conjunction type_vn_prim type_with_ab
 %type <TreePtr<Node>> 				unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement statement_nc statement stmt_disjunction stmt_conjunction stmt_primary norm_expr_or_stmt 
-%type <TreePtr<Node>>				bare_declaration cons_or_des 
-%type <TreePtr<Node>> 				compound_primary compound_prefix parameter type_id 
+%type <TreePtr<Node>>				bare_declaration declaration_nc cons_or_des 
+%type <TreePtr<Node>> 				compound_primary compound_prefix parameter 
+%type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				ab_declarator ab_declarator_prefix ab_declarator_postfix
 %type <wstring> 					vn_name
@@ -229,7 +231,7 @@ item		: item VN_SUB_SEP unified				{ $$ = $1; $$.nodes.push_back($3); $$.loc = @
 			| unified								{ $$.nodes.push_back($1); $$.loc = @$; }
 
 unified		: normal
-			| type_id
+			| type_specified	// i.e. no abstract types - these must be in ()
 
 //////////////////////////////// NORMALS ////////////////////////////////////         
 // Normal is basically anything other than a type
@@ -244,8 +246,8 @@ norm_conjunction 	: norm_expr_or_stmt
 		
 norm_expr_or_stmt	: expr_expression
 					| statement_nc // statements not including Compound, which is expressional from this POV
+					| declaration_nc // declarations not including Compound			 
 					| compound_prefix // Branch off here for compound_primary to avoid conflicts with prefix = (used for inits)
-					| bare_declaration			
 
 //////////////////////////////// STATEMENTS ////////////////////////////////////         
 
@@ -282,7 +284,7 @@ stmt_primary: compound_primary
 			| statement_nc %prec ';'
 			| ';'															{ $$ = vn->OnNop(@1); }      
 					
-// _nc here means "not a compound_primary"						
+// _nc here means "not a compound"				
 statement_nc: bare_statement ';'												{ $$ = $1; }      
 			| ARGS_BODY_STMT_KEYWORD '(' semicolon_args ')' stmt_primary		{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
 			| WHILE_KEYWORD '(' expr_expression ')' stmt_primary 				{ $$ = vn->OnWhile($3, @3, $5, @5); }
@@ -304,17 +306,11 @@ semicolon_args	: expr_expression											{ $$.push_back($1); }
 				| semicolon_args ';' expr_expression						{ $$ = $1; $$.push_back($3); }
 
 //////////////////////////////// DECLARATIONS /////////////////////////////////////         
-                  
-parameters	: parameter												{ $$.push_back($1); }
-			| parameters COMMA parameter							{ $$ = $1; $$.push_back($3); }			
+                            
+// _nc here means "not a compound"				
+declaration_nc		: bare_declaration ';'								{ $$ = $1; }      
 
-parameterisation	: '(' parameters ')'							{ $$ = $2; }
-					| '(' ')'										{ $$.clear(); }							
-	
-parameter   : type_id
-            | bare_declaration 
-            | expr_prefix
-            
+  
 bare_declaration	: cons_or_des			// Use of a type_specified in a declaration context is OK for constructor/destructor (maybe)									
 					| type_specified declarator							{ $$ = vn->OnTypeAndDeclarator($1, $2); }	
 		
@@ -330,8 +326,20 @@ declarator_postfix	: declarator_primary
                 
 declarator_primary	: norm_primary
                 
-cons_or_des : CONSTRUCTOR parameterisation 		 						{ $$ = vn->OnConstructor($2); } 
-         
+cons_or_des : CONSTRUCTOR parameterisation 		 	{ $$ = vn->OnConstructor(nullptr, $2); } 
+//cons_or_des : CONSTRUCTOR DESIGNATED_NORMAL parameterisation 		 	{ $$ = vn->OnConstructor($2.as_designated, $3); } 
+
+parameters	: parameter												{ $$.push_back($1); }
+			| parameters COMMA parameter							{ $$ = $1; $$.push_back($3); }			
+
+parameterisation	: '(' parameters ')'							{ $$ = $2; }
+					| '(' ')'										{ $$.clear(); }							
+	
+// Use type_primary to force paraentheses around VN prefix ops which could cause expr vs type ambiguity
+parameter   : type_primary declarator								{ $$ = vn->OnTypeAndDeclarator($1, $2); }	
+            | type_primary ab_declarator							{ $$ = vn->OnTypeAndDeclarator($1, $2); }  
+            | expr_prefix
+
 //////////////////////////////// EXPRESSIONS ////////////////////////////////////         
 
 expr_expression		: expr_comma_op
@@ -430,7 +438,8 @@ expr_primary: norm_primary
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 			| NORM_TERM_KEYWORD									{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
 			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayLiteral({}); } // ={...} dismbiguates against compound_primary
-			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayLiteral($3); }               
+			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayLiteral($3); }    
+			| FUNC_ON_TYPE '(' type_id ')'            			{ $$ = nullptr; }    // TODO!!
 
 norm_primary: vn_wildcard
 			| builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, $2); }
@@ -478,8 +487,10 @@ ab_declarator_postfix	: parameterisation										{ $$ = make_shared<Declarators
 // Not including types that require declarators (except via built-in, designation etc)          
 type_specified		: type_prefix          
           
+// Using typie_id can conflict with other Delta rules that can have a declaration before the arrow
+// (It's a conflict between the very similar syntax of abstract vs non-abstract declarator)    
 type_prefix : type_postfix
-			| 			 		  DELTA type_id DELTA_ARROW type_prefix	{ $$ = vn->OnDelta($2, $4); }
+			| 			   DELTA type_specified DELTA_ARROW type_prefix	{ $$ = vn->OnDelta($2, $4); } 
 			| 									      GRASS type_prefix	{ $$ = vn->OnGrass($2); }
 			| 								     POINTER_IS type_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 								       NEGATION type_prefix	{ $$ = vn->OnNegation($2); }
@@ -488,8 +499,12 @@ type_prefix : type_postfix
 type_postfix: type_primary		   
 			                                       
 type_primary: type_vn_prim
-			| '(' type_id ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
 			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }			
+
+// Removed due to conflicts, parser not happy when there are paths to both abstract and non-abstract 
+// declarators. Parens don't help.
+//			| '(' type_id ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
+
 									
 type_vn_prim: type_builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, $2); }
 			| DESIGNATED_TYPE     									  			{ $$ = $1.as_designated; }		

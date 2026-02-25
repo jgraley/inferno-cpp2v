@@ -607,8 +607,9 @@ TreePtr<Node> VNLangActions::OnFunction( TreePtr<Node> return_type, list<TreePtr
 }
 
 
-TreePtr<Node> VNLangActions::OnConstructor( list<TreePtr<Node>> params )
+TreePtr<Node> VNLangActions::OnConstructor( TreePtr<Node> identifier, list<TreePtr<Node>> params )
 {
+	(void)identifier;
 	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Constructor>>();
 	for( auto p : params )
 		ret->params.insert(p);
