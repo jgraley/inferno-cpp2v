@@ -80,6 +80,7 @@ public:
 	TreePtr<Node> OnRangeCase( TreePtr<Node> value_lo, any lo_loc, TreePtr<Node> value_hi, any hi_loc );	
 	TreePtr<Node> OnDefault( any loc );	
 	TreePtr<Node> OnNop( any loc );	
+	TreePtr<Node> OnFuncOnType( string keyword, any keyword_loc, TreePtr<Node> type_arg, any type_arg_loc );
 	
 	TreePtr<Node> OnNormalTerminalKeyword( string keyword, any keyword_loc );
 	TreePtr<Node> OnPrimitiveStmt( string keyword, any keyword_loc);

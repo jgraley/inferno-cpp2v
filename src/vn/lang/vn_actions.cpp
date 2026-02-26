@@ -478,6 +478,22 @@ TreePtr<Node> VNLangActions::OnNop( any loc )
 }
 
 
+TreePtr<Node> VNLangActions::OnFuncOnType( string keyword, any keyword_loc, TreePtr<Node> type_arg, any type_arg_loc )
+{
+	TreePtr<CPPTree::TemplateExpression> node;
+	if( keyword=="sizeof" )
+		node = MakeTreeNode<StandardAgentWrapper<CPPTree::SizeOf>>();
+	else if( keyword=="alignof" )
+		node = MakeTreeNode<StandardAgentWrapper<CPPTree::AlignOf>>();
+	else
+		ASSERTFAIL();
+		
+	node->argument = type_arg;
+	
+	return node;
+}
+
+
 TreePtr<Node> VNLangActions::OnNormalTerminalKeyword( string keyword, any keyword_loc )
 {
 	if( keyword=="this" )

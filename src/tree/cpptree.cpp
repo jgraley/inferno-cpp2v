@@ -1251,11 +1251,22 @@ Syntax::Production SizeOf::GetMyProductionTerminal() const
 }
 
 
+string SizeOf::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return "sizeof(" + renderer->DoRender(argument, Production::BOOT_TYPE, policy ) + ")";
+}
+
 //////////////////////////// AlignOf ///////////////////////////////
 
 Syntax::Production AlignOf::GetMyProductionTerminal() const
 { 
 	return Production::PREFIX; 
+}
+
+
+string AlignOf::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return "alignof(" + renderer->DoRender(argument, Production::BOOT_TYPE, policy ) + ")";
 }
 
 //////////////////////////// Compound ///////////////////////////////

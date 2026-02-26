@@ -535,9 +535,11 @@ struct Parameter : LocalVariable
 /** A local variable with unspecified storage which may be used within a function but is not preserved
  across recursion or between calls (such a variable could safely be implemented as any of
  Static, Field or Automatic since it supports only those guarantees common to all). */
+// TODO Really a local node, move out of here
 struct Temporary : LocalVariable
 {
     NODE_FUNCTIONS_FINAL
+	string GetRenderTerminal( Production ) const { throw Unimplemented(); }    
 };
 
 /// Node for a base class within a class declaration, specifies another class from which to inherit
@@ -1135,6 +1137,7 @@ struct SizeOf : TemplateExpression
 { 
 	NODE_FUNCTIONS_FINAL 
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
 }; 
 
 /// alignof() a type
@@ -1142,6 +1145,7 @@ struct AlignOf : TemplateExpression
 { 
 	NODE_FUNCTIONS_FINAL
 	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
 };
 
 //////////////////////////// Statements ////////////////////////////

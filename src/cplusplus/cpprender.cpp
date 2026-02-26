@@ -322,10 +322,6 @@ string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Pro
             s += DoRender( st, Syntax::Production::STATEMENT_LOW );    
         return s + " })";
     }
-    else if( auto pot = DynamicTreePtrCast< SizeOf >(expression) )
-        return "sizeof(" + DoRender( pot->argument, Syntax::Production::BOTTOM_EXPR ) + ")";               
-    else if( auto pot = DynamicTreePtrCast< AlignOf >(expression) )
-        return "alignof(" + DoRender( pot->argument, Syntax::Production::BOTTOM_EXPR ) + ")";    
     else
         return Render::Dispatch( expression, surround_prod, policy );
 
