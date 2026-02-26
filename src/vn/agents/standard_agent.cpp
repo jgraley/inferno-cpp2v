@@ -577,7 +577,8 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
     else
     {
         // Free replace pattern, just duplicate it.
-        ASSERT( me_plink.GetPatternTreePtr()->IsFinal() )(me_plink); 
+        ASSERT( me_plink.GetPatternTreePtr()->IsFinal() )
+              ("Wildcard (intermediate class) found in replace-only context: ")(me_plink); 
         return GenReplaceLayoutNormal( kit, me_plink, acting_engine ); 
     }
 }
@@ -594,7 +595,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlay( const ReplaceKit 
     
     ASSERT( bottom_layer_node->IsFinal() )
           (*bottom_layer_node)
-          (" must be a final class.");
+          (" must be a final class (possibly came from input tree).");
     ASSERT( IsSubcategory(*bottom_layer_node) ) 
           (*bottom_layer_node)
           (" must be a non-strict subclass of ")
@@ -724,7 +725,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
             if( should_overlay )
             {
                 TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[j]);        
-                ASSERT(    my_singular );
+                ASSERT( my_singular );
                 ASSERT( *my_singular ); // Should not have marked this one for overlay if NULL
                 PatternLink my_singular_plink( my_singular );                    
                 child_patches.push_back( my_singular_plink.GetChildAgent()->GenReplaceLayout(kit, my_singular_plink, acting_engine) );           

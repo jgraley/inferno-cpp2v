@@ -496,7 +496,10 @@ string Render::DoRenderTypeAndDeclarator( TreePtr<Node> type, string declarator,
 		type = MakeTreeNode<Type>();
 	}
 	
-	return AccomodateBootTypeAndDeclarator(type, declarator, declarator_prod, surround_prod, policy, constant);
+	if( unique_coupling_names.count(type) > 0 )					
+		return unique_coupling_names.at(type) + " " + declarator;	
+	else 
+		return AccomodateBootTypeAndDeclarator(type, declarator, declarator_prod, surround_prod, policy, constant);
 }
 
 
