@@ -78,8 +78,8 @@
 	DELTA 									"▲"
 	DELTA_ARROW 							"⯈"
 	BUILT_IN 								"⯁"
-	OPEN_VN 								"【"
-	CLOSE_VN 								"】"
+	OPEN_VN 								"⦅"
+	CLOSE_VN 								"⦆"
 	ANY 									"☆"
 	STAR 									"★"
 	ID_BY_NAME								"⊛"
@@ -96,8 +96,8 @@
 	BUILD_SIZE								"🄽"
 	STRINGIZE								"§"
 	PRERESTRICT								"‽"
-	OPEN_TYPE								"⦅"
-	CLOSE_TYPE								"⦆"
+	OPEN_TYPE								"⸨"
+	CLOSE_TYPE								"⸩"
 	OPEN_MAP_CALL							"〔"
 	CLOSE_MAP_CALL							"〕"
 	ATTRIBUTE								"‡"
@@ -157,7 +157,7 @@
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_disjunction type_conjunction type_vn_prim type_with_ab
 %type <TreePtr<Node>> 				unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement statement_nc statement stmt_disjunction stmt_conjunction stmt_primary norm_expr_or_stmt 
-%type <TreePtr<Node>>				bare_declaration cons_or_des 
+%type <TreePtr<Node>>				declaration_nc bare_declaration cons_or_des 
 %type <TreePtr<Node>> 				compound_primary compound_prefix parameter type_id 
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				ab_declarator ab_declarator_prefix ab_declarator_postfix
@@ -246,7 +246,7 @@ norm_conjunction 	: norm_expr_or_stmt
 norm_expr_or_stmt	: expr_expression
 					| statement_nc // statements not including Compound, which is expressional from this POV
 					| compound_prefix // Branch off here for compound_primary to avoid conflicts with prefix = (used for inits)
-					| bare_declaration			
+					| declaration_nc			
 
 //////////////////////////////// STATEMENTS ////////////////////////////////////         
 
@@ -305,6 +305,8 @@ semicolon_args	: expr_expression											{ $$.push_back($1); }
 				| semicolon_args ';' expr_expression						{ $$ = $1; $$.push_back($3); }
 
 //////////////////////////////// DECLARATIONS /////////////////////////////////////         
+        
+declaration_nc		: bare_declaration  
                   
 bare_declaration	: cons_or_des			// Use of a type_specified in a declaration context is OK for constructor/destructor (maybe)									
 					| type_specified declarator							{ $$ = vn->OnTypeAndDeclarator($1, $2); }	
@@ -323,12 +325,12 @@ declarator_primary	: norm_primary
                 
 cons_or_des : CONSTRUCTOR parameterisation 		 						{ $$ = vn->OnConstructor($2); } 
          
-parameters	: parameter												{ $$.push_back($1); }
-			| parameters COMMA parameter							{ $$ = $1; $$.push_back($3); }			
-
 parameterisation	: '(' parameters ')'							{ $$ = $2; }
 					| '(' ')'										{ $$.clear(); }							
-	
+
+parameters	: parameter												{ $$.push_back($1); }
+			| parameters COMMA parameter							{ $$ = $1; $$.push_back($3); }			
+				
 parameter   : type_specified declarator 							{ $$ = vn->OnParameter($1, $2, @2); }	
 //			| type_id												{ $$ = vn->OnAnonymousParameter($1, @1); }	
             | expr_prefix
@@ -408,7 +410,7 @@ transform_norm_part : start_transform_name_scope TRANSFORM_NAME_NORMAL { $$ = $2
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
 stuff_depth_limit		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
 
-// Use a prerestriction to disambiguate ⤨【DeclarationOf】...
+// Use a prerestriction to disambiguate ⤨⦅DeclarationOf⦆...
 unified_prefix	: expr_prefix
 				| type_prefix
 				| transform_unif_part expr_prefix	 			{ $$ = vn->OnTransform($1, @1, $2, @2); }

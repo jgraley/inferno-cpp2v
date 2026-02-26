@@ -896,7 +896,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // with some kind of "real identifier node" syntax (and its name hint)
 
 
-// Productions using 【 】: 
+// Productions using ⦅ ⦆: 
 // - Try again at TypeOf->TypeIs etc
 // - AFTER adding C mixture, try using () and making things look like printf etc
 

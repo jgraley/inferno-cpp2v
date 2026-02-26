@@ -53,8 +53,8 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 ▲				{ return YY::VNLangParser::make_DELTA(location()); };
 ⯈				{ return YY::VNLangParser::make_DELTA_ARROW(location()); };
 ⯁				{ return YY::VNLangParser::make_BUILT_IN(location()); };
-【				{ return YY::VNLangParser::make_OPEN_VN(location()); };
-】				{ return YY::VNLangParser::make_CLOSE_VN(location()); };
+⦅				{ return YY::VNLangParser::make_OPEN_VN(location()); };
+⦆				{ return YY::VNLangParser::make_CLOSE_VN(location()); };
 ☆				{ return YY::VNLangParser::make_ANY(location()); };
 ★				{ return YY::VNLangParser::make_STAR(location()); };
 ⊛				{ return YY::VNLangParser::make_ID_BY_NAME(location()); };
@@ -70,8 +70,8 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 🄽				{ return YY::VNLangParser::make_BUILD_SIZE(location()); };
 §				{ return YY::VNLangParser::make_STRINGIZE(location()); };
 ‽ 				{ return YY::VNLangParser::make_PRERESTRICT(location()); };
-⦅ 				{ return YY::VNLangParser::make_OPEN_TYPE(location()); };
-⦆ 				{ return YY::VNLangParser::make_CLOSE_TYPE(location()); };
+⸨  				{ return YY::VNLangParser::make_OPEN_TYPE(location()); };
+⸩ 				{ return YY::VNLangParser::make_CLOSE_TYPE(location()); };
 〔				{ return YY::VNLangParser::make_OPEN_MAP_CALL(location()); };
  〕				{ return YY::VNLangParser::make_CLOSE_MAP_CALL(location()); };
 ‡				{ return YY::VNLangParser::make_ATTRIBUTE(location()); };

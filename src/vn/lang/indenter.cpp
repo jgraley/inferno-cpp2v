@@ -4,6 +4,7 @@ using namespace VN;
 
 void Indenter::AddLinesFromString( string s )
 {	
+	FTRACE(s)("\n");
 	string::size_type next_start = 0;
 	string::size_type found_pos;
     while ((found_pos = s.find("\n", next_start)) != string::npos)
@@ -44,7 +45,7 @@ void Indenter::DoIndent()
 string Indenter::GetString() const
 {
 	// Tabs give more cosistent indentation in Geany when using 
-	// Unicode (which makes spaces vary for come ewason)
+	// Unicode (which makes spaces vary for some reason)
 	string s;
 	for( const Line &line : lines )
 		s += string(line.depth, '\t') + line.text + "\n";
@@ -55,8 +56,8 @@ string Indenter::GetString() const
 int Indenter::GetBracketBalance(string s) const
 {
 	// Note: <> for templates is not so easy
-	int opens = Count("(", s) + Count("[", s) + Count("{", s) + Count("【", s);
-	int closes = Count(")", s) + Count("[", s) + Count("}", s) + Count("】", s);
+	int opens = Count("(", s) + Count("[", s) + Count("{", s) + Count("⦅", s);
+	int closes = Count(")", s) + Count("[", s) + Count("}", s) + Count("⦆", s);
 	return opens - closes;
 }
 

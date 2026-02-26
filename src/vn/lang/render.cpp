@@ -466,9 +466,9 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
     
     list<string> sitems = PopulateItemStrings( node, policy );    
     if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
-		s += Join( sitems, "⚬\n", "【\n", "\n】" );   
+		s += Join( sitems, "⚬\n", "⦅\n", "\n⦆" );   
 	else 
-		s += Join( sitems, " ⚬ ", "【", "】" );    
+		s += Join( sitems, " ⚬ ", "⦅", "⦆" );    
 
 	return s;
 }

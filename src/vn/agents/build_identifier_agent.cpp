@@ -96,7 +96,7 @@ string BuildIdentifierAgent::GetAgentRender( VN::RendererInterface *renderer, Sy
 		ls_production.push_back( "\"" + format + "\"" ); // quotes to diambiguate from % as modulo
 	ls_production.push_back( sources );
 	
-	return s + Join( ls_production, "⚬", "【", "】");
+	return s + Join( ls_production, "⚬", "⦅", "⦆");
 } 
   
     
