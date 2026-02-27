@@ -24,12 +24,9 @@ UniDeclarator::UniDeclarator(TreePtr<Node> inner_) :
 
 Result Concrete::DeclaratorReduce( TreePtr<Node> & ) const
 {
-	Result info;
-	info.abstract = false;
-	info.innermost = inner; // Can be NULL, in the case of ☆ and yet still not abstract
-	
+	// inner can be NULL, in the case of ☆ and yet still not abstract	
 	// No need for Next(), we're done and it's concrete
-	return info;
+	return { false, inner };
 }
 
 

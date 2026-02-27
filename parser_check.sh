@@ -2,7 +2,7 @@
 
 ARGS=$*
 
-make -j 3
+make -j 20
 rm -rf p1 gp1 p2 gp2
 
 # Render the built-in patterns 
@@ -29,4 +29,4 @@ TC=small.c
 diff --color out_builtin.cpp out_p1.cpp
 
 # Full test run using patterns we previously wrote to p1/
-make -j 3 test I="${ARGS} p1 -q${QA}"
+make -j 20 test I="${ARGS} p1 -q${QA}"

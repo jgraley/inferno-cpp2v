@@ -636,11 +636,9 @@ TreePtr<Node> VNLangActions::OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<No
 {
 	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
 	if( result.abstract )
-		throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(declarator_loc),
-				"unexpected abstract declarator");
-	// NOTE: innermost id == NULL => ☆ (not abstract)
-	
+		return type;	
+		
+	// NOTE: innermost id == NULL => ☆ (not abstract)	
 	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();
 	ret->type = type;
 	ret->identifier = result.innermost;
@@ -649,47 +647,13 @@ TreePtr<Node> VNLangActions::OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<No
 }
 
 
-TreePtr<Node> VNLangActions::OnTypeAndAbstractDeclarator( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
-{
-	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
-	if( !result.abstract )
-		throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(declarator_loc),
-				"unexpected concrete declarator");
-
-	return type;	
-}
-
-
 TreePtr<Node> VNLangActions::OnParameter( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
 {
 	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
-	if( result.abstract )
-		throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(declarator_loc),
-				"unexpected abstract declarator");
-	// NOTE: innermost id == NULL => ☆ (not abstract)
-
 	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
 	ret->type = type;
+	ASSERT(!result.abstract); // TODO probably not good enough just to leave the identifier as NULL, need new node?
 	ret->identifier = result.innermost;
-	ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?
-	return ret;
-}
-
-
-TreePtr<Node> VNLangActions::OnAbstractParameter( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
-{
-	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
-	if( !result.abstract )
-		throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(declarator_loc),
-				"unexpected concrete declarator");
-				
-	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
-	ret->type = type;
-	ASSERTFAIL(); // TODO probably not good enough just to leave the identifier as NULL, need new node?
-	ret->identifier = nullptr;
 	ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?
 	return ret;
 }
