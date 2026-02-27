@@ -252,4 +252,7 @@ string VNLangRecogniser::GetContextText() const
 // type and norm. This breaks DeclarationOf which was trying to be unified (the PR was supposed to disambiguate).
 // fix is to split DeclarationOf and TypeDeclarationOf, then because TypeDeclarationOf converts from type
 // to normal we have to put VN brackets around its argument making it a promary. To make life easier in the
-// future, doing this to all the VN prefix ops that can switch between type and norm.
+// future, doing this to all the VN prefix ops that can switch between type and norm. Stuff is tricky, 1.
+// we like the prefix syntax without any braces at all, but braces are likely needed for unified argument
+// and 2. for completeness there should be a Stuff-As-Type symbol although this isn't manifesting atm.
+ 

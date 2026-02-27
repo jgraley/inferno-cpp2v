@@ -204,7 +204,7 @@ sep_commands 	: sep_commands VN_SEMI script_command		{ $$ = $1; $$.push_back($3)
 				| designation_command						{ recogniser->AddGnomon($1); }
 			
 // Add more commands here
-script_command	: ENGINE normal   		 		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
+script_command	: ENGINE unified   		 		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
 				| normal 			  				{ $$ = make_shared<VN::PatternCommand>($1, @$); } // in trivial cases, this decays back to the node
 				| ATTRIBUTE		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
@@ -397,6 +397,9 @@ expr_prefix : expr_postfix
 			| 			       DELTA normal DELTA_ARROW expr_prefix	 { $$ = vn->OnDelta($2, $4); }
 			| 								   NEGATION expr_prefix	 { $$ = vn->OnNegation($2); }
 			|                     prerestrict_name_part expr_prefix	 { $$ = vn->OnRestrict($1, @1, $2, @2); }
+//			|  									  STUFF expr_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+//			|  STUFF OPEN_VN           unified CLOSE_VN expr_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+//			|  STUFF OPEN_VN stuff_depth_limit CLOSE_VN expr_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
 			|  									  STUFF unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 			|  STUFF OPEN_VN           unified CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			|  STUFF OPEN_VN stuff_depth_limit CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
@@ -470,7 +473,10 @@ type_prefix : type_postfix
 			| 								     POINTER_IS type_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 								       NEGATION type_prefix	{ $$ = vn->OnNegation($2); }
 			|                    type_prerestrict_name_part type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-  
+//			|  	    								  STUFF type_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+//			|      STUFF OPEN_VN           unified CLOSE_VN type_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+//			|      STUFF OPEN_VN stuff_depth_limit CLOSE_VN type_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+
 transform_type_part : start_transform_name_scope TRANSFORM_NAME_TYPE { $$ = $2.as_ascii; (void)$1; }
 			   
 type_postfix: type_primary		   
