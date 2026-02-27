@@ -796,9 +796,13 @@ TreePtr<Node> VNLangActions::OnTransform( string kind, any kind_loc, TreePtr<Nod
 	{
 		to_agent = MakeTreeNode<TransformOfAgent>( &DeclarationOf::instance );
 	}
+	else if( kind == "TypeDeclarationOf" )
+	{
+		to_agent = MakeTreeNode<TransformOfAgent>( &TypeDeclarationOf::instance2 );
+	}
 	else
 	{
-		ASSERT(false)("Unknown name ")(kind)(" should have been caught by recogniser");
+		ASSERT(false)("Unknown name ")(kind)(" was recognised but not handled here");
 	}
 	to_agent->pattern = pattern;
 	return to_agent;

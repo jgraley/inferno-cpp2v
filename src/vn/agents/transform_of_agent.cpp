@@ -329,14 +329,14 @@ int TransformOfAgent::GetExtenderChannelOrdinal() const
 
 Syntax::Production TransformOfAgent::GetAgentProduction() const
 {
-	return Syntax::Production::PREFIX;
+	return Syntax::Production::PRIMARY_EXPR;
 }
 
 
 string TransformOfAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return "⤨" + transformation->GetName() + " " + renderer->DoRender( pattern, Syntax::Production::PREFIX );
+	return "⤨" + transformation->GetName() + "⦅" + renderer->DoRender( pattern, Syntax::Production::PREFIX ) + "⦆";
 } 
 
     

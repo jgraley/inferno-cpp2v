@@ -125,8 +125,8 @@
 	<string>	ASCII_FORMAT 				_("ASCII format string")
 	<string>	TYPENAME					_("type name")
 	<string>	TYPE_SPECIFIER			_("simple type specifier")
-	<YY::TokenMetadata> TRANSFORM_NAME_UNIFIED	_("unified transformation name")
-	<YY::TokenMetadata> TRANSFORM_NAME_NORMAL	_("normal transformation name")
+	<YY::TokenMetadata> TRANSFORM_NAME_TYPE		_("type transformation")
+	<YY::TokenMetadata> TRANSFORM_NAME_NORMAL	_("normal transformation")
 	<YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
 	<YY::TokenMetadata> UNICODE_NAME 			_("Unicode name")
 	<YY::TokenMetadata>	DESIGNATED_NORMAL		_("designated name")
@@ -160,9 +160,9 @@
 %type <TreePtr<Node>>				declaration_nc bare_declaration cons_or_des_type 
 %type <TreePtr<Node>> 				compound_primary compound_prefix parameter type_id 
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
-%type <TreePtr<Node>> 				ab_declarator ab_declarator_prefix ab_declarator_postfix
+//%type <TreePtr<Node>> 				ab_declarator ab_declarator_prefix ab_declarator_postfix
 %type <wstring> 					vn_name
-%type <string>						transform_norm_part transform_unif_part
+%type <string>						transform_norm_part transform_type_part
 %type <YY::TokenMetadata> 			resolved_name resolved_type_name node_namespace
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands
 %type <shared_ptr<VN::Command>>		script_command 
@@ -314,12 +314,16 @@ bare_declaration	: type_specified declarator							{ $$ = vn->OnTypeAndDeclarato
 declarator			: declarator_prefix									 
 
 declarator_prefix	: declarator_postfix
-//					|                     C_AMPERSAND declarator_prefix { $$ = make_shared<Declarators::Reference>($2); } 
-//					|                          C_STAR declarator_prefix { $$ = make_shared<Declarators::Pointer>($2); } 
+					|                     C_AMPERSAND declarator_prefix { $$ = make_shared<Declarators::Reference>($2); } 
+					|                          C_STAR declarator_prefix { $$ = make_shared<Declarators::Pointer>($2); } 
+					|                      					C_AMPERSAND { $$ = make_shared<Declarators::Reference>(nullptr); }  
+					|                           				 C_STAR { $$ = make_shared<Declarators::Pointer>(nullptr); } 
 
 declarator_postfix	: declarator_primary
 					| declarator_postfix parameterisation				{ $$ = make_shared<Declarators::Function>($1, $2); }               
 					| declarator_postfix '[' normal ']'					{ $$ = make_shared<Declarators::Array>($1, $3); } 
+					| parameterisation									{ $$ = make_shared<Declarators::Function>(nullptr, $1); }       
+					| '[' normal ']'									{ $$ = make_shared<Declarators::Array>(nullptr, $2); }                 		
                 
 declarator_primary	: norm_primary										{ $$ = make_shared<Declarators::Concrete>($1); }  
                          
@@ -330,7 +334,6 @@ parameters	: parameter												{ $$.push_back($1); }
 			| parameters COMMA parameter							{ $$ = $1; $$.push_back($3); }			
 				
 parameter   : type_specified declarator 							{ $$ = vn->OnParameter($1, $2, @2); }	
-			| type_primary ab_declarator							{ $$ = vn->OnParameter($1, $2, @1); }	
             | expr_prefix
             
 //////////////////////////////// EXPRESSIONS ////////////////////////////////////         
@@ -395,13 +398,12 @@ expr_prefix : expr_postfix
 			| 								 POINTER_IS expr_prefix	 { $$ = vn->OnPointerIs($2); }
 			| 			       DELTA normal DELTA_ARROW expr_prefix	 { $$ = vn->OnDelta($2, $4); }
 			| 								   NEGATION expr_prefix	 { $$ = vn->OnNegation($2); }
-			|       				transform_norm_part type_prefix	 { $$ = vn->OnTransform($1, @1, $2, @2); }
+			|                     prerestrict_name_part expr_prefix	 { $$ = vn->OnRestrict($1, @1, $2, @2); }
 			| 								 BUILD_SIZE unified_prefix	{ $$ = vn->OnBuildSize($2); }
 			| 								  STRINGIZE unified_prefix	{ $$ = vn->OnStringize($2); }
 			|  									  STUFF unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 			|  STUFF OPEN_VN           unified CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			|  STUFF OPEN_VN stuff_depth_limit CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
-			|                     prerestrict_name_part unified_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 
 transform_norm_part : start_transform_name_scope TRANSFORM_NAME_NORMAL { $$ = $2.as_ascii; (void)$1; }
 
@@ -411,9 +413,6 @@ stuff_depth_limit		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2,
 // Use a prerestriction to disambiguate ⤨⦅DeclarationOf⦆...
 unified_prefix	: expr_prefix
 				| type_prefix
-				| transform_unif_part expr_prefix	 			{ $$ = vn->OnTransform($1, @1, $2, @2); }
-  
-transform_unif_part : start_transform_name_scope TRANSFORM_NAME_UNIFIED { $$ = $2.as_ascii; (void)$1; }
   
 expr_postfix: expr_primary     
 			| expr_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2, $1); }
@@ -441,6 +440,7 @@ norm_primary: vn_wildcard
 			| build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| build_id_part OPEN_VN VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			| FUNC_ON_TYPE '(' type_id ')'            					{ $$ = vn->OnFuncOnType($1.as_ascii, @1, $3, @3); }			
+			| transform_norm_part OPEN_VN type_prefix CLOSE_VN			{ $$ = vn->OnTransform($1, @1, $3, @3); }
 			
 vn_wildcard : STAR												{ $$ = vn->OnStar(nullptr); }
 			| STAR OPEN_VN normal CLOSE_VN						{ $$ = vn->OnStar($3); }
@@ -462,21 +462,7 @@ type_conjunction 	: type_with_ab
 					| type_conjunction CONJUNCTION type_prefix				{ $$ = vn->OnConjunction($1, $3); }
                     
 type_with_ab		: type_specified
-					| type_primary ab_declarator							{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }  
-					
-ab_declarator		: ab_declarator_prefix										    
-
-ab_declarator_prefix	: ab_declarator_postfix
-						|                      						C_AMPERSAND { $$ = make_shared<Declarators::Reference>(nullptr); }  
-						|                           					 C_STAR { $$ = make_shared<Declarators::Pointer>(nullptr); } 
-						|                      C_AMPERSAND ab_declarator_prefix { $$ = make_shared<Declarators::Reference>($2); } 
-						|                           C_STAR ab_declarator_prefix { $$ = make_shared<Declarators::Pointer>($2); } 
-
-ab_declarator_postfix	: parameterisation										{ $$ = make_shared<Declarators::Function>(nullptr, $1); }       
-						| '[' normal ']'										{ $$ = make_shared<Declarators::Array>(nullptr, $2); } 
-                		| ab_declarator_postfix parameterisation				{ $$ = make_shared<Declarators::Function>($1, $2); }       
-						| ab_declarator_postfix '[' normal ']'					{ $$ = make_shared<Declarators::Array>($1, $3); } 
-//                		| declarator_primary
+					| type_specified declarator 							{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }  
 						 			                
 // Not including types that require declarators (except via built-in, designation etc)          
 type_specified		: type_prefix          
@@ -486,7 +472,9 @@ type_prefix : type_postfix
 			| 									      GRASS type_prefix	{ $$ = vn->OnGrass($2); }
 			| 								     POINTER_IS type_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 								       NEGATION type_prefix	{ $$ = vn->OnNegation($2); }
-			|                 type_prerestrict_name_part unified_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|                    type_prerestrict_name_part type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+  
+transform_type_part : start_transform_name_scope TRANSFORM_NAME_TYPE { $$ = $2.as_ascii; (void)$1; }
 			   
 type_postfix: type_primary		   
 			                                       
@@ -503,6 +491,7 @@ type_vn_prim: type_builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1,
 			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| type_build_id_part OPEN_VN VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
+			| transform_type_part OPEN_VN expr_prefix CLOSE_VN 					{ $$ = vn->OnTransform($1, @1, $3, @3); }
 
 type_builtin_name_part : start_builtin_scope resolved_type_name				{ $$ = $2.as_andata_block; (void)$1; }
 type_prerestrict_name_part : start_prerestrict_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }

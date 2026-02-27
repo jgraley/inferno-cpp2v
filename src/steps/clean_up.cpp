@@ -443,7 +443,7 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     auto nested_array = MakePatternNode<StuffAgent, Type>();
     auto sx_not = MakePatternNode<NegationAgent, Type>();
     auto sx_any = MakePatternNode<DisjunctionAgent, Type>();
-    auto getdecl = MakePatternNode<TransformOfAgent, TypeIdentifier>( &DeclarationOf::instance ); // TODO should be modulo typedefs
+    auto getdecl = MakePatternNode<TransformOfAgent, TypeIdentifier>( &TypeDeclarationOf::instance2 ); // TODO should be modulo typedefs
     auto id = MakePatternNode<InstanceIdentifier>();
     auto stuff1 = MakePatternNode<StuffAgent, Scope>();
     auto s_stuff2 = MakePatternNode<StuffAgent, Scope>();

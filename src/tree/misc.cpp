@@ -55,8 +55,9 @@ catch( TransUtilsInterface::UnknownNode &)
 }
     
 
-
-DeclarationOf DeclarationOf::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
+// TODO Use these instead of constructing a temp (could contain lookup tables etc in the future)
+DeclarationOf DeclarationOf::instance; 
+TypeDeclarationOf TypeDeclarationOf::instance2; 
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
 AugTreePtr<Record> TryGetRecordDeclaration( const TransKit &kit, AugTreePtr<TypeIdentifier> id )

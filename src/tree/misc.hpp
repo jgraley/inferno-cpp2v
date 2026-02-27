@@ -16,9 +16,16 @@ public:
     class DeclarationNotFound : public ::Mismatch {};
     
     AugTreePtr<Node> TryApplyTransformation( const TransKit &kit, 
-                                          AugTreePtr<Node> node ) const override;
+                                             AugTreePtr<Node> node ) const override;
     static DeclarationOf instance;
 };
+
+class TypeDeclarationOf : public DeclarationOf
+{
+public:
+    static TypeDeclarationOf instance2;
+};
+
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
 // TODO make this a Transformation
