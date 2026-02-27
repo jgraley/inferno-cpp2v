@@ -96,9 +96,10 @@ public:
 	
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
 	TreePtr<Node> OnConstructor( list<TreePtr<Node>> params );	
-	TreePtr<Node> OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<Node> declarator );	
-	TreePtr<Node> OnTypeAndAnonymousDeclarator( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
+	TreePtr<Node> OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
+	TreePtr<Node> OnTypeAndAbstractDeclarator( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
 	TreePtr<Node> OnParameter( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
+	TreePtr<Node> OnAbstractParameter( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
 	
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );
 	TreePtr<Node> OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );

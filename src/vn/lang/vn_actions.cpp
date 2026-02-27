@@ -632,31 +632,30 @@ TreePtr<Node> VNLangActions::OnConstructor( list<TreePtr<Node>> params )
 }
 
 
-TreePtr<Node> VNLangActions::OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<Node> declarator )
+TreePtr<Node> VNLangActions::OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
 {
-	// Any of analymous type or declaration will come in here.
-	// We can probably differentiate in the parser, but no need since the declarator gives 
-	// away what's happening.
-	TreePtr<Node> innermost = Declarators::Declarator::Next(declarator, type);
-	// NOTE: innermost id == NULL => ☆ (not anonymous type)
+	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
+	if( result.abstract )
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(declarator_loc),
+				"unexpected abstract declarator");
+	// NOTE: innermost id == NULL => ☆ (not abstract)
+	
 	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();
 	ret->type = type;
-	ret->identifier = innermost;
+	ret->identifier = result.innermost;
 	ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?	
 	return ret;
 }
 
 
-TreePtr<Node> VNLangActions::OnTypeAndAnonymousDeclarator( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
+TreePtr<Node> VNLangActions::OnTypeAndAbstractDeclarator( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
 {
-	// Any of analymous type or declaration will come in here.
-	// We can probably differentiate in the parser, but no need since the declarator gives 
-	// away what's happening.
-	TreePtr<Node> innermost = Declarators::Declarator::Next(declarator, type);
-	if( innermost )
+	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
+	if( !result.abstract )
 		throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(declarator_loc),
-				"unexpected symbol in anonymous declarator");
+				"unexpected concrete declarator");
 
 	return type;	
 }
@@ -664,14 +663,33 @@ TreePtr<Node> VNLangActions::OnTypeAndAnonymousDeclarator( TreePtr<Node> type, T
 
 TreePtr<Node> VNLangActions::OnParameter( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
 {
-	// Any of analymous type or declaration will come in here.
-	// We can probably differentiate in the parser, but no need since the declarator gives 
-	// away what's happening.
-	TreePtr<Node> innermost = Declarators::Declarator::Next(declarator, type);
-	// NOTE: innermost id == NULL => ☆ (not anonymous type)
+	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
+	if( result.abstract )
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(declarator_loc),
+				"unexpected abstract declarator");
+	// NOTE: innermost id == NULL => ☆ (not abstract)
+
 	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
 	ret->type = type;
-	ret->identifier = innermost;
+	ret->identifier = result.innermost;
+	ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?
+	return ret;
+}
+
+
+TreePtr<Node> VNLangActions::OnAbstractParameter( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
+{
+	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
+	if( !result.abstract )
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(declarator_loc),
+				"unexpected concrete declarator");
+				
+	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
+	ret->type = type;
+	ASSERTFAIL(); // TODO probably not good enough just to leave the identifier as NULL, need new node?
+	ret->identifier = nullptr;
 	ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?
 	return ret;
 }

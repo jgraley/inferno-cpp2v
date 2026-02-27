@@ -309,7 +309,7 @@ semicolon_args	: expr_expression											{ $$.push_back($1); }
 // _nc here means "not a compound"						
 declaration_nc		: bare_declaration ';'
                   
-bare_declaration	: type_specified declarator							{ $$ = vn->OnTypeAndDeclarator($1, $2); }	
+bare_declaration	: type_specified declarator							{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }	
 		
 declarator			: declarator_prefix									 
 
@@ -321,7 +321,7 @@ declarator_postfix	: declarator_primary
 					| declarator_postfix parameterisation				{ $$ = make_shared<Declarators::Function>($1, $2); }               
 					| declarator_postfix '[' normal ']'					{ $$ = make_shared<Declarators::Array>($1, $3); } 
                 
-declarator_primary	: norm_primary
+declarator_primary	: norm_primary										{ $$ = make_shared<Declarators::Concrete>($1); }  
                          
 parameterisation	: '(' parameters ')'							{ $$ = $2; }
 					| '(' ')'										{ $$.clear(); }							
@@ -330,7 +330,7 @@ parameters	: parameter												{ $$.push_back($1); }
 			| parameters COMMA parameter							{ $$ = $1; $$.push_back($3); }			
 				
 parameter   : type_specified declarator 							{ $$ = vn->OnParameter($1, $2, @2); }	
-//			| type_id												{ $$ = vn->OnAnonymousParameter($1, @1); }	
+			| type_primary ab_declarator							{ $$ = vn->OnAbstractParameter($1, $2, @1); }	
             | expr_prefix
             
 //////////////////////////////// EXPRESSIONS ////////////////////////////////////         
@@ -462,7 +462,7 @@ type_conjunction 	: type_with_ab
 					| type_conjunction CONJUNCTION type_prefix				{ $$ = vn->OnConjunction($1, $3); }
                     
 type_with_ab		: type_specified
-					| type_primary ab_declarator							{ $$ = vn->OnTypeAndAnonymousDeclarator($1, $2, @2); }  
+					| type_primary ab_declarator							{ $$ = vn->OnTypeAndAbstractDeclarator($1, $2, @2); }  
 					
 ab_declarator		: ab_declarator_prefix										    
 

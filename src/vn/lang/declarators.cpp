@@ -5,15 +5,14 @@
 using namespace Declarators;
 
 // See how this function is used for an example of how it should be used.
-TreePtr<Node> Declarator::Next( TreePtr<Node> inner, TreePtr<Node> &type )
+Result Declarator::DoReduce( TreePtr<Node> inner, TreePtr<Node> &type )
 {
 	if( !inner )
-		return nullptr; // We're done and it's anonymous or ☆
+		return Result { true, nullptr }; // We're done and it's abstract
 		
-	if( auto declarator = dynamic_cast<const Declarator *>(inner.get()) )
-		return declarator->DeclaratorReduce(type); // We're not done
-	else
-		return inner; // We're done and it's not anonymous (we can allow VN agent nodes here and indeed these make us drop out of declarator reduction)
+	auto declarator = dynamic_cast<const Declarator *>(inner.get());
+	ASSERTS( declarator );
+	return declarator->DeclaratorReduce(type); // We're not done
 }
 
 
@@ -23,23 +22,34 @@ UniDeclarator::UniDeclarator(TreePtr<Node> inner_) :
 }
 
 
-TreePtr<Node> Pointer::DeclaratorReduce( TreePtr<Node> &type ) const
+Result Concrete::DeclaratorReduce( TreePtr<Node> & ) const
+{
+	Result info;
+	info.abstract = false;
+	info.innermost = inner; // Can be NULL, in the case of ☆ and yet still not abstract
+	
+	// No need for Next(), we're done and it's concrete
+	return info;
+}
+
+
+Result Pointer::DeclaratorReduce( TreePtr<Node> &type ) const
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Pointer>>();
 	node->destination = type;
 	node->constancy = MakeTreeNode<CPPTree::NonConst>(); // TODO do better
 	type = node;
-	return Next(inner, type);
+	return DoReduce(inner, type);
 }
 
 
-TreePtr<Node> Reference::DeclaratorReduce( TreePtr<Node> &type ) const
+Result Reference::DeclaratorReduce( TreePtr<Node> &type ) const
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Reference>>();
 	node->destination = type;
 	node->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>(); // TODO do better
 	type = node;
-	return Next(inner, type);
+	return DoReduce(inner, type);
 }
 
 
@@ -50,13 +60,13 @@ Array::Array(TreePtr<Node> inner_, TreePtr<Node> size_) :
 }
 
 
-TreePtr<Node> Array::DeclaratorReduce( TreePtr<Node> &type ) const
+Result Array::DeclaratorReduce( TreePtr<Node> &type ) const
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Array>>();
 	node->element = type;
 	node->size = size;
 	type = node;
-	return Next(inner, type);
+	return DoReduce(inner, type);
 }
 
 
@@ -67,12 +77,12 @@ Function::Function(TreePtr<Node> inner_, list<TreePtr<Node>> params_) :
 }
 
 
-TreePtr<Node> Function::DeclaratorReduce( TreePtr<Node> &type ) const
+Result Function::DeclaratorReduce( TreePtr<Node> &type ) const
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Function>>();
 	node->return_type = type;
 	for( auto param : params )
 		node->params.push_back(param);
 	type = node;
-	return Next(inner, type);
+	return DoReduce(inner, type);
 }
