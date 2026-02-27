@@ -28,14 +28,14 @@ TreePtr<Node> BuildContainerSizeAgent::BuildNewSubtree(const SCREngine *acting_e
 
 Syntax::Production BuildContainerSizeAgent::GetAgentProduction() const
 {
-	return Syntax::Production::PREFIX;
+	return Syntax::Production::PRIMARY_EXPR;
 }
 
 
 string BuildContainerSizeAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	string s = "🄽" + renderer->DoRender( container, Syntax::Production::PREFIX );
+	string s = "🄽⦅" + renderer->DoRender( container, Syntax::Production::PREFIX ) + "⦆";
 	return s;
 } 
   

@@ -24,14 +24,14 @@ TreePtr<Node> StringizeAgent::BuildNewSubtree(const SCREngine *acting_engine)
 
 Syntax::Production StringizeAgent::GetAgentProduction() const
 {
-	return Syntax::Production::PREFIX;
+	return Syntax::Production::PRIMARY_EXPR;
 }
 
 
 string StringizeAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
 {
 	(void)surround_prod;
-	return "§" + renderer->DoRender( source, Syntax::Production::PREFIX );
+	return "§⦅" + renderer->DoRender( source, Syntax::Production::PREFIX ) + "⦆";
 } 
 
     

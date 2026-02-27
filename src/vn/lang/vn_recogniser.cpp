@@ -243,3 +243,13 @@ string VNLangRecogniser::GetContextText() const
 }
 
 
+// Diary
+
+// Tried raising prec of conj/dis - bad move, would lead to parenthesisation of compounds. We need them to be at 
+// lower prec than norm_expr_or_stmt so they can be used directly on compounds
+
+// Lots of conflicts incl around declarators resolved by making pre-restriction refuse to switch between
+// type and norm. This breaks DeclarationOf which was trying to be unified (the PR was supposed to disambiguate).
+// fix is to split DeclarationOf and TypeDeclarationOf, then because TypeDeclarationOf converts from type
+// to normal we have to put VN brackets around its argument making it a promary. To make life easier in the
+// future, doing this to all the VN prefix ops that can switch between type and norm.
