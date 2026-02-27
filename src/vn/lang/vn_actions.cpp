@@ -635,27 +635,41 @@ TreePtr<Node> VNLangActions::OnConstructor( list<TreePtr<Node>> params )
 TreePtr<Node> VNLangActions::OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
 {
 	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
-	if( result.abstract )
-		return type;	
+	switch( result.outcome )
+	{
+		case Declarators::Result::ABSTRACT:
+			return result.type;	
 		
-	// NOTE: innermost id == NULL => ☆ (not abstract)	
-	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();
-	ret->type = type;
-	ret->identifier = result.innermost;
-	ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?	
-	return ret;
+		case Declarators::Result::CONCRETE:
+		case Declarators::Result::WILDCARD:
+			// NOTE: innermost id == NULL => ☆ (not abstract)	
+			auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();
+			ret->type = result.type;
+			ret->identifier = result.leaf;
+			ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?	
+			return ret;
+	}
+	ASSERTFAIL();
 }
 
 
 TreePtr<Node> VNLangActions::OnParameter( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
 {
 	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
-	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
-	ret->type = type;
-	ASSERT(!result.abstract); // TODO probably not good enough just to leave the identifier as NULL, need new node?
-	ret->identifier = result.innermost;
-	ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?
-	return ret;
+	switch( result.outcome )
+	{
+		case Declarators::Result::ABSTRACT:
+			ASSERTFAIL();	 // TODO not good enough just to leave the identifier as NULL, need new node 
+		
+		case Declarators::Result::CONCRETE:
+		case Declarators::Result::WILDCARD:
+			auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
+			ret->type = result.type;
+			ret->identifier = result.leaf;
+			ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?
+			return ret;
+	}
+	ASSERTFAIL();
 }
 
 
