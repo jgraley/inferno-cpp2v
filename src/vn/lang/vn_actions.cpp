@@ -798,7 +798,7 @@ TreePtr<Node> VNLangActions::OnTransform( string kind, any kind_loc, TreePtr<Nod
 	}
 	else if( kind == "TypeDeclarationOf" )
 	{
-		to_agent = MakeTreeNode<TransformOfAgent>( &TypeDeclarationOf::instance2 );
+		to_agent = MakeTreeNode<TransformOfAgent>( &TypeDeclarationOf::instance );
 	}
 	else
 	{

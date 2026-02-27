@@ -25,7 +25,7 @@ AugTreePtr<Identifier> GetIdentifierOfDeclaration( AugTreePtr<Declaration> d )
 }
 
     
-AugTreePtr<Node> DeclarationOf::TryApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const try
+AugTreePtr<Node> BaseDeclarationOf::TryApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const try
 {    
     set<AugTreePtr<Node>> declarers = kit.utils->GetDeclarers( node );
     
@@ -57,7 +57,7 @@ catch( TransUtilsInterface::UnknownNode &)
 
 // TODO Use these instead of constructing a temp (could contain lookup tables etc in the future)
 DeclarationOf DeclarationOf::instance; 
-TypeDeclarationOf TypeDeclarationOf::instance2; 
+TypeDeclarationOf TypeDeclarationOf::instance; 
 
 // Look for a record, skipping over typedefs. Returns nullptr if not a record.
 AugTreePtr<Record> TryGetRecordDeclaration( const TransKit &kit, AugTreePtr<TypeIdentifier> id )

@@ -10,20 +10,32 @@
 // TODO refactor this away
 AugTreePtr<CPPTree::Identifier> GetIdentifierOfDeclaration( AugTreePtr<CPPTree::Declaration> d );
 
-class DeclarationOf : public Transformation
+class BaseDeclarationOf : public Transformation
 {
 public:
     class DeclarationNotFound : public ::Mismatch {};
     
     AugTreePtr<Node> TryApplyTransformation( const TransKit &kit, 
                                              AugTreePtr<Node> node ) const override;
+};
+
+
+// Version for use with instance ids, returns Instance etc
+class DeclarationOf : public BaseDeclarationOf
+{
+public:
     static DeclarationOf instance;
 };
 
-class TypeDeclarationOf : public DeclarationOf
+
+// Version for use with type ids, returns Record, Typedef etc
+// At present the only reason we have differently named classes is to differentiate 
+// during parsing, so we know if we're working on a type or a normal.
+// But real differences could develop, no reason for them not to.
+class TypeDeclarationOf : public BaseDeclarationOf
 {
 public:
-    static TypeDeclarationOf instance2;
+    static TypeDeclarationOf instance;
 };
 
 
