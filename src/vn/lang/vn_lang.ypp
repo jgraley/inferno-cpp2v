@@ -157,7 +157,7 @@
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_disjunction type_conjunction type_vn_prim type_with_ab
 %type <TreePtr<Node>> 				unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement statement_nc statement stmt_disjunction stmt_conjunction stmt_primary norm_expr_or_stmt 
-%type <TreePtr<Node>>				declaration_nc bare_declaration cons_or_des 
+%type <TreePtr<Node>>				declaration_nc bare_declaration cons_or_des_type 
 %type <TreePtr<Node>> 				compound_primary compound_prefix parameter type_id 
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				ab_declarator ab_declarator_prefix ab_declarator_postfix
@@ -169,7 +169,7 @@
 %type <VN::Limit>					stuff_depth_limit
 %type <VN::Itemisation>				itemisation items_bare items_sep
 %type <VN::Item>					item
-%type <shared_ptr<VN::Gnomon>>		part_resolve recogniser_command 
+%type <shared_ptr<VN::Gnomon>>		part_resolve designation_command 
 %type <shared_ptr<VN::Gnomon>>		start_transform_name_scope
 %type <shared_ptr<VN::Gnomon>>		start_builtin_scope start_prerestrict_scope start_id_by_name_scope start_build_id_scope
 %type <list<TreePtr<Node>>>			statements 
@@ -200,8 +200,8 @@ commands        : sep_commands							{ $$ = $1; }
 // in the correct order. STOP BREAKING THIS!!!
 sep_commands 	: sep_commands VN_SEMI script_command		{ $$ = $1; $$.push_back($3); }	
 				| script_command							{ $$.push_back($1); }
-				| sep_commands VN_SEMI recogniser_command	{ $$ = $1; recogniser->AddGnomon($3); }	
-				| recogniser_command						{ recogniser->AddGnomon($1); }
+				| sep_commands VN_SEMI designation_command	{ $$ = $1; recogniser->AddGnomon($3); }	
+				| designation_command						{ recogniser->AddGnomon($1); }
 			
 // Add more commands here
 script_command	: ENGINE normal   		 		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
@@ -209,8 +209,8 @@ script_command	: ENGINE normal   		 		 	{ $$ = make_shared<VN::EngineCommand>($2
 				| ATTRIBUTE		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
-recogniser_command	: vn_name DESIGNATE normal		{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
-					| vn_name DESIGNATE type_specified		{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
+designation_command	: vn_name DESIGNATE normal		{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
+					| vn_name DESIGNATE type_id		{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
 
 //////////////////////////////////// ITEMISATION ///////////////////////////////////////////
 // For explicit/built-in nodes mostly
@@ -283,7 +283,7 @@ stmt_primary: compound_primary
 			| statement_nc %prec ';'
 			| ';'															{ $$ = vn->OnNop(@1); }      
 					
-// _nc here means "not a compound_primary"						
+// _nc here means "not a compound"						
 statement_nc: bare_statement ';'												{ $$ = $1; }      
 			| ARGS_BODY_STMT_KEYWORD '(' semicolon_args ')' stmt_primary		{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
 			| WHILE_KEYWORD '(' expr_expression ')' stmt_primary 				{ $$ = vn->OnWhile($3, @3, $5, @5); }
@@ -306,10 +306,10 @@ semicolon_args	: expr_expression											{ $$.push_back($1); }
 
 //////////////////////////////// DECLARATIONS /////////////////////////////////////         
         
-declaration_nc		: bare_declaration  
+// _nc here means "not a compound"						
+declaration_nc		: bare_declaration ';'
                   
-bare_declaration	: cons_or_des			// Use of a type_specified in a declaration context is OK for constructor/destructor (maybe)									
-					| type_specified declarator							{ $$ = vn->OnTypeAndDeclarator($1, $2); }	
+bare_declaration	: type_specified declarator							{ $$ = vn->OnTypeAndDeclarator($1, $2); }	
 		
 declarator			: declarator_prefix									 
 
@@ -322,9 +322,7 @@ declarator_postfix	: declarator_primary
 					| declarator_postfix '[' normal ']'					{ $$ = make_shared<Declarators::Array>($1, $3); } 
                 
 declarator_primary	: norm_primary
-                
-cons_or_des : CONSTRUCTOR parameterisation 		 						{ $$ = vn->OnConstructor($2); } 
-         
+                         
 parameterisation	: '(' parameters ')'							{ $$ = $2; }
 					| '(' ')'										{ $$.clear(); }							
 
@@ -493,7 +491,10 @@ type_postfix: type_primary
 			                                       
 type_primary: type_vn_prim
 			| '(' type_id ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
-			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }			
+			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }
+			| cons_or_des_type			
+				
+cons_or_des_type : CONSTRUCTOR parameterisation 		 						{ $$ = vn->OnConstructor($2); } 				
 									
 type_vn_prim: type_builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, $2); }
 			| DESIGNATED_TYPE     									  			{ $$ = $1.as_designated; }		
