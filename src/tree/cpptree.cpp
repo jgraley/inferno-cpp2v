@@ -990,6 +990,13 @@ TreePtr<AccessSpec> Union::GetInitialAccess() const
 	return MakeTreeNode<Public>();
 }
 
+//////////////////////////// InheritanceRecord ///////////////////////////////
+
+string InheritanceRecord::GetToken() const
+{
+	throw Unimplemented();
+}
+
 //////////////////////////// Struct ///////////////////////////////
 
 TreePtr<AccessSpec> Struct::GetInitialAccess() const
@@ -997,11 +1004,23 @@ TreePtr<AccessSpec> Struct::GetInitialAccess() const
 	return MakeTreeNode<Public>();
 }
 
+
+string Struct::GetToken() const
+{
+	return "struct";
+}
+
 //////////////////////////// Class ///////////////////////////////
 
 TreePtr<AccessSpec> Class::GetInitialAccess() const
 {
 	return MakeTreeNode<Private>();
+}
+
+
+string Class::GetToken() const
+{
+	return "class";
 }
 
 //////////////////////////// True ///////////////////////////////

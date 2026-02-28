@@ -881,6 +881,8 @@ struct InheritanceRecord : Record
 {
     NODE_FUNCTIONS
     Collection<Base> bases; ///< contains the InheritanceRecords from which we inherit
+    
+    virtual string GetToken() const;
 };
 
 /// Struct as per InheritanceRecord
@@ -889,6 +891,7 @@ struct Struct : InheritanceRecord
 	NODE_FUNCTIONS_FINAL 
 	
 	TreePtr<AccessSpec> GetInitialAccess() const override;    
+    string GetToken() const override;
 };
 
 /// Class as per InheritanceRecord
@@ -897,6 +900,7 @@ struct Class : InheritanceRecord
 	NODE_FUNCTIONS_FINAL 
 	
 	TreePtr<AccessSpec> GetInitialAccess() const override;    
+    string GetToken() const override;
 };
 
 //////////////////////////// Expressions ////////////////////////////
