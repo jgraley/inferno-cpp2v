@@ -757,7 +757,7 @@ struct Integral : Numeric
     NODE_FUNCTIONS
     TreePtr<Integer> width;  ///< Number of bits, not bytes
 
-	struct UnimplemetedIntegralType : Unimplemented {};
+	struct UnimplementedIntegralType : Unimplemented {};
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
@@ -804,7 +804,7 @@ struct Floating : Numeric
     NODE_FUNCTIONS_FINAL
     TreePtr<FloatSemantics> semantics; ///< These are the semantics of the representation
 
-	struct UnimplemetedFloatingType : Unimplemented {};
+	struct UnimplementedFloatingType : Unimplemented {};
 
 	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
 }; 
@@ -854,9 +854,13 @@ struct Record : TypeDeclaration,
 {
     NODE_FUNCTIONS
     
+    struct UnimplementedToken : Unimplemented {};
+    
     virtual string GetColour() const { return TypeDeclaration::GetColour(); } // TypeDeclaration wins
 	Production GetMyProductionTerminal() const override;	
 	virtual TreePtr<AccessSpec> GetInitialAccess() const;    
+    virtual string GetToken() const;
+    virtual string GetExtras() const; // class MyClass <here> { int a; ...
 };
 
 /// A union, as per Record.
@@ -865,6 +869,7 @@ struct Union : Record
 	NODE_FUNCTIONS_FINAL 
 	
 	TreePtr<AccessSpec> GetInitialAccess() const override;    
+    string GetToken() const override;	
 };
 
 /// An Enum, as per record. 
@@ -872,7 +877,8 @@ struct Union : Record
  the given value. Values are always explicit. */
 struct Enum : Record 
 { 
-	NODE_FUNCTIONS_FINAL 	
+	NODE_FUNCTIONS_FINAL 
+    string GetToken() const override;
 };
 
 /// A record that can inherit from other records and be inherited from. 
@@ -880,9 +886,7 @@ struct Enum : Record
 struct InheritanceRecord : Record
 {
     NODE_FUNCTIONS
-    Collection<Base> bases; ///< contains the InheritanceRecords from which we inherit
-    
-    virtual string GetToken() const;
+    Collection<Base> bases; ///< contains the InheritanceRecords from which we inherit   
 };
 
 /// Struct as per InheritanceRecord

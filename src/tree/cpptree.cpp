@@ -842,7 +842,7 @@ string Integral::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
     int64_t width_bits;
     auto ic = DynamicTreePtrCast<SpecificInteger>( width );
     if(!ic)
-		throw UnimplemetedIntegralType();
+		throw UnimplementedIntegralType();
     width_bits = ic->GetInt64();
 
     TRACE("width %" PRId64 "\n", width);
@@ -873,7 +873,7 @@ string Integral::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
     else if( width_bits <= TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] )
         s += "long long";
     else
-		throw UnimplemetedIntegralType();
+		throw UnimplementedIntegralType();
 		
 	if( ReadArgs::use.count("c") )
 		s += SSPrintf("/* %d bits */", width_bits );
@@ -945,7 +945,7 @@ string Floating::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
     else if( &(const llvm::fltSemantics &)*sem == TypeDb::long_double_semantics )
         s += "long double";
     else
-        throw UnimplemetedFloatingType();
+        throw UnimplementedFloatingType();
 
     return s;
 }
@@ -978,9 +978,22 @@ Syntax::Production Record::GetMyProductionTerminal() const
 	return Production::BARE_DECLARATION;
 }
 
+
 TreePtr<AccessSpec> Record::GetInitialAccess() const
 {
 	return nullptr;
+}
+
+
+string Record::GetToken() const
+{
+	throw UnimplementedToken();
+}
+
+
+string Record::GetExtras() const
+{
+	return ""; // Nothing extra by default
 }
 
 //////////////////////////// Union ///////////////////////////////
@@ -990,12 +1003,22 @@ TreePtr<AccessSpec> Union::GetInitialAccess() const
 	return MakeTreeNode<Public>();
 }
 
+
+string Union::GetToken() const
+{
+	return "union";
+}
+
+//////////////////////////// Enum ///////////////////////////////
+
+string Enum::GetToken() const
+{
+	return "enum";
+}
+
 //////////////////////////// InheritanceRecord ///////////////////////////////
 
-string InheritanceRecord::GetToken() const
-{
-	throw Unimplemented();
-}
+
 
 //////////////////////////// Struct ///////////////////////////////
 
