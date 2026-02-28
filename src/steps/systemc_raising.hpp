@@ -17,10 +17,10 @@ using namespace VN;
 /** We look for the decl and remeove it since the inferno
  Node does not require declaration. Then just switch each appearance
  over to the new node, using an embedded pattern */
-class RaiseSCType : public VNStep 
+class RaiseSCClass : public VNStep 
 {
 public:
-    RaiseSCType( TreePtr< CPPTree::Type > lr_scnode );
+    RaiseSCClass( TreePtr< CPPTree::Type > lr_scnode );
 };
 
 

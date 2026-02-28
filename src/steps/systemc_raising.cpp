@@ -10,23 +10,27 @@ using namespace SCTree;
 using namespace Steps;
 
 
-RaiseSCType::RaiseSCType( TreePtr< Type > lr_sctype )
+RaiseSCClass::RaiseSCClass( TreePtr< Type > lr_sctype )
 {
     auto over = MakePatternNode<DeltaAgent, Node>();
-    auto s_scope = MakePatternNode< DeclScope >();
-    auto r_scope = MakePatternNode< DeclScope >();
+    auto s_program = MakePatternNode< Program >();
+    auto r_program = MakePatternNode< Program >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto s_usertype = MakePatternNode< TypeDeclaration >();
+    auto s_class = MakePatternNode< Class >();
     auto s_token = MakePatternNode< SpecificTypeIdentifierByNameAgent >( lr_sctype->GetLoweredIdName() );                
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, s_token, lr_sctype );    
-    
+    auto s_decls = MakePatternNode<StarAgent, Declaration>();
+    auto s_bases = MakePatternNode<StarAgent, Base>();
+        
     // Eliminate the declaration that came from isystemc.h
-    over->through = s_scope;
-    over->overlay = r_scope;
-    s_scope->members = (decls, s_usertype);
-    s_usertype->identifier = s_token;
-    
-    r_scope->members = (decls);          
+    over->through = s_program;
+    over->overlay = r_program;
+    s_program->members = (decls, s_class);
+    s_class->identifier = s_token;
+    s_class->members = (s_decls);
+    s_class->bases = (s_bases); 
+        
+    r_program->members = (decls);          
        
     Configure( COMPARE_REPLACE, over, r_embedded );
 }
@@ -35,24 +39,28 @@ RaiseSCType::RaiseSCType( TreePtr< Type > lr_sctype )
 RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_scclass )
 {
     auto over = MakePatternNode<DeltaAgent, Node>();
-    auto s_scope = MakePatternNode< DeclScope >();
-    auto r_scope = MakePatternNode< DeclScope >();
+    auto s_program = MakePatternNode< Program >();
+    auto r_program = MakePatternNode< Program >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
     auto l_bases = MakePatternNode<StarAgent, Base>();
-    auto s_usertype = MakePatternNode< TypeDeclaration >();
-    auto ls_class = MakePatternNode< InheritanceRecord >();
+    auto s_class = MakePatternNode< Class >();
+    auto ls_class = MakePatternNode< Class >();
     auto ls_base = MakePatternNode< Base >();
     auto l_tid = MakePatternNode< TypeIdentifier >();
     auto s_token = MakePatternNode< SpecificTypeIdentifierByNameAgent >( lr_scclass->GetLoweredIdName() ); 
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, ls_class, lr_scclass );    
-    
+    auto s_decls = MakePatternNode<StarAgent, Declaration>();
+    auto s_bases = MakePatternNode<StarAgent, Base>();
+
     // Eliminate the declaration that came from isystemc.h
-    over->through = s_scope;
-    over->overlay = r_scope;
-    s_scope->members = (decls, s_usertype);
-    s_usertype->identifier = s_token;        
-    r_scope->members = (decls);   
+    over->through = s_program;
+    over->overlay = r_program;
+    s_program->members = (decls, s_class);
+    s_class->identifier = s_token;        
+    s_class->members = (s_decls);
+    s_class->bases = (s_bases);     
+    r_program->members = (decls);   
     
     ls_class->identifier = l_tid;       
     ls_class->members = (l_decls);
@@ -148,8 +156,8 @@ RaiseTerminationFunction::RaiseTerminationFunction( TreePtr<TerminationFunction>
 RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
 {
     auto over = MakePatternNode<DeltaAgent, Node>();
-    auto s_scope = MakePatternNode< DeclScope >();
-    auto r_scope = MakePatternNode< DeclScope >();
+    auto s_program = MakePatternNode< Program >();
+    auto r_program = MakePatternNode< Program >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
     auto l_cdecls = MakePatternNode<StarAgent, Declaration>();
@@ -176,12 +184,12 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, l_module, l_module );            
     
     // Eliminate the declaration that came from isystemc.h
-    over->through = s_scope;
-    over->overlay = r_scope;
-    s_scope->members = (decls, s_instance);
+    over->through = s_program;
+    over->overlay = r_program;
+    s_program->members = (decls, s_instance);
     s_instance->identifier = s_token;        
     s_instance->type = MakePatternNode<Callable>(); // just narrow things a little        
-    r_scope->members = (decls);   
+    r_program->members = (decls);   
             
     l_module->members = (l_overcons, l_process, l_decls);
     l_module->bases = (l_bases);
@@ -349,8 +357,8 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
 
 RemoveVoidInstances::RemoveVoidInstances()
 {
-    auto s_scope = MakePatternNode<Program>();
-    auto r_scope = MakePatternNode<Program>();
+    auto s_program = MakePatternNode<Program>();
+    auto r_program = MakePatternNode<Program>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto s_instance = MakePatternNode<Static>();
     auto s_any = MakePatternNode<DisjunctionAgent, Type>();
@@ -359,22 +367,22 @@ RemoveVoidInstances::RemoveVoidInstances()
     auto s_void_param = MakePatternNode<Parameter>();
     
     // Eliminate the declaration that came from isystemc.h
-    s_scope->members = (decls, s_instance);
+    s_program->members = (decls, s_instance);
     s_instance->type = s_any;
     s_any->disjuncts = (s_callable, MakePatternNode<Void>() ); // match void instances (pointless) or functions as below...
     s_callable->params = (s_params, s_void_param); // one void param is enough, but don't match on zero params
     s_void_param->type = MakePatternNode<Void>();
     
-    r_scope->members = (decls);   
+    r_program->members = (decls);   
        
-    Configure( COMPARE_REPLACE, s_scope, r_scope );
+    Configure( COMPARE_REPLACE, s_program, r_program );
 }
 
 
 RemoveSCPrototypes::RemoveSCPrototypes()
 {
-    auto s_scope = MakePatternNode<Program>();
-    auto r_scope = MakePatternNode<Program>();
+    auto s_program = MakePatternNode<Program>();
+    auto r_program = MakePatternNode<Program>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto s_any = MakePatternNode<DisjunctionAgent, Instance>();
     
@@ -398,7 +406,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     auto s_int2 = MakePatternNode<Signed>();   
     auto s_int3 = MakePatternNode<Signed>();   
     
-    s_scope->members = (decls, s_any);
+    s_program->members = (decls, s_any);
     s_any->disjuncts = (s_cease_inst, s_exit_inst, s_wait_inst, s_next_trigger_inst, s_delta_count_inst);
     
     // void cease( unsigned char exit_code );
@@ -443,16 +451,15 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_delta_count_type->return_type = MakePatternNode<Integral>(); // Some kind of integer (in SC it's a sc_dt::uint64) 
     //s_delta_count_type->params = ();
     
-    r_scope->members = (decls);   
+    r_program->members = (decls);   
 
-
-    Configure( COMPARE_REPLACE, s_scope, r_scope );
+    Configure( COMPARE_REPLACE, s_program, r_program );
 }
 
 
 void SystemCRaising::Build( vector< shared_ptr<VNStep> > *sequence )
 {
-    sequence->push_back( make_shared<RaiseSCType>( MakePatternNode<Event>() ) );
+    sequence->push_back( make_shared<RaiseSCClass>( MakePatternNode<Event>() ) );
     sequence->push_back( make_shared<RaiseSCHierarchicalClass>( MakePatternNode<Module>() ) );
     sequence->push_back( make_shared<RaiseSCHierarchicalClass>( MakePatternNode<Interface>() ) );
     sequence->push_back( make_shared<RaiseSCDynamic>( MakePatternNode<WaitDynamic>() ) );

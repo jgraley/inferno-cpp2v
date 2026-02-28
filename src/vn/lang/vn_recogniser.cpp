@@ -246,7 +246,9 @@ string VNLangRecogniser::GetContextText() const
 // Diary
 
 // Tried raising prec of conj/dis - bad move, would lead to parenthesisation of compounds. We need them to be at 
-// lower prec than norm_expr_or_stmt so they can be used directly on compounds
+// lower prec than norm_expr_or_stmt so they can be used directly on compounds. The point is (re compunds) that
+// with these VN binops down at low prec, the remaining VN ops are all unops, and we can safely make a duplicate
+// of them for any "awkward" primaries (like compounds) and not need to mix.
 
 // Lots of conflicts incl around declarators resolved by making pre-restriction refuse to switch between
 // type and norm. This breaks DeclarationOf which was trying to be unified (the PR was supposed to disambiguate).
