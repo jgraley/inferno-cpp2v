@@ -659,44 +659,41 @@ string CppRender::RenderPreProcDecl( TreePtr<PreProcDecl> ppd, Syntax::Productio
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderRecordBody( TreePtr<Record> record, Syntax::Policy policy ) 
+string CppRender::RenderBases( TreePtr<InheritanceRecord> ir, Syntax::Policy policy ) 
 {	
 	string s;
 	
 	// Base classes
-	if( TreePtr<InheritanceRecord> ir = DynamicTreePtrCast< InheritanceRecord >(record) )
+	if( !ir->bases.empty() )
 	{
-		if( !ir->bases.empty() )
+		s += " : ";
+		bool first=true;
+		for( TreePtr<Node> bn : sc.GetTreePtrOrdering(ir->bases) )
 		{
-			s += " : ";
-			bool first=true;
-			for( TreePtr<Node> bn : sc.GetTreePtrOrdering(ir->bases) )
-			{
-				if( !first )
-					s += ", ";
-				first=false;
-				auto b = TreePtr<Base>::DynamicCast(bn);
-				ASSERT( b );
-				s += DoRender( b->access, Syntax::Production::TERMINAL ) + " ";
-				s += DoRender( b->record, Syntax::Production::RESOLVER);
-			}
+			if( !first )
+				s += ", ";
+			first=false;
+			auto b = TreePtr<Base>::DynamicCast(bn);
+			ASSERT( b );
+			s += DoRender( b->access, Syntax::Production::TERMINAL, policy ) + " ";
+			s += DoRender( b->record, Syntax::Production::RESOLVER, policy);
 		}
 	}
+	return s;
+}
+
+
+string CppRender::RenderRecordBody( TreePtr<Record> record, Syntax::Policy policy ) 
+{
+	string s;
 
 	// Members
+	TreePtr<AccessSpec> a = record->GetInitialAccess();
+	ASSERT( a );
 	s += "\n{ // memb\n";
-	if( auto enum_ = TreePtr<Enum>::DynamicCast(record) )
-	{
-		s += RenderEnumBodyScope( enum_ ); 
-	}
-	else
-	{
-		TreePtr<AccessSpec> a = record->GetInitialAccess();
-		ASSERT( a );
-		s += RenderDeclScope( record, type_index(typeid(*a)), policy );          
-	}
-		
+	s += RenderDeclScope( record, type_index(typeid(*a)), policy );          
 	s += "}";
+		
 	return s;
 }
 
@@ -712,6 +709,16 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
         auto id = DoRender( t->identifier, starting_declarator_prod);
         return "typedef " + DoRenderTypeAndDeclarator( t->type, id, starting_declarator_prod, Syntax::Production::SPACE_SEP_DECLARATION, policy );
     }
+    else if( TreePtr<Enum> enum_ = DynamicTreePtrCast< Enum >(declaration) )
+    {
+		string s = RenderRecordProto( enum_, policy );        
+		if( !policy.force_incomplete_records )
+		{
+			s += RenderEnumBody( enum_, policy );
+			s = '\n' + s + '\n';
+		}
+		return s;		
+	}
     else if( TreePtr<Record> record = DynamicTreePtrCast< Record >(declaration) )
     {
         // Prototype of the record
@@ -720,6 +727,8 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 			string s = RenderRecordProto( record, policy );        
 			if( !policy.force_incomplete_records )
 			{
+				if( auto ir = DynamicTreePtrCast< InheritanceRecord >(record) )
+					s += RenderBases(ir, policy);
 				s += RenderRecordBody( record, policy );
 				s = '\n' + s + '\n';
 			}
@@ -747,10 +756,10 @@ string CppRender::RenderConstructorInitList( Sequence<Statement> spe ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderEnumBodyScope( TreePtr<CPPTree::Record> record ) try
+string CppRender::RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Policy policy ) try
 {
     TRACE();   
-    string s;
+    string s = "\n{\n";
     bool first = true;
     for( TreePtr<Declaration> pe : record->members )
     {
@@ -760,7 +769,7 @@ string CppRender::RenderEnumBodyScope( TreePtr<CPPTree::Record> record ) try
         auto o = TreePtr<Instance>::DynamicCast(pe);
         if( !o )
         {
-            s += RenderNodeExplicit( pe, Syntax::Production::ASSIGN, default_policy );
+            s += RenderNodeExplicit( pe, Syntax::Production::ASSIGN, policy );
             continue;
         }
         // We're really declaring the id, and don't want scope resolution
@@ -769,14 +778,14 @@ string CppRender::RenderEnumBodyScope( TreePtr<CPPTree::Record> record ) try
         auto ei = TreePtr<Expression>::DynamicCast( o->initialiser );
         if( !ei )
         {
-            s += RenderNodeExplicit( o->initialiser, Syntax::Production::INITIALISER, default_policy );
+            s += RenderNodeExplicit( o->initialiser, Syntax::Production::INITIALISER, policy );
             continue;
         }       
         s += DoRender( ei, Syntax::Production::INITIALISER);
 
         first = false;    
     }
-    return s + "\n";
+    return s + "}";
 }
 DEFAULT_CATCH_CLAUSE
 
