@@ -117,7 +117,7 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
     if( TreePtr<Uninitialised>::DynamicCast(node) )
         return string();  
     else if( auto program = TreePtr<Program>::DynamicCast(node) )
-        return RenderProgram( program, surround_prod );
+        return RenderProgram( program, surround_prod, policy );
     else if( auto access = TreePtr<AccessSpec>::DynamicCast(node) ) // Identifier can be a kind of type or expression
         return RenderAccessSpec( access, surround_prod, policy );
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
@@ -145,13 +145,13 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
 }
 
 
-string CppRender::RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Production surround_prod )
+string CppRender::RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	(void)surround_prod;
     string s;
 
     // Track scopes for name resolution
-    s += RenderDeclScope( program ); // gets the .hpp stuff directly 
+    s += RenderDeclScope( program, Syntax::DefaultAccess, policy ); // gets the .hpp stuff directly 
     
     s += "\n// Definitions";    
     
@@ -317,7 +317,7 @@ string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Pro
     if( auto ce = DynamicTreePtrCast< StatementExpression >(expression) )
     {
         string s = "({ ";
-        s += RenderDeclScope( ce ); // Must do this first to populate backing list
+        s += RenderDeclScope( ce, Syntax::DefaultAccess, policy ); // Must do this first to populate backing list
         for( TreePtr<Statement> st : ce->statements )    
             s += DoRender( st, Syntax::Production::STATEMENT_LOW );    
         return s + " })";
@@ -659,8 +659,8 @@ string CppRender::RenderPreProcDecl( TreePtr<PreProcDecl> ppd, Syntax::Productio
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderRecordBody( TreePtr<Record> record ) 
-{
+string CppRender::RenderRecordBody( TreePtr<Record> record, Syntax::Policy policy ) 
+{	
 	string s;
 	
 	// Base classes
@@ -685,11 +685,16 @@ string CppRender::RenderRecordBody( TreePtr<Record> record )
 
 	// Members
 	s += "\n{ // memb\n";
-	TreePtr<AccessSpec> a = record->GetInitialAccess();
-	if( a )
-		s += RenderDeclScope( record, type_index(typeid(*a)) );          
+	if( auto enum_ = TreePtr<Enum>::DynamicCast(record) )
+	{
+		s += RenderEnumBodyScope( enum_ ); 
+	}
 	else
-		s += RenderEnumBodyScope( record ); 
+	{
+		TreePtr<AccessSpec> a = record->GetInitialAccess();
+		ASSERT( a );
+		s += RenderDeclScope( record, type_index(typeid(*a)), policy );          
+	}
 		
 	s += "}";
 	return s;
@@ -715,7 +720,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 			string s = RenderRecordProto( record, policy );        
 			if( !policy.force_incomplete_records )
 			{
-				s += RenderRecordBody( record );
+				s += RenderRecordBody( record, policy );
 				s = '\n' + s + '\n';
 			}
 			return s;
@@ -789,7 +794,8 @@ DEFAULT_CATCH_CLAUSE
 
 
 string CppRender::MaybeRenderFieldAccess( TreePtr<Declaration> declaration,
-                                          type_index *current_access )
+                                          type_index *current_access,
+                                          Syntax::Policy policy )
 {
     ASSERT( current_access );
     string s;
@@ -800,9 +806,9 @@ string CppRender::MaybeRenderFieldAccess( TreePtr<Declaration> declaration,
 	if( TreePtr<Field> f = DynamicTreePtrCast<Field>(declaration) )
 		this_access = f->access;
 
-	Syntax::Policy policy = default_policy;
-	policy.current_access = *current_access;
-    s = DoRender( this_access, Syntax::Production::BARE_DECLARATION, policy );
+	Syntax::Policy access_policy = policy;
+	access_policy.current_access = *current_access;
+    s = DoRender( this_access, Syntax::Production::BARE_DECLARATION, access_policy );
     *current_access = type_index(typeid(*this_access));
     
     return s;  
@@ -810,14 +816,14 @@ string CppRender::MaybeRenderFieldAccess( TreePtr<Declaration> declaration,
 
 
 string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
-                                   type_index init_access ) try
+                                   type_index init_access,
+                                   Syntax::Policy policy ) try
 {
     TRACE();
-    Syntax::Policy decl_scope_policy = default_policy;
     if( DynamicTreePtrCast<Record>(decl_scope) )
     {
-		decl_scope_policy.split_bulky_statics = true; // Our scope is a record body
-		decl_scope_policy.permit_static_keyword = true; // Our scope is a record body
+		policy.split_bulky_statics = true; // Our scope is a record body
+		policy.permit_static_keyword = true; // Our scope is a record body
 	}
     Sequence<Declaration> sorted = SortDecls( decl_scope->members, true, unique_identifier_names );
 
@@ -836,10 +842,10 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
         if( DynamicTreePtrCast<Record>(pd) && !DynamicTreePtrCast<Enum>(pd) ) 
         {    
 			// A record within our scope
-			s += MaybeRenderFieldAccess( pd, &init_access );
-
-			Syntax::Policy record_policy = decl_scope_policy;
+			Syntax::Policy record_policy = policy;
 			record_policy.force_incomplete_records = true; 
+
+			s += MaybeRenderFieldAccess( pd, &init_access, record_policy );
 			s += DoRender( pd, Syntax::Production::DECLARATION, record_policy ); 
 		}
 		
@@ -851,8 +857,8 @@ string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
     {
         TreePtr<Declaration> d = require_complete.front();
         require_complete.pop();       		
-        s += MaybeRenderFieldAccess( d, &init_access );        
-        s += DoRender( d, Syntax::Production::DECLARATION, decl_scope_policy );
+        s += MaybeRenderFieldAccess( d, &init_access, policy );        
+        s += DoRender( d, Syntax::Production::DECLARATION, policy );
     }
     TRACE();
     return s;

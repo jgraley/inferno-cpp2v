@@ -19,7 +19,7 @@ private:
 	string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) override;
 	
 	string DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
-	string RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Production surround_prod ); 
+	string RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Production surround_prod, Syntax::Policy policy ); 
     string RenderLiteral( TreePtr<CPPTree::Literal> sp, Syntax::Production surround_prod ); 
     string RenderScopeResolvingPrefix( TreePtr<Node> node ) final;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const final;
@@ -51,15 +51,17 @@ private:
 	string RenderMacroDeclaration( TreePtr<CPPTree::MacroDeclaration> md, Syntax::Production surround_prod );
     string RenderRecordProto( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
 	string RenderPreProcDecl( TreePtr<CPPTree::PreProcDecl> ppd, Syntax::Production surround_prod );
-	string RenderRecordBody( TreePtr<CPPTree::Record> record );
+	string RenderRecordBody( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
     string RenderDeclaration( TreePtr<CPPTree::Declaration> declaration, Syntax::Production surround_prod, Syntax::Policy policy );
  	string RenderConstructorInitList( Sequence<CPPTree::Statement> spe );
 	string RenderEnumBodyScope( TreePtr<CPPTree::Record> record );
     string RenderOperandSequence( Sequence<CPPTree::Expression> spe );
 	string MaybeRenderFieldAccess( TreePtr<CPPTree::Declaration> declaration,
-			  			           type_index *current_access );
+			  			           type_index *current_access,
+			  			           Syntax::Policy policy );
     string RenderDeclScope( TreePtr<CPPTree::DeclScope> decl_scope,
-							type_index init_access = Syntax::DefaultAccess );
+							type_index init_access,
+							Syntax::Policy policy );
 
 	UniquifyNames::NodeToNameMap unique_identifier_names;
 };
