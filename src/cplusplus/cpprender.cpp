@@ -148,19 +148,50 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
 string CppRender::RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	(void)surround_prod;
-    string s;
+	Syntax::Policy definition_policy = policy;
+	definition_policy.force_initialisation = true;
 
-    // Track scopes for name resolution
-    s += RenderDeclScope( program, Syntax::DefaultAccess, policy ); // gets the .hpp stuff directly 
+    Sequence<Declaration> sorted = SortDecls( program->members, true, unique_identifier_names );
+
+	queue<TreePtr<Declaration>> require_complete;
+	
+    // Emit preprocs and an incomplete for each record 
+    string s;
+    for( TreePtr<Declaration> pd : sorted )
+    {       
+        if( auto ppd = DynamicTreePtrCast<PreProcDecl>(pd) )
+        {
+            s += DoRender( ppd, Syntax::Production::DECLARATION ) + "\n";
+            continue;
+        }
+        
+        if( DynamicTreePtrCast<Record>(pd) && !DynamicTreePtrCast<Enum>(pd) ) 
+        {    
+			// A record within our scope
+			Syntax::Policy record_policy = policy;
+			record_policy.force_incomplete_records = true; 
+
+			s += DoRender( pd, Syntax::Production::DECLARATION, record_policy ); 
+		}
+		
+		require_complete.push( pd );
+    }
+    
+    // Emit the complete declarations (from top-level only), sorted for dependencies
+    while( !require_complete.empty()  )
+    {
+        TreePtr<Declaration> d = require_complete.front();
+        require_complete.pop();       		
+        s += DoRender( d, Syntax::Production::DECLARATION, policy );
+    }
     
     s += "\n// Definitions";    
     
+    // Emit the actual definitions (from anywhere), sorted for dependencies
     // These are rendered here, inside program scope but outside any additional scopes
     // that were on the scope stack when the instance was seen. These could go in a .cpp file.
     while( !definitions.empty() )
     {
-		Syntax::Policy definition_policy = default_policy;
-		definition_policy.force_initialisation = true;
         s += "\n";
         s += DoRender( definitions.front(), Syntax::Production::DECLARATION, definition_policy ); 
         s += "\n";
@@ -317,9 +348,10 @@ string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Pro
     if( auto ce = DynamicTreePtrCast< StatementExpression >(expression) )
     {
         string s = "({ ";
-        s += RenderDeclScope( ce, Syntax::DefaultAccess, policy ); // Must do this first to populate backing list
+		for( TreePtr<Declaration> m : ce->members )    
+			s += DoRender( m, Syntax::Production::DECLARATION, policy );       
         for( TreePtr<Statement> st : ce->statements )    
-            s += DoRender( st, Syntax::Production::STATEMENT_LOW );    
+            s += DoRender( st, Syntax::Production::STATEMENT_LOW, policy );    
         return s + " })";
     }
     else
@@ -688,11 +720,25 @@ string CppRender::RenderRecordBody( TreePtr<Record> record, Syntax::Policy polic
 	string s;
 
 	// Members
+	s += "\n{ // memb\n";
+
 	TreePtr<AccessSpec> a = record->GetInitialAccess();
 	ASSERT( a );
-	s += "\n{ // memb\n";
-	s += RenderDeclScope( record, type_index(typeid(*a)), policy );          
-	s += "}";
+	type_index current_access = type_index(typeid(*a));
+
+    policy.split_bulky_statics = true; // Our scope is a record body
+	policy.permit_static_keyword = true; // Our scope is a record body
+	
+    Sequence<Declaration> sorted = SortDecls( record->members, true, unique_identifier_names );
+	
+    // Emit preprocs and an incomplete for each record 
+    for( TreePtr<Declaration> d : sorted )
+    {       
+        s += MaybeRenderFieldAccess( d, &current_access, policy );        
+        s += DoRender( d, Syntax::Production::DECLARATION, policy ) + "\n";
+    }
+   
+   	s += "}";
 		
 	return s;
 }
@@ -822,55 +868,3 @@ string CppRender::MaybeRenderFieldAccess( TreePtr<Declaration> declaration,
     
     return s;  
 }                                 
-
-
-string CppRender::RenderDeclScope( TreePtr<DeclScope> decl_scope,
-                                   type_index init_access,
-                                   Syntax::Policy policy ) try
-{
-    TRACE();
-    if( DynamicTreePtrCast<Record>(decl_scope) )
-    {
-		policy.split_bulky_statics = true; // Our scope is a record body
-		policy.permit_static_keyword = true; // Our scope is a record body
-	}
-    Sequence<Declaration> sorted = SortDecls( decl_scope->members, true, unique_identifier_names );
-
-	queue<TreePtr<Declaration>> require_complete;
-	
-    // Emit preprocs and an incomplete for each record 
-    string s;
-    for( TreePtr<Declaration> pd : sorted )
-    {       
-        if( auto ppd = DynamicTreePtrCast<PreProcDecl>(pd) )
-        {
-            s += DoRender( ppd, Syntax::Production::DECLARATION ) + "\n";
-            continue;
-        }
-        
-        if( DynamicTreePtrCast<Record>(pd) && !DynamicTreePtrCast<Enum>(pd) ) 
-        {    
-			// A record within our scope
-			Syntax::Policy record_policy = policy;
-			record_policy.force_incomplete_records = true; 
-
-			s += MaybeRenderFieldAccess( pd, &init_access, record_policy );
-			s += DoRender( pd, Syntax::Production::DECLARATION, record_policy ); 
-		}
-		
-		require_complete.push( pd );
-    }
-    
-    // Emit the actual definitions, sorted for dependencies
-    while( !require_complete.empty()  )
-    {
-        TreePtr<Declaration> d = require_complete.front();
-        require_complete.pop();       		
-        s += MaybeRenderFieldAccess( d, &init_access, policy );        
-        s += DoRender( d, Syntax::Production::DECLARATION, policy );
-    }
-    TRACE();
-    return s;
-}
-DEFAULT_CATCH_CLAUSE
-

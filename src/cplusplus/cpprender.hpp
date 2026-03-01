@@ -60,9 +60,6 @@ private:
 	string MaybeRenderFieldAccess( TreePtr<CPPTree::Declaration> declaration,
 			  			           type_index *current_access,
 			  			           Syntax::Policy policy );
-    string RenderDeclScope( TreePtr<CPPTree::DeclScope> decl_scope,
-							type_index init_access,
-							Syntax::Policy policy );
 
 	UniquifyNames::NodeToNameMap unique_identifier_names;
 };
