@@ -109,10 +109,7 @@ struct Scope : virtual Node
 struct DeclScope : virtual Scope
 {
     NODE_FUNCTIONS
-    Collection<Declaration> members; /// The declarations in this scope
-    
-	//string MaybeRenderFieldAccess( TreePtr<Declaration> declaration,
-     //                              type_index *current_access );
+    Collection<Declaration> members; /// The declarations in this scope    
 };
 
 /// The top level of a program

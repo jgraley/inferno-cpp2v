@@ -734,7 +734,17 @@ string CppRender::RenderRecordBody( TreePtr<Record> record, Syntax::Policy polic
     // Emit preprocs and an incomplete for each record 
     for( TreePtr<Declaration> d : sorted )
     {       
-        s += MaybeRenderFieldAccess( d, &current_access, policy );        
+		// Decide access spec for this declaration (explicit if instance, 
+		// otherwise force to Public because decls don't have an access spec). TODO fix this, #877
+		TreePtr<AccessSpec> this_access = MakeTreeNode<Public>();
+		if( TreePtr<Field> f = DynamicTreePtrCast<Field>(d) )
+			this_access = f->access;
+
+		Syntax::Policy access_policy = policy;
+		access_policy.current_access = current_access;
+		s += DoRender( this_access, Syntax::Production::BARE_DECLARATION, access_policy );
+		current_access = type_index(typeid(*this_access));
+
         s += DoRender( d, Syntax::Production::DECLARATION, policy ) + "\n";
     }
    
@@ -845,26 +855,4 @@ string CppRender::RenderOperandSequence( Sequence<Expression> spe ) try
 		renders.push_back( DoRender( pe, Syntax::Production::COMMA_SEP ) );
     return Join(renders, ", ", "{", "}"); // TODO now only used in operaotr new, where the {} looks wrong
 }
-DEFAULT_CATCH_CLAUSE
-
-
-string CppRender::MaybeRenderFieldAccess( TreePtr<Declaration> declaration,
-                                          type_index *current_access,
-                                          Syntax::Policy policy )
-{
-    ASSERT( current_access );
-    string s;
-    
-    // Decide access spec for this declaration (explicit if instance, 
-    // otherwise force to Public because decls don't have an access spec). TODO fix this, #877
-    TreePtr<AccessSpec> this_access = MakeTreeNode<Public>();
-	if( TreePtr<Field> f = DynamicTreePtrCast<Field>(declaration) )
-		this_access = f->access;
-
-	Syntax::Policy access_policy = policy;
-	access_policy.current_access = *current_access;
-    s = DoRender( this_access, Syntax::Production::BARE_DECLARATION, access_policy );
-    *current_access = type_index(typeid(*this_access));
-    
-    return s;  
-}                                 
+DEFAULT_CATCH_CLAUSE                            
