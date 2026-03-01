@@ -577,7 +577,7 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 
 string Base::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	throw TemporarilyDisabled(); // TODO fix DeclScope render
+	//throw TemporarilyDisabled(); // TODO fix DeclScope render
 
 	string s;
 	s += renderer->DoRender( access, Syntax::Production::TERMINAL, policy );
@@ -1005,18 +1005,21 @@ Syntax::Production Record::GetMyProductionTerminal() const
 
 string Record::GetRender( VN::RendererInterface *renderer, Syntax::Production, Policy policy ) 
 {
-	throw TemporarilyDisabled(); // TODO fix DeclScope render
+	//throw TemporarilyDisabled(); // TODO fix DeclScope render
 	
-	list<string> ls;
-	for( TreePtr<Node> m : members )
-		ls.push_back( renderer->DoRender(m, Syntax::Production::DECLARATION, policy ) );    
-	
-	return GetToken() + 
-	       " " + 
-	       renderer->DoRender(identifier, Production::PURE_IDENTIFIER, policy) + // Don't want scope resolution when declaring
-	       RenderExtras(renderer, Production::SPACE_SEP_DECLARATION, policy) + 
-	       "\n" +	       
-	       Join( ls, "\n", "{\n", "}" );
+	string s;
+	s += GetToken();
+	s += " ";
+	s += renderer->DoRender(identifier, Production::PURE_IDENTIFIER, policy); // Don't want scope resolution when declaring
+
+	if( policy.force_incomplete_records )
+		return s;
+
+	s += RenderExtras(renderer, Production::SPACE_SEP_DECLARATION, policy);
+    s += "\n";
+	s += RenderBody(renderer, policy);
+	s += "\n";
+	return s;
 }   
 
 
@@ -1085,10 +1088,15 @@ string Union::GetToken() const
 
 //////////////////////////// Enum ///////////////////////////////
 
-string Enum::GetToken() const
+string Enum::RenderBody( VN::RendererInterface *, Syntax::Policy  )
 {
 	throw TemporarilyDisabled(); // TODO implement enum render
-	//return "enum";
+}
+
+
+string Enum::GetToken() const
+{
+	return "enum";
 }
 
 //////////////////////////// InheritanceRecord ///////////////////////////////

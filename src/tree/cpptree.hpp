@@ -881,6 +881,7 @@ struct Union : Record
 struct Enum : Record 
 { 
 	NODE_FUNCTIONS_FINAL 
+	string RenderBody( VN::RendererInterface *renderer, Syntax::Policy policy ) override;	
     string GetToken() const override;
 };
 
