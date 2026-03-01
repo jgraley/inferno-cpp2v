@@ -691,69 +691,6 @@ string CppRender::RenderPreProcDecl( TreePtr<PreProcDecl> ppd, Syntax::Productio
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderBases( TreePtr<InheritanceRecord> ir, Syntax::Policy policy ) 
-{	
-	string s;
-	
-	// Base classes
-	if( !ir->bases.empty() )
-	{
-		s += " : ";
-		bool first=true;
-		for( TreePtr<Node> bn : sc.GetTreePtrOrdering(ir->bases) )
-		{
-			if( !first )
-				s += ", ";
-			first=false;
-			auto b = TreePtr<Base>::DynamicCast(bn);
-			ASSERT( b );
-			s += DoRender( b->access, Syntax::Production::TERMINAL, policy ) + " ";
-			s += DoRender( b->record, Syntax::Production::RESOLVER, policy);
-		}
-	}
-	return s;
-}
-
-
-string CppRender::RenderRecordBody( TreePtr<Record> record, Syntax::Policy policy ) 
-{
-	string s;
-
-	// Members
-	s += "\n{ // memb\n";
-
-	TreePtr<AccessSpec> a = record->GetInitialAccess();
-	ASSERT( a );
-	type_index current_access = type_index(typeid(*a));
-
-    policy.split_bulky_statics = true; // Our scope is a record body
-	policy.permit_static_keyword = true; // Our scope is a record body
-	
-    Sequence<Declaration> sorted = SortDecls( record->members, true );
-	
-    // Emit preprocs and an incomplete for each record 
-    for( TreePtr<Declaration> d : sorted )
-    {       
-		// Decide access spec for this declaration (explicit if instance, 
-		// otherwise force to Public because decls don't have an access spec). TODO fix this, #877
-		TreePtr<AccessSpec> this_access = MakeTreeNode<Public>();
-		if( TreePtr<Field> f = DynamicTreePtrCast<Field>(d) )
-			this_access = f->access;
-
-		Syntax::Policy access_policy = policy;
-		access_policy.current_access = current_access;
-		s += DoRender( this_access, Syntax::Production::BARE_DECLARATION, access_policy );
-		current_access = type_index(typeid(*this_access));
-
-        s += DoRender( d, Syntax::Production::DECLARATION, policy ) + "\n";
-    }
-   
-   	s += "}";
-		
-	return s;
-}
-
-
 string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
     TRACE();
@@ -774,25 +711,6 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 			s = '\n' + s + '\n';
 		}
 		return s;		
-	}
-    else if( TreePtr<Record> record = DynamicTreePtrCast< Record >(declaration) )
-    {
-        // Prototype of the record
-        try
-        {
-			string s = RenderRecordProto( record, policy );        
-			if( !policy.force_incomplete_records )
-			{
-				if( auto ir = DynamicTreePtrCast< InheritanceRecord >(record) )
-					s += RenderBases(ir, policy);
-				s += RenderRecordBody( record, policy );
-				s = '\n' + s + '\n';
-			}
-			return s;
-		}
-		catch( Syntax::Unimplemented &e )
-		{
-		}
     }
     else if( TreePtr<LabelDeclaration> l = DynamicTreePtrCast<LabelDeclaration>(declaration) )
         return DoRender( l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":"; 

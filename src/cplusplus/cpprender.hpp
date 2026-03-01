@@ -51,8 +51,6 @@ private:
 	string RenderMacroDeclaration( TreePtr<CPPTree::MacroDeclaration> md, Syntax::Production surround_prod );
     string RenderRecordProto( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
 	string RenderPreProcDecl( TreePtr<CPPTree::PreProcDecl> ppd, Syntax::Production surround_prod );
-	string RenderBases( TreePtr<CPPTree::InheritanceRecord> record, Syntax::Policy policy );
-	string RenderRecordBody( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
     string RenderDeclaration( TreePtr<CPPTree::Declaration> declaration, Syntax::Production surround_prod, Syntax::Policy policy );
  	string RenderConstructorInitList( Sequence<CPPTree::Statement> spe );
 	string RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
