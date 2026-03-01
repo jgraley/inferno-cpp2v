@@ -1,6 +1,7 @@
 
 #include "cpptree.hpp"
 #include "common/read_args.hpp"
+#include "vn/lang/sort_decls.hpp"
 
 #define EXPLICIT_BASE 0
 
@@ -1017,6 +1018,45 @@ string Record::GetRender( VN::RendererInterface *renderer, Syntax::Production, P
 	       "\n" +	       
 	       Join( ls, "\n", "{\n", "}" );
 }   
+
+
+string Record::RenderBody( VN::RendererInterface *renderer, Syntax::Policy policy )
+{
+	string s;
+
+	// Members
+	s += "\n{ // memb\n";
+
+	TreePtr<AccessSpec> a = GetInitialAccess();
+	ASSERT( a );
+	type_index current_access = type_index(typeid(*a));
+
+    policy.split_bulky_statics = true; // Our scope is a record body
+	policy.permit_static_keyword = true; // Our scope is a record body
+	
+    Sequence<Declaration> sorted = SortDecls( members, true );
+	
+    // Emit preprocs and an incomplete for each record 
+    for( TreePtr<Declaration> d : sorted )
+    {       
+		// Decide access spec for this declaration (explicit if instance, 
+		// otherwise force to Public because decls don't have an access spec). TODO fix this, #877
+		TreePtr<AccessSpec> this_access = MakeTreeNode<Public>();
+		if( TreePtr<Field> f = DynamicTreePtrCast<Field>(d) )
+			this_access = f->access;
+
+		Syntax::Policy access_policy = policy;
+		access_policy.current_access = current_access;
+		s += renderer->DoRender( this_access, Syntax::Production::BARE_DECLARATION, access_policy );
+		current_access = type_index(typeid(*this_access));
+
+        s += renderer->DoRender( d, Syntax::Production::DECLARATION, policy ) + "\n";
+    }
+   
+   	s += "}";
+		
+	return s;
+}
 
 
 string Record::GetToken() const

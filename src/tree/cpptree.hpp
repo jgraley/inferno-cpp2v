@@ -861,6 +861,7 @@ struct Record : TypeDeclaration,
 	virtual TreePtr<AccessSpec> GetInitialAccess() const;    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) override;     
+	virtual string RenderBody( VN::RendererInterface *renderer, Syntax::Policy policy );
     virtual string GetToken() const;
     virtual string RenderExtras(VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
 };

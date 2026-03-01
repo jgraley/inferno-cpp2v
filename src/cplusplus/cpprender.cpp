@@ -151,7 +151,7 @@ string CppRender::RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Prod
 	Syntax::Policy definition_policy = policy;
 	definition_policy.force_initialisation = true;
 
-    Sequence<Declaration> sorted = SortDecls( program->members, true, unique_identifier_names );
+    Sequence<Declaration> sorted = SortDecls( program->members, true );
 
 	queue<TreePtr<Declaration>> require_complete;
 	
@@ -380,7 +380,7 @@ string CppRender::RenderMakeRecord( TreePtr<RecordLiteral> make_rec, Syntax::Pro
 
     TreePtr<Record> r = TryGetRecordDeclaration(trans_kit, id).GetTreePtr();
     // Make sure we have the same ordering as when the record was rendered
-    Sequence<Declaration> sorted_members = SortDecls( r->members, true, unique_identifier_names );
+    Sequence<Declaration> sorted_members = SortDecls( r->members, true );
 
     // Determine args sequence using param sequence
     Sequence<Expression> sub_expr_sequence = SortMapById( make_rec->operands, sorted_members );
@@ -729,7 +729,7 @@ string CppRender::RenderRecordBody( TreePtr<Record> record, Syntax::Policy polic
     policy.split_bulky_statics = true; // Our scope is a record body
 	policy.permit_static_keyword = true; // Our scope is a record body
 	
-    Sequence<Declaration> sorted = SortDecls( record->members, true, unique_identifier_names );
+    Sequence<Declaration> sorted = SortDecls( record->members, true );
 	
     // Emit preprocs and an incomplete for each record 
     for( TreePtr<Declaration> d : sorted )
