@@ -110,6 +110,9 @@ struct DeclScope : virtual Scope
 {
     NODE_FUNCTIONS
     Collection<Declaration> members; /// The declarations in this scope
+    
+	//string MaybeRenderFieldAccess( TreePtr<Declaration> declaration,
+     //                              type_index *current_access );
 };
 
 /// The top level of a program
@@ -548,6 +551,7 @@ struct Base : Declaration
     NODE_FUNCTIONS_FINAL
     TreePtr<AccessSpec> access; ///< Can inherited members be accessed?
     TreePtr<TypeIdentifier> record; ///< what do we inherit? must refer to InheritanceRecord
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    
 };              
 
 /// Identifier for a label that can be any label.
@@ -857,10 +861,11 @@ struct Record : TypeDeclaration,
     struct UnimplementedToken : Unimplemented {};
     
     virtual string GetColour() const { return TypeDeclaration::GetColour(); } // TypeDeclaration wins
-	Production GetMyProductionTerminal() const override;	
 	virtual TreePtr<AccessSpec> GetInitialAccess() const;    
+	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) override;     
     virtual string GetToken() const;
-    virtual string GetExtras() const; // class MyClass <here> { int a; ...
+    virtual string RenderExtras(VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
 };
 
 /// A union, as per Record.
@@ -886,7 +891,10 @@ struct Enum : Record
 struct InheritanceRecord : Record
 {
     NODE_FUNCTIONS
+
     Collection<Base> bases; ///< contains the InheritanceRecords from which we inherit   
+
+    string RenderExtras(VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy) override;
 };
 
 /// Struct as per InheritanceRecord

@@ -63,6 +63,10 @@ Syntax::Production Declaration::GetMyProductionTerminal() const
 	return Production::BARE_DECLARATION;
 }
 
+//////////////////////////// DeclScope ///////////////////////////////
+
+
+
 //////////////////////////// Program ///////////////////////////////
 
 Syntax::Production Program::GetMyProductionTerminal() const
@@ -568,6 +572,19 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 		return Production::BARE_DECLARATION;
 }
 
+//////////////////////////// Base //////////////////////////////
+
+string Base::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	throw TemporarilyDisabled(); // TODO fix DeclScope render
+
+	string s;
+	s += renderer->DoRender( access, Syntax::Production::TERMINAL, policy );
+	s += " ";
+	s += renderer->DoRender( record, Syntax::Production::RESOLVER, policy );
+	return s;
+}   
+
 //////////////////////////// LabelIdentifier //////////////////////////////
 
 Syntax::Production LabelIdentifier::GetMyProductionTerminal() const
@@ -973,16 +990,33 @@ Syntax::Production Typedef::GetMyProductionTerminal() const
 
 //////////////////////////// Record ///////////////////////////////
 
+TreePtr<AccessSpec> Record::GetInitialAccess() const
+{
+	return nullptr;
+}
+
+
 Syntax::Production Record::GetMyProductionTerminal() const
 {
 	return Production::BARE_DECLARATION;
 }
 
 
-TreePtr<AccessSpec> Record::GetInitialAccess() const
+string Record::GetRender( VN::RendererInterface *renderer, Syntax::Production, Policy policy ) 
 {
-	return nullptr;
-}
+	throw TemporarilyDisabled(); // TODO fix DeclScope render
+	
+	list<string> ls;
+	for( TreePtr<Node> m : members )
+		ls.push_back( renderer->DoRender(m, Syntax::Production::DECLARATION, policy ) );    
+	
+	return GetToken() + 
+	       " " + 
+	       renderer->DoRender(identifier, Production::PURE_IDENTIFIER, policy) + // Don't want scope resolution when declaring
+	       RenderExtras(renderer, Production::SPACE_SEP_DECLARATION, policy) + 
+	       "\n" +	       
+	       Join( ls, "\n", "{\n", "}" );
+}   
 
 
 string Record::GetToken() const
@@ -991,7 +1025,7 @@ string Record::GetToken() const
 }
 
 
-string Record::GetExtras() const
+string Record::RenderExtras(VN::RendererInterface *, Syntax::Production, Policy)
 {
 	return ""; // Nothing extra by default
 }
@@ -1013,12 +1047,23 @@ string Union::GetToken() const
 
 string Enum::GetToken() const
 {
-	return "enum";
+	throw TemporarilyDisabled(); // TODO implement enum render
+	//return "enum";
 }
 
 //////////////////////////// InheritanceRecord ///////////////////////////////
 
-
+string InheritanceRecord::RenderExtras(VN::RendererInterface *renderer, Syntax::Production, Policy policy)
+{
+	list<string> ls;
+	for( TreePtr<Base> b : bases )
+		ls.push_back( renderer->DoRender(b, Syntax::Production::BARE_DECLARATION, policy ) );    	
+	
+	if( ls.empty() )
+		return "";
+	else
+		return " : " + Join( ls, ", ", "", "" );
+}
 
 //////////////////////////// Struct ///////////////////////////////
 
