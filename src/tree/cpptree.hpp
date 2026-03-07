@@ -428,7 +428,7 @@ struct AccessSpec : Property
 
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
-    virtual string GetToken() const;	
+    virtual string GetKeyword() const;	
 };
 
 /// Property for public access
@@ -436,7 +436,7 @@ struct Public : AccessSpec
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-    string GetToken() const override;		
+    string GetKeyword() const override;		
 };
 
 /// Property for private access
@@ -444,7 +444,7 @@ struct Private : AccessSpec
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-    string GetToken() const override;		
+    string GetKeyword() const override;		
 };
 
 /// Property for protected access
@@ -452,7 +452,7 @@ struct Protected : AccessSpec
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-    string GetToken() const override;		
+    string GetKeyword() const override;		
 };
 
 /// Property that indicates whether some Instance is constant.
@@ -879,7 +879,7 @@ struct Record : TypeDeclaration,
 	virtual TreePtr<AccessSpec> GetInitialAccess() const;    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) override;     
-    virtual string GetToken() const;
+    virtual string GetKeyword() const;
     virtual string RenderExtras(VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
 	virtual string RenderBody( VN::RendererInterface *renderer, Syntax::Policy policy );
 };
@@ -890,7 +890,7 @@ struct Union : Record
 	NODE_FUNCTIONS_FINAL 
 	
 	TreePtr<AccessSpec> GetInitialAccess() const override;    
-    string GetToken() const override;	
+    string GetKeyword() const override;	
 };
 
 /// An Enum, as per record. 
@@ -899,7 +899,7 @@ struct Union : Record
 struct Enum : Record 
 { 
 	NODE_FUNCTIONS_FINAL 
-    string GetToken() const override;
+    string GetKeyword() const override;
 	string RenderBody( VN::RendererInterface *renderer, Syntax::Policy policy ) override;	
 };
 
@@ -920,7 +920,7 @@ struct Struct : InheritanceRecord
 	NODE_FUNCTIONS_FINAL 
 	
 	TreePtr<AccessSpec> GetInitialAccess() const override;    
-    string GetToken() const override;
+    string GetKeyword() const override;
 };
 
 /// Class as per InheritanceRecord
@@ -929,7 +929,7 @@ struct Class : InheritanceRecord
 	NODE_FUNCTIONS_FINAL 
 	
 	TreePtr<AccessSpec> GetInitialAccess() const override;    
-    string GetToken() const override;
+    string GetKeyword() const override;
 };
 
 //////////////////////////// Expressions ////////////////////////////

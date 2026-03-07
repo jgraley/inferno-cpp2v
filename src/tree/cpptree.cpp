@@ -572,7 +572,7 @@ string AccessSpec::GetRender( VN::RendererInterface *, Production surround_prod,
 	    in_class_body )
 		return ""; // elide because same as previous
 		
-	string s = GetToken();    
+	string s = GetKeyword();    
     if( in_class_body )
 		s += ":\n";	
 	
@@ -580,28 +580,28 @@ string AccessSpec::GetRender( VN::RendererInterface *, Production surround_prod,
 }
 
 
-string AccessSpec::GetToken() const
+string AccessSpec::GetKeyword() const
 {
 	throw UnimplementedToken();
 }
 
 //////////////////////////// Public //////////////////////////////
 
-string Public::GetToken() const
+string Public::GetKeyword() const
 {
 	return "public";
 }
 
 //////////////////////////// Private //////////////////////////////
 
-string Private::GetToken() const
+string Private::GetKeyword() const
 {
 	return "private";
 }
 
 //////////////////////////// Protected //////////////////////////////
 
-string Protected::GetToken() const
+string Protected::GetKeyword() const
 {
 	return "protected";
 }
@@ -1055,7 +1055,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Syntax::Production, P
 	//throw TemporarilyDisabled(); // TODO fix DeclScope render
 	
 	string s;
-	s += GetToken();
+	s += GetKeyword();
 	s += " ";
 	s += renderer->DoRender(identifier, Production::PURE_IDENTIFIER, policy); // Don't want scope resolution when declaring
 
@@ -1069,7 +1069,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Syntax::Production, P
 }   
 
 
-string Record::GetToken() const
+string Record::GetKeyword() const
 {
 	throw UnimplementedToken();
 }
@@ -1127,14 +1127,14 @@ TreePtr<AccessSpec> Union::GetInitialAccess() const
 }
 
 
-string Union::GetToken() const
+string Union::GetKeyword() const
 {
 	return "union";
 }
 
 //////////////////////////// Enum ///////////////////////////////
 
-string Enum::GetToken() const
+string Enum::GetKeyword() const
 {
 	return "enum";
 }
@@ -1167,7 +1167,7 @@ TreePtr<AccessSpec> Struct::GetInitialAccess() const
 }
 
 
-string Struct::GetToken() const
+string Struct::GetKeyword() const
 {
 	return "struct";
 }
@@ -1180,7 +1180,7 @@ TreePtr<AccessSpec> Class::GetInitialAccess() const
 }
 
 
-string Class::GetToken() const
+string Class::GetKeyword() const
 {
 	return "class";
 }

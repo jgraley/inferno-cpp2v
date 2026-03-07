@@ -308,6 +308,7 @@ semicolon_args	: expr_expression											{ $$.push_back($1); }
 declaration_nc		: bare_declaration ';'
                   
 bare_declaration	: type_specified declarator							{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }	
+//					| class_specifier									{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }
 		
 declarator			: declarator_prefix									 
 

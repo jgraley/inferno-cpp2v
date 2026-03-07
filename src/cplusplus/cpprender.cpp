@@ -630,22 +630,11 @@ string CppRender::RenderMacroDeclaration( TreePtr<MacroDeclaration> md, Syntax::
 }
 
 
-string CppRender::RenderRecordProto( TreePtr<Record> record, Syntax::Policy policy )
+string CppRender::RenderEnumHead( TreePtr<Record> record, Syntax::Policy policy )
 {
-    string s;
-    if( DynamicTreePtrCast< Class >(record) )
-        s += "class";
-    else if( DynamicTreePtrCast< Struct >(record) )
-        s += "struct";
-    else if( DynamicTreePtrCast< Union >(record) )
-        s += "union";
-    else if( DynamicTreePtrCast< Enum >(record) )
-        s += "enum";
-    else
-        throw Syntax::Unimplemented();
-
-    // Name of the record
-    s += " " + DoRender( record->identifier, Syntax::Production::PURE_IDENTIFIER, policy); // Don't want scope resolution when declaring
+    string s = "enum";
+    s += " ";
+    s += DoRender( record->identifier, Syntax::Production::PURE_IDENTIFIER, policy); // Don't want scope resolution when declaring
     
     return s;
 }
@@ -677,7 +666,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
     }
     else if( TreePtr<Enum> enum_ = DynamicTreePtrCast< Enum >(declaration) )
     {
-		string s = RenderRecordProto( enum_, policy );        
+		string s = RenderEnumHead( enum_, policy );        
 		if( !policy.force_incomplete_records )
 		{
 			s += RenderEnumBody( enum_, policy );
