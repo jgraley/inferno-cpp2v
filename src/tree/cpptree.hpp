@@ -546,8 +546,11 @@ struct Temporary : LocalVariable
 struct Base : Declaration
 {
     NODE_FUNCTIONS_FINAL
+
     TreePtr<AccessSpec> access; ///< Can inherited members be accessed?
     TreePtr<TypeIdentifier> record; ///< what do we inherit? must refer to InheritanceRecord
+
+	Production GetMyProductionTerminal() const override;    
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    
 };              
 
@@ -861,9 +864,9 @@ struct Record : TypeDeclaration,
 	virtual TreePtr<AccessSpec> GetInitialAccess() const;    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) override;     
-	virtual string RenderBody( VN::RendererInterface *renderer, Syntax::Policy policy );
     virtual string GetToken() const;
     virtual string RenderExtras(VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
+	virtual string RenderBody( VN::RendererInterface *renderer, Syntax::Policy policy );
 };
 
 /// A union, as per Record.
@@ -881,8 +884,8 @@ struct Union : Record
 struct Enum : Record 
 { 
 	NODE_FUNCTIONS_FINAL 
-	string RenderBody( VN::RendererInterface *renderer, Syntax::Policy policy ) override;	
     string GetToken() const override;
+	string RenderBody( VN::RendererInterface *renderer, Syntax::Policy policy ) override;	
 };
 
 /// A record that can inherit from other records and be inherited from. 

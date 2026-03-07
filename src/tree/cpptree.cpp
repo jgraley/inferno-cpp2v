@@ -575,14 +575,18 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 
 //////////////////////////// Base //////////////////////////////
 
+Syntax::Production Base::GetMyProductionTerminal() const
+{
+	return Production::SPACE_SEP_DECLARATION;
+}
+
+
 string Base::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	//throw TemporarilyDisabled(); // TODO fix DeclScope render
-
 	string s;
-	s += renderer->DoRender( access, Syntax::Production::TERMINAL, policy );
+	s += renderer->DoRender( access, Production::TERMINAL, policy );
 	s += " ";
-	s += renderer->DoRender( record, Syntax::Production::RESOLVER, policy );
+	s += renderer->DoRender( record, Production::RESOLVER, policy );
 	return s;
 }   
 
@@ -1018,9 +1022,20 @@ string Record::GetRender( VN::RendererInterface *renderer, Syntax::Production, P
 	s += RenderExtras(renderer, Production::SPACE_SEP_DECLARATION, policy);
     s += "\n";
 	s += RenderBody(renderer, policy);
-	s += "\n";
 	return s;
 }   
+
+
+string Record::GetToken() const
+{
+	throw UnimplementedToken();
+}
+
+
+string Record::RenderExtras(VN::RendererInterface *, Syntax::Production, Policy)
+{
+	return ""; // Nothing extra by default
+}
 
 
 string Record::RenderBody( VN::RendererInterface *renderer, Syntax::Policy policy )
@@ -1028,7 +1043,7 @@ string Record::RenderBody( VN::RendererInterface *renderer, Syntax::Policy polic
 	string s;
 
 	// Members
-	s += "\n{ // memb\n";
+	s += "{\n";
 
 	TreePtr<AccessSpec> a = GetInitialAccess();
 	ASSERT( a );
@@ -1053,24 +1068,12 @@ string Record::RenderBody( VN::RendererInterface *renderer, Syntax::Policy polic
 		s += renderer->DoRender( this_access, Syntax::Production::BARE_DECLARATION, access_policy );
 		current_access = type_index(typeid(*this_access));
 
-        s += renderer->DoRender( d, Syntax::Production::DECLARATION, policy ) + "\n";
+        s += renderer->DoRender( d, Syntax::Production::DECLARATION, policy );
     }
    
    	s += "}";
 		
 	return s;
-}
-
-
-string Record::GetToken() const
-{
-	throw UnimplementedToken();
-}
-
-
-string Record::RenderExtras(VN::RendererInterface *, Syntax::Production, Policy)
-{
-	return ""; // Nothing extra by default
 }
 
 //////////////////////////// Union ///////////////////////////////
@@ -1088,15 +1091,15 @@ string Union::GetToken() const
 
 //////////////////////////// Enum ///////////////////////////////
 
-string Enum::RenderBody( VN::RendererInterface *, Syntax::Policy  )
-{
-	throw TemporarilyDisabled(); // TODO implement enum render
-}
-
-
 string Enum::GetToken() const
 {
 	return "enum";
+}
+
+
+string Enum::RenderBody( VN::RendererInterface *, Syntax::Policy  )
+{
+	throw TemporarilyDisabled(); // TODO implement enum render
 }
 
 //////////////////////////// InheritanceRecord ///////////////////////////////
@@ -1105,7 +1108,7 @@ string InheritanceRecord::RenderExtras(VN::RendererInterface *renderer, Syntax::
 {
 	list<string> ls;
 	for( TreePtr<Base> b : bases )
-		ls.push_back( renderer->DoRender(b, Syntax::Production::BARE_DECLARATION, policy ) );    	
+		ls.push_back( renderer->DoRender(b, Production::SPACE_SEP_DECLARATION, policy ) );    	
 	
 	if( ls.empty() )
 		return "";
