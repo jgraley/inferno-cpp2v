@@ -103,7 +103,7 @@ void VNScript::ProcessVNPath( string spath )
 void VNScript::ProcessVNFile(string spath)
 {
 	if( !ReadArgs::trace_quiet )
-		fprintf(stderr, "Reading %s\n", spath.c_str()); 
+		fprintf(stderr, "Parsing %s\n", spath.c_str()); 
 		
 	Command::List script = ParseFile(spath);
 	RunScript( spath, script );
