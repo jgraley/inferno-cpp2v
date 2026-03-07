@@ -128,6 +128,16 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	         ( ToASCII(text)=="sizeof" ||
 	           ToASCII(text)=="alignof" ) )
 		return YY::VNLangParser::make_FUNC_ON_TYPE(metadata, loc);
+	else if( ascii && 
+	         ( ToASCII(text)=="class" ||
+	           ToASCII(text)=="struct" ||
+	           ToASCII(text)=="union" ) )
+		return YY::VNLangParser::make_CLASS_KEYWORD(metadata, loc);
+	else if( ascii && 
+	         ( ToASCII(text)=="public" ||
+	           ToASCII(text)=="private" ||
+	           ToASCII(text)=="protected" ) )
+		return YY::VNLangParser::make_ACCESS_KEYWORD(metadata, loc);
 
 		
 	if( designation_gnomon )

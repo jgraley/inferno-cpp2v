@@ -620,7 +620,7 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 
 Syntax::Production Base::GetMyProductionTerminal() const
 {
-	return Production::SPACE_SEP_DECLARATION;
+	return Production::TYPE_IN_DECLARATION;
 }
 
 
@@ -1062,7 +1062,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Syntax::Production, P
 	if( policy.force_incomplete_records )
 		return s;
 
-	s += RenderExtras(renderer, Production::SPACE_SEP_DECLARATION, policy);
+	s += RenderExtras(renderer, Production::TYPE_IN_DECLARATION, policy);
     s += "\n";
 	s += RenderBody(renderer, policy);
 	return s;
@@ -1151,7 +1151,7 @@ string InheritanceRecord::RenderExtras(VN::RendererInterface *renderer, Syntax::
 {
 	list<string> ls;
 	for( TreePtr<Base> b : bases )
-		ls.push_back( renderer->DoRender(b, Production::SPACE_SEP_DECLARATION, policy ) );    	
+		ls.push_back( renderer->DoRender(b, Production::TYPE_IN_DECLARATION, policy ) );    	
 	
 	if( ls.empty() )
 		return "";

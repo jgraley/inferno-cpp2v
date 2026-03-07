@@ -673,6 +673,46 @@ TreePtr<Node> VNLangActions::OnParameter( TreePtr<Node> type, TreePtr<Node> decl
 }
 
 
+TreePtr<Node> VNLangActions::OnInheritanceRecord( string keyword, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
+{
+	TreePtr<CPPTree::InheritanceRecord> node;
+	if( keyword=="class" )
+		node = MakeTreeNode<CPPTree::Class>();
+	else if( keyword=="struct" )
+		node = MakeTreeNode<CPPTree::Struct>();
+	else if( keyword=="union" )
+		node = MakeTreeNode<CPPTree::Union>();
+		
+	node->identifier = id;
+	for( TreePtr<Node> base : bases )
+		node->bases.insert( base );				
+	for( TreePtr<Node> member : members )
+		node->members.insert( member );				
+	return node;
+}
+
+
+TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> access, TreePtr<Node> type )
+{
+	auto node = MakeTreeNode<CPPTree::Base>();
+	node->access = access;
+	return node;
+}
+
+
+TreePtr<Node> VNLangActions::OnAccessSpec( string access )
+{
+	if( access=="public" )
+		return MakeTreeNode<CPPTree::Public>();
+	else if( access=="private" )
+		return MakeTreeNode<CPPTree::Private>();
+	else if( access=="protected" )
+		return MakeTreeNode<CPPTree::Protected>();
+	else
+		ASSERTFAIL();
+}
+
+
 TreePtr<Node> VNLangActions::OnIdValuePair( TreePtr<Node> key, any id_loc, TreePtr<Node> value )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::IdValuePair>>();

@@ -156,6 +156,7 @@ Fingerprinter::Fingerprinter() :
 
 Fingerprinter::NodeSetByFingerprint Fingerprinter::GetNodesInTreeByFingerprint( TreePtr<Node> context )
 {
+	ASSERT(context)("Got NULL context");
 	fingerprints.clear();
 	incoming_links_map.clear();
     int index=0;
@@ -173,7 +174,7 @@ Fingerprinter::NodeSetByFingerprint Fingerprinter::GetNodesInTreeByFingerprint( 
 
 void Fingerprinter::ProcessTPI( const TreePtrInterface *tpi, int &index )
 {	
-	auto x = (TreePtr<Node>)(*tpi);
+	auto x = (TreePtr<Node>)(*tpi);	
 	ProcessNode( x, index );
 	
 	// Gathering incoming tree ptr interface pointers here so that we don't 
@@ -253,15 +254,22 @@ void Fingerprinter::ProcessSingularItem( const TreePtrInterface *p_x_sing, int &
 
 void Fingerprinter::ProcessSequence( SequenceInterface *x_seq, int &index )
 {
-    for( const TreePtrInterface &x : *x_seq )
+    for( const TreePtrInterface &tpi : *x_seq )
     {
-        ProcessTPI( &x, index );
+		ASSERT((TreePtr<Node>)tpi)("Got NULL in a Sequence, which isn't allowed even for patterns");
+        ProcessTPI( &tpi, index );
     }
 }
 
 
 void Fingerprinter::ProcessCollection( CollectionInterface *x_col, int &index )
 {
+    for( const TreePtrInterface &tpi : *x_col )
+    {
+		ASSERT((TreePtr<Node>)tpi)("Got NULL in a Collection, which isn't allowed even for patterns");		
+		incoming_links_map[(TreePtr<Node>)tpi].insert(&tpi);
+	}
+
     TreePtr<Node> prev_x;
     int prev_start_index = 0;
     for( TreePtr<Node> x : comparer.GetTreePtrOrdering(*x_col) )
@@ -285,10 +293,7 @@ void Fingerprinter::ProcessCollection( CollectionInterface *x_col, int &index )
         }
             
         prev_x = x;
-    }
-    
-    for( const TreePtrInterface &tpi : *x_col )
-		incoming_links_map[(TreePtr<Node>)tpi].insert(&tpi);
+    }    
 }
 
 

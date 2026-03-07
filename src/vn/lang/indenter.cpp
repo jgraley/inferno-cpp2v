@@ -4,7 +4,6 @@ using namespace VN;
 
 void Indenter::AddLinesFromString( string s )
 {	
-	FTRACE(s)("\n");
 	string::size_type next_start = 0;
 	string::size_type found_pos;
     while ((found_pos = s.find("\n", next_start)) != string::npos)

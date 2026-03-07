@@ -71,11 +71,31 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 		commands.push_back("‡"); // TODO this will be the general attribute syntax, presumably with VN braces and accepting textual attributes
 
 	for( TreePtr<Node> node : coupling_names_uniqifier.GetNodesInDepthFirstPostOrder() )	
+	{
+		// Use the incoming links to determine whether we should render as a type or not.
+		set<const TreePtrInterface *> ils = incoming_links_map.at(node);		
+		set<TreePtr<Node>> arches;		
+		for( const TreePtrInterface *il : ils )
+			arches.insert( il->MakeValueArchetype() );
+		bool typeish = false;
+		for( TreePtr<Node> ail : arches )
+		{
+			// Favouring types, because sometmess we just get Node whan it could be anything
+			// eg engine, stuff terminus. From a syntax POV, we treat Base like a Type
+			if( dynamic_pointer_cast<CPPTree::Type>(ail) ||
+				dynamic_pointer_cast<CPPTree::Base>(ail) )
+				typeish = true;
+		}
+		Syntax::Production prod;
+		if( typeish )
+			prod = Syntax::Production::VN_DESIGNATE_TYPE;
+		else
+			prod = Syntax::Production::VN_DESIGNATE;
+			
 		commands.push_back( unique_coupling_names.at(node) + 
 							" ⪮ " + 
-							AccomodateInit( node, 
-							                Syntax::Production::VN_DESIGNATE, 
-							                designation_policy ) );
+							AccomodateInit( node, prod, designation_policy ) );
+	}
 
 	ASSERT( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() || !pattern->GetReplacePattern() )
 	   	  (pattern->GetSearchComparePattern())
@@ -333,7 +353,7 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
 string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {   
     if( !node )
-		return RenderNullPointer();	
+		return RenderNullPointer(surround_prod);	
 			
 	const Agent *agent = Agent::TryAsAgentConst(node);
 	if( !agent )
@@ -365,12 +385,18 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 }
 
 
-string Render::RenderNullPointer()
+string Render::RenderNullPointer(Syntax::Production surround_prod)
 {	
+	string s;
 	// Assume NULL means we're in a pattern, and it represents a wildcard
-	// Note same symbol as Stuff nodes etc but this is a terminal not a prefix
-	// so a risk of ambiguity here.
-	return "☆";
+	if( surround_prod==Syntax::Production::TYPE_IN_NEW ||
+		surround_prod==Syntax::Production::SPACE_SEP_TYPE ||
+		surround_prod==Syntax::Production::PRIMARY_TYPE ||
+	    surround_prod==Syntax::Production::TYPE_IN_DECLARATION ||
+	    surround_prod==Syntax::Production::VN_DESIGNATE_TYPE )
+		s += "⍑";
+	
+	return s + "☆";
 }
 
 

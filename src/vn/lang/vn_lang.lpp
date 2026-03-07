@@ -76,6 +76,7 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
  〕				{ return YY::VNLangParser::make_CLOSE_MAP_CALL(location()); };
 ‡				{ return YY::VNLangParser::make_ATTRIBUTE(location()); };
 ⨤				{ return YY::VNLangParser::make_CONSTRUCTOR(location()); };
+⍑ 				{ return YY::VNLangParser::make_TYPE_INDICATOR(location()); };
 
 // Multi-character before single-character
 ==|!=			{ return YY::VNLangParser::make_C_EQUALITY_OP(str(), location()); }

@@ -23,7 +23,8 @@ public:
 		BOOT,
 		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
 		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())		
-		VN_DESIGNATE, // defining names using ⪮
+		VN_DESIGNATE, // Designating non-types using ⪮
+		VN_DESIGNATE_TYPE, // Designating types using ⪮
 		VN_DISJUNCTION,
 		VN_CONJUNCTION,
 		TOP_VN,
@@ -48,7 +49,7 @@ public:
 		BARE_STATEMENT = 40, // Statement with no semicolon
 		BARE_DECLARATION, // Actual declaration with no semicolon, eg int i	
 		SPACE_SEP_STATEMENT, // eg throw <here>;
-		SPACE_SEP_DECLARATION, // the type in typedef <here>;
+		TYPE_IN_DECLARATION, // the type in typedef <here>;
 		SPACE_SEP_PRE_PROC,
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
 		TOP_STMT_DECL, // Highest statement precedence

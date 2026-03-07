@@ -102,6 +102,7 @@
 	CLOSE_MAP_CALL							"〕"
 	ATTRIBUTE								"‡"
 	CONSTRUCTOR								"⨤"
+	TYPE_INDICATOR							"⍑"	
 	<string>	COMMA						_("comma")
 	<string>	C_ASSIGN					"="
 	<string>	C_COMPOUND_ASSIGN			_("C compound_primary assignment operator")
@@ -124,7 +125,7 @@
 	<bool>		BOOL_LITERAL				_("boolean literal")
 	<string>	ASCII_FORMAT 				_("ASCII format string")
 	<string>	TYPENAME					_("type name")
-	<string>	TYPE_SPECIFIER			_("simple type specifier")
+	<string>	TYPE_SPECIFIER				_("simple type specifier")
 	<YY::TokenMetadata> TRANSFORM_NAME_TYPE		_("type transformation")
 	<YY::TokenMetadata> TRANSFORM_NAME_NORMAL	_("normal transformation")
 	<YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
@@ -147,6 +148,8 @@
 	<YY::TokenMetadata> CASE_KEYWORD			_("case")
 	<YY::TokenMetadata> DEFAULT_KEYWORD			_("default")
 	<YY::TokenMetadata> FUNC_ON_TYPE			_("function acting on a type")
+	<YY::TokenMetadata> CLASS_KEYWORD			_("class keyword")
+	<YY::TokenMetadata> ACCESS_KEYWORD			_("access keyword")
 	stmt_low 
 	stmt_high
 	
@@ -157,10 +160,10 @@
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_disjunction type_conjunction type_vn_prim type_with_ab
 %type <TreePtr<Node>> 				unified unified_prefix
 %type <TreePtr<Node>> 				bare_statement statement_nc statement stmt_disjunction stmt_conjunction stmt_primary norm_expr_or_stmt 
-%type <TreePtr<Node>>				declaration_nc bare_declaration cons_or_des_type 
+%type <TreePtr<Node>>				declaration bare_declaration cons_or_des_type 
 %type <TreePtr<Node>> 				compound_primary compound_prefix parameter type_id 
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
-//%type <TreePtr<Node>> 				ab_declarator ab_declarator_prefix ab_declarator_postfix
+%type <TreePtr<Node>> 				class_spec base_spec member access_spec access_spec_nw
 %type <wstring> 					vn_name
 %type <string>						transform_norm_part transform_type_part
 %type <YY::TokenMetadata> 			resolved_name resolved_type_name node_namespace
@@ -174,6 +177,7 @@
 %type <shared_ptr<VN::Gnomon>>		start_builtin_scope start_prerestrict_scope start_id_by_name_scope start_build_id_scope
 %type <list<TreePtr<Node>>>			statements 
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
+%type <list<TreePtr<Node>>>			members bases 
 %type <const AvailableNodeData::Block *> builtin_name_part prerestrict_name_part id_by_name_part build_id_part
 %type <const AvailableNodeData::Block *> type_builtin_name_part type_prerestrict_name_part type_id_by_name_part type_build_id_part
 %type <multiset<string>>			type_specifier_seq
@@ -231,6 +235,7 @@ item		: item VN_SUB_SEP unified				{ $$ = $1; $$.nodes.push_back($3); $$.loc = @
 
 unified		: normal
 			| type_id
+			| access_spec_nw // TODO access specs to be merged into normal column
 
 //////////////////////////////// NORMALS ////////////////////////////////////         
 // Normal is basically anything other than a type
@@ -246,7 +251,7 @@ norm_conjunction 	: norm_expr_or_stmt
 norm_expr_or_stmt	: expr_expression
 					| statement_nc // statements not including Compound, which is expressional from this POV
 					| compound_prefix // Branch off here for compound_primary to avoid conflicts with prefix = (used for inits)
-					| declaration_nc			
+					| declaration			
 
 //////////////////////////////// STATEMENTS ////////////////////////////////////         
 
@@ -304,11 +309,10 @@ semicolon_args	: expr_expression											{ $$.push_back($1); }
 
 //////////////////////////////// DECLARATIONS /////////////////////////////////////         
         
-// _nc here means "not a compound"						
-declaration_nc		: bare_declaration ';'
+declaration			: bare_declaration ';'
                   
 bare_declaration	: type_specified declarator							{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }	
-//					| class_specifier									{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }
+					| class_spec		
 		
 declarator			: declarator_prefix									 
 
@@ -326,6 +330,33 @@ declarator_postfix	: declarator_primary
                 
 declarator_primary	: norm_primary										{ $$ = make_shared<Declarators::Concrete>($1); }  
                          
+                         
+                         
+                         
+                         
+class_spec		: CLASS_KEYWORD type_specified '{' members '}'				{ $$ = vn->OnInheritanceRecord( $1.as_ascii, $2, {}, $4 ); }
+				| CLASS_KEYWORD type_specified ':' bases '{' members '}'	{ $$ = vn->OnInheritanceRecord( $1.as_ascii, $2, $4, $6 ); }
+                                                  
+bases			: base_spec                                                 { $$.push_back($1); } 
+				| bases COMMA base_spec										{ $$ = $1; $$.push_back($3); } 
+                                       
+base_spec		: type_specified											{ $$ = vn->OnBase(nullptr, $1); } // TODO should be default access for the record type, not nullptr which means wildcard
+				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
+				| vn_wildcard												{ $$ = $1; }
+                                                      
+// Collate members from the back so that each ACCESS_KEYWORD applies to all members seen so far                                                                                    
+members			: member       		                     				    { $$.push_back($1); } 
+				| member members 											{ $$ = $2; $$.push_front($1); } 
+				| access_spec ':' members									{ $$ = $3; } // TODO respect the access keyword                                                    
+                                                                          
+member			: declaration
+				| vn_wildcard ';' // TODO support for VN stuff around declarations
+                          
+access_spec		: access_spec_nw	                          				
+				| ANY 														{ $$ = nullptr; }
+                          
+access_spec_nw	: ACCESS_KEYWORD	                          				{ $$ = vn->OnAccessSpec($1.as_ascii); }
+                                                  
 parameterisation	: '(' parameters ')'							{ $$ = $2; }
 					| '(' ')'										{ $$.clear(); }							
 
@@ -430,7 +461,7 @@ expr_primary: norm_primary
 			| NORM_TERM_KEYWORD									{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
 			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayLiteral({}); } // ={...} dismbiguates against compound_primary
 			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayLiteral($3); }               
-			| FUNC_ON_TYPE '(' type_id ')'            					{ $$ = vn->OnFuncOnType($1.as_ascii, @1, $3, @3); }			
+			| FUNC_ON_TYPE '(' type_id ')'       				{ $$ = vn->OnFuncOnType($1.as_ascii, @1, $3, @3); }			
 
 norm_primary: vn_wildcard
 			| builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, $2); }
@@ -496,7 +527,8 @@ type_vn_prim: type_builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1,
 			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| type_build_id_part OPEN_VN VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			| transform_type_part OPEN_VN unified_prefix CLOSE_VN 				{ $$ = vn->OnTransform($1, @1, $3, @3); }
-
+			| TYPE_INDICATOR STAR												{ $$ = vn->OnStar(nullptr); }
+			
 type_builtin_name_part : start_builtin_scope resolved_type_name				{ $$ = $2.as_andata_block; (void)$1; }
 type_prerestrict_name_part : start_prerestrict_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
 type_id_by_name_part 	: start_id_by_name_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }

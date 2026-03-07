@@ -595,8 +595,7 @@ struct SpecificLabelIdentifier : LabelIdentifier,
     NODE_FUNCTIONS_FINAL
     
 	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy);
-    
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy);    
 };
 
 /// Declaration of a label for switch, goto etc.

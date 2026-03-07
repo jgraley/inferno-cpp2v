@@ -98,6 +98,9 @@ public:
 	TreePtr<Node> OnConstructor( list<TreePtr<Node>> params );	
 	TreePtr<Node> OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
 	TreePtr<Node> OnParameter( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
+	TreePtr<Node> OnInheritanceRecord( string keyword, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	
+	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type );	
+	TreePtr<Node> OnAccessSpec( string access );		
 	
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );
 	TreePtr<Node> OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );
