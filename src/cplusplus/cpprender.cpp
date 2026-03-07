@@ -118,8 +118,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return string();  
     else if( auto program = TreePtr<Program>::DynamicCast(node) )
         return RenderProgram( program, surround_prod, policy );
-    else if( auto access = TreePtr<AccessSpec>::DynamicCast(node) ) // Identifier can be a kind of type or expression
-        return RenderAccessSpec( access, surround_prod, policy );
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
         return RenderLiteral( literal, surround_prod );
     else if( auto call = TreePtr<Call>::DynamicCast(node) )
@@ -433,31 +431,6 @@ TreePtr<SeqArgumentation> CppRender::MakeSeqArgumentation( TreePtr<MapArgumentat
 	sa->arguments = SortMapById( map_argumentation->arguments, key_sequence ); // TODO could absorb
 	return sa;
 }											   
-
-
-string CppRender::RenderAccessSpec( TreePtr<AccessSpec> access, Syntax::Production surround_prod, Syntax::Policy policy ) try
-{
-	if( type_index(typeid(*access)) == policy.current_access && 
-	    surround_prod == Syntax::Production::BARE_DECLARATION )
-		return "";
-		
-	(void)surround_prod;
-	string s;
-    if( DynamicTreePtrCast<Public>( access ) )
-        s = "public";
-    else if( DynamicTreePtrCast<Private>( access ) )
-        s = "private";
-    else if( DynamicTreePtrCast<Protected>( access ) )
-        s = "protected";
-    else
-        s = ERROR_UNKNOWN("access spec");
-    
-    if( surround_prod == Syntax::Production::BARE_DECLARATION )
-		s += ":\n";
-	
-	return s;
-}
-DEFAULT_CATCH_CLAUSE
 
 
 string CppRender::RenderStorage( TreePtr<Instance> st, Syntax::Policy policy ) try

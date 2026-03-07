@@ -38,7 +38,6 @@ private:
                                                Sequence<CPPTree::Declaration> key_sequence );  
 	TreePtr<CPPTree::SeqArgumentation> MakeSeqArgumentation( TreePtr<CPPTree::MapArgumentation> map_argumentation,
 										 		             Sequence<CPPTree::Declaration> key_sequence );
-    string RenderAccessSpec( TreePtr<CPPTree::AccessSpec> access, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderStorage( TreePtr<CPPTree::Instance> st, Syntax::Policy policy ); // No actual storage node
     void ExtractInits( Sequence<CPPTree::Statement> &body, 
                        Sequence<CPPTree::Statement> &inits, 
