@@ -563,6 +563,49 @@ Syntax::Production AccessSpec::GetMyProductionTerminal() const
 	return Production::TERMINAL; 
 }
 
+
+string AccessSpec::GetRender( VN::RendererInterface *, Production surround_prod, Policy policy )
+{
+	bool in_class_body = (surround_prod == Syntax::Production::BARE_DECLARATION);
+	
+	if( type_index(typeid(*this)) == policy.current_access && 
+	    in_class_body )
+		return ""; // elide because same as previous
+		
+	string s = GetToken();    
+    if( in_class_body )
+		s += ":\n";	
+	
+	return s;
+}
+
+
+string AccessSpec::GetToken() const
+{
+	throw UnimplementedToken();
+}
+
+//////////////////////////// Public //////////////////////////////
+
+string Public::GetToken() const
+{
+	return "public";
+}
+
+//////////////////////////// Private //////////////////////////////
+
+string Private::GetToken() const
+{
+	return "private";
+}
+
+//////////////////////////// Protected //////////////////////////////
+
+string Protected::GetToken() const
+{
+	return "protected";
+}
+
 //////////////////////////// Instance //////////////////////////////
 
 Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Policy policy) const

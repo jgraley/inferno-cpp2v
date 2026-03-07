@@ -142,6 +142,7 @@ public:
 	
 	struct Refusal : Exception {};
 	struct Unimplemented : Refusal {};
+    struct UnimplementedToken : Unimplemented {};
 	struct RefusedByPolicy : Refusal {};
 	struct RefuseDueLocal : Refusal {};
 	struct TemporarilyDisabled : Refusal {};

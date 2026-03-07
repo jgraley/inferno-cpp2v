@@ -427,16 +427,33 @@ struct AccessSpec : Property
 	NODE_FUNCTIONS 
 
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
+    virtual string GetToken() const;	
 };
 
 /// Property for public access
-struct Public : AccessSpec { NODE_FUNCTIONS_FINAL };
+struct Public : AccessSpec 
+{ 
+	NODE_FUNCTIONS_FINAL 
+	
+    string GetToken() const override;		
+};
 
 /// Property for private access
-struct Private : AccessSpec { NODE_FUNCTIONS_FINAL };
+struct Private : AccessSpec  
+{ 
+	NODE_FUNCTIONS_FINAL 
+	
+    string GetToken() const override;		
+};
 
 /// Property for protected access
-struct Protected : AccessSpec { NODE_FUNCTIONS_FINAL };
+struct Protected : AccessSpec  
+{ 
+	NODE_FUNCTIONS_FINAL 
+	
+    string GetToken() const override;		
+};
 
 /// Property that indicates whether some Instance is constant.
 struct Constancy : Property { NODE_FUNCTIONS };
@@ -857,9 +874,7 @@ struct Record : TypeDeclaration,
                 DeclScope // Member declarations go in here
 {
     NODE_FUNCTIONS
-    
-    struct UnimplementedToken : Unimplemented {};
-    
+       
     virtual string GetColour() const { return TypeDeclaration::GetColour(); } // TypeDeclaration wins
 	virtual TreePtr<AccessSpec> GetInitialAccess() const;    
 	Production GetMyProductionTerminal() const override;	
