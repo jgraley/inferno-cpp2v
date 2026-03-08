@@ -627,9 +627,9 @@ Syntax::Production Base::GetMyProductionTerminal() const
 string Base::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	string s;
-	s += renderer->DoRender( access, Production::TERMINAL, policy );
+	s += renderer->DoRender( access, Production::PRIMARY_EXPR, policy );
 	s += " ";
-	s += renderer->DoRender( record, Production::RESOLVER, policy );
+	s += renderer->DoRender( record, Production::SPACE_SEP_TYPE, policy );
 	return s;
 }   
 
@@ -670,7 +670,7 @@ Syntax::Production LabelDeclaration::GetMyProductionTerminal() const
 
 string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
-	return renderer->DoRender( identifier, Syntax::Production::PURE_IDENTIFIER) + ":";	
+	return renderer->DoRender( identifier, Syntax::Production::PURE_IDENTIFIER) + ":";	// TODO try PRIMARY_EXPR like with access specs which also end in :
 }
 
 //////////////////////////// Callable //////////////////////////////

@@ -145,7 +145,11 @@ Agent *PatternLink::GetChildAgent() const
 {
     ASSERT( p_tpi )
           ("GetChildAgent() called on uninitialised (nullptr) link\n");
-    return Agent::AsAgent((TreePtr<Node>)*p_tpi);    
+    Agent *agent = Agent::TryAsAgent((TreePtr<Node>)*p_tpi);    
+    ASSERT( agent )
+          ("Failed to get an agent from a plink\n")
+          ("Note: all nodes in a pattern must be agents (use StandardAgent for X tree nodes)" );
+	return agent;
 }
 
 

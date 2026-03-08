@@ -677,11 +677,11 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( string keyword, TreePtr<Node> 
 {
 	TreePtr<CPPTree::InheritanceRecord> node;
 	if( keyword=="class" )
-		node = MakeTreeNode<CPPTree::Class>();
+		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Class>>();
 	else if( keyword=="struct" )
-		node = MakeTreeNode<CPPTree::Struct>();
+		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Struct>>();
 	else if( keyword=="union" )
-		node = MakeTreeNode<CPPTree::Union>();
+		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Union>>();
 		
 	node->identifier = id;
 	for( TreePtr<Node> base : bases )
@@ -694,20 +694,26 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( string keyword, TreePtr<Node> 
 
 TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> access, TreePtr<Node> type )
 {
-	auto node = MakeTreeNode<CPPTree::Base>();
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Base>>();	
 	node->access = access;
+	node->record = type;
 	return node;
 }
 
+TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> type )
+{
+	// TODO should be default access for the record type, not hard-coded
+	return OnBase( MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>(), type );
+}
 
 TreePtr<Node> VNLangActions::OnAccessSpec( string access )
 {
 	if( access=="public" )
-		return MakeTreeNode<CPPTree::Public>();
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
 	else if( access=="private" )
-		return MakeTreeNode<CPPTree::Private>();
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Private>>();
 	else if( access=="protected" )
-		return MakeTreeNode<CPPTree::Protected>();
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Protected>>();
 	else
 		ASSERTFAIL();
 }

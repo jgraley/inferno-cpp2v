@@ -387,15 +387,16 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 
 string Render::RenderNullPointer(Syntax::Production surround_prod)
 {	
-	string s;
 	// Assume NULL means we're in a pattern, and it represents a wildcard
+	string s;
+	
 	if( surround_prod==Syntax::Production::TYPE_IN_NEW ||
 		surround_prod==Syntax::Production::SPACE_SEP_TYPE ||
 		surround_prod==Syntax::Production::PRIMARY_TYPE ||
 	    surround_prod==Syntax::Production::TYPE_IN_DECLARATION ||
 	    surround_prod==Syntax::Production::VN_DESIGNATE_TYPE )
 		s += "⍑";
-	
+		
 	return s + "☆";
 }
 

@@ -155,21 +155,23 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
     // Our algorithm will modify the source container, so make a copy of it
     Sequence<Declaration> unsorted;
     for( const TreePtrInterface &a : c )
+    {
+		ASSERT(a);
         unsorted.push_back( a );
+	}
 
      // Sort using SimpleCompare first: this should improve reproducibility
     Sequence<Declaration> pre_sorted = PreSortDecls( unsorted );
 
-    Sequence<Declaration> sorted;
-
-	// Move pre-processor declarations into the sorted list first
-	ExtractDeclsToBack<LocalInclude>(sorted, pre_sorted);
-	ExtractDeclsToBack<SystemInclude>(sorted, pre_sorted);
-	ExtractDeclsToBack<PreProcDecl>(sorted, pre_sorted);
-
     // Uncomment one of these to stress the sorter
     //pre_sorted = ReverseDecls( pre_sorted );
     //pre_sorted = JumbleDecls( pre_sorted );
+
+	// Move pre-processor declarations into the sorted list first
+    Sequence<Declaration> sorted;
+	ExtractDeclsToBack<LocalInclude>(sorted, pre_sorted);
+	ExtractDeclsToBack<SystemInclude>(sorted, pre_sorted);
+	ExtractDeclsToBack<PreProcDecl>(sorted, pre_sorted);
 
     // Keep searching our local container of decls (cc) for decls that do not depend
     // on anything else in the container. Such a decl may be safely rendered before the
@@ -193,6 +195,7 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
             if( !a_has_deps )
             {
                 TRACE(*a)(" ");
+                ASSERT(a);
                 sorted.push_back(a);
                 pre_sorted.erase(a);
                 found = true;
@@ -227,16 +230,7 @@ Sequence<Declaration> PreSortDecls( Sequence<Declaration> c )
     // Extract the decls from the set, now in SimpleCompare order
     Sequence<Declaration> s;
     for( TreePtr<Node> e : sco )
-    {
-        auto d = TreePtr<Declaration>::DynamicCast(e);
-        s.push_back(d);
-        //if( auto inst = TreePtr<Instance>::DynamicCast(d) )
-        //{
-        //    auto sid = TreePtr<SpecificIdentifier>::DynamicCast(inst->identifier);
-        //    string ustr = unique->at(sid);
-        //    FTRACEC(inst)("(")(ustr)(", ")(inst->type)(", ")(inst->initialiser)(")\n");
-        //}
-    }
+        s.push_back(e);
     
     return s;
 }

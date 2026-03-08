@@ -130,14 +130,14 @@
 	<YY::TokenMetadata> TRANSFORM_NAME_NORMAL	_("normal transformation")
 	<YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
 	<YY::TokenMetadata> UNICODE_NAME 			_("Unicode name")
-	<YY::TokenMetadata>	DESIGNATED_NORMAL		_("designated name")
+	<YY::TokenMetadata>	DESIGNATED_NORMAL		_("designated non-type name")
 	<YY::TokenMetadata>	DESIGNATED_TYPE			_("designated type name")
-	<YY::TokenMetadata>	RESOLVED_NORMAL			_("resolved node name")
+	<YY::TokenMetadata>	RESOLVED_NORMAL			_("resolved non-type node name")
 	<YY::TokenMetadata>	RESOLVED_TYPE			_("resolved type node name")
 	<YY::TokenMetadata>	NODE_NAMESPACE			_("scope resolving name")
 	<YY::TokenMetadata>	DECLARATION_OF			_("DeclarationOf")
 	<YY::TokenMetadata>	TYPE_OF					_("TypeOf")
-	<YY::TokenMetadata> NORM_TERM_KEYWORD		_("terminal keyword")
+	<YY::TokenMetadata> NORM_TERM_KEYWORD		_("non-type terminal keyword")
 	<YY::TokenMetadata> PRIMITIVE_STMT_KEYWORD  _("statement keyword") // eg break;
 	<YY::TokenMetadata> SPACE_SEP_STMT_KEYWORD 	_("space-separated statement keyword") // eg return 12;
 	<YY::TokenMetadata> ARGS_BODY_STMT_KEYWORD 	_("args-and-body statement keyword") // eg switch(args) body
@@ -340,7 +340,7 @@ class_spec		: CLASS_KEYWORD type_specified '{' members '}'				{ $$ = vn->OnInher
 bases			: base_spec                                                 { $$.push_back($1); } 
 				| bases COMMA base_spec										{ $$ = $1; $$.push_back($3); } 
                                        
-base_spec		: type_specified											{ $$ = vn->OnBase(nullptr, $1); } // TODO should be default access for the record type, not nullptr which means wildcard
+base_spec		: type_specified											{ $$ = vn->OnBase($1); } 
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
 				| vn_wildcard												{ $$ = $1; }
                                                       
@@ -350,7 +350,7 @@ members			: member       		                     				    { $$.push_back($1); }
 				| access_spec ':' members									{ $$ = $3; } // TODO respect the access keyword                                                    
                                                                           
 member			: declaration
-				| vn_wildcard ';' // TODO support for VN stuff around declarations
+				| expr_expression ';' // TODO merge declarations and statements so can share the VN stuff
                           
 access_spec		: access_spec_nw	                          				
 				| ANY 														{ $$ = nullptr; }

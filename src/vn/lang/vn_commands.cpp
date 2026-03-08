@@ -97,8 +97,6 @@ PatternCommand::PatternCommand( TreePtr<Node> pattern_, any loc_ ) :
 {
 	// pattern can be NULL (i.e. singular wildcard)
 }
-//	‽⦅CPPTree::Compound⦆¬‽⦅CPPTree::Compound⦆⩨⦅¬( ☆: )⦆my_labelidentifier
-//                                                ~~
 
 
 TreePtr<Node> PatternCommand::DecayToPattern( TreePtr<Node> node, VNLangActions *vn )

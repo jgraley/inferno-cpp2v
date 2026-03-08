@@ -110,7 +110,9 @@ vector<bool> AutolocatingAgent::AreChildrenFixedType() const
 		TreePtr<Node> child_node = child_link.GetPatternTreePtr();
 		ASSERT( child_node );
 		Agent *child_agent = Agent::TryAsAgent(child_node);
-		ASSERT( child_agent )(child_node)(" should be an agent");
+		ASSERT( child_agent )
+		      (child_node)(" should be an agent\n")
+		      ("Note: all nodes in a pattern must be agents (use StandardAgent for X tree nodes)" );
 		vb.push_back( child_agent->IsSelfOrChildrenFixedType() );
 	}
 	return vb;
