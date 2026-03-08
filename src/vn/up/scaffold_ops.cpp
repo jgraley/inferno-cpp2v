@@ -27,8 +27,8 @@ TreeZone ScaffoldOps::FreeZoneIntoExtraTree( FreeZone free_zone, const TreeZone 
 		// This is a requirement for placing a zone (generally including terminii) into its own extra tree. Alternatively
 		// we could allow NULL TreePtrs/placeholders to exist in tree and define semantics for them.
 		TreePtr<Node> term_child_node = tree_zone_for_plug_types.GetTerminusXLink(i).GetChildTreePtr();
-		ASSERT(term_child_node);
-		FreeZone plug = CreateScaffoldToSpec(term_child_node, 0); // finally no terminii!!!
+		ASSERT(term_child_node);				  
+		FreeZone plug = CreateScaffoldToSpec(term_child_node, 0); 
 		XLink resulting_xlink;
         terminus_it = free_zone.MergeTerminus( terminus_it, make_unique<FreeZone>(plug), &resulting_xlink );
         terminii.push_back(resulting_xlink);

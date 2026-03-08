@@ -142,7 +142,8 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> free_child ) const
 TreePtr<Node> Mutator::ExchangeContainer( ContainerInterface *free_child_container, 
                                           list<Mutator> &free_zone_terminii )
 {
-	ASSERT( mode==Mode::Container );
+	ASSERT( mode==Mode::Container )
+	      ("Can't put a container into a singular terminus"); // other way around is OK though; see ExchangeChild()
 	TreePtr<Node> old_child = (TreePtr<Node>)*container_iterator;
 	
 	// We don't need the placeholder any more
@@ -214,6 +215,12 @@ TreePtr<Node> Mutator::GetParentNode() const
 bool Mutator::IsAtRoot() const
 {
 	return mode == Mode::Root;
+}
+
+
+bool Mutator::CanAcceptContainer() const
+{
+	return mode == Mode::Container;
 }
 
 

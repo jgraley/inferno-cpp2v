@@ -163,7 +163,8 @@ FreeZone::TerminusIterator FreeZone::MergeTerminus( TerminusIterator it_t,
 	{
 		// Child is a subcontainer-rooted free zone. Populate, but don't provide 
 		// an XLink because it would be ambiguous.
-		// TODO separate function for this case.
+		ASSERT( it_t->CanAcceptContainer() )
+			  ("Attempt to merge a container-based free zone into a singular or root terminus");
 		it_t->ExchangeContainer( child_base_container, child_zone->terminii );
 	}
 	else

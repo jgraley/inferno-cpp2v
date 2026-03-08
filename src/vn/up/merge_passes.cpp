@@ -33,6 +33,10 @@ void FreeZoneMergeImpl::Run( shared_ptr<Patch> &layout, PolicyFunction policy, R
 				FreeZone *child_free_zone = child_free_patch->GetZone();                    
 				if( policy(free_zone, child_free_zone) )
 				{
+					if( child_free_zone->TryGetContainerBase() )
+						ASSERT( it_t->CanAcceptContainer() )
+						      ("Attempt to merge a container-based free zone into a singular or root terminus\n")
+						      ("Note: container could be a Star (★) coupled to a place where only one child node is allowed");
 					XLink resulting_xlink;
 					it_t = free_zone->MergeTerminus( it_t, make_unique<FreeZone>(*child_free_zone), &resulting_xlink );  
 					TRACE("Mutator OK\n");

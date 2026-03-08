@@ -67,6 +67,7 @@ public:
 
     TreePtr<Node> GetParentNode() const;
     bool IsAtRoot() const;        
+    bool CanAcceptContainer() const;
     XLink GetXLink() const; 
     const TreePtrInterface *GetTreePtrInterface() const;
     TreePtr<Node> GetChildTreePtr() const;
