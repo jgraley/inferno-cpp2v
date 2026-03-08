@@ -168,6 +168,12 @@ Graphable::NodeBlock StarAgent::GetGraphBlockInfo() const
 }
  
 
+bool StarAgent::IsSubContainer() const 
+{
+	return true; 
+}
+
+
 unique_ptr<BooleanResult> StarAgent::IsSubcontainerInCategoryOperator::Evaluate( const EvalKit &kit,
                                                                                  list<unique_ptr<SymbolicResult>> &&op_results ) const
 {

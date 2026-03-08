@@ -702,6 +702,12 @@ TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> access, TreePtr<Node> type )
 
 TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> type )
 {
+	// if Star was given without an access, make it apply to the whole base. 
+	// (this is the only legal way to interpret Star here)
+	Agent *agent = Agent::AsAgent(type);
+	if( agent->IsSubContainer() )
+		return type;
+		
 	// TODO should be default access for the record type, not hard-coded
 	return OnBase( MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>(), type );
 }
@@ -966,9 +972,11 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // and ({}) is StatementExpression so {} should be available wherever () is
 
 // Note: ▲⯈ stays at low prec so we can have ꩜⩨▲ uninterupted. Luckily both () and {} are lower and can be used directly, 
-// each booting the parser so we can put a wide range of stuff in them.
+// each booting the parser so we can put a wide range of stuff in them. If we keep ∧ and ∨ at low precidence, the remaining 
+// VN ops are all unops. This means the primary only appears once. Thus, we can safely duplicate the rules of them for any 
+// "awkward" primaries (like compounds). 
 
-// Review the virt-specificers and const on the node methods for rendering
+// Review the virt-specifiers and const on the node methods for rendering
 
 // MAYBE Move conj and disj back to original precidences. The lowered precs require two syntaxes, statement and expression. So we can
 // get confused by eg { return x; ∧ goto y; } (=new form) versus { (return x;) ∧ (goto y;); } - or maybe we use the former and it's not confusing...
@@ -990,10 +998,8 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Types: see https://alx71hub.github.io/hcb/#decl-specifier-seq
 // Keep the () on types for disambiguation unless you can prove away or just rely on designations TODO.
-// Use your type/type_disjunction as the basis for a type_id with anonymous declarator.
-// type-id which uses anonymous-declarator shall be used for designations so we retain ⪮ syntax and they resemble "using".
-// Use type_id instead of type_spec in decl_spec_seq: type_id will be a node while the others are just modifiers
-// to the decl (not the type) so do eg 
-// decl_specification = decl-spec-seq(opt) type_id decl-spec-seq(opt) 
-// producing type node and multiset of decl-spec strings and keep them separate
 
+// Use the typieish symbol ⍑ on Star ★, and try parsing ★⦅x⦆ correctly based on x
+// Blend declarations in with statements. This means unifying the handling of x: syntax, so access specs and labels need unifying
+// Clean up bases and access specs, fix use of Public for Default.
+// Remember the current way of parsign access specs with : permits over-writing all the decls in the current list with the new access

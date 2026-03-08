@@ -104,6 +104,7 @@ public:
     virtual TreePtr<Node> GetArchetypeNode() const = 0;
     virtual shared_ptr< TreePtrInterface > GetArchetypeTreePtr() const = 0;
     virtual string GetPlanAsString() const = 0;
+    virtual bool IsSubContainer() const = 0;
 };
 
 };

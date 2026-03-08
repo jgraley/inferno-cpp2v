@@ -534,6 +534,12 @@ string AgentCommon::GetPlanAsString() const
 }
 
 
+bool AgentCommon::IsSubContainer() const 
+{
+	return false; // in most cases, not.
+}
+
+
 string AgentCommon::GetTrace() const
 {
     return Traceable::GetName() + GetSerialString();

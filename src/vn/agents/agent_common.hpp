@@ -72,7 +72,8 @@ public:
 
 
     virtual string GetGraphId() const;
-    virtual string GetPlanAsString() const override;
+    string GetPlanAsString() const override;
+    bool IsSubContainer() const override;
     
     virtual string GetTrace() const;
 

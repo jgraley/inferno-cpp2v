@@ -59,6 +59,8 @@ public:
     {
 		return "many"; 
 	} 
+    bool IsSubContainer() const override;
+	
 private:
     const TreePtrInterface *GetRestriction() const
     {
