@@ -1000,6 +1000,12 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Keep the () on types for disambiguation unless you can prove away or just rely on designations TODO.
 
 // Use the typieish symbol ⍑ on Star ★, and try parsing ★⦅x⦆ correctly based on x
-// Blend declarations in with statements. This means unifying the handling of x: syntax, so access specs and labels need unifying
+
+// Blend declarations in with statements. This means unifying the handling of x: syntax, so access specs and labels need unifying.
+// Add a local node for a prefixed statement/member, and use prefix style for both statements and members. Reduce the local
+// nodes in the actions, applying the effect as required:
+// - Label gets added as another member
+// - Access is applied to subsequent members
+// Before the : we probably want expr_prefix to get some VNs. For legacy's sake, support x :; using eg Nop and elide in the action. 
+
 // Clean up bases and access specs, fix use of Public for Default.
-// Remember the current way of parsign access specs with : permits over-writing all the decls in the current list with the new access

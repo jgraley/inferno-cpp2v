@@ -330,10 +330,6 @@ declarator_postfix	: declarator_primary
                 
 declarator_primary	: norm_primary										{ $$ = make_shared<Declarators::Concrete>($1); }  
                          
-                         
-                         
-                         
-                         
 class_spec		: CLASS_KEYWORD type_specified '{' members '}'				{ $$ = vn->OnInheritanceRecord( $1.as_ascii, $2, {}, $4 ); }
 				| CLASS_KEYWORD type_specified ':' bases '{' members '}'	{ $$ = vn->OnInheritanceRecord( $1.as_ascii, $2, $4, $6 ); }
                                                   
@@ -344,13 +340,12 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
 				| vn_wildcard												{ $$ = $1; }
                                                       
-// Collate members from the back so that each ACCESS_KEYWORD applies to all members seen so far                                                                                    
 members			: member       		                     				    { $$.push_back($1); } 
 				| member members 											{ $$ = $2; $$.push_front($1); } 
-				| access_spec ':' members									{ $$ = $3; } // TODO respect the access keyword                                                    
+				| access_spec_nw ':' members								{ $$ = $3; } // TODO set the access keyword on all                                                   
                                                                           
 member			: declaration
-				| expr_expression ';' // TODO merge declarations and statements so can share the VN stuff
+				| statement_nc // for the VN bits TODO merge declarations and statements so can share 
                           
 access_spec		: access_spec_nw	                          				
 				| ANY 														{ $$ = nullptr; }
