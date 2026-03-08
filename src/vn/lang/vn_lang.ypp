@@ -272,7 +272,7 @@ compound_primary	: '{' VN_SEP '}'                   						{ $$ = vn->OnCompound(
 					| '{' statements VN_SEP statements '}'  				{ $$ = vn->OnCompound($2, @2, $4, @4); }
 
 statements	: statement														{ $$.push_back($1); }
-			| statements statement											{ $$ = $1; $$.push_back($2); }
+			| statement statements											{ $$ = $2; $$.push_front($1); }
          
 statement	: stmt_disjunction
 
