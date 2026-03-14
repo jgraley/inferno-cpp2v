@@ -431,7 +431,7 @@ TreePtr<Node> VNLangActions::OnCompound( list<TreePtr<Node>> members, any memb_l
 }
 
 
-TreePtr<Node> VNLangActions::OnArrayLiteral( list<TreePtr<Node>> elements )
+TreePtr<Node> VNLangActions::OnArrayInitialiser( list<TreePtr<Node>> elements )
 {
 	// Fill out the array literal
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::ArrayLiteral>>();
@@ -1036,18 +1036,22 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Types: see https://alx71hub.github.io/hcb/#decl-specifier-seq
 // Keep the () on types for disambiguation unless you can prove away or just rely on designations TODO.
 
-// Use the typieish symbol ⍑ on Star ★, and try parsing ★⦅x⦆ correctly based on x
+// Typieish symbol to be a type_prefix operator which teleports into expr_prefix
 
-// Blend declarations in with statements.
-
-// Clean up bases and access specs, fix use of Public for Default. I suspect the "class" keyword should open a scope with gnomon
-// supplied to action class, which will stack it using WeakStack.
+// Clean up base sccess specs, fix use of Public for Default. Just correct them in OnInheritanceRecord() like with members, except
+// we'll need a DefaultAccess local node type to differentiate from NULL which means wild.
 
 // Semantics of optional keywords: if absent, this is taken to be the default (eg, private for a base of a class, non-const for 
 // a declaration etc). ☆ should be accepted to mean "any". Thus a fully wild base is ☆ ☆.
 
+// Renderer is producing eg ⊛CPPTree::SpecificTypeIdentifier⦅"sc_module"⦆⨟ when the CPPTree should be implicit eg 003
+
 // Note: there are no expicit forms for agents. Thus, no ⯁Star⦅⦆ for example.
 
+// Eliding Program:
+// alternative to normal that accepts multiple stmt/decl (with ;) OR an expression or a type, and it probably
+// needs its own ∧ and ∨. Call all this "program" (or maybe switch to "unit" as in compilation unit)
+// Call OnProgram to get a Program node. Rendering should be straightforward.
 
 // NOTE
 // Lots of conflicts incl around declarators resolved by making pre-restriction refuse to switch between

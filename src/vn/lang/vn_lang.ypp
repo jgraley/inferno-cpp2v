@@ -138,10 +138,10 @@
 	<YY::TokenMetadata>	DECLARATION_OF			_("DeclarationOf")
 	<YY::TokenMetadata>	TYPE_OF					_("TypeOf")
 	<YY::TokenMetadata> NORM_TERM_KEYWORD		_("non-type terminal keyword")
-	<YY::TokenMetadata> PRIMITIVE_STMT_KEYWORD  _("statement keyword") // eg break;
-	<YY::TokenMetadata> SPACE_SEP_STMT_KEYWORD 	_("space-separated statement keyword") // eg return 12;
-	<YY::TokenMetadata> ARGS_BODY_STMT_KEYWORD 	_("args-and-body statement keyword") // eg switch(args) body
-	<YY::TokenMetadata> ARGS_BODY_CHAIN_STMT_KEYWORD 	_("args-body-chain statement keyword") // eg if(args) body else chain_body	
+	<YY::TokenMetadata> PRIMITIVE_STMT_KEYWORD  _("stmt_decl keyword") // eg break;
+	<YY::TokenMetadata> SPACE_SEP_STMT_KEYWORD 	_("space-separated stmt_decl keyword") // eg return 12;
+	<YY::TokenMetadata> ARGS_BODY_STMT_KEYWORD 	_("args-and-body stmt_decl keyword") // eg switch(args) body
+	<YY::TokenMetadata> ARGS_BODY_CHAIN_STMT_KEYWORD 	_("args-body-chain stmt_decl keyword") // eg if(args) body else chain_body	
 	<YY::TokenMetadata> PRIMITIVE_CHAIN_KEYWORD _("chain keyword") // eg else
 	<YY::TokenMetadata> DO_KEYWORD				_("do")
 	<YY::TokenMetadata> WHILE_KEYWORD			_("while")
@@ -159,11 +159,11 @@
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expr_expression norm_primary expr_id_value vn_wildcard
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_disjunction type_conjunction type_vn_prim type_with_ab
 %type <TreePtr<Node>> 				unified unified_prefix
-%type <TreePtr<Node>> 				bare_statement statement_nc statement stmt_disjunction stmt_conjunction stmt_primary norm_expr_or_stmt 
-%type <TreePtr<Node>>				declaration bare_declaration cons_or_des_type 
+%type <TreePtr<Node>> 				bare_stmt_decl stmt_decl_nc stmt_decl stmt_decl_disjunction stmt_decl_conjunction stmt_decl_primary norm_expr_stmt_decl 
+%type <TreePtr<Node>>				cons_or_des_type 
 %type <TreePtr<Node>> 				compound_primary compound_prefix parameter type_id 
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
-%type <TreePtr<Node>> 				class_spec base_spec member access_spec access_spec_nw
+%type <TreePtr<Node>> 				class_spec base_spec access_spec access_spec_nw
 %type <wstring> 					vn_name
 %type <string>						transform_norm_part transform_type_part
 %type <YY::TokenMetadata> 			resolved_name resolved_type_name node_namespace
@@ -175,9 +175,9 @@
 %type <shared_ptr<VN::Gnomon>>		part_resolve designation_command 
 %type <shared_ptr<VN::Gnomon>>		start_transform_name_scope
 %type <shared_ptr<VN::Gnomon>>		start_explicit_scope start_prerestrict_scope start_id_by_name_scope start_build_id_scope
-%type <list<TreePtr<Node>>>			statements 
+%type <list<TreePtr<Node>>>			stmt_decls 
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
-%type <list<TreePtr<Node>>>			members bases 
+%type <list<TreePtr<Node>>>			bases 
 %type <const AvailableNodeData::Block *> explicit_name_part prerestrict_name_part id_by_name_part build_id_part
 %type <const AvailableNodeData::Block *> type_explicit_name_part type_prerestrict_name_part type_id_by_name_part type_build_id_part
 %type <multiset<string>>			type_specifier_seq
@@ -245,15 +245,14 @@ normal				: norm_disjunction
 norm_disjunction	: norm_conjunction
 					| norm_disjunction DISJUNCTION norm_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
 
-norm_conjunction 	: norm_expr_or_stmt
-					| norm_conjunction CONJUNCTION norm_expr_or_stmt				{ $$ = vn->OnConjunction($1, $3); }
+norm_conjunction 	: norm_expr_stmt_decl
+					| norm_conjunction CONJUNCTION norm_expr_stmt_decl				{ $$ = vn->OnConjunction($1, $3); }
 		
-norm_expr_or_stmt	: expr_expression
-					| statement_nc // statements not including Compound, which is expressional from this POV
+norm_expr_stmt_decl	: expr_expression
+					| stmt_decl_nc // stmt_decls not including Compound, which is expressional from this POV
 					| compound_prefix // Branch off here for compound_primary to avoid conflicts with prefix = (used for inits)
-					| declaration			
 
-//////////////////////////////// STATEMENTS ////////////////////////////////////         
+//////////////////////////////// COMPOUND ////////////////////////////////////         
 
 // Because there's no separator in {{code} expr} the prefix ops would conflict with infix that use same symbol,
 // so we'll need to complete a branch of the syntax for compounds with a copy of the unary VN operators (none are postfix).
@@ -267,53 +266,53 @@ compound_prefix : compound_primary
 				|                     prerestrict_name_part compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 
 compound_primary	: '{' VN_SEP '}'                   						{ $$ = vn->OnCompound({}, @2, {}, @3); } 
-					| '{' statements VN_SEP '}'           					{ $$ = vn->OnCompound($2, @2, {}, @4); }
-					| '{' VN_SEP statements '}'           					{ $$ = vn->OnCompound({}, @2, $3, @3); }
-					| '{' statements VN_SEP statements '}'  				{ $$ = vn->OnCompound($2, @2, $4, @4); }
+					| '{' stmt_decls VN_SEP '}'           					{ $$ = vn->OnCompound($2, @2, {}, @4); }
+					| '{' VN_SEP stmt_decls '}'           					{ $$ = vn->OnCompound({}, @2, $3, @3); }
+					| '{' stmt_decls VN_SEP stmt_decls '}'  				{ $$ = vn->OnCompound($2, @2, $4, @4); }
 
-statements	: statement														{ $$.push_back($1); }
-			| statement statements											{ $$ = $2; $$.push_front($1); }
+//////////////////////////////// STATEMENTS/DECLARATIONS ////////////////////////////////////         
+
+stmt_decls	: stmt_decl														{ $$.push_back($1); }
+			| stmt_decl stmt_decls											{ $$ = $2; $$.push_front($1); }
          
-statement	: stmt_disjunction
+stmt_decl	: stmt_decl_disjunction
 
-stmt_disjunction	: stmt_conjunction
-					| stmt_disjunction DISJUNCTION stmt_conjunction			{ $$ = vn->OnDisjunction($1, $3); }
+stmt_decl_disjunction	: stmt_decl_conjunction
+						| stmt_decl_disjunction DISJUNCTION stmt_decl_conjunction	{ $$ = vn->OnDisjunction($1, $3); }
 
-stmt_conjunction 	: stmt_primary
-					| stmt_conjunction CONJUNCTION stmt_primary				{ $$ = vn->OnConjunction($1, $3); }
+stmt_decl_conjunction 	: stmt_decl_primary
+						| stmt_decl_conjunction CONJUNCTION stmt_decl_primary		{ $$ = vn->OnConjunction($1, $3); }
 
-stmt_primary: compound_primary 
-			| statement_nc %prec ';'
-			| ';'															{ $$ = vn->OnNop(@1); }      
+stmt_decl_primary	: compound_primary 
+					| stmt_decl_nc %prec ';'
+					| ';'															{ $$ = vn->OnNop(@1); }      
 					
-// _nc here means "not a compound"						
-statement_nc: bare_statement ';'												{ $$ = $1; }      
-			| ARGS_BODY_STMT_KEYWORD '(' semicolon_args ')' stmt_primary		{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
-			| WHILE_KEYWORD '(' expr_expression ')' stmt_primary 				{ $$ = vn->OnWhile($3, @3, $5, @5); }
-			| ARGS_BODY_CHAIN_STMT_KEYWORD '(' semicolon_args ')' stmt_primary	
-			  %prec ARGS_BODY_CHAIN_STMT_KEYWORD								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
-			| ARGS_BODY_CHAIN_STMT_KEYWORD '(' semicolon_args ')' stmt_primary
-			  PRIMITIVE_CHAIN_KEYWORD stmt_primary								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
-			| expr_expression ':'												{ $$ = vn->OnLabel($1, @1); } 
-			| CASE_KEYWORD expr_expression ':'									{ $$ = vn->OnCase($2, @2); } 
-			| CASE_KEYWORD expr_expression RANGE_OP expr_expression ':'			{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
-			| DEFAULT_KEYWORD ':'												{ $$ = vn->OnDefault(@$); } 
+// _nc here means "not a compound"							
+stmt_decl_nc: bare_stmt_decl ';'													{ $$ = $1; }      
+			| ARGS_BODY_STMT_KEYWORD '(' semicolon_args ')' stmt_decl_primary		{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
+			| WHILE_KEYWORD '(' expr_expression ')' stmt_decl_primary 				{ $$ = vn->OnWhile($3, @3, $5, @5); }
+			| ARGS_BODY_CHAIN_STMT_KEYWORD '(' semicolon_args ')' stmt_decl_primary	
+			  %prec ARGS_BODY_CHAIN_STMT_KEYWORD									{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
+			| ARGS_BODY_CHAIN_STMT_KEYWORD '(' semicolon_args ')' stmt_decl_primary
+			  PRIMITIVE_CHAIN_KEYWORD stmt_decl_primary								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
+			| expr_expression ':'													{ $$ = vn->OnLabel($1, @1); } 
+			| CASE_KEYWORD expr_expression ':'										{ $$ = vn->OnCase($2, @2); } 
+			| CASE_KEYWORD expr_expression RANGE_OP expr_expression ':'				{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
+			| DEFAULT_KEYWORD ':'													{ $$ = vn->OnDefault(@$); } 
+			| access_spec_nw ':' 										                                        
 
-bare_statement	: expr_expression
+bare_stmt_decl	: expr_expression
 				| PRIMITIVE_STMT_KEYWORD										{ $$ = vn->OnPrimitiveStmt($1.as_ascii, @1); }
 				| SPACE_SEP_STMT_KEYWORD expr_expression						{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
-				| DO_KEYWORD statement WHILE_KEYWORD '(' expr_expression ')' 	{ $$ = vn->OnDo($2, @2, $5, @5); }
+				| DO_KEYWORD stmt_decl WHILE_KEYWORD '(' expr_expression ')' 	{ $$ = vn->OnDo($2, @2, $5, @5); }
+				| type_specified declarator										{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }	
+				| class_spec		
 
 semicolon_args	: expr_expression											{ $$.push_back($1); }
 				| semicolon_args ';' expr_expression						{ $$ = $1; $$.push_back($3); }
 
-//////////////////////////////// DECLARATIONS /////////////////////////////////////         
-        
-declaration			: bare_declaration ';'
-                  
-bare_declaration	: type_specified declarator							{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }	
-					| class_spec		
-		
+//////////////////////////////// DECLARATORS /////////////////////////////////////         
+                          		
 declarator			: declarator_prefix									 
 
 declarator_prefix	: declarator_postfix
@@ -330,28 +329,8 @@ declarator_postfix	: declarator_primary
                 
 declarator_primary	: norm_primary										{ $$ = make_shared<Declarators::Concrete>($1); }  
                          
-class_spec		: CLASS_KEYWORD type_specified '{' members '}'				{ $$ = vn->OnInheritanceRecord( $1.as_ascii, $2, {}, $4 ); }
-				| CLASS_KEYWORD type_specified ':' bases '{' members '}'	{ $$ = vn->OnInheritanceRecord( $1.as_ascii, $2, $4, $6 ); }
-                                                  
-bases			: base_spec                                                 { $$.push_back($1); } 
-				| bases COMMA base_spec										{ $$ = $1; $$.push_back($3); } 
-                                       
-base_spec		: type_specified											{ $$ = vn->OnBase($1); } 
-				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
-				| vn_wildcard												{ $$ = $1; }
-                                                      
-members			: member       		                     				    { $$.push_back($1); } 
-				| member members 											{ $$ = $2; $$.push_front($1); } 
-                                                                          
-member			: declaration
-				| statement_nc // for the VN bits TODO merge declarations and statements so can share 
-				| access_spec_nw ':' 										                                        
-                          
-access_spec		: access_spec_nw	                          				
-				| ANY 														{ $$ = nullptr; }
-                          
-access_spec_nw	: ACCESS_KEYWORD	                          				{ $$ = vn->OnAccessSpec($1.as_ascii); }
-                                                  
+//////////////////////////////////////// PARAMETERS /////////////////////////////////////////////
+
 parameterisation	: '(' parameters ')'							{ $$ = $2; }
 					| '(' ')'										{ $$.clear(); }							
 
@@ -359,8 +338,25 @@ parameters	: parameter												{ $$.push_back($1); }
 			| parameters COMMA parameter							{ $$ = $1; $$.push_back($3); }			
 				
 parameter   : type_specified declarator 							{ $$ = vn->OnParameter($1, $2, @2); }	
-            | expr_prefix
-            
+            | expr_prefix           
+                         
+//////////////////////////////// CLASSES ////////////////////////////////////                                  
+                         
+class_spec		: CLASS_KEYWORD type_specified '{' stmt_decls '}'			{ $$ = vn->OnInheritanceRecord( $1.as_ascii, $2, {}, $4 ); }
+				| CLASS_KEYWORD type_specified ':' bases '{' stmt_decls '}'	{ $$ = vn->OnInheritanceRecord( $1.as_ascii, $2, $4, $6 ); }
+                                                  
+bases			: base_spec                                                 { $$.push_back($1); } 
+				| bases COMMA base_spec										{ $$ = $1; $$.push_back($3); } 
+                                       
+base_spec		: type_specified											{ $$ = vn->OnBase($1); } 
+				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
+				| vn_wildcard												{ $$ = $1; }
+                          
+access_spec		: access_spec_nw	                          				
+				| ANY 														{ $$ = nullptr; }
+                          
+access_spec_nw	: ACCESS_KEYWORD	                          				{ $$ = vn->OnAccessSpec($1.as_ascii); }
+                                                  
 //////////////////////////////// EXPRESSIONS ////////////////////////////////////         
 
 expr_expression		: expr_comma_op
@@ -424,9 +420,6 @@ expr_prefix : expr_postfix
 			| 			       DELTA normal DELTA_ARROW expr_prefix	 { $$ = vn->OnDelta($2, $4); }
 			| 								   NEGATION expr_prefix	 { $$ = vn->OnNegation($2); }
 			|                     prerestrict_name_part expr_prefix	 { $$ = vn->OnRestrict($1, @1, $2, @2); }
-//			|  									  STUFF expr_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-//			|  STUFF OPEN_VN           unified CLOSE_VN expr_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-//			|  STUFF OPEN_VN stuff_depth_limit CLOSE_VN expr_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
 			|  									  STUFF unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 			|  STUFF OPEN_VN           unified CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			|  STUFF OPEN_VN stuff_depth_limit CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
@@ -454,8 +447,8 @@ expr_primary: norm_primary
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 			| NORM_TERM_KEYWORD									{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
-			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayLiteral({}); } // ={...} dismbiguates against compound_primary
-			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayLiteral($3); }               
+			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayInitialiser({}); } // ={...} dismbiguates against compound_primary
+			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayInitialiser($3); }               
 			| FUNC_ON_TYPE '(' type_id ')'       				{ $$ = vn->OnFuncOnType($1.as_ascii, @1, $3, @3); }			
 
 norm_primary: vn_wildcard
@@ -523,6 +516,8 @@ type_vn_prim: type_explicit_name_part itemisation								{ $$ = vn->OnExplicitNo
 			| type_build_id_part OPEN_VN VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			| transform_type_part OPEN_VN unified_prefix CLOSE_VN 				{ $$ = vn->OnTransform($1, @1, $3, @3); }
 			| TYPE_INDICATOR STAR												{ $$ = vn->OnStar(nullptr); }
+			| TYPE_INDICATOR STAR OPEN_VN type_id CLOSE_VN						{ $$ = vn->OnStar($4); }
+			| STAR OPEN_VN type_id CLOSE_VN										{ $$ = vn->OnStar($3); }
 			
 type_explicit_name_part : start_explicit_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
 type_prerestrict_name_part : start_prerestrict_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }

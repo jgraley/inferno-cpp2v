@@ -163,9 +163,10 @@ public:
 	virtual Production GetMyProduction(const VN::RendererInterface *renderer, Policy policy ) const;
 	virtual Production GetMyProductionTerminal() const;
 	virtual Production GetOperandInDeclaratorProduction() const;
-    static Syntax::Production BoostPrecedence( Syntax::Production prec );
-    static int GetPrecedence( Syntax::Production prec );
+    static Production BoostPrecedence( Production prec );
+    static int GetPrecedence( Production prec );
     static string::size_type GetLineBreakThreshold();
+    static bool IsType( Production prod );
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"

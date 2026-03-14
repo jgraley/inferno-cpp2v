@@ -74,13 +74,13 @@ Syntax::Production Syntax::GetOperandInDeclaratorProduction() const
 } 
 
 
-Syntax::Production Syntax::BoostPrecedence( Syntax::Production prec )
+Syntax::Production Syntax::BoostPrecedence( Production prec )
 {
-	return (Syntax::Production)((int)prec + 1);
+	return (Production)((int)prec + 1);
 }
 
 
-int Syntax::GetPrecedence( Syntax::Production prec )
+int Syntax::GetPrecedence( Production prec )
 {
 	return (int)prec;
 }
@@ -89,4 +89,14 @@ int Syntax::GetPrecedence( Syntax::Production prec )
 string::size_type Syntax::GetLineBreakThreshold()
 {
 	return 80;
+}
+
+
+bool Syntax::IsType( Production prod )
+{
+	return prod == Syntax::Production::TYPE_IN_NEW ||
+		   prod == Syntax::Production::SPACE_SEP_TYPE ||
+		   prod == Syntax::Production::PRIMARY_TYPE ||
+		   prod == Syntax::Production::TYPE_IN_DECLARATION ||
+		   prod == Syntax::Production::VN_DESIGNATE_TYPE;
 }
