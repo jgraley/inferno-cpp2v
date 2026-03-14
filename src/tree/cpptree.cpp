@@ -620,7 +620,7 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 
 Syntax::Production Base::GetMyProductionTerminal() const
 {
-	return Production::TYPE_IN_DECLARATION;
+	return Production::BASE_CLASS_SPEC;
 }
 
 
@@ -1055,14 +1055,14 @@ string Record::GetRender( VN::RendererInterface *renderer, Syntax::Production, P
 	//throw TemporarilyDisabled(); // TODO fix DeclScope render
 	
 	string s;
-	s += GetKeyword();
+	s += GetKeyword(); // class, struct etc
 	s += " ";
 	s += renderer->DoRender(identifier, Production::PURE_IDENTIFIER, policy); // Don't want scope resolution when declaring
 
 	if( policy.force_incomplete_records )
 		return s;
 
-	s += RenderExtras(renderer, Production::TYPE_IN_DECLARATION, policy);
+	s += RenderExtras(renderer, Production::SPACE_SEP_STATEMENT, policy);
     s += "\n";
 	s += RenderBody(renderer, policy);
 	return s;
@@ -1151,7 +1151,7 @@ string InheritanceRecord::RenderExtras(VN::RendererInterface *renderer, Syntax::
 {
 	list<string> ls;
 	for( TreePtr<Base> b : bases )
-		ls.push_back( renderer->DoRender(b, Production::TYPE_IN_DECLARATION, policy ) );    	
+		ls.push_back( renderer->DoRender(b, Production::BASE_CLASS_SPEC, policy ) );    	
 	
 	if( ls.empty() )
 		return "";

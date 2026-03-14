@@ -73,8 +73,6 @@ private:
                                                          list<unique_ptr<SYM::SymbolicResult>> &&op_results ) const override;
         virtual string RenderNF() const override;
     };
-
-public:
 };
 
 

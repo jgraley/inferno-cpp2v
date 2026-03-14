@@ -1002,10 +1002,28 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Use the typieish symbol ⍑ on Star ★, and try parsing ★⦅x⦆ correctly based on x
 
 // Blend declarations in with statements. This means unifying the handling of x: syntax, so access specs and labels need unifying.
-// Add a local node for a prefixed statement/member, and use prefix style for both statements and members. Reduce the local
+// Add a local node for a prefixed statement/member, add an infix binop for both statements and members. Precidence is naturally
+// quite low - below the statement/decl recidences. Reduce the local
 // nodes in the actions, applying the effect as required:
 // - Label gets added as another member
 // - Access is applied to subsequent members
 // Before the : we probably want expr_prefix to get some VNs. For legacy's sake, support x :; using eg Nop and elide in the action. 
 
-// Clean up bases and access specs, fix use of Public for Default.
+// Clean up bases and access specs, fix use of Public for Default. I suspect the "class" keyword should open a scope with gnomon
+// supplied to action class, which will stack it using WeakStack.
+
+// Semantics of optional keywords: if absent, this is taken to be the default (eg, private for a base of a class, non-const for 
+// a declaration etc). ☆ should be accepted to mean "any". Thus a fully wild base is ☆ ☆.
+
+// Note: there are no expicit forms for agents. Thus, no ⯁Star⦅⦆ for example.
+
+
+// NOTE
+// Lots of conflicts incl around declarators resolved by making pre-restriction refuse to switch between
+// type and norm. This breaks DeclarationOf which was trying to be unified (the PR was supposed to disambiguate).
+// fix is to split DeclarationOf and TypeDeclarationOf, then because TypeDeclarationOf converts from type
+// to normal we have to put VN brackets around its argument making it a promary. To make life easier in the
+// future, doing this to all the VN prefix ops that can switch between type and norm. Stuff is tricky, 1.
+// we like the prefix syntax without any braces at all, but braces are likely needed for unified argument
+// and 2. for completeness there should be a Stuff-As-Type symbol although this isn't manifesting atm.
+ 

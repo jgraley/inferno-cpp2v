@@ -50,6 +50,7 @@ public:
 		BARE_DECLARATION, // Actual declaration with no semicolon, eg int i	
 		SPACE_SEP_STATEMENT, // eg throw <here>;
 		TYPE_IN_DECLARATION, // the type in typedef <here>;
+		BASE_CLASS_SPEC, // A base class including public etc
 		SPACE_SEP_PRE_PROC,
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
 		TOP_STMT_DECL, // Highest statement precedence
