@@ -676,18 +676,55 @@ TreePtr<Node> VNLangActions::OnParameter( TreePtr<Node> type, TreePtr<Node> decl
 TreePtr<Node> VNLangActions::OnInheritanceRecord( string keyword, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
 {
 	TreePtr<CPPTree::InheritanceRecord> node;
+	TreePtr<CPPTree::AccessSpec> current_access;
 	if( keyword=="class" )
+	{
 		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Class>>();
+		current_access = MakeTreeNode<StandardAgentWrapper<CPPTree::Private>>();
+	}
 	else if( keyword=="struct" )
+	{
 		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Struct>>();
+		current_access = MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
+	}
 	else if( keyword=="union" )
+	{
 		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Union>>();
-		
+		current_access = MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
+	}
+	else
+		ASSERTFAIL()
+	
 	node->identifier = id;
 	for( TreePtr<Node> base : bases )
 		node->bases.insert( base );				
+	
 	for( TreePtr<Node> member : members )
-		node->members.insert( member );				
+	{
+		if( auto new_access = TreePtr<CPPTree::AccessSpec>::DynamicCast(member) )
+		{
+			current_access = new_access;
+		}
+		else if( auto o = TreePtr<CPPTree::Instance>::DynamicCast(member) )
+		{
+			auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
+			field->type = o->type;
+			field->identifier = o->identifier;
+			field->initialiser = o->initialiser;
+			field->access = dynamic_pointer_cast<StandardAgentWrapper<Node>>( current_access->Duplicate(current_access) );
+			ASSERT(field->access);
+			node->members.insert( field );				
+		}
+		else if( Agent::TryAsAgent(member) )
+		{
+			node->members.insert( member );							
+		}
+		else
+		{
+			ASSERT(false)(member);
+		}
+	}
+	
 	return node;
 }
 
@@ -1001,12 +1038,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Use the typieish symbol ⍑ on Star ★, and try parsing ★⦅x⦆ correctly based on x
 
-// Blend declarations in with statements. This means unifying the handling of x: syntax, so access specs and labels need unifying.
-// Add a local node for a prefixed statement/member, add an infix binop for both statements and members. Precidence is naturally
-// quite low - below the statement/decl recidences. Reduce the local nodes in the actions, applying the effect as required:
-// - Label gets added as another member
-// - Access is applied to subsequent members
-// Before the : we probably want expr_prefix to get some VNs. For legacy's sake, support x :; using eg Nop and elide in the action. 
+// Blend declarations in with statements.
 
 // Clean up bases and access specs, fix use of Public for Default. I suspect the "class" keyword should open a scope with gnomon
 // supplied to action class, which will stack it using WeakStack.

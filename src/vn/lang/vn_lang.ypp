@@ -342,10 +342,10 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
                                                       
 members			: member       		                     				    { $$.push_back($1); } 
 				| member members 											{ $$ = $2; $$.push_front($1); } 
-				| access_spec_nw ':' members								{ $$ = $3; } // TODO set the access keyword on all                                                   
                                                                           
 member			: declaration
 				| statement_nc // for the VN bits TODO merge declarations and statements so can share 
+				| access_spec_nw ':' 										                                        
                           
 access_spec		: access_spec_nw	                          				
 				| ANY 														{ $$ = nullptr; }
