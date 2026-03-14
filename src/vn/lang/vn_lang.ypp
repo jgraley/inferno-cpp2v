@@ -77,7 +77,7 @@
 	STUFF		 							"⩨"
 	DELTA 									"▲"
 	DELTA_ARROW 							"⯈"
-	BUILT_IN 								"⯁"
+	EXPLICIT 								"⯁"
 	OPEN_VN 								"⦅"
 	CLOSE_VN 								"⦆"
 	ANY 									"☆"
@@ -174,12 +174,12 @@
 %type <VN::Item>					item
 %type <shared_ptr<VN::Gnomon>>		part_resolve designation_command 
 %type <shared_ptr<VN::Gnomon>>		start_transform_name_scope
-%type <shared_ptr<VN::Gnomon>>		start_builtin_scope start_prerestrict_scope start_id_by_name_scope start_build_id_scope
+%type <shared_ptr<VN::Gnomon>>		start_explicit_scope start_prerestrict_scope start_id_by_name_scope start_build_id_scope
 %type <list<TreePtr<Node>>>			statements 
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			members bases 
-%type <const AvailableNodeData::Block *> builtin_name_part prerestrict_name_part id_by_name_part build_id_part
-%type <const AvailableNodeData::Block *> type_builtin_name_part type_prerestrict_name_part type_id_by_name_part type_build_id_part
+%type <const AvailableNodeData::Block *> explicit_name_part prerestrict_name_part id_by_name_part build_id_part
+%type <const AvailableNodeData::Block *> type_explicit_name_part type_prerestrict_name_part type_id_by_name_part type_build_id_part
 %type <multiset<string>>			type_specifier_seq
 
 // Solve the dangling-else amiguity by giving the "else" token a higher priority than the "if" token
@@ -294,15 +294,15 @@ statement_nc: bare_statement ';'												{ $$ = $1; }
 			  %prec ARGS_BODY_CHAIN_STMT_KEYWORD								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
 			| ARGS_BODY_CHAIN_STMT_KEYWORD '(' semicolon_args ')' stmt_primary
 			  PRIMITIVE_CHAIN_KEYWORD stmt_primary								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
+			| expr_expression ':'												{ $$ = vn->OnLabel($1, @1); } 
+			| CASE_KEYWORD expr_expression ':'									{ $$ = vn->OnCase($2, @2); } 
+			| CASE_KEYWORD expr_expression RANGE_OP expr_expression ':'			{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
+			| DEFAULT_KEYWORD ':'												{ $$ = vn->OnDefault(@$); } 
 
 bare_statement	: expr_expression
 				| PRIMITIVE_STMT_KEYWORD										{ $$ = vn->OnPrimitiveStmt($1.as_ascii, @1); }
 				| SPACE_SEP_STMT_KEYWORD expr_expression						{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
 				| DO_KEYWORD statement WHILE_KEYWORD '(' expr_expression ')' 	{ $$ = vn->OnDo($2, @2, $5, @5); }
-				| expr_expression ':'											{ $$ = vn->OnLabel($1, @1); } 
-				| CASE_KEYWORD expr_expression ':'								{ $$ = vn->OnCase($2, @2); } 
-				| CASE_KEYWORD expr_expression RANGE_OP expr_expression ':'		{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
-				| DEFAULT_KEYWORD ':'											{ $$ = vn->OnDefault(@$); } 
 
 semicolon_args	: expr_expression											{ $$.push_back($1); }
 				| semicolon_args ';' expr_expression						{ $$ = $1; $$.push_back($3); }
@@ -459,7 +459,7 @@ expr_primary: norm_primary
 			| FUNC_ON_TYPE '(' type_id ')'       				{ $$ = vn->OnFuncOnType($1.as_ascii, @1, $3, @3); }			
 
 norm_primary: vn_wildcard
-			| builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, $2); }
+			| explicit_name_part itemisation							{ $$ = vn->OnExplicitNode($1, @1, $2); }
 			| DESIGNATED_NORMAL       				  					{ $$ = $1.as_designated; }
 			| id_by_name_part OPEN_VN STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
 			| build_id_part OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
@@ -473,7 +473,7 @@ vn_wildcard : STAR												{ $$ = vn->OnStar(nullptr); }
 			| STAR OPEN_VN normal CLOSE_VN						{ $$ = vn->OnStar($3); }
 			| ANY												{ $$ = nullptr; }
 
-builtin_name_part 	: start_builtin_scope resolved_name			{ $$ = $2.as_andata_block; (void)$1; }
+explicit_name_part 	: start_explicit_scope resolved_name			{ $$ = $2.as_andata_block; (void)$1; }
 prerestrict_name_part : start_prerestrict_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
 id_by_name_part 	: start_id_by_name_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
 build_id_part 		: start_build_id_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
@@ -515,7 +515,7 @@ type_primary: type_vn_prim
 				
 cons_or_des_type : CONSTRUCTOR parameterisation 		 						{ $$ = vn->OnConstructor($2); } 				
 									
-type_vn_prim: type_builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1, @1, $2); }
+type_vn_prim: type_explicit_name_part itemisation								{ $$ = vn->OnExplicitNode($1, @1, $2); }
 			| DESIGNATED_TYPE     									  			{ $$ = $1.as_designated; }		
 			| type_id_by_name_part OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
 			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
@@ -524,7 +524,7 @@ type_vn_prim: type_builtin_name_part itemisation								{ $$ = vn->OnBuiltIn($1,
 			| transform_type_part OPEN_VN unified_prefix CLOSE_VN 				{ $$ = vn->OnTransform($1, @1, $3, @3); }
 			| TYPE_INDICATOR STAR												{ $$ = vn->OnStar(nullptr); }
 			
-type_builtin_name_part : start_builtin_scope resolved_type_name				{ $$ = $2.as_andata_block; (void)$1; }
+type_explicit_name_part : start_explicit_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
 type_prerestrict_name_part : start_prerestrict_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
 type_id_by_name_part 	: start_id_by_name_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
 type_build_id_part 		: start_build_id_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
@@ -562,7 +562,7 @@ node_namespace 	: part_resolve NODE_NAMESPACE			{ $$ = $2; }
 				| NODE_NAMESPACE						{ $$ = $1; }				      
 
 
-start_builtin_scope		: BUILT_IN 			{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
+start_explicit_scope	: EXPLICIT 			{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 										      recogniser->AddGnomon($$); }
 										      
 start_prerestrict_scope	: PRERESTRICT		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 

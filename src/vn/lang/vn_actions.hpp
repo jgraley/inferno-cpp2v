@@ -58,7 +58,7 @@ public:
 	TreePtr<Node> OnStar( TreePtr<Node> restriction );
 	TreePtr<Node> OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit );
 	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
-	TreePtr<Node> OnBuiltIn( const AvailableNodeData::Block *block, any node_name_loc, Itemisation itemisation );
+	TreePtr<Node> OnExplicitNode( const AvailableNodeData::Block *block, any node_name_loc, Itemisation itemisation );
 	TreePtr<Node> OnEmbeddedCommands( list<shared_ptr<Command>> commands );
 	TreePtr<Node> OnRestrict( const AvailableNodeData::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc );
 	
@@ -125,8 +125,9 @@ public:
 	
 private: 
 	unique_ptr<AvailableNodeData> node_names;	
+
 public: // TODO provide a getter	
-	Command::List top_level_commands;
+	Command::List top_level_commands;	
 };
 	
 };

@@ -139,7 +139,7 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 }
 
 
-TreePtr<Node> VNLangActions::OnBuiltIn( const AvailableNodeData::Block *block, any node_name_loc, Itemisation src_itemisation )
+TreePtr<Node> VNLangActions::OnExplicitNode( const AvailableNodeData::Block *block, any node_name_loc, Itemisation src_itemisation )
 {
 	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
 	NodeEnum ne = leaf_block->node_enum.value();
@@ -1003,8 +1003,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Blend declarations in with statements. This means unifying the handling of x: syntax, so access specs and labels need unifying.
 // Add a local node for a prefixed statement/member, add an infix binop for both statements and members. Precidence is naturally
-// quite low - below the statement/decl recidences. Reduce the local
-// nodes in the actions, applying the effect as required:
+// quite low - below the statement/decl recidences. Reduce the local nodes in the actions, applying the effect as required:
 // - Label gets added as another member
 // - Access is applied to subsequent members
 // Before the : we probably want expr_prefix to get some VNs. For legacy's sake, support x :; using eg Nop and elide in the action. 

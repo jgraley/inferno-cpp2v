@@ -44,6 +44,7 @@ public:
 		// ----- Parts of statements and declarations
 		CONDITION = 30,		// Use in surrounds like if( <here> ) ... which could be a decl etc. 
 		BRACED,		 // {} from the outside
+		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
 		
 		MIN_NODE_SEMICOLON, // Note: nodes higher than here \/ can get ";" added.
 		BARE_STATEMENT = 40, // Statement with no semicolon
@@ -52,7 +53,6 @@ public:
 		TYPE_IN_DECLARATION, // the type in typedef <here>;
 		BASE_CLASS_SPEC, // A base class including public etc
 		SPACE_SEP_PRE_PROC,
-		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
 		TOP_STMT_DECL, // Highest statement precedence
 						
 		// ----- Used in c-style cast. TODO try BOOT.

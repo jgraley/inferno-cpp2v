@@ -52,7 +52,7 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 ⩨				{ return YY::VNLangParser::make_STUFF(location()); };
 ▲				{ return YY::VNLangParser::make_DELTA(location()); };
 ⯈				{ return YY::VNLangParser::make_DELTA_ARROW(location()); };
-⯁				{ return YY::VNLangParser::make_BUILT_IN(location()); };
+⯁				{ return YY::VNLangParser::make_EXPLICIT(location()); };
 ⦅				{ return YY::VNLangParser::make_OPEN_VN(location()); };
 ⦆				{ return YY::VNLangParser::make_CLOSE_VN(location()); };
 ☆				{ return YY::VNLangParser::make_ANY(location()); };
