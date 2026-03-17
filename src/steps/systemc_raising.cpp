@@ -13,8 +13,8 @@ using namespace Steps;
 RaiseSCClass::RaiseSCClass( TreePtr< Type > lr_sctype )
 {
     auto over = MakePatternNode<DeltaAgent, Node>();
-    auto s_program = MakePatternNode< Program >();
-    auto r_program = MakePatternNode< Program >();
+    auto s_program = MakePatternNode< CodeUnit >();
+    auto r_program = MakePatternNode< CodeUnit >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto s_class = MakePatternNode< Class >();
     auto s_token = MakePatternNode< SpecificTypeIdentifierByNameAgent >( lr_sctype->GetLoweredIdName() );                
@@ -39,8 +39,8 @@ RaiseSCClass::RaiseSCClass( TreePtr< Type > lr_sctype )
 RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_scclass )
 {
     auto over = MakePatternNode<DeltaAgent, Node>();
-    auto s_program = MakePatternNode< Program >();
-    auto r_program = MakePatternNode< Program >();
+    auto s_program = MakePatternNode< CodeUnit >();
+    auto r_program = MakePatternNode< CodeUnit >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
     auto l_bases = MakePatternNode<StarAgent, Base>();
@@ -156,8 +156,8 @@ RaiseTerminationFunction::RaiseTerminationFunction( TreePtr<TerminationFunction>
 RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
 {
     auto over = MakePatternNode<DeltaAgent, Node>();
-    auto s_program = MakePatternNode< Program >();
-    auto r_program = MakePatternNode< Program >();
+    auto s_program = MakePatternNode< CodeUnit >();
+    auto r_program = MakePatternNode< CodeUnit >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
     auto l_cdecls = MakePatternNode<StarAgent, Declaration>();
@@ -357,8 +357,8 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
 
 RemoveVoidInstances::RemoveVoidInstances()
 {
-    auto s_program = MakePatternNode<Program>();
-    auto r_program = MakePatternNode<Program>();
+    auto s_program = MakePatternNode<CodeUnit>();
+    auto r_program = MakePatternNode<CodeUnit>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto s_instance = MakePatternNode<Static>();
     auto s_any = MakePatternNode<DisjunctionAgent, Type>();
@@ -381,8 +381,8 @@ RemoveVoidInstances::RemoveVoidInstances()
 
 RemoveSCPrototypes::RemoveSCPrototypes()
 {
-    auto s_program = MakePatternNode<Program>();
-    auto r_program = MakePatternNode<Program>();
+    auto s_program = MakePatternNode<CodeUnit>();
+    auto r_program = MakePatternNode<CodeUnit>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto s_any = MakePatternNode<DisjunctionAgent, Instance>();
     

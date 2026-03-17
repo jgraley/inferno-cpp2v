@@ -68,9 +68,9 @@ Syntax::Production Declaration::GetMyProductionTerminal() const
 
 
 
-//////////////////////////// Program ///////////////////////////////
+//////////////////////////// CodeUnit ///////////////////////////////
 
-Syntax::Production Program::GetMyProductionTerminal() const
+Syntax::Production CodeUnit::GetMyProductionTerminal() const
 {
 	return Production::PROGRAM;
 }

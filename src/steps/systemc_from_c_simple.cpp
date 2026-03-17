@@ -18,23 +18,23 @@ GlobalScopeToModule::GlobalScopeToModule()
 {
     auto delta = MakePatternNode<DeltaAgent, Scope>();
 	auto s_all = MakePatternNode<ConjunctionAgent, Scope>();
-	auto s_scope = MakePatternNode< Program >();
+	auto s_scope = MakePatternNode< CodeUnit >();
 	auto s_decls = MakePatternNode<StarAgent, Declaration>();
 	auto s_despin = MakePatternNode<NegationAgent, Scope>();
-	auto sn_scope = MakePatternNode< Program >();
+	auto sn_scope = MakePatternNode< CodeUnit >();
 	auto sn_module = MakePatternNode< Module >();
-	auto r_scope = MakePatternNode< Program >();
+	auto r_scope = MakePatternNode< CodeUnit >();
 	auto r_gmodule = MakePatternNode< GlobalsModule >();
 	auto r_gmodule_tid = MakePatternNode<BuildSpecificTypeIdentifierAgent>("GlobalScope");
 	auto r_gmodule_inst = MakePatternNode< Static >();
-	auto es_scope = MakePatternNode< Program >();
+	auto es_scope = MakePatternNode< CodeUnit >();
 	auto es_decls = MakePatternNode<StarAgent, Declaration>();
 	auto es_instance = MakePatternNode<Instance>();
 	auto es_gmodule = MakePatternNode< LocalTree::GlobalsModule >();
 	auto es_gmodule_name = MakePatternNode< TypeIdentifier >();
 	auto es_gmodule_decls = MakePatternNode<StarAgent, Declaration>();
 	auto er_gmodule = MakePatternNode< LocalTree::GlobalsModule >();
-	auto er_scope = MakePatternNode< Program >();
+	auto er_scope = MakePatternNode< CodeUnit >();
 	auto er_field = MakePatternNode<Field>();
 	auto es_id = MakePatternNode<InstanceIdentifier>();
 #ifdef ALSO_MOVE_VARS

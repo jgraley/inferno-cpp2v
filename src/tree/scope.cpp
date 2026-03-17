@@ -14,7 +14,7 @@ TreePtr<Scope> GetScope( TreePtr<Node> context, TreePtr<Identifier> id )
 {
     TRACE("Trying program (global)\n" );
 
-    // Look through the members of all scopes (Program, Records, CallableParams, Compounds)
+    // Look through the members of all scopes (CodeUnit, Records, CallableParams, Compounds)
     Walk walkr(context, nullptr, nullptr);
     for( const TreePtrInterface &n : walkr )
     {

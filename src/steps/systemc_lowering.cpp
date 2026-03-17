@@ -357,11 +357,11 @@ AddIncludeSystemC::AddIncludeSystemC()
 {
 	string filename = "systemc.h";
 	
-    auto s_conjunction = MakePatternNode<ConjunctionAgent, Program>();
-    auto s_program = MakePatternNode<Program>();
-    auto r_program = MakePatternNode<Program>();
+    auto s_conjunction = MakePatternNode<ConjunctionAgent, CodeUnit>();
+    auto s_program = MakePatternNode<CodeUnit>();
+    auto r_program = MakePatternNode<CodeUnit>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto s_stuff = MakePatternNode<StuffAgent, Program>();
+    auto s_stuff = MakePatternNode<StuffAgent, CodeUnit>();
     auto r_include = MakePatternNode<SystemInclude>();
     auto s_negation = MakePatternNode<NegationAgent, Declaration>();
     auto sx_include = MakePatternNode<SystemInclude>();
@@ -383,11 +383,11 @@ AddIncludeSCExtensions::AddIncludeSCExtensions()
 {
 	string filename = "systemc_extensions.h";
 
-    auto s_conjunction = MakePatternNode<ConjunctionAgent, Program>();
-    auto s_program = MakePatternNode<Program>();
-    auto r_program = MakePatternNode<Program>();
+    auto s_conjunction = MakePatternNode<ConjunctionAgent, CodeUnit>();
+    auto s_program = MakePatternNode<CodeUnit>();
+    auto r_program = MakePatternNode<CodeUnit>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto s_stuff = MakePatternNode<StuffAgent, Program>();
+    auto s_stuff = MakePatternNode<StuffAgent, CodeUnit>();
     auto r_include = MakePatternNode<LocalInclude>();
     auto s_negation = MakePatternNode<NegationAgent, Declaration>();
     auto sx_include = MakePatternNode<LocalInclude>();

@@ -116,7 +116,7 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
 {			
     if( TreePtr<Uninitialised>::DynamicCast(node) )
         return string();  
-    else if( auto program = TreePtr<Program>::DynamicCast(node) )
+    else if( auto program = TreePtr<CodeUnit>::DynamicCast(node) )
         return RenderProgram( program, surround_prod, policy );
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
         return RenderLiteral( literal, surround_prod );
@@ -143,7 +143,7 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
 }
 
 
-string CppRender::RenderProgram( TreePtr<CPPTree::Program> program, Syntax::Production surround_prod, Syntax::Policy policy )
+string CppRender::RenderProgram( TreePtr<CPPTree::CodeUnit> program, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	(void)surround_prod;
 	Syntax::Policy definition_policy = policy;
@@ -213,7 +213,7 @@ string CppRender::RenderScopeResolvingPrefix( TreePtr<Node> node ) try
               
     if( !scope )
         return ""; // either we're not in a scope or id is undeclared
-    else if( DynamicTreePtrCast<Program>( scope ) )
+    else if( DynamicTreePtrCast<CodeUnit>( scope ) )
         return "";
     else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
         return RenderScopeResolvingPrefix( e->identifier );    // omit scope for the enum itself
@@ -562,7 +562,7 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surrou
 			if( ReadArgs::use.count("c") )
 				s += "/* split */";   
 			// Emit just a prototype now and request definition later
-			// Split out the definition of the instance for rendering later at Program scope
+			// Split out the definition of the instance for rendering later at CodeUnit scope
 			if( !TreePtr<Uninitialised>::DynamicCast(o->initialiser) )
 				definitions.push(o);
 		}		

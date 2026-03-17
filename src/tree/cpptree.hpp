@@ -115,7 +115,7 @@ struct DeclScope : virtual Scope
 /// The top level of a program
 /** The top level of a program is considered a collection of declarations.
  main() would typically be a function instance somewhere in this collection. */
-struct Program : DeclScope 
+struct CodeUnit : DeclScope 
 { 
 	NODE_FUNCTIONS_FINAL
 	Production GetMyProductionTerminal() const override;

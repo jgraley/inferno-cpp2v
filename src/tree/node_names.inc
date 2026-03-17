@@ -15,7 +15,7 @@ NODE(CPPTree, Type)
 NODE(CPPTree, Declaration)
 NODE(CPPTree, Scope)
 NODE(CPPTree, DeclScope)
-NODE(CPPTree, Program)
+NODE(CPPTree, CodeUnit)
 NODE(CPPTree, Uncombable)
 // Identifiers etc
 NODE(CPPTree, Identifier)

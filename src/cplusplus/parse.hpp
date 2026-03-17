@@ -66,7 +66,7 @@ public:
         }
         pp.EnterMainSourceFile();
 
-        auto root = MakeTreeNode<Program>();
+        auto root = MakeTreeNode<CodeUnit>();
         auto context = root;
         clang::IdentifierTable it(opts);
         InfernoAction actions(context, root, it, pp, *ptarget);
@@ -90,7 +90,7 @@ private:
                       clang::IdentifierTable &, clang::Preprocessor &pp,
                       clang::TargetInfo &T) :
             preprocessor(pp), target_info(T), ident_track(context),
-            global_scope(context), all_decls(MakeTreeNode<Program>()) // TODO Scope not Program
+            global_scope(context), all_decls(MakeTreeNode<CodeUnit>()) // TODO Scope not CodeUnit
         {
             ASSERT( context );
             ASSERT( root );
@@ -141,7 +141,7 @@ private:
         RCHold<Node, CXXScopeTy *> hold_scope;
         IdentifierTracker ident_track;
         TreePtr<Node> global_scope;
-        TreePtr<Program> all_decls; // not the actual program, just a flattening of the decls
+        TreePtr<CodeUnit> all_decls; // not the actual program, just a flattening of the decls
         // we maintain this because decls don't always make it
         // into the tree by the time we need them, thanks to the
         // way clang works. Decls go in here immediately.

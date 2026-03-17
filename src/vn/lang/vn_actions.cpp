@@ -1038,7 +1038,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Typieish symbol to be a type_prefix operator which teleports into expr_prefix
 
-// Clean up base sccess specs, fix use of Public for Default. Just correct them in OnInheritanceRecord() like with members, except
+// Clean up base access specs, fix use of Public for Default. Just correct them in OnInheritanceRecord() like with members, except
 // we'll need a DefaultAccess local node type to differentiate from NULL which means wild.
 
 // Semantics of optional keywords: if absent, this is taken to be the default (eg, private for a base of a class, non-const for 
@@ -1046,12 +1046,12 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Renderer is producing eg ⊛CPPTree::SpecificTypeIdentifier⦅"sc_module"⦆⨟ when the CPPTree should be implicit eg 003
 
-// Note: there are no expicit forms for agents. Thus, no ⯁Star⦅⦆ for example.
+// Note: there are no explicit forms for agents. Thus, no ⯁Star⦅⦆ for example.
 
-// Eliding Program:
+// Eliding CodeUnit:
 // alternative to normal that accepts multiple stmt/decl (with ;) OR an expression or a type, and it probably
 // needs its own ∧ and ∨. Call all this "program" (or maybe switch to "unit" as in compilation unit)
-// Call OnProgram to get a Program node. Rendering should be straightforward.
+// Call OnProgram to get a CodeUnit node. Rendering should be straightforward.
 
 // NOTE
 // Lots of conflicts incl around declarators resolved by making pre-restriction refuse to switch between
