@@ -810,7 +810,7 @@ private:
             DefaultTransUtils utils(all_decls);
             TransKit kit { &utils };
             // Actions if we have an intiialiser
-            if( auto ai = DynamicTreePtrCast<ArrayLiteral>(o->initialiser) )
+            if( auto ai = DynamicTreePtrCast<ArrayInitialiser>(o->initialiser) )
             {
 				// If an array does not give its size (eg myarr[]), fill the size
 				// in from the initialiser
@@ -1791,7 +1791,7 @@ private:
         // Assume initialiser is for an Array, and create an ArrayInitialiser node
         // even if it's really a struct init. We'll come along later and replace with a
         // RecordInitialiser when we can see what the struct is.
-        auto ao = MakeTreeNode<ArrayLiteral>();
+        auto ao = MakeTreeNode<ArrayInitialiser>();
         for(unsigned i=0; i<NumInit; i++)
         {
             TreePtr<Expression> e = hold_expr.FromRaw( InitList[i] );
@@ -1804,14 +1804,14 @@ private:
     // Create a RecordInitialiser using the elements of the supplied ArrayInitialiser and matching
     // them against the members of the supplied record. Records are stored using an unordered
     // collection for the members, so we have to use the ordered backing map. Array inits are ordered.
-    TreePtr<RecordLiteral> CreateRecordLiteralFromArrayLiteral( TreePtr<ArrayLiteral> ai,
+    TreePtr<RecordInitialiser> CreateRecordLiteralFromArrayLiteral( TreePtr<ArrayInitialiser> ai,
             TreePtr<Record> r )
     {
         // Make new record initialiser and fill in the type
-        auto ri = MakeTreeNode<RecordLiteral>();
+        auto ri = MakeTreeNode<RecordInitialiser>();
         ri->type = r->identifier;
 
-        // Fill in the RecordLiteral operands collection with pairs that relate operands to their member ids
+        // Fill in the RecordInitialiser operands collection with pairs that relate operands to their member ids
         TreePtr<Scope> s = r;
         PopulateMapOperator( ri->operands, ai->elements, s );
 
@@ -2160,7 +2160,7 @@ private:
         // change it.
         DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
-        if( TreePtr<ArrayLiteral> ai = DynamicTreePtrCast<ArrayLiteral>(e) )
+        if( TreePtr<ArrayInitialiser> ai = DynamicTreePtrCast<ArrayInitialiser>(e) )
             if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(t) )
                 if( TreePtr<Record> r = TryGetRecordDeclaration(kit, ti).GetTreePtr() )
                     e = CreateRecordLiteralFromArrayLiteral( ai, r );

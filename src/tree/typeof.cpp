@@ -74,7 +74,7 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
     {
         return GET_CHILD(c, type);
     }
-    else if( auto rl = AugTreePtr<RecordLiteral>::DynamicCast(o) )
+    else if( auto rl = AugTreePtr<RecordInitialiser>::DynamicCast(o) )
     {
         return GET_CHILD(rl, type);
     }
@@ -126,7 +126,7 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
         else
             throw SubscriptUsageMismatch();
     }
-    else if( auto al = AugTreePtr<ArrayLiteral>::DynamicCast(op) )
+    else if( auto al = AugTreePtr<ArrayInitialiser>::DynamicCast(op) )
     {
         auto a = kit.utils->MakeAugTreeNode<Array>();
         auto sz = kit.utils->MakeAugTreeNode<SpecificInteger>( (int)(al->elements.size()) ); // TODO make it work with size_t and remove the cast

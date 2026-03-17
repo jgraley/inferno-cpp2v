@@ -122,8 +122,8 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return RenderLiteral( literal, surround_prod );
     else if( auto call = TreePtr<Call>::DynamicCast(node) )
         return RenderMapArgsCallAsSeqArg( call, surround_prod ); // Still need this for map args resolution TODO raise/lower steps
-    else if( auto make_rec = TreePtr<RecordLiteral>::DynamicCast(node) )
-        return RenderMakeRecord( make_rec, surround_prod );
+    else if( auto make_rec = TreePtr<RecordInitialiser>::DynamicCast(node) )
+        return RenderRecordInitialiser( make_rec, surround_prod );
     else if( auto macro_decl = TreePtr<MacroDeclaration>::DynamicCast(node) )
         return RenderMacroDeclaration( macro_decl, surround_prod );
     else if( auto macro_stmt = TreePtr<MacroStatement>::DynamicCast(node) )
@@ -359,7 +359,7 @@ string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Pro
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderMakeRecord( TreePtr<RecordLiteral> make_rec, Syntax::Production surround_prod ) try
+string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, Syntax::Production surround_prod ) try
 {
 	(void)surround_prod;
     string s;
@@ -373,7 +373,7 @@ string CppRender::RenderMakeRecord( TreePtr<RecordLiteral> make_rec, Syntax::Pro
     // fields, but they need to be sorted based on dependency order when rendering
     // the records (we also aim for repeatability here). This ordering must then
     // be applied to the Collection<IdValuePair> in order to get a match-up between sub-expressions
-    // and fields. I think C++ side-steps this by diallowing the RecordLiteral syntax
+    // and fields. I think C++ side-steps this by diallowing the RecordInitialiser syntax
     // in classes where dependencies might matter.
 
     TreePtr<Record> r = TryGetRecordDeclaration(trans_kit, id).GetTreePtr();

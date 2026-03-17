@@ -1289,15 +1289,15 @@ string Subscript::GetRender( VN::RendererInterface *renderer, Production, Policy
 		   "]";       
 }
 
-//////////////////////////// ArrayLiteral ///////////////////////////////
+//////////////////////////// ArrayInitialiser ///////////////////////////////
 
-Syntax::Production ArrayLiteral::GetMyProductionTerminal() const
+Syntax::Production ArrayInitialiser::GetMyProductionTerminal() const
 { 
 	return Production::INITIALISER; 
 }
 
 
-string ArrayLiteral::GetRender( VN::RendererInterface *renderer, Production, Policy )
+string ArrayInitialiser::GetRender( VN::RendererInterface *renderer, Production, Policy )
 {
 	list<string> renders;    
     for( TreePtr<Expression> e : elements )
@@ -1417,9 +1417,9 @@ string ConstructInit::GetRender( VN::RendererInterface *renderer, Production, Po
 	return argumentation->DirectRenderArgumentation(renderer, policy);
 }
 
-//////////////////////////// RecordLiteral ///////////////////////////////
+//////////////////////////// RecordInitialiser ///////////////////////////////
 
-Syntax::Production RecordLiteral::GetMyProductionTerminal() const
+Syntax::Production RecordInitialiser::GetMyProductionTerminal() const
 { 
 	return Production::BRACKETED; 
 }

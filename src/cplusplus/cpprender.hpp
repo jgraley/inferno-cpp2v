@@ -33,7 +33,7 @@ private:
     string RenderMapArgsCallAsSeqArg( TreePtr<CPPTree::Call> call, Syntax::Production surround_prod );
     string RenderMacroStatement( TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod );
     string RenderExpression( TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod, Syntax::Policy policy );
-    string RenderMakeRecord( TreePtr<CPPTree::RecordLiteral> make_rec, Syntax::Production surround_prod );
+    string RenderRecordInitialiser( TreePtr<CPPTree::RecordInitialiser> make_rec, Syntax::Production surround_prod );
 	Sequence<CPPTree::Expression> SortMapById( Collection<CPPTree::IdValuePair> &id_value_map,
                                                Sequence<CPPTree::Declaration> key_sequence );  
 	TreePtr<CPPTree::SeqArgumentation> MakeSeqArgumentation( TreePtr<CPPTree::MapArgumentation> map_argumentation,

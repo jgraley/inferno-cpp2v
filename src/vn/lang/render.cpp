@@ -146,7 +146,7 @@ Syntax::Policy Render::GetDefaultPolicy()
 	policy.refuse_map_argumentation = false;
 
 	// Don't insert {} into patterns because they imply Compound or StatementExpression
-	// or ArrayLiteral or RecordLiteral. Use () instead, which are purely for disamiguation.
+	// or ArrayInitialiser or RecordInitialiser. Use () instead, which are purely for disamiguation.
 	policy.boot_statements_using_braces = false;
 	
 	// Need to separate members from statements in Compound
