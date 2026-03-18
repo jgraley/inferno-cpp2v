@@ -112,7 +112,7 @@ string IdentifierByNameAgent::GetAgentRender( VN::RendererInterface *renderer, S
     (void)renderer;
 	(void)surround_prod;
 	(void)policy;
-	string s = "⊛CPPTree::Specific" + GetIdentifierSubTypeName() + "Identifier";
+	string s = "⊛Specific" + GetIdentifierSubTypeName() + "Identifier";
 	s += "⦅\"" + name;
 	s += "\"⦆";
 	return s;

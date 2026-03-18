@@ -1033,19 +1033,13 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Check 093-DetectSuperLoop, we have ☆:; and then goto ☆ even though a coupling would seem to be needed, but we didn't get a designation.
 
-// Tix:
-// Lose StandardAgentWrapper #867
-// Add ability to pre-process #862
-// Global designations #872
-// Type mismatches #874
-
 // C fold-in: 
 // things like OnPrefixOperator() should take an actual parser token not a string
 
 // Types: see https://alx71hub.github.io/hcb/#decl-specifier-seq
 // Keep the () on types for disambiguation unless you can prove away or just rely on designations TODO.
 
-// Typieish symbol to be a type_prefix operator which teleports into expr_prefix
+// Typeish symbol to be a type_prefix operator which teleports into expr_prefix
 
 // Clean up base access specs, fix use of Public for Default. Just correct them in OnInheritanceRecord() like with members, except
 // we'll need a DefaultAccess local node type to differentiate from NULL which means wild.
@@ -1057,15 +1051,6 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Note: there are no explicit forms for agents. Thus, no ⯁Star⦅⦆ for example.
 
-// Eliding CodeUnit:
-// - Pass Policy into GetAgentRender() and back into DoRender() until compiles OK
-// - Whereever flags are being set before recursing policy, consider whether some sub-production should clear them again (or re-default them)
-// - fix up any other issues re: passing around policy recursively
-// - definitions needs to be under shared_ptr since Policy is passed by value. CodeUnit::GetRender() can create/destroy it however
-// - Once rendering OK for C++ render, switch to something simpler for VN render, and for now use ∞{}
-// - Get VN parser to accept ∞{code unit}
-// - Try and switch to implict, main challenge being the top level
- 
 
 // 
 // NOTE

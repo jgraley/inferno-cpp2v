@@ -78,7 +78,7 @@ Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
 
 string BuildIdentifierAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
-	string s = "⧇CPPTree::Specific" + GetIdentifierSubTypeName() + "Identifier"; 
+	string s = "⧇Specific" + GetIdentifierSubTypeName() + "Identifier"; 
 	(void)surround_prod;
 
 	// List the sources as a pseudo-item
