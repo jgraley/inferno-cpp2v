@@ -63,10 +63,10 @@ Syntax::Production PointerIsAgent::GetAgentProduction() const
 }
 
 
-string PointerIsAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
+string PointerIsAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	(void)surround_prod;
-	return "⮎" + renderer->DoRender( (TreePtr<Node>)(*GetPointer()), Syntax::Production::PREFIX );
+	return "⮎" + renderer->DoRender( (TreePtr<Node>)(*GetPointer()), Syntax::Production::PREFIX, policy );
 } 
 
 

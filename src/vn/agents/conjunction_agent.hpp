@@ -28,7 +28,7 @@ public:
                                           const SCREngine *acting_engine ) final;
 
 	Syntax::Production GetAgentProduction() const override;
-	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const final;
+	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const final;
     NodeBlock GetGraphBlockInfo() const final;
     mutable Collection<Node> conjuncts; // TODO provide const iterators and remove mutable
 

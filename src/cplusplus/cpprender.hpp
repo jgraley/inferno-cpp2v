@@ -19,21 +19,20 @@ private:
 	string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) override;
 	
 	string DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
-	string RenderProgram( TreePtr<CPPTree::CodeUnit> program, Syntax::Production surround_prod, Syntax::Policy policy ); 
-    string RenderLiteral( TreePtr<CPPTree::Literal> sp, Syntax::Production surround_prod ); 
-    string RenderScopeResolvingPrefix( TreePtr<Node> node ) final;
+    string RenderLiteral( TreePtr<CPPTree::Literal> sp, Syntax::Production surround_prod, Syntax::Policy policy ); 
+    string RenderScopeResolvingPrefix( TreePtr<Node> node, Syntax::Policy policy ) final;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const final;
     string RenderIdentifier( TreePtr<CPPTree::Identifier> id, Syntax::Production surround_prod );
     string DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                       bool constant ) final;
     string Sanitise( string s );
-    string RenderOperator( TreePtr<CPPTree::Operator> op, Syntax::Production surround_prod );
-    string RenderMapArgs( TreePtr<CPPTree::Type> callee_type, TreePtr<CPPTree::MapArgumentation> map_argumentation );
-    string RenderMapArgsCallAsSeqArg( TreePtr<CPPTree::Call> call, Syntax::Production surround_prod );
-    string RenderMacroStatement( TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod );
+    string RenderOperator( TreePtr<CPPTree::Operator> op, Syntax::Production surround_prod, Syntax::Policy policy );
+    string RenderMapArgs( TreePtr<CPPTree::Type> callee_type, TreePtr<CPPTree::MapArgumentation> map_argumentation, Syntax::Policy policy );
+    string RenderMapArgsCallAsSeqArg( TreePtr<CPPTree::Call> call, Syntax::Production surround_prod, Syntax::Policy policy );
+    string RenderMacroStatement( TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderExpression( TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod, Syntax::Policy policy );
-    string RenderRecordInitialiser( TreePtr<CPPTree::RecordInitialiser> make_rec, Syntax::Production surround_prod );
+    string RenderRecordInitialiser( TreePtr<CPPTree::RecordInitialiser> make_rec, Syntax::Production surround_prod, Syntax::Policy policy );
 	Sequence<CPPTree::Expression> SortMapById( Collection<CPPTree::IdValuePair> &id_value_map,
                                                Sequence<CPPTree::Declaration> key_sequence );  
 	TreePtr<CPPTree::SeqArgumentation> MakeSeqArgumentation( TreePtr<CPPTree::MapArgumentation> map_argumentation,
@@ -43,17 +42,16 @@ private:
                        Sequence<CPPTree::Statement> &inits, 
                        Sequence<CPPTree::Statement> &remainder );
 
-    string RenderInstanceProto( TreePtr<CPPTree::Instance> o, Syntax::Production starting_declarator_prod );
-    string RenderInitialisation( TreePtr<CPPTree::Initialiser> init );
+    string RenderInstanceProto( TreePtr<CPPTree::Instance> o, Syntax::Production starting_declarator_prod, Syntax::Policy policy );
+    string RenderInitialisation( TreePtr<CPPTree::Initialiser> init, Syntax::Policy policy );
     string RenderInstance( TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod, Syntax::Policy policy );
     bool ShouldSplitInstance( TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod, Syntax::Policy policy );
-	string RenderMacroDeclaration( TreePtr<CPPTree::MacroDeclaration> md, Syntax::Production surround_prod );
+	string RenderMacroDeclaration( TreePtr<CPPTree::MacroDeclaration> md, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderEnumHead( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
-	string RenderPreProcDecl( TreePtr<CPPTree::PreProcDecl> ppd, Syntax::Production surround_prod );
+	string RenderPreProcDecl( TreePtr<CPPTree::PreProcDecl> ppd, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderDeclaration( TreePtr<CPPTree::Declaration> declaration, Syntax::Production surround_prod, Syntax::Policy policy );
- 	string RenderConstructorInitList( Sequence<CPPTree::Statement> spe );
+ 	string RenderConstructorInitList( Sequence<CPPTree::Statement> spe, Syntax::Policy policy );
 	string RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
-    string RenderOperandSequence( Sequence<CPPTree::Expression> spe );
 
 	UniquifyNames::NodeToNameMap unique_identifier_names;
 };

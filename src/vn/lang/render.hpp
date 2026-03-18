@@ -29,8 +29,6 @@ public:
     
 	static Syntax::Policy GetDefaultPolicy();
 	string DoRender( TreePtr<Node> node, 
-	                             Syntax::Production surround_prod ) final;
-	string DoRender( TreePtr<Node> node, 
 	                             Syntax::Production surround_prod, 
 	                             Syntax::Policy policy ) final;
 	string AccomodateInit( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
@@ -44,7 +42,7 @@ public:
 	list<string> PopulateItemStrings( shared_ptr<const Node> node, Syntax::Policy policy );
 	string RenderNodeTypeName( shared_ptr<const Node> node ) const; 
 	string RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) final;
-	string RenderScopeResolvingPrefix( TreePtr<Node> id ) override;
+	string RenderScopeResolvingPrefix( TreePtr<Node> id, Syntax::Policy policy ) override;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const override;
 
     string DoRenderTypeAndDeclarator( TreePtr<Node> type, string declarator, 
@@ -65,7 +63,6 @@ public:
 
     const Syntax::Policy default_policy;
     TreePtr<Node> context;
-    queue<TreePtr<CPPTree::Instance>> definitions;
     UniquifyNames::NodeToNameMap unique_coupling_names;
     UniquifyNames::LinkSetByNode incoming_links_map;
     const string output_x_path;                                     

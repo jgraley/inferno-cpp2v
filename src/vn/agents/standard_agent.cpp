@@ -972,14 +972,14 @@ Syntax::Production StandardAgent::GetAgentProduction() const
 }		
 
 
-string StandardAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod) const
+string StandardAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	shared_ptr<const Node> node = GetPatternPtr();
 	if( dynamic_cast<const CPPTree::SpecificIdentifier *>(node.get()) )
     {
 		// SpecificIdentifiers appear rarely in patterns, and when they do they are not declared,
 		// so we should not try to render the C++ terminal	   
-		return renderer->RenderNodeExplicit(node, surround_prod, Syntax::Policy());
+		return renderer->RenderNodeExplicit(node, surround_prod, policy);
 	}	
 	else
 	{

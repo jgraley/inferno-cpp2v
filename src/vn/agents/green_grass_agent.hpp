@@ -28,7 +28,7 @@ public:
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatingQuery(PatternLink keyer_plink) const; 
 
 	Syntax::Production GetAgentProduction() const override;
-	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const final;
+	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const final;
 	
 	NodeBlock GetGraphBlockInfo() const final;
     TreePtr<Node> through;

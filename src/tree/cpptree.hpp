@@ -112,13 +112,15 @@ struct DeclScope : virtual Scope
     Collection<Declaration> members; /// The declarations in this scope    
 };
 
-/// The top level of a program
-/** The top level of a program is considered a collection of declarations.
- main() would typically be a function instance somewhere in this collection. */
+/// One unit of code
+/** Like a compilation unit but for VN. Does not have to be entire program.
+ * It is considered a collection of declarations. main() would typically be a 
+ * function instance somewhere in the collection, if included. */
 struct CodeUnit : DeclScope 
 { 
 	NODE_FUNCTIONS_FINAL
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
 };
 
 /// Indicates that the node cannot be combinationalised

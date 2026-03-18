@@ -116,24 +116,22 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
 {			
     if( TreePtr<Uninitialised>::DynamicCast(node) )
         return string();  
-    else if( auto program = TreePtr<CodeUnit>::DynamicCast(node) )
-        return RenderProgram( program, surround_prod, policy );
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
-        return RenderLiteral( literal, surround_prod );
+        return RenderLiteral( literal, surround_prod, policy );
     else if( auto call = TreePtr<Call>::DynamicCast(node) )
-        return RenderMapArgsCallAsSeqArg( call, surround_prod ); // Still need this for map args resolution TODO raise/lower steps
+        return RenderMapArgsCallAsSeqArg( call, surround_prod, policy ); // Still need this for map args resolution TODO raise/lower steps
     else if( auto make_rec = TreePtr<RecordInitialiser>::DynamicCast(node) )
-        return RenderRecordInitialiser( make_rec, surround_prod );
+        return RenderRecordInitialiser( make_rec, surround_prod, policy );
     else if( auto macro_decl = TreePtr<MacroDeclaration>::DynamicCast(node) )
-        return RenderMacroDeclaration( macro_decl, surround_prod );
+        return RenderMacroDeclaration( macro_decl, surround_prod, policy );
     else if( auto macro_stmt = TreePtr<MacroStatement>::DynamicCast(node) )
-        return RenderMacroStatement( macro_stmt, surround_prod );
+        return RenderMacroStatement( macro_stmt, surround_prod, policy );
     else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
         return RenderExpression( expression, surround_prod, policy );
     else if( auto instance = TreePtr<Instance>::DynamicCast(node) )    // Instance is a kind of Statement and Declaration
         return RenderInstance( instance, surround_prod, policy ); 
     else if( auto ppd = TreePtr<PreProcDecl>::DynamicCast(node) )
-        return RenderPreProcDecl(ppd, surround_prod); 
+        return RenderPreProcDecl(ppd, surround_prod, policy); 
     else if( auto declaration = TreePtr<Declaration>::DynamicCast(node) )
         return RenderDeclaration( declaration, surround_prod, policy );
         
@@ -143,71 +141,15 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
 }
 
 
-string CppRender::RenderProgram( TreePtr<CPPTree::CodeUnit> program, Syntax::Production surround_prod, Syntax::Policy policy )
+string CppRender::RenderLiteral( TreePtr<Literal> sp, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
 	(void)surround_prod;
-	Syntax::Policy definition_policy = policy;
-	definition_policy.force_initialisation = true;
-
-    Sequence<Declaration> sorted = SortDecls( program->members, true );
-
-	queue<TreePtr<Declaration>> require_complete;
-	
-    // Emit preprocs and an incomplete for each record 
-    string s;
-    for( TreePtr<Declaration> pd : sorted )
-    {       
-        if( auto ppd = DynamicTreePtrCast<PreProcDecl>(pd) )
-        {
-            s += DoRender( ppd, Syntax::Production::DECLARATION ) + "\n";
-            continue;
-        }
-        
-        if( DynamicTreePtrCast<Record>(pd) && !DynamicTreePtrCast<Enum>(pd) ) 
-        {    
-			// A record within our scope
-			Syntax::Policy record_policy = policy;
-			record_policy.force_incomplete_records = true; 
-
-			s += DoRender( pd, Syntax::Production::DECLARATION, record_policy ); 
-		}
-		
-		require_complete.push( pd );
-    }
-    
-    // Emit the complete declarations (from top-level only), sorted for dependencies
-    while( !require_complete.empty()  )
-    {
-        TreePtr<Declaration> d = require_complete.front();
-        require_complete.pop();       		
-        s += DoRender( d, Syntax::Production::DECLARATION, policy );
-    }
-    
-    s += "\n// Definitions";    
-    
-    // Emit the actual definitions (from anywhere), sorted for dependencies
-    // These are rendered here, inside program scope but outside any additional scopes
-    // that were on the scope stack when the instance was seen. These could go in a .cpp file.
-    while( !definitions.empty() )
-    {
-        s += "\n";
-        s += DoRender( definitions.front(), Syntax::Production::DECLARATION, definition_policy ); 
-        s += "\n";
-        definitions.pop();
-    }
-    return s;  
-}
-
-
-string CppRender::RenderLiteral( TreePtr<Literal> sp, Syntax::Production surround_prod ) try
-{
-	(void)surround_prod;
-    return Sanitise( sp->GetRender(this, surround_prod, default_policy) );
+    return Sanitise( sp->GetRender(this, surround_prod, policy) );
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderScopeResolvingPrefix( TreePtr<Node> node ) try
+string CppRender::RenderScopeResolvingPrefix( TreePtr<Node> node, Syntax::Policy policy ) try
 {
     TreePtr<Node> scope = TryGetScope(node);
               
@@ -216,9 +158,9 @@ string CppRender::RenderScopeResolvingPrefix( TreePtr<Node> node ) try
     else if( DynamicTreePtrCast<CodeUnit>( scope ) )
         return "";
     else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
-        return RenderScopeResolvingPrefix( e->identifier );    // omit scope for the enum itself
+        return RenderScopeResolvingPrefix( e->identifier, policy );    // omit scope for the enum itself
     else if( auto r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
-        return r->identifier->GetRender(this, Syntax::Production::RESOLVER, default_policy) + "::";
+        return r->identifier->GetRender(this, Syntax::Production::RESOLVER, policy) + "::";
     else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
              DynamicTreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
              DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
@@ -267,7 +209,7 @@ string CppRender::Sanitise( string s ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surround_prod ) try
+string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
     (void)surround_prod;
     ASSERT(op);
@@ -279,12 +221,12 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
         ASSERTFAIL(); // Hold this spot for resolving the map args to the constructor
     }
     else
-        return RenderNodeExplicit( op, surround_prod, default_policy );
+        return RenderNodeExplicit( op, surround_prod, policy );
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderMapArgs( TreePtr<Type> callee_type, TreePtr<MapArgumentation> map_argumentation ) try
+string CppRender::RenderMapArgs( TreePtr<Type> callee_type, TreePtr<MapArgumentation> map_argumentation, Syntax::Policy policy ) try
 {   
 	list<string> ls;
 	ASSERT( callee_type );
@@ -300,12 +242,12 @@ string CppRender::RenderMapArgs( TreePtr<Type> callee_type, TreePtr<MapArgumenta
 	TreePtr<SeqArgumentation> sa = MakeSeqArgumentation( map_argumentation, decl_sequence );
 
 	// Let the SeqArgumentation node do the actual render
-	return sa->DirectRenderArgumentation(this, default_policy);
+	return sa->DirectRenderArgumentation(this, policy);
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<Call> call, Syntax::Production surround_prod ) try
+string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<Call> call, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
 	(void)surround_prod;
 	// Note: we need to operate on the call, so that we can use callee to find the declaration and 
@@ -316,23 +258,23 @@ string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<Call> call, Syntax::Product
 
     // Render the expression that resolves to the function name unless this is
     // a constructor call in which case just the name of the thing being constructed.
-    string s = DoRender( call->callee, Syntax::Production::POSTFIX );
+    string s = DoRender( call->callee, Syntax::Production::POSTFIX, policy );
 
 	// A map-args call isn't C++, so lower it to sequential args - requires the function type
-    s += RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args);
+    s += RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args, policy);
     return s;
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderMacroStatement( TreePtr<MacroStatement> ms, Syntax::Production surround_prod ) try
+string CppRender::RenderMacroStatement( TreePtr<MacroStatement> ms, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
 	(void)surround_prod;
-	string s = DoRender( ms->identifier, Syntax::Production::POSTFIX );
+	string s = DoRender( ms->identifier, Syntax::Production::POSTFIX, policy );
 	
     list<string> renders; // TODO duplicated code, factor out into RenderSeqMacroArgs()
     for( TreePtr<Node> node : ms->arguments )
-        renders.push_back( DoRender( node, Syntax::Production::COMMA_SEP) );
+        renders.push_back( DoRender( node, Syntax::Production::COMMA_SEP, policy) );
     s += Join(renders, ", ", "(", ");\n");
     return s;
 }
@@ -359,7 +301,7 @@ string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Pro
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, Syntax::Production surround_prod ) try
+string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
 	(void)surround_prod;
     string s;
@@ -386,10 +328,10 @@ string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, 
     // Render to strings
     list<string> ls;
     for( TreePtr<Expression> e : sub_expr_sequence )
-        ls.push_back( DoRender( e, Syntax::Production::COMMA_SEP ) );
+        ls.push_back( DoRender( e, Syntax::Production::COMMA_SEP, policy ) );
 
     // Do the syntax
-    s += "(" + DoRender( make_rec->type, Syntax::Production::BOTTOM_EXPR ) + ")"; 
+    s += "(" + DoRender( make_rec->type, Syntax::Production::BOTTOM_EXPR, policy ) + ")"; 
     s += Join( ls, ", ", "{", "}" );   // Use of {} in expressions is irregular so handle locally 
     return s;
 }
@@ -474,7 +416,7 @@ void CppRender::ExtractInits( Sequence<Statement> &body,
 }
 
 
-string CppRender::RenderInstanceProto( TreePtr<Instance> o, Syntax::Production starting_declarator_prod ) try
+string CppRender::RenderInstanceProto( TreePtr<Instance> o, Syntax::Production starting_declarator_prod, Syntax::Policy policy ) try
 {
     string s;
     bool constant=false;
@@ -486,15 +428,15 @@ string CppRender::RenderInstanceProto( TreePtr<Instance> o, Syntax::Production s
         if( DynamicTreePtrCast<Const>(f->constancy) )
             constant = true;
             
-    string declarator = DoRender( o->identifier, starting_declarator_prod );
-    s += DoRenderTypeAndDeclarator( o->type, declarator, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, default_policy, constant );
+    string declarator = DoRender( o->identifier, starting_declarator_prod, policy );
+    s += DoRenderTypeAndDeclarator( o->type, declarator, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, policy, constant );
 
     return s;
 } 
 DEFAULT_CATCH_CLAUSE  
 
 
-string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
+string CppRender::RenderInitialisation( TreePtr<Initialiser> init, Syntax::Policy policy ) try
 {
 	string s;
 	if( ReadArgs::use.count("c") )
@@ -522,7 +464,7 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
         if( !inits.empty() )
         {
             s += " :\n";
-            s += RenderConstructorInitList( inits );
+            s += RenderConstructorInitList( inits, policy );
 
 			// Render the other stuff as a Compound so we always get {} in all cases
 			auto r = MakeTreeNode<Compound>();
@@ -532,7 +474,7 @@ string CppRender::RenderInitialisation( TreePtr<Initialiser> init ) try
 		}	
     }
 	
-    return s + DoRender( init, Syntax::Production::INITIALISER); 
+    return s + DoRender( init, Syntax::Production::INITIALISER, policy); 
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -547,8 +489,8 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surrou
 			s += "/* force init */";   
 		// Definition is out-of-line so skip the storage
 		policy.force_initialisation = false; // stop at one level
-		s += RenderInstanceProto( o, Syntax::Production::RESOLVER );
-		s += RenderInitialisation( o->initialiser );	
+		s += RenderInstanceProto( o, Syntax::Production::RESOLVER, policy );
+		s += RenderInitialisation( o->initialiser, policy );	
 		s += "\n";		
 	}
 	else 
@@ -556,7 +498,7 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surrou
 		if( ReadArgs::use.count("c") )
 			s += "/* no force init */";   
 		s += RenderStorage( o, policy );
-		s += RenderInstanceProto( o, Syntax::Production::PURE_IDENTIFIER );
+		s += RenderInstanceProto( o, Syntax::Production::PURE_IDENTIFIER, policy );
 		if( ShouldSplitInstance(o, surround_prod, policy) )
 		{
 			if( ReadArgs::use.count("c") )
@@ -564,14 +506,18 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surrou
 			// Emit just a prototype now and request definition later
 			// Split out the definition of the instance for rendering later at CodeUnit scope
 			if( !TreePtr<Uninitialised>::DynamicCast(o->initialiser) )
-				definitions.push(o);
+			{
+				ASSERT(policy.definitions); // Not under a node that can render definitions
+				policy.definitions->push(o);
+				FTRACE(o)((void *)&policy)("\n");
+			}
 		}		
 		else
 		{
 			if( ReadArgs::use.count("c") )
 				s += "/* no split */";   
 			// Emit the whole lot in-line
-			s += RenderInitialisation( o->initialiser );							
+			s += RenderInitialisation( o->initialiser, policy );							
 		}
 	}
 	return s;
@@ -580,7 +526,7 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surrou
 
 // Non-const static objects in records and functions 
 // get split into a part that goes into the record (main line of rendering) and
-// a part that goes separately (definitions gets appended at the very end).
+// a part that goes separately (definitions get appended at end of code unit).
 // Do all functions, since SortDecls() ignores function bodies for dep analysis
 bool CppRender::ShouldSplitInstance( TreePtr<Instance> o, Syntax::Production , Syntax::Policy policy ) 
 {
@@ -615,18 +561,18 @@ bool CppRender::ShouldSplitInstance( TreePtr<Instance> o, Syntax::Production , S
 }
 
 
-string CppRender::RenderMacroDeclaration( TreePtr<MacroDeclaration> md, Syntax::Production surround_prod )
+string CppRender::RenderMacroDeclaration( TreePtr<MacroDeclaration> md, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	(void)surround_prod;	
     // ---- Proto ----
-	string s = DoRender( md->identifier, Syntax::Production::POSTFIX );
+	string s = DoRender( md->identifier, Syntax::Production::POSTFIX, policy );
 	list<string> renders;
 	for( TreePtr<Node> node : md->arguments )
-		renders.push_back( DoRender(node, Syntax::Production::COMMA_SEP) );
+		renders.push_back( DoRender(node, Syntax::Production::COMMA_SEP, policy) );
 	s += Join(renders, ", ", "(", ")");
 	
 	// ---- Initialisation ----	    
-    return s + RenderInitialisation( md->initialiser );
+    return s + RenderInitialisation( md->initialiser, policy );
 }
 
 
@@ -640,15 +586,15 @@ string CppRender::RenderEnumHead( TreePtr<Record> record, Syntax::Policy policy 
 }
 
 
-string CppRender::RenderPreProcDecl( TreePtr<PreProcDecl> ppd, Syntax::Production surround_prod ) try
+string CppRender::RenderPreProcDecl( TreePtr<PreProcDecl> ppd, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
 	(void)surround_prod;
     if( auto si = TreePtr<SystemInclude>::DynamicCast(ppd) )
         return "#include <" + si->filename->GetString() + ">";
     else if( auto si = TreePtr<LocalInclude>::DynamicCast(ppd) )
-        return "#include " + si->filename->GetRender(this, Syntax::Production::SPACE_SEP_PRE_PROC, default_policy);
+        return "#include " + si->filename->GetRender(this, Syntax::Production::SPACE_SEP_PRE_PROC, policy);
     else
-        return RenderNodeExplicit( ppd, surround_prod, default_policy );     
+        return RenderNodeExplicit( ppd, surround_prod, policy );     
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -661,7 +607,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
     if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
     {
         Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
-        auto id = DoRender( t->identifier, starting_declarator_prod);
+        auto id = DoRender( t->identifier, starting_declarator_prod, policy );
         return "typedef " + DoRenderTypeAndDeclarator( t->type, id, starting_declarator_prod, Syntax::Production::TYPE_IN_DECLARATION, policy );
     }
     else if( TreePtr<Enum> enum_ = DynamicTreePtrCast< Enum >(declaration) )
@@ -675,18 +621,18 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 		return s;		
     }
     else if( TreePtr<LabelDeclaration> l = DynamicTreePtrCast<LabelDeclaration>(declaration) )
-        return DoRender( l->identifier, Syntax::Production::PURE_IDENTIFIER) + ":"; 
+        return DoRender( l->identifier, Syntax::Production::PURE_IDENTIFIER, policy) + ":"; 
     
     return Render::Dispatch( declaration, surround_prod, policy );
 }
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderConstructorInitList( Sequence<Statement> spe ) try
+string CppRender::RenderConstructorInitList( Sequence<Statement> spe, Syntax::Policy policy ) try
 {
     list<string> ls; 
     for( TreePtr<Statement> st : spe )
-        ls.push_back( "    " + DoRender( st, Syntax::Production::COMMA_SEP, default_policy ) );		
+        ls.push_back( "    " + DoRender( st, Syntax::Production::COMMA_SEP, policy ) );		
     return Join(ls, ",\n");
 }
 DEFAULT_CATCH_CLAUSE
@@ -709,7 +655,7 @@ string CppRender::RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Polic
             continue;
         }
         // We're really declaring the id, and don't want scope resolution
-        s += DoRender( o->identifier, Syntax::Production::PURE_IDENTIFIER); 
+        s += DoRender( o->identifier, Syntax::Production::PURE_IDENTIFIER, policy ); 
         
         auto ei = TreePtr<Expression>::DynamicCast( o->initialiser );
         if( !ei )
@@ -717,22 +663,11 @@ string CppRender::RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Polic
             s += RenderNodeExplicit( o->initialiser, Syntax::Production::INITIALISER, policy );
             continue;
         }       
-        s += DoRender( ei, Syntax::Production::INITIALISER);
+        s += DoRender( ei, Syntax::Production::INITIALISER, policy );
 
         first = false;    
     }
     return s + "}";
 }
 DEFAULT_CATCH_CLAUSE
-
-
-string CppRender::RenderOperandSequence( Sequence<Expression> spe ) try
-{
-    TRACE();
-    string s;
-	list<string> renders;    
-    for( TreePtr<Expression> pe : spe )
-		renders.push_back( DoRender( pe, Syntax::Production::COMMA_SEP ) );
-    return Join(renders, ", ", "{", "}"); // TODO now only used in operaotr new, where the {} looks wrong
-}
-DEFAULT_CATCH_CLAUSE                            
+                 

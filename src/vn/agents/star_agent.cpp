@@ -122,7 +122,7 @@ Syntax::Production StarAgent::GetAgentProduction() const
 }
 
 
-string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
+string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	string s;
 	//s += to_string((int)surround_prod);
@@ -132,7 +132,7 @@ string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Produ
 	s += "★";
 	
 	if( *GetRestriction() )
-		s += "⦅" + renderer->DoRender( TreePtr<Node>(*GetRestriction()), Syntax::Production::BOTTOM_EXPR) + "⦆";
+		s += "⦅" + renderer->DoRender( TreePtr<Node>(*GetRestriction()), Syntax::Production::BOTTOM_EXPR, policy) + "⦆";
 	
 	return s;
 }  

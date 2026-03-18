@@ -164,12 +164,6 @@ Syntax::Policy Render::GetDefaultPolicy()
 }
 
 
-string Render::DoRender( TreePtr<Node> node, Syntax::Production surround_prod )
-{
-	return DoRender( node, surround_prod, default_policy );
-}
-
-
 string Render::DoRender( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {	
     INDENT("R");
@@ -402,7 +396,7 @@ string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, S
 	try
 	{
 		if( const Agent *agent = Agent::TryAsAgentConst(node) )
-			return agent->GetAgentRender( this, surround_prod );
+			return agent->GetAgentRender( this, surround_prod, policy );
 	}
 	catch( Syntax::Refusal & ) {}
 	
@@ -437,14 +431,14 @@ list<string> Render::PopulateItemStrings( shared_ptr<const Node> node, Syntax::P
 			if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(items[i]) )                
 			{
 				if( con->size() == 1 )
-					sitems.push_back( DoRender( TreePtr<Node>(con->front()), Syntax::Production::VN_SEP_ITEMS ) );
+					sitems.push_back( DoRender( TreePtr<Node>(con->front()), Syntax::Production::VN_SEP_ITEMS, policy ) );
 				else
 				{
 					list<string> scon;
 					for( const TreePtrInterface &p : *con )
 					{
 						ASSERT( p ); 
-						scon.push_back( DoRender( TreePtr<Node>(p), Syntax::Production::VN_SEP_ITEMS ) );
+						scon.push_back( DoRender( TreePtr<Node>(p), Syntax::Production::VN_SEP_ITEMS, policy ) );
 					}
 					if( GetTotalSize(scon) > Syntax::GetLineBreakThreshold() )
 						sitems.push_back( Join( scon, "🞄\n", "", "") );
@@ -454,7 +448,7 @@ list<string> Render::PopulateItemStrings( shared_ptr<const Node> node, Syntax::P
 			}            
 			else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
 			{
-				string ss = DoRender( TreePtr<Node>(*singular), Syntax::Production::VN_SEP_ITEMS );
+				string ss = DoRender( TreePtr<Node>(*singular), Syntax::Production::VN_SEP_ITEMS, policy );
 				sitems.push_back( ss );
 			}
 			else
@@ -497,7 +491,7 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
 }
 
 
-string Render::RenderScopeResolvingPrefix( TreePtr<Node> )
+string Render::RenderScopeResolvingPrefix( TreePtr<Node>, Syntax::Policy )
 {
 	ASSERTFAIL("VN renderer doesn't do scope resolution");
 }
@@ -560,9 +554,9 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
 		// which may require precdence booting. 
 		if( const Agent *type_agent = Agent::TryAsAgentConst(type) )
 			return (constant?"const ":"") + 
-		   type_agent->GetAgentRender( this, type_prod ) + 
+		   type_agent->GetAgentRender( this, type_prod, policy ) + 
 		   (declarator != "" ? " "+declarator : "");
-		    // return agent->GetAgentRender( this, surround_prod );
+		    // return agent->GetAgentRender( this, surround_prod, policy );
 	}
 	catch( Syntax::Refusal & ) {}
 	
@@ -608,11 +602,9 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 		struct FakeRenderer : RendererInterface
 		{
 			string DoRender( TreePtr<Node>, 
-										 Syntax::Production ) final { return "fake"; } 
-			string DoRender( TreePtr<Node>, 
 										 Syntax::Production, 
 										 Syntax::Policy ) final { return "fake"; } 
-			string RenderScopeResolvingPrefix( TreePtr<Node> ) final { return ""; } 
+			string RenderScopeResolvingPrefix( TreePtr<Node>, Syntax::Policy ) final { return ""; } 
 			string GetUniqueIdentifierName( TreePtr<Node> ) const final { return "fake"; }
 			string DoRenderTypeAndDeclarator( TreePtr<Node>, string, 
 											  Syntax::Production, Syntax::Production, Syntax::Policy,

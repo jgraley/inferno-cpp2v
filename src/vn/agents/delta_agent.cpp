@@ -63,7 +63,7 @@ Syntax::Production DeltaAgent::GetAgentProduction() const
 }
 
 
-string DeltaAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
+string DeltaAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	(void)surround_prod;
 	// We can use PREFIX for this because there's nothing in front of the ▲ unlike
@@ -71,8 +71,8 @@ string DeltaAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Prod
 	// As with ?: we can use BOOT for the through argument (it boots the parser).
 	// And we do, despite the asymmetry, because search and replace are different anyway
 	// with search much more likely to begin with ∧ or ∨.
-	string st = renderer->DoRender( (TreePtr<Node>)(*GetThrough()), Syntax::Production::BOOT );
-	string so = renderer->DoRender( (TreePtr<Node>)(*GetOverlay()), Syntax::Production::PREFIX );
+	string st = renderer->DoRender( (TreePtr<Node>)(*GetThrough()), Syntax::Production::BOOT, policy );
+	string so = renderer->DoRender( (TreePtr<Node>)(*GetOverlay()), Syntax::Production::PREFIX, policy );
 	if( st.size() > Syntax::GetLineBreakThreshold() )
 		return "▲" + st + "\n⯈" + so;
 	else

@@ -28,7 +28,7 @@ public:
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const override;                                       
 
 	Syntax::Production GetAgentProduction() const override;
-	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const final;
+	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const final;
     NodeBlock GetGraphBlockInfo() const final;
     bool IsNonTrivialPreRestriction(const TreePtrInterface *pptr) const final;          
 	bool IsSelfOrChildrenFixedType() const final;

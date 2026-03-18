@@ -1049,10 +1049,16 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Note: there are no explicit forms for agents. Thus, no ⯁Star⦅⦆ for example.
 
 // Eliding CodeUnit:
-// alternative to normal that accepts multiple stmt/decl (with ;) OR an expression or a type, and it probably
-// needs its own ∧ and ∨. Call all this "program" (or maybe switch to "unit" as in compilation unit)
-// Call OnProgram to get a CodeUnit node. Rendering should be straightforward.
+// - Pass Policy into GetAgentRender() and back into DoRender() until compiles OK
+// - Whereever flags are being set before recursing policy, consider whether some sub-production should clear them again (or re-default them)
+// - fix up any other issues re: passing around policy recursively
+// - definitions needs to be under shared_ptr since Policy is passed by value. CodeUnit::GetRender() can create/destroy it however
+// - Once rendering OK for C++ render, switch to something simpler for VN render, and for now use ∞{}
+// - Get VN parser to accept ∞{code unit}
+// - Try and switch to implict, main challenge being the top level
+ 
 
+// 
 // NOTE
 // Lots of conflicts incl around declarators resolved by making pre-restriction refuse to switch between
 // type and norm. This breaks DeclarationOf which was trying to be unified (the PR was supposed to disambiguate).

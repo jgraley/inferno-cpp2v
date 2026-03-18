@@ -87,11 +87,11 @@ Syntax::Production ChildAgent::GetAgentProduction() const
 }
 
 
-string ChildAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
+string ChildAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	(void)surround_prod;
 	string s = "⩨⦅=1⦆";
-	return s + renderer->DoRender( terminus, Syntax::Production::PREFIX ); 
+	return s + renderer->DoRender( terminus, Syntax::Production::PREFIX, policy ); 
 }    
     
     
@@ -168,13 +168,13 @@ Syntax::Production StuffAgent::GetAgentProduction() const
 }
 
 
-string StuffAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
+string StuffAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	(void)surround_prod;
 	string s = "⩨";
 	if( recurse_restriction )
-		s += "⦅" + renderer->DoRender( recurse_restriction, Syntax::Production::BOTTOM_EXPR) + "⦆";
-	return s + renderer->DoRender( terminus, Syntax::Production::PREFIX ); 
+		s += "⦅" + renderer->DoRender( recurse_restriction, Syntax::Production::BOTTOM_EXPR, policy) + "⦆";
+	return s + renderer->DoRender( terminus, Syntax::Production::PREFIX, policy ); 
 }    
     
     

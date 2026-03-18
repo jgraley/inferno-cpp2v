@@ -107,10 +107,11 @@ Syntax::Production IdentifierByNameAgent::GetAgentProduction() const
 }
 
 
-string IdentifierByNameAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod ) const
+string IdentifierByNameAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
     (void)renderer;
 	(void)surround_prod;
+	(void)policy;
 	string s = "⊛CPPTree::Specific" + GetIdentifierSubTypeName() + "Identifier";
 	s += "⦅\"" + name;
 	s += "\"⦆";
