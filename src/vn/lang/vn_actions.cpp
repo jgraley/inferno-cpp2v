@@ -1047,8 +1047,6 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Semantics of optional keywords: if absent, this is taken to be the default (eg, private for a base of a class, non-const for 
 // a declaration etc). ☆ should be accepted to mean "any". Thus a fully wild base is ☆ ☆.
 
-// Renderer is producing eg ⊛CPPTree::SpecificTypeIdentifier⦅"sc_module"⦆⨟ when the CPPTree should be implicit eg 003
-
 // Note: there are no explicit forms for agents. Thus, no ⯁Star⦅⦆ for example.
 
 

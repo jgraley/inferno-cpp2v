@@ -164,7 +164,7 @@
 %type <TreePtr<Node>> 				bare_stmt_decl stmt_decl_nc stmt_decl stmt_decl_disjunction stmt_decl_conjunction stmt_decl_primary norm_expr_stmt_decl 
 %type <TreePtr<Node>>				cons_or_des_type 
 %type <TreePtr<Node>> 				compound_primary compound_prefix parameter type_id 
-%type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
+%type <TreePtr<Node>> 				type_for_declarator declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				class_spec base_spec access_spec access_spec_nw
 %type <wstring> 					vn_name
 %type <string>						transform_norm_part transform_type_part
@@ -188,8 +188,8 @@
 // In the rule, we must set the no-else rule to the "if" priority using %prec. Then, the TOKEN
 // for "else" will be compared with the RULE for no-else case and highest precidence will win.
 // It's all rather brittle.
-%precedence ARGS_BODY_CHAIN_STMT_KEYWORD
-%precedence PRIMITIVE_CHAIN_KEYWORD
+%precedence ARGS_BODY_CHAIN_STMT_KEYWORD // basically "then"
+%precedence PRIMITIVE_CHAIN_KEYWORD      // basically "else"
 
 %%
 
@@ -308,7 +308,7 @@ bare_stmt_decl	: expr_expression
 				| PRIMITIVE_STMT_KEYWORD										{ $$ = vn->OnPrimitiveStmt($1.as_ascii, @1); }
 				| SPACE_SEP_STMT_KEYWORD expr_expression						{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
 				| DO_KEYWORD stmt_decl WHILE_KEYWORD '(' expr_expression ')' 	{ $$ = vn->OnDo($2, @2, $5, @5); }
-				| type_specified declarator										{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }	
+				| type_for_declarator declarator								{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }	
 				| class_spec		
 
 semicolon_args	: expr_expression											{ $$.push_back($1); }
@@ -340,7 +340,7 @@ parameterisation	: '(' parameters ')'							{ $$ = $2; }
 parameters	: parameter												{ $$.push_back($1); }
 			| parameters COMMA parameter							{ $$ = $1; $$.push_back($3); }			
 				
-parameter   : type_specified declarator 							{ $$ = vn->OnParameter($1, $2, @2); }	
+parameter   : type_for_declarator declarator 						{ $$ = vn->OnParameter($1, $2, @2); }	
             | expr_prefix           
                          
 //////////////////////////////// CLASSES ////////////////////////////////////                                  
@@ -485,7 +485,10 @@ type_conjunction 	: type_with_ab
 					| type_conjunction CONJUNCTION type_prefix				{ $$ = vn->OnConjunction($1, $3); }
                     
 type_with_ab		: type_specified
-					| type_specified declarator 							{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }  
+					| type_for_declarator declarator 						{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }  
+						 		
+// prevent typeised postfix expressions looking like declarators eg ⍑x[2] typeizes x[2] and you need (⍑x) [2] for an abstract type
+type_for_declarator : type_primary						 			                
 						 			                
 // Not including types that require declarators (except via built-in, designation etc)          
 type_specified		: type_prefix          
@@ -496,9 +499,7 @@ type_prefix : type_postfix
 			| 								     POINTER_IS type_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 								       NEGATION type_prefix	{ $$ = vn->OnNegation($2); }
 			|                    type_prerestrict_name_part type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-//			|  	    								  STUFF type_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-//			|      STUFF OPEN_VN           unified CLOSE_VN type_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-//			|      STUFF OPEN_VN stuff_depth_limit CLOSE_VN type_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+			|								 TYPE_INDICATOR expr_prefix { $$ = $2; }
 
 transform_type_part : start_transform_name_scope TRANSFORM_NAME_TYPE { $$ = $2.as_ascii; (void)$1; }
 			   
@@ -518,7 +519,6 @@ type_vn_prim: type_explicit_name_part itemisation								{ $$ = vn->OnExplicitNo
 			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| type_build_id_part OPEN_VN VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			| transform_type_part OPEN_VN unified_prefix CLOSE_VN 				{ $$ = vn->OnTransform($1, @1, $3, @3); }
-			| TYPE_INDICATOR STAR												{ $$ = vn->OnStar(nullptr); }
 			| TYPE_INDICATOR STAR OPEN_VN type_id CLOSE_VN						{ $$ = vn->OnStar($4); }
 			| STAR OPEN_VN type_id CLOSE_VN										{ $$ = vn->OnStar($3); }
 			
