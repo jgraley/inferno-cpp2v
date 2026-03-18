@@ -289,9 +289,9 @@ string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Pro
     {
         string s = "({ ";
 		for( TreePtr<Declaration> m : ce->members )    
-			s += DoRender( m, Syntax::Production::DECLARATION, policy );       
+			s += DoRender( m, Syntax::Production::STMT_DECL, policy );       
         for( TreePtr<Statement> st : ce->statements )    
-            s += DoRender( st, Syntax::Production::STATEMENT_LOW, policy );    
+            s += DoRender( st, Syntax::Production::STMT_DECL_LOW, policy );    
         return s + " })";
     }
     else
@@ -429,7 +429,7 @@ string CppRender::RenderInstanceProto( TreePtr<Instance> o, Syntax::Production s
             constant = true;
             
     string declarator = DoRender( o->identifier, starting_declarator_prod, policy );
-    s += DoRenderTypeAndDeclarator( o->type, declarator, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, policy, constant );
+    s += DoRenderTypeAndDeclarator( o->type, declarator, starting_declarator_prod, Syntax::Production::BARE_STMT_DECL, policy, constant );
 
     return s;
 } 
@@ -541,7 +541,7 @@ bool CppRender::ShouldSplitInstance( TreePtr<Instance> o, Syntax::Production , S
     else
     {
         // ----- objects ------ 
-        //if( surround_prod==Syntax::Production::DECLARATION )
+        //if( surround_prod==Syntax::Production::STMT_DECL )
 	//		return false;
 			
         if( policy.split_bulky_statics )

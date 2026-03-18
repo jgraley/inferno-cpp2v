@@ -61,7 +61,7 @@ string Type::GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy polic
 
 Syntax::Production Declaration::GetMyProductionTerminal() const
 {
-	return Production::BARE_DECLARATION;
+	return Production::BARE_STMT_DECL;
 }
 
 //////////////////////////// DeclScope ///////////////////////////////
@@ -77,23 +77,36 @@ Syntax::Production CodeUnit::GetMyProductionTerminal() const
 
 string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {
+    string s;
 	(void)surround_prod;
-
+	if( !policy.full_render_code_unit )
+	{
+		s += "∞{\n";
+		for( TreePtr<Node> m : members )
+		{
+			s += renderer->DoRender( m, Production::STMT_DECL, policy ) + "\n";
+		}
+		s += "}";
+		return s;
+	}
 
     Sequence<Declaration> sorted = SortDecls( members, true );
 
 	queue<TreePtr<Declaration>> require_complete;
+	queue<TreePtr<Declaration>> general;
 	queue<shared_ptr<Syntax>> my_definitions;
 	Policy my_policy = policy;
 	my_policy.definitions = &my_definitions;
 	
+    if( !sorted.empty()  )
+		s += "\n// Pre-proc and forward classes\n";   
+		
     // Emit preprocs and an incomplete for each record 
-    string s;
     for( TreePtr<Declaration> pd : sorted )
     {       
         if( auto ppd = DynamicTreePtrCast<PreProcDecl>(pd) )
         {
-            s += renderer->DoRender( ppd, Syntax::Production::DECLARATION, my_policy ) + "\n";
+            s += renderer->DoRender( ppd, Production::STMT_DECL, my_policy ) + "\n";
             continue;
         }
         
@@ -103,35 +116,49 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 			Syntax::Policy record_policy = my_policy;
 			record_policy.force_incomplete_records = true; 
 
-			s += renderer->DoRender( pd, Syntax::Production::DECLARATION, record_policy ); 
+			s += renderer->DoRender( pd, Production::STMT_DECL, record_policy ); 
+			require_complete.push( pd );
 		}
-		
-		require_complete.push( pd );
+		else
+		{
+			general.push( pd );
+		}
     }
     
-    // Emit the complete declarations (from top-level only), sorted for dependencies
+    // Emit the complete declarations of user types from in here, sorted for dependencies
+    if( !require_complete.empty()  )
+		s += "\n// Complete classes\n";    
+    
     while( !require_complete.empty()  )
     {
         TreePtr<Declaration> d = require_complete.front();
         require_complete.pop();       		
-        s += renderer->DoRender( d, Syntax::Production::DECLARATION, my_policy );
+        s += renderer->DoRender( d, Production::STMT_DECL, my_policy );
     }
     
-    s += "\n// Definitions";    
+    if( !general.empty()  )
+		s += "\n// General\n";    
+
+    while( !general.empty()  )
+    {
+        TreePtr<Declaration> d = general.front();
+        general.pop();       		
+        s += renderer->DoRender( d, Production::STMT_DECL, my_policy );
+    }
+
+    if( !my_definitions.empty() )
+		s += "\n// Instance definitions\n";    
     
-    // Emit the actual definitions (from anywhere), sorted for dependencies
+    // Emit the actual definitions of instances from anywhere under here, sorted for dependencies
     // These are rendered here, inside program scope but outside any additional scopes
     // that were on the scope stack when the instance was seen. These could go in a .cpp file.
-    FTRACE(my_definitions)((void*)&policy)("\n");
-	
 	Syntax::Policy definition_policy = policy;
 	definition_policy.force_initialisation = true;
 	while( !my_definitions.empty() )
     {
 		auto def = (TreePtr<Node>)(dynamic_pointer_cast<Node>(my_definitions.front()));
 		ASSERT(def);
-        s += "\n";
-        s += renderer->DoRender( def, Syntax::Production::DECLARATION, definition_policy ); 
+        s += renderer->DoRender( def, Syntax::Production::STMT_DECL, definition_policy ); 
         s += "\n";
         my_definitions.pop();
     }
@@ -629,7 +656,7 @@ Syntax::Production AccessSpec::GetMyProductionTerminal() const
 
 string AccessSpec::GetRender( VN::RendererInterface *, Production surround_prod, Policy policy )
 {
-	bool in_class_body = (surround_prod == Syntax::Production::BARE_DECLARATION);
+	bool in_class_body = (surround_prod == Syntax::Production::BARE_STMT_DECL);
 	
 	if( type_index(typeid(*this)) == policy.current_access && 
 	    in_class_body )
@@ -674,9 +701,9 @@ string Protected::GetKeyword() const
 Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Policy policy) const
 { 
 	if( !DynamicTreePtrCast<Expression>(initialiser) && policy.force_initialisation )
-		return Production::DECLARATION;
+		return Production::STMT_DECL;
 	else
-		return Production::BARE_DECLARATION;
+		return Production::BARE_STMT_DECL;
 }
 
 //////////////////////////// Base //////////////////////////////
@@ -764,11 +791,11 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
         {
 			Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
 			string name = renderer->DoRender( o->identifier, starting_declarator_prod, policy);
-			strings.push_back( renderer->DoRenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_DECLARATION, policy, false ) );
+			strings.push_back( renderer->DoRenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_STMT_DECL, policy, false ) );
 		}
 		else
 		{
-            strings.push_back( renderer->DoRender( d, Syntax::Production::BARE_DECLARATION, policy ) );
+            strings.push_back( renderer->DoRender( d, Syntax::Production::BARE_STMT_DECL, policy ) );
         }		
 	}					
 
@@ -1096,7 +1123,7 @@ string Labeley::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 
 Syntax::Production Typedef::GetMyProductionTerminal() const
 {
-	return Production::BARE_DECLARATION; 
+	return Production::BARE_STMT_DECL; 
 }
 
 //////////////////////////// Record ///////////////////////////////
@@ -1109,7 +1136,7 @@ TreePtr<AccessSpec> Record::GetInitialAccess() const
 
 Syntax::Production Record::GetMyProductionTerminal() const
 {
-	return Production::BARE_DECLARATION;
+	return Production::BARE_STMT_DECL;
 }
 
 
@@ -1125,7 +1152,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Syntax::Production, P
 	if( policy.force_incomplete_records )
 		return s;
 
-	s += RenderExtras(renderer, Production::SPACE_SEP_STATEMENT, policy);
+	s += RenderExtras(renderer, Production::SPACE_SEP_STMT_DECL, policy);
     s += "\n";
 	s += RenderBody(renderer, policy);
 	return s;
@@ -1171,10 +1198,10 @@ string Record::RenderBody( VN::RendererInterface *renderer, Syntax::Policy polic
 
 		Syntax::Policy access_policy = policy;
 		access_policy.current_access = current_access;
-		s += renderer->DoRender( this_access, Syntax::Production::BARE_DECLARATION, access_policy );
+		s += renderer->DoRender( this_access, Syntax::Production::BARE_STMT_DECL, access_policy );
 		current_access = type_index(typeid(*this_access));
 
-        s += renderer->DoRender( d, Syntax::Production::DECLARATION, policy );
+        s += renderer->DoRender( d, Syntax::Production::STMT_DECL, policy );
     }
    
    	s += "}";
@@ -1525,11 +1552,11 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
 {
     string s = " { ";
     for( TreePtr<Declaration> m : members )    
-        s += renderer->DoRender( m, Syntax::Production::DECLARATION, policy );    
+        s += renderer->DoRender( m, Syntax::Production::STMT_DECL, policy );    
     if( policy.compound_uses_vn_separator )
 		s += "⚬";
     for( TreePtr<Statement> st : statements )    
-        s += renderer->DoRender( st, Syntax::Production::STATEMENT_LOW, policy );    
+        s += renderer->DoRender( st, Syntax::Production::STMT_DECL_LOW, policy );    
     s += " } ";
     return s;
 }
@@ -1550,20 +1577,20 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 
 Syntax::Production Return::GetMyProductionTerminal() const
 { 
-	return Production::BARE_STATEMENT; 	
+	return Production::BARE_STMT_DECL; 	
 }
 
 
 string Return::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return "return " + renderer->DoRender( return_value, Syntax::Production::SPACE_SEP_STATEMENT, policy );
+	return "return " + renderer->DoRender( return_value, Syntax::Production::SPACE_SEP_STMT_DECL, policy );
 }
 
 //////////////////////////// Goto ///////////////////////////////
 
 Syntax::Production Goto::GetMyProductionTerminal() const
 { 
-	return Production::BARE_STATEMENT; 
+	return Production::BARE_STMT_DECL; 
 }
 
 
@@ -1572,7 +1599,7 @@ string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	string s = "goto ";
 	bool star = false;
 	bool remove_double_deref = false;
-	Production prod = Production::SPACE_SEP_STATEMENT;
+	Production prod = Production::SPACE_SEP_STMT_DECL;
     if( policy.goto_uses_ref_and_deref )
     {
 		if( !DynamicTreePtrCast< SpecificLabelIdentifier >(destination) )
@@ -1602,7 +1629,7 @@ Syntax::Production If::GetMyProductionTerminal() const
 	// If we don't have an else clause, we might steal the else from a 
 	// surrounding If node, so drop our precedence a little bit.
 	bool has_else_clause = !DynamicTreePtrCast<Nop>(body_else);
-	return has_else_clause ? Production::STATEMENT_HIGH : Production::STATEMENT_LOW; 
+	return has_else_clause ? Production::STMT_DECL_HIGH : Production::STMT_DECL_LOW; 
 }
 
 
@@ -1612,10 +1639,10 @@ string If::GetRender( VN::RendererInterface *renderer, Production, Policy policy
 	string s = "if( " +
 		       renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
 		       " )\n" +
-		       renderer->DoRender( body, has_else_clause ? Production::STATEMENT_HIGH : Production::STATEMENT_LOW, policy );
+		       renderer->DoRender( body, has_else_clause ? Production::STMT_DECL_HIGH : Production::STMT_DECL_LOW, policy );
 		       
     if( has_else_clause )  
-        s += "else\n" + renderer->DoRender( body_else, Production::STATEMENT_LOW, policy);
+        s += "else\n" + renderer->DoRender( body_else, Production::STMT_DECL_LOW, policy);
         
     return s;		       
 }
@@ -1624,14 +1651,14 @@ string If::GetRender( VN::RendererInterface *renderer, Production, Policy policy
 
 Syntax::Production Breakable::GetMyProductionTerminal() const
 { 
-	return Production::STATEMENT_HIGH; 
+	return Production::STMT_DECL_HIGH; 
 }
 
 //////////////////////////// While ///////////////////////////////
 
 Syntax::Production While::GetMyProductionTerminal() const
 { 
-	return Production::STATEMENT; 
+	return Production::STMT_DECL; 
 }
 
 
@@ -1640,21 +1667,21 @@ string While::GetRender( VN::RendererInterface *renderer, Production, Policy pol
 	return "while( " +
 		   renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
-		   renderer->DoRender( body, Production::STATEMENT, policy );
+		   renderer->DoRender( body, Production::STMT_DECL, policy );
 }
 
 //////////////////////////// Do ///////////////////////////////
 
 Syntax::Production Do::GetMyProductionTerminal() const
 { 
-	return Production::BARE_STATEMENT; 
+	return Production::BARE_STMT_DECL; 
 }
 
 
 string Do::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return "do\n" +
-		   renderer->DoRender( body, Production::STATEMENT_LOW, policy ) +
+		   renderer->DoRender( body, Production::STMT_DECL_LOW, policy ) +
 		   "while( " +
 		   renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
 		   " )" ;
@@ -1664,7 +1691,7 @@ string Do::GetRender( VN::RendererInterface *renderer, Production, Policy policy
 
 Syntax::Production For::GetMyProductionTerminal() const
 { 
-	return Production::STATEMENT; 
+	return Production::STMT_DECL; 
 }
 
 
@@ -1677,14 +1704,14 @@ string For::GetRender( VN::RendererInterface *renderer, Production, Policy polic
 		   "; " +
 		   renderer->DoRender( increment, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
-		   renderer->DoRender( body, Production::STATEMENT, policy );
+		   renderer->DoRender( body, Production::STMT_DECL, policy );
 }
 
 //////////////////////////// Switch ///////////////////////////////
 
 Syntax::Production Switch::GetMyProductionTerminal() const
 { 
-	return Production::STATEMENT; 
+	return Production::STMT_DECL; 
 }
 
 
@@ -1693,7 +1720,7 @@ string Switch::GetRender( VN::RendererInterface *renderer, Production, Policy po
 	return "switch( " +
 		   renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
-		   renderer->DoRender( body, Production::STATEMENT, policy );
+		   renderer->DoRender( body, Production::STMT_DECL, policy );
 }
 
 //////////////////////////// SwitchTarget ///////////////////////////////
@@ -1732,7 +1759,7 @@ string Default::GetRender( VN::RendererInterface *, Production, Policy )
 
 Syntax::Production Continue::GetMyProductionTerminal() const
 { 
-	return Production::BARE_STATEMENT; 
+	return Production::BARE_STMT_DECL; 
 }
 
 
@@ -1746,7 +1773,7 @@ string Continue::GetRenderTerminal( Production ) const
 
 Syntax::Production Break::GetMyProductionTerminal() const
 { 
-	return Production::BARE_STATEMENT; 
+	return Production::BARE_STMT_DECL; 
 }
 
 
@@ -1776,7 +1803,7 @@ string MembInitialisation::GetRender( VN::RendererInterface *renderer, Productio
 
 Syntax::Production Nop::GetMyProductionTerminal() const
 { 
-	return Production::BARE_STATEMENT; // Force a ;
+	return Production::BARE_STMT_DECL; // Force a ;
 }
 
 
@@ -1797,16 +1824,16 @@ Syntax::Production PreprocessorIdentifier::GetMyProductionTerminal() const
 Syntax::Production MacroDeclaration::GetMyProduction(const VN::RendererInterface *, Policy) const
 { 
 	if( !DynamicTreePtrCast<Expression>(initialiser) )
-		return Production::DECLARATION;
+		return Production::STMT_DECL;
 	else
-		return Production::BARE_DECLARATION;
+		return Production::BARE_STMT_DECL;
 }
 
 //////////////////////////// MacroStatement ///////////////////////////////
 
 Syntax::Production MacroStatement::GetMyProductionTerminal() const
 { 
-	return Production::STATEMENT; 
+	return Production::STMT_DECL; 
 }
 
 //////////////////////////// PreProcDecl ///////////////////////////////

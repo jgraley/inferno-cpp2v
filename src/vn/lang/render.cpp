@@ -160,6 +160,8 @@ Syntax::Policy Render::GetDefaultPolicy()
 	// which is an error. Or, the render is ambiguous in vn files.
 	policy.refuse_local_node_types = true;
 	
+	policy.full_render_code_unit = false;
+	
 	return policy;
 }
 
@@ -320,26 +322,7 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
         return s + AccomodatePreRestriction( node, surround_prod, policy );
 	}
 
-
-	switch( surround_prod )
-	{
-		case Syntax::Production::BOTTOM_STMT_DECL:
-		case Syntax::Production::STATEMENT:
-		case Syntax::Production::STATEMENT_LOW...Syntax::Production::STATEMENT_HIGH:
-			surround_prod = Syntax::Production::BARE_STATEMENT;
-			break;
-			
-		case Syntax::Production::DECLARATION:
-			surround_prod = Syntax::Production::BARE_DECLARATION;
-			break;
-			
-		default: // Expr cases -> expr decays to statement
-			surround_prod = Syntax::Production::BARE_STATEMENT;
-			break;
-			
-	}
-
- 	return s + AccomodatePreRestriction( node, surround_prod, policy ) +
+ 	return s + AccomodatePreRestriction( node, Syntax::Production::BARE_STMT_DECL, policy ) +
 		   ";\n";                                  
 }
 

@@ -33,11 +33,9 @@ public:
 		// scheme, booted using {}, to disambiguate if/else.
 		BOTTOM_STMT_DECL,		
 		MIN_SURR_SEMICOLON = 20, // Note: surroundings higher than here \/ can get ";" added.
-		STATEMENT_SEQ, // A number of statements in sequence without {}
-		STATEMENT_LOW, // Lowest statement precedence: {} etc from the inside		
-		STATEMENT_HIGH, // eg if( ... ) <here>;    is this prefix?
-		STATEMENT,
-		DECLARATION,
+		STMT_DECL_LOW, // Lowest statement precedence: {} etc from the inside		
+		STMT_DECL_HIGH, // eg if( ... ) <here>;    is this prefix?
+		STMT_DECL,
 		PRE_PROC_DIRECTIVE, // Preprocessor directives are treated like non-bare statements
 		MAX_SURR_SEMICOLON,	// Note: surroundings lower than here /\ can get ";" added.
 
@@ -47,9 +45,8 @@ public:
 		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
 		
 		MIN_NODE_SEMICOLON, // Note: nodes higher than here \/ can get ";" added.
-		BARE_STATEMENT = 40, // Statement with no semicolon
-		BARE_DECLARATION, // Actual declaration with no semicolon, eg int i	
-		SPACE_SEP_STATEMENT, // eg throw <here>;
+		BARE_STMT_DECL = 40, // Statement/declaration with no semicolon
+		SPACE_SEP_STMT_DECL, // eg throw <here>;
 		TYPE_IN_DECLARATION, // the type in typedef <here>;
 		BASE_CLASS_SPEC, // A base class including public etc
 		SPACE_SEP_PRE_PROC,
@@ -117,6 +114,7 @@ public:
 			compound_uses_vn_separator(false),
 			goto_uses_ref_and_deref(true),
 			refuse_local_node_types(false),
+			full_render_code_unit(true),
 			definitions(nullptr) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
@@ -132,6 +130,7 @@ public:
 		bool compound_uses_vn_separator;
 		bool goto_uses_ref_and_deref;
 		bool refuse_local_node_types;
+		bool full_render_code_unit;
 	    queue<shared_ptr<Syntax>> *definitions;
 	};
 	

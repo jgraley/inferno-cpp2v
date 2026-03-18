@@ -103,6 +103,8 @@
 	ATTRIBUTE								"‡"
 	CONSTRUCTOR								"⨤"
 	TYPE_INDICATOR							"⍑"	
+	CODE_UNIT 								"∞"
+
 	<string>	COMMA						_("comma")
 	<string>	C_ASSIGN					"="
 	<string>	C_COMPOUND_ASSIGN			_("C compound_primary assignment operator")
@@ -269,6 +271,7 @@ compound_primary	: '{' VN_SEP '}'                   						{ $$ = vn->OnCompound(
 					| '{' stmt_decls VN_SEP '}'           					{ $$ = vn->OnCompound($2, @2, {}, @4); }
 					| '{' VN_SEP stmt_decls '}'           					{ $$ = vn->OnCompound({}, @2, $3, @3); }
 					| '{' stmt_decls VN_SEP stmt_decls '}'  				{ $$ = vn->OnCompound($2, @2, $4, @4); }
+					| CODE_UNIT '{' stmt_decls '}' 							{ $$ = vn->OnCodeUnit($3, @3); }
 
 //////////////////////////////// STATEMENTS/DECLARATIONS ////////////////////////////////////         
 

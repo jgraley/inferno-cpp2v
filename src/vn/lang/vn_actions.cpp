@@ -431,6 +431,15 @@ TreePtr<Node> VNLangActions::OnCompound( list<TreePtr<Node>> members, any memb_l
 }
 
 
+TreePtr<Node> VNLangActions::OnCodeUnit( list<TreePtr<Node>> members, any memb_loc )
+{
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::CodeUnit>>();
+	for( TreePtr<Node> member : members )
+		node->members.insert(member);
+	return node;
+}
+
+
 TreePtr<Node> VNLangActions::OnArrayInitialiser( list<TreePtr<Node>> elements )
 {
 	// Fill out the array literal
