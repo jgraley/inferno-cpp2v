@@ -32,7 +32,6 @@ public:
                                         ContainerInterface *parent_container,
                                         ContainerInterface::iterator container_iterator );
                                              
-private: friend class XTreeDatabase;
 	static Mutator CreateTreeRoot( TreePtrInterface *tpi_root_node );
 	static Mutator CreateTreeSingular( TreePtr<Node> parent_node, 
 	                                   TreePtrInterface *parent_singular );

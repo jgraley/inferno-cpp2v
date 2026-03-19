@@ -1012,7 +1012,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // - There are other interesting things here, like assign and ?: are not merged, ?: is higher and some RValue-like cases go straight to ?:, excluding assign - reproduce in parser and renderer, don't accept what C++ doesn't!
 // - I think norm_/normal can become expr_
 // - Labels will need their own "stuff" I think, otherwise it will be too hard to disambiguate with things like : and && hanging around
-// Organisation: blend norm_paren into norm_primary and other stuff from the C++ BNF
+// Organisation: stuff from the C++ BNF
 
 // {} is always an explicit Compound
 // and ({}) is StatementExpression so {} should be available wherever () is
