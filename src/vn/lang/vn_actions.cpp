@@ -1031,6 +1031,12 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // direct analysis of child nodes - this works because VN-renders are patterns and could have special nodes in between (and
 // we never attempt to analyse special nodes for their "true" type because it can be ambiguous.
 
+// Agents inherit from nodes so Agent::GetAgentRender() can just be GetRender(). Simplify the call sites.
+
+// Node::GetRender() could implement the explicit render.
+
+// In vn_lang.ypp, the names of symbols should be translatable strings with the symbol AND a textual explaination - why not be helpful?
+
 // Check 093-DetectSuperLoop, we have ☆:; and then goto ☆ even though a coupling would seem to be needed, but we didn't get a designation.
 
 // C fold-in: 
@@ -1038,11 +1044,6 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // Types: see https://alx71hub.github.io/hcb/#decl-specifier-seq
 // Keep the () on types for disambiguation unless you can prove away or just rely on designations TODO.
-
-// Typeish symbol to be a type_prefix operator which teleports into expr_prefix
-
-// Clean up base access specs, fix use of Public for Default. Just correct them in OnInheritanceRecord() like with members, except
-// we'll need a DefaultAccess local node type to differentiate from NULL which means wild.
 
 // Semantics of optional keywords: if absent, this is taken to be the default (eg, private for a base of a class, non-const for 
 // a declaration etc). ☆ should be accepted to mean "any". Thus a fully wild base is ☆ ☆.
