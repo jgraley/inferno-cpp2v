@@ -435,6 +435,23 @@ string MapArgumentation::DirectRenderArgumentation(VN::RendererInterface *render
     return Join( ls, ", ", "〔", "〕" );	
 }
 
+
+TreePtr<Argumentation> MapArgumentation::ConvertToSeq(TreePtr<Type> callee_type, VN::RendererInterface *, Policy)
+{
+	// Convert f->params from Parameters to Declarations and settle on an arbitrary 
+	// ordering. This needs to be the same on each visit with a given callee.
+	Sequence<Declaration> decl_sequence;   
+	if( auto f = TreePtr<CallableParams>::DynamicCast(callee_type) )  
+		for( auto param : f->params )
+			decl_sequence.push_back(param); 
+
+	// Determine args sequence using param sequence
+	auto sa = MakeTreeNode<SeqArgumentation>();
+	sa->arguments = IdValuePair::SortMapById( arguments, decl_sequence ); // TODO could absorb
+	
+	return sa;
+}
+
 //////////////////////////// SeqArgumentation ///////////////////////////////
 
 Syntax::Production SeqArgumentation::GetMyProductionTerminal() const
@@ -456,6 +473,12 @@ string SeqArgumentation::DirectRenderArgumentation(VN::RendererInterface *render
 		ls.push_back( renderer->DoRender( arg, Production::COMMA_SEP, policy ) );	
 	
 	return Join( ls, ", ", "(", ")" );	
+}
+
+
+TreePtr<Argumentation> SeqArgumentation::ConvertToSeq(TreePtr<Type>, VN::RendererInterface *, Policy)
+{
+	return TreePtr<SeqArgumentation>( shared_from_this() );
 }
 
 //////////////////////////// Literal ///////////////////////////////
@@ -1521,25 +1544,14 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	TreePtr<Type> callee_type = TypeOf::instance.Get(*renderer->GetTransKit(), callee).GetTreePtr();
 	ASSERT( callee_type );
 	
-
-	
 	auto map_argumentation = TreePtr<MapArgumentation>::DynamicCast( argumentation );
 	ASSERT( map_argumentation );
 	// Convert MapArgumentation to SeqArgumentation
 	// Note: we need to operate on the call, so that we can use callee to find the function type 
 	// and resolve the map into a sequence.
 
-	// Convert f->params from Parameters to Declarations and settle on an arbitrary 
-	// ordering. This needs to be the same on each visit with a given callee.
-	Sequence<Declaration> decl_sequence;   
-	if( auto f = TreePtr<CallableParams>::DynamicCast(callee_type) )  
-		for( auto param : f->params )
-			decl_sequence.push_back(param); 
+	TreePtr<SeqArgumentation> sa = map_argumentation->ConvertToSeq(callee_type, renderer, policy);
 
-	// Determine args sequence using param sequence
-	auto sa = MakeTreeNode<SeqArgumentation>();
-	sa->arguments = IdValuePair::SortMapById( map_argumentation->arguments, decl_sequence ); // TODO could absorb
-	
 	// Let the SeqArgumentation node do the actual render
 	s += sa->DirectRenderArgumentation(renderer, policy);    
 	return s;
