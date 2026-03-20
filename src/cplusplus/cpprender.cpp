@@ -52,8 +52,9 @@ string CppRender::RenderToString( TreePtr<Node> root )
     // Context is used for various lookups but does not need
     // to be a Scope.
     context = root; 
-        
     utils = make_unique<DefaultTransUtils>(context);
+    trans_kit = TransKit{ utils.get() };
+            
     using namespace placeholders;
 
     // Make the identifiers unique (does its own tree walk). Be strict about undeclared
@@ -67,8 +68,9 @@ string CppRender::RenderToString( TreePtr<Node> root )
 		.include_designation_named_identifiers = false,
 		.preserve_undeclared_ids = true
 	};
+	
 	UniquifyNames identifiers_uniqifier(un_policy); 
-    trans_kit = TransKit{ utils.get() };
+
     unique_identifier_names = identifiers_uniqifier.UniquifyAll( trans_kit, context );
     
     Syntax::Policy top_policy = default_policy;
@@ -119,7 +121,7 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
         return RenderLiteral( literal, surround_prod, policy );
     else if( auto call = TreePtr<Call>::DynamicCast(node) )
-        return RenderMapArgsCallAsSeqArg( call, surround_prod, policy ); // Still need this for map args resolution TODO raise/lower steps
+        return RenderCall( call, surround_prod, policy ); // Still need this for map args resolution TODO raise/lower steps
     else if( auto make_rec = TreePtr<RecordInitialiser>::DynamicCast(node) )
         return RenderRecordInitialiser( make_rec, surround_prod, policy );
     else if( auto macro_decl = TreePtr<MacroDeclaration>::DynamicCast(node) )
@@ -226,36 +228,49 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<Call> call, Syntax::Production surround_prod, Syntax::Policy policy ) try
+string CppRender::RenderCall( TreePtr<Call> call, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
 	(void)surround_prod;
-	// Note: we need to operate on the call, so that we can use callee to find the declaration and 
-	// resolve the map into a sequence.
+	
+	// Render the expression that resolves to the function name unless this is
+	// a constructor call in which case just the name of the thing being constructed.
+	string s = DoRender( call->callee, Syntax::Production::POSTFIX, policy );
+	
+	TreePtr<SeqArgumentation> sa;
+	if( auto map_argumentation = TreePtr<MapArgumentation>::DynamicCast( call->argumentation ) )
+	{
+		// Convert MapArgumentation to SeqArgumentation
+		// Note: we need to operate on the call, so that we can use callee to find the function type 
+		// and resolve the map into a sequence.
+		utils = make_unique<DefaultTransUtils>(context);
+		trans_kit = TransKit{ utils.get() };
+		auto callee_type = TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr();
+		ASSERT( callee_type );
+		
+		// Convert f->params from Parameters to Declarations and settle on an arbitrary 
+		// ordering. This needs to be the same on each visit with a given callee.
+		Sequence<Declaration> decl_sequence;   
+		if( auto f = TreePtr<CallableParams>::DynamicCast(callee_type) )  
+			for( auto param : f->params )
+				decl_sequence.push_back(param); 
 
-	auto map_argumentation = TreePtr<MapArgumentation>::DynamicCast( call->argumentation );
-	ASSERT( map_argumentation );
-
-    // Render the expression that resolves to the function name unless this is
-    // a constructor call in which case just the name of the thing being constructed.
-    string s = DoRender( call->callee, Syntax::Production::POSTFIX, policy );
-
-	// A map-args call isn't C++, so lower it to sequential args - requires the function type
-    auto callee_type = TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr();
-	ASSERT( callee_type );
-    
-	// Convert f->params from Parameters to Declarations and settle on an arbitrary 
-	// ordering. This needs to be the same on each visit with a given callee.
-	Sequence<Declaration> decl_sequence;   
-	if( auto f = TreePtr<CallableParams>::DynamicCast(callee_type) )  
-		for( auto param : f->params )
-			decl_sequence.push_back(param); 
-
-	// Determine args sequence using param sequence
-	auto sa = MakeTreeNode<SeqArgumentation>();
-	sa->arguments = IdValuePair::SortMapById( map_argumentation->arguments, decl_sequence ); // TODO could absorb
-
+		// Determine args sequence using param sequence
+		sa = MakeTreeNode<SeqArgumentation>();
+		sa->arguments = IdValuePair::SortMapById( map_argumentation->arguments, decl_sequence ); // TODO could absorb
+	}
+	else if( (sa = TreePtr<SeqArgumentation>::DynamicCast( call->argumentation )) )
+	{
+	}
+	else
+	{
+		ASSERTFAIL();
+	}
+	
+	ASSERT( sa );
+	
 	// Let the SeqArgumentation node do the actual render
-	s += sa->DirectRenderArgumentation(this, policy);    return s;
+	s += sa->DirectRenderArgumentation(this, policy);    
+	return s;
 }
 DEFAULT_CATCH_CLAUSE
 
