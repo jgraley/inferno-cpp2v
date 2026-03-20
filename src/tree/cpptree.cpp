@@ -436,8 +436,11 @@ string MapArgumentation::DirectRenderArgumentation(VN::RendererInterface *render
 }
 
 
-TreePtr<Argumentation> MapArgumentation::ConvertToSeq(TreePtr<Type> callee_type, VN::RendererInterface *, Policy)
+TreePtr<Argumentation> MapArgumentation::ConvertToSeq(TreePtr<Expression> callee, VN::RendererInterface *renderer, Policy)
 {
+	TreePtr<Type> callee_type = TypeOf::instance.Get(*renderer->GetTransKit(), callee).GetTreePtr();
+	ASSERT( callee_type );
+
 	// Convert f->params from Parameters to Declarations and settle on an arbitrary 
 	// ordering. This needs to be the same on each visit with a given callee.
 	Sequence<Declaration> decl_sequence;   
@@ -476,7 +479,7 @@ string SeqArgumentation::DirectRenderArgumentation(VN::RendererInterface *render
 }
 
 
-TreePtr<Argumentation> SeqArgumentation::ConvertToSeq(TreePtr<Type>, VN::RendererInterface *, Policy)
+TreePtr<Argumentation> SeqArgumentation::ConvertToSeq(TreePtr<Expression>, VN::RendererInterface *, Policy)
 {
 	return TreePtr<SeqArgumentation>( shared_from_this() );
 }
@@ -1540,9 +1543,6 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	string s = renderer->DoRender( callee, Syntax::Production::POSTFIX, policy );
 	if( !(policy.refuse_map_argumentation && TreePtr<MapArgumentation>::DynamicCast( argumentation )) )
 		return s + argumentation->DirectRenderArgumentation(renderer, policy);
-
-	TreePtr<Type> callee_type = TypeOf::instance.Get(*renderer->GetTransKit(), callee).GetTreePtr();
-	ASSERT( callee_type );
 	
 	auto map_argumentation = TreePtr<MapArgumentation>::DynamicCast( argumentation );
 	ASSERT( map_argumentation );
@@ -1550,7 +1550,7 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	// Note: we need to operate on the call, so that we can use callee to find the function type 
 	// and resolve the map into a sequence.
 
-	TreePtr<SeqArgumentation> sa = map_argumentation->ConvertToSeq(callee_type, renderer, policy);
+	TreePtr<SeqArgumentation> sa = map_argumentation->ConvertToSeq(callee, renderer, policy);
 
 	// Let the SeqArgumentation node do the actual render
 	s += sa->DirectRenderArgumentation(renderer, policy);    
