@@ -1080,6 +1080,9 @@ struct New : Operator
     TreePtr<Argumentation> placement_argumentation; ///< arguments for placement usage
     TreePtr<Argumentation> constructor_argumentation; ///< arguments to the constructor
     TreePtr<Globality> global; ///< whether placement is global
+    // TODO we want constructors to be resolved, so there should be a construcotr_id in here - 
+    // we would use that to resolve map arguments (the type is no good for this - it's the type of 
+    // the constructed object, not the constructor)
 
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
@@ -1144,7 +1147,8 @@ struct Call : GoSub, Expression
 struct ConstructInit : Initialiser
 {
 	NODE_FUNCTIONS_FINAL
-	TreePtr<InstanceIdentifier> constructor_id; // TODO could generalise to include built-in "constructor"
+	TreePtr<InstanceIdentifier> constructor_id; // We use resolved constructors, so it has an identifier
+	// TODO could generalise to include built-in "constructor"
     TreePtr<Argumentation> argumentation; 
 
 	Production GetMyProductionTerminal() const override;
