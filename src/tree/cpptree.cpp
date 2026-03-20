@@ -438,6 +438,10 @@ string MapArgumentation::DirectRenderArgumentation(VN::RendererInterface *render
 
 TreePtr<Argumentation> MapArgumentation::ConvertToSeq(TreePtr<Expression> callee, VN::RendererInterface *renderer, Policy)
 {
+	// Note: we need to operate on the call, so that we can use callee to find the function type 
+	// and resolve the map into a sequence.
+
+	// Determine the type of the callee function or constructor
 	TreePtr<Type> callee_type = TypeOf::instance.Get(*renderer->GetTransKit(), callee).GetTreePtr();
 	ASSERT( callee_type );
 
@@ -1543,14 +1547,8 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	string s = renderer->DoRender( callee, Syntax::Production::POSTFIX, policy );
 	if( !(policy.refuse_map_argumentation && TreePtr<MapArgumentation>::DynamicCast( argumentation )) )
 		return s + argumentation->DirectRenderArgumentation(renderer, policy);
-	
-	auto map_argumentation = TreePtr<MapArgumentation>::DynamicCast( argumentation );
-	ASSERT( map_argumentation );
-	// Convert MapArgumentation to SeqArgumentation
-	// Note: we need to operate on the call, so that we can use callee to find the function type 
-	// and resolve the map into a sequence.
 
-	TreePtr<SeqArgumentation> sa = map_argumentation->ConvertToSeq(callee, renderer, policy);
+	TreePtr<SeqArgumentation> sa = argumentation->ConvertToSeq(callee, renderer, policy);
 
 	// Let the SeqArgumentation node do the actual render
 	s += sa->DirectRenderArgumentation(renderer, policy);    
