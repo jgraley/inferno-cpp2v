@@ -109,7 +109,7 @@ public:
 			current_access(DefaultAccess),
 			refuse_c_style_cast(false),
 			detect_and_render_constructor(true),
-			refuse_map_argumentation(true),
+			convert_map_argumentation(true),
 			boot_statements_using_braces(true),
 			compound_uses_vn_separator(false),
 			goto_uses_ref_and_deref(true),
@@ -125,7 +125,7 @@ public:
 		type_index current_access;
 		bool refuse_c_style_cast;		
 		bool detect_and_render_constructor;
-		bool refuse_map_argumentation;
+		bool convert_map_argumentation;
 		bool boot_statements_using_braces;
 		bool compound_uses_vn_separator;
 		bool goto_uses_ref_and_deref;

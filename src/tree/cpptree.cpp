@@ -425,7 +425,7 @@ string MapArgumentation::GetRender( VN::RendererInterface *, Production, Policy 
 
 string MapArgumentation::DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy)
 {
-	if( policy.refuse_map_argumentation )
+	if( policy.convert_map_argumentation )
 		throw RefusedByPolicy(); // Would output 〔, 〕 and ⦂, so C++ renderer needs to resolve into seq args
 			
 	list<string> ls;
@@ -1545,7 +1545,7 @@ Syntax::Production Call::GetMyProductionTerminal() const
 string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {				
 	string s = renderer->DoRender( callee, Syntax::Production::POSTFIX, policy );
-	if( !(policy.refuse_map_argumentation && TreePtr<MapArgumentation>::DynamicCast( argumentation )) )
+	if( !(policy.convert_map_argumentation) )
 		return s + argumentation->DirectRenderArgumentation(renderer, policy);
 
 	TreePtr<SeqArgumentation> sa = argumentation->ConvertToSeq(callee, renderer, policy);
