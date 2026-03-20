@@ -1545,13 +1545,13 @@ Syntax::Production Call::GetMyProductionTerminal() const
 string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {				
 	string s = renderer->DoRender( callee, Syntax::Production::POSTFIX, policy );
-	if( !(policy.convert_map_argumentation) )
-		return s + argumentation->DirectRenderArgumentation(renderer, policy);
-
-	TreePtr<SeqArgumentation> sa = argumentation->ConvertToSeq(callee, renderer, policy);
-
+	
+	TreePtr<Argumentation> arg = argumentation;
+	if( policy.convert_map_argumentation )
+		arg = arg->ConvertToSeq(callee, renderer, policy);
+		
 	// Let the SeqArgumentation node do the actual render
-	s += sa->DirectRenderArgumentation(renderer, policy);    
+	s += arg->DirectRenderArgumentation(renderer, policy);    
 	return s;
 }
 
