@@ -1513,6 +1513,10 @@ Syntax::Production Call::GetMyProductionTerminal() const
 
 string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {				
+	if( policy.refuse_map_argumentation && TreePtr<MapArgumentation>::DynamicCast( argumentation ) )
+		throw RefusedByPolicy(); // Would output 〔, 〕 and ⦂, so C++ renderer needs to resolve into seq args
+
+	
 	return renderer->DoRender( callee, Syntax::Production::POSTFIX, policy ) + 
 	       argumentation->DirectRenderArgumentation(renderer, policy);
 }
