@@ -226,9 +226,21 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderMapArgs( TreePtr<Type> callee_type, TreePtr<MapArgumentation> map_argumentation, Syntax::Policy policy ) try
-{   
-	list<string> ls;
+string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<Call> call, Syntax::Production surround_prod, Syntax::Policy policy ) try
+{
+	(void)surround_prod;
+	// Note: we need to operate on the call, so that we can use callee to find the declaration and 
+	// resolve the map into a sequence.
+
+	auto map_argumentation = TreePtr<MapArgumentation>::DynamicCast( call->argumentation );
+	ASSERT( map_argumentation );
+
+    // Render the expression that resolves to the function name unless this is
+    // a constructor call in which case just the name of the thing being constructed.
+    string s = DoRender( call->callee, Syntax::Production::POSTFIX, policy );
+
+	// A map-args call isn't C++, so lower it to sequential args - requires the function type
+    auto callee_type = TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr();
 	ASSERT( callee_type );
     
 	// Convert f->params from Parameters to Declarations and settle on an arbitrary 
@@ -243,27 +255,7 @@ string CppRender::RenderMapArgs( TreePtr<Type> callee_type, TreePtr<MapArgumenta
 	sa->arguments = IdValuePair::SortMapById( map_argumentation->arguments, decl_sequence ); // TODO could absorb
 
 	// Let the SeqArgumentation node do the actual render
-	return sa->DirectRenderArgumentation(this, policy);
-}
-DEFAULT_CATCH_CLAUSE
-
-
-string CppRender::RenderMapArgsCallAsSeqArg( TreePtr<Call> call, Syntax::Production surround_prod, Syntax::Policy policy ) try
-{
-	(void)surround_prod;
-	// Note: we need to operate on the call, so that we can use callee to find the declaration and 
-	// resolve the map into a sequence.
-
-	auto map_args = TreePtr<MapArgumentation>::DynamicCast( call->argumentation );
-	ASSERT( map_args );
-
-    // Render the expression that resolves to the function name unless this is
-    // a constructor call in which case just the name of the thing being constructed.
-    string s = DoRender( call->callee, Syntax::Production::POSTFIX, policy );
-
-	// A map-args call isn't C++, so lower it to sequential args - requires the function type
-    s += RenderMapArgs(TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr(), map_args, policy);
-    return s;
+	s += sa->DirectRenderArgumentation(this, policy);    return s;
 }
 DEFAULT_CATCH_CLAUSE
 
