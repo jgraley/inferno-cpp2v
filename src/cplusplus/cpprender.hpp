@@ -33,8 +33,6 @@ private:
     string RenderMacroStatement( TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderExpression( TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderRecordInitialiser( TreePtr<CPPTree::RecordInitialiser> make_rec, Syntax::Production surround_prod, Syntax::Policy policy );
-	TreePtr<CPPTree::SeqArgumentation> MakeSeqArgumentation( TreePtr<CPPTree::MapArgumentation> map_argumentation,
-										 		             Sequence<CPPTree::Declaration> key_sequence );
     string RenderStorage( TreePtr<CPPTree::Instance> st, Syntax::Policy policy ); // No actual storage node
     void ExtractInits( Sequence<CPPTree::Statement> &body, 
                        Sequence<CPPTree::Statement> &inits, 

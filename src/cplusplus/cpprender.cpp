@@ -239,7 +239,8 @@ string CppRender::RenderMapArgs( TreePtr<Type> callee_type, TreePtr<MapArgumenta
 			decl_sequence.push_back(param); 
 
 	// Determine args sequence using param sequence
-	TreePtr<SeqArgumentation> sa = MakeSeqArgumentation( map_argumentation, decl_sequence );
+	auto sa = MakeTreeNode<SeqArgumentation>();
+	sa->arguments = IdValuePair::SortMapById( map_argumentation->arguments, decl_sequence ); // TODO could absorb
 
 	// Let the SeqArgumentation node do the actual render
 	return sa->DirectRenderArgumentation(this, policy);
@@ -336,15 +337,6 @@ string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, 
     return s;
 }
 DEFAULT_CATCH_CLAUSE
-
-
-TreePtr<SeqArgumentation> CppRender::MakeSeqArgumentation( TreePtr<MapArgumentation> map_argumentation,
-														   Sequence<Declaration> key_sequence )
-{
-	auto sa = MakeTreeNode<SeqArgumentation>();
-	sa->arguments = IdValuePair::SortMapById( map_argumentation->arguments, key_sequence ); // TODO could absorb
-	return sa;
-}											   
 
 
 string CppRender::RenderStorage( TreePtr<Instance> st, Syntax::Policy policy ) try
