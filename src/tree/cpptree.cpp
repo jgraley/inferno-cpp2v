@@ -380,6 +380,34 @@ string IdValuePair::GetRender( VN::RendererInterface *renderer, Production, Poli
            renderer->DoRender( value, Production::COLON_SEP, policy );	
 }
 
+Sequence<Expression> IdValuePair::SortMapById( Collection<IdValuePair> &id_value_map,
+                                               Sequence<Declaration> key_sequence )
+{   
+    Sequence<Expression> out_sequence;
+    for( TreePtr<Declaration> d : key_sequence )
+    {
+        // We only care about instances...
+        if( TreePtr<Instance> i = DynamicTreePtrCast<Instance>( d ) )
+        {
+            // ...and not function instances
+            if( !DynamicTreePtrCast<Callable>( i->type ) )
+            {
+                // search init for matching member (not a map: this is a Collection of IdValuePair nodes)
+                for( TreePtr<IdValuePair> mi : id_value_map )
+                {
+                    if( i->identifier == mi->key )
+                    {
+                        out_sequence.push_back( mi->value );
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return out_sequence;
+}
+
+
 //////////////////////////// MapArgumentation ///////////////////////////////
 
 Syntax::Production MapArgumentation::GetMyProductionTerminal() const
@@ -416,7 +444,7 @@ Syntax::Production SeqArgumentation::GetMyProductionTerminal() const
 
 string SeqArgumentation::GetRender( VN::RendererInterface *, Production, Policy )
 {	
-	throw Unimplemented(); // Not syntactically valid in isolation
+	throw Unimplemented(); // Not syntactically valid in isolation	
 }
 
 

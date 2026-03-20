@@ -323,7 +323,7 @@ string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, 
     Sequence<Declaration> sorted_members = SortDecls( r->members, true );
 
     // Determine args sequence using param sequence
-    Sequence<Expression> sub_expr_sequence = SortMapById( make_rec->operands, sorted_members );
+    Sequence<Expression> sub_expr_sequence = IdValuePair::SortMapById( make_rec->operands, sorted_members );
     
     // Render to strings
     list<string> ls;
@@ -338,39 +338,11 @@ string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, 
 DEFAULT_CATCH_CLAUSE
 
 
-Sequence<Expression> CppRender::SortMapById( Collection<IdValuePair> &id_value_map,
-                                             Sequence<Declaration> key_sequence )
-{   
-    Sequence<Expression> out_sequence;
-    for( TreePtr<Declaration> d : key_sequence )
-    {
-        // We only care about instances...
-        if( TreePtr<Instance> i = DynamicTreePtrCast<Instance>( d ) )
-        {
-            // ...and not function instances
-            if( !DynamicTreePtrCast<Callable>( i->type ) )
-            {
-                // search init for matching member (not a map: this is a Collection of IdValuePair nodes)
-                for( TreePtr<IdValuePair> mi : id_value_map )
-                {
-                    if( i->identifier == mi->key )
-                    {
-                        out_sequence.push_back( mi->value );
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    return out_sequence;
-}
-
-
 TreePtr<SeqArgumentation> CppRender::MakeSeqArgumentation( TreePtr<MapArgumentation> map_argumentation,
 														   Sequence<Declaration> key_sequence )
 {
 	auto sa = MakeTreeNode<SeqArgumentation>();
-	sa->arguments = SortMapById( map_argumentation->arguments, key_sequence ); // TODO could absorb
+	sa->arguments = IdValuePair::SortMapById( map_argumentation->arguments, key_sequence ); // TODO could absorb
 	return sa;
 }											   
 

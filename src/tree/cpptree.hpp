@@ -246,6 +246,10 @@ struct IdValuePair : virtual Node
     virtual string GetColour() const { return "/set28/8"; }    
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );	
+
+	// Sort-of a method on Collection<IdValuePair>
+	static Sequence<Expression> SortMapById( Collection<IdValuePair> &id_value_map,
+								     	     Sequence<Declaration> key_sequence );
 };
 
 
