@@ -236,35 +236,24 @@ string CppRender::RenderCall( TreePtr<Call> call, Syntax::Production surround_pr
 	// a constructor call in which case just the name of the thing being constructed.
 	string s = DoRender( call->callee, Syntax::Production::POSTFIX, policy );
 	
-	TreePtr<SeqArgumentation> sa;
-	if( auto map_argumentation = TreePtr<MapArgumentation>::DynamicCast( call->argumentation ) )
-	{
-		// Convert MapArgumentation to SeqArgumentation
-		// Note: we need to operate on the call, so that we can use callee to find the function type 
-		// and resolve the map into a sequence.
-		auto callee_type = TypeOf::instance.Get(*GetTransKit(), call->callee).GetTreePtr();
-		ASSERT( callee_type );
-		
-		// Convert f->params from Parameters to Declarations and settle on an arbitrary 
-		// ordering. This needs to be the same on each visit with a given callee.
-		Sequence<Declaration> decl_sequence;   
-		if( auto f = TreePtr<CallableParams>::DynamicCast(callee_type) )  
-			for( auto param : f->params )
-				decl_sequence.push_back(param); 
-
-		// Determine args sequence using param sequence
-		sa = MakeTreeNode<SeqArgumentation>();
-		sa->arguments = IdValuePair::SortMapById( map_argumentation->arguments, decl_sequence ); // TODO could absorb
-	}
-	else if( (sa = TreePtr<SeqArgumentation>::DynamicCast( call->argumentation )) )
-	{
-	}
-	else
-	{
-		ASSERTFAIL();
-	}
+	auto map_argumentation = TreePtr<MapArgumentation>::DynamicCast( call->argumentation );
+	ASSERT( map_argumentation );
+	// Convert MapArgumentation to SeqArgumentation
+	// Note: we need to operate on the call, so that we can use callee to find the function type 
+	// and resolve the map into a sequence.
+	auto callee_type = TypeOf::instance.Get(*GetTransKit(), call->callee).GetTreePtr();
+	ASSERT( callee_type );
 	
-	ASSERT( sa );
+	// Convert f->params from Parameters to Declarations and settle on an arbitrary 
+	// ordering. This needs to be the same on each visit with a given callee.
+	Sequence<Declaration> decl_sequence;   
+	if( auto f = TreePtr<CallableParams>::DynamicCast(callee_type) )  
+		for( auto param : f->params )
+			decl_sequence.push_back(param); 
+
+	// Determine args sequence using param sequence
+	auto sa = MakeTreeNode<SeqArgumentation>();
+	sa->arguments = IdValuePair::SortMapById( map_argumentation->arguments, decl_sequence ); // TODO could absorb
 	
 	// Let the SeqArgumentation node do the actual render
 	s += sa->DirectRenderArgumentation(this, policy);    
