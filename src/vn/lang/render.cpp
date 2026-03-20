@@ -596,7 +596,7 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 									   Syntax::Production, 
 									   Syntax::Policy ) final { return "fake"; } 	
 			TreePtr<Node> TryGetScope( TreePtr<Node> ) const final { return nullptr; }
-
+			const TransKit *GetTransKit() const override { return nullptr; }
 		} fake_renderer;
 
 		// Can it render?
@@ -653,4 +653,10 @@ bool Render::IsDeclared( TreePtr<Identifier> id )
 string Render::RenderMismatchException( string fname, const Mismatch &me )
 {
     return "❌"+fname+"() error: "+me.What()+"❌";
+}
+
+
+const TransKit *Render::GetTransKit() const
+{
+	return &trans_kit;
 }

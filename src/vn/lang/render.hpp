@@ -60,6 +60,7 @@ public:
 	bool IsDeclared( TreePtr<CPPTree::Identifier> id );
 							 
 	string RenderMismatchException( string fname, const Mismatch &me );
+	const TransKit *GetTransKit() const override;
 
     const Syntax::Policy default_policy;
     TreePtr<Node> context;

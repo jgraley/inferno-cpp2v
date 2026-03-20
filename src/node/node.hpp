@@ -94,6 +94,8 @@ struct Node : NodeBases,
     virtual string GetTrace() const override;    
 };
 
+class TransKit;
+
 namespace VN
 {
 	class RendererInterface
@@ -112,6 +114,7 @@ namespace VN
 										   Syntax::Production surround_prod, 
 		                                   Syntax::Policy policy ) = 0;
 		virtual TreePtr<Node> TryGetScope( TreePtr<Node> node ) const = 0;
+		virtual const TransKit *GetTransKit() const = 0;
 	};
 };
 

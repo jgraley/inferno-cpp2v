@@ -242,9 +242,7 @@ string CppRender::RenderCall( TreePtr<Call> call, Syntax::Production surround_pr
 		// Convert MapArgumentation to SeqArgumentation
 		// Note: we need to operate on the call, so that we can use callee to find the function type 
 		// and resolve the map into a sequence.
-		utils = make_unique<DefaultTransUtils>(context);
-		trans_kit = TransKit{ utils.get() };
-		auto callee_type = TypeOf::instance.Get(trans_kit, call->callee).GetTreePtr();
+		auto callee_type = TypeOf::instance.Get(*GetTransKit(), call->callee).GetTreePtr();
 		ASSERT( callee_type );
 		
 		// Convert f->params from Parameters to Declarations and settle on an arbitrary 
