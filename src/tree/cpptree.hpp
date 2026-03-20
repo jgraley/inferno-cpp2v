@@ -258,7 +258,7 @@ struct Argumentation : virtual Node
     NODE_FUNCTIONS
     
     virtual string DirectRenderArgumentation(VN::RendererInterface *, Policy) { return ""; }
-    virtual TreePtr<Argumentation> ConvertToSeq(TreePtr<Expression>, VN::RendererInterface *, Policy) { return nullptr; }
+    virtual TreePtr<Argumentation> ConvertToSeqIfPolicyAllows(TreePtr<Expression>, VN::RendererInterface *, Policy) { return nullptr; }
 };
 
 
@@ -271,7 +271,7 @@ struct MapArgumentation : Argumentation
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
     string DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy) final;
-    TreePtr<Argumentation> ConvertToSeq(TreePtr<Expression> callee, VN::RendererInterface *, Policy) final;
+    TreePtr<Argumentation> ConvertToSeqIfPolicyAllows(TreePtr<Expression> callee, VN::RendererInterface *, Policy) final;
 };
 
 
@@ -285,7 +285,7 @@ struct SeqArgumentation : Argumentation
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
     string DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy) final;
-    TreePtr<Argumentation> ConvertToSeq(TreePtr<Expression> callee, VN::RendererInterface *, Policy) final;
+    TreePtr<Argumentation> ConvertToSeqIfPolicyAllows(TreePtr<Expression> callee, VN::RendererInterface *, Policy) final;
 };  
 
 //////////////////////////// Literals ///////////////////////////////

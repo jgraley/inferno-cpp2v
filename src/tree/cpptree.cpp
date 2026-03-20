@@ -425,7 +425,7 @@ string MapArgumentation::GetRender( VN::RendererInterface *, Production, Policy 
 
 string MapArgumentation::DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy)
 {
-	if( policy.convert_map_argumentation )
+	if( policy.convert_argumentation_to_seq )
 		throw RefusedByPolicy(); // Would output 〔, 〕 and ⦂, so C++ renderer needs to resolve into seq args
 			
 	list<string> ls;
@@ -436,8 +436,11 @@ string MapArgumentation::DirectRenderArgumentation(VN::RendererInterface *render
 }
 
 
-TreePtr<Argumentation> MapArgumentation::ConvertToSeq(TreePtr<Expression> callee, VN::RendererInterface *renderer, Policy)
+TreePtr<Argumentation> MapArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expression> callee, VN::RendererInterface *renderer, Policy policy)
 {
+	if( !policy.convert_argumentation_to_seq )
+		return TreePtr<SeqArgumentation>( shared_from_this() );
+
 	// Note: we need to operate on the call, so that we can use callee to find the function type 
 	// and resolve the map into a sequence.
 
@@ -483,7 +486,7 @@ string SeqArgumentation::DirectRenderArgumentation(VN::RendererInterface *render
 }
 
 
-TreePtr<Argumentation> SeqArgumentation::ConvertToSeq(TreePtr<Expression>, VN::RendererInterface *, Policy)
+TreePtr<Argumentation> SeqArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expression>, VN::RendererInterface *, Policy)
 {
 	return TreePtr<SeqArgumentation>( shared_from_this() );
 }
@@ -1484,6 +1487,8 @@ string New::GetRender( VN::RendererInterface *renderer, Production, Policy polic
 		   " " +
 		   renderer->DoRender( type, Syntax::Production::TYPE_IN_NEW, policy ) +
 		   constructor_argumentation->DirectRenderArgumentation(renderer, policy);
+
+	// TODO could use ConvertToSeqIfPolicyAllows() once we have a constructor_id
 }
 
 //////////////////////////// Delete ///////////////////////////////
@@ -1546,9 +1551,8 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 {				
 	string s = renderer->DoRender( callee, Syntax::Production::POSTFIX, policy );
 	
-	TreePtr<Argumentation> arg = argumentation;
-	if( policy.convert_map_argumentation )
-		arg = arg->ConvertToSeq(callee, renderer, policy);
+	// We may need to convert the argumentation into a suitable form depending on policy.
+	TreePtr<Argumentation> arg = argumentation->ConvertToSeqIfPolicyAllows(callee, renderer, policy);
 		
 	// Let the SeqArgumentation node do the actual render
 	s += arg->DirectRenderArgumentation(renderer, policy);    
@@ -1566,11 +1570,13 @@ Syntax::Production ConstructInit::GetMyProductionTerminal() const
 string ConstructInit::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {		
 	if( !policy.detect_and_render_constructor )
-		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang
+		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang				
 			
 	// We never render the identifier for constructors - they are "invisible" and represent
 	// the choice of which overload we are bound to.		
 	return argumentation->DirectRenderArgumentation(renderer, policy);
+	
+	// TODO could use ConvertToSeqIfPolicyAllows() since we have a constructor_id
 }
 
 //////////////////////////// RecordInitialiser ///////////////////////////////

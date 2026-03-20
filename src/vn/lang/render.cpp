@@ -143,7 +143,7 @@ Syntax::Policy Render::GetDefaultPolicy()
 	policy.detect_and_render_constructor = false;
 	
 	// Permit map args with their non-C syntax
-	policy.convert_map_argumentation = false;
+	policy.convert_argumentation_to_seq = false;
 
 	// Don't insert {} into patterns because they imply Compound or StatementExpression
 	// or ArrayInitialiser or RecordInitialiser. Use () instead, which are purely for disamiguation.
