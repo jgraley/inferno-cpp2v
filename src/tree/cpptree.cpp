@@ -1517,15 +1517,18 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	string s = renderer->DoRender( callee, Syntax::Production::POSTFIX, policy );
 	if( !(policy.refuse_map_argumentation && TreePtr<MapArgumentation>::DynamicCast( argumentation )) )
 		return s + argumentation->DirectRenderArgumentation(renderer, policy);
+
+	TreePtr<Type> callee_type = TypeOf::instance.Get(*renderer->GetTransKit(), callee).GetTreePtr();
+	ASSERT( callee_type );
+	
+
 	
 	auto map_argumentation = TreePtr<MapArgumentation>::DynamicCast( argumentation );
 	ASSERT( map_argumentation );
 	// Convert MapArgumentation to SeqArgumentation
 	// Note: we need to operate on the call, so that we can use callee to find the function type 
 	// and resolve the map into a sequence.
-	auto callee_type = TypeOf::instance.Get(*renderer->GetTransKit(), callee).GetTreePtr();
-	ASSERT( callee_type );
-	
+
 	// Convert f->params from Parameters to Declarations and settle on an arbitrary 
 	// ordering. This needs to be the same on each visit with a given callee.
 	Sequence<Declaration> decl_sequence;   

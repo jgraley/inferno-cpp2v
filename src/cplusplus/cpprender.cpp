@@ -120,8 +120,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return string();  
     else if( auto literal = DynamicTreePtrCast< Literal >(node) )
         return RenderLiteral( literal, surround_prod, policy );
-    else if( auto call = TreePtr<Call>::DynamicCast(node) )
-        return RenderCall( call, surround_prod, policy ); // Still need this for map args resolution TODO raise/lower steps
     else if( auto make_rec = TreePtr<RecordInitialiser>::DynamicCast(node) )
         return RenderRecordInitialiser( make_rec, surround_prod, policy );
     else if( auto macro_decl = TreePtr<MacroDeclaration>::DynamicCast(node) )
@@ -224,40 +222,6 @@ string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surro
     }
     else
         return RenderNodeExplicit( op, surround_prod, policy );
-}
-DEFAULT_CATCH_CLAUSE
-
-
-string CppRender::RenderCall( TreePtr<Call> call, Syntax::Production surround_prod, Syntax::Policy policy ) try
-{
-	(void)surround_prod;
-	
-	// Render the expression that resolves to the function name unless this is
-	// a constructor call in which case just the name of the thing being constructed.
-	string s = DoRender( call->callee, Syntax::Production::POSTFIX, policy );
-	
-	auto map_argumentation = TreePtr<MapArgumentation>::DynamicCast( call->argumentation );
-	ASSERT( map_argumentation );
-	// Convert MapArgumentation to SeqArgumentation
-	// Note: we need to operate on the call, so that we can use callee to find the function type 
-	// and resolve the map into a sequence.
-	auto callee_type = TypeOf::instance.Get(*GetTransKit(), call->callee).GetTreePtr();
-	ASSERT( callee_type );
-	
-	// Convert f->params from Parameters to Declarations and settle on an arbitrary 
-	// ordering. This needs to be the same on each visit with a given callee.
-	Sequence<Declaration> decl_sequence;   
-	if( auto f = TreePtr<CallableParams>::DynamicCast(callee_type) )  
-		for( auto param : f->params )
-			decl_sequence.push_back(param); 
-
-	// Determine args sequence using param sequence
-	auto sa = MakeTreeNode<SeqArgumentation>();
-	sa->arguments = IdValuePair::SortMapById( map_argumentation->arguments, decl_sequence ); // TODO could absorb
-	
-	// Let the SeqArgumentation node do the actual render
-	s += sa->DirectRenderArgumentation(this, policy);    
-	return s;
 }
 DEFAULT_CATCH_CLAUSE
 

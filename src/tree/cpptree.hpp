@@ -258,6 +258,7 @@ struct Argumentation : virtual Node
     NODE_FUNCTIONS
     
     virtual string DirectRenderArgumentation(VN::RendererInterface *, Policy) { return ""; }
+    //virtual TreePtr<SeqArgumentation> ConvertToSeq(TreePtr<Type> VN::RendererInterface *, Policy) { return ""; }
 };
 
 
