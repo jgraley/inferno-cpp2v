@@ -88,9 +88,9 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 		}
 		Syntax::Production prod;
 		if( typeish )
-			prod = Syntax::Production::VN_DESIGNATE_TYPE;
+			prod = Syntax::Production::VN_DESIGNATE_TERM_TYPE;
 		else
-			prod = Syntax::Production::VN_DESIGNATE;
+			prod = Syntax::Production::VN_DESIGNATE_TERM;
 			
 		commands.push_back( unique_coupling_names.at(node) + 
 							" ⪮ " + 

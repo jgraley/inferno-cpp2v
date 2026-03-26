@@ -64,22 +64,21 @@
 %define api.token.prefix {TOK_}
 
 %token
-	DESIGNATE 							        _("designate operator ⪮")
-	VN_SEMI 							        _("command terminator ⨟")
-	OPEN_MAP_CALL						        _("open map-arguments 〔")
-	CLOSE_MAP_CALL						        _("close map-arguments 〕")	
-	MAP_ARG_OP 							        _("map-argument operator ⦂")
+	DESIGNATE_COMMAND 					        _("designate command ⪮")
+	ENGINE_COMMAND	 						    _("engine command ꩜")
+	ATTRIBUTE_COMMAND						    _("attribute command ‡")
+	COMMAND_TERM 						        _("command terminator ⨟")
 	OPEN_VN 							        _("open VN-params ⦅")
 	CLOSE_VN 							        _("close VN-params ⦆")
 	VN_SEP 								        _("VN-param separator ⚬")
 	VN_SUB_SEP							        _("container separator 🞄")
-	RESOLUTION_OP 						        _("C scope-resolution operator ::")
-	RANGE_OP 							        _("GCC range operator ..")
-	ENGINE	 							        _("engine command ꩜")
-	STUFF		 						        _("stuff operator ⩨")
-	DELTA 								        _("delta-compare operator ▲")
-	DELTA_ARROW 						        _("delta-replace operator ⯈")
-	EXPLICIT 							        _("explicit node operator ⯁")
+	OPEN_MAP_CALL						        _("open map-arguments 〔")
+	CLOSE_MAP_CALL						        _("close map-arguments 〕")	
+	MAP_ARG_OP 							        _("map-argument operator ⦂")
+	STUFF_OP		 					        _("stuff operator ⩨")
+	DELTA_COMPARE_OP 					        _("delta-compare operator ▲")
+	DELTA_REPLACE_OP 					        _("delta-replace operator ⯈")
+	EXPLICIT_OP 						        _("explicit node operator ⯁")
 	ANY 								        _("any node operator ☆")
 	STAR 								        _("star operator ★")
 	ID_BY_NAME							        _("identifier-by-name operator ⊛")
@@ -93,11 +92,12 @@
 	BUILD_SIZE							        _("build-container-size operator 🄽")
 	STRINGIZE							        _("stringise operator §")
 	PRERESTRICT							        _("prerestriction operator ‽")
-	ATTRIBUTE							        _("VN-script attribute ‡")
 	CONSTRUCTOR							        _("constructor marker ⨤")
 	TYPE_INDICATOR						        _("type operator ⍑")
 	CODE_UNIT 							        _("code unit operator ∞")
-	
+	RESOLUTION_OP 						        _("C scope-resolution operator ::")
+	RANGE_OP 							        _("GCC range operator ..")
+		
 <string>	C_ASSIGN				        _("C assignment operator =")
 <string>	C_COMPOUND_ASSIGN				_("C compound-assignment operator")
 <string>	C_LOGICAL_OR_OP			        _("C logical-or operator ||")		
@@ -127,8 +127,6 @@
 <YY::TokenMetadata>	RESOLVED_NORMAL			_("resolved non-type node name")
 <YY::TokenMetadata>	RESOLVED_TYPE			_("resolved type node name")
 <YY::TokenMetadata>	NODE_NAMESPACE			_("scope resolving name")
-<YY::TokenMetadata>	DECLARATION_OF			_("DeclarationOf")
-<YY::TokenMetadata>	TYPE_OF					_("TypeOf")
 <YY::TokenMetadata> NORM_TERM_KEYWORD		_("non-type terminal keyword")
 <YY::TokenMetadata> PRIMITIVE_STMT_KEYWORD  _("stmt_decl keyword") // eg break;
 <YY::TokenMetadata> SPACE_SEP_STMT_KEYWORD 	_("space-separated stmt_decl keyword") // eg return 12;
@@ -188,25 +186,25 @@ stmt_high
 vnscript 		: commands 								{ vn->OnVNScript($1); }
      
 // This is to make the ⨟ optional on last command
-commands        : sep_commands							{ $$ = $1; }
-				| sep_commands VN_SEMI					{ $$ = $1; }
+commands        : sep_commands								{ $$ = $1; }
+				| sep_commands COMMAND_TERM					{ $$ = $1; }
 				
 // The ⨟ turns patterns into commands. This rule must 
 // be left-associative so calls to OnParse() happen
 // in the correct order. STOP BREAKING THIS!!!
-sep_commands 	: sep_commands VN_SEMI script_command		{ $$ = $1; $$.push_back($3); }	
-				| script_command							{ $$.push_back($1); }
-				| sep_commands VN_SEMI designation_command	{ $$ = $1; recogniser->AddGnomon($3); }	
-				| designation_command						{ recogniser->AddGnomon($1); }
+sep_commands 	: sep_commands COMMAND_TERM script_command		{ $$ = $1; $$.push_back($3); }	
+				| script_command								{ $$.push_back($1); }
+				| sep_commands COMMAND_TERM designation_command	{ $$ = $1; recogniser->AddGnomon($3); }	
+				| designation_command							{ recogniser->AddGnomon($1); }
 			
 // Add more commands here
-script_command	: ENGINE unified   		 		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
+script_command	: ENGINE_COMMAND unified   		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
 				| normal 			  				{ $$ = make_shared<VN::PatternCommand>($1, @$); } // in trivial cases, this decays back to the node
-				| ATTRIBUTE		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
+				| ATTRIBUTE_COMMAND		  			{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
-designation_command	: vn_name DESIGNATE normal		{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
-					| vn_name DESIGNATE type_id		{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
+designation_command	: vn_name DESIGNATE_COMMAND normal		{ $$ = make_shared<VN::NonTypeDesignationGnomon>($1, $3); }
+					| vn_name DESIGNATE_COMMAND type_id		{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
 
 //////////////////////////////////// ITEMISATION ///////////////////////////////////////////
 // For explicit/built-in nodes mostly
@@ -248,12 +246,12 @@ norm_primary       	: expr_expression
 // Because there's no separator in {{code} expr} the prefix ops would conflict with infix that use same symbol,
 // so we'll need to complete a branch of the syntax for compounds with a copy of the unary VN operators (none are postfix).
 compound_prefix : compound_primary 
-				| 			       DELTA normal DELTA_ARROW compound_prefix	{ $$ = vn->OnDelta($2, $4); }
+				| 			       DELTA_COMPARE_OP normal DELTA_REPLACE_OP compound_prefix	{ $$ = vn->OnDelta($2, $4); }
 				| 								   NEGATION compound_prefix	{ $$ = vn->OnNegation($2); }
 				|       				transform_norm_part compound_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
-				|  									  STUFF compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-				|  STUFF OPEN_VN           unified CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-				|  STUFF OPEN_VN stuff_depth_limit CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+				|  									  STUFF_OP compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+				|  STUFF_OP OPEN_VN           unified CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+				|  STUFF_OP OPEN_VN stuff_depth_limit CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
 				|                     prerestrict_name_part compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 
 compound_primary	: '{' VN_SEP '}'                   						{ $$ = vn->OnCompound({}, @2, {}, @3); } 
@@ -398,12 +396,12 @@ expr_prefix : expr_postfix
 			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
 			| 									  GRASS expr_prefix	 { $$ = vn->OnGrass($2); }
 			| 								 POINTER_IS expr_prefix	 { $$ = vn->OnPointerIs($2); }
-			| 			       DELTA normal DELTA_ARROW expr_prefix	 { $$ = vn->OnDelta($2, $4); }
+			|  DELTA_COMPARE_OP normal DELTA_REPLACE_OP expr_prefix	 { $$ = vn->OnDelta($2, $4); }
 			| 								   NEGATION expr_prefix	 { $$ = vn->OnNegation($2); }
 			|                     prerestrict_name_part expr_prefix	 { $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|  									  STUFF unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			|  STUFF OPEN_VN           unified CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			|  STUFF OPEN_VN stuff_depth_limit CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+			|  									  STUFF_OP unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+			|  STUFF_OP OPEN_VN           unified CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+			|  STUFF_OP OPEN_VN stuff_depth_limit CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
 
 transform_norm_part : start_transform_name_scope TRANSFORM_NAME_NORMAL { $$ = $2.as_ascii; (void)$1; }
 
@@ -475,7 +473,7 @@ type_for_declarator : type_primary
 type_specified		: type_prefix          
           
 type_prefix : type_postfix
-			| 			 		  DELTA type_id DELTA_ARROW type_prefix	{ $$ = vn->OnDelta($2, $4); }
+			| 	  DELTA_COMPARE_OP type_id DELTA_REPLACE_OP type_prefix	{ $$ = vn->OnDelta($2, $4); }
 			| 									      GRASS type_prefix	{ $$ = vn->OnGrass($2); }
 			| 								     POINTER_IS type_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 								       NEGATION type_prefix	{ $$ = vn->OnNegation($2); }
@@ -494,7 +492,7 @@ type_primary: type_vn_prim
 cons_or_des_type : CONSTRUCTOR parameterisation 		 						{ $$ = vn->OnConstructor($2); } 				
 									
 type_vn_prim: type_explicit_name_part itemisation								{ $$ = vn->OnExplicitNode($1, @1, $2); }
-			| DESIGNATED_TYPE     									  			{ $$ = $1.as_designated; }		
+			| DESIGNATED_TYPE     								  			{ $$ = $1.as_designated; }		
 			| type_id_by_name_part OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
 			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
@@ -541,7 +539,7 @@ node_namespace 	: part_resolve NODE_NAMESPACE			{ $$ = $2; }
 				| NODE_NAMESPACE						{ $$ = $1; }				      
 
 
-start_explicit_scope	: EXPLICIT 			{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
+start_explicit_scope	: EXPLICIT_OP 			{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 										      recogniser->AddGnomon($$); }
 										      
 start_prerestrict_scope	: PRERESTRICT		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 

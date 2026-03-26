@@ -98,5 +98,5 @@ bool Syntax::IsType( Production prod )
 		   prod == Syntax::Production::SPACE_SEP_TYPE ||
 		   prod == Syntax::Production::PRIMARY_TYPE ||
 		   prod == Syntax::Production::TYPE_IN_DECLARATION ||
-		   prod == Syntax::Production::VN_DESIGNATE_TYPE;
+		   prod == Syntax::Production::VN_DESIGNATE_TERM_TYPE;
 }

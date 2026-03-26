@@ -29,8 +29,8 @@ VNL_DEPS = $(VNL_DIR)/makefile
 -include $(VNL_LYPP_MODULES:%=build/%.lpp.d) 
 -include $(VNL_LYPP_MODULES:%=build/%.ypp.d)
 
-$(VNL_LYPP_MODULES:%=build/%.lpp.hpp) : build/%.lpp.hpp : build/%.lpp.cpp
-$(VNL_LYPP_MODULES:%=build/%.lpp.cpp): build/%.lpp.cpp : %.lpp $(VNL_DEPS)
+$(VNL_LYPP_MODULES:%=build/%.lpp.hpp) : build/%.lpp.hpp : build/%.lpp.cpp build/%.ypp.hpp
+$(VNL_LYPP_MODULES:%=build/%.lpp.cpp) : build/%.lpp.cpp : %.lpp build/%.ypp.hpp $(VNL_DEPS)
 	@mkdir -p $(dir $@)
 	@echo GENERATING LEXER
 	$(REFLEX) $(REFLEX_OPTIONS) $< --outfile=$@ --header-file=$(subst .cpp,.hpp,$@)	
@@ -38,7 +38,7 @@ $(VNL_LYPP_MODULES:%=build/%.lpp.cpp): build/%.lpp.cpp : %.lpp $(VNL_DEPS)
 
 $(VNL_LYPP_MODULES:%=build/%.ypp.hpp) : build/%.ypp.hpp : build/%.ypp.cpp
 $(VNL_LYPP_MODULES:%=build/%.location.hpp) : build/%.location.hpp : build/%.ypp.cpp
-$(VNL_LYPP_MODULES:%=build/%.ypp.cpp): build/%.ypp.cpp : %.ypp $(VNL_DEPS) 
+$(VNL_LYPP_MODULES:%=build/%.ypp.cpp) : build/%.ypp.cpp : %.ypp $(VNL_DEPS) 
 	@mkdir -p $(dir $@)
 	@echo GENERATING PARSER
 	$(BISON) $(BISON_OPTIONS) -d $< -o $@ 

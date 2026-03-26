@@ -1,5 +1,5 @@
-#ifndef DELTA_AGENT_HPP
-#define DELTA_AGENT_HPP
+#ifndef DELTA_COMPARE_OP_AGENT_HPP
+#define DELTA_COMPARE_OP_AGENT_HPP
 
 #include "common/common.hpp"
 #include "autolocating_agent.hpp"

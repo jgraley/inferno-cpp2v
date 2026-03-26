@@ -23,8 +23,8 @@ public:
 		BOOT,
 		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
 		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())		
-		VN_DESIGNATE, // Designating non-types using ⪮
-		VN_DESIGNATE_TYPE, // Designating types using ⪮
+		VN_DESIGNATE_TERM, // Designating non-types using ⪮
+		VN_DESIGNATE_TERM_TYPE, // Designating types using ⪮
 		VN_DISJUNCTION,
 		VN_CONJUNCTION,
 		TOP_VN,
