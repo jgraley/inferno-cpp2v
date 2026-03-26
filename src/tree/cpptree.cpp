@@ -439,7 +439,7 @@ string MapArgumentation::DirectRenderArgumentation(VN::RendererInterface *render
 TreePtr<Argumentation> MapArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expression> callee, VN::RendererInterface *renderer, Policy policy)
 {
 	if( !policy.convert_argumentation_to_seq )
-		return TreePtr<SeqArgumentation>( shared_from_this() );
+		return TreePtr<SeqArgumentation>( shared_from_this() ); // No conversion needed, so return self
 
 	// Note: we need to operate on the call, so that we can use callee to find the function type 
 	// and resolve the map into a sequence.
@@ -1552,6 +1552,7 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	string s = renderer->DoRender( callee, Syntax::Production::POSTFIX, policy );
 	
 	// We may need to convert the argumentation into a suitable form depending on policy.
+	// If a conversion occurs, the callee is needed in order to transform the arguments.
 	TreePtr<Argumentation> arg = argumentation->ConvertToSeqIfPolicyAllows(callee, renderer, policy);
 		
 	// Let the SeqArgumentation node do the actual render

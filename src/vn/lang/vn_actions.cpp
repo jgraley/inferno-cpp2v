@@ -746,6 +746,7 @@ TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> access, TreePtr<Node> type )
 	return node;
 }
 
+
 TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> type )
 {
 	// if Star was given without an access, make it apply to the whole base. 
@@ -757,6 +758,7 @@ TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> type )
 	// TODO should be default access for the record type, not hard-coded
 	return OnBase( MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>(), type );
 }
+
 
 TreePtr<Node> VNLangActions::OnAccessSpec( string access )
 {
@@ -1003,7 +1005,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // NOTE ON CONSTRUCTORS
 // Since VN uses "bound" C++, we will always need to specify which of possibly overloaded constructors we are
-// referring to when constructing. So pure C++ is basically not possible here. Falling back to built-in node syntax here.
+// referring to when constructing. So pure C++ is basically not possible here. Falling back to built-in node syntax herde.
 
 // Note: comma operator can stay in: C-productions that use commas are all expressional and come in at norm_no_comma_op
 
@@ -1026,6 +1028,10 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // MAYBE Move conj and disj back to original precidences. The lowered precs require two syntaxes, statement and expression. So we can
 // get confused by eg { return x; ∧ goto y; } (=new form) versus { (return x;) ∧ (goto y;); } - or maybe we use the former and it's not confusing...
+// No, don't. If we only have VN unops at high prec, we can build separate columns of them for incompatible primary
+// elements without ambiguity. I.e. if P and Q are need to be kept separate, we can build P_prom, P_post, P_ptr, Q_prim, Q_post, Q_pre
+// and all cases are covered. But if we want ∧ we need all 4 forms of P/Q_pre ∧ P/Q_pre and some of these it's unclear
+// whether the expression is a P or a Q. It's better to put these at low prec even if we need more than one set.
 
 // A pattern emerges in the CPPTree GetRender() functions: we are using VN-render policy to prevent the render from depending on a 
 // direct analysis of child nodes - this works because VN-renders are patterns and could have special nodes in between (and
@@ -1037,7 +1043,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 // In vn_lang.ypp, the names of symbols should be translatable strings with the symbol AND a textual explaination - why not be helpful?
 
-// Check 093-DetectSuperLoop, we have ☆:; and then goto ☆ even though a coupling would seem to be needed, but we didn't get a designation.
+// Check 093-DetectSuperLoop, we have a label definition ☆:; and then goto ☆ even though a coupling would seem to be needed, but we didn't get a designation.
 
 // C fold-in: 
 // things like OnPrefixOperator() should take an actual parser token not a string
@@ -1048,8 +1054,10 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Semantics of optional keywords: if absent, this is taken to be the default (eg, private for a base of a class, non-const for 
 // a declaration etc). ☆ should be accepted to mean "any". Thus a fully wild base is ☆ ☆.
 
-// Note: there are no explicit forms for agents. Thus, no ⯁Star⦅⦆ for example.
+// Note: there are no explicit forms for agents. Thus, no ⯁Star⦅⦆ for example. This could have been handy for a greedy
+// alternative to ★. But see zipping syntax #883 for an alternative that uses a post-pass to move ★ toward root.
 
+// Note: 🞊  《》 ⸨⸩ are free now
 
 // 
 // NOTE
