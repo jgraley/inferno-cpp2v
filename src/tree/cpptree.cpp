@@ -787,6 +787,42 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 		return Production::BARE_STMT_DECL;
 }
 
+
+string Instance::RenderStorage( VN::RendererInterface *, Syntax::Policy ) const 
+{ 
+	return ""; 
+}
+
+//////////////////////////// Static //////////////////////////////
+
+string Static::RenderStorage( VN::RendererInterface *, Syntax::Policy policy ) const 
+{ 
+    if( policy.permit_static_keyword )
+        return "static ";
+    else
+		return "";
+}
+
+//////////////////////////// Field //////////////////////////////
+
+string Field::RenderStorage( VN::RendererInterface *, Syntax::Policy ) const 
+{ 
+	TreePtr<Virtuality> v = virt;
+	if( DynamicTreePtrCast<Virtual>( v ) )
+		return "virtual ";
+	else if( DynamicTreePtrCast<NonVirtual>( v ) )
+		return ""; // TODO GetRender() for Virtuality
+	else
+		ASSERTFAIL();
+}
+
+//////////////////////////// Temporary //////////////////////////////
+
+string Temporary::RenderStorage( VN::RendererInterface *, Syntax::Policy ) const 
+{ 
+	return "/*temp*/ ";
+}
+
 //////////////////////////// Base //////////////////////////////
 
 Syntax::Production Base::GetMyProductionTerminal() const

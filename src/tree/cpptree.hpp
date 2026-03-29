@@ -509,6 +509,7 @@ struct Instance : Declaration,
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
+	virtual string RenderStorage( VN::RendererInterface *renderer, Syntax::Policy policy ) const;
 };
 
 /// A variable or function with one instance across the entire program. 
@@ -518,6 +519,8 @@ struct Instance : Declaration,
 struct Static : Instance
 {
     NODE_FUNCTIONS_FINAL
+    
+	string RenderStorage( VN::RendererInterface *renderer, Syntax::Policy policy ) const override;
 };
 
 /// A non-static member Instance (function or variable)
@@ -529,8 +532,11 @@ struct Static : Instance
 struct Field : Instance
 {
     NODE_FUNCTIONS_FINAL
+    
     TreePtr<Virtuality> virt; ///< Is the field virtual?
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
+    
+   	string RenderStorage( VN::RendererInterface *renderer, Syntax::Policy policy ) const override;
 };
 
 /// Any variable local to a Compound-statement. Cannot be a function.
@@ -564,7 +570,9 @@ struct Parameter : LocalVariable
 struct Temporary : LocalVariable
 {
     NODE_FUNCTIONS_FINAL
+    
 	string GetRenderTerminal( Production ) const { throw Unimplemented(); }    
+	string RenderStorage( VN::RendererInterface *renderer, Syntax::Policy policy ) const override;	
 };
 
 /// Node for a base class within a class declaration, specifies another class from which to inherit

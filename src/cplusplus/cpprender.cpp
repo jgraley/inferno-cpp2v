@@ -297,31 +297,6 @@ string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, 
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderStorage( TreePtr<Instance> st, Syntax::Policy policy ) try
-{
-	// In VN, Static means in the C++ sense not the C sense
-    if( DynamicTreePtrCast<Static>( st ) && policy.permit_static_keyword )
-        return "static ";
-    else if( DynamicTreePtrCast<LocalVariable>( st ) )
-        return ""; // Assume automatic allocation is the default
-    else if( DynamicTreePtrCast<Temporary>( st ) )
-        return "/*temp*/ ";
-    else if( TreePtr<Field> no = DynamicTreePtrCast<Field>( st ) )
-    {
-        TreePtr<Virtuality> v = no->virt;
-        if( DynamicTreePtrCast<Virtual>( v ) )
-            return "virtual ";
-        else if( DynamicTreePtrCast<NonVirtual>( v ) )
-            return "";
-        else
-            return ERROR_UNKNOWN("virtualness");
-    }
-    else
-        return ""; // eg for Instance as a wildcard
-}
-DEFAULT_CATCH_CLAUSE
-
-
 string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Syntax::Policy policy )
 {
     string s;
@@ -332,7 +307,7 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Synta
     Syntax::Production proto_prod = out_of_line ? Syntax::Production::RESOLVER : Syntax::Production::PURE_IDENTIFIER;
     
     if( !out_of_line )
-		s += RenderStorage( o, policy );
+		s += o->RenderStorage( this, policy );
     
     bool constant = !!DynamicTreePtrCast<Const>(o->constancy);
     string declarator = DoRender( o->identifier, proto_prod, policy );
