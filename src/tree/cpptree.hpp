@@ -76,7 +76,6 @@ struct Type : virtual Node
 
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
 
-
 	virtual string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                                Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                                bool constant );
@@ -120,7 +119,7 @@ struct CodeUnit : DeclScope
 { 
 	NODE_FUNCTIONS_FINAL
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 /// Indicates that the node cannot be combinationalised
@@ -230,8 +229,8 @@ struct SpecificTypeIdentifier : TypeIdentifier,
         SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
     NODE_FUNCTIONS_FINAL
 
-	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) final;
-	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) final;
+	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
+	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
 };
 
 
@@ -245,7 +244,7 @@ struct IdValuePair : virtual Node
     
     virtual string GetColour() const { return "/set28/8"; }    
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
 
 	// Sort-of a method on Collection<IdValuePair>
 	static Sequence<Expression> SortMapById( Collection<IdValuePair> &id_value_map,
@@ -269,7 +268,7 @@ struct MapArgumentation : Argumentation
 	Collection<IdValuePair> arguments;
 	
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy) final;
     TreePtr<Argumentation> ConvertToSeqIfPolicyAllows(TreePtr<Expression> callee, VN::RendererInterface *, Policy) final;
 };
@@ -283,7 +282,7 @@ struct SeqArgumentation : Argumentation
     Sequence<Expression> arguments; ///< Argumentation taken in order
 	
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy) final;
     TreePtr<Argumentation> ConvertToSeqIfPolicyAllows(TreePtr<Expression> callee, VN::RendererInterface *, Policy) final;
 };  
@@ -604,7 +603,7 @@ struct SpecificLabelIdentifier : LabelIdentifier,
     NODE_FUNCTIONS_FINAL
     
 	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy);    
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy) override;    
 };
 
 /// Declaration of a label for switch, goto etc.
@@ -1016,7 +1015,7 @@ struct ConditionalOperator : Operator
 	TreePtr<Expression> expr_else;	
 	
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
 };
 
 /// Subscripting on objects
@@ -1027,7 +1026,7 @@ struct Subscript : Operator
 	TreePtr<Expression> index;	
 	
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
 };
 
 /// An array formed directly from elements which should all be the same type
@@ -1037,7 +1036,7 @@ struct ArrayInitialiser : Initialiser
     Sequence<Expression> elements; 
 	
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
 };
 
 struct This : Operator
@@ -1085,7 +1084,7 @@ struct New : Operator
     // the constructed object, not the constructor)
 
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 /// Node for C++ delete operator
@@ -1097,7 +1096,7 @@ struct Delete : Operator
     TreePtr<Globality> global; ///< whether global placement
 
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 /// Node for accessing an element in a record as in base.member
@@ -1110,7 +1109,7 @@ struct Lookup : Operator
     TreePtr<InstanceIdentifier> member; ///< the member to find
 	
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 /// Node for a c-style cast. 
@@ -1122,7 +1121,7 @@ struct Cast : Operator
     TreePtr<Type> type; ///< the desired new type
 	
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 
@@ -1139,7 +1138,7 @@ struct Call : GoSub, Expression
     TreePtr<Argumentation> argumentation; 
 	
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };  
 
 
@@ -1152,7 +1151,7 @@ struct ConstructInit : Initialiser
     TreePtr<Argumentation> argumentation; 
 
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 
@@ -1213,7 +1212,7 @@ struct Compound : SequentialScope,  ///< Local declarations go in here (preferab
 {
     NODE_FUNCTIONS_FINAL
 	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };                   
 
 /// GCC extension for compound statements that return a value
@@ -1226,7 +1225,7 @@ struct StatementExpression : Expression, ///< Evaluates to whatever the last sta
     
     virtual string GetColour() const { return Expression::GetColour(); } // Expression wins    
 	Production GetMyProductionTerminal() const override;	
-	//string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	//string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };                   
 
 
@@ -1239,7 +1238,7 @@ struct Return : Statement
     TreePtr<Initialiser> return_value; ///< return value or Uninitialised
 
 	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 
@@ -1256,7 +1255,7 @@ struct Goto : Statement, Uncombable
     TreePtr<Expression> destination; ///< where to go to, expresison allowed
 
 	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 /// If statement
@@ -1268,7 +1267,7 @@ struct If : Statement
     TreePtr<Statement> body_else;  ///< executes when false, can be Nop if no else clause
 
 	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 /// Designate a statement that may be broken out of
@@ -1297,7 +1296,7 @@ struct While : Loop, Uncombable
     TreePtr<Expression> condition; ///< Tested before each iteration; false terminates immediately
 
 	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 /// Do loop (first iteration always runs)
@@ -1307,7 +1306,7 @@ struct Do : Loop, Uncombable // a do..while() construct
     TreePtr<Expression> condition; ///< Tested after each iteration; false terminates immediately
 
 	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 /// C-style for loop. 
@@ -1322,7 +1321,7 @@ struct For : Loop
     // then the grammar will want to produce a terminator ie `for(a;b;c;)`
 
 	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 /// Switch statement. 
@@ -1336,7 +1335,7 @@ struct Switch : Breakable
     TreePtr<Expression> condition; ///< Evaluates to a value whose case we'll jump to
 
 	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 /// Intermediate for labels in a switch statement.
@@ -1355,7 +1354,7 @@ struct RangeCase : SwitchTarget
     TreePtr<Expression> value_lo; ///< start of range, inclusive
     TreePtr<Expression> value_hi; ///< end of range, inclusive
 
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 }; 
 
 /// Case label
@@ -1364,7 +1363,7 @@ struct Case : SwitchTarget
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> value; ///< Switch jumps here when condition is this value
 
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 /// Default label in a switch statement
@@ -1372,7 +1371,7 @@ struct Default : SwitchTarget
 { 
 	NODE_FUNCTIONS_FINAL
 	
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
 /// Continue (to innermost Loop)
@@ -1402,7 +1401,7 @@ struct MembInitialisation : Statement
 	TreePtr<Initialiser> initialiser;
 
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
 };
 
 /// Do nothing; these get optimised out where possible
@@ -1411,7 +1410,7 @@ struct Nop : Statement
 	NODE_FUNCTIONS_FINAL 
 
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy );
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
   
 //////////////////////////// Preprocessor stuff ////////////////////////////

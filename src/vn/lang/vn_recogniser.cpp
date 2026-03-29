@@ -81,23 +81,23 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 		
 	// Pick off keywords
 	if( ascii && ToASCII(text)=="this" )
-		return YY::VNLangParser::make_NORM_TERM_KEYWORD(metadata, loc);
+		return YY::VNLangParser::make_KEYWORD_PRIMARY_OP(metadata, loc);
 	else if( ascii && ToASCII(text)=="break" )
-		return YY::VNLangParser::make_PRIMITIVE_STMT_KEYWORD(metadata, loc);
+		return YY::VNLangParser::make_KEYWORD_SIMPLE_STMT(metadata, loc);
 	else if( ascii && ToASCII(text)=="continue" )
-		return YY::VNLangParser::make_PRIMITIVE_STMT_KEYWORD(metadata, loc);
+		return YY::VNLangParser::make_KEYWORD_SIMPLE_STMT(metadata, loc);
 	else if( ascii && ToASCII(text)=="return" )
-		return YY::VNLangParser::make_SPACE_SEP_STMT_KEYWORD(metadata, loc);
+		return YY::VNLangParser::make_KEYWORD_SPACE_SEP_STMT(metadata, loc);
 	else if( ascii && ToASCII(text)=="goto" )
-		return YY::VNLangParser::make_SPACE_SEP_STMT_KEYWORD(metadata, loc);
+		return YY::VNLangParser::make_KEYWORD_SPACE_SEP_STMT(metadata, loc);
 	else if( ascii && ToASCII(text)=="switch" )
-		return YY::VNLangParser::make_ARGS_BODY_STMT_KEYWORD(metadata, loc);
+		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_STMT(metadata, loc);
 	else if( ascii && ToASCII(text)=="for" )
-		return YY::VNLangParser::make_ARGS_BODY_STMT_KEYWORD(metadata, loc);
+		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_STMT(metadata, loc);
 	else if( ascii && ToASCII(text)=="if" )
-		return YY::VNLangParser::make_ARGS_BODY_CHAIN_STMT_KEYWORD(metadata, loc);
+		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_CHAIN_STMT(metadata, loc);
 	else if( ascii && ToASCII(text)=="else" )
-		return YY::VNLangParser::make_PRIMITIVE_CHAIN_KEYWORD(metadata, loc);
+		return YY::VNLangParser::make_CHAINING_KEYWORD(metadata, loc);
 	else if( ascii && ToASCII(text)=="while" )
 		return YY::VNLangParser::make_WHILE_KEYWORD(metadata, loc);
 	else if( ascii && ToASCII(text)=="do" )

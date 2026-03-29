@@ -79,22 +79,22 @@
 	DELTA_COMPARE_OP 					        _("delta-compare operator ▲")
 	DELTA_REPLACE_OP 					        _("delta-replace operator ⯈")
 	EXPLICIT_OP 						        _("explicit node operator ⯁")
-	ANY 								        _("any node operator ☆")
-	STAR 								        _("star operator ★")
-	ID_BY_NAME							        _("identifier-by-name operator ⊛")
-	BUILDER_ID							        _("node-builder operator ⧇")
-	TRANSFORM							        _("transform operator ⤨")
-	NEGATION							        _("negation operator ¬")
-	CONJUNCTION							        _("conjunction operator ∧")
-	DISJUNCTION							        _("disjunction operator ∨")
-	GRASS								        _("green-grass operator ⫴")
-	POINTER_IS							        _("pointer-is operator ⮎")
-	BUILD_SIZE							        _("build-container-size operator 🄽")
-	STRINGIZE							        _("stringise operator §")
-	PRERESTRICT							        _("prerestriction operator ‽")
+	ANY_NODE_OP 						        _("any node operator ☆")
+	STAR_OP 							        _("star operator ★")
+	ID_BY_NAME_OP						        _("identifier-by-name operator ⊛")
+	BUILDER_ID_OP						        _("node-builder operator ⧇")
+	TRANSFORM_OP						        _("transform operator ⤨")
+	NEGATION_OP							        _("negation operator ¬")
+	CONJUNCTION_OP						        _("conjunction operator ∧")
+	DISJUNCTION_OP						        _("disjunction operator ∨")
+	GREEN_GRASS_OP						        _("green-grass operator ⫴")
+	POINTER_IS_OP							    _("pointer-is operator ⮎")
+	BUILD_SIZE_OP							    _("build-container-size operator 🄽")
+	STRINGIZE_OP							    _("stringise operator §")
+	PRERESTRICT_OP						        _("prerestriction operator ‽")
 	CONSTRUCTOR							        _("constructor marker ⨤")
-	TYPE_INDICATOR						        _("type operator ⍑")
-	CODE_UNIT 							        _("code unit operator ∞")
+	TYPE_INDICATOR						        _("type indicator ⍑")
+	CODE_UNIT 							        _("code unit ∞")
 	RESOLUTION_OP 						        _("C scope-resolution operator ::")
 	RANGE_OP 							        _("GCC range operator ..")
 		
@@ -106,9 +106,9 @@
 <string>	C_BITWISE_XOR_OP		        _("C bitwise-xor operator ^")
 <string>	C_EQUALITY_OP					_("C equality operator ==")
 <string>  	C_RELATIONAL_OP					_("C relational operator")
-<string>	C_SHIFT_OP						_("C shift operator")
-<string>	C_ADD_SUB_OP					_("C add/subtract")
-<string>    C_DIV_MOD_OP					_("C divide/modulo")
+<string>	C_SHIFT_OP						_("C shift operator operator")
+<string>	C_ADD_SUB_OP					_("C add/subtract operator")
+<string>    C_DIV_MOD_OP					_("C divide/modulo operator")
 <string>  	C_PREFIX_OP						_("C prefix operator")
 <string>	C_PRE_OR_INFIX_OP				_("C prefix/infix operator")
 <string>    C_PRE_OR_POSTFIX_OP 			_("C prefix/postfix operator")
@@ -127,12 +127,12 @@
 <YY::TokenMetadata>	RESOLVED_NORMAL			_("resolved non-type node name")
 <YY::TokenMetadata>	RESOLVED_TYPE			_("resolved type node name")
 <YY::TokenMetadata>	NODE_NAMESPACE			_("scope resolving name")
-<YY::TokenMetadata> NORM_TERM_KEYWORD		_("non-type terminal keyword")
-<YY::TokenMetadata> PRIMITIVE_STMT_KEYWORD  _("stmt_decl keyword") // eg break;
-<YY::TokenMetadata> SPACE_SEP_STMT_KEYWORD 	_("space-separated stmt_decl keyword") // eg return 12;
-<YY::TokenMetadata> ARGS_BODY_STMT_KEYWORD 	_("args-and-body stmt_decl keyword") // eg switch(args) body
-<YY::TokenMetadata> ARGS_BODY_CHAIN_STMT_KEYWORD 	_("args-body-chain stmt_decl keyword") // eg if(args) body else chain_body	
-<YY::TokenMetadata> PRIMITIVE_CHAIN_KEYWORD _("C chaining keyword") // eg else
+<YY::TokenMetadata> KEYWORD_PRIMARY_OP		_("non-type keyword operator")
+<YY::TokenMetadata> KEYWORD_SIMPLE_STMT     _("keyword simple statement") // eg break;
+<YY::TokenMetadata> KEYWORD_SPACE_SEP_STMT 	_("keyword space-separated statement") // eg return 12;
+<YY::TokenMetadata> KEYWORD_ARGS_BODY_STMT 	_("keyword args-and-body statement") // eg switch(args) body
+<YY::TokenMetadata> KEYWORD_ARGS_BODY_CHAIN_STMT 	_("keyword args-body-chain statement") // eg if(args) body else chain_body	
+<YY::TokenMetadata> CHAINING_KEYWORD 		_("C chaining keyword") // eg else
 <YY::TokenMetadata> DO_KEYWORD				_("C do keyword")
 <YY::TokenMetadata> WHILE_KEYWORD			_("C while keyword")
 <YY::TokenMetadata> CASE_KEYWORD			_("C case keyword")
@@ -163,21 +163,21 @@ stmt_high
 %type <VN::Itemisation>				itemisation items_bare items_sep
 %type <VN::Item>					item
 %type <shared_ptr<VN::Gnomon>>		part_resolve designation_command 
-%type <shared_ptr<VN::Gnomon>>		start_transform_name_scope
-%type <shared_ptr<VN::Gnomon>>		start_explicit_scope start_prerestrict_scope start_id_by_name_scope start_build_id_scope
+%type <shared_ptr<VN::Gnomon>>		transform_op_scope
+%type <shared_ptr<VN::Gnomon>>		explicit_op_scope prerestrict_op_scope id_by_name_op_scope builder_id_op_scope
 %type <list<TreePtr<Node>>>			stmt_decls 
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases 
-%type <const AvailableNodeData::Block *> explicit_name_part prerestrict_name_part id_by_name_part build_id_part
-%type <const AvailableNodeData::Block *> type_explicit_name_part type_prerestrict_name_part type_id_by_name_part type_build_id_part
+%type <const AvailableNodeData::Block *> explicit_op_named prerestrict_op_named id_by_name_op_named build_id_named
+%type <const AvailableNodeData::Block *> type_explicit_op_named type_prerestrict_op_named type_id_by_name_op_named type_build_id_op_named
 %type <multiset<string>>			type_specifier_seq
 
 // Solve the dangling-else amiguity by giving the "else" token a higher priority than the "if" token
 // In the rule, we must set the no-else rule to the "if" priority using %prec. Then, the TOKEN
 // for "else" will be compared with the RULE for no-else case and highest precidence will win.
 // It's all rather brittle.
-%precedence ARGS_BODY_CHAIN_STMT_KEYWORD // basically "then"
-%precedence PRIMITIVE_CHAIN_KEYWORD      // basically "else"
+%precedence KEYWORD_ARGS_BODY_CHAIN_STMT // basically "then"
+%precedence CHAINING_KEYWORD  			     // basically "else"
 
 %%
 
@@ -189,9 +189,8 @@ vnscript 		: commands 								{ vn->OnVNScript($1); }
 commands        : sep_commands								{ $$ = $1; }
 				| sep_commands COMMAND_TERM					{ $$ = $1; }
 				
-// The ⨟ turns patterns into commands. This rule must 
-// be left-associative so calls to OnParse() happen
-// in the correct order. STOP BREAKING THIS!!!
+// The ⨟ turns patterns into commands. This rule must be left-associative so calls to OnParse() happen
+// in the correct order. 
 sep_commands 	: sep_commands COMMAND_TERM script_command		{ $$ = $1; $$.push_back($3); }	
 				| script_command								{ $$.push_back($1); }
 				| sep_commands COMMAND_TERM designation_command	{ $$ = $1; recogniser->AddGnomon($3); }	
@@ -233,10 +232,10 @@ unified		: normal
 normal				: norm_disjunction
 
 norm_disjunction	: norm_conjunction
-					| norm_disjunction DISJUNCTION norm_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
+					| norm_disjunction DISJUNCTION_OP norm_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
 
 norm_conjunction 	: norm_primary       
-					| norm_conjunction CONJUNCTION norm_primary       			{ $$ = vn->OnConjunction($1, $3); }
+					| norm_conjunction CONJUNCTION_OP norm_primary       			{ $$ = vn->OnConjunction($1, $3); }
 		
 norm_primary       	: expr_expression
 					| stmt_decls												{ ASSERT($1.size() == 1); $$ = $1.front(); } // For CodeUnit
@@ -247,12 +246,12 @@ norm_primary       	: expr_expression
 // so we'll need to complete a branch of the syntax for compounds with a copy of the unary VN operators (none are postfix).
 compound_prefix : compound_primary 
 				| 			       DELTA_COMPARE_OP normal DELTA_REPLACE_OP compound_prefix	{ $$ = vn->OnDelta($2, $4); }
-				| 								   NEGATION compound_prefix	{ $$ = vn->OnNegation($2); }
+				| 								   NEGATION_OP compound_prefix	{ $$ = vn->OnNegation($2); }
 				|       				transform_norm_part compound_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
 				|  									  STUFF_OP compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				|  STUFF_OP OPEN_VN           unified CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|  STUFF_OP OPEN_VN stuff_depth_limit CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
-				|                     prerestrict_name_part compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+				|                     prerestrict_op_named compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 
 compound_primary	: '{' VN_SEP '}'                   						{ $$ = vn->OnCompound({}, @2, {}, @3); } 
 					| '{' stmt_decls VN_SEP '}'           					{ $$ = vn->OnCompound($2, @2, {}, @4); }
@@ -271,12 +270,12 @@ stmt_decl	: compound_prefix
 					
 // _nc here means "not a compound"							
 stmt_decl_nc: bare_stmt_decl ';'													{ $$ = $1; }      
-			| ARGS_BODY_STMT_KEYWORD '(' semicolon_args ')' stmt_decl				{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
+			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_decl				{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
 			| WHILE_KEYWORD '(' expr_expression ')' stmt_decl 						{ $$ = vn->OnWhile($3, @3, $5, @5); }
-			| ARGS_BODY_CHAIN_STMT_KEYWORD '(' semicolon_args ')' stmt_decl	
-			  %prec ARGS_BODY_CHAIN_STMT_KEYWORD									{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
-			| ARGS_BODY_CHAIN_STMT_KEYWORD '(' semicolon_args ')' stmt_decl
-			  PRIMITIVE_CHAIN_KEYWORD stmt_decl										{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
+			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_decl	
+			  %prec KEYWORD_ARGS_BODY_CHAIN_STMT									{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
+			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_decl
+			  CHAINING_KEYWORD stmt_decl											{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
 			| expr_expression ':'													{ $$ = vn->OnLabel($1, @1); } 
 			| CASE_KEYWORD expr_expression ':'										{ $$ = vn->OnCase($2, @2); } 
 			| CASE_KEYWORD expr_expression RANGE_OP expr_expression ':'				{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
@@ -284,8 +283,8 @@ stmt_decl_nc: bare_stmt_decl ';'													{ $$ = $1; }
 			| access_spec_nw ':' 										                                        
 
 bare_stmt_decl	: expr_expression
-				| PRIMITIVE_STMT_KEYWORD										{ $$ = vn->OnPrimitiveStmt($1.as_ascii, @1); }
-				| SPACE_SEP_STMT_KEYWORD expr_expression						{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
+				| KEYWORD_SIMPLE_STMT											{ $$ = vn->OnSimpleStmt($1.as_ascii, @1); }
+				| KEYWORD_SPACE_SEP_STMT expr_expression						{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
 				| DO_KEYWORD stmt_decl WHILE_KEYWORD '(' expr_expression ')' 	{ $$ = vn->OnDo($2, @2, $5, @5); }
 				| type_for_declarator declarator								{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }	
 				| class_spec		
@@ -335,7 +334,7 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 				| vn_wildcard												{ $$ = $1; }
                           
 access_spec		: access_spec_nw	                          				
-				| ANY 														{ $$ = nullptr; }
+				| ANY_NODE_OP 												{ $$ = nullptr; }
                           
 access_spec_nw	: ACCESS_KEYWORD	                          				{ $$ = vn->OnAccessSpec($1.as_ascii); }
                                                   
@@ -388,22 +387,22 @@ expr_mul_etc 		: expr_prefix
 					| expr_mul_etc '*' expr_prefix								{ $$ = vn->OnInfixOperator("*", $1, $3); }
 		
 expr_prefix : expr_postfix
-			| 					    C_PREFIX_OP 		expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    '&' 				expr_prefix	 { $$ = vn->OnPrefixOperator("&", $2); }
-			| 					    '*'		 			expr_prefix	 { $$ = vn->OnPrefixOperator("*", $2); }
-			| 					    C_ADD_SUB_OP	    expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_PRE_OR_INFIX_OP   expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	 { $$ = vn->OnPrefixOperator($1, $2); }
-			| 									  GRASS expr_prefix	 { $$ = vn->OnGrass($2); }
-			| 								 POINTER_IS expr_prefix	 { $$ = vn->OnPointerIs($2); }
-			|  DELTA_COMPARE_OP normal DELTA_REPLACE_OP expr_prefix	 { $$ = vn->OnDelta($2, $4); }
-			| 								   NEGATION expr_prefix	 { $$ = vn->OnNegation($2); }
-			|                     prerestrict_name_part expr_prefix	 { $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|  									  STUFF_OP unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			|  STUFF_OP OPEN_VN           unified CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			|  STUFF_OP OPEN_VN stuff_depth_limit CLOSE_VN unified_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+			| 					    C_PREFIX_OP 		expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    '&' 				expr_prefix	{ $$ = vn->OnPrefixOperator("&", $2); }
+			| 					    '*'		 			expr_prefix	{ $$ = vn->OnPrefixOperator("*", $2); }
+			| 					    C_ADD_SUB_OP	    expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_PRE_OR_INFIX_OP   expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
+			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
+			| 						GREEN_GRASS_OP 		expr_prefix	{ $$ = vn->OnGrass($2); }
+			| 						POINTER_IS_OP 		expr_prefix	{ $$ = vn->OnPointerIs($2); }
+			|  DELTA_COMPARE_OP normal DELTA_REPLACE_OP expr_prefix	{ $$ = vn->OnDelta($2, $4); }
+			| 					   	NEGATION_OP 		expr_prefix	{ $$ = vn->OnNegation($2); }
+			|                     prerestrict_op_named expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|  						STUFF_OP 		 unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+			| STUFF_OP OPEN_VN           unified CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
+			| STUFF_OP OPEN_VN stuff_depth_limit CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
 
-transform_norm_part : start_transform_name_scope TRANSFORM_NAME_NORMAL { $$ = $2.as_ascii; (void)$1; }
+transform_norm_part : transform_op_scope TRANSFORM_NAME_NORMAL { $$ = $2.as_ascii; (void)$1; }
 
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
 stuff_depth_limit		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
@@ -425,43 +424,43 @@ expr_primary: vn_primary
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
-			| NORM_TERM_KEYWORD									{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
+			| KEYWORD_PRIMARY_OP								{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
 			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayInitialiser({}); } // ={...} dismbiguates against compound_primary
 			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayInitialiser($3); }               
 			| FUNC_ON_TYPE '(' type_id ')'       				{ $$ = vn->OnFuncOnType($1.as_ascii, @1, $3, @3); }			
 
 vn_primary  : vn_wildcard
-			| explicit_name_part itemisation							{ $$ = vn->OnExplicitNode($1, @1, $2); }
-			| DESIGNATED_NORMAL       				  					{ $$ = $1.as_designated; }
-			| id_by_name_part OPEN_VN STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
-			| build_id_part OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
-			| build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
-			| build_id_part OPEN_VN VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
-			| transform_norm_part OPEN_VN unified_prefix CLOSE_VN		{ $$ = vn->OnTransform($1, @1, $3, @3); }
-			| BUILD_SIZE OPEN_VN unified CLOSE_VN 						{ $$ = vn->OnBuildSize($3); }
-			| STRINGIZE OPEN_VN unified	CLOSE_VN						{ $$ = vn->OnStringize($3); }
+			| explicit_op_named itemisation							{ $$ = vn->OnExplicitNode($1, @1, $2); }
+			| DESIGNATED_NORMAL       				  				{ $$ = $1.as_designated; }
+			| id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN	{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+			| build_id_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
+			| build_id_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
+			| build_id_named OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
+			| transform_norm_part OPEN_VN unified_prefix CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
+			| BUILD_SIZE_OP OPEN_VN unified CLOSE_VN 				{ $$ = vn->OnBuildSize($3); }
+			| STRINGIZE_OP OPEN_VN unified	CLOSE_VN				{ $$ = vn->OnStringize($3); }
 
-vn_wildcard : STAR												{ $$ = vn->OnStar(nullptr); }
-			| STAR OPEN_VN normal CLOSE_VN						{ $$ = vn->OnStar($3); }
-			| ANY												{ $$ = nullptr; }
+vn_wildcard : STAR_OP											{ $$ = vn->OnStar(nullptr); }
+			| STAR_OP OPEN_VN normal CLOSE_VN					{ $$ = vn->OnStar($3); }
+			| ANY_NODE_OP										{ $$ = nullptr; }
 
 comma_sep_expr_decl	: expr_no_comma_op											{ $$.push_back($1); }
 					| comma_sep_expr_decl ',' expr_no_comma_op					{ $$ = $1; $$.push_back($3); }			
 
-explicit_name_part 	: start_explicit_scope resolved_name			{ $$ = $2.as_andata_block; (void)$1; }
-prerestrict_name_part : start_prerestrict_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
-id_by_name_part 	: start_id_by_name_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
-build_id_part 		: start_build_id_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
+explicit_op_named 	: explicit_op_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
+prerestrict_op_named: prerestrict_op_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
+id_by_name_op_named : id_by_name_op_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
+build_id_named 		: builder_id_op_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
 
 //////////////////////////////// TYPES ////////////////////////////////////         
        
 type_id 			: type_disjunction
 
 type_disjunction	: type_conjunction
-					| type_disjunction DISJUNCTION type_conjunction			{ $$ = vn->OnDisjunction($1, $3); }
+					| type_disjunction DISJUNCTION_OP type_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
 
 type_conjunction 	: type_with_ab
-					| type_conjunction CONJUNCTION type_prefix				{ $$ = vn->OnConjunction($1, $3); }
+					| type_conjunction CONJUNCTION_OP type_prefix			{ $$ = vn->OnConjunction($1, $3); }
                     
 type_with_ab		: type_specified
 					| type_for_declarator declarator 						{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }  
@@ -474,13 +473,13 @@ type_specified		: type_prefix
           
 type_prefix : type_postfix
 			| 	  DELTA_COMPARE_OP type_id DELTA_REPLACE_OP type_prefix	{ $$ = vn->OnDelta($2, $4); }
-			| 									      GRASS type_prefix	{ $$ = vn->OnGrass($2); }
-			| 								     POINTER_IS type_prefix	{ $$ = vn->OnPointerIs($2); }
-			| 								       NEGATION type_prefix	{ $$ = vn->OnNegation($2); }
-			|                    type_prerestrict_name_part type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			| 						      GREEN_GRASS_OP type_prefix	{ $$ = vn->OnGrass($2); }
+			| 							     POINTER_IS_OP type_prefix	{ $$ = vn->OnPointerIs($2); }
+			| 							       NEGATION_OP type_prefix	{ $$ = vn->OnNegation($2); }
+			|                    type_prerestrict_op_named type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|								 TYPE_INDICATOR expr_prefix { $$ = $2; }
 
-transform_type_part : start_transform_name_scope TRANSFORM_NAME_TYPE { $$ = $2.as_ascii; (void)$1; }
+transform_type_part : transform_op_scope TRANSFORM_NAME_TYPE { $$ = $2.as_ascii; (void)$1; }
 			   
 type_postfix: type_primary		   
 			                                       
@@ -491,20 +490,20 @@ type_primary: type_vn_prim
 				
 cons_or_des_type : CONSTRUCTOR parameterisation 		 						{ $$ = vn->OnConstructor($2); } 				
 									
-type_vn_prim: type_explicit_name_part itemisation								{ $$ = vn->OnExplicitNode($1, @1, $2); }
-			| DESIGNATED_TYPE     								  			{ $$ = $1.as_designated; }		
-			| type_id_by_name_part OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
-			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
-			| type_build_id_part OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
-			| type_build_id_part OPEN_VN VN_SEP item CLOSE_VN 					{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
+type_vn_prim: type_explicit_op_named itemisation								{ $$ = vn->OnExplicitNode($1, @1, $2); }
+			| DESIGNATED_TYPE     									  			{ $$ = $1.as_designated; }		
+			| type_id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+			| type_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 	{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
+			| type_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
+			| type_build_id_op_named OPEN_VN VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			| transform_type_part OPEN_VN unified_prefix CLOSE_VN 				{ $$ = vn->OnTransform($1, @1, $3, @3); }
-			| TYPE_INDICATOR STAR OPEN_VN type_id CLOSE_VN						{ $$ = vn->OnStar($4); }
-			| STAR OPEN_VN type_id CLOSE_VN										{ $$ = vn->OnStar($3); }
+			| TYPE_INDICATOR STAR_OP OPEN_VN type_id CLOSE_VN					{ $$ = vn->OnStar($4); }
+			| STAR_OP OPEN_VN type_id CLOSE_VN									{ $$ = vn->OnStar($3); }
 			
-type_explicit_name_part : start_explicit_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
-type_prerestrict_name_part : start_prerestrict_scope resolved_type_name		{ $$ = $2.as_andata_block; (void)$1; }
-type_id_by_name_part 	: start_id_by_name_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
-type_build_id_part 		: start_build_id_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
+type_explicit_op_named 		: explicit_op_scope resolved_type_name				{ $$ = $2.as_andata_block; (void)$1; }
+type_prerestrict_op_named 	: prerestrict_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
+type_id_by_name_op_named 	: id_by_name_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
+type_build_id_op_named 		: builder_id_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
 
 
 // eg "long unsigned int". VN represents this as a single node. We don't want nodes for its constituent parts.
@@ -539,19 +538,19 @@ node_namespace 	: part_resolve NODE_NAMESPACE			{ $$ = $2; }
 				| NODE_NAMESPACE						{ $$ = $1; }				      
 
 
-start_explicit_scope	: EXPLICIT_OP 			{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
+explicit_op_scope		: EXPLICIT_OP 		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 										      recogniser->AddGnomon($$); }
 										      
-start_prerestrict_scope	: PRERESTRICT		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
+prerestrict_op_scope	: PRERESTRICT_OP	{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 										      recogniser->AddGnomon($$); }
 
-start_id_by_name_scope	: ID_BY_NAME 		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
+id_by_name_op_scope		: ID_BY_NAME_OP 	{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 											  recogniser->AddGnomon($$); }
 
-start_build_id_scope	: BUILDER_ID 		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
+builder_id_op_scope		: BUILDER_ID_OP 	{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 											  recogniser->AddGnomon($$); }
 
-start_transform_name_scope	: TRANSFORM		{ $$ = make_shared<VN::TransformNameScopeGnomon>(); 
+transform_op_scope		: TRANSFORM_OP		{ $$ = make_shared<VN::TransformNameScopeGnomon>(); 
 											  recogniser->AddGnomon($$); }
 
 %%

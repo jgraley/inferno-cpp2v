@@ -511,7 +511,7 @@ TreePtr<Node> VNLangActions::OnNormalTerminalKeyword( string keyword, any keywor
 	ASSERTFAIL();
 }
 
-TreePtr<Node> VNLangActions::OnPrimitiveStmt( string keyword, any keyword_loc)
+TreePtr<Node> VNLangActions::OnSimpleStmt( string keyword, any keyword_loc)
 {
 	if( keyword=="break" )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Break>>();
@@ -1040,8 +1040,6 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 // Agents inherit from nodes so Agent::GetAgentRender() can just be GetRender(). Simplify the call sites.
 
 // Node::GetRender() could implement the explicit render.
-
-// In vn_lang.ypp, the names of symbols should be translatable strings with the symbol AND a textual explaination - why not be helpful?
 
 // Check 093-DetectSuperLoop, we have a label definition ☆:; and then goto ☆ even though a coupling would seem to be needed, but we didn't get a designation.
 
