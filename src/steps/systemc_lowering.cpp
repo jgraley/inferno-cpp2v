@@ -127,12 +127,13 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     l1_class->bases = (l1_bases);
     l1_cons_macro->identifier = MakePatternNode< PreprocessorIdentifier >();
     l1_cons_macro->arguments = l1_macro_args;
-    l1_cons_macro->initialiser = l1_delta;
+    l1_cons_macro->initialiser = l1_delta; // #886 don't do it here, do it in member initialsiers
     l1_delta->through = l1s_comp;
     l1_delta->overlay = l1r_comp;
     l1s_comp->members = (l1_decls);
     l1s_comp->statements = (l1_statements);
     l1r_comp->members = (l1_decls);
+	l1r_comp->statements = (l1_statements, l1r_memb_init);
     
     l1_field->type = tid;
     l1_field->identifier = l1_field_id;
@@ -141,7 +142,6 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
 	l1_statements_negation->negand = l1x_memb_init;
 	l1x_memb_init->member_id = l1_field_id; // this should be enough to prevent spin
 	
-	l1r_comp->statements = (l1_statements, l1r_memb_init);
 	l1r_memb_init->member_id = l1_field_id;
 	l1r_memb_init->initialiser = l1r_cons_init;
 	l1r_cons_init->constructor_id = MakePatternNode< SpecificInstanceIdentifier >("constructor_id_should_not_appear_in_code");

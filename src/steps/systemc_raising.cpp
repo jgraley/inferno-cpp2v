@@ -313,10 +313,12 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l3_instance = MakePatternNode<Instance>();  
     auto l3_delta = MakePatternNode<DeltaAgent, Initialiser>();  
     auto l3s_construct_init = MakePatternNode<ConstructInit>();
+    auto ls_instance = MakePatternNode<Instance>();  
+    auto lr_instance = MakePatternNode<Instance>();  
 
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_embedded_3 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( stuff, l3_instance, l3_instance );            
-    auto r_embedded_1 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( r_embedded_3, ls_comp, lr_comp );            
+    auto r_embedded_1 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( r_embedded_3, ls_instance, lr_instance );            
                     
     // dispense with an empty constructor                 
     stuff->terminus = over;
@@ -335,10 +337,13 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     r_module->identifier = module_typeid;
             
     // Embedded 1: dispense with any calls to s_constructor_id from member inits
+    ls_instance->type = module_typeid;
+    ls_instance->initialiser = ls_comp;
     ls_comp->members = (l_decls);
-	ls_comp->statements = (l_pre, l1s_memb_init, l_post);
+	ls_comp->statements = (l_pre, l1s_memb_init, l_post); // #886 remove the memb init from ls_instance, and leave the ls_instance->initialiser alone
 	l1s_memb_init->initialiser = l1s_cons_init;
 	l1s_cons_init->constructor_id = s_constructor_id;
+    lr_instance->initialiser = lr_comp;
     lr_comp->members = (l_decls);
     lr_comp->statements = (l_pre, l_post);
 

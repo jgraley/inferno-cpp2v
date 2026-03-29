@@ -324,7 +324,6 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Synta
 		// Split out the definition of the instance for rendering later at CodeUnit scope
 		ASSERT(policy.definitions); // Not under a node that can render definitions
 		policy.definitions->push(o);
-		FTRACE(o)((void *)&policy)("\n");
 		return s;
 	}		
 

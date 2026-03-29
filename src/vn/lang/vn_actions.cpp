@@ -656,6 +656,7 @@ TreePtr<Node> VNLangActions::OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<No
 			ret->type = result.type;
 			ret->identifier = result.leaf;
 			ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?	
+			ret->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
 			return ret;
 	}
 	ASSERTFAIL();
@@ -676,6 +677,7 @@ TreePtr<Node> VNLangActions::OnParameter( TreePtr<Node> type, TreePtr<Node> decl
 			ret->type = result.type;
 			ret->identifier = result.leaf;
 			ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?
+			ret->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
 			return ret;
 	}
 	ASSERTFAIL();
@@ -720,6 +722,7 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( string keyword, TreePtr<Node> 
 			field->type = o->type;
 			field->identifier = o->identifier;
 			field->initialiser = o->initialiser;
+			field->constancy = o->constancy;
 			field->access = dynamic_pointer_cast<StandardAgentWrapper<Node>>( current_access->Duplicate(current_access) );
 			ASSERT(field->access);
 			node->members.insert( field );				
