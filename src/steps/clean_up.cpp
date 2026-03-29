@@ -87,6 +87,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     r_temp->identifier = r_temp_id;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
     r_temp->type = r_type;
+    r_temp->constancy = MakePatternNode<NonConst>();
     r_assign->operands = (r_temp_id, last);
     last->pattern = r_type;
     overlay->overlay = r_temp_id;        

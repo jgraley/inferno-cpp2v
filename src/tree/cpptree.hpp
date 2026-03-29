@@ -503,6 +503,7 @@ struct Instance : Declaration,
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
     TreePtr<InstanceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
     TreePtr<Initialiser> initialiser; ///< init value for data, body for Callable type
+    TreePtr<Constancy> constancy; ///< is the instance constant (ie compile time value)?
     
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
@@ -516,7 +517,6 @@ struct Instance : Declaration,
 struct Static : Instance
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<Constancy> constancy; ///< is the instance constant (ie compile time value)?
 };
 
 /// A non-static member Instance (function or variable)
@@ -530,7 +530,6 @@ struct Field : Instance
     NODE_FUNCTIONS_FINAL
     TreePtr<Virtuality> virt; ///< Is the field virtual?
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
-    TreePtr<Constancy> constancy; ///< Is the field constant (ie only written by constructor)
 };
 
 /// Any variable local to a Compound-statement. Cannot be a function.

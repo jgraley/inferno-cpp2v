@@ -257,6 +257,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     r_flag->type = r_boolean;
     r_flag->identifier = r_flag_id;
     r_flag->initialiser = r_true;
-        
+    r_flag->constancy = MakePatternNode<NonConst>();        
+
     Configure( SEARCH_REPLACE, s_all, inst );
 }

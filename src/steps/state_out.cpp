@@ -285,6 +285,7 @@ AddStateLabelVar::AddStateLabelVar()
     state_var->identifier = state_var_id;
     state_var->type = MakePatternNode<Labeley>();    
     state_var->initialiser = MakePatternNode<Uninitialised>();
+    state_var->constancy = MakePatternNode<NonConst>();
 
     Configure( SEARCH_REPLACE, s_comp, r_embedded );
 }
@@ -523,6 +524,7 @@ AddYieldFlag::AddYieldFlag()
     r_flag_decl->identifier = r_flag_id;
     r_flag_decl->type = MakePatternNode<Boolean>();
     r_flag_decl->initialiser = MakePatternNode<Uninitialised>();
+    r_flag_decl->constancy = MakePatternNode<NonConst>();        
     over->overlay = embedded;
     r_comp->members = (decls, r_flag_decl);
     r_comp->statements = (r_flag_init, stmts);

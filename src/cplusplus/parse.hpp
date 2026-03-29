@@ -502,7 +502,7 @@ private:
             else
                 constancy = MakeTreeNode<NonConst>();
 */
-			TreePtr<Type> type = CreateTypeNode(D, 0, &constancy);
+			TreePtr<Type> type = CreateTypeNode(D, 0, &constancy);			
             ASSERT( constancy );
             TreePtr<Instance> o;
 
@@ -531,7 +531,6 @@ private:
                             no->virt = MakeTreeNode<NonVirtual> ();
                         }
                         no->access = access;
-                        no->constancy = constancy;
                     }
                     else if (S->getFnParent()) // in code
                     {
@@ -539,9 +538,7 @@ private:
                     }
                     else // top level
                     {
-                        TreePtr<Static> no = MakeTreeNode<Static> ();
-                        o = no;
-                        no->constancy = constancy;
+                        o = MakeTreeNode<Static> ();
                     }
                     break;
                 }
@@ -549,22 +546,11 @@ private:
                     o = MakeTreeNode<Automatic> ();
                     break;
                 case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
-                {
-                    TreePtr<Static> no = MakeTreeNode<Static> ();
-                    o = no;
-                    no->constancy = constancy;
-                }
-                    break;
                 case clang::DeclSpec::SCS_static:
-                {
-                    TreePtr<Static> no = MakeTreeNode<Static> ();
-                    o = no;
-                    no->constancy = constancy;
-                }
+                    o = MakeTreeNode<Static> ();                    
                     break;
                 default:
-                    ASSERTFAIL("Unsupported storage class")
-                    ;
+                    ASSERTFAIL("Unsupported storage class");
                     break;
                 }
             }
@@ -592,6 +578,7 @@ private:
             }
             o->type = type;
             o->initialiser = MakeTreeNode<Uninitialised> ();
+            o->constancy = constancy;
 
             return o;
         }
@@ -624,6 +611,7 @@ private:
             }
             param->type = type;
             param->initialiser = MakeTreeNode<Uninitialised> ();
+            param->constancy = constancy;
 
             return param;
         }

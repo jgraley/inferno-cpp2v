@@ -87,6 +87,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     auto r_sub_comp= MakeTreeNode<Compound>();
     auto r_newvar = MakeTreeNode< Temporary >();
     r_newvar->type = type;
+    r_newvar->constancy = MakePatternNode<NonConst>();    
     auto id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("temp_retval");
     r_newvar->identifier = id;
     r_newvar->initialiser = MakePatternNode<Uninitialised>();
@@ -172,6 +173,7 @@ ReturnViaTemp::ReturnViaTemp()
     r_temp->initialiser = MakePatternNode<Uninitialised>();
     r_temp->type = return_type;
     r_temp->identifier = r_temp_id;
+    r_temp->constancy = MakePatternNode<NonConst>();    
     r_temp_id->sources = (func_id);
     
     Configure( SEARCH_REPLACE, s_module, embedded_m );  
@@ -268,9 +270,11 @@ AddLinkAddress::AddLinkAddress()
     lr_retaddr->identifier = lr_retaddr_id;
     lr_retaddr->type = MakePatternNode<Labeley>();
     lr_retaddr->initialiser = MakePatternNode<Uninitialised>();
+    lr_retaddr->constancy = MakePatternNode<NonConst>();
     lr_temp_retaddr->identifier = lr_temp_retaddr_id;
     lr_temp_retaddr->type = MakePatternNode<Labeley>();
     lr_temp_retaddr->initialiser = MakePatternNode<Uninitialised>();
+    lr_temp_retaddr->constancy = MakePatternNode<NonConst>();
     lr_comp->statements = (l_stmts);
     
     s_module->members = (gg, decls);
@@ -281,7 +285,7 @@ AddLinkAddress::AddLinkAddress()
     r_retaddr->initialiser = MakePatternNode<Uninitialised>();
     //r_retaddr->virt = MakePatternNode<NonVirtual>();
     //r_retaddr->access = MakePatternNode<Private>();
-    //r_retaddr->constancy = MakePatternNode<NonConst>();
+    r_retaddr->constancy = MakePatternNode<NonConst>();
     r_retaddr_id->sources = (l_inst_id);
     Configure( SEARCH_REPLACE, s_module, embedded_m );  
 }
@@ -355,11 +359,13 @@ ParamsViaTemps::ParamsViaTemps()
     r_param->type = param_type;
     r_param->initialiser = r_temp_id;
     r_param->identifier = param_id;
+    r_param->constancy = MakePatternNode<NonConst>();
     r_cp->params = (params);
     r_cp->return_type = return_type;
     r_temp->type = param_type;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
     r_temp->identifier = r_temp_id;
+    r_temp->constancy = MakePatternNode<NonConst>();    
     r_temp_id->sources = (func_id, param_id);
     
     Configure( SEARCH_REPLACE, s_module, embedded_m );  
