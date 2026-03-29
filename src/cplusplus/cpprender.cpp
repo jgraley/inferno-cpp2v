@@ -322,126 +322,43 @@ string CppRender::RenderStorage( TreePtr<Instance> st, Syntax::Policy policy ) t
 DEFAULT_CATCH_CLAUSE
 
 
-void CppRender::ExtractInits( Sequence<Statement> &body, 
-                              Sequence<Statement> &inits, 
-                              Sequence<Statement> &remainder )
-{
-    // Initialisers are just calls to the constructor embedded in the body. In Inferno,
-    // we call a constructor by 
-    for( TreePtr<Statement> s : body )
-    {
-        if( auto call = DynamicTreePtrCast< MembInitialisation >(s) ) 
-			inits.push_back(s);
-		else
-		    remainder.push_back(s);
-    }
-}
-
-
-string CppRender::RenderInstanceProto( TreePtr<Instance> o, Syntax::Production starting_declarator_prod, Syntax::Policy policy ) try
-{
-    string s;
-    bool constant=false;
-
-    if( TreePtr<Static> st = DynamicTreePtrCast<Static>(o) )
-        if( DynamicTreePtrCast<Const>(st->constancy) )
-            constant = true;
-    if( TreePtr<Field> f = DynamicTreePtrCast<Field>(o) )
-        if( DynamicTreePtrCast<Const>(f->constancy) )
-            constant = true;
-            
-    string declarator = DoRender( o->identifier, starting_declarator_prod, policy );
-    s += DoRenderTypeAndDeclarator( o->type, declarator, starting_declarator_prod, Syntax::Production::BARE_STMT_DECL, policy, constant );
-
-    return s;
-} 
-DEFAULT_CATCH_CLAUSE  
-
-
-string CppRender::RenderInitialisation( TreePtr<Initialiser> init, Syntax::Policy policy ) try
-{
-	string s;
-	if( ReadArgs::use.count("c") )
-		s += "/* RenderInitialisation(" + Trace(init) + ") */";
-	if( auto stmt = DynamicTreePtrCast<Statement>(init) )
-    {
-        // Put the contents of the body into a Compound-like form even if there's only one
-        // Statement there - this is because we will wrangle with them later
-        Sequence<Statement> code;
-        Collection<Declaration> members;
-        if( TreePtr<Compound> comp = DynamicTreePtrCast<Compound>(stmt) )
-        {
-            members = comp->members;
-            code = comp->statements;
-        }
-        else 
-            code.push_back( stmt );
-
-        // Seperate the statements into constructor initialisers and "other stuff"
-        Sequence<Statement> inits;
-        Sequence<Statement> remainder;
-        ExtractInits( code, inits, remainder );
-
-        // Render the constructor initialisers if there are any
-        if( !inits.empty() )
-        {
-            s += " :\n";
-            s += RenderConstructorInitList( inits, policy );
-
-			// Render the other stuff as a Compound so we always get {} in all cases
-			auto r = MakeTreeNode<Compound>();
-			r->members = members;
-			r->statements = remainder;		
-			init = r;	
-		}	
-    }
-	
-    return s + DoRender( init, Syntax::Production::INITIALISER, policy); 
-}
-DEFAULT_CATCH_CLAUSE
-
-
 string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surround_prod, Syntax::Policy policy )
 {
     string s;
     
-	if( policy.force_initialisation )
-	{
-		if( ReadArgs::use.count("c") )
-			s += "/* force init */";   
-		// Definition is out-of-line so skip the storage
-		policy.force_initialisation = false; // stop at one level
-		s += RenderInstanceProto( o, Syntax::Production::RESOLVER, policy );
-		s += RenderInitialisation( o->initialiser, policy );	
-		s += "\n";		
-	}
-	else 
-	{		
-		if( ReadArgs::use.count("c") )
-			s += "/* no force init */";   
+    bool out_of_line = policy.force_initialisation;
+    policy.force_initialisation = false; // stop at one level
+    
+    Syntax::Production proto_prod = out_of_line ? Syntax::Production::RESOLVER : Syntax::Production::PURE_IDENTIFIER;
+    
+    if( !out_of_line )
 		s += RenderStorage( o, policy );
-		s += RenderInstanceProto( o, Syntax::Production::PURE_IDENTIFIER, policy );
-		if( ShouldSplitInstance(o, surround_prod, policy) )
-		{
-			if( ReadArgs::use.count("c") )
-				s += "/* split */";   
-			// Emit just a prototype now and request definition later
-			// Split out the definition of the instance for rendering later at CodeUnit scope
-			if( !TreePtr<Uninitialised>::DynamicCast(o->initialiser) )
-			{
-				ASSERT(policy.definitions); // Not under a node that can render definitions
-				policy.definitions->push(o);
-				FTRACE(o)((void *)&policy)("\n");
-			}
-		}		
-		else
-		{
-			if( ReadArgs::use.count("c") )
-				s += "/* no split */";   
-			// Emit the whole lot in-line
-			s += RenderInitialisation( o->initialiser, policy );							
-		}
-	}
+    
+    bool constant = !!DynamicTreePtrCast<Const>(o->constancy);
+    string declarator = DoRender( o->identifier, proto_prod, policy );
+    s += DoRenderTypeAndDeclarator( o->type, declarator, proto_prod, Syntax::Production::BARE_STMT_DECL, policy, constant );
+
+    if( TreePtr<Uninitialised>::DynamicCast(o->initialiser) )
+		return s;
+		
+    bool split = ShouldSplitInstance(o, surround_prod, policy) && !out_of_line;
+    
+	if( split )
+	{
+		// Emit just a prototype now and request definition later
+		// Split out the definition of the instance for rendering later at CodeUnit scope
+		ASSERT(policy.definitions); // Not under a node that can render definitions
+		policy.definitions->push(o);
+		FTRACE(o)((void *)&policy)("\n");
+		return s;
+	}		
+
+	s += Declaration::RenderMemberInits( o->initialiser, this, policy );							
+	s += DoRender( o->initialiser, Syntax::Production::INITIALISER, policy);
+	
+	if( out_of_line )
+		s += "\n";		
+
 	return s;
 }
 
@@ -494,7 +411,9 @@ string CppRender::RenderMacroDeclaration( TreePtr<MacroDeclaration> md, Syntax::
 	s += Join(renders, ", ", "(", ")");
 	
 	// ---- Initialisation ----	    
-    return s + RenderInitialisation( md->initialiser, policy );
+    s += Declaration::RenderMemberInits( md->initialiser, this, policy );
+	s += DoRender( md->initialiser, Syntax::Production::INITIALISER, policy);
+	return s;
 }
 
 
@@ -549,15 +468,6 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 }
 DEFAULT_CATCH_CLAUSE
 
-
-string CppRender::RenderConstructorInitList( Sequence<Statement> spe, Syntax::Policy policy ) try
-{
-    list<string> ls; 
-    for( TreePtr<Statement> st : spe )
-        ls.push_back( "    " + DoRender( st, Syntax::Production::COMMA_SEP, policy ) );		
-    return Join(ls, ",\n");
-}
-DEFAULT_CATCH_CLAUSE
 
 
 string CppRender::RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Policy policy ) try

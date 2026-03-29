@@ -65,9 +65,28 @@ Syntax::Production Declaration::GetMyProductionTerminal() const
 	return Production::BARE_STMT_DECL;
 }
 
+
+string Declaration::RenderMemberInits( TreePtr<Initialiser> init, VN::RendererInterface *renderer, Syntax::Policy policy )
+{
+	string s;
+	if( ReadArgs::use.count("c") )
+		s += "/* RenderMemberInits(" + Trace(init) + ") */";
+	if( auto comp = DynamicTreePtrCast<Compound>(init) )
+    {
+		list<string> ls; 
+		for( TreePtr<Statement> st : comp->statements ) // TODO put memb inits in their own place #886
+			if( auto mi = DynamicTreePtrCast< MembInitialisation >(st) ) 
+				ls.push_back( "    " + renderer->DoRender( mi, Syntax::Production::COMMA_SEP, policy ) );		
+
+        // Render the constructor initialisers if there are any
+        if( !ls.empty() )        
+            s += " :\n" + Join(ls, ",\n");		
+    }
+	
+    return s; 
+}
+
 //////////////////////////// DeclScope ///////////////////////////////
-
-
 
 //////////////////////////// CodeUnit ///////////////////////////////
 
@@ -1629,7 +1648,8 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
     if( policy.compound_uses_vn_separator )
 		s += "⚬";
     for( TreePtr<Statement> st : statements )    
-        s += renderer->DoRender( st, Syntax::Production::STMT_DECL_LOW, policy );    
+        if( !DynamicTreePtrCast< MembInitialisation >(st) ) // TODO remove, see #886
+			s += renderer->DoRender( st, Syntax::Production::STMT_DECL_LOW, policy );    
     s += " } ";
     return s;
 }

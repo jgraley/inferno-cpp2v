@@ -92,7 +92,8 @@ struct Declaration : virtual Node
     NODE_FUNCTIONS 
     
     virtual string GetColour() const { return "/set28/1"; }
-	Production GetMyProductionTerminal() const override;	    
+	Production GetMyProductionTerminal() const override;	
+	static string RenderMemberInits( TreePtr<Initialiser> init, VN::RendererInterface *renderer, Syntax::Policy policy );  
 };
 
 /// A scope is any space in a program where declarations may appear. Declarations

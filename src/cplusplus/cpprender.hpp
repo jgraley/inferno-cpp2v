@@ -32,19 +32,13 @@ private:
     string RenderExpression( TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderRecordInitialiser( TreePtr<CPPTree::RecordInitialiser> make_rec, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderStorage( TreePtr<CPPTree::Instance> st, Syntax::Policy policy ); // No actual storage node
-    void ExtractInits( Sequence<CPPTree::Statement> &body, 
-                       Sequence<CPPTree::Statement> &inits, 
-                       Sequence<CPPTree::Statement> &remainder );
 
-    string RenderInstanceProto( TreePtr<CPPTree::Instance> o, Syntax::Production starting_declarator_prod, Syntax::Policy policy );
-    string RenderInitialisation( TreePtr<CPPTree::Initialiser> init, Syntax::Policy policy );
     string RenderInstance( TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod, Syntax::Policy policy );
     bool ShouldSplitInstance( TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod, Syntax::Policy policy );
 	string RenderMacroDeclaration( TreePtr<CPPTree::MacroDeclaration> md, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderEnumHead( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
 	string RenderPreProcDecl( TreePtr<CPPTree::PreProcDecl> ppd, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderDeclaration( TreePtr<CPPTree::Declaration> declaration, Syntax::Production surround_prod, Syntax::Policy policy );
- 	string RenderConstructorInitList( Sequence<CPPTree::Statement> spe, Syntax::Policy policy );
 	string RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
 
 	UniquifyNames::NodeToNameMap unique_identifier_names;
