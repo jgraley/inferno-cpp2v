@@ -322,7 +322,7 @@ string CppRender::RenderStorage( TreePtr<Instance> st, Syntax::Policy policy ) t
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surround_prod, Syntax::Policy policy )
+string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Syntax::Policy policy )
 {
     string s;
     
@@ -341,7 +341,7 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surrou
     if( TreePtr<Uninitialised>::DynamicCast(o->initialiser) )
 		return s;
 		
-    bool split = ShouldSplitInstance(o, surround_prod, policy) && !out_of_line;
+    bool split = ShouldSplitInstance(o, policy) && !out_of_line;
     
 	if( split )
 	{
@@ -367,7 +367,7 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production surrou
 // get split into a part that goes into the record (main line of rendering) and
 // a part that goes separately (definitions get appended at end of code unit).
 // Do all functions, since SortDecls() ignores function bodies for dep analysis
-bool CppRender::ShouldSplitInstance( TreePtr<Instance> o, Syntax::Production , Syntax::Policy policy ) 
+bool CppRender::ShouldSplitInstance( TreePtr<Instance> o, Syntax::Policy policy ) 
 {
     if( DynamicTreePtrCast<Callable>( o->type ) )
     {

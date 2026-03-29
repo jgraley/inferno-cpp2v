@@ -34,7 +34,7 @@ private:
     string RenderStorage( TreePtr<CPPTree::Instance> st, Syntax::Policy policy ); // No actual storage node
 
     string RenderInstance( TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod, Syntax::Policy policy );
-    bool ShouldSplitInstance( TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod, Syntax::Policy policy );
+    bool ShouldSplitInstance( TreePtr<CPPTree::Instance> o, Syntax::Policy policy );
 	string RenderMacroDeclaration( TreePtr<CPPTree::MacroDeclaration> md, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderEnumHead( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
 	string RenderPreProcDecl( TreePtr<CPPTree::PreProcDecl> ppd, Syntax::Production surround_prod, Syntax::Policy policy );
