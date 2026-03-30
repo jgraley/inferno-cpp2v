@@ -328,6 +328,7 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Synta
 	}		
 
 	s += Declaration::RenderMemberInits( o->initialiser, this, policy );							
+	s += Declaration::RenderMemberInits( o->initialiser, this, policy );							
 	s += DoRender( o->initialiser, Syntax::Production::INITIALISER, policy);
 	
 	if( out_of_line )

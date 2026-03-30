@@ -425,11 +425,13 @@ struct MembInitialisation : Statement // TODO not a Statement
 
 
 /// All the member initialsiers needed for a field etc. Order in which objects are intialised is established here.
-struct MembInits : virtual Node 
+struct MembInitSeq : virtual Node 
 {
 	NODE_FUNCTIONS
 	
 	Sequence<MembInitialisation> memb_inits;
+	
+	string RenderMemberInits( VN::RendererInterface *renderer, Syntax::Policy policy );	
 };
 
 
@@ -532,7 +534,10 @@ struct Instance : Declaration,
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
+	// Storage comes first
 	virtual string RenderStorage( VN::RendererInterface *renderer, Syntax::Policy policy ) const;
+	// Extras come before initialiser
+	virtual string RenderExtras( VN::RendererInterface *renderer, Syntax::Policy policy );
 };
 
 /// A variable or function with one instance across the entire program. 
@@ -553,7 +558,7 @@ struct Static : Instance
  Constancy differs from that in Static, so we do not try to introduce a common intermediate.
  Note that static members are Static, not Field */
 struct Field : Instance,
-               MembInits
+               MembInitSeq
 {
     NODE_FUNCTIONS_FINAL
     
@@ -561,6 +566,7 @@ struct Field : Instance,
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
     
    	string RenderStorage( VN::RendererInterface *renderer, Syntax::Policy policy ) const override;
+	string RenderExtras( VN::RendererInterface *renderer, Syntax::Policy policy ) override;
 };
 
 /// Any variable local to a Compound-statement. Cannot be a function.
@@ -1459,7 +1465,8 @@ struct SpecificPreprocessorIdentifier : PreprocessorIdentifier,
 
 /// A proprocessor macro usage that may be used as a field, and takes 
 /// arbitrary operands.
-struct MacroField : Declaration
+struct MacroField : Declaration,
+					MembInitSeq
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<PreprocessorIdentifier> identifier;

@@ -793,6 +793,12 @@ string Instance::RenderStorage( VN::RendererInterface *, Syntax::Policy ) const
 	return ""; 
 }
 
+
+string Instance::RenderExtras( VN::RendererInterface *, Syntax::Policy )
+{
+	return "";
+}
+
 //////////////////////////// Static //////////////////////////////
 
 string Static::RenderStorage( VN::RendererInterface *, Syntax::Policy policy ) const 
@@ -814,6 +820,12 @@ string Field::RenderStorage( VN::RendererInterface *, Syntax::Policy ) const
 		return ""; // TODO GetRender() for Virtuality
 	else
 		ASSERTFAIL();
+}
+
+
+string Field::RenderExtras( VN::RendererInterface *renderer, Syntax::Policy policy )
+{
+	return MembInitSeq::RenderMemberInits( renderer, policy ); // TODO delete Declaration::RenderMemberInits() and drop the :: here
 }
 
 //////////////////////////// Temporary //////////////////////////////
@@ -1926,6 +1938,25 @@ string MembInitialisation::GetRender( VN::RendererInterface *renderer, Productio
 
 	return renderer->DoRender( member_id, Production::PURE_IDENTIFIER, policy ) +
 		   renderer->DoRender( initialiser, Production::INITIALISER, policy );
+}
+
+//////////////////////////// MembInitSeq ///////////////////////////////
+
+string MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Syntax::Policy policy )
+{
+	string s;
+	if( ReadArgs::use.count("c") )
+		s += "/* RenderMemberInits() */";
+		
+	list<string> ls; 
+	for( TreePtr<MembInitialisation> mi : memb_inits ) 
+		ls.push_back( "    " + renderer->DoRender( mi, Syntax::Production::COMMA_SEP, policy ) );		
+
+    // Render the constructor initialisers if there are any
+    if( !ls.empty() )        
+        s += " :\n" + Join(ls, ",\n");		    
+	
+    return s; 
 }
 
 //////////////////////////// Nop ///////////////////////////////
