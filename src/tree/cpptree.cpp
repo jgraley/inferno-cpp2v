@@ -65,27 +65,6 @@ Syntax::Production Declaration::GetMyProductionTerminal() const
 	return Production::BARE_STMT_DECL;
 }
 
-
-string Declaration::RenderMemberInits( TreePtr<Initialiser> init, VN::RendererInterface *renderer, Syntax::Policy policy )
-{
-	string s;
-	if( ReadArgs::use.count("c") )
-		s += "/* RenderMemberInits(" + Trace(init) + ") */";
-	if( auto comp = DynamicTreePtrCast<Compound>(init) )
-    {
-		list<string> ls; 
-		for( TreePtr<Statement> st : comp->statements ) // TODO put memb inits in their own place #886
-			if( auto mi = DynamicTreePtrCast< MembInitialisation >(st) ) 
-				ls.push_back( "    " + renderer->DoRender( mi, Syntax::Production::COMMA_SEP, policy ) );		
-
-        // Render the constructor initialisers if there are any
-        if( !ls.empty() )        
-            s += " :\n" + Join(ls, ",\n");		
-    }
-	
-    return s; 
-}
-
 //////////////////////////// DeclScope ///////////////////////////////
 
 //////////////////////////// CodeUnit ///////////////////////////////
@@ -825,7 +804,7 @@ string Field::RenderStorage( VN::RendererInterface *, Syntax::Policy ) const
 
 string Field::RenderExtras( VN::RendererInterface *renderer, Syntax::Policy policy )
 {
-	return MembInitSeq::RenderMemberInits( renderer, policy ); // TODO delete Declaration::RenderMemberInits() and drop the :: here
+	return RenderMemberInits( renderer, policy ); 
 }
 
 //////////////////////////// Temporary //////////////////////////////

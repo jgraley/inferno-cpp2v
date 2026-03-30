@@ -327,8 +327,7 @@ string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Synta
 		return s;
 	}		
 
-	s += Declaration::RenderMemberInits( o->initialiser, this, policy );							
-	s += Declaration::RenderMemberInits( o->initialiser, this, policy );							
+	s += o->RenderExtras( this, policy );							
 	s += DoRender( o->initialiser, Syntax::Production::INITIALISER, policy);
 	
 	if( out_of_line )
@@ -386,8 +385,7 @@ string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production s
 	s += Join(renders, ", ", "(", ")");
 	
 	// ---- Initialisation ----	    
-    s += Declaration::RenderMemberInits( md->initialiser, this, policy );
-    s += md->MembInitSeq::RenderMemberInits( this, policy ); // TODO drop the :: and Declaration::Render...
+    s += md->RenderMemberInits( this, policy ); // TODO drop the :: and Declaration::Render...
 	s += DoRender( md->initialiser, Syntax::Production::INITIALISER, policy );
 	return s;
 }

@@ -93,7 +93,6 @@ struct Declaration : virtual Node
     
     virtual string GetColour() const { return "/set28/1"; }
 	Production GetMyProductionTerminal() const override;	
-	static string RenderMemberInits( TreePtr<Initialiser> init, VN::RendererInterface *renderer, Syntax::Policy policy );  
 };
 
 
