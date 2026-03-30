@@ -122,8 +122,8 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return RenderLiteral( literal, surround_prod, policy );
     else if( auto make_rec = TreePtr<RecordInitialiser>::DynamicCast(node) )
         return RenderRecordInitialiser( make_rec, surround_prod, policy );
-    else if( auto macro_decl = TreePtr<MacroDeclaration>::DynamicCast(node) )
-        return RenderMacroDeclaration( macro_decl, surround_prod, policy );
+    else if( auto macro_decl = TreePtr<MacroField>::DynamicCast(node) )
+        return RenderMacroField( macro_decl, surround_prod, policy );
     else if( auto macro_stmt = TreePtr<MacroStatement>::DynamicCast(node) )
         return RenderMacroStatement( macro_stmt, surround_prod, policy );
     else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
@@ -346,7 +346,7 @@ bool CppRender::ShouldSplitInstance( TreePtr<Instance> o, Syntax::Policy policy 
     if( DynamicTreePtrCast<Callable>( o->type ) )
     {
         // ----- functions -----
-        if( auto smf = TreePtr<MacroDeclaration>::DynamicCast(o) )
+        if( auto smf = TreePtr<MacroField>::DynamicCast(o) )
             return false; // don't split these
             
         return true;
@@ -374,7 +374,7 @@ bool CppRender::ShouldSplitInstance( TreePtr<Instance> o, Syntax::Policy policy 
 }
 
 
-string CppRender::RenderMacroDeclaration( TreePtr<MacroDeclaration> md, Syntax::Production surround_prod, Syntax::Policy policy )
+string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	(void)surround_prod;	
     // ---- Proto ----
@@ -386,7 +386,7 @@ string CppRender::RenderMacroDeclaration( TreePtr<MacroDeclaration> md, Syntax::
 	
 	// ---- Initialisation ----	    
     s += Declaration::RenderMemberInits( md->initialiser, this, policy );
-	s += DoRender( md->initialiser, Syntax::Production::INITIALISER, policy);
+	s += DoRender( md->initialiser, Syntax::Production::INITIALISER, policy );
 	return s;
 }
 

@@ -187,7 +187,7 @@ unique_ptr<SymbolicResult> ChildToSymbolOperator::Evaluate( const EvalKit &kit,
     // Itemise the child node of the XLink we got, according to the "schema"
     // of the referee node (note: link number is only valid wrt referee)
     vector< Itemiser::Element * > keyer_items = archetype_node->Itemise( ar->GetOnlyXLink().GetChildTreePtr().get() );   
-    ASSERT( item_index < keyer_items.size() );     
+    ASSERT( item_index < keyer_items.size() )("Item index %d of ", item_index)(archetype_node)(" is too big (size=%d)", keyer_items.size());
     
     // Extract the item indicated by item_index. 
     return EvalFromItem( ar->GetOnlyXLink(), keyer_items[item_index] );

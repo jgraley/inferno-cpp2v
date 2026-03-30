@@ -1948,9 +1948,9 @@ Syntax::Production PreprocessorIdentifier::GetMyProductionTerminal() const
 	return Production::PURE_IDENTIFIER; 
 }
 
-//////////////////////////// MacroDeclaration ///////////////////////////////
+//////////////////////////// MacroField ///////////////////////////////
 
-Syntax::Production MacroDeclaration::GetMyProduction(const VN::RendererInterface *, Policy) const
+Syntax::Production MacroField::GetMyProduction(const VN::RendererInterface *, Policy) const
 { 
 	if( !DynamicTreePtrCast<Expression>(initialiser) )
 		return Production::STMT_DECL;

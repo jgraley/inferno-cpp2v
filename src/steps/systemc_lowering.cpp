@@ -24,14 +24,14 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto s_decls_negation = MakePatternNode<NegationAgent, Declaration>();
-    auto sx_cons_macro = MakePatternNode< MacroDeclaration >(); 
+    auto sx_cons_macro = MakePatternNode< MacroField >(); 
     auto sx_params = MakePatternNode<StarAgent, Node>();
     
 	auto r_scclass = MakePatternNode< SCRecord >();
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
     auto r_token = MakePatternNode< SpecificTypeIdentifier >( ""/*s_scclass->GetLoweredIdName() TODO SCRecord is intermediate and has no lowered id name */ ); 
-    auto r_cons_macro = MakePatternNode< MacroDeclaration >(); 
+    auto r_cons_macro = MakePatternNode< MacroField >(); 
     auto r_comp = MakePatternNode< Compound >();
     auto ctor_macro_name = MakePatternNode< SpecificPreprocessorIdentifier >( "SC_CTOR" ); // #819 style
     auto ctor_macro_byname = MakePatternNode< SpecificPreprocessorIdentifierByNameAgent >( "SC_CTOR" );                
@@ -87,7 +87,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l1_statements_negation = MakePatternNode<NegationAgent, Statement>();
     auto l1x_memb_init = MakePatternNode<MembInitialisation>();
     auto l1_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l1_cons_macro = MakePatternNode< MacroDeclaration >(); 
+    auto l1_cons_macro = MakePatternNode< MacroField >(); 
     auto l1_macro_args = MakePatternNode<StarAgent, Node>();    
     auto l1s_comp = MakePatternNode< Compound >();
     auto l1r_comp = MakePatternNode< Compound >();
@@ -242,8 +242,8 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto r_process_macro = MakePatternNode< MacroStatement >();
     auto overcons = MakePatternNode<DeltaAgent, Declaration>();
     auto overtype = MakePatternNode<DeltaAgent, Type>();
-    auto s_cons_macro = MakePatternNode< MacroDeclaration >();
-    auto r_cons_macro = MakePatternNode< MacroDeclaration >();
+    auto s_cons_macro = MakePatternNode< MacroField >();
+    auto r_cons_macro = MakePatternNode< MacroField >();
     auto macro_args = MakePatternNode<StarAgent, Node>();
     auto process = MakePatternNode< Instance >();
     auto pre = MakePatternNode<StarAgent, Statement>();

@@ -96,6 +96,7 @@ struct Declaration : virtual Node
 	static string RenderMemberInits( TreePtr<Initialiser> init, VN::RendererInterface *renderer, Syntax::Policy policy );  
 };
 
+
 /// A scope is any space in a program where declarations may appear. Declarations
 /** are associated with the scope node but unordered. Scopes are used for name 
  * resolution during parse. */
@@ -409,6 +410,28 @@ struct False : Bool
 // be *one* Declaration node that points to the identifier and serves to 
 // declare it. There should be 0 or more "users" that point to the
 // identifier. 
+
+/// Initialise a member from inside a constructor body
+struct MembInitialisation : Statement // TODO not a Statement
+{
+	NODE_FUNCTIONS_FINAL
+
+	TreePtr<InstanceIdentifier> member_id;
+	TreePtr<Initialiser> initialiser;
+
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
+};
+
+
+/// All the member initialsiers needed for a field etc. Order in which objects are intialised is established here.
+struct MembInits : virtual Node 
+{
+	NODE_FUNCTIONS
+	
+	Sequence<MembInitialisation> memb_inits;
+};
+
 
 /// Property for a member function that may or may not be virtual.
 struct Virtuality : Property { NODE_FUNCTIONS };
@@ -1400,18 +1423,6 @@ struct Break : Statement
 	string GetRenderTerminal( Production production ) const override;	
 };
 
-/// Initialise a member from inside a constructor body
-struct MembInitialisation : Statement 
-{
-	NODE_FUNCTIONS_FINAL
-
-	TreePtr<InstanceIdentifier> member_id;
-	TreePtr<Initialiser> initialiser;
-
-	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
-};
-
 /// Do nothing; these get optimised out where possible
 struct Nop : Statement 
 { 
@@ -1447,9 +1458,8 @@ struct SpecificPreprocessorIdentifier : PreprocessorIdentifier,
 
 /// A proprocessor macro usage that may be used as a field, and takes 
 /// arbitrary operands.
-struct MacroDeclaration : Declaration
+struct MacroField : Declaration
 {
-	// TODO be MacroDeclaration, inherit from Declaration and add an initialiser for body of declared function
     NODE_FUNCTIONS_FINAL
     TreePtr<PreprocessorIdentifier> identifier;
     Sequence<Node> arguments; ///< Args taken in order, macro so can be anything
