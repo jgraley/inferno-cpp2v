@@ -1675,8 +1675,7 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
     if( policy.compound_uses_vn_separator )
 		s += "⚬";
     for( TreePtr<Statement> st : statements )    
-        if( policy.compound_uses_vn_separator || !DynamicTreePtrCast< MembInitialisation >(st) ) // TODO remove, see #886
-			s += renderer->DoRender( st, Syntax::Production::STMT_DECL_LOW, policy );    
+		s += renderer->DoRender( st, Syntax::Production::STMT_DECL_LOW, policy );    
     s += " } ";
     return s;
 }
