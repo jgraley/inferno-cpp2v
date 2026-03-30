@@ -412,7 +412,7 @@ struct False : Bool
 // identifier. 
 
 /// Initialise a member from inside a constructor body
-struct MembInitialisation : Statement // TODO not a Statement
+struct MembInitialisation : Statement // TODO not a Statement, just virtual Node now
 {
 	NODE_FUNCTIONS_FINAL
 

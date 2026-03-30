@@ -1536,14 +1536,14 @@ private:
 		CollectArgs( &inits, MemInits, NumMemInits );
 		TRACE("ActOnMemInitializers() ConstructorDecl: ")(d)(" MemInits: ")(inits)("\n");
 
-		TreePtr<Field> f = DynamicTreePtrCast<Field> (d);		
-		ASSERT( f );
-		ASSERT( DynamicTreePtrCast<Uninitialised>(f->initialiser) );
-        TreePtr<Compound> comp = DynamicTreePtrCast<Compound>(f->initialiser);
-        comp = MakeTreeNode<Compound>();
-        f->initialiser = comp;
+		auto mis = DynamicTreePtrCast<MembInitSeq>(d);		
+		ASSERT( mis );
         for( auto i : inits )
-			comp->statements.push_back( i );
+		{
+			auto mi = TreePtr<MembInitialisation>::DynamicCast(i);
+			ASSERT( mi );
+			mis->memb_inits.push_back( mi );
+		}		
     }
   
     virtual DeclTy *ActOnTag(clang::Scope *S, unsigned TagType, TagKind TK,
@@ -2077,7 +2077,7 @@ private:
     void CollectArgs( Sequence<Expression> *ps, ExprTy **Args, unsigned NumArgs )
     {
         for(unsigned i=0; i<NumArgs; i++ )
-        ps->push_back( hold_expr.FromRaw(Args[i]) );
+			ps->push_back( hold_expr.FromRaw(Args[i]) );
     }
 
     /// ActOnCXXNew - Parsed a C++ 'new' expression. UseGlobal is true if the
