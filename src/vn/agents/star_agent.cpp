@@ -82,7 +82,7 @@ Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
     (void)kit;
     (void)me_plink;
     (void)acting_engine;
-    ASSERT( key_xlink );
+    ASSERT( key_xlink )("Star node appears in replace pattern but is not keyed, so it's probably missing from search pattern");
     TreePtr<Node> key_node = key_xlink.GetChildTreePtr();
     
     // Key needs to implement ContainerInterface

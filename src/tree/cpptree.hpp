@@ -552,7 +552,8 @@ struct Static : Instance
  are intended to control the generation of read/write lines for modules. This usage of
  Constancy differs from that in Static, so we do not try to introduce a common intermediate.
  Note that static members are Static, not Field */
-struct Field : Instance
+struct Field : Instance,
+               MembInits
 {
     NODE_FUNCTIONS_FINAL
     

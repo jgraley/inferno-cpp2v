@@ -1536,12 +1536,12 @@ private:
 		CollectArgs( &inits, MemInits, NumMemInits );
 		TRACE("ActOnMemInitializers() ConstructorDecl: ")(d)(" MemInits: ")(inits)("\n");
 
-		TreePtr<Instance> o = DynamicTreePtrCast<Instance> (d);		
-		ASSERT( o );
-		ASSERT( DynamicTreePtrCast<Uninitialised>(o->initialiser) );
-        TreePtr<Compound> comp = DynamicTreePtrCast<Compound>(o->initialiser);
+		TreePtr<Field> f = DynamicTreePtrCast<Field> (d);		
+		ASSERT( f );
+		ASSERT( DynamicTreePtrCast<Uninitialised>(f->initialiser) );
+        TreePtr<Compound> comp = DynamicTreePtrCast<Compound>(f->initialiser);
         comp = MakeTreeNode<Compound>();
-        o->initialiser = comp;
+        f->initialiser = comp;
         for( auto i : inits )
 			comp->statements.push_back( i );
     }
