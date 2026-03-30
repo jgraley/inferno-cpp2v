@@ -83,21 +83,19 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l1_class = MakePatternNode< InheritanceRecord >();
     auto l1_fields = MakePatternNode<StarAgent, Declaration>();
     auto l1_bases = MakePatternNode<StarAgent, Base>();
-    auto l1_statements = MakePatternNode<StarAgent, Statement>();
-    auto l1_statements_negation = MakePatternNode<NegationAgent, Statement>();
-    auto l1x_memb_init = MakePatternNode<MembInitialisation>();
-    auto l1_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l1_cons_macro = MakePatternNode< MacroField >(); 
     auto l1_macro_args = MakePatternNode<StarAgent, Node>();    
-    auto l1s_comp = MakePatternNode< Compound >();
-    auto l1r_comp = MakePatternNode< Compound >();
-    auto l1_field = MakePatternNode< Field >();
+    auto l1_member_inst_field = MakePatternNode< Field >();
     auto l1_field_id = MakePatternNode< InstanceIdentifier >();
-    auto l1_delta = MakePatternNode<DeltaAgent, Initialiser>();  
+    auto l1_delta = MakePatternNode<DeltaAgent, MacroField>();  
+    auto l1s_macro_field = MakePatternNode< MacroField >(); 
+    auto l1r_macro_field = MakePatternNode< MacroField >(); 
     auto l1r_memb_init = MakePatternNode<MembInitialisation>();
     auto l1r_cons_init = MakePatternNode<ConstructInit>();
     auto l1r_args = MakePatternNode<SeqArgumentation>();
 	auto l1r_arg = MakePatternNode< StringizeAgent >();
+    auto l1_memb_inits = MakePatternNode< StarAgent, MembInitialisation >();
+    auto l1_memb_inits_negation = MakePatternNode< NegationAgent, MembInitialisation >();
+    auto l1x_memb_init = MakePatternNode<MembInitialisation>();
     
     auto l2_conjunction = MakePatternNode<ConjunctionAgent, Instance>();  
     auto l2_negation = MakePatternNode<NegationAgent, Instance>();  
@@ -123,23 +121,26 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
        
     // Field decl of our module in some OTHER class: add call to all constructors
     l1_class->identifier = MakePatternNode< TypeIdentifier >(); // not tid, the OTHER class
-    l1_class->members = (l1_fields, l1_cons_macro, l1_field);
+    
+    // Looking for: 
+    // - some random unrelated fields
+    // - the macro field for parent class constructor - to which which we need to add a member init for child class
+    // - the instance field of the child class
+    l1_class->members = (l1_fields, l1_delta, l1_member_inst_field); 
     l1_class->bases = (l1_bases);
-    l1_cons_macro->identifier = MakePatternNode< PreprocessorIdentifier >();
-    l1_cons_macro->arguments = l1_macro_args;
-    l1_cons_macro->initialiser = l1_delta; // #886 don't do it here, do it in member initialsiers
-    l1_delta->through = l1s_comp;
-    l1_delta->overlay = l1r_comp;
-    l1s_comp->members = (l1_decls);
-    l1s_comp->statements = (l1_statements);
-    l1r_comp->members = (l1_decls);
-	l1r_comp->statements = (l1_statements, l1r_memb_init);
+    l1_delta->through = l1s_macro_field;
+    l1_delta->overlay = l1r_macro_field;
+    l1s_macro_field->identifier = MakePatternNode< PreprocessorIdentifier >();
+    l1s_macro_field->arguments = l1_macro_args;
+    l1s_macro_field->memb_inits = (l1_memb_inits);
+    l1r_macro_field->arguments = l1_macro_args;
+    l1r_macro_field->memb_inits = (l1_memb_inits, l1r_memb_init); 
     
-    l1_field->type = tid;
-    l1_field->identifier = l1_field_id;
+    l1_member_inst_field->type = tid;
+    l1_member_inst_field->identifier = l1_field_id;
     
-	l1_statements->restriction = l1_statements_negation;
-	l1_statements_negation->negand = l1x_memb_init;
+	l1_memb_inits->restriction = l1_memb_inits_negation;
+	l1_memb_inits_negation->negand = l1x_memb_init;
 	l1x_memb_init->member_id = l1_field_id; // this should be enough to prevent spin
 	
 	l1r_memb_init->member_id = l1_field_id;

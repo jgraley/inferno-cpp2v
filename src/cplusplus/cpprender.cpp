@@ -387,6 +387,7 @@ string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production s
 	
 	// ---- Initialisation ----	    
     s += Declaration::RenderMemberInits( md->initialiser, this, policy );
+    s += md->MembInitSeq::RenderMemberInits( this, policy ); // TODO drop the :: and Declaration::Render...
 	s += DoRender( md->initialiser, Syntax::Production::INITIALISER, policy );
 	return s;
 }

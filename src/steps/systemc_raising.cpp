@@ -297,15 +297,13 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto over = MakePatternNode<DeltaAgent, Scope>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l_pre = MakePatternNode<StarAgent, Statement>();
-    auto l_post = MakePatternNode<StarAgent, Statement>();
+    auto l_pre = MakePatternNode<StarAgent, MembInitialisation>();
+    auto l_post = MakePatternNode<StarAgent, MembInitialisation>();
     auto s_cons = MakePatternNode< Field >();
     auto s_comp = MakePatternNode< Compound >();
     auto s_constructor_id = MakePatternNode< InstanceIdentifier >();
     auto s_ctype = MakePatternNode<Constructor>();
     auto s_params = MakePatternNode<StarAgent, Parameter>();
-    auto ls_comp = MakePatternNode< Compound >();
-    auto lr_comp = MakePatternNode< Compound >();
     auto s_module = MakePatternNode< Module >();
     auto r_module = MakePatternNode< Module >();
     auto l1s_memb_init = MakePatternNode<MembInitialisation>();
@@ -338,14 +336,10 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
             
     // Embedded 1: dispense with any calls to s_constructor_id from member inits
     ls_field->type = module_typeid;
-    ls_field->initialiser = ls_comp;
-    ls_comp->members = (l_decls);
-	ls_comp->statements = (l_pre, l1s_memb_init, l_post); // #886 remove the memb init from ls_instance, and leave the ls_instance->initialiser alone
+    ls_field->memb_inits = (l_pre, l1s_memb_init, l_post);
 	l1s_memb_init->initialiser = l1s_cons_init;
 	l1s_cons_init->constructor_id = s_constructor_id;
-    lr_field->initialiser = lr_comp;
-    lr_comp->members = (l_decls);
-    lr_comp->statements = (l_pre, l_post);
+    lr_field->memb_inits = (l_pre, l_post);
 
     // Embedded 3: dispense with any init constructs using s_constructor_id
     l3_instance->type = module_typeid;
