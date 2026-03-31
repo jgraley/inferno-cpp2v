@@ -93,6 +93,7 @@ struct Declaration : virtual Node
     
     virtual string GetColour() const { return "/set28/1"; }
 	Production GetMyProductionTerminal() const override;	
+	virtual bool ShouldSplitInstance( Syntax::Policy policy ) const;
 };
 
 
@@ -533,10 +534,13 @@ struct Instance : Declaration,
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
+	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
+	bool ShouldSplitInstance( Policy policy ) const override;
+	
 	// Storage comes first
-	virtual string RenderStorage( VN::RendererInterface *renderer, Syntax::Policy policy ) const;
+	virtual string RenderStorage( VN::RendererInterface *renderer, Policy policy ) const;
 	// Extras come before initialiser
-	virtual string RenderExtras( VN::RendererInterface *renderer, Syntax::Policy policy );
+	virtual string RenderExtras( VN::RendererInterface *renderer, Policy policy );
 };
 
 /// A variable or function with one instance across the entire program. 
@@ -547,7 +551,8 @@ struct Static : Instance
 {
     NODE_FUNCTIONS_FINAL
     
-	string RenderStorage( VN::RendererInterface *renderer, Syntax::Policy policy ) const override;
+	string RenderStorage( VN::RendererInterface *renderer, Policy policy ) const override;
+	bool ShouldSplitInstance( Policy policy ) const override;
 };
 
 /// A non-static member Instance (function or variable)
@@ -564,8 +569,8 @@ struct Field : Instance,
     TreePtr<Virtuality> virt; ///< Is the field virtual?
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
     
-   	string RenderStorage( VN::RendererInterface *renderer, Syntax::Policy policy ) const override;
-	string RenderExtras( VN::RendererInterface *renderer, Syntax::Policy policy ) override;
+   	string RenderStorage( VN::RendererInterface *renderer, Policy policy ) const override;
+	string RenderExtras( VN::RendererInterface *renderer, Policy policy ) override;
 };
 
 /// Any variable local to a Compound-statement. Cannot be a function.

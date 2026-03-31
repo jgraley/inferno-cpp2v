@@ -32,8 +32,6 @@ private:
     string RenderExpression( TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderRecordInitialiser( TreePtr<CPPTree::RecordInitialiser> make_rec, Syntax::Production surround_prod, Syntax::Policy policy );
 
-    string RenderInstance( TreePtr<CPPTree::Instance> o, Syntax::Production surround_prod, Syntax::Policy policy );
-    bool ShouldSplitInstance( TreePtr<CPPTree::Instance> o, Syntax::Policy policy );
 	string RenderMacroField( TreePtr<CPPTree::MacroField> md, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderEnumHead( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
 	string RenderPreProcDecl( TreePtr<CPPTree::PreProcDecl> ppd, Syntax::Production surround_prod, Syntax::Policy policy );

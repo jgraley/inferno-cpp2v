@@ -85,6 +85,9 @@ Syntax::Policy CppRender::GetDefaultPolicy()
 	// Insert braces to disambiguate stratements eg in case of if/else ambiguity
 	policy.boot_statements_using_braces = true;
 	
+	// This can be necessary to resolve dependencies or at least produce readable code
+	policy.can_split_instances = true;
+	
 	return policy;
 }
 
@@ -128,8 +131,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return RenderMacroStatement( macro_stmt, surround_prod, policy );
     else if( auto expression = TreePtr<Expression>::DynamicCast(node) ) // Expression is a kind of Statement
         return RenderExpression( expression, surround_prod, policy );
-    else if( auto instance = TreePtr<Instance>::DynamicCast(node) )    // Instance is a kind of Statement and Declaration
-        return RenderInstance( instance, surround_prod, policy ); 
     else if( auto ppd = TreePtr<PreProcDecl>::DynamicCast(node) )
         return RenderPreProcDecl(ppd, surround_prod, policy); 
     else if( auto declaration = TreePtr<Declaration>::DynamicCast(node) )
@@ -295,83 +296,6 @@ string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, 
     return s;
 }
 DEFAULT_CATCH_CLAUSE
-
-
-string CppRender::RenderInstance( TreePtr<Instance> o, Syntax::Production, Syntax::Policy policy )
-{
-    string s;
-    
-    bool out_of_line = policy.force_initialisation;
-    policy.force_initialisation = false; // stop at one level
-    
-    Syntax::Production proto_prod = out_of_line ? Syntax::Production::RESOLVER : Syntax::Production::PURE_IDENTIFIER;
-    
-    if( !out_of_line )
-		s += o->RenderStorage( this, policy );
-    
-    bool constant = !!DynamicTreePtrCast<Const>(o->constancy);
-    string declarator = DoRender( o->identifier, proto_prod, policy );
-    s += DoRenderTypeAndDeclarator( o->type, declarator, proto_prod, Syntax::Production::BARE_STMT_DECL, policy, constant );
-
-    if( TreePtr<Uninitialised>::DynamicCast(o->initialiser) )
-		return s;
-		
-    bool split = ShouldSplitInstance(o, policy) && !out_of_line;
-    
-	if( split )
-	{
-		// Emit just a prototype now and request definition later
-		// Split out the definition of the instance for rendering later at CodeUnit scope
-		ASSERT(policy.definitions); // Not under a node that can render definitions
-		policy.definitions->push(o);
-		return s;
-	}		
-
-	s += o->RenderExtras( this, policy );							
-	s += DoRender( o->initialiser, Syntax::Production::INITIALISER, policy);
-	
-	if( out_of_line )
-		s += "\n";		
-
-	return s;
-}
-
-
-// Non-const static objects in records and functions 
-// get split into a part that goes into the record (main line of rendering) and
-// a part that goes separately (definitions get appended at end of code unit).
-// Do all functions, since SortDecls() ignores function bodies for dep analysis
-bool CppRender::ShouldSplitInstance( TreePtr<Instance> o, Syntax::Policy policy ) 
-{
-    if( DynamicTreePtrCast<Callable>( o->type ) )
-    {
-        // ----- functions -----
-        if( auto smf = TreePtr<MacroField>::DynamicCast(o) )
-            return false; // don't split these
-            
-        return true;
-    }
-    else
-    {
-        // ----- objects ------ 
-        //if( surround_prod==Syntax::Production::STMT_DECL )
-	//		return false;
-			
-        if( policy.split_bulky_statics )
-		{
-			// we're a field of a record
-			if( TreePtr<Static> s = DynamicTreePtrCast<Static>(o) )
-			{
-				if( DynamicTreePtrCast<Const>(s->constancy) && DynamicTreePtrCast<Numeric>( o->type ) )
-					return false;
-
-				return true;                
-			}
-		}
-
-        return false;
-    }
-}
 
 
 string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production surround_prod, Syntax::Policy policy )

@@ -65,6 +65,13 @@ Syntax::Production Declaration::GetMyProductionTerminal() const
 	return Production::BARE_STMT_DECL;
 }
 
+
+bool Declaration::ShouldSplitInstance( Syntax::Policy ) const 
+{ 
+	// Splitting instances is generally unsafe, unless we know how to do it for a given kind of Declaration.
+	return false; 
+}	
+
 //////////////////////////// DeclScope ///////////////////////////////
 
 //////////////////////////// CodeUnit ///////////////////////////////
@@ -767,6 +774,60 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 }
 
 
+string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+    string s;
+    
+    //if( policy.compound_uses_vn_separator ) // TODO hack, please remove
+	//	throw RefusedByPolicy();
+    
+    Policy sub_policy = policy;
+    sub_policy.force_initialisation = false; // stop at one level
+    
+    Production proto_prod = policy.force_initialisation ? Production::RESOLVER : Production::PURE_IDENTIFIER;
+    
+    if( !policy.force_initialisation )
+		s += RenderStorage( renderer, sub_policy );
+    
+    bool constant = !!DynamicTreePtrCast<Const>(constancy);
+    string declarator = renderer->DoRender( identifier, proto_prod, sub_policy );
+    s += renderer->DoRenderTypeAndDeclarator( type, declarator, proto_prod, Production::BARE_STMT_DECL, sub_policy, constant );
+
+    if( TreePtr<Uninitialised>::DynamicCast(initialiser) )
+		return s;
+		    
+	if( policy.can_split_instances && 
+		!policy.force_initialisation && 
+		ShouldSplitInstance(policy) )
+	{
+		// Emit just a prototype now and request definition later
+		// Split out the definition of the instance for rendering later at CodeUnit scope
+		ASSERT(policy.definitions); // Not under a node that can render definitions
+		policy.definitions->push(TreePtr<Instance>(shared_from_this()));
+		return s;
+	}		
+
+	s += RenderExtras( renderer, sub_policy );							
+
+	s += renderer->DoRender( initialiser, Production::INITIALISER, sub_policy);
+	
+	if( policy.force_initialisation )
+		s += "\n";		
+
+	return s;
+}
+
+
+// Decide what gets split into a part that goes into the record (main line of rendering) and
+// a part that goes separately (definitions get appended at end of code unit).
+bool Instance::ShouldSplitInstance( Policy ) const
+{
+	// By default for Instance, split a function but not a data object. There are overrides, 
+	// and a more general default in Declaration.
+    return !!DynamicTreePtrCast<Callable>( type );
+}
+
+
 string Instance::RenderStorage( VN::RendererInterface *, Syntax::Policy ) const 
 { 
 	return ""; 
@@ -780,7 +841,7 @@ string Instance::RenderExtras( VN::RendererInterface *, Syntax::Policy )
 
 //////////////////////////// Static //////////////////////////////
 
-string Static::RenderStorage( VN::RendererInterface *, Syntax::Policy policy ) const 
+string Static::RenderStorage( VN::RendererInterface *, Policy policy ) const 
 { 
     if( policy.permit_static_keyword )
         return "static ";
@@ -788,9 +849,22 @@ string Static::RenderStorage( VN::RendererInterface *, Syntax::Policy policy ) c
 		return "";
 }
 
+
+bool Static::ShouldSplitInstance( Policy policy ) const
+{
+	if( policy.split_bulky_statics )
+	{
+		if( DynamicTreePtrCast<Const>(constancy) && DynamicTreePtrCast<Numeric>( type ) )
+			return false;
+
+		return true;                
+	}
+	return false;
+}
+
 //////////////////////////// Field //////////////////////////////
 
-string Field::RenderStorage( VN::RendererInterface *, Syntax::Policy ) const 
+string Field::RenderStorage( VN::RendererInterface *, Policy ) const 
 { 
 	TreePtr<Virtuality> v = virt;
 	if( DynamicTreePtrCast<Virtual>( v ) )
@@ -802,14 +876,14 @@ string Field::RenderStorage( VN::RendererInterface *, Syntax::Policy ) const
 }
 
 
-string Field::RenderExtras( VN::RendererInterface *renderer, Syntax::Policy policy )
+string Field::RenderExtras( VN::RendererInterface *renderer, Policy policy )
 {
 	return RenderMemberInits( renderer, policy ); 
 }
 
 //////////////////////////// Temporary //////////////////////////////
 
-string Temporary::RenderStorage( VN::RendererInterface *, Syntax::Policy ) const 
+string Temporary::RenderStorage( VN::RendererInterface *, Policy ) const 
 { 
 	return "/*temp*/ ";
 }
@@ -873,7 +947,6 @@ string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production,
 
 //////////////////////////// Callable //////////////////////////////
 
-
 Syntax::Production Callable::GetMyProductionTerminal() const
 {
 	// Rendering as a type.
@@ -881,12 +954,12 @@ Syntax::Production Callable::GetMyProductionTerminal() const
 	return Production::DECLARATOR_IN_USE; 
 }
 
+
 Syntax::Production Callable::GetOperandInDeclaratorProduction() const
 {
 	// Rendering a non-abstract declarator.
 	return Production::POSTFIX; // eg int a();
 }
-
 
 //////////////////////////// CallableParams //////////////////////////////
 

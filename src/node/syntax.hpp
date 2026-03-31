@@ -115,7 +115,8 @@ public:
 			goto_uses_ref_and_deref(true),
 			refuse_local_node_types(false),
 			full_render_code_unit(true),
-			definitions(nullptr) {}
+			definitions(nullptr),
+			can_split_instances(false) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
 		bool split_bulky_statics;
@@ -132,6 +133,7 @@ public:
 		bool refuse_local_node_types;
 		bool full_render_code_unit;
 	    queue<shared_ptr<Syntax>> *definitions;
+		bool can_split_instances;
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:
