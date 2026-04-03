@@ -623,7 +623,6 @@ InsertInferredYield::InsertInferredYield()
     auto stmts = MakePatternNode<StarAgent, Statement>();
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
     auto over = MakePatternNode<DeltaAgent, Statement>();
-    auto flag_decl = MakePatternNode<LocalVariable>();
     auto flag_id = MakePatternNode<InstanceIdentifier>();
     auto r_yield = MakePatternNode<WaitDelta>();
     auto loop = MakePatternNode<Loop>();

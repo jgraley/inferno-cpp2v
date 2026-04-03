@@ -198,7 +198,7 @@ static TreePtr<Statement> MakeResetAssignmentPattern()
 {
     auto ass = MakePatternNode<Assign>();
     auto decl = MakePatternNode<TransformOfAgent, InstanceIdentifier>( &DeclarationOf::instance );
-    decl->pattern = MakePatternNode<LocalVariable>();
+    decl->pattern = MakePatternNode<Automatic>();
     ass->operands = (decl, MakePatternNode<Literal>());    
     return ass;
 }
@@ -565,7 +565,7 @@ AddInferredYield::AddInferredYield()
     auto stmts = MakePatternNode<StarAgent, Statement>();
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
     auto over = MakePatternNode<DeltaAgent, Statement>();
-    auto flag_decl = MakePatternNode<LocalVariable>();
+    auto flag_decl = MakePatternNode<Automatic>();
     auto flag_id = MakePatternNode<InstanceIdentifier>();
     auto r_yield = MakePatternNode<WaitDelta>();
     auto loop = MakePatternNode<Loop>();

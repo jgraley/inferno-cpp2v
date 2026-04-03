@@ -13,8 +13,8 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     // with an uninitialised decl and an assign. Put the new decl in the 
     // decls section of the compound.
     auto sc = MakePatternNode<Compound>();
-    auto si = MakePatternNode<LocalVariable>();
-    auto over = MakePatternNode<DeltaAgent, LocalVariable>();
+    auto si = MakePatternNode<Automatic>();
+    auto over = MakePatternNode<DeltaAgent, Automatic>();
     si->identifier = MakePatternNode<InstanceIdentifier>();  // Only acting on initialised Instances
     si->initialiser = MakePatternNode<Expression>();  // Only acting on initialised Instances
     auto decls = MakePatternNode<StarAgent, Declaration>();
@@ -24,7 +24,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     sc->statements = ( pre, over, post );
 
     auto rc = MakePatternNode<Compound>();
-    auto ri = MakePatternNode<LocalVariable>();
+    auto ri = MakePatternNode<Automatic>();
     over->through = si;
     over->overlay = ri;
     ri->initialiser = MakePatternNode<Uninitialised>();
@@ -41,7 +41,7 @@ MoveInstanceDeclarations::MoveInstanceDeclarations()
 {    
     // Just move the decl to the decls collection
     auto sc = MakePatternNode<Compound>();
-    auto var = MakePatternNode<LocalVariable>();
+    auto var = MakePatternNode<Automatic>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     sc->members = ( decls );
     auto pre = MakePatternNode<StarAgent, Statement>();
@@ -54,36 +54,4 @@ MoveInstanceDeclarations::MoveInstanceDeclarations()
 
     Configure( SEARCH_REPLACE,sc, rc);
 }
-
-
-SplitInstanceDeclarations2::SplitInstanceDeclarations2()
-{
-    // Match a compound with an ini9tialised decl in the statements. Replace
-    // with an uninitialised decl and an assign. Put the new decl in the 
-    // decls section of the compound.
-    auto sc = MakePatternNode<Compound>();
-    auto si = MakePatternNode<LocalVariable>();
-    auto over = MakePatternNode<DeltaAgent, LocalVariable>();
-    si->identifier = MakePatternNode<InstanceIdentifier>();  // Only acting on initialised Instances
-    si->initialiser = MakePatternNode<Expression>();  // Only acting on initialised Instances
-    auto decls = MakePatternNode<StarAgent, Declaration>();
-    sc->members = ( decls, over );
-    auto stmts = MakePatternNode<StarAgent, Statement>();
-    sc->statements = ( stmts );
-
-    auto rc = MakePatternNode<Compound>();
-    auto ri = MakePatternNode<LocalVariable>();
-    over->through = si;
-    over->overlay = ri;
-    ri->initialiser = MakePatternNode<Uninitialised>();
-    rc->members = ( over, decls );
-    auto ra = MakePatternNode<Assign>();
-    ra->operands = ( si->identifier, si->initialiser );
-    rc->statements = ( ra, stmts );
-
-    Configure( SEARCH_REPLACE,sc, rc);
-}
-    
-    
-
 

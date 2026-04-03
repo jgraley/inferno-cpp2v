@@ -606,17 +606,11 @@ struct Field : Instance,
 	string RenderExtras( VN::RendererInterface *renderer, Policy policy ) override;
 };
 
-/// Any variable local to a Compound-statement. Cannot be a function.
-struct LocalVariable : Instance
-{
-    NODE_FUNCTIONS
-};
-
 /// A local variable with automatic allocation
 /** A variable with one instance for each *invocation* of a function, ie
     non-static locals. Safe across recursion. Note that static locals
     are Static, not Automatic. */
-struct Automatic : LocalVariable
+struct Automatic : Instance
 {
     NODE_FUNCTIONS_FINAL
 };
@@ -624,7 +618,7 @@ struct Automatic : LocalVariable
 /// A function parameter
 /** Function parameters. Allocation is probably the same as automatic, unless 
  *  elided by function call optimsiations. */
-struct Parameter : LocalVariable
+struct Parameter : Instance
 {
     NODE_FUNCTIONS_FINAL
 };
@@ -634,7 +628,7 @@ struct Parameter : LocalVariable
  across recursion or between calls (such a variable could safely be implemented as any of
  Static, Field or Automatic since it supports only those guarantees common to all). */
 // TODO Really a local node, move out of here
-struct Temporary : LocalVariable
+struct Temporary : Instance
 {
     NODE_FUNCTIONS_FINAL
     
