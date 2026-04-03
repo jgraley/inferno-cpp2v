@@ -101,7 +101,10 @@ namespace VN
 	class RendererInterface
 	{
 	public:	
-		virtual string DoRender( TreePtr<Node> node, 
+		virtual string DoRenderTPI( const TreePtrInterface *tpi, 
+		                            Syntax::Production surround_prod, 
+		                            Syntax::Policy policy ) = 0;
+		virtual string DoRenderPreserve( TreePtr<Node> node, 
 		                         Syntax::Production surround_prod, 
 		                         Syntax::Policy policy ) = 0;
 		virtual string DoRenderTypeAndDeclarator( TreePtr<Node> type, string declarator, 

@@ -90,13 +90,3 @@ string::size_type Syntax::GetLineBreakThreshold()
 {
 	return 80;
 }
-
-
-bool Syntax::IsType( Production prod )
-{
-	return prod == Syntax::Production::TYPE_IN_NEW ||
-		   prod == Syntax::Production::SPACE_SEP_TYPE ||
-		   prod == Syntax::Production::PRIMARY_TYPE ||
-		   prod == Syntax::Production::TYPE_IN_DECLARATION ||
-		   prod == Syntax::Production::VN_DESIGNATE_TERM_TYPE;
-}

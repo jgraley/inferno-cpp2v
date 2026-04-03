@@ -50,7 +50,7 @@ string ConjunctionAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax
 	// Commutative and associative so don't boost productions
 	list<string> ls;
 	for( const TreePtrInterface &p : GetConjuncts() )                 
-		ls.push_back( renderer->DoRender( (TreePtr<Node>)p, Syntax::Production::VN_CONJUNCTION, policy ) );
+		ls.push_back( renderer->DoRenderPreserve( (TreePtr<Node>)p, Syntax::Production::VN_CONJUNCTION, policy ) );
 	return Join(ls, " ∧ ");
 }    
     

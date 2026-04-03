@@ -336,7 +336,7 @@ Syntax::Production TransformOfAgent::GetAgentProduction() const
 string TransformOfAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	(void)surround_prod;
-	return "⤨" + transformation->GetName() + "⦅" + renderer->DoRender( pattern, Syntax::Production::PREFIX, policy ) + "⦆";
+	return "⤨" + transformation->GetName() + "⦅" + renderer->DoRenderTPI( &pattern, Syntax::Production::PREFIX, policy ) + "⦆";
 } 
 
     

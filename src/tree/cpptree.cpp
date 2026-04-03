@@ -90,7 +90,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 		s += "∞{\n";
 		for( TreePtr<Node> m : members )
 		{
-			s += renderer->DoRender( m, Production::STMT_DECL, policy ) + "\n";
+			s += renderer->DoRenderTPI( &m, Production::STMT_DECL, policy ) + "\n";
 		}
 		s += "}";
 		return s;
@@ -112,7 +112,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
     {       
         if( auto ppd = DynamicTreePtrCast<PreProcDecl>(pd) )
         {
-            s += renderer->DoRender( ppd, Production::STMT_DECL, my_policy ) + "\n";
+            s += renderer->DoRenderTPI( &ppd, Production::STMT_DECL, my_policy ) + "\n";
             continue;
         }
         
@@ -122,7 +122,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 			Syntax::Policy record_policy = my_policy;
 			record_policy.force_incomplete_records = true; 
 
-			s += renderer->DoRender( pd, Production::STMT_DECL, record_policy ); 
+			s += renderer->DoRenderTPI( &pd, Production::STMT_DECL, record_policy ); 
 			require_complete.push( pd );
 		}
 		else
@@ -139,7 +139,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
     {
         TreePtr<Declaration> d = require_complete.front();
         require_complete.pop();       		
-        s += renderer->DoRender( d, Production::STMT_DECL, my_policy );
+        s += renderer->DoRenderTPI( &d, Production::STMT_DECL, my_policy );
     }
     
     if( !general.empty()  )
@@ -149,7 +149,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
     {
         TreePtr<Declaration> d = general.front();
         general.pop();       		
-        s += renderer->DoRender( d, Production::STMT_DECL, my_policy );
+        s += renderer->DoRenderTPI( &d, Production::STMT_DECL, my_policy );
     }
 
     if( !my_definitions.empty() )
@@ -164,7 +164,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
     {
 		auto def = (TreePtr<Node>)(dynamic_pointer_cast<Node>(my_definitions.front()));
 		ASSERT(def);
-        s += renderer->DoRender( def, Syntax::Production::STMT_DECL, definition_policy ); 
+        s += renderer->DoRenderTPI( &def, Syntax::Production::STMT_DECL, definition_policy ); 
         s += "\n";
         my_definitions.pop();
     }
@@ -330,7 +330,7 @@ string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterfa
     if( !rec )
 		throw Unimplemented(); // Constructor must be declared in a record       
 		
-    return renderer->DoRender( rec->identifier, Syntax::Production::PURE_IDENTIFIER, policy );	// PURE_IDENTIFIER prevents scope resolution
+    return renderer->DoRenderTPI( &rec->identifier, Syntax::Production::PURE_IDENTIFIER, policy );	// PURE_IDENTIFIER prevents scope resolution
 }
 
 //////////////////////////// SpecificDestructorIdentifier //////////////////////////////
@@ -346,7 +346,7 @@ string SpecificDestructorIdentifier::GetRenderWithoutScope( VN::RendererInterfac
 		throw Unimplemented(); // Constructor must be declared in a record    
 		   
     return "~" + 
-           renderer->DoRender( rec->identifier, Syntax::Production::PURE_IDENTIFIER, policy );	// PURE_IDENTIFIER prevents scope resolution
+           renderer->DoRenderTPI( &rec->identifier, Syntax::Production::PURE_IDENTIFIER, policy );	// PURE_IDENTIFIER prevents scope resolution
 }
 
 //////////////////////////// TypeIdentifier //////////////////////////////
@@ -381,9 +381,9 @@ Syntax::Production IdValuePair::GetMyProductionTerminal() const
 
 string IdValuePair::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-    return renderer->DoRender( key, BoostPrecedence(Production::COLON_SEP), policy ) +
+    return renderer->DoRenderTPI( &key, BoostPrecedence(Production::COLON_SEP), policy ) +
 		   "⦂ " +
-           renderer->DoRender( value, Production::COLON_SEP, policy );	
+           renderer->DoRenderTPI( &value, Production::COLON_SEP, policy );	
 }
 
 Sequence<Expression> IdValuePair::SortMapById( Collection<IdValuePair> &id_value_map,
@@ -435,7 +435,7 @@ string MapArgumentation::DirectRenderArgumentation(VN::RendererInterface *render
 			
 	list<string> ls;
 	for( TreePtr<Node> arg : arguments )
-		ls.push_back( renderer->DoRender( arg, Production::COMMA_SEP, policy ) );
+		ls.push_back( renderer->DoRenderTPI( &arg, Production::COMMA_SEP, policy ) );
 	
     return Join( ls, ", ", "〔", "〕" );	
 }
@@ -485,7 +485,7 @@ string SeqArgumentation::DirectRenderArgumentation(VN::RendererInterface *render
 {
 	list<string> ls;
 	for( TreePtr<Node> arg : arguments )
-		ls.push_back( renderer->DoRender( arg, Production::COMMA_SEP, policy ) );	
+		ls.push_back( renderer->DoRenderTPI( &arg, Production::COMMA_SEP, policy ) );	
 	
 	return Join( ls, ", ", "(", ")" );	
 }
@@ -778,8 +778,8 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 {
     string s;
     
-    //if( policy.compound_uses_vn_separator ) // TODO hack, please remove
-	//	throw RefusedByPolicy();
+    if( policy.compound_uses_vn_separator ) // TODO hack, please remove
+		throw RefusedByPolicy();
     
     Policy sub_policy = policy;
     sub_policy.force_initialisation = false; // stop at one level
@@ -790,7 +790,7 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 		s += RenderStorage( renderer, sub_policy );
     
     bool constant = !!DynamicTreePtrCast<Const>(constancy);
-    string declarator = renderer->DoRender( identifier, proto_prod, sub_policy );
+    string declarator = renderer->DoRenderTPI( &identifier, proto_prod, sub_policy );
     s += renderer->DoRenderTypeAndDeclarator( type, declarator, proto_prod, Production::BARE_STMT_DECL, sub_policy, constant );
 
     if( TreePtr<Uninitialised>::DynamicCast(initialiser) )
@@ -809,7 +809,7 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 
 	s += RenderExtras( renderer, sub_policy );							
 
-	s += renderer->DoRender( initialiser, Production::INITIALISER, sub_policy);
+	s += renderer->DoRenderTPI( &initialiser, Production::INITIALISER, sub_policy);
 	
 	if( policy.force_initialisation )
 		s += "\n";		
@@ -899,9 +899,9 @@ Syntax::Production Base::GetMyProductionTerminal() const
 string Base::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	string s;
-	s += renderer->DoRender( access, Production::PRIMARY_EXPR, policy );
+	s += renderer->DoRenderTPI( &access, Production::PRIMARY_EXPR, policy );
 	s += " ";
-	s += renderer->DoRender( record, Production::SPACE_SEP_TYPE, policy );
+	s += renderer->DoRenderTPI( &record, Production::SPACE_SEP_TYPE, policy );
 	return s;
 }   
 
@@ -942,7 +942,7 @@ Syntax::Production LabelDeclaration::GetMyProductionTerminal() const
 
 string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->DoRender( identifier, Syntax::Production::PURE_IDENTIFIER, policy) + ":";	// TODO try PRIMARY_EXPR like with access specs which also end in :
+	return renderer->DoRenderTPI( &identifier, Syntax::Production::PURE_IDENTIFIER, policy) + ":";	// TODO try PRIMARY_EXPR like with access specs which also end in :
 }
 
 //////////////////////////// Callable //////////////////////////////
@@ -971,12 +971,12 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
         if( auto o = TreePtr<Instance>::DynamicCast(d) )
         {
 			Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
-			string name = renderer->DoRender( o->identifier, starting_declarator_prod, policy);
+			string name = renderer->DoRenderTPI( &o->identifier, starting_declarator_prod, policy);
 			strings.push_back( renderer->DoRenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_STMT_DECL, policy, false ) );
 		}
 		else
 		{
-            strings.push_back( renderer->DoRender( d, Syntax::Production::BARE_STMT_DECL, policy ) );
+            strings.push_back( renderer->DoRenderTPI( &d, Syntax::Production::BARE_STMT_DECL, policy ) );
         }		
 	}					
 
@@ -1046,7 +1046,7 @@ string Array::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, strin
 {
 	string d2 = declarator + 
 	            "[" + 
-	            renderer->DoRender( size, Syntax::Production::BOTTOM_EXPR, policy) + 
+	            renderer->DoRenderTPI( &size, Syntax::Production::BOTTOM_EXPR, policy) + 
 	            "]";
     return renderer->DoRenderTypeAndDeclarator( element, 
 												d2, 
@@ -1328,7 +1328,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Syntax::Production, P
 	string s;
 	s += GetKeyword(); // class, struct etc
 	s += " ";
-	s += renderer->DoRender(identifier, Production::PURE_IDENTIFIER, policy); // Don't want scope resolution when declaring
+	s += renderer->DoRenderTPI(&identifier, Production::PURE_IDENTIFIER, policy); // Don't want scope resolution when declaring
 
 	if( policy.force_incomplete_records )
 		return s;
@@ -1379,10 +1379,10 @@ string Record::RenderBody( VN::RendererInterface *renderer, Syntax::Policy polic
 
 		Syntax::Policy access_policy = policy;
 		access_policy.current_access = current_access;
-		s += renderer->DoRender( this_access, Syntax::Production::BARE_STMT_DECL, access_policy );
+		s += renderer->DoRenderTPI( &this_access, Syntax::Production::BARE_STMT_DECL, access_policy );
 		current_access = type_index(typeid(*this_access));
 
-        s += renderer->DoRender( d, Syntax::Production::STMT_DECL, policy );
+        s += renderer->DoRenderTPI( &d, Syntax::Production::STMT_DECL, policy );
     }
    
    	s += "}";
@@ -1422,7 +1422,7 @@ string InheritanceRecord::RenderExtras(VN::RendererInterface *renderer, Syntax::
 {
 	list<string> ls;
 	for( TreePtr<Base> b : bases )
-		ls.push_back( renderer->DoRender(b, Production::BASE_CLASS_SPEC, policy ) );    	
+		ls.push_back( renderer->DoRenderTPI(&b, Production::BASE_CLASS_SPEC, policy ) );    	
 	
 	if( ls.empty() )
 		return "";
@@ -1486,7 +1486,7 @@ string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	if( dynamic_cast<AddressOf *>(shared_from_this().get()) ) \
 		if( auto id = TreePtr<Identifier>::DynamicCast(*operands_it) ) \
 			paren = !renderer->RenderScopeResolvingPrefix( id, policy ).empty(); \
-	return s + (paren?"(":"") + renderer->DoRender( *operands_it, Production::PROD, policy) + (paren?")":""); \
+	return s + (paren?"(":"") + renderer->DoRenderTPI( &*operands_it, Production::PROD, policy) + (paren?")":""); \
 } \
 
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
@@ -1497,7 +1497,7 @@ Syntax::Production NODE::GetMyProductionTerminal() const \
 string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy policy ) \
 { \
 	Sequence<Expression>::iterator operands_it = operands.begin(); \
-	return renderer->DoRender( *operands_it, Production::PROD, policy) + TEXT; \
+	return renderer->DoRenderTPI( &*operands_it, Production::PROD, policy) + TEXT; \
 } \
 
 #define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
@@ -1515,10 +1515,10 @@ string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 		case Association::LEFT:  prod_right = BoostPrecedence(prod_right); break; \
 	} \
 	Sequence<Expression>::iterator operands_it = operands.begin(); \
-	string s = renderer->DoRender( *operands_it, prod_left, policy ); \
+	string s = renderer->DoRenderTPI( &*operands_it, prod_left, policy ); \
 	s += TEXT; \
 	++operands_it; \
-	s += renderer->DoRender( *operands_it, prod_right, policy ); \
+	s += renderer->DoRenderTPI( &*operands_it, prod_right, policy ); \
 	return s; \
 }
 
@@ -1536,12 +1536,12 @@ Syntax::Production ConditionalOperator::GetMyProductionTerminal() const
 
 string ConditionalOperator::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->DoRender( condition, BoostPrecedence(Syntax::Production::ASSIGN), policy ) + 
+	return renderer->DoRenderTPI( &condition, BoostPrecedence(Syntax::Production::ASSIGN), policy ) + 
 		   " ? " +
 		   // Middle expression boots parser - so you can't split it up using (), [] etc
-		   renderer->DoRender( expr_then, Production::BOTTOM_EXPR, policy ) + 
+		   renderer->DoRenderTPI( &expr_then, Production::BOTTOM_EXPR, policy ) + 
 		   " : " +
-		   renderer->DoRender( expr_else, Production::ASSIGN, policy );          
+		   renderer->DoRenderTPI( &expr_else, Production::ASSIGN, policy );          
 }
 
 
@@ -1554,9 +1554,9 @@ Syntax::Production Subscript::GetMyProductionTerminal() const
 
 string Subscript::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->DoRender( destination, Production::POSTFIX, policy ) + 
+	return renderer->DoRenderTPI( &destination, Production::POSTFIX, policy ) + 
 		   "[" +
-		   renderer->DoRender( index, Production::BOTTOM_EXPR, policy ) + 
+		   renderer->DoRenderTPI( &index, Production::BOTTOM_EXPR, policy ) + 
 		   "]";       
 }
 
@@ -1572,7 +1572,7 @@ string ArrayInitialiser::GetRender( VN::RendererInterface *renderer, Production,
 {
 	list<string> renders;    
     for( TreePtr<Expression> e : elements )
-		renders.push_back( renderer->DoRender( e, Production::COMMA_SEP, policy ) );
+		renders.push_back( renderer->DoRenderTPI( &e, Production::COMMA_SEP, policy ) );
     // Use of ={} in expressions is irregular so handle locally. = is used to disambiguate
     // from a compound statement.
     return "=" + Join(renders, ", ", "{", "}"); 
@@ -1604,7 +1604,7 @@ string New::GetRender( VN::RendererInterface *renderer, Production, Policy polic
 	return string (DynamicTreePtrCast<Global>(global) ? "::" : "") +
 		   "new" + placement_argumentation->DirectRenderArgumentation(renderer, policy) +
 		   " " +
-		   renderer->DoRender( type, Syntax::Production::TYPE_IN_NEW, policy ) +
+		   renderer->DoRenderTPI( &type, Syntax::Production::TYPE_IN_NEW, policy ) +
 		   constructor_argumentation->DirectRenderArgumentation(renderer, policy);
 
 	// TODO could use ConvertToSeqIfPolicyAllows() once we have a constructor_id
@@ -1623,7 +1623,7 @@ string Delete::GetRender( VN::RendererInterface *renderer, Production, Policy po
 	return string(DynamicTreePtrCast<Global>(global) ? "::" : "") +
 		   "delete" +
 		   (DynamicTreePtrCast<DeleteArray>(array) ? "[]" : "") +
-		   " " + renderer->DoRender( pointer, Syntax::Production::PREFIX, policy );
+		   " " + renderer->DoRenderTPI( &pointer, Syntax::Production::PREFIX, policy );
 }
 
 
@@ -1637,9 +1637,9 @@ Syntax::Production Lookup::GetMyProductionTerminal() const
 
 string Lookup::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->DoRender(object, Production::POSTFIX, policy) +
+	return renderer->DoRenderTPI(&object, Production::POSTFIX, policy) +
 		   "." +
-		   renderer->DoRender(member, Production::PRIMARY_EXPR, policy);
+		   renderer->DoRenderTPI(&member, Production::PRIMARY_EXPR, policy);
 }
 
 //////////////////////////// Cast ///////////////////////////////
@@ -1654,8 +1654,8 @@ string Cast::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	if( policy.refuse_c_style_cast )
 		throw RefusedByPolicy();
 		
-    return "(" + renderer->DoRender( type, Syntax::Production::BOOT_TYPE, policy ) + ")" +
-                 renderer->DoRender( operand, Syntax::Production::PREFIX, policy );
+    return "(" + renderer->DoRenderTPI( &type, Syntax::Production::BOOT_TYPE, policy ) + ")" +
+                 renderer->DoRenderTPI( &operand, Syntax::Production::PREFIX, policy );
 }
 
 //////////////////////////// Call ///////////////////////////////
@@ -1668,7 +1668,7 @@ Syntax::Production Call::GetMyProductionTerminal() const
 
 string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {				
-	string s = renderer->DoRender( callee, Syntax::Production::POSTFIX, policy );
+	string s = renderer->DoRenderTPI( &callee, Syntax::Production::POSTFIX, policy );
 	
 	// We may need to convert the argumentation into a suitable form depending on policy.
 	// If a conversion occurs, the callee is needed in order to transform the arguments.
@@ -1716,7 +1716,7 @@ Syntax::Production SizeOf::GetMyProductionTerminal() const
 
 string SizeOf::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return "sizeof(" + renderer->DoRender(argument, Production::BOOT_TYPE, policy ) + ")";
+	return "sizeof(" + renderer->DoRenderTPI(&argument, Production::BOOT_TYPE, policy ) + ")";
 }
 
 //////////////////////////// AlignOf ///////////////////////////////
@@ -1729,7 +1729,7 @@ Syntax::Production AlignOf::GetMyProductionTerminal() const
 
 string AlignOf::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return "alignof(" + renderer->DoRender(argument, Production::BOOT_TYPE, policy ) + ")";
+	return "alignof(" + renderer->DoRenderTPI(&argument, Production::BOOT_TYPE, policy ) + ")";
 }
 
 //////////////////////////// Compound ///////////////////////////////
@@ -1744,11 +1744,11 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
 {
     string s = " { ";
     for( TreePtr<Declaration> m : members )    
-        s += renderer->DoRender( m, Syntax::Production::STMT_DECL, policy );    
+        s += renderer->DoRenderTPI( &m, Syntax::Production::STMT_DECL, policy );    
     if( policy.compound_uses_vn_separator )
 		s += "⚬";
     for( TreePtr<Statement> st : statements )    
-		s += renderer->DoRender( st, Syntax::Production::STMT_DECL_LOW, policy );    
+		s += renderer->DoRenderTPI( &st, Syntax::Production::STMT_DECL_LOW, policy );    
     s += " } ";
     return s;
 }
@@ -1775,7 +1775,7 @@ Syntax::Production Return::GetMyProductionTerminal() const
 
 string Return::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return "return " + renderer->DoRender( return_value, Syntax::Production::SPACE_SEP_STMT_DECL, policy );
+	return "return " + renderer->DoRenderTPI( &return_value, Syntax::Production::SPACE_SEP_STMT_DECL, policy );
 }
 
 //////////////////////////// Goto ///////////////////////////////
@@ -1806,7 +1806,7 @@ string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 		prod = Production::PREFIX;
 	}
 	
-	string label = renderer->DoRender( destination, prod, policy );
+	string label = renderer->DoRenderTPI( &destination, prod, policy );
 	
 	if( remove_double_deref )
 		label = label.substr(2); // REMOVE THE &&
@@ -1829,12 +1829,12 @@ string If::GetRender( VN::RendererInterface *renderer, Production, Policy policy
 {
 	bool has_else_clause = !DynamicTreePtrCast<Nop>(body_else); // Nop means no else clause
 	string s = "if( " +
-		       renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
+		       renderer->DoRenderTPI( &condition, Production::BOTTOM_EXPR, policy ) +
 		       " )\n" +
-		       renderer->DoRender( body, has_else_clause ? Production::STMT_DECL_HIGH : Production::STMT_DECL_LOW, policy );
+		       renderer->DoRenderTPI( &body, has_else_clause ? Production::STMT_DECL_HIGH : Production::STMT_DECL_LOW, policy );
 		       
     if( has_else_clause )  
-        s += "else\n" + renderer->DoRender( body_else, Production::STMT_DECL_LOW, policy);
+        s += "else\n" + renderer->DoRenderTPI( &body_else, Production::STMT_DECL_LOW, policy);
         
     return s;		       
 }
@@ -1857,9 +1857,9 @@ Syntax::Production While::GetMyProductionTerminal() const
 string While::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return "while( " +
-		   renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
+		   renderer->DoRenderTPI( &condition, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
-		   renderer->DoRender( body, Production::STMT_DECL, policy );
+		   renderer->DoRenderTPI( &body, Production::STMT_DECL, policy );
 }
 
 //////////////////////////// Do ///////////////////////////////
@@ -1873,9 +1873,9 @@ Syntax::Production Do::GetMyProductionTerminal() const
 string Do::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return "do\n" +
-		   renderer->DoRender( body, Production::STMT_DECL_LOW, policy ) +
+		   renderer->DoRenderTPI( &body, Production::STMT_DECL_LOW, policy ) +
 		   "while( " +
-		   renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
+		   renderer->DoRenderTPI( &condition, Production::BOTTOM_EXPR, policy ) +
 		   " )" ;
 }
 
@@ -1890,13 +1890,13 @@ Syntax::Production For::GetMyProductionTerminal() const
 string For::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return "for( " +
-		   renderer->DoRender( initialisation, Production::BOTTOM_EXPR, policy ) +
+		   renderer->DoRenderTPI( &initialisation, Production::BOTTOM_EXPR, policy ) +
 		   "; " +
-		   renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
+		   renderer->DoRenderTPI( &condition, Production::BOTTOM_EXPR, policy ) +
 		   "; " +
-		   renderer->DoRender( increment, Production::BOTTOM_EXPR, policy ) +
+		   renderer->DoRenderTPI( &increment, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
-		   renderer->DoRender( body, Production::STMT_DECL, policy );
+		   renderer->DoRenderTPI( &body, Production::STMT_DECL, policy );
 }
 
 //////////////////////////// Switch ///////////////////////////////
@@ -1910,9 +1910,9 @@ Syntax::Production Switch::GetMyProductionTerminal() const
 string Switch::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return "switch( " +
-		   renderer->DoRender( condition, Production::BOTTOM_EXPR, policy ) +
+		   renderer->DoRenderTPI( &condition, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
-		   renderer->DoRender( body, Production::STMT_DECL, policy );
+		   renderer->DoRenderTPI( &body, Production::STMT_DECL, policy );
 }
 
 //////////////////////////// SwitchTarget ///////////////////////////////
@@ -1927,9 +1927,9 @@ Syntax::Production SwitchTarget::GetMyProductionTerminal() const
 string RangeCase::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return "case " + 
-	       renderer->DoRender( value_lo, Syntax::Production::EXPR_CONST, policy) + 
+	       renderer->DoRenderTPI( &value_lo, Syntax::Production::EXPR_CONST, policy) + 
 	       ".." +
-	       renderer->DoRender( value_hi, Syntax::Production::EXPR_CONST, policy) + 
+	       renderer->DoRenderTPI( &value_hi, Syntax::Production::EXPR_CONST, policy) + 
 	       ":";	
 }
 
@@ -1937,7 +1937,7 @@ string RangeCase::GetRender( VN::RendererInterface *renderer, Production, Policy
 
 string Case::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return "case " + renderer->DoRender( value, Syntax::Production::EXPR_CONST, policy) + ":";	
+	return "case " + renderer->DoRenderTPI( &value, Syntax::Production::EXPR_CONST, policy) + ":";	
 }
 
 //////////////////////////// Default //////////////////////////////
@@ -1987,8 +1987,8 @@ string MembInitialisation::GetRender( VN::RendererInterface *renderer, Productio
 	if( !policy.detect_and_render_constructor )
 		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang
 
-	return renderer->DoRender( member_id, Production::PURE_IDENTIFIER, policy ) +
-		   renderer->DoRender( initialiser, Production::INITIALISER, policy );
+	return renderer->DoRenderTPI( &member_id, Production::PURE_IDENTIFIER, policy ) +
+		   renderer->DoRenderTPI( &initialiser, Production::INITIALISER, policy );
 }
 
 //////////////////////////// MembInitSeq ///////////////////////////////
@@ -2001,7 +2001,7 @@ string MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Syntax::
 		
 	list<string> ls; 
 	for( TreePtr<MembInitialisation> mi : memb_inits ) 
-		ls.push_back( "    " + renderer->DoRender( mi, Syntax::Production::COMMA_SEP, policy ) );		
+		ls.push_back( "    " + renderer->DoRenderTPI( &mi, Syntax::Production::COMMA_SEP, policy ) );		
 
     // Render the constructor initialisers if there are any
     if( !ls.empty() )        

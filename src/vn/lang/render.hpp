@@ -28,14 +28,17 @@ public:
     void WriteToFile(string s);
     
 	static Syntax::Policy GetDefaultPolicy();
-	string DoRender( TreePtr<Node> node, 
-	                             Syntax::Production surround_prod, 
-	                             Syntax::Policy policy ) final;
+	string DoRenderTPI( const TreePtrInterface *tpi, 
+	                    Syntax::Production surround_prod, 
+	                    Syntax::Policy policy ) final;
+	string DoRenderPreserve( TreePtr<Node> node, 
+							 Syntax::Production surround_prod, 
+							 Syntax::Policy policy ) final;
 	string AccomodateInit( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
-	string RenderNullPointer(Syntax::Production surround_prod);
+	string RenderNullPointer(Syntax::Production surround_prod, Syntax::Policy policy);
 
 	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 

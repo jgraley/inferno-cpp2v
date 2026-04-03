@@ -23,8 +23,7 @@ public:
 		BOOT,
 		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
 		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())		
-		VN_DESIGNATE_TERM, // Designating non-types using ⪮
-		VN_DESIGNATE_TERM_TYPE, // Designating types using ⪮
+		VN_DESIGNATE_RHS, // Designating using ⪮
 		VN_DISJUNCTION,
 		VN_CONJUNCTION,
 		TOP_VN,
@@ -134,6 +133,7 @@ public:
 		bool full_render_code_unit;
 	    queue<shared_ptr<Syntax>> *definitions;
 		bool can_split_instances;
+		shared_ptr<Syntax> pointer_archetype;
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:
@@ -169,7 +169,6 @@ public:
     static Production BoostPrecedence( Production prec );
     static int GetPrecedence( Production prec );
     static string::size_type GetLineBreakThreshold();
-    static bool IsType( Production prod );
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"

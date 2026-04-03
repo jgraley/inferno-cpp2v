@@ -122,17 +122,20 @@ Syntax::Production StarAgent::GetAgentProduction() const
 }
 
 
-string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
+string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production, Syntax::Policy policy ) const
 {
 	string s;
-	//s += to_string((int)surround_prod);
-	if( Syntax::IsType(surround_prod) && !*GetRestriction() )		 
-		s += "⍑";		
+	if( !*GetRestriction() ) // A restriction establishes the kind of node
+	{		
+		bool is_a_type = !!dynamic_pointer_cast<CPPTree::Type>( policy.pointer_archetype );
+		if( is_a_type )		 
+			s += "⍑";		
+	}
 		
 	s += "★";
 	
 	if( *GetRestriction() )
-		s += "⦅" + renderer->DoRender( TreePtr<Node>(*GetRestriction()), Syntax::Production::BOTTOM_EXPR, policy) + "⦆";
+		s += "⦅" + renderer->DoRenderPreserve( TreePtr<Node>(*GetRestriction()), Syntax::Production::BOTTOM_EXPR, policy) + "⦆";
 	
 	return s;
 }  
