@@ -200,7 +200,7 @@ TreePtr<Node> VNLangActions::OnExplicitNode( const AvailableNodeData::Block *blo
 			else if( auto optional_arch = TreePtr<CPPTree::OptionalKeywordProperty>::DynamicCast(dest_sing->MakeValueArchetype()) )
 			{
 				if( src_item.nodes.empty() )
-					*dest_sing = optional_arch->GetDefaultNode();
+					*dest_sing = optional_arch->GetDefaultNode(nullptr);
 				else
 					throw YY::VNLangParser::syntax_error( 
 						any_cast<YY::VNLangParser::location_type>(src_item.loc),
@@ -768,14 +768,21 @@ TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> access, TreePtr<Node> type )
 
 TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> type )
 {
+	// TODO zipping syntax:
+	// ★ ★ parses to unrestricted Star
+	//   ★  would be Star restricted to Base(default access, ☆)
+
 	// if Star was given without an access, make it apply to the whole base. 
 	// (this is the only legal way to interpret Star here)
 	Agent *agent = Agent::AsAgent(type);
 	if( agent->IsSubContainer() )
 		return type;
 		
-	// TODO should be default access for the record type, not hard-coded
-	return OnBase( MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>(), type );
+	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Base>>();	
+	auto arch = dynamic_pointer_cast<CPPTree::OptionalKeywordProperty>(node->access.MakeValueArchetype());
+	node->access = arch->GetDefaultNode(type);
+	node->record = type;
+	return node;
 }
 
 
@@ -1011,14 +1018,25 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 
 //////////////////////////// Virtuality //////////////////////////////
 
-TreePtr<Node> CPPTree::Virtuality::GetDefaultNode() const
+TreePtr<Node> CPPTree::Virtuality::GetDefaultNode(TreePtr<Node>) const
 {
 	return MakeTreeNode<StandardAgentWrapper<NonVirtual>>();
 }
 
+//////////////////////////// AccessSpec //////////////////////////////
+
+TreePtr<Node> CPPTree::AccessSpec::GetDefaultNode(TreePtr<Node> type) const
+{
+	ASSERT(type); // if this is firing, it's probably due to explicit node parsing. Confirm we have an Instance and then pass in its type.
+	if( TreePtr<Class>::DynamicCast(type) ) // TODO better to v-call into type
+		return MakeTreeNode<StandardAgentWrapper<Private>>();
+	else
+		return MakeTreeNode<StandardAgentWrapper<Public>>();
+}
+
 //////////////////////////// Constancy //////////////////////////////
 
-TreePtr<Node> CPPTree::Constancy::GetDefaultNode() const
+TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 {
 	return MakeTreeNode<StandardAgentWrapper<NonConst>>();
 }

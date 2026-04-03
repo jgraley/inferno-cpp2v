@@ -34,7 +34,7 @@ struct OptionalKeywordProperty : Property
 	
 	// So if this is optional in the syntax, which final aka concrete node type is intended
 	// when nothing is given in the syntax (note: intermediates are always wildcards)
-	virtual TreePtr<Node> GetDefaultNode() const { ASSERTFAIL(); }
+	virtual TreePtr<Node> GetDefaultNode(TreePtr<Node>) const { ASSERTFAIL(); }
 };
 
 
@@ -453,7 +453,7 @@ struct Virtuality : OptionalKeywordProperty
 	NODE_FUNCTIONS 
 
 	Production GetMyProductionTerminal() const override;
-	TreePtr<Node> GetDefaultNode() const final; 
+	TreePtr<Node> GetDefaultNode(TreePtr<Node> type) const final; 
 };
 
 
@@ -491,7 +491,7 @@ struct AccessSpec : OptionalKeywordProperty
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
     virtual string GetKeyword() const;	
-	TreePtr<Node> GetDefaultNode() const final;     
+	TreePtr<Node> GetDefaultNode(TreePtr<Node> type) const final;     
 };
 
 /// Property for public access
@@ -522,7 +522,7 @@ struct Protected : AccessSpec
 struct Constancy : OptionalKeywordProperty 
 { 
 	NODE_FUNCTIONS 
-	TreePtr<Node> GetDefaultNode() const final;     
+	TreePtr<Node> GetDefaultNode(TreePtr<Node> type) const final;     
 };
 
 /// Property indicating the Instance is constant

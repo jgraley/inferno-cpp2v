@@ -813,12 +813,6 @@ string AccessSpec::GetKeyword() const
 	throw UnimplementedToken();
 }
 
-
-TreePtr<Node> AccessSpec::GetDefaultNode() const
-{
-	ASSERTFAIL(); // it depends on if we're a class or a struct/union
-}
-
 //////////////////////////// Public //////////////////////////////
 
 string Public::GetKeyword() const
