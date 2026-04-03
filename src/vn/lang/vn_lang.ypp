@@ -181,7 +181,7 @@ stmt_high
 
 %%
 
-//////////////////////////////////// ','NDS ///////////////////////////////////////////
+//////////////////////////////////// COMMANDS ///////////////////////////////////////////
 
 vnscript 		: commands 								{ vn->OnVNScript($1); }
      
@@ -332,6 +332,7 @@ bases			: base_spec                                                 { $$.push_ba
 base_spec		: type_specified											{ $$ = vn->OnBase($1); } 
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
 				| vn_wildcard												{ $$ = $1; }
+				| DESIGNATED_NORMAL       				  					{ $$ = $1.as_designated; } // To match a designated Star
                           
 access_spec		: access_spec_nw	                          				
 				| ANY_NODE_OP 												{ $$ = nullptr; }

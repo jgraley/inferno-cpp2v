@@ -73,23 +73,15 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 	for( TreePtr<Node> node : coupling_names_uniqifier.GetNodesInDepthFirstPostOrder() )	
 	{
 		// Use the incoming links to determine whether we should render as a type or not.
+		designation_policy.pointer_archetype = MakeTreeNode<Node>();	
+
 		set<const TreePtrInterface *> ils = incoming_links_map.at(node);		
-		set<TreePtr<Node>> arches;		
 		for( const TreePtrInterface *il : ils )
-			arches.insert( il->MakeValueArchetype() );
-		bool typeish = false;
-		for( TreePtr<Node> ail : arches )
 		{
-			// Favouring types, because sometmess we just get Node whan it could be anything
-			// eg engine, stuff terminus. From a syntax POV, we treat Base like a Type
-			if( dynamic_pointer_cast<CPPTree::Type>(ail) ||
-				dynamic_pointer_cast<CPPTree::Base>(ail) )
-				typeish = true;
-		}
-		if( typeish )
-			designation_policy.pointer_archetype = MakeTreeNode<Type>();
-		else
-			designation_policy.pointer_archetype = MakeTreeNode<Node>();	
+			TreePtr<Node> arch = il->MakeValueArchetype();
+			if( dynamic_pointer_cast<CPPTree::Type>(arch) ) // Prioritise Type since we don't have eg NonType
+				designation_policy.pointer_archetype = arch;
+		}		
 			
 		commands.push_back( unique_coupling_names.at(node) + 
 							" ⪮ " + 
