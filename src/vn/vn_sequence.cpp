@@ -147,9 +147,9 @@ string VNSequence::GetStepName( int step_index ) const
 }
 
 
-void VNSequence::DoRender( int step_index, Render &render ) const
+void VNSequence::RenderStep( int step_index, Render &render ) const
 {
-    steps[step_index]->DoRender(render);
+    steps[step_index]->RenderStep(render);
 }
 
 

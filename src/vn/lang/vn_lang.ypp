@@ -330,12 +330,12 @@ bases			: base_spec                                                 { $$.push_ba
 				| bases ',' base_spec										{ $$ = $1; $$.push_back($3); } 
                                        
 base_spec		: type_specified											{ $$ = vn->OnBase($1); } 
-				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
 				| vn_wildcard												{ $$ = $1; }
 				| DESIGNATED_NORMAL       				  					{ $$ = $1.as_designated; } // To match a designated Star
+				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
                           
 access_spec		: access_spec_nw	                          				
-				| ANY_NODE_OP 												{ $$ = nullptr; }
+				| vn_primary 												
                           
 access_spec_nw	: ACCESS_KEYWORD	                          				{ $$ = vn->OnAccessSpec($1.as_ascii); }
                                                   

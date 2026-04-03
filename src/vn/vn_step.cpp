@@ -142,7 +142,7 @@ void VNStep::GenerateGraphRegions( Graph &graph ) const
 }  
 
 
-void VNStep::DoRender( Render &render ) const
+void VNStep::RenderStep( Render &render ) const
 {
 	render.WriteToFile( render.RenderToString( root_engine, IsLoweringForRenderStep() ) );
 }

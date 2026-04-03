@@ -74,7 +74,7 @@ string CppRender::RenderToString( TreePtr<Node> root )
     unique_identifier_names = identifiers_uniqifier.UniquifyAll( trans_kit, context );
     
     Syntax::Policy top_policy = default_policy;
-    return DoRenderTPI( &root, Syntax::Production::PROGRAM, top_policy );
+    return DoRender( &root, Syntax::Production::PROGRAM, top_policy );
 }	
 
 
@@ -230,11 +230,11 @@ DEFAULT_CATCH_CLAUSE
 string CppRender::RenderMacroStatement( TreePtr<MacroStatement> ms, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
 	(void)surround_prod;
-	string s = DoRenderTPI( &ms->identifier, Syntax::Production::POSTFIX, policy );
+	string s = DoRender( &ms->identifier, Syntax::Production::POSTFIX, policy );
 	
     list<string> renders; // TODO duplicated code, factor out into RenderSeqMacroArgs()
     for( TreePtr<Node> node : ms->arguments )
-        renders.push_back( DoRenderTPI( &node, Syntax::Production::COMMA_SEP, policy) );
+        renders.push_back( DoRender( &node, Syntax::Production::COMMA_SEP, policy) );
     s += Join(renders, ", ", "(", ");\n");
     return s;
 }
@@ -249,9 +249,9 @@ string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Pro
     {
         string s = "({ ";
 		for( TreePtr<Declaration> m : ce->members )    
-			s += DoRenderTPI( &m, Syntax::Production::STMT_DECL, policy );       
+			s += DoRender( &m, Syntax::Production::STMT_DECL, policy );       
         for( TreePtr<Statement> st : ce->statements )    
-            s += DoRenderTPI( &st, Syntax::Production::STMT_DECL_LOW, policy );    
+            s += DoRender( &st, Syntax::Production::STMT_DECL_LOW, policy );    
         return s + " })";
     }
     else
@@ -288,10 +288,10 @@ string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, 
     // Render to strings
     list<string> ls;
     for( TreePtr<Expression> e : sub_expr_sequence )
-        ls.push_back( DoRenderTPI( &e, Syntax::Production::COMMA_SEP, policy ) );
+        ls.push_back( DoRender( &e, Syntax::Production::COMMA_SEP, policy ) );
 
     // Do the syntax
-    s += "(" + DoRenderTPI( &make_rec->type, Syntax::Production::BOTTOM_EXPR, policy ) + ")"; 
+    s += "(" + DoRender( &make_rec->type, Syntax::Production::BOTTOM_EXPR, policy ) + ")"; 
     s += Join( ls, ", ", "{", "}" );   // Use of {} in expressions is irregular so handle locally 
     return s;
 }
@@ -302,15 +302,15 @@ string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production s
 {
 	(void)surround_prod;	
     // ---- Proto ----
-	string s = DoRenderTPI( &md->identifier, Syntax::Production::POSTFIX, policy );
+	string s = DoRender( &md->identifier, Syntax::Production::POSTFIX, policy );
 	list<string> renders;
 	for( TreePtr<Node> node : md->arguments )
-		renders.push_back( DoRenderTPI(&node, Syntax::Production::COMMA_SEP, policy) );
+		renders.push_back( DoRender(&node, Syntax::Production::COMMA_SEP, policy) );
 	s += Join(renders, ", ", "(", ")");
 	
 	// ---- Initialisation ----	    
     s += md->RenderMemberInits( this, policy ); // TODO drop the :: and Declaration::Render...
-	s += DoRenderTPI( &md->initialiser, Syntax::Production::INITIALISER, policy );
+	s += DoRender( &md->initialiser, Syntax::Production::INITIALISER, policy );
 	return s;
 }
 
@@ -319,7 +319,7 @@ string CppRender::RenderEnumHead( TreePtr<Record> record, Syntax::Policy policy 
 {
     string s = "enum";
     s += " ";
-    s += DoRenderTPI( &record->identifier, Syntax::Production::PURE_IDENTIFIER, policy); // Don't want scope resolution when declaring
+    s += DoRender( &record->identifier, Syntax::Production::PURE_IDENTIFIER, policy); // Don't want scope resolution when declaring
     
     return s;
 }
@@ -346,7 +346,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
     if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
     {
         Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
-        auto id = DoRenderTPI( &t->identifier, starting_declarator_prod, policy );
+        auto id = DoRender( &t->identifier, starting_declarator_prod, policy );
         return "typedef " + DoRenderTypeAndDeclarator( t->type, id, starting_declarator_prod, Syntax::Production::TYPE_IN_DECLARATION, policy );
     }
     else if( TreePtr<Enum> enum_ = DynamicTreePtrCast< Enum >(declaration) )
@@ -360,7 +360,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 		return s;		
     }
     else if( TreePtr<LabelDeclaration> l = DynamicTreePtrCast<LabelDeclaration>(declaration) )
-        return DoRenderTPI( &l->identifier, Syntax::Production::PURE_IDENTIFIER, policy) + ":"; 
+        return DoRender( &l->identifier, Syntax::Production::PURE_IDENTIFIER, policy) + ":"; 
     
     return Render::Dispatch( declaration, surround_prod, policy );
 }
@@ -385,7 +385,7 @@ string CppRender::RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Polic
             continue;
         }
         // We're really declaring the id, and don't want scope resolution
-        s += DoRenderTPI( &o->identifier, Syntax::Production::PURE_IDENTIFIER, policy ); 
+        s += DoRender( &o->identifier, Syntax::Production::PURE_IDENTIFIER, policy ); 
         
         auto ei = TreePtr<Expression>::DynamicCast( o->initialiser );
         if( !ei )
@@ -393,7 +393,7 @@ string CppRender::RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Polic
             s += RenderNodeExplicit( o->initialiser, Syntax::Production::INITIALISER, policy );
             continue;
         }       
-        s += DoRenderTPI( &ei, Syntax::Production::INITIALISER, policy );
+        s += DoRender( &ei, Syntax::Production::INITIALISER, policy );
 
         first = false;    
     }

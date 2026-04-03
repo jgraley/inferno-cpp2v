@@ -623,7 +623,7 @@ void Inferno::DoPatternRender( const Step &sp, string output_x_path, bool add_fi
 	if( add_file_extension )
 		output_x_path += ".vn";
     VN::Render r( output_x_path );
-    vn_sequence->DoRender( sp.step_index, r );
+    vn_sequence->RenderStep( sp.step_index, r );
 }
    
    

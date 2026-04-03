@@ -26,6 +26,14 @@ struct Property : virtual Node
     virtual string GetColour() const { return "/set28/7"; }
 };
 
+
+/// A property with an optional keyword in the C syntax
+struct OptionalKeywordProperty : Property
+{
+	NODE_FUNCTIONS
+};
+
+
 /// Variable initialiser or function body
 /** This intermediate is used for an initial value for for a variable/object in
  which case it will be an Expression, or for the implementation of a Callable
@@ -436,7 +444,7 @@ struct MembInitSeq : virtual Node
 
 
 /// Property for a member function that may or may not be virtual.
-struct Virtuality : Property { NODE_FUNCTIONS };
+struct Virtuality : OptionalKeywordProperty { NODE_FUNCTIONS };
 
 /// Property for a virtual member funciton
 struct Virtual : Virtuality
@@ -456,7 +464,7 @@ struct NonVirtual : Virtuality { NODE_FUNCTIONS_FINAL };
  control generated high-level interfaces. Note that we only specify access
  for physical things like instances. Abstract stuff like TypeDef are always
  considered Public. */
-struct AccessSpec : Property 
+struct AccessSpec : OptionalKeywordProperty 
 { 
 	NODE_FUNCTIONS 
 
@@ -490,7 +498,7 @@ struct Protected : AccessSpec
 };
 
 /// Property that indicates whether some Instance is constant.
-struct Constancy : Property { NODE_FUNCTIONS };
+struct Constancy : OptionalKeywordProperty { NODE_FUNCTIONS };
 
 /// Property indicating the Instance is constant
 struct Const : Constancy { NODE_FUNCTIONS_FINAL };
@@ -621,6 +629,7 @@ struct Base : Declaration
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    
 };              
 
+
 /// Identifier for a label that can be any label.
 /** LabelIdentifier is an Expression as well as an Identifier so that
     it may be assigned to variables and used in ?: expressions as 
@@ -635,6 +644,7 @@ struct LabelIdentifier : Identifier,
 	Production GetMyProductionTerminal() const override;    
 };
 
+
 /// Identifier for a specific label that has been declared somewhere.
 struct SpecificLabelIdentifier : LabelIdentifier,
                                  SpecificIdentifier
@@ -647,6 +657,7 @@ struct SpecificLabelIdentifier : LabelIdentifier,
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy) override;    
 };
+
 
 /// Declaration of a label for switch, goto etc.
 /** This node represents a label such as mylabel:
@@ -679,6 +690,7 @@ struct Callable : Type
 	Production GetOperandInDeclaratorProduction() const override;
 };
 
+
 /// Anything that can be called and has parameters
 /** Parameters are generated as a sequence of automatic variable/object 
  declarations (ie Instances) inside the Scope we derive from. */
@@ -692,12 +704,14 @@ protected:
     string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy);
 };
 
+
 /// Anything that can be called and has parameters and return value
 struct CallableParamsReturn : CallableParams
 {
     NODE_FUNCTIONS
     TreePtr<Type> return_type; ///< The return type
 };
+
 
 /// Subroutine like in Basic, no params or return.
 /** Note: Subroutine has *explicitly* no params or return, this may be relied upon
@@ -707,6 +721,7 @@ struct Subroutine : Callable
     NODE_FUNCTIONS
 };
 
+
 /// A procedure like in pascal etc, params but no return value. 
 /** Note: Procedure has *explicitly* no return, this may be relied upon
     in transformations that use Subroutine as a wildcard */
@@ -714,6 +729,7 @@ struct Procedure : CallableParams
 {
     NODE_FUNCTIONS
 };
+
 
 /// A function like in C, Pascal; params and a single return value of the specified type.
 struct Function : CallableParamsReturn
@@ -725,6 +741,7 @@ struct Function : CallableParamsReturn
                                        bool constant ) final;
 };
 
+
 /// A C++ constructor. The init list is just zero or more calls to constructors in the body
 struct Constructor : Procedure // TODO be CallableParams
 { 
@@ -735,6 +752,7 @@ struct Constructor : Procedure // TODO be CallableParams
                                        bool constant ) final;
 };
 
+
 /// A C++ destructor
 struct Destructor : Subroutine // TODO be Callable
 { 
@@ -744,6 +762,7 @@ struct Destructor : Subroutine // TODO be Callable
                                        Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                        bool constant ) final;
 };
+
 
 /// This is the type of an array that contains the specified number of elements of the specified type.
 struct Array : Type
@@ -759,6 +778,7 @@ struct Array : Type
                                        bool constant ) final;	
 };
 
+
 /// Intermediate for indirect access to some type as specified
 struct Indirection : Type
 {
@@ -770,6 +790,7 @@ struct Indirection : Type
 	Production GetOperandInDeclaratorProduction() const override;
 };
 
+
 /// A C/C++ pointer
 struct Pointer : Indirection 
 { 
@@ -780,6 +801,7 @@ struct Pointer : Indirection
                                        bool constant ) final;
 };
 
+
 /// A C++ reference
 struct Reference : Indirection 
 { 
@@ -789,6 +811,7 @@ struct Reference : Indirection
                                        Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                        bool constant ) final;
 };
+
 
 /// The pseudo-type void, disallowed in some circumstances as per C.
 struct Void : Type 

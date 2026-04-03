@@ -157,7 +157,7 @@ Syntax::Policy Render::GetDefaultPolicy()
 }
 
 
-string Render::DoRenderTPI( const TreePtrInterface *tpi, 
+string Render::DoRender( const TreePtrInterface *tpi, 
                             Syntax::Production surround_prod, 
                             Syntax::Policy policy )
 {
@@ -364,17 +364,14 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 }
 
 
-string Render::RenderNullPointer(Syntax::Production, Syntax::Policy policy)
+string Render::RenderNullPointer(Syntax::Production surround_prod, Syntax::Policy policy)
 {	
-	// Assume NULL means we're in a pattern, and it represents a wildcard
-	string s;
-	
-	bool is_a_type = !!dynamic_pointer_cast<Type>( policy.pointer_archetype );
-		
-	if( is_a_type )
-		s += "⍑";
-		
-	return s + "☆";
+	if( auto arch = dynamic_pointer_cast<OptionalKeywordProperty>( policy.pointer_archetype ) )
+		return Dispatch( (TreePtr<Node>)arch, surround_prod, policy );
+	else if( dynamic_pointer_cast<Type>( policy.pointer_archetype ) )
+		return "⍑☆";
+	else 
+		return "☆";
 }
 
 
@@ -418,14 +415,14 @@ list<string> Render::PopulateItemStrings( shared_ptr<const Node> node, Syntax::P
 			if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(items[i]) )                
 			{
 				if( con->size() == 1 )
-					sitems.push_back( DoRenderTPI( &(con->front()), Syntax::Production::VN_SEP_ITEMS, policy ) );
+					sitems.push_back( DoRender( &(con->front()), Syntax::Production::VN_SEP_ITEMS, policy ) );
 				else
 				{
 					list<string> scon;
 					for( const TreePtrInterface &p : *con )
 					{
 						ASSERT( p ); 
-						scon.push_back( DoRenderTPI( &p, Syntax::Production::VN_SEP_ITEMS, policy ) );
+						scon.push_back( DoRender( &p, Syntax::Production::VN_SEP_ITEMS, policy ) );
 					}
 					if( GetTotalSize(scon) > Syntax::GetLineBreakThreshold() )
 						sitems.push_back( Join( scon, "🞄\n", "", "") );
@@ -435,7 +432,7 @@ list<string> Render::PopulateItemStrings( shared_ptr<const Node> node, Syntax::P
 			}            
 			else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(items[i]) )
 			{
-				string ss = DoRenderTPI( singular, Syntax::Production::VN_SEP_ITEMS, policy );
+				string ss = DoRender( singular, Syntax::Production::VN_SEP_ITEMS, policy );
 				sitems.push_back( ss );
 			}
 			else
@@ -588,7 +585,7 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 		// Passing in the real renderer would cause unwanted side-effects.
 		struct FakeRenderer : RendererInterface
 		{
-			string DoRenderTPI( const TreePtrInterface *, 
+			string DoRender( const TreePtrInterface *, 
 								Syntax::Production, 
 								Syntax::Policy ) final { return "fake"; } 
 			string DoRenderPreserve( TreePtr<Node>, 

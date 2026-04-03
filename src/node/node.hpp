@@ -101,7 +101,7 @@ namespace VN
 	class RendererInterface
 	{
 	public:	
-		virtual string DoRenderTPI( const TreePtrInterface *tpi, 
+		virtual string DoRender( const TreePtrInterface *tpi, 
 		                            Syntax::Production surround_prod, 
 		                            Syntax::Policy policy ) = 0;
 		virtual string DoRenderPreserve( TreePtr<Node> node, 

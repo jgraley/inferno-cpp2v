@@ -49,7 +49,7 @@ public:
     NodeBlock GetGraphBlockInfo() const final;
     virtual string GetGraphId() const; 
     void GenerateGraphRegions( Graph &graph ) const;
-    void DoRender( Render &render ) const;
+    void RenderStep( Render &render ) const;
     
     // For pattern transformations
     shared_ptr<CompareReplace> GetTopLevelEngine() const;
