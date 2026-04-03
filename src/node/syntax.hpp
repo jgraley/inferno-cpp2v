@@ -91,7 +91,7 @@ public:
 		EXPLICIT_NODE = 100, // Eg ⯁MyNode⦅...⦆
 		RESOLVER, // :: in C++	
 		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
-		TERMINAL, // Lexer tokens of any kind (other than type or expression)
+		KEYWORD, // Lexer tokens of any kind (other than type or expression)
 		ANONYMOUS,
 		NULLPTR // NULL in a pattern as a singluar wildcard
 	};

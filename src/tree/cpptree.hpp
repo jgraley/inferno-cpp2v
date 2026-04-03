@@ -31,6 +31,10 @@ struct Property : virtual Node
 struct OptionalKeywordProperty : Property
 {
 	NODE_FUNCTIONS
+	
+	// So if this is optional in the syntax, which final aka concrete node type is intended
+	// when nothing is given in the syntax (note: intermediates are always wildcards)
+	virtual TreePtr<Node> GetDefaultNode() const { ASSERTFAIL(); }
 };
 
 
@@ -444,16 +448,32 @@ struct MembInitSeq : virtual Node
 
 
 /// Property for a member function that may or may not be virtual.
-struct Virtuality : OptionalKeywordProperty { NODE_FUNCTIONS };
+struct Virtuality : OptionalKeywordProperty 
+{ 
+	NODE_FUNCTIONS 
+
+	Production GetMyProductionTerminal() const override;
+	TreePtr<Node> GetDefaultNode() const final; 
+};
+
 
 /// Property for a virtual member funciton
 struct Virtual : Virtuality
 {
     NODE_FUNCTIONS_FINAL
-    // TODO pure when supported by clang
+
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
 };
+
+
 /// Property for a non-virtual member funciton
-struct NonVirtual : Virtuality { NODE_FUNCTIONS_FINAL };
+struct NonVirtual : Virtuality 
+{ 
+	NODE_FUNCTIONS_FINAL 
+
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
+};
+
 
 /// Property for any access spec
 /** Property for C++ access specifiers public, protected and private. AccessSpec
@@ -471,6 +491,7 @@ struct AccessSpec : OptionalKeywordProperty
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
     virtual string GetKeyword() const;	
+	TreePtr<Node> GetDefaultNode() const final;     
 };
 
 /// Property for public access
@@ -498,7 +519,11 @@ struct Protected : AccessSpec
 };
 
 /// Property that indicates whether some Instance is constant.
-struct Constancy : OptionalKeywordProperty { NODE_FUNCTIONS };
+struct Constancy : OptionalKeywordProperty 
+{ 
+	NODE_FUNCTIONS 
+	TreePtr<Node> GetDefaultNode() const final;     
+};
 
 /// Property indicating the Instance is constant
 struct Const : Constancy { NODE_FUNCTIONS_FINAL };

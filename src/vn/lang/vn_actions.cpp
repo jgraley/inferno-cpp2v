@@ -193,12 +193,28 @@ TreePtr<Node> VNLangActions::OnExplicitNode( const AvailableNodeData::Block *blo
 				dest_col->insert( src );	
         else if( TreePtrInterface *dest_sing = dynamic_cast<TreePtrInterface *>(dest_item) )
         {
-			if( src_item.nodes.size() != 1 )
-			    throw YY::VNLangParser::syntax_error( 
-				    any_cast<YY::VNLangParser::location_type>(src_item.loc),
-				    SSPrintf("In ⯁, singular item requires exactly one sub-pattern but %d were given.",
-				    src_item.nodes.size() ) ); 
-            *dest_sing = src_item.nodes.front();
+			if( src_item.nodes.size() == 1 )
+			{
+				*dest_sing = src_item.nodes.front();
+			}
+			else if( auto optional_arch = TreePtr<CPPTree::OptionalKeywordProperty>::DynamicCast(dest_sing->MakeValueArchetype()) )
+			{
+				if( src_item.nodes.empty() )
+					*dest_sing = optional_arch->GetDefaultNode();
+				else
+					throw YY::VNLangParser::syntax_error( 
+						any_cast<YY::VNLangParser::location_type>(src_item.loc),
+						SSPrintf("In ⯁, optional singular item requires zero or one sub-pattern but %d were given.",
+						src_item.nodes.size() ) ); 
+			}
+			else
+			{
+				throw YY::VNLangParser::syntax_error( 
+					any_cast<YY::VNLangParser::location_type>(src_item.loc),
+					SSPrintf("In ⯁, non-optional singular item requires exactly one sub-pattern but %d were given.",
+					src_item.nodes.size() ) ); 
+			}
+            
 		}
         else
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
@@ -991,6 +1007,22 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 	
 	return AvailableNodeData().GetNameToEnumMap().at(typ);	
 }
+
+
+//////////////////////////// Virtuality //////////////////////////////
+
+TreePtr<Node> CPPTree::Virtuality::GetDefaultNode() const
+{
+	return MakeTreeNode<StandardAgentWrapper<NonVirtual>>();
+}
+
+//////////////////////////// Constancy //////////////////////////////
+
+TreePtr<Node> CPPTree::Constancy::GetDefaultNode() const
+{
+	return MakeTreeNode<StandardAgentWrapper<NonConst>>();
+}
+
 
 
 // Consider c-style scoping of designations (eg for macros?)

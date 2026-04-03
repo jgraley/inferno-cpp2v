@@ -713,11 +713,82 @@ Syntax::Production SpecificFloat::GetMyProductionTerminal() const
 	return Production::PRIMARY_EXPR; 
 }
 
+//////////////////////////// True ///////////////////////////////
+
+Syntax::Production True::GetMyProductionTerminal() const
+{ 
+	return Production::PRIMARY_EXPR; 
+}
+
+//////////////////////////// False ///////////////////////////////
+
+Syntax::Production False::GetMyProductionTerminal() const
+{ 
+	return Production::PRIMARY_EXPR; 
+}
+
+//////////////////////////// MembInitialisation ///////////////////////////////
+
+Syntax::Production MembInitialisation::GetMyProductionTerminal() const
+{ 
+	return Production::COMMA_SEP; 
+}
+
+
+string MembInitialisation::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	if( !policy.detect_and_render_constructor )
+		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang
+
+	return renderer->DoRender( &member_id, Production::PURE_IDENTIFIER, policy ) +
+		   renderer->DoRender( &initialiser, Production::INITIALISER, policy );
+}
+
+//////////////////////////// MembInitSeq ///////////////////////////////
+
+string MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Syntax::Policy policy )
+{
+	string s;
+	if( ReadArgs::use.count("c") )
+		s += "/* RenderMemberInits() */";
+		
+	list<string> ls; 
+	for( TreePtr<MembInitialisation> mi : memb_inits ) 
+		ls.push_back( "    " + renderer->DoRender( &mi, Syntax::Production::COMMA_SEP, policy ) );		
+
+    // Render the constructor initialisers if there are any
+    if( !ls.empty() )        
+        s += " :\n" + Join(ls, ",\n");		    
+	
+    return s; 
+}
+
+//////////////////////////// Virtuality //////////////////////////////
+
+Syntax::Production Virtuality::GetMyProductionTerminal() const
+{
+	return Production::KEYWORD;
+}
+
+//////////////////////////// Virtual //////////////////////////////
+
+string Virtual::GetRender( VN::RendererInterface *, Production , Policy  )
+{
+	return "virtual";
+}
+
+//////////////////////////// NonVirtual //////////////////////////////
+
+string NonVirtual::GetRender( VN::RendererInterface *, Production, Policy )
+{
+	return "";
+}
+
 //////////////////////////// AccessSpec //////////////////////////////
 
 Syntax::Production AccessSpec::GetMyProductionTerminal() const
 { 
-	return Production::TERMINAL; 
+	return Production::KEYWORD; 
 }
 
 
@@ -740,6 +811,12 @@ string AccessSpec::GetRender( VN::RendererInterface *, Production surround_prod,
 string AccessSpec::GetKeyword() const
 {
 	throw UnimplementedToken();
+}
+
+
+TreePtr<Node> AccessSpec::GetDefaultNode() const
+{
+	ASSERTFAIL(); // it depends on if we're a class or a struct/union
 }
 
 //////////////////////////// Public //////////////////////////////
@@ -864,15 +941,12 @@ bool Static::ShouldSplitInstance( Policy policy ) const
 
 //////////////////////////// Field //////////////////////////////
 
-string Field::RenderStorage( VN::RendererInterface *, Policy ) const 
+string Field::RenderStorage( VN::RendererInterface *renderer, Policy policy) const 
 { 
-	TreePtr<Virtuality> v = virt;
-	if( DynamicTreePtrCast<Virtual>( v ) )
-		return "virtual ";
-	else if( DynamicTreePtrCast<NonVirtual>( v ) )
-		return ""; // TODO GetRender() for Virtuality
-	else
-		ASSERTFAIL();
+	string s = renderer->DoRender(&virt, Production::SPACE_SEP_STMT_DECL, policy);
+	if( !s.empty() )
+		s += " "; // TODO improve on this by using Join() in our caller
+	return s;
 }
 
 
@@ -1456,20 +1530,6 @@ string Class::GetKeyword() const
 	return "class";
 }
 
-//////////////////////////// True ///////////////////////////////
-
-Syntax::Production True::GetMyProductionTerminal() const
-{ 
-	return Production::PRIMARY_EXPR; 
-}
-
-//////////////////////////// False ///////////////////////////////
-
-Syntax::Production False::GetMyProductionTerminal() const
-{ 
-	return Production::PRIMARY_EXPR; 
-}
-
 //////////////////////////// Operators from operator_data.inc ///////////////////////////////
 
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
@@ -1972,42 +2032,6 @@ Syntax::Production Break::GetMyProductionTerminal() const
 string Break::GetRenderTerminal( Production ) const
 {
 	return "break";
-}
-
-//////////////////////////// MembInitialisation ///////////////////////////////
-
-Syntax::Production MembInitialisation::GetMyProductionTerminal() const
-{ 
-	return Production::COMMA_SEP; 
-}
-
-
-string MembInitialisation::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
-{
-	if( !policy.detect_and_render_constructor )
-		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang
-
-	return renderer->DoRender( &member_id, Production::PURE_IDENTIFIER, policy ) +
-		   renderer->DoRender( &initialiser, Production::INITIALISER, policy );
-}
-
-//////////////////////////// MembInitSeq ///////////////////////////////
-
-string MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Syntax::Policy policy )
-{
-	string s;
-	if( ReadArgs::use.count("c") )
-		s += "/* RenderMemberInits() */";
-		
-	list<string> ls; 
-	for( TreePtr<MembInitialisation> mi : memb_inits ) 
-		ls.push_back( "    " + renderer->DoRender( &mi, Syntax::Production::COMMA_SEP, policy ) );		
-
-    // Render the constructor initialisers if there are any
-    if( !ls.empty() )        
-        s += " :\n" + Join(ls, ",\n");		    
-	
-    return s; 
 }
 
 //////////////////////////// Nop ///////////////////////////////
