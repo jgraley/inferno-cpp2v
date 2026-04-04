@@ -322,7 +322,7 @@ string CppRender::RenderEnumHead( TreePtr<Record> record, Syntax::Policy policy 
 		
     string s = "enum";
     s += " ";    
-    s += DoRender( &record->identifier, Syntax::Production::PURE_IDENTIFIER, id_policy); // Don't want scope resolution when declaring
+    s += DoRender( &record->identifier, Syntax::Production::IDENTIFIER_EXPR, id_policy); // Don't want scope resolution when declaring
     
     return s;
 }
@@ -364,7 +364,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 		return s;		
     }
     else if( TreePtr<LabelDeclaration> l = DynamicTreePtrCast<LabelDeclaration>(declaration) )
-        return DoRender( &l->identifier, Syntax::Production::PURE_IDENTIFIER, id_policy) + ":"; 
+        return DoRender( &l->identifier, Syntax::Production::IDENTIFIER_EXPR, id_policy) + ":"; 
     
     return Render::Dispatch( declaration, surround_prod, policy );
 }
@@ -391,7 +391,7 @@ string CppRender::RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Polic
             continue;
         }
         // We're really declaring the id, and don't want scope resolution
-        s += DoRender( &o->identifier, Syntax::Production::PURE_IDENTIFIER, id_policy ); 
+        s += DoRender( &o->identifier, Syntax::Production::IDENTIFIER_EXPR, id_policy ); 
         
         auto ei = TreePtr<Expression>::DynamicCast( o->initialiser );
         if( !ei )

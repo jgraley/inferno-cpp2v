@@ -84,6 +84,7 @@ public:
 		PRIMARY_EXPR, // one-token literal eg 12, 12.34, "foo"
 		PRIMARY_TYPE, // one-token type eg void, bool
 		COMPOUND, // excluded from added ;
+		IDENTIFIER_EXPR, // Identifier that could be a VN expression in parentheses
 		BRACKETED, // (), {} from the outside		
 		TOP_EXPR, // Highest expression precedence 
 		
