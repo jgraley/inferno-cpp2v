@@ -489,7 +489,7 @@ private:
 
         TreePtr<Instance> CreateInstanceNode(clang::Scope *S,
                 clang::Declarator &D, TreePtr<AccessSpec> access =
-                        TreePtr<AccessSpec> (), bool automatic = false)
+                        TreePtr<AccessSpec> ())
         {
             TRACE();
             const clang::DeclSpec &DS = D.getDeclSpec();
@@ -506,53 +506,43 @@ private:
             ASSERT( constancy );
             TreePtr<Instance> o;
 
-            if (automatic)
+            TRACE("scope flags 0x%x\n", S->getFlags());
+            if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
+			{
+				TreePtr<Field> no = MakeTreeNode<Field> ();
+				o = no;
+				if (DS.isVirtualSpecified())
+				{
+					no->virt = MakeTreeNode<Virtual> ();
+				}
+				else
+				{
+					no->virt = MakeTreeNode<NonVirtual> ();
+				}
+				no->access = access;
+			}
+			else if (S->getFnParent()) // in code
+			{
+				o = MakeTreeNode<Local> ();
+			}
+			else // top level
+			{
+				o = MakeTreeNode<Global> ();
+			}
+
+            clang::DeclSpec::SCS scs = DS.getStorageClassSpec();
+            switch (scs)
             {
-                o = MakeTreeNode<Local>();
-            }
-            else
-            {
-                clang::DeclSpec::SCS scs = DS.getStorageClassSpec();
-                switch (scs)
-                {
                 case clang::DeclSpec::SCS_unspecified:
-                {
-                    TRACE("scope flags 0x%x\n", S->getFlags());
-                    if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
-                    {
-                        TreePtr<Field> no = MakeTreeNode<Field> ();
-                        o = no;
-                        if (DS.isVirtualSpecified())
-                        {
-                            no->virt = MakeTreeNode<Virtual> ();
-                        }
-                        else
-                        {
-                            no->virt = MakeTreeNode<NonVirtual> ();
-                        }
-                        no->access = access;
-                    }
-                    else if (S->getFnParent()) // in code
-                    {
-                        o = MakeTreeNode<Local> ();
-                    }
-                    else // top level
-                    {
-                        o = MakeTreeNode<Global> ();
-                    }
                     break;
-                }
                 case clang::DeclSpec::SCS_auto:
-                    o = MakeTreeNode<Local> ();
-                    break;
-                case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
+					ASSERTFAIL("auto not supported")	      
+                case clang::DeclSpec::SCS_extern:
+                    ASSERTFAIL("extern not supported")	                  
                 case clang::DeclSpec::SCS_static:
-                    o = MakeTreeNode<Global> ();                    
-                    break;
+					ASSERTFAIL("static not supported")					
                 default:
                     ASSERTFAIL("Unsupported storage class");
-                    break;
-                }
             }
 
             all_decls->members.insert(o);
@@ -679,7 +669,7 @@ private:
                     D.getIdentifier(), recurse);
         }
 
-        TreePtr<Declaration> CreateDelcaration(clang::Scope *S,
+        TreePtr<Declaration> CreateDeclaration(clang::Scope *S,
                 clang::Declarator &D, TreePtr<AccessSpec> a = TreePtr<
                         AccessSpec> ())
         {
@@ -743,7 +733,7 @@ private:
             if (!d)
             {
 				TRACE("Created decl: ")(d)("\n");
-                d = CreateDelcaration(S, D); // make a new one
+                d = CreateDeclaration(S, D); // make a new one
                 IssueDeclaration(S, d);
             }
             
@@ -1450,7 +1440,7 @@ private:
     {
         //const clang::DeclSpec &DS = D.getDeclSpec();
         //TRACE("Element %p\n", Init);
-        TreePtr<Declaration> d = CreateDelcaration( S, D, ConvertAccess( AS ) );
+        TreePtr<Declaration> d = CreateDeclaration( S, D, ConvertAccess( AS ) );
         TreePtr<Instance> o = DynamicTreePtrCast<Instance>(d);
 
         if( BitfieldWidth )
@@ -2104,7 +2094,7 @@ private:
         CollectArgs( &(ca->arguments), ConstructorArgs, NumConsArgs );
 
         if( UseGlobal )
-            n->global = MakeTreeNode<Global>();
+            n->global = MakeTreeNode<IsGlobal>();
         else
             n->global = MakeTreeNode<NonGlobal>();
 
@@ -2128,7 +2118,7 @@ private:
             d->array = MakeTreeNode<DeleteNonArray>();
 
         if( UseGlobal )
-            d->global = MakeTreeNode<Global>();
+            d->global = MakeTreeNode<IsGlobal>();
         else
             d->global = MakeTreeNode<NonGlobal>();
 

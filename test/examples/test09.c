@@ -4,7 +4,7 @@
 int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 int *p;
 
-static struct 
+struct 
 {
     int a2[6];
 } s;
@@ -37,6 +37,6 @@ typedef int v4si __attribute__ ((vector_size (16)));
 
 int *ptrfunc()
 {
-	static int i;
-	return (&i)+0;
+	int i;
+	return 0;
 }

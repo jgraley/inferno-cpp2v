@@ -825,8 +825,7 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 
 string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-    string s;
-    
+    list<string> ls;
     if( policy.compound_uses_vn_separator ) // TODO hack, please remove
 		throw RefusedByPolicy();
     
@@ -836,14 +835,17 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
     Production proto_prod = policy.force_initialisation ? Production::RESOLVER : Production::PURE_IDENTIFIER;
     
     if( !policy.force_initialisation )
-		s += RenderStorage( renderer, sub_policy );
+		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
     
     bool constant = !!DynamicTreePtrCast<Const>(constancy);
     string declarator = renderer->DoRender( &identifier, proto_prod, sub_policy );
-    s += renderer->DoRenderTypeAndDeclarator( type, declarator, proto_prod, Production::BARE_STMT_DECL, sub_policy, constant );
+    Append( ls, {renderer->DoRenderTypeAndDeclarator(type, declarator, proto_prod, Production::BARE_STMT_DECL, sub_policy, constant) } );
+
+    if( !policy.force_initialisation )
+		Append( ls, RenderDeclSpecPost(renderer, sub_policy) );
 
     if( TreePtr<Uninitialised>::DynamicCast(initialiser) )
-		return s;
+		return Join( ls, " " );
 		    
 	if( policy.can_split_instances && 
 		!policy.force_initialisation && 
@@ -853,17 +855,15 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 		// Split out the definition of the instance for rendering later at CodeUnit scope
 		ASSERT(policy.definitions); // Not under a node that can render definitions
 		policy.definitions->push(TreePtr<Instance>(shared_from_this()));
-		return s;
+		return Join( ls, " " );
 	}		
 
-	s += RenderExtras( renderer, sub_policy );							
+	if( auto mis = dynamic_cast<MembInitSeq *>(this) )
+		Append( ls, { mis->RenderMemberInits(renderer, sub_policy) } );							
 
-	s += renderer->DoRender( &initialiser, Production::INITIALISER, sub_policy);
-	
-	if( policy.force_initialisation )
-		s += "\n";		
+	Append( ls, { renderer->DoRender(&initialiser, Production::INITIALISER, sub_policy) } );
 
-	return s;
+	return Join( ls, " " ) + (policy.force_initialisation?"\n":"");
 }
 
 
@@ -877,25 +877,25 @@ bool Instance::ShouldSplitInstance( Policy ) const
 }
 
 
-string Instance::RenderStorage( VN::RendererInterface *, Syntax::Policy ) const 
+list<string> Instance::RenderDeclSpecPre( VN::RendererInterface *, Syntax::Policy ) const 
 { 
-	return ""; 
+	return {}; 
 }
 
 
-string Instance::RenderExtras( VN::RendererInterface *, Syntax::Policy )
+list<string> Instance::RenderDeclSpecPost( VN::RendererInterface *, Syntax::Policy )
 {
-	return "";
+	return {};
 }
 
 //////////////////////////// Global //////////////////////////////
 
-string Global::RenderStorage( VN::RendererInterface *, Policy policy ) const 
+list<string> Global::RenderDeclSpecPre( VN::RendererInterface *, Policy policy ) const 
 { 
     if( policy.permit_static_keyword )
-        return "static ";
+        return {};
     else
-		return "";
+		return {};
 }
 
 
@@ -913,25 +913,16 @@ bool Global::ShouldSplitInstance( Policy policy ) const
 
 //////////////////////////// Field //////////////////////////////
 
-string Field::RenderStorage( VN::RendererInterface *renderer, Policy policy) const 
+list<string> Field::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy) const 
 { 
-	string s = renderer->DoRender(&virt, Production::SPACE_SEP_STMT_DECL, policy);
-	if( !s.empty() )
-		s += " "; // TODO improve on this by using Join() in our caller
-	return s;
-}
-
-
-string Field::RenderExtras( VN::RendererInterface *renderer, Policy policy )
-{
-	return RenderMemberInits( renderer, policy ); 
+	return { renderer->DoRender(&virt, Production::SPACE_SEP_STMT_DECL, policy) };
 }
 
 //////////////////////////// Temporary //////////////////////////////
 
-string Temporary::RenderStorage( VN::RendererInterface *, Policy ) const 
+list<string> Temporary::RenderDeclSpecPre( VN::RendererInterface *, Policy ) const 
 { 
-	return "/*temp*/ ";
+	return { "/*temp*/" };
 }
 
 //////////////////////////// Base //////////////////////////////

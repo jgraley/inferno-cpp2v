@@ -46,6 +46,20 @@ private:
 };
 
 
+template< typename E >
+inline void Append( list<E> &dest, const list<E> &src )
+{
+	dest.insert( dest.end(), src.begin(), src.end() );
+}
+
+
+template< typename E >
+inline void Append( list<E> &dest, list<E> &&src ) // move semantics
+{
+	dest.insert( dest.end(), src.begin(), src.end() );
+}
+
+
 // Returns an interator to that which was inserted
 template< typename S >
 inline typename S::iterator InsertSolo( S &s, const typename S::value_type &p )

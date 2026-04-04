@@ -569,9 +569,9 @@ struct Instance : Declaration,
 	bool ShouldSplitInstance( Policy policy ) const override;
 	
 	// Storage comes first
-	virtual string RenderStorage( VN::RendererInterface *renderer, Policy policy ) const;
+	virtual list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const;
 	// Extras come before initialiser
-	virtual string RenderExtras( VN::RendererInterface *renderer, Policy policy );
+	virtual list<string> RenderDeclSpecPost( VN::RendererInterface *renderer, Policy policy );
 };
 
 /// A variable or function with one instance across the entire program. 
@@ -581,7 +581,7 @@ struct Global : Instance
 {
     NODE_FUNCTIONS_FINAL
     
-	string RenderStorage( VN::RendererInterface *renderer, Policy policy ) const override;
+	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 	bool ShouldSplitInstance( Policy policy ) const override;
 };
 
@@ -599,8 +599,7 @@ struct Field : Instance,
     TreePtr<Virtuality> virt; ///< Is the field virtual?
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
     
-   	string RenderStorage( VN::RendererInterface *renderer, Policy policy ) const override;
-	string RenderExtras( VN::RendererInterface *renderer, Policy policy ) override;
+   	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 };
 
 /// A local variable with automatic allocation
@@ -629,7 +628,7 @@ struct Temporary : Instance
     NODE_FUNCTIONS_FINAL
     
 	string GetRenderTerminal( Production ) const { throw Unimplemented(); }    
-	string RenderStorage( VN::RendererInterface *renderer, Syntax::Policy policy ) const override;	
+	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Syntax::Policy policy ) const override;	
 };
 
 /// Node for a base class within a class declaration, specifies another class from which to inherit

@@ -1,4 +1,4 @@
-static struct { int a; } b;
+struct { int a; } b;
 
 class Test 
 {
@@ -37,7 +37,7 @@ enum GGFF
    D
 };
 
-static struct { int c; } d;
+struct { int c; } d;
 struct BStruct { int a; };
 
 int main()

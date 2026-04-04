@@ -1,5 +1,5 @@
 
-static int factorial( int n )
+int factorial( int n )
 {
     if( n==0 )
     { // TODO stack generation goes wrong for return not in compound statement
