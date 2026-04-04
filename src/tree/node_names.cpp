@@ -75,6 +75,19 @@ shared_ptr<TreePtrInterface> AvailableNodeData::MakeTreePtr(NodeEnum ne) const
 }
 
 
+bool AvailableNodeData::IsQualifier(const LeafBlock *block) const
+{
+	bool is_qualifier = false;
+	if( block->node_enum )
+	{
+		shared_ptr<Node> spn = MakeNode(block->node_enum.value());
+		if( dynamic_cast<const CPPTree::Qualifier *>(spn.get()) )
+			is_qualifier = true;
+	}
+	return is_qualifier;
+}
+
+
 bool AvailableNodeData::IsType(const LeafBlock *block) const
 {
 	bool is_type = false;
@@ -86,7 +99,6 @@ bool AvailableNodeData::IsType(const LeafBlock *block) const
 	}
 	return is_type;
 }
-
 
 
 void AvailableNodeData::InitialiseMap()

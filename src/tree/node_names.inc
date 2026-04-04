@@ -7,6 +7,7 @@
 
 // Underlying Node Types
 NODE(CPPTree, Property)
+NODE(CPPTree, Qualifier)
 NODE(CPPTree, Initialiser)
 NODE(CPPTree, Uninitialised)
 NODE(CPPTree, Statement)

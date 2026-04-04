@@ -816,14 +816,25 @@ string Protected::GetRender( VN::RendererInterface *, Production , Policy )
 	return "protected";
 }
 
+//////////////////////////// Constancy //////////////////////////////
+
+Syntax::Production Constancy::GetMyProductionTerminal() const
+{ 
+	return Production::KEYWORD; 
+}
+
 //////////////////////////// Instance //////////////////////////////
 
 Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Policy policy) const
 { 
-	if( !DynamicTreePtrCast<Expression>(initialiser) && policy.force_initialisation )
-		return Production::STMT_DECL;
+	bool will_split = policy.can_split_instances && 
+					  !policy.force_initialisation && 
+					  ShouldSplitInstance(policy);
+	
+	if( initialiser && DynamicTreePtrCast<Compound>(initialiser) && !will_split ) 
+		return Production::STMT_DECL; // won't get ; added
 	else
-		return Production::BARE_STMT_DECL;
+		return Production::BARE_STMT_DECL; // will get ; added
 }
 
 
@@ -845,6 +856,9 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
     bool constant = !!DynamicTreePtrCast<Const>(constancy);
     string declarator = renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy );
     Append( ls, {renderer->DoRenderTypeAndDeclarator(type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, constant) } );
+
+	// TODO const can appear in different places
+	//Append( ls, {renderer->DoRender(&constancy, Production::KEYWORD, policy)} );
 
     if( !policy.force_initialisation )
 		Append( ls, RenderDeclSpecPost(renderer, sub_policy) );
@@ -1053,9 +1067,9 @@ string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer,
 												bool )
 {
 	if( declarator.empty() )
-		return "⨤" + GetRenderParameterisation(renderer, policy); // anonymoius
+		return "⨤" + GetRenderParameterisation(renderer, policy); // anonymous
 	else
-		return declarator + GetRenderParameterisation(renderer, policy);
+		return declarator + GetRenderParameterisation(renderer, policy); // working 
 }
 
 //////////////////////////// Destructor //////////////////////////////

@@ -28,7 +28,7 @@ struct Property : virtual Node
 
 
 /// A property with an optional keyword in the C syntax
-struct OptionalKeywordProperty : Property
+struct Qualifier : Property
 {
 	NODE_FUNCTIONS
 	
@@ -448,7 +448,7 @@ struct MembInitSeq : virtual Node
 
 
 /// Property for a member function that may or may not be virtual.
-struct Virtuality : OptionalKeywordProperty 
+struct Virtuality : Qualifier 
 { 
 	NODE_FUNCTIONS 
 
@@ -484,7 +484,7 @@ struct NonVirtual : Virtuality
  control generated high-level interfaces. Note that we only specify access
  for physical things like instances. Abstract stuff like TypeDef are always
  considered Public. */
-struct AccessSpec : OptionalKeywordProperty 
+struct AccessSpec : Qualifier 
 { 
 	NODE_FUNCTIONS 
 
@@ -517,9 +517,11 @@ struct Protected : AccessSpec
 };
 
 /// Property that indicates whether some Instance is constant.
-struct Constancy : OptionalKeywordProperty 
+struct Constancy : Qualifier 
 { 
 	NODE_FUNCTIONS 
+
+	Production GetMyProductionTerminal() const override;
 	TreePtr<Node> GetDefaultNode(TreePtr<Node> type) const final;     
 };
 

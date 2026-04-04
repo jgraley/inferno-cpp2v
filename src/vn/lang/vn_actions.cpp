@@ -197,7 +197,7 @@ TreePtr<Node> VNLangActions::OnExplicitNode( const AvailableNodeData::Block *blo
 			{
 				*dest_sing = src_item.nodes.front();
 			}
-			else if( auto optional_arch = TreePtr<CPPTree::OptionalKeywordProperty>::DynamicCast(dest_sing->MakeValueArchetype()) )
+			else if( auto optional_arch = TreePtr<CPPTree::Qualifier>::DynamicCast(dest_sing->MakeValueArchetype()) )
 			{
 				if( src_item.nodes.empty() )
 					*dest_sing = optional_arch->GetDefaultNode(nullptr);
@@ -657,7 +657,38 @@ TreePtr<Node> VNLangActions::OnConstructor( list<TreePtr<Node>> params )
 }
 
 
-TreePtr<Node> VNLangActions::OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
+TreePtr<Node> VNLangActions::OnDeclaration( set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
+{
+	return OnDeclaration( specs_pre, type, declarator, declarator_loc, MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>() );
+}
+
+
+TreePtr<Node> VNLangActions::OnDeclaration( set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc, TreePtr<Node> init )
+{
+	(void)specs_pre; // TODO first we need to determine whether to make a Field, Local or Global
+	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
+	switch( result.outcome )
+	{
+		case Declarators::Result::CONCRETE:
+		case Declarators::Result::WILDCARD:
+		{
+			// NOTE: innermost id == NULL => ☆ (not abstract)	
+			auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();
+			ret->type = result.type;
+			ret->identifier = result.leaf;
+			ret->initialiser = init;
+			ret->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>(); // TODO
+			return ret;
+		}
+
+		default:
+			ASSERTFAIL(); // internal error because concrete decls are parsed separately
+	}
+	ASSERTFAIL();
+}
+
+
+TreePtr<Node> VNLangActions::OnAbDeclType( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
 {
 	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
 	switch( result.outcome )
@@ -665,17 +696,9 @@ TreePtr<Node> VNLangActions::OnTypeAndDeclarator( TreePtr<Node> type, TreePtr<No
 		case Declarators::Result::ABSTRACT:
 			return result.type;	
 		
-		case Declarators::Result::CONCRETE:
-		case Declarators::Result::WILDCARD:
-			// NOTE: innermost id == NULL => ☆ (not abstract)	
-			auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();
-			ret->type = result.type;
-			ret->identifier = result.leaf;
-			ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?	
-			ret->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
-			return ret;
+		default:
+			ASSERTFAIL(); // internal error because abstract decls are parsed separately
 	}
-	ASSERTFAIL();
 }
 
 
@@ -779,7 +802,7 @@ TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> type )
 		return type;
 		
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Base>>();	
-	auto arch = dynamic_pointer_cast<CPPTree::OptionalKeywordProperty>(node->access.MakeValueArchetype());
+	auto arch = dynamic_pointer_cast<CPPTree::Qualifier>(node->access.MakeValueArchetype());
 	node->access = arch->GetDefaultNode(type);
 	node->record = type;
 	return node;
@@ -1110,6 +1133,11 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // Note: 🞊  《》 ⸨⸩ are free now
 
 // Labels an &&: use policy, as seen with resolvers, and get rid of PURE_IDENTIFIER (now only used to control && generation)
+
+// Constructors:
+// See Constructor::GetRenderTypeAndDeclarator() and Destructor::GetRenderTypeAndDeclarator
+// Get them to generate correct syntax when not abstract, and add to parser. Need to fish out the class name
+// in both parse and render scenarios. For render use a policy? For parse, maybe recogniser recognises it?
 
 
 // 

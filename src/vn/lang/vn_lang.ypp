@@ -126,6 +126,7 @@
 <YY::TokenMetadata>	DESIGNATED_TYPE			_("designated type name")
 <YY::TokenMetadata>	RESOLVED_NORMAL			_("resolved non-type node name")
 <YY::TokenMetadata>	RESOLVED_TYPE			_("resolved type node name")
+<YY::TokenMetadata>	RESOLVED_QUAL			_("resolved qualifier node name")
 <YY::TokenMetadata>	NODE_NAMESPACE			_("scope resolving name")
 <YY::TokenMetadata> KEYWORD_PRIMARY_OP		_("non-type keyword operator")
 <YY::TokenMetadata> KEYWORD_SIMPLE_STMT     _("keyword simple statement") // eg break;
@@ -152,11 +153,14 @@ stmt_high
 %type <TreePtr<Node>> 				bare_stmt_decl stmt_decl_nc stmt_decl norm_primary        
 %type <TreePtr<Node>>				cons_or_des_type 
 %type <TreePtr<Node>> 				compound_primary parameter type_id compound_prefix
-%type <TreePtr<Node>> 				type_for_declarator declarator declarator_prefix declarator_postfix declarator_primary
+%type <TreePtr<Node>> 				type_for_declarator 
+%type <TreePtr<Node>> 				qualifier qualifier_nw
+%type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
+%type <TreePtr<Node>> 				ab_declarator ab_declarator_prefix ab_declarator_postfix
 %type <TreePtr<Node>> 				class_spec base_spec access_spec access_spec_nw
 %type <wstring> 					vn_name
 %type <string>						transform_op_named transform_type_part
-%type <YY::TokenMetadata> 			resolved_name resolved_type_name node_namespace
+%type <YY::TokenMetadata> 			resolved_name resolved_type_name resolved_qual_name node_namespace
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
@@ -168,7 +172,8 @@ stmt_high
 %type <list<TreePtr<Node>>>			stmt_decls 
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases 
-%type <const AvailableNodeData::Block *> explicit_op_named prerestrict_op_named id_by_name_op_named build_id_named
+%type <set<TreePtr<Node>>>			qualifiers 
+%type <const AvailableNodeData::Block *> explicit_op_named prerestrict_op_named id_by_name_op_named build_id_named qual_explicit_op_named
 %type <const AvailableNodeData::Block *> type_explicit_op_named type_prerestrict_op_named type_id_by_name_op_named type_build_id_op_named
 %type <multiset<string>>			type_specifier_seq
 
@@ -225,6 +230,7 @@ item		: item VN_SUB_SEP unified				{ $$ = $1; $$.nodes.push_back($3); $$.loc = @
 unified		: normal
 			| type_id
 			| access_spec_nw // TODO access specs to be merged into normal column
+			| qualifier_nw
 
 //////////////////////////////// NORMALS ////////////////////////////////////         
 // Normal is basically anything other than a type
@@ -232,13 +238,13 @@ unified		: normal
 normal				: norm_disjunction
 
 norm_disjunction	: norm_conjunction
-					| norm_disjunction DISJUNCTION_OP norm_conjunction				{ $$ = vn->OnDisjunction($1, $3); }
+					| norm_disjunction DISJUNCTION_OP norm_conjunction			{ $$ = vn->OnDisjunction($1, $3); }
 
 norm_conjunction 	: norm_primary       
-					| norm_conjunction CONJUNCTION_OP norm_primary       			{ $$ = vn->OnConjunction($1, $3); }
+					| norm_conjunction CONJUNCTION_OP norm_primary       		{ $$ = vn->OnConjunction($1, $3); }
 		
 norm_primary       	: expr_expression
-					| stmt_decls												{ ASSERT($1.size() == 1); $$ = $1.front(); } // For CodeUnit
+					| stmt_decl			
 
 //////////////////////////////// COMPOUND ////////////////////////////////////         
 
@@ -276,6 +282,8 @@ stmt_decl_nc: bare_stmt_decl ';'													{ $$ = $1; }
 			  %prec KEYWORD_ARGS_BODY_CHAIN_STMT									{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
 			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_decl
 			  CHAINING_KEYWORD stmt_decl											{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
+			| type_for_declarator declarator compound_prefix						{ $$ = vn->OnDeclaration({}, $1, $2, @2, $3); }	
+			| qualifiers type_for_declarator declarator compound_prefix				{ $$ = vn->OnDeclaration($1, $2, $3, @3, $4); }	
 			| expr_expression ':'													{ $$ = vn->OnLabel($1, @1); } 
 			| CASE_KEYWORD expr_expression ':'										{ $$ = vn->OnCase($2, @2); } 
 			| CASE_KEYWORD expr_expression RANGE_OP expr_expression ':'				{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
@@ -286,11 +294,25 @@ bare_stmt_decl	: expr_expression
 				| KEYWORD_SIMPLE_STMT											{ $$ = vn->OnSimpleStmt($1.as_ascii, @1); }
 				| KEYWORD_SPACE_SEP_STMT expr_expression						{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
 				| DO_KEYWORD stmt_decl WHILE_KEYWORD '(' expr_expression ')' 	{ $$ = vn->OnDo($2, @2, $5, @5); }
-				| type_for_declarator declarator								{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }	
+				| type_for_declarator declarator								{ $$ = vn->OnDeclaration({}, $1, $2, @2); }	
+				| qualifiers type_for_declarator declarator						{ $$ = vn->OnDeclaration($1, $2, $3, @3); }	
+				| type_for_declarator declarator ANY_NODE_OP					{ $$ = vn->OnDeclaration({}, $1, $2, @2, nullptr); } // note: ☆ has ; but no =
+				| qualifiers type_for_declarator declarator ANY_NODE_OP			{ $$ = vn->OnDeclaration($1, $2, $3, @3, nullptr); }
+				| type_for_declarator declarator C_ASSIGN expr_expression			 { $$ = vn->OnDeclaration({}, $1, $2, @2, $4); } // note: ☆ has ; but no =
+				| qualifiers type_for_declarator declarator C_ASSIGN expr_expression { $$ = vn->OnDeclaration($1, $2, $3, @3, $5); }
 				| class_spec		
 
 semicolon_args	: expr_expression											{ $$.push_back($1); }
 				| semicolon_args ';' expr_expression						{ $$ = $1; $$.push_back($3); }
+
+qualifiers		: qualifier													{ $$.insert( $1 ); }
+
+qualifier		: qualifier_nw
+
+// No wildcards version
+qualifier_nw	: qual_explicit_op_named itemisation						{ $$ = vn->OnExplicitNode($1, @1, $2); }
+
+qual_explicit_op_named 		: explicit_op_scope resolved_qual_name			{ $$ = $2.as_andata_block; (void)$1; }
 
 //////////////////////////////// DECLARATORS /////////////////////////////////////         
                           		
@@ -299,17 +321,28 @@ declarator			: declarator_prefix
 declarator_prefix	: declarator_postfix
 					|                          '&' declarator_prefix { $$ = make_shared<Declarators::Reference>($2); } 
 					|                          '*' declarator_prefix { $$ = make_shared<Declarators::Pointer>($2); } 
-					|                      	      				 '&' { $$ = make_shared<Declarators::Reference>(nullptr); }  
-					|                           				 '*' { $$ = make_shared<Declarators::Pointer>(nullptr); } 
 
 declarator_postfix	: declarator_primary
-					| declarator_postfix parameterisation				{ $$ = make_shared<Declarators::Function>($1, $2); }               
-					| declarator_postfix '[' normal ']'					{ $$ = make_shared<Declarators::Array>($1, $3); } 
-					| parameterisation									{ $$ = make_shared<Declarators::Function>(nullptr, $1); }       
-					| '[' normal ']'									{ $$ = make_shared<Declarators::Array>(nullptr, $2); }                 		
+					| declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2); }               
+					| declarator_postfix '[' normal ']'				{ $$ = make_shared<Declarators::Array>($1, $3); } 
                 
-declarator_primary	: vn_primary  										{ $$ = make_shared<Declarators::Concrete>($1); }  
+declarator_primary	: vn_primary  									{ $$ = make_shared<Declarators::Concrete>($1); }  
                          
+//////////////////////////////// ABSTRACT DECLARATORS /////////////////////////////////////         
+                          		
+ab_declarator			: ab_declarator_prefix									 
+
+ab_declarator_prefix	: ab_declarator_postfix
+						|                          '&' ab_declarator_prefix { $$ = make_shared<Declarators::Reference>($2); } 
+						|                          '*' ab_declarator_prefix { $$ = make_shared<Declarators::Pointer>($2); } 
+						|                      	      		 		 	'&' { $$ = make_shared<Declarators::Reference>(nullptr); }  
+						|                           				 	'*' { $$ = make_shared<Declarators::Pointer>(nullptr); } 
+
+ab_declarator_postfix	: ab_declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2); }               
+						| ab_declarator_postfix '[' normal ']'				{ $$ = make_shared<Declarators::Array>($1, $3); } 
+						| parameterisation									{ $$ = make_shared<Declarators::Function>(nullptr, $1); }       
+						| '[' normal ']'									{ $$ = make_shared<Declarators::Array>(nullptr, $2); }                 		
+					                         
 //////////////////////////////////////// PARAMETERS /////////////////////////////////////////////
 
 parameterisation	: '(' parameters ')'							{ $$ = $2; }
@@ -335,7 +368,7 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
                           
 access_spec		: access_spec_nw	                          				
-				| vn_primary 												
+				| qualifier 												
                           
 access_spec_nw	: ACCESS_KEYWORD	                          				{ $$ = vn->OnAccessSpec($1.as_ascii); }
                                                   
@@ -463,7 +496,7 @@ type_conjunction 	: type_with_ab
 					| type_conjunction CONJUNCTION_OP type_prefix			{ $$ = vn->OnConjunction($1, $3); }
                     
 type_with_ab		: type_specified
-					| type_for_declarator declarator 						{ $$ = vn->OnTypeAndDeclarator($1, $2, @2); }  
+					| type_for_declarator ab_declarator 					{ $$ = vn->OnAbDeclType($1, $2, @2); }  
 						 		
 // prevent typeised postfix expressions looking like declarators eg ⍑x[2] typeizes x[2] and you need (⍑x) [2] for an abstract type
 type_for_declarator : type_primary						 			                
@@ -527,6 +560,9 @@ resolved_name	: part_resolve RESOLVED_NORMAL			{ $$ = $2; }
 
 resolved_type_name	: part_resolve RESOLVED_TYPE		{ $$ = $2; }
 					| RESOLVED_TYPE						{ $$ = $1; }
+
+resolved_qual_name	: part_resolve RESOLVED_QUAL		{ $$ = $2; }
+					| RESOLVED_QUAL						{ $$ = $1; }
 
 // On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 
 // expire when the production is complete or an error forces unwind. The naming layer

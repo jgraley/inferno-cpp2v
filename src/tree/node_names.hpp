@@ -65,6 +65,7 @@ public:
 	const AvailableNodeData::NamespaceBlock *GetNodeNamesRoot();
 	shared_ptr<Node> MakeNode(NodeEnum ne) const;
 	shared_ptr<TreePtrInterface> MakeTreePtr(NodeEnum ne) const;
+	bool IsQualifier(const LeafBlock *block) const;
 	bool IsType(const LeafBlock *block) const;
 	
 private:

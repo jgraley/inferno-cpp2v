@@ -366,7 +366,7 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 
 string Render::RenderNullPointer(Syntax::Production surround_prod, Syntax::Policy policy)
 {	
-	if( auto arch = dynamic_pointer_cast<OptionalKeywordProperty>( policy.pointer_archetype ) )
+	if( auto arch = dynamic_pointer_cast<Qualifier>( policy.pointer_archetype ) )
 		return Dispatch( (TreePtr<Node>)arch, surround_prod, policy );
 	else if( dynamic_pointer_cast<Type>( policy.pointer_archetype ) )
 		return "⍑☆";

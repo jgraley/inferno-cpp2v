@@ -180,7 +180,9 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstr
 		metadata.as_andata_block = sub_block; // return it to the parser whatever it is
 		if( auto lb = dynamic_cast<const AvailableNodeData::LeafBlock *>(sub_block) )
 		{
-			if( AvailableNodeData().IsType(lb) )			
+			if( AvailableNodeData().IsQualifier(lb) )			
+				return YY::VNLangParser::make_RESOLVED_QUAL(metadata, loc);
+			else if( AvailableNodeData().IsType(lb) )			
 				return YY::VNLangParser::make_RESOLVED_TYPE(metadata, loc);
 			else
 				return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
@@ -203,7 +205,9 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstr
 			metadata.as_andata_block = sub_block; // return it to the parser whatever it is
 			if( auto lb = dynamic_cast<const AvailableNodeData::LeafBlock *>(sub_block) )
 			{
-				if( AvailableNodeData().IsType(lb) )			
+				if( AvailableNodeData().IsQualifier(lb) )			
+					return YY::VNLangParser::make_RESOLVED_QUAL(metadata, loc);
+				else if( AvailableNodeData().IsType(lb) )			
 					return YY::VNLangParser::make_RESOLVED_TYPE(metadata, loc);
 				else
 					return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
