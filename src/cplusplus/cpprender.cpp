@@ -318,11 +318,11 @@ string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production s
 string CppRender::RenderEnumHead( TreePtr<Record> record, Syntax::Policy policy )
 {
 	Syntax::Policy id_policy = policy;
-	id_policy.resolve_identifier_scope = false;
+	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
 		
     string s = "enum";
     s += " ";    
-    s += DoRender( &record->identifier, Syntax::Production::IDENTIFIER_EXPR, id_policy); // Don't want scope resolution when declaring
+    s += DoRender( &record->identifier, Syntax::Production::PRIMARY_EXPR, id_policy); 
     
     return s;
 }
@@ -346,7 +346,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 	(void)surround_prod;
 	Syntax::Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
-    Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
+    Syntax::Production starting_declarator_prod = Syntax::Production::PRIMARY_EXPR;
 
     if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
     {
@@ -363,8 +363,8 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 		}
 		return s;		
     }
-    else if( TreePtr<LabelDeclaration> l = DynamicTreePtrCast<LabelDeclaration>(declaration) )
-        return DoRender( &l->identifier, Syntax::Production::IDENTIFIER_EXPR, id_policy) + ":"; 
+    else 
+		ASSERTFAIL();
     
     return Render::Dispatch( declaration, surround_prod, policy );
 }
@@ -375,7 +375,7 @@ DEFAULT_CATCH_CLAUSE
 string CppRender::RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Policy policy ) try
 {
 	Syntax::Policy id_policy = policy;
-	id_policy.resolve_identifier_scope = false;
+	id_policy.resolve_identifier_scope = false; // We're really declaring the id, and don't want scope resolution
 	
     string s = "\n{\n";
     bool first = true;
@@ -387,11 +387,11 @@ string CppRender::RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Polic
         auto o = TreePtr<Instance>::DynamicCast(pe);
         if( !o )
         {
-            s += RenderNodeExplicit( pe, Syntax::Production::ASSIGN, policy );
+            s += RenderNodeExplicit( pe, Syntax::Production::COMMA_SEP, policy );
             continue;
         }
-        // We're really declaring the id, and don't want scope resolution
-        s += DoRender( &o->identifier, Syntax::Production::IDENTIFIER_EXPR, id_policy ); 
+        
+        s += DoRender( &o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN), id_policy ); 
         
         auto ei = TreePtr<Expression>::DynamicCast( o->initialiser );
         if( !ei )
