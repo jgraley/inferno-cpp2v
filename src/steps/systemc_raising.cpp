@@ -303,7 +303,9 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto s_comp = MakePatternNode< Compound >();
     auto s_constructor_id = MakePatternNode< InstanceIdentifier >();
     auto s_ctype = MakePatternNode<Constructor>();
+    auto ls_ctype = MakePatternNode<Constructor>();
     auto s_params = MakePatternNode<StarAgent, Parameter>();
+    auto ls_params = MakePatternNode<StarAgent, Parameter>();
     auto s_module = MakePatternNode< Module >();
     auto r_module = MakePatternNode< Module >();
     auto l1s_memb_init = MakePatternNode<MembInitialisation>();
@@ -335,7 +337,8 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     r_module->identifier = module_typeid;
             
     // Embedded 1: dispense with any calls to s_constructor_id from member inits
-    ls_field->type = module_typeid;
+    ls_field->type = ls_ctype;
+    ls_ctype->params = (ls_params); // any parameters
     ls_field->memb_inits = (l_pre, l1s_memb_init, l_post);
 	l1s_memb_init->initialiser = l1s_cons_init;
 	l1s_cons_init->constructor_id = s_constructor_id;

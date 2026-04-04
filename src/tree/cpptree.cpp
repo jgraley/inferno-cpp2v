@@ -1069,7 +1069,7 @@ string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer,
 	if( declarator.empty() )
 		return "⨤" + GetRenderParameterisation(renderer, policy); // anonymous
 	else
-		return declarator + GetRenderParameterisation(renderer, policy); // working 
+		return declarator + GetRenderParameterisation(renderer, policy); // working correctly for output render
 }
 
 //////////////////////////// Destructor //////////////////////////////
@@ -1081,7 +1081,7 @@ string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *, string d
 	if( declarator.empty() )
 		return "~()"; // anonymoius
 	else
-		return declarator + "()";
+		return declarator + "()"; // working correctly for output render
 }
 
 //////////////////////////// Array //////////////////////////////

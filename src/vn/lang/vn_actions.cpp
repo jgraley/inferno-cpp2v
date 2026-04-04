@@ -1136,8 +1136,8 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 
 // Constructors:
 // See Constructor::GetRenderTypeAndDeclarator() and Destructor::GetRenderTypeAndDeclarator
-// Get them to generate correct syntax when not abstract, and add to parser. Need to fish out the class name
-// in both parse and render scenarios. For render use a policy? For parse, maybe recogniser recognises it?
+// These are working correctly for output render, so where are the calls coming from with the class name
+// corectly provided as the declarator?
 
 
 // 
