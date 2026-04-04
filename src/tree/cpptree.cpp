@@ -791,45 +791,23 @@ Syntax::Production AccessSpec::GetMyProductionTerminal() const
 	return Production::KEYWORD; 
 }
 
-
-string AccessSpec::GetRender( VN::RendererInterface *, Production surround_prod, Policy policy )
-{
-	bool in_class_body = (surround_prod == Syntax::Production::BARE_STMT_DECL);
-	
-	if( type_index(typeid(*this)) == policy.current_access && 
-	    in_class_body )
-		return ""; // elide because same as previous
-		
-	string s = GetKeyword();    
-    if( in_class_body )
-		s += ":\n";	
-	
-	return s;
-}
-
-
-string AccessSpec::GetKeyword() const
-{
-	throw UnimplementedToken();
-}
-
 //////////////////////////// Public //////////////////////////////
 
-string Public::GetKeyword() const
+string Public::GetRender( VN::RendererInterface *, Production , Policy )
 {
 	return "public";
 }
 
 //////////////////////////// Private //////////////////////////////
 
-string Private::GetKeyword() const
+string Private::GetRender( VN::RendererInterface *, Production , Policy )
 {
 	return "private";
 }
 
 //////////////////////////// Protected //////////////////////////////
 
-string Protected::GetKeyword() const
+string Protected::GetRender( VN::RendererInterface *, Production , Policy )
 {
 	return "protected";
 }
@@ -1429,7 +1407,7 @@ string Record::RenderBody( VN::RendererInterface *renderer, Syntax::Policy polic
 
 	TreePtr<AccessSpec> a = GetInitialAccess();
 	ASSERT( a );
-	type_index current_access = type_index(typeid(*a));
+	type_index current_access_ti( typeid(*a) );
 
     policy.split_bulky_statics = true; // Our scope is a record body
 	policy.permit_static_keyword = true; // Our scope is a record body
@@ -1444,11 +1422,11 @@ string Record::RenderBody( VN::RendererInterface *renderer, Syntax::Policy polic
 		TreePtr<AccessSpec> this_access = MakeTreeNode<Public>();
 		if( TreePtr<Field> f = DynamicTreePtrCast<Field>(d) )
 			this_access = f->access;
+		type_index this_access_ti( typeid(*this_access) );
 
-		Syntax::Policy access_policy = policy;
-		access_policy.current_access = current_access;
-		s += renderer->DoRender( &this_access, Syntax::Production::BARE_STMT_DECL, access_policy );
-		current_access = type_index(typeid(*this_access));
+		if( this_access_ti != current_access_ti )
+			s += renderer->DoRender( &this_access, Syntax::Production::BARE_STMT_DECL, policy ) + ":";
+		current_access_ti = this_access_ti;
 
         s += renderer->DoRender( &d, Syntax::Production::STMT_DECL, policy );
     }

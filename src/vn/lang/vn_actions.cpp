@@ -1028,10 +1028,9 @@ TreePtr<Node> CPPTree::Virtuality::GetDefaultNode(TreePtr<Node>) const
 TreePtr<Node> CPPTree::AccessSpec::GetDefaultNode(TreePtr<Node> type) const
 {
 	ASSERT(type); // if this is firing, it's probably due to explicit node parsing. Confirm we have an Instance and then pass in its type.
-	if( TreePtr<Class>::DynamicCast(type) ) // TODO better to v-call into type
-		return MakeTreeNode<StandardAgentWrapper<Private>>();
-	else
-		return MakeTreeNode<StandardAgentWrapper<Public>>();
+	auto record = TreePtr<Record>::DynamicCast(type);
+	ASSERT(record); // Type is not a record (maybe could provide Public)
+	return record->GetInitialAccess();
 }
 
 //////////////////////////// Constancy //////////////////////////////

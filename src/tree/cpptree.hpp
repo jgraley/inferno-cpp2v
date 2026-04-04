@@ -489,8 +489,6 @@ struct AccessSpec : OptionalKeywordProperty
 	NODE_FUNCTIONS 
 
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
-    virtual string GetKeyword() const;	
 	TreePtr<Node> GetDefaultNode(TreePtr<Node> type) const final;     
 };
 
@@ -499,7 +497,7 @@ struct Public : AccessSpec
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-    string GetKeyword() const override;		
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;    	
 };
 
 /// Property for private access
@@ -507,7 +505,7 @@ struct Private : AccessSpec
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-    string GetKeyword() const override;		
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;    	
 };
 
 /// Property for protected access
@@ -515,7 +513,7 @@ struct Protected : AccessSpec
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-    string GetKeyword() const override;		
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;    	
 };
 
 /// Property that indicates whether some Instance is constant.
