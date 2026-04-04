@@ -239,7 +239,9 @@ string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Productio
     // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
     // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
     // uses are declaring the id, or otherwise can't cope with the :: anyway. 
-    if( surround_prod < Syntax::Production::PURE_IDENTIFIER ) 
+    ASSERT( policy.resolve_identifier_scope==(surround_prod < Syntax::Production::PURE_IDENTIFIER) )
+		  (policy.resolve_identifier_scope)(" ")((int)surround_prod);
+    if( surround_prod < Syntax::Production::PURE_IDENTIFIER && policy.resolve_identifier_scope) 
     {
 		auto me = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
 		ASSERT(me);			
@@ -322,6 +324,8 @@ Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
 
 string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy )
 {
+	Syntax::Policy id_policy = policy;
+	id_policy.resolve_identifier_scope = false;
 	auto me = TreePtr<SpecificConstructorIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
 	ASSERT(me);		
 	
@@ -330,13 +334,15 @@ string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterfa
     if( !rec )
 		throw Unimplemented(); // Constructor must be declared in a record       
 		
-    return renderer->DoRender( &rec->identifier, Syntax::Production::PURE_IDENTIFIER, policy );	// PURE_IDENTIFIER prevents scope resolution
+    return renderer->DoRender( &rec->identifier, Syntax::Production::PURE_IDENTIFIER, id_policy );	// PURE_IDENTIFIER prevents scope resolution
 }
 
 //////////////////////////// SpecificDestructorIdentifier //////////////////////////////
 
 string SpecificDestructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy )
 {
+	Syntax::Policy id_policy = policy;
+	id_policy.resolve_identifier_scope = false;
 	auto me = TreePtr<SpecificDestructorIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
 	ASSERT(me);		
 	
@@ -346,7 +352,7 @@ string SpecificDestructorIdentifier::GetRenderWithoutScope( VN::RendererInterfac
 		throw Unimplemented(); // Constructor must be declared in a record    
 		   
     return "~" + 
-           renderer->DoRender( &rec->identifier, Syntax::Production::PURE_IDENTIFIER, policy );	// PURE_IDENTIFIER prevents scope resolution
+           renderer->DoRender( &rec->identifier, Syntax::Production::PURE_IDENTIFIER, id_policy );	// PURE_IDENTIFIER prevents scope resolution
 }
 
 //////////////////////////// TypeIdentifier //////////////////////////////
@@ -740,7 +746,10 @@ string MembInitialisation::GetRender( VN::RendererInterface *renderer, Productio
 	if( !policy.detect_and_render_constructor )
 		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang
 
-	return renderer->DoRender( &member_id, Production::PURE_IDENTIFIER, policy ) +
+	Syntax::Policy id_policy = policy;
+	id_policy.resolve_identifier_scope = false;
+
+	return renderer->DoRender( &member_id, Production::PURE_IDENTIFIER, id_policy ) +
 		   renderer->DoRender( &initialiser, Production::INITIALISER, policy );
 }
 
@@ -825,12 +834,15 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 
 string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
+    Policy sub_policy = policy;
+    sub_policy.force_initialisation = false; // stop at one level
+	Syntax::Policy id_policy = sub_policy;
+	if( !policy.force_initialisation )
+		id_policy.resolve_identifier_scope = false;
+
     list<string> ls;
     if( policy.compound_uses_vn_separator ) // TODO hack, please remove
 		throw RefusedByPolicy();
-    
-    Policy sub_policy = policy;
-    sub_policy.force_initialisation = false; // stop at one level
     
     Production proto_prod = policy.force_initialisation ? Production::RESOLVER : Production::PURE_IDENTIFIER;
     
@@ -838,7 +850,7 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
     
     bool constant = !!DynamicTreePtrCast<Const>(constancy);
-    string declarator = renderer->DoRender( &identifier, proto_prod, sub_policy );
+    string declarator = renderer->DoRender( &identifier, proto_prod, id_policy );
     Append( ls, {renderer->DoRenderTypeAndDeclarator(type, declarator, proto_prod, Production::BARE_STMT_DECL, sub_policy, constant) } );
 
     if( !policy.force_initialisation )
@@ -979,7 +991,9 @@ Syntax::Production LabelDeclaration::GetMyProductionTerminal() const
 
 string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->DoRender( &identifier, Syntax::Production::PURE_IDENTIFIER, policy) + ":";	// TODO try PRIMARY_EXPR like with access specs which also end in :
+	Syntax::Policy id_policy = policy;
+	id_policy.resolve_identifier_scope = false;
+	return renderer->DoRender( &identifier, Syntax::Production::PURE_IDENTIFIER, id_policy) + ":";	// TODO try PRIMARY_EXPR like with access specs which also end in :
 }
 
 //////////////////////////// Callable //////////////////////////////
@@ -1002,13 +1016,17 @@ Syntax::Production Callable::GetOperandInDeclaratorProduction() const
 
 string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy)
 {
+	Syntax::Policy id_policy = policy;
+	id_policy.resolve_identifier_scope = false;
+	Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
+		
     list<string> strings;
     for( auto d : params )
 	{
         if( auto o = TreePtr<Instance>::DynamicCast(d) )
         {
-			Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
-			string name = renderer->DoRender( &o->identifier, starting_declarator_prod, policy);
+			// TODO Use Instance render?
+			string name = renderer->DoRender( &o->identifier, starting_declarator_prod, id_policy);
 			strings.push_back( renderer->DoRenderTypeAndDeclarator( o->type, name, starting_declarator_prod, Syntax::Production::BARE_STMT_DECL, policy, false ) );
 		}
 		else
@@ -1361,11 +1379,13 @@ Syntax::Production Record::GetMyProductionTerminal() const
 string Record::GetRender( VN::RendererInterface *renderer, Syntax::Production, Policy policy ) 
 {
 	//throw TemporarilyDisabled(); // TODO fix DeclScope render
-	
+	Policy id_policy = policy;
+	id_policy.resolve_identifier_scope = false;
+		
 	string s;
 	s += GetKeyword(); // class, struct etc
 	s += " ";
-	s += renderer->DoRender(&identifier, Production::PURE_IDENTIFIER, policy); // Don't want scope resolution when declaring
+	s += renderer->DoRender(&identifier, Production::PURE_IDENTIFIER, id_policy); // Don't want scope resolution when declaring
 
 	if( policy.force_incomplete_records )
 		return s;

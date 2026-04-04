@@ -317,9 +317,12 @@ string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production s
 
 string CppRender::RenderEnumHead( TreePtr<Record> record, Syntax::Policy policy )
 {
+	Syntax::Policy id_policy = policy;
+	id_policy.resolve_identifier_scope = false;
+		
     string s = "enum";
-    s += " ";
-    s += DoRender( &record->identifier, Syntax::Production::PURE_IDENTIFIER, policy); // Don't want scope resolution when declaring
+    s += " ";    
+    s += DoRender( &record->identifier, Syntax::Production::PURE_IDENTIFIER, id_policy); // Don't want scope resolution when declaring
     
     return s;
 }
@@ -340,13 +343,14 @@ DEFAULT_CATCH_CLAUSE
 
 string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
-    TRACE();
 	(void)surround_prod;
+	Syntax::Policy id_policy = policy;
+	id_policy.resolve_identifier_scope = false;
+    Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
 
     if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
     {
-        Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
-        auto id = DoRender( &t->identifier, starting_declarator_prod, policy );
+        auto id = DoRender( &t->identifier, starting_declarator_prod, id_policy );
         return "typedef " + DoRenderTypeAndDeclarator( t->type, id, starting_declarator_prod, Syntax::Production::TYPE_IN_DECLARATION, policy );
     }
     else if( TreePtr<Enum> enum_ = DynamicTreePtrCast< Enum >(declaration) )
@@ -360,7 +364,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 		return s;		
     }
     else if( TreePtr<LabelDeclaration> l = DynamicTreePtrCast<LabelDeclaration>(declaration) )
-        return DoRender( &l->identifier, Syntax::Production::PURE_IDENTIFIER, policy) + ":"; 
+        return DoRender( &l->identifier, Syntax::Production::PURE_IDENTIFIER, id_policy) + ":"; 
     
     return Render::Dispatch( declaration, surround_prod, policy );
 }
@@ -370,7 +374,9 @@ DEFAULT_CATCH_CLAUSE
 
 string CppRender::RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Policy policy ) try
 {
-    TRACE();   
+	Syntax::Policy id_policy = policy;
+	id_policy.resolve_identifier_scope = false;
+	
     string s = "\n{\n";
     bool first = true;
     for( TreePtr<Declaration> pe : record->members )
@@ -385,7 +391,7 @@ string CppRender::RenderEnumBody( TreePtr<CPPTree::Record> record, Syntax::Polic
             continue;
         }
         // We're really declaring the id, and don't want scope resolution
-        s += DoRender( &o->identifier, Syntax::Production::PURE_IDENTIFIER, policy ); 
+        s += DoRender( &o->identifier, Syntax::Production::PURE_IDENTIFIER, id_policy ); 
         
         auto ei = TreePtr<Expression>::DynamicCast( o->initialiser );
         if( !ei )

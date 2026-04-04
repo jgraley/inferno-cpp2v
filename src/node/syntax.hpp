@@ -112,7 +112,8 @@ public:
 			refuse_local_node_types(false),
 			full_render_code_unit(true),
 			definitions(nullptr),
-			can_split_instances(false) {}
+			can_split_instances(false),
+			resolve_identifier_scope(true) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
 		bool split_bulky_statics;
@@ -127,6 +128,7 @@ public:
 		bool full_render_code_unit;
 	    queue<shared_ptr<Syntax>> *definitions;
 		bool can_split_instances;
+		bool resolve_identifier_scope;
 		shared_ptr<Syntax> pointer_archetype;
 	};
 	
