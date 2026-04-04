@@ -198,7 +198,7 @@ static TreePtr<Statement> MakeResetAssignmentPattern()
 {
     auto ass = MakePatternNode<Assign>();
     auto decl = MakePatternNode<TransformOfAgent, InstanceIdentifier>( &DeclarationOf::instance );
-    decl->pattern = MakePatternNode<Automatic>();
+    decl->pattern = MakePatternNode<Local>();
     ass->operands = (decl, MakePatternNode<Literal>());    
     return ass;
 }
@@ -261,7 +261,7 @@ AddStateLabelVar::AddStateLabelVar()
     auto lr_goto = MakePatternNode<Goto>();
     auto sx_goto = MakePatternNode<Goto>();
     auto lr_assign = MakePatternNode<Assign>();
-    auto state_var = MakePatternNode<Automatic>();
+    auto state_var = MakePatternNode<Local>();
     auto sx_not = MakePatternNode<NegationAgent, Expression>();
     auto lsx_not = MakePatternNode<NegationAgent, Expression>();
     auto state_var_id = MakePatternNode< BuildSpecificInstanceIdentifierAgent >("state");
@@ -565,7 +565,7 @@ AddInferredYield::AddInferredYield()
     auto stmts = MakePatternNode<StarAgent, Statement>();
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
     auto over = MakePatternNode<DeltaAgent, Statement>();
-    auto flag_decl = MakePatternNode<Automatic>();
+    auto flag_decl = MakePatternNode<Local>();
     auto flag_id = MakePatternNode<InstanceIdentifier>();
     auto r_yield = MakePatternNode<WaitDelta>();
     auto loop = MakePatternNode<Loop>();
@@ -671,8 +671,8 @@ LoopRotation::LoopRotation()
     auto comp_loop_decls = MakePatternNode<StarAgent, Declaration>();
     auto comp_yield_decls = MakePatternNode<StarAgent, Declaration>();
     auto x_comp_decls = MakePatternNode<StarAgent, Declaration>();
-    auto s_cur_enum = MakePatternNode<Static>();
-    auto s_outer_enum = MakePatternNode<Static>();
+    auto s_cur_enum = MakePatternNode<Global>();
+    auto s_outer_enum = MakePatternNode<Global>();
     auto inits = MakePatternNode<StarAgent, Statement>();
     auto stmts = MakePatternNode<StarAgent, Statement>();
     auto prepre = MakePatternNode<StarAgent, Statement>();

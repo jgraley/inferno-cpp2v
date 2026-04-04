@@ -135,11 +135,11 @@ It is possible to place two star nodes consecutively in the sequence. In this ca
 
 A `Star` in a collection acts similarly as when in a sequence. However, since collections are unordered, the semantics differ slightly. A collection in a search pattern may only contain zero or one `Star` node. If a star node is present, it will try to match all nodes not matched by other (non-`Star`) elements of the collection. It is not possible to insert multiple `Star` nodes with different restrictions, though this feature may be added later.
 
-For example, the collection `(Star<Declaration>, Typedef, Static)` will match any collection of `Declaration`s that includes a `Typedef` and a `Static`, and these may appear in any order. 
+For example, the collection `(Star<Declaration>, Typedef, Global)` will match any collection of `Declaration`s that includes a `Typedef` and a `Global`, and these may appear in any order. 
 
 ### 4.3 Notes on collection matching
 
-To clarify, Vida Nova may use a non-order-preserving implementation to store collections, including ones in search and replace patterns. This means that the order in which elements are specified when constructing a Collection will not affect behaviour. So for example `(Static, Typedef, Star<Declaration>)` will be equivalent to the above example.
+To clarify, Vida Nova may use a non-order-preserving implementation to store collections, including ones in search and replace patterns. This means that the order in which elements are specified when constructing a Collection will not affect behaviour. So for example `(Global, Typedef, Star<Declaration>)` will be equivalent to the above example.
 
 Only one non-star pattern nodes in a collection can match a given input tree node, so the above example can only match collections in the input program that contain at least two elements.
 

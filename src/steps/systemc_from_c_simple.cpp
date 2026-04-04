@@ -26,7 +26,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 	auto r_scope = MakePatternNode< CodeUnit >();
 	auto r_gmodule = MakePatternNode< GlobalsModule >();
 	auto r_gmodule_tid = MakePatternNode<BuildSpecificTypeIdentifierAgent>("GlobalScope");
-	auto r_gmodule_inst = MakePatternNode< Static >();
+	auto r_gmodule_inst = MakePatternNode< Global >();
 	auto es_scope = MakePatternNode< CodeUnit >();
 	auto es_decls = MakePatternNode<StarAgent, Declaration>();
 	auto es_instance = MakePatternNode<Instance>();

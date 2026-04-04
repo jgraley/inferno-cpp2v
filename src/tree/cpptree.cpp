@@ -910,9 +910,9 @@ string Instance::RenderExtras( VN::RendererInterface *, Syntax::Policy )
 	return "";
 }
 
-//////////////////////////// Static //////////////////////////////
+//////////////////////////// Global //////////////////////////////
 
-string Static::RenderStorage( VN::RendererInterface *, Policy policy ) const 
+string Global::RenderStorage( VN::RendererInterface *, Policy policy ) const 
 { 
     if( policy.permit_static_keyword )
         return "static ";
@@ -921,7 +921,7 @@ string Static::RenderStorage( VN::RendererInterface *, Policy policy ) const
 }
 
 
-bool Static::ShouldSplitInstance( Policy policy ) const
+bool Global::ShouldSplitInstance( Policy policy ) const
 {
 	if( policy.split_bulky_statics )
 	{

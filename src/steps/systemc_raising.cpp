@@ -161,7 +161,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
     auto l_cdecls = MakePatternNode<StarAgent, Declaration>();
-    auto s_instance = MakePatternNode< Static >();
+    auto s_instance = MakePatternNode< Global >();
     auto ls_comp = MakePatternNode< Compound >();
     auto lr_comp = MakePatternNode< Compound >();
     auto l_module = MakePatternNode< Module >();
@@ -359,7 +359,7 @@ RemoveVoidInstances::RemoveVoidInstances()
     auto s_program = MakePatternNode<CodeUnit>();
     auto r_program = MakePatternNode<CodeUnit>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto s_instance = MakePatternNode<Static>();
+    auto s_instance = MakePatternNode<Global>();
     auto s_any = MakePatternNode<DisjunctionAgent, Type>();
     auto s_callable = MakePatternNode<CallableParams>();
     auto s_params = MakePatternNode<StarAgent, Parameter>();
@@ -385,19 +385,19 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto s_any = MakePatternNode<DisjunctionAgent, Instance>();
     
-    auto s_cease_inst = MakePatternNode<Static>();
+    auto s_cease_inst = MakePatternNode<Global>();
     auto s_cease_type = MakePatternNode<Function>();   
     auto s_cease_param = MakePatternNode<Parameter>();   
-    auto s_exit_inst = MakePatternNode<Static>();
+    auto s_exit_inst = MakePatternNode<Global>();
     auto s_exit_type = MakePatternNode<Function>();   
     auto s_exit_param = MakePatternNode<Parameter>();   
-    auto s_wait_inst = MakePatternNode<Static>();
+    auto s_wait_inst = MakePatternNode<Global>();
     auto s_wait_type = MakePatternNode<Function>();   
     auto s_wait_param = MakePatternNode<Parameter>();   
-    auto s_next_trigger_inst = MakePatternNode<Static>();
+    auto s_next_trigger_inst = MakePatternNode<Global>();
     auto s_next_trigger_type = MakePatternNode<Function>();   
     auto s_next_trigger_param = MakePatternNode<Parameter>();   
-    auto s_delta_count_inst = MakePatternNode<Static>();
+    auto s_delta_count_inst = MakePatternNode<Global>();
     auto s_delta_count_type = MakePatternNode<Function>();   
 
     auto s_unsigned_char = MakePatternNode<Unsigned>();   

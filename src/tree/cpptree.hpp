@@ -577,10 +577,9 @@ struct Instance : Declaration,
 };
 
 /// A variable or function with one instance across the entire program. 
-/** This includes extern and
- static scope for globals, as well as static locals. If a Static variable is Const, then it may be
- regarded as a compile-time constant. A static constant function may be regarded as idempotent. */
-struct Static : Instance
+/** This includes extern and static scope for globals. If a Global variable is Const, then it may be
+ regarded as a compile-time constant. */
+struct Global : Instance
 {
     NODE_FUNCTIONS_FINAL
     
@@ -592,8 +591,8 @@ struct Static : Instance
 /** A variable or function with one instance for each object of the containing class, ie
  non-static members. Functions have a "this" pointer. Note that access and constancy
  are intended to control the generation of read/write lines for modules. This usage of
- Constancy differs from that in Static, so we do not try to introduce a common intermediate.
- Note that static members are Static, not Field */
+ Constancy differs from that in Global, so we do not try to introduce a common intermediate.
+ Note that static members are Global, not Field */
 struct Field : Instance,
                MembInitSeq
 {
@@ -608,9 +607,8 @@ struct Field : Instance,
 
 /// A local variable with automatic allocation
 /** A variable with one instance for each *invocation* of a function, ie
-    non-static locals. Safe across recursion. Note that static locals
-    are Static, not Automatic. */
-struct Automatic : Instance
+    non-static locals. Safe across recursion. */
+struct Local : Instance
 {
     NODE_FUNCTIONS_FINAL
 };
@@ -626,7 +624,7 @@ struct Parameter : Instance
 /// A local temp variable not preserved across function calls
 /** A local variable with unspecified storage which may be used within a function but is not preserved
  across recursion or between calls (such a variable could safely be implemented as any of
- Static, Field or Automatic since it supports only those guarantees common to all). */
+ Global, Field or Local since it supports only those guarantees common to all). */
 // TODO Really a local node, move out of here
 struct Temporary : Instance
 {
@@ -959,7 +957,7 @@ struct Typedef : TypeDeclaration
 
 /// Intermediate for declaration of a struct, class, union or enum. 
 /** The set of member Declaration (which will be Field
- or Static) is in the Scope. They can be variables/objects in all 
+ or Global) is in the Scope. They can be variables/objects in all 
  cases and additionally Callable instances in Struct/Class. */
 struct Record : TypeDeclaration,
                 DeclScope // Member declarations go in here
@@ -1139,7 +1137,7 @@ struct This : Operator
 struct Globality : Property { NODE_FUNCTIONS };
 
 /// Property indicating ::new/::delete was used
-struct Global : Globality { NODE_FUNCTIONS_FINAL }; 
+struct IsGlobal : Globality { NODE_FUNCTIONS_FINAL }; 
 
 /// Property indicating just new/delete, no :: was used
 struct NonGlobal : Globality { NODE_FUNCTIONS_FINAL }; 

@@ -508,7 +508,7 @@ private:
 
             if (automatic)
             {
-                o = MakeTreeNode<Automatic>();
+                o = MakeTreeNode<Local>();
             }
             else
             {
@@ -534,20 +534,20 @@ private:
                     }
                     else if (S->getFnParent()) // in code
                     {
-                        o = MakeTreeNode<Automatic> ();
+                        o = MakeTreeNode<Local> ();
                     }
                     else // top level
                     {
-                        o = MakeTreeNode<Static> ();
+                        o = MakeTreeNode<Global> ();
                     }
                     break;
                 }
                 case clang::DeclSpec::SCS_auto:
-                    o = MakeTreeNode<Automatic> ();
+                    o = MakeTreeNode<Local> ();
                     break;
                 case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
                 case clang::DeclSpec::SCS_static:
-                    o = MakeTreeNode<Static> ();                    
+                    o = MakeTreeNode<Global> ();                    
                     break;
                 default:
                     ASSERTFAIL("Unsupported storage class");
@@ -1879,7 +1879,7 @@ private:
     {
         TreePtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
         TreePtr<Enum> e( DynamicTreePtrCast<Enum>(d) );
-        auto o = MakeTreeNode<Static>();
+        auto o = MakeTreeNode<Global>();
         all_decls->members.insert(o);
         o->identifier = CreateInstanceIdentifier(Id);
         o->constancy = MakeTreeNode<Const>(); // static const member need not consume storage!!

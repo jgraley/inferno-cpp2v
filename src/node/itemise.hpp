@@ -45,7 +45,7 @@ public:
     template< class ITEMISE_TYPE >
     inline static vector< uintptr_t > ItemiseImpl( const ITEMISE_TYPE *itemise_archetype )
     {
-        //TRACES("Static itemise %s ", typeid(*itemise_archetype).name() );
+        //TRACES("static itemise %s ", typeid(*itemise_archetype).name() );
         (void)itemise_archetype;
         ITEMISE_TYPE d( *itemise_archetype );
         ITEMISE_TYPE s( *itemise_archetype );

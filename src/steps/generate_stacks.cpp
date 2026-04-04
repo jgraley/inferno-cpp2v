@@ -75,7 +75,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     retval->pattern = type;
     
     // Restrict the search to returns that have an automatic variable under them
-    auto cs_stuff = MakePatternNode<StuffAgent, Expression>(); // TODO the exclusion Stuff<GetDec<Automatic>> is too strong;
+    auto cs_stuff = MakePatternNode<StuffAgent, Expression>(); // TODO the exclusion Stuff<GetDec<Local>> is too strong;
                                                                     // use Not<GetDec<Temp>>
     s_and->conjuncts = ( retval, cs_stuff );
     auto cs_id = MakePatternNode<TransformOfAgent, InstanceIdentifier>( &DeclarationOf::instance );
@@ -318,7 +318,7 @@ ParamsViaTemps::ParamsViaTemps()
     auto mr_args = MakePatternNode<MapArgumentation>();
     auto ms_operand = MakePatternNode<IdValuePair>();
     auto m_operands = MakePatternNode<StarAgent, IdValuePair>();
-    auto r_param = MakePatternNode<Automatic>();
+    auto r_param = MakePatternNode<Local>();
     auto param_type = MakePatternNode<Type>();
     auto r_temp = MakePatternNode<Temporary>();
     auto mr_assign = MakePatternNode<Assign>();
@@ -404,8 +404,8 @@ GenerateStacks::GenerateStacks()
     auto cs_stuff = MakePatternNode<StuffAgent, Compound>();
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
     auto over = MakePatternNode<DeltaAgent, Declaration>();
-    auto cs_instance = MakePatternNode<Automatic>();
-    auto s_instance = MakePatternNode<Automatic>();
+    auto cs_instance = MakePatternNode<Local>();
+    auto s_instance = MakePatternNode<Local>();
     auto r_index = MakePatternNode<Field>();
     auto r_instance = MakePatternNode<Field>();
     auto r_index_type = MakePatternNode<Unsigned>();

@@ -150,7 +150,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
 
 	l1r_args->arguments = (l1r_arg);
 	l1r_arg->source =  tid;                    
-    // Static decl of our module: init to call
+    // static decl of our module: init to call
     // Not fields: they can't have constructor calls as intiialisers
     l2_conjunction->conjuncts = (l2_instance, l2_negation);
     l2_negation->negand = MakePatternNode<Field>();

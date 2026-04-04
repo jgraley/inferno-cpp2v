@@ -45,7 +45,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_over_enum = MakePatternNode<DeltaAgent, Enum>();
     auto ls_enum = MakePatternNode<Enum>();
     auto lr_enum = MakePatternNode<Enum>();
-    auto lr_state_decl = MakePatternNode<Static>();
+    auto lr_state_decl = MakePatternNode<Global>();
     auto lr_state_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_STATE_%s");
     auto lr_case = MakePatternNode<Case>();
     auto lr_int = MakePatternNode<Signed>();
@@ -72,8 +72,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto m_stuff_func = MakePatternNode<StuffAgent, Scope>();
     auto l_module = MakePatternNode<DeclScope>();
     auto l_func = MakePatternNode<Field>();
-    auto r_lmap = MakePatternNode<Static>();
-    auto l_lmap = MakePatternNode<Static>();
+    auto r_lmap = MakePatternNode<Global>();
+    auto l_lmap = MakePatternNode<Global>();
     auto r_lmap_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("lmap");
     auto r_array = MakePatternNode<Array>();
     auto r_make = MakePatternNode<ArrayInitialiser>();
@@ -196,7 +196,7 @@ LabelTypeToEnum::LabelTypeToEnum()
     auto stuff_labeley = MakePatternNode<StuffAgent, Scope>();
     auto stuff_lmap = MakePatternNode<StuffAgent, Scope>();
     auto labeley = MakePatternNode<Labeley>();
-    auto lmap = MakePatternNode<Static>();
+    auto lmap = MakePatternNode<Global>();
     auto lmap_const = MakePatternNode<Const>();
     auto lmap_type = MakePatternNode<Array>();
     auto lmap_id = MakePatternNode<InstanceIdentifier>();
@@ -268,7 +268,7 @@ AddStateEnumVar::AddStateEnumVar()
     auto lr_goto = MakePatternNode<Goto>();
     auto s_goto = MakePatternNode<Goto>();
     auto lr_assign = MakePatternNode<Assign>();
-    auto state_var = MakePatternNode<Automatic>();
+    auto state_var = MakePatternNode<Local>();
     auto lx_not = MakePatternNode<NegationAgent, Expression>();
     auto state_var_id = MakePatternNode< BuildSpecificInstanceIdentifierAgent >("state");
     auto s_gg = MakePatternNode<GreenGrassAgent, Compound>();

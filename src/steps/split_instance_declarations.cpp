@@ -13,8 +13,8 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     // with an uninitialised decl and an assign. Put the new decl in the 
     // decls section of the compound.
     auto sc = MakePatternNode<Compound>();
-    auto si = MakePatternNode<Automatic>();
-    auto over = MakePatternNode<DeltaAgent, Automatic>();
+    auto si = MakePatternNode<Local>();
+    auto over = MakePatternNode<DeltaAgent, Local>();
     si->identifier = MakePatternNode<InstanceIdentifier>();  // Only acting on initialised Instances
     si->initialiser = MakePatternNode<Expression>();  // Only acting on initialised Instances
     auto decls = MakePatternNode<StarAgent, Declaration>();
@@ -24,7 +24,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     sc->statements = ( pre, over, post );
 
     auto rc = MakePatternNode<Compound>();
-    auto ri = MakePatternNode<Automatic>();
+    auto ri = MakePatternNode<Local>();
     over->through = si;
     over->overlay = ri;
     ri->initialiser = MakePatternNode<Uninitialised>();
@@ -41,7 +41,7 @@ MoveInstanceDeclarations::MoveInstanceDeclarations()
 {    
     // Just move the decl to the decls collection
     auto sc = MakePatternNode<Compound>();
-    auto var = MakePatternNode<Automatic>();
+    auto var = MakePatternNode<Local>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     sc->members = ( decls );
     auto pre = MakePatternNode<StarAgent, Statement>();
