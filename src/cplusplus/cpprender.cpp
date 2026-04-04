@@ -161,7 +161,7 @@ string CppRender::RenderScopeResolvingPrefix( TreePtr<Node> node, Syntax::Policy
     else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
         return RenderScopeResolvingPrefix( e->identifier, policy );    // omit scope for the enum itself
     else if( auto r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
-        return r->identifier->GetRender(this, Syntax::Production::RESOLVER, policy) + "::";
+        return r->identifier->GetRender(this, Syntax::Production::PRIMARY_EXPR, policy) + "::"; 
     else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
              DynamicTreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
              DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body

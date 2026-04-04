@@ -1109,6 +1109,9 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 
 // Note: 🞊  《》 ⸨⸩ are free now
 
+// Labels an &&: use policy, as seen with resolvers, and get rid of PURE_IDENTIFIER (now only used to control && generation)
+
+
 // 
 // NOTE
 // Lots of conflicts incl around declarators resolved by making pre-restriction refuse to switch between

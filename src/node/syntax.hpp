@@ -89,8 +89,7 @@ public:
 		
 		// ----- Abstract, lexer-ish productions of no particuler kind
 		EXPLICIT_NODE = 100, // Eg ⯁MyNode⦅...⦆
-		RESOLVER, // :: in C++	
-		PURE_IDENTIFIER, // Higher than expr because could be a type, label etc
+		PURE_IDENTIFIER, // Now only for a label id without dereference (&&)
 		KEYWORD, // Lexer tokens of any kind (other than type or expression)
 		ANONYMOUS,
 		NULLPTR // NULL in a pattern as a singluar wildcard

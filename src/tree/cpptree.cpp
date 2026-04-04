@@ -304,7 +304,7 @@ string SpecificIdentifier::GetRenderWithoutScope( VN::RendererInterface *rendere
 
 Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
 { 
-	return Production::PURE_IDENTIFIER; 
+	return Production::PRIMARY_EXPR; 
 }
 
 
@@ -320,7 +320,7 @@ Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
 string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy )
 {
 	Syntax::Policy id_policy = policy;
-	id_policy.resolve_identifier_scope = false;
+	id_policy.resolve_identifier_scope = false;// prevents scope resolution
 	auto me = TreePtr<SpecificConstructorIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
 	ASSERT(me);		
 	
@@ -329,7 +329,7 @@ string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterfa
     if( !rec )
 		throw Unimplemented(); // Constructor must be declared in a record       
 		
-    return renderer->DoRender( &rec->identifier, Production::PRIMARY_EXPR, id_policy );	// PURE_IDENTIFIER prevents scope resolution
+    return renderer->DoRender( &rec->identifier, Production::PRIMARY_EXPR, id_policy );	
 }
 
 //////////////////////////// SpecificDestructorIdentifier //////////////////////////////
@@ -337,7 +337,7 @@ string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterfa
 string SpecificDestructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy )
 {
 	Syntax::Policy id_policy = policy;
-	id_policy.resolve_identifier_scope = false;
+	id_policy.resolve_identifier_scope = false; // prevents scope resolution
 	auto me = TreePtr<SpecificDestructorIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
 	ASSERT(me);		
 	
@@ -347,14 +347,14 @@ string SpecificDestructorIdentifier::GetRenderWithoutScope( VN::RendererInterfac
 		throw Unimplemented(); // Constructor must be declared in a record    
 		   
     return "~" + 
-           renderer->DoRender( &rec->identifier, Production::PRIMARY_EXPR, id_policy );	// PURE_IDENTIFIER prevents scope resolution
+           renderer->DoRender( &rec->identifier, Production::PRIMARY_EXPR, id_policy );	
 }
 
 //////////////////////////// TypeIdentifier //////////////////////////////
 
 Syntax::Production TypeIdentifier::GetMyProductionTerminal() const
 { 
-	return Production::PURE_IDENTIFIER; 
+	return Production::PRIMARY_EXPR; 
 }
 
 //////////////////////////// SpecificTypeIdentifier //////////////////////////////
@@ -368,8 +368,8 @@ string SpecificTypeIdentifier::GetRender( VN::RendererInterface *renderer, Produ
 
 string SpecificTypeIdentifier::GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy )
 {
-	// Yes to scope resolution, otherwise we drop scope reolution on type usages
-	return SpecificIdentifier::GetRender(renderer, Production::RESOLVER, policy);
+	// Yes to scope resolution, otherwise we drop scope resolution on type usages
+	return SpecificIdentifier::GetRender(renderer, Production::PRIMARY_EXPR, policy); 
 }
 
 //////////////////////////// IdValuePair ///////////////////////////////
@@ -838,15 +838,13 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
     list<string> ls;
     if( policy.compound_uses_vn_separator ) // TODO hack, please remove
 		throw RefusedByPolicy();
-    
-    Production proto_prod = policy.force_initialisation ? Production::RESOLVER : Production::PRIMARY_EXPR;
-    
+        
     if( !policy.force_initialisation )
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
     
     bool constant = !!DynamicTreePtrCast<Const>(constancy);
-    string declarator = renderer->DoRender( &identifier, proto_prod, id_policy );
-    Append( ls, {renderer->DoRenderTypeAndDeclarator(type, declarator, proto_prod, Production::BARE_STMT_DECL, sub_policy, constant) } );
+    string declarator = renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy );
+    Append( ls, {renderer->DoRenderTypeAndDeclarator(type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, constant) } );
 
     if( !policy.force_initialisation )
 		Append( ls, RenderDeclSpecPost(renderer, sub_policy) );
@@ -970,7 +968,7 @@ string SpecificLabelIdentifier::GetRender( VN::RendererInterface *renderer, Prod
 	    surround_prod < Syntax::Production::PURE_IDENTIFIER ) // Don't add && in a label declaration
 	{
 		// label-as-variable (GCC extension)  
-		return "&&" + SpecificIdentifier::GetRender( renderer, Syntax::Production::RESOLVER, policy );
+		return "&&" + SpecificIdentifier::GetRender( renderer, Syntax::Production::PRIMARY_EXPR, policy );
 	}		   
     
     return SpecificIdentifier::GetRender( renderer, surround_prod, policy );
@@ -1013,7 +1011,6 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 {
 	Syntax::Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
-	Syntax::Production starting_declarator_prod = Syntax::Production::PURE_IDENTIFIER;
 		
     list<string> strings;
     for( auto d : params )
@@ -2029,7 +2026,7 @@ string Nop::GetRender( VN::RendererInterface *, Production, Policy )
 
 Syntax::Production PreprocessorIdentifier::GetMyProductionTerminal() const
 { 
-	return Production::PURE_IDENTIFIER; 
+	return Production::PRIMARY_EXPR; 
 }
 
 //////////////////////////// MacroField ///////////////////////////////

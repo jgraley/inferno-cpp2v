@@ -511,7 +511,7 @@ type_build_id_op_named 		: builder_id_op_scope resolved_type_name			{ $$ = $2.as
 type_specifier_seq	: TYPE_SPECIFIER												{ $$.insert($1); }
 					| TYPE_SPECIFIER type_specifier_seq								{ $$ = $2; $$.insert($1); }
 
-//////////////////////////////////////// RESOLVER GLUE /////////////////////////////////////////////
+//////////////////////////////////////// RECOGNISER GLUE /////////////////////////////////////////////
 // 2 things going on here:
 // - Recogniser can only supply one token, but we can "or" them together using rules.
 // - We create Gnomons and give them to the recogniser - their lifetime indicates scopes.
