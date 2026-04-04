@@ -195,6 +195,27 @@ struct InstanceIdentifier : Identifier,
 	Production GetMyProductionTerminal() const override;
 };
                                
+
+// Constructors and destructors have identifiers because the tree is "resolved" which means
+// we already know exactly which decl a function call should reach. Mediating the relationship via
+// identifiers allows patterns to use couplings to get from usage to decl. These 
+// identifiers render differently: where the name would go you have [Scope::][~]Class
+// TODO we don't want the name we inherit from SpecificIdentifier so split a NamedIdentifier 
+// out and use for named cases, but not these.
+/// Identifier for a Constructor                     
+struct ConstructorIdentifier : InstanceIdentifier
+{
+    NODE_FUNCTIONS_FINAL
+};
+
+
+/// Identifier for a Constructor                     
+struct DestructorIdentifier : InstanceIdentifier
+{
+    NODE_FUNCTIONS_FINAL
+};
+
+
 /// Identifier for a specific Instance, linked to by a particular Declaration                           
 struct SpecificInstanceIdentifier : InstanceIdentifier,
                                     SpecificIdentifier
@@ -207,7 +228,7 @@ struct SpecificInstanceIdentifier : InstanceIdentifier,
                             
 
 /// Identifier for a specific Constructor                     
-struct SpecificConstructorIdentifier : InstanceIdentifier,
+struct SpecificConstructorIdentifier : ConstructorIdentifier,
                                        SpecificIdentifier
 {
     NODE_FUNCTIONS_FINAL
@@ -216,7 +237,7 @@ struct SpecificConstructorIdentifier : InstanceIdentifier,
                             
 
 /// Identifier for a specific Constructor                     
-struct SpecificDestructorIdentifier : InstanceIdentifier,
+struct SpecificDestructorIdentifier : DestructorIdentifier,
                                       SpecificIdentifier
 {
     NODE_FUNCTIONS_FINAL

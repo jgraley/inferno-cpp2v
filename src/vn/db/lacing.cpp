@@ -59,6 +59,8 @@ void Lacing::FixupCategories(const CategorySet &raw_categories_)
             if( Node::IsEquivalentCategory(*x, *y) )
             {
                 unique = false;
+                if( TreePtr<CPPTree::SpecificIdentifier>::DynamicCast(y) )
+					FTRACE("Discard ")(y)(" as equaivalent to ")(x)("\n");
             }
             else
             {
@@ -74,9 +76,7 @@ void Lacing::FixupCategories(const CategorySet &raw_categories_)
             categories.insert(x);
 		}
     }
-    
-    
-
+ 
     // We need to process a NULL category that includes all the X tree
     // nodes that don't fall into any of the supplied categories. It's
     // a disjoint category: no strict supers or subs.

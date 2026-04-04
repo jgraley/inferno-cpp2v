@@ -300,6 +300,7 @@ string SpecificIdentifier::GetRenderWithoutScope( VN::RendererInterface *rendere
     return s;
 }
 
+
 //////////////////////////// InstanceIdentifier //////////////////////////////
 
 Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
@@ -845,6 +846,12 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 	Syntax::Policy id_policy = sub_policy;
 	if( !policy.force_initialisation )
 		id_policy.resolve_identifier_scope = false;
+
+	// Demand consistency between type and identifier
+	if( TreePtr<Constructor>::DynamicCast(type) )
+		ASSERT( !identifier || TreePtr<ConstructorIdentifier>::DynamicCast(identifier) )(identifier);
+	if( TreePtr<Destructor>::DynamicCast(type) )
+		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);
 
     list<string> ls;
     if( policy.compound_uses_vn_separator ) // TODO hack, please remove

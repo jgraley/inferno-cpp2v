@@ -178,7 +178,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto ls_id = MakePatternNode< InstanceIdentifier >();
     auto l_bases = MakePatternNode<StarAgent, Base>();
     auto l_ctype = MakePatternNode<Constructor>();
-    auto l_ident = MakePatternNode<InstanceIdentifier>();
+    auto l_ident = MakePatternNode<ConstructorIdentifier>();
     auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( lr_scprocess->GetLoweredIdName() ); 
     auto s_arg_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "func" );
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, l_module, l_module );            
@@ -301,7 +301,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l_post = MakePatternNode<StarAgent, MembInitialisation>();
     auto s_cons = MakePatternNode< Field >();
     auto s_comp = MakePatternNode< Compound >();
-    auto s_constructor_id = MakePatternNode< InstanceIdentifier >();
+    auto s_constructor_id = MakePatternNode< ConstructorIdentifier >();
     auto s_ctype = MakePatternNode<Constructor>();
     auto ls_ctype = MakePatternNode<Constructor>();
     auto s_params = MakePatternNode<StarAgent, Parameter>();
