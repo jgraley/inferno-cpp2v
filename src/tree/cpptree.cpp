@@ -231,17 +231,12 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 }
 
 
-string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy) 
+string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production, Policy policy) 
 {		
 	// Vcall on what kind of id this is
 	string s = GetRenderWithoutScope(renderer, policy);          
 
-    // Slight cheat for expediency: if a PURE_IDENTIFIER is expected, suppress scope resolution.
-    // This could lead to the rendering of identifiers in the wrong scope. But, most PURE_IDENTIFIER
-    // uses are declaring the id, or otherwise can't cope with the :: anyway. 
-    ASSERT( policy.resolve_identifier_scope==(surround_prod < Syntax::Production::PURE_IDENTIFIER) )
-		  (policy.resolve_identifier_scope)(" ")((int)surround_prod);
-    if( surround_prod < Syntax::Production::PURE_IDENTIFIER && policy.resolve_identifier_scope) 
+    if( policy.resolve_identifier_scope) 
     {
 		auto me = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
 		ASSERT(me);			
