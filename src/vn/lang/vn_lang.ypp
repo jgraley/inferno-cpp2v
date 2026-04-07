@@ -149,8 +149,9 @@ stmt_high
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expr_expression vn_primary vn_paren expr_id_value vn_wildcard
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_disjunction type_conjunction type_vn_prim type_with_ab
-%type <TreePtr<Node>> 				unified unified_prefix
-%type <TreePtr<Node>> 				bare_stmt_decl stmt_decl_nc stmt_decl norm_primary        
+%type <TreePtr<Node>> 				unified unified_prefix norm_primary
+%type <TreePtr<Node>> 				bare_statement statement_nc stmt_decl         
+%type <TreePtr<Node>> 				bare_declaration declaration
 %type <TreePtr<Node>>				cons_or_des_type 
 %type <TreePtr<Node>> 				compound compound_primary parameter type_id compound_prefix 
 %type <TreePtr<Node>> 				type_for_declarator 
@@ -267,44 +268,50 @@ compound_primary	: '{' VN_SEP '}'                   						{ $$ = vn->OnCompound(
 					| '{' stmt_decls VN_SEP stmt_decls '}'  				{ $$ = vn->OnCompound($2, @2, $4, @4); }
 					| CODE_UNIT '{' stmt_decls '}' 							{ $$ = vn->OnCodeUnit($3, @3); }
 
-//////////////////////////////// STATEMENTS/DECLARATIONS ////////////////////////////////////         
-
 stmt_decls	: stmt_decl														{ $$.push_back($1); }
 			| stmt_decl stmt_decls											{ $$ = $2; $$.push_front($1); }
-         
-stmt_decl	: compound 
-			| stmt_decl_nc %prec ';'
-			| ';'															{ $$ = vn->OnNop(@1); }      
-					
-// _nc here means "not a compound"							
-stmt_decl_nc: bare_stmt_decl ';'													{ $$ = $1; }      
-			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_decl				{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
-			| WHILE_KEYWORD '(' expr_expression ')' stmt_decl 						{ $$ = vn->OnWhile($3, @3, $5, @5); }
-			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_decl	
-			  %prec KEYWORD_ARGS_BODY_CHAIN_STMT									{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
-			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_decl
-			  CHAINING_KEYWORD stmt_decl											{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
-			| type_for_declarator declarator compound								{ $$ = vn->OnDeclaration({}, $1, $2, @2, $3); }	
-			| qualifiers type_for_declarator declarator compound					{ $$ = vn->OnDeclaration($1, $2, $3, @3, $4); }	
-			| XSTRUCTOR declarator compound											{ $$ = vn->OnDeclaration({}, nullptr, $2, @2, $3); }	
-			| qualifiers XSTRUCTOR declarator compound								{ $$ = vn->OnDeclaration($1, nullptr, $3, @3, $4); }	
-			| expr_expression ':'													{ $$ = vn->OnLabel($1, @1); } 
-			| CASE_KEYWORD expr_expression ':'										{ $$ = vn->OnCase($2, @2); } 
-			| CASE_KEYWORD expr_expression RANGE_OP expr_expression ':'				{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
-			| DEFAULT_KEYWORD ':'													{ $$ = vn->OnDefault(@$); } 
+
+//////////////////////////////// DECLARATIONS ////////////////////////////////////         
+
+declaration	: bare_declaration ';'											{ $$ = $1; }      
+			| type_for_declarator declarator compound						{ $$ = vn->OnDeclaration({}, $1, $2, @2, $3); }	
+			| qualifiers type_for_declarator declarator compound			{ $$ = vn->OnDeclaration($1, $2, $3, @3, $4); }	
+			| XSTRUCTOR declarator compound									{ $$ = vn->OnDeclaration({}, nullptr, $2, @2, $3); }	
+			| qualifiers XSTRUCTOR declarator compound						{ $$ = vn->OnDeclaration($1, nullptr, $3, @3, $4); }	
 			| access_spec_nw ':' 										                                        
 
-bare_stmt_decl	: expr_expression
-				| KEYWORD_SIMPLE_STMT											{ $$ = vn->OnSimpleStmt($1.as_ascii, @1); }
-				| KEYWORD_SPACE_SEP_STMT expr_expression						{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
-				| DO_KEYWORD stmt_decl WHILE_KEYWORD '(' expr_expression ')' 	{ $$ = vn->OnDo($2, @2, $5, @5); }
-				| type_for_declarator declarator								{ $$ = vn->OnDeclaration({}, $1, $2, @2); }	
+bare_declaration: type_for_declarator declarator								{ $$ = vn->OnDeclaration({}, $1, $2, @2); }	
 				| qualifiers type_for_declarator declarator						{ $$ = vn->OnDeclaration($1, $2, $3, @3); }	
 				| type_for_declarator declarator ANY_NODE_OP					{ $$ = vn->OnDeclaration({}, $1, $2, @2, nullptr); } // note: ☆ has ; but no =
 				| qualifiers type_for_declarator declarator ANY_NODE_OP			{ $$ = vn->OnDeclaration($1, $2, $3, @3, nullptr); }
 				| type_for_declarator declarator C_ASSIGN expr_expression			 { $$ = vn->OnDeclaration({}, $1, $2, @2, $4); } // note: ☆ has ; but no =
 				| qualifiers type_for_declarator declarator C_ASSIGN expr_expression { $$ = vn->OnDeclaration($1, $2, $3, @3, $5); }
 				| class_spec		
+
+//////////////////////////////// STATEMENTS ////////////////////////////////////         
+         
+stmt_decl	: compound 
+			| statement_nc %prec ';'
+			| expr_expression ';'
+			| declaration 
+			| ';'															{ $$ = vn->OnNop(@1); }      
+					
+// _nc here means "not a compound"							
+statement_nc: bare_statement ';'													{ $$ = $1; }      
+			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_decl				{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
+			| WHILE_KEYWORD '(' expr_expression ')' stmt_decl 						{ $$ = vn->OnWhile($3, @3, $5, @5); }
+			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_decl	
+			  %prec KEYWORD_ARGS_BODY_CHAIN_STMT									{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
+			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_decl
+			  CHAINING_KEYWORD stmt_decl											{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
+			| expr_expression ':'													{ $$ = vn->OnLabel($1, @1); } 
+			| CASE_KEYWORD expr_expression ':'										{ $$ = vn->OnCase($2, @2); } 
+			| CASE_KEYWORD expr_expression RANGE_OP expr_expression ':'				{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
+			| DEFAULT_KEYWORD ':'													{ $$ = vn->OnDefault(@$); } 
+
+bare_statement	: KEYWORD_SIMPLE_STMT											{ $$ = vn->OnSimpleStmt($1.as_ascii, @1); }
+				| KEYWORD_SPACE_SEP_STMT expr_expression						{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
+				| DO_KEYWORD stmt_decl WHILE_KEYWORD '(' expr_expression ')' 	{ $$ = vn->OnDo($2, @2, $5, @5); }
 
 semicolon_args	: expr_expression											{ $$.push_back($1); }
 				| semicolon_args ';' expr_expression						{ $$ = $1; $$.push_back($3); }
