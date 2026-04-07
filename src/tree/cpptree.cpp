@@ -300,7 +300,6 @@ string SpecificIdentifier::GetRenderWithoutScope( VN::RendererInterface *rendere
     return s;
 }
 
-
 //////////////////////////// InstanceIdentifier //////////////////////////////
 
 Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
@@ -322,10 +321,8 @@ string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterfa
 {
 	Syntax::Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;// prevents scope resolution
-	auto me = TreePtr<SpecificConstructorIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
-	ASSERT(me);		
+	auto me = TreePtr<Node>(shared_from_this());		
 	
-    // TODO use TryGetRecordDeclaration( Typeof( o->identifier ) ) and leave scopes out of it
     TreePtr<Record> rec = DynamicTreePtrCast<Record>( renderer->TryGetScope( me ) );
     if( !rec )
 		throw Unimplemented(); // Constructor must be declared in a record       
@@ -339,10 +336,8 @@ string SpecificDestructorIdentifier::GetRenderWithoutScope( VN::RendererInterfac
 {
 	Syntax::Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // prevents scope resolution
-	auto me = TreePtr<SpecificDestructorIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
-	ASSERT(me);		
+	auto me = TreePtr<Node>(shared_from_this());	
 	
-    // TODO use TryGetRecordDeclaration( Typeof( o->identifier ) ) and leave scopes out of it
     TreePtr<Record> rec = DynamicTreePtrCast<Record>( renderer->TryGetScope( me ) );
     if( !rec )
 		throw Unimplemented(); // Constructor must be declared in a record    
@@ -885,7 +880,11 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 	}		
 
 	if( auto mis = dynamic_cast<MembInitSeq *>(this) )
+	{
 		Append( ls, { mis->RenderMemberInits(renderer, sub_policy) } );							
+		if( policy.compound_uses_vn_separator ) // TODO hack, please remove
+			throw RefusedByPolicy(); 
+	}
 
 	Append( ls, { renderer->DoRender(&initialiser, Production::INITIALISER, sub_policy) } );
 
@@ -1073,22 +1072,25 @@ string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer,
 												Syntax::Production , Syntax::Production, Syntax::Policy policy,
 												bool )
 {
-	if( declarator.empty() )
-		return "⨤" + GetRenderParameterisation(renderer, policy); // anonymous
+	if( policy.use_vn_xstructor_symbol )
+		return "⨤" + declarator + GetRenderParameterisation(renderer, policy); 
 	else
-		return declarator + GetRenderParameterisation(renderer, policy); // working correctly for output render
+		return declarator + GetRenderParameterisation(renderer, policy); 
 }
 
 //////////////////////////// Destructor //////////////////////////////
 
 string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *, string declarator, 
-											   Syntax::Production , Syntax::Production, Syntax::Policy,
+											   Syntax::Production , Syntax::Production, Syntax::Policy policy,
 											   bool )
 {
 	if( declarator.empty() )
-		return "~()"; // anonymoius
+		declarator = "~";
+	
+	if( policy.use_vn_xstructor_symbol )
+		return "⨤" + declarator + "()"; 
 	else
-		return declarator + "()"; // working correctly for output render
+		return declarator + "()"; 
 }
 
 //////////////////////////// Array //////////////////////////////

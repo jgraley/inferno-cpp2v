@@ -112,7 +112,8 @@ public:
 			full_render_code_unit(true),
 			definitions(nullptr),
 			can_split_instances(false),
-			resolve_identifier_scope(true) {}
+			resolve_identifier_scope(true),
+			use_vn_xstructor_symbol(true) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
 		bool split_bulky_statics;
@@ -128,6 +129,7 @@ public:
 	    queue<shared_ptr<Syntax>> *definitions;
 		bool can_split_instances;
 		bool resolve_identifier_scope;
+		bool use_vn_xstructor_symbol;
 		shared_ptr<Syntax> pointer_archetype;
 	};
 	

@@ -648,7 +648,7 @@ TreePtr<Node> VNLangActions::OnFunction( TreePtr<Node> return_type, list<TreePtr
 }
 
 
-TreePtr<Node> VNLangActions::OnConstructor( list<TreePtr<Node>> params )
+TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 {
 	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Constructor>>();
 	for( auto p : params )
@@ -1134,11 +1134,12 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 
 // Labels an &&: use policy, as seen with resolvers, and get rid of PURE_IDENTIFIER (now only used to control && generation)
 
-// Constructors:
-// See Constructor::GetRenderTypeAndDeclarator() and Destructor::GetRenderTypeAndDeclarator
-// These are working correctly for output render, so where are the calls coming from with the class name
-// corectly provided as the declarator?
-
+// Constructors etc:
+// - Fix parse of my_type ( my_instanceidentifier ∧ ‽InstanceIdentifier ¬globals ) my_initialiser;
+//   - Good example of VN stuff in a decl: ∧ has caused () but parser don't like ( when expecting identifier here
+// - Fix remaining mis-parses with Instance::GetRender() enabled
+// - Fill in OnDeclaration() properly and pass parser test
+// - Re-enable render of member inits (MembInitSeq) and add parsing ability
 
 // 
 // NOTE

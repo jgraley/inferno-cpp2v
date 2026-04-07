@@ -71,7 +71,7 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 🄽				{ return YY::VNLangParser::make_BUILD_SIZE_OP(location()); };
 §				{ return YY::VNLangParser::make_STRINGIZE_OP(location()); };
 ‽ 				{ return YY::VNLangParser::make_PRERESTRICT_OP(location()); };
-⨤				{ return YY::VNLangParser::make_CONSTRUCTOR(location()); };
+⨤				{ return YY::VNLangParser::make_XSTRUCTOR(location()); };
 ⍑ 				{ return YY::VNLangParser::make_TYPE_INDICATOR(location()); };
 ∞ 				{ return YY::VNLangParser::make_CODE_UNIT(location()); };
 

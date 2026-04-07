@@ -87,7 +87,9 @@ Syntax::Policy CppRender::GetDefaultPolicy()
 	
 	// This can be necessary to resolve dependencies or at least produce readable code
 	policy.can_split_instances = true;
-	
+		
+	// Render constructors and destructors per C++ standard
+	policy.use_vn_xstructor_symbol = false;
 	return policy;
 }
 
