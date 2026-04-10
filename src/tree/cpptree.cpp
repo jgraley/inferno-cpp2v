@@ -1208,23 +1208,17 @@ Syntax::Production Numeric::GetMyProductionTerminal() const
 //////////////////////////// Integral ///////////////////////////////
 
 string Integral::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                             Syntax::Production, Syntax::Production, Syntax::Policy policy,
+                                             Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                              bool constant)
 {
     int64_t width_val;
     auto ic = DynamicTreePtrCast<SpecificInteger>( width );
     if( !ic )
-		throw Unimplemented(); // Cannot render because width was wildcarded (using NULL or Integer node)
+		throw Unimplemented(); // Cannot render because width was wildcarded (eg using NULL or Integer node)
 		
+    // Fix the width by possibly adding bitfield notation to the declarator
     width_val = ic->GetInt64();
-
     TRACE("width %" PRId64 "\n", width_val);
-
-	string s = GetRenderTypeSpecSeq( renderer, policy ); // TODO could we not recurse via DoRenderTypeAndDeclarator() - once we've made the declarator string?
-
-    s += " " + declarator;
-
-    // Fix the width
     bool bitfield = !( width_val == TypeDb::char_bits ||
                        width_val == TypeDb::integral_bits[clang::DeclSpec::TSW_short] ||
                        width_val == TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ||
@@ -1235,10 +1229,16 @@ string Integral::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
     {
 		// This function only exists to provide bitfields in member declarations that use declarators.
 		// RenderSimpleTypeIntegral() can provide the pure types directly, without bitfields.
-		s += SSPrintf(":%" PRId64, width_val);
+		declarator += SSPrintf(":%" PRId64, width_val);
+		declarator_prod = Syntax::Production::POSTFIX;
     }
 
-	return (constant?"const ":"") + s;
+	return Type::GetRenderTypeAndDeclarator( renderer, declarator, declarator_prod, surround_prod, policy, constant );
+	//string s = GetRenderTypeSpecSeq( renderer, policy ); // TODO could we not recurse via DoRenderTypeAndDeclarator() - once we've made the declarator string?
+
+    //s += " " + declarator;
+
+	//return (constant?"const ":"") + s;
 }
 
 
