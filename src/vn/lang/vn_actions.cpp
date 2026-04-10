@@ -1153,9 +1153,7 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // - Re-enable render of member inits (MembInitSeq) and add parsing ability
 
 // Resolving common ambiguities
-// - Still comment out abstract decls and cons_or_des_type
-// - make cons marker more like an actual type
-// - Get better at dismabiguating VN stuff, promatry, prefic, postfix including pre-restrictions. Use the recogniser.
+// - Get better at dismabiguating VN stuff, primary, prefix, postfix including pre-restrictions. Use the recogniser.
 // - Overdo this. Think in terms of SDR columns (statement/declaration/expression) and anything that cannot use
 //   this due to conflicts needs its own "pocket syntax" i.e. prefix/postfix/primary VNs, disambiguated via recogniser
 //   such that its constructs are unambiguous as with the rule for types.

@@ -655,13 +655,14 @@ struct Temporary : Instance
 };
 
 /// Node for a base class within a class declaration, specifies another class from which to inherit
-struct Base : Declaration
+struct Base : virtual Node
 {
     NODE_FUNCTIONS_FINAL
 
     TreePtr<AccessSpec> access; ///< Can inherited members be accessed?
     TreePtr<TypeIdentifier> record; ///< what do we inherit? must refer to InheritanceRecord
 
+    string GetColour() const override { return "/set28/1"; }
 	Production GetMyProductionTerminal() const override;    
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    
 };              

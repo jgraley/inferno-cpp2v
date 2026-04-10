@@ -216,7 +216,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::CreateNodeToken(const AvailableN
 	if( AvailableNodeData().IsQualifier(block) )			
 		return YY::VNLangParser::make_RESOLVED_QUAL(metadata, loc);
 	else if( AvailableNodeData().IsDeclaration(block) )			
-		return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
+		return YY::VNLangParser::make_RESOLVED_DECL(metadata, loc);
 	else if( AvailableNodeData().IsType(block) )			
 		return YY::VNLangParser::make_RESOLVED_TYPE(metadata, loc);
 	else

@@ -125,17 +125,23 @@ Syntax::Production StarAgent::GetAgentProduction() const
 string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production, Syntax::Policy policy ) const
 {
 	string s;
-	if( !*GetRestriction() ) // A restriction establishes the kind of node
-	{		
-		bool is_a_type = !!dynamic_pointer_cast<CPPTree::Type>( policy.pointer_archetype );
-		if( is_a_type )		 
+	TreePtr<Node> restriction{ *GetRestriction() };
+	if( !restriction ) // A restriction establishes the kind of node
+	{			
+		if( dynamic_pointer_cast<CPPTree::Type>( policy.pointer_archetype ) )		 
 			s += "⍑";		
+		else if( dynamic_pointer_cast<CPPTree::Declaration>( policy.pointer_archetype ) )
+		{
+			// Using parent's child-pointer type rather than Declaration since that's a 
+			// clearer hint that no actual restriction is required.
+			restriction = dynamic_pointer_cast<Node>( policy.pointer_archetype );
+		}
 	}
 		
 	s += "★";
 	
-	if( *GetRestriction() )
-		s += "⦅" + renderer->DoRenderPreserve( TreePtr<Node>(*GetRestriction()), Syntax::Production::BOTTOM_EXPR, policy) + "⦆";
+	if( restriction )
+		s += "⦅" + renderer->DoRenderPreserve( restriction, Syntax::Production::BOTTOM_EXPR, policy) + "⦆";
 	
 	return s;
 }  

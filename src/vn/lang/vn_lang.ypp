@@ -126,6 +126,7 @@
 <YY::TokenMetadata>	DESIGNATED_TYPE			_("designated type name")
 <YY::TokenMetadata>	RESOLVED_NORMAL			_("resolved non-type node name")
 <YY::TokenMetadata>	RESOLVED_TYPE			_("resolved type node name")
+<YY::TokenMetadata>	RESOLVED_DECL			_("resolved declaration node name")
 <YY::TokenMetadata>	RESOLVED_QUAL			_("resolved qualifier node name")
 <YY::TokenMetadata>	NODE_NAMESPACE			_("scope resolving name")
 <YY::TokenMetadata> KEYWORD_PRIMARY_OP		_("non-type keyword operator")
@@ -151,8 +152,9 @@ stmt_high
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_vn_prim 
 //%type <TreePtr<Node>> 				type_disjunction type_conjunction
 %type <TreePtr<Node>> 				unified_boot unified_prefix normal
-%type <TreePtr<Node>> 				bare_statement statement_nc stmt_decl         
-%type <TreePtr<Node>> 				bare_declaration declaration
+%type <TreePtr<Node>> 				bare_statement statement_nc statement stmt_decl         
+%type <TreePtr<Node>> 				decl_boot decl_disjunction decl_conjunction declaration bare_declaration  
+%type <TreePtr<Node>> 				decl_prefix decl_postfix decl_primary decl_vn_prim
 %type <TreePtr<Node>> 				compound compound_primary parameter type_boot compound_prefix 
 %type <TreePtr<Node>> 				type_for_declarator 
 %type <TreePtr<Node>> 				qualifier qualifier_nw
@@ -163,7 +165,7 @@ stmt_high
 %type <TreePtr<Node>>				instance_proto
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named
-%type <YY::TokenMetadata> 			resolved_name resolved_type_name resolved_qual_name node_namespace
+%type <YY::TokenMetadata> 			resolved_name resolved_type_name resolved_decl_name resolved_qual_name node_namespace
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
@@ -176,7 +178,9 @@ stmt_high
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases 
 %type <set<TreePtr<Node>>>			qualifiers 
-%type <const AvailableNodeData::Block *> explicit_op_named prerestrict_op_named id_by_name_op_named build_id_named qual_explicit_op_named
+%type <const AvailableNodeData::Block *> explicit_op_named prerestrict_op_named id_by_name_op_named build_id_named 
+%type <const AvailableNodeData::Block *> qual_explicit_op_named
+%type <const AvailableNodeData::Block *> decl_explicit_op_named decl_prerestrict_op_named
 %type <const AvailableNodeData::Block *> type_explicit_op_named type_prerestrict_op_named type_id_by_name_op_named type_build_id_op_named
 %type <multiset<string>>			type_specifier_seq
 
@@ -232,13 +236,14 @@ item		: item VN_SUB_SEP unified_boot			{ $$ = $1; $$.nodes.push_back($3); $$.loc
 
 unified_boot	: normal_boot
 				| type_boot
-				| access_spec_nw // TODO access specs to be merged into normal_boot column
+				| access_spec_nw // TODO access specs to be merged into normal_boot column - no, they are qualifiers now I think
 				| qualifier_nw
+				| decl_boot
 
 //////////////////////////////// NORMALS ////////////////////////////////////         
 // Normal is basically anything other than a type
 
-normal_boot				: norm_disjunction
+normal_boot			: norm_disjunction
 
 norm_disjunction	: norm_conjunction
 					| norm_disjunction DISJUNCTION_OP norm_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
@@ -247,7 +252,7 @@ norm_conjunction 	: normal
 					| norm_conjunction CONJUNCTION_OP normal    			{ $$ = vn->OnConjunction($1, $3); }
 		
 normal       		: expression
-					| stmt_decl			
+					| statement			
 
 //////////////////////////////// COMPOUND ////////////////////////////////////         
 
@@ -273,11 +278,23 @@ compound_primary	: '{' VN_SEP '}'                   						{ $$ = vn->OnCompound(
 stmt_decls	: stmt_decl														{ $$.push_back($1); }
 			| stmt_decl stmt_decls											{ $$ = $2; $$.push_front($1); }
 
+stmt_decl	: statement
+			| declaration
+
 //////////////////////////////// DECLARATIONS ////////////////////////////////////         
+
+decl_boot	: decl_disjunction
+
+decl_disjunction	: decl_conjunction
+					| decl_disjunction DISJUNCTION_OP decl_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
+
+decl_conjunction 	: declaration       
+					| decl_conjunction CONJUNCTION_OP declaration    			{ $$ = vn->OnConjunction($1, $3); }
 
 declaration	: bare_declaration ';'								{ $$ = $1; }      
 			| instance_proto compound							{ $$ = vn->OnInstanceInit($1, @1, $2); }	
-			| access_spec_nw ':' 										                                        
+			| access_spec_nw ':' 		
+			| decl_prefix								                                        
 
 bare_declaration: instance_proto
 				| instance_proto ANY_NODE_OP					{ $$ = vn->OnInstanceInit($1, @1, nullptr); } // note: ☆ has ; but no =
@@ -288,6 +305,28 @@ instance_proto	: type_for_declarator declarator								{ $$ = vn->OnInstance({},
 				| qualifiers type_for_declarator declarator						{ $$ = vn->OnInstance($1, $2, $3, @3); }	
 				| XSTRUCTOR declarator											{ $$ = vn->OnInstance({}, nullptr, $2, @2); }	
 				| qualifiers XSTRUCTOR declarator								{ $$ = vn->OnInstance($1, nullptr, $3, @3); }	
+
+decl_prefix : decl_postfix
+			| 	DELTA_COMPARE_OP decl_boot DELTA_REPLACE_OP decl_prefix	{ $$ = vn->OnDelta($2, $4); }
+			| 						         GREEN_GRASS_OP decl_prefix	{ $$ = vn->OnGrass($2); }
+			| 							      POINTER_IS_OP decl_prefix	{ $$ = vn->OnPointerIs($2); }
+			| 							        NEGATION_OP decl_prefix	{ $$ = vn->OnNegation($2); }
+			|                     decl_prerestrict_op_named decl_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|								 TYPE_INDICATOR decl_prefix { $$ = $2; }
+			   
+decl_postfix: decl_primary		   
+	                                       
+decl_primary: decl_vn_prim
+			| '(' decl_boot ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
+						
+decl_vn_prim: decl_explicit_op_named itemisation								{ $$ = vn->OnExplicitNode($1, @1, $2); }
+//			| DESIGNATED_DECL     									  			{ $$ = $1.as_designated; }		// TODO declaration designations
+			| STAR_OP OPEN_VN decl_boot CLOSE_VN								{ $$ = vn->OnStar($3); }
+			
+decl_explicit_op_named 		: explicit_op_scope resolved_decl_name				{ $$ = $2.as_andata_block; (void)$1; }
+decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_name			{ $$ = $2.as_andata_block; (void)$1; }
+
+//////////////////////////////// QUALIFIERS ////////////////////////////////////         
 
 // TODO what about more than one?
 qualifiers		: qualifier													{ $$.insert( $1 ); }
@@ -301,20 +340,19 @@ qual_explicit_op_named 		: explicit_op_scope resolved_qual_name			{ $$ = $2.as_a
 
 //////////////////////////////// STATEMENTS ////////////////////////////////////         
          
-stmt_decl	: compound 
+statement	: compound 
 			| statement_nc %prec ';'
 			| expression ';'
-			| declaration 
 			| ';'															{ $$ = vn->OnNop(@1); }      
 					
 // _nc here means "not a compound"							
 statement_nc: bare_statement ';'												{ $$ = $1; }      
-			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_decl			{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
-			| WHILE_KEYWORD '(' expression ')' stmt_decl 						{ $$ = vn->OnWhile($3, @3, $5, @5); }
-			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_decl	
+			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' statement			{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
+			| WHILE_KEYWORD '(' expression ')' statement 						{ $$ = vn->OnWhile($3, @3, $5, @5); }
+			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' statement	
 			  %prec KEYWORD_ARGS_BODY_CHAIN_STMT								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
-			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_decl
-			  CHAINING_KEYWORD stmt_decl										{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
+			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' statement
+			  CHAINING_KEYWORD statement										{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
 			| expression ':'													{ $$ = vn->OnLabel($1, @1); } 
 			| CASE_KEYWORD expression ':'										{ $$ = vn->OnCase($2, @2); } 
 			| CASE_KEYWORD expression RANGE_OP expression ':'					{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
@@ -322,7 +360,7 @@ statement_nc: bare_statement ';'												{ $$ = $1; }
 
 bare_statement	: KEYWORD_SIMPLE_STMT											{ $$ = vn->OnSimpleStmt($1.as_ascii, @1); }
 				| KEYWORD_SPACE_SEP_STMT expression								{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
-				| DO_KEYWORD stmt_decl WHILE_KEYWORD '(' expression ')' 		{ $$ = vn->OnDo($2, @2, $5, @5); }
+				| DO_KEYWORD statement WHILE_KEYWORD '(' expression ')' 		{ $$ = vn->OnDo($2, @2, $5, @5); }
 
 semicolon_args	: expression										{ $$.push_back($1); }
 				| semicolon_args ';' expression						{ $$ = $1; $$.push_back($3); }
@@ -365,7 +403,7 @@ parameters	: parameter												{ $$.push_back($1); }
 			| parameters ',' parameter								{ $$ = $1; $$.push_back($3); }			
 				
 parameter   : type_for_declarator declarator 						{ $$ = vn->OnParameter($1, $2, @2); }	
-            | expr_prefix           
+            | decl_boot           									// TODO open a parameters scope for the actions
                          
 //////////////////////////////// CLASSES ////////////////////////////////////                                  
                          
@@ -456,6 +494,7 @@ stuff_depth		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 };
 
 unified_prefix	: expr_prefix
 				| type_prefix
+				| decl_prefix
   
 expr_postfix: expr_primary     
 			| expr_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2, $1); }
@@ -586,6 +625,9 @@ resolved_name	: part_resolve RESOLVED_NORMAL			{ $$ = $2; }
 
 resolved_type_name	: part_resolve RESOLVED_TYPE		{ $$ = $2; }
 					| RESOLVED_TYPE						{ $$ = $1; }
+
+resolved_decl_name	: part_resolve RESOLVED_DECL 		{ $$ = $2; }
+					| RESOLVED_DECL						{ $$ = $1; }
 
 resolved_qual_name	: part_resolve RESOLVED_QUAL		{ $$ = $2; }
 					| RESOLVED_QUAL						{ $$ = $1; }
