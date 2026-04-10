@@ -1141,7 +1141,16 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // - Fill in OnDeclaration() properly and pass parser test
 // - Re-enable render of member inits (MembInitSeq) and add parsing ability
 
-// 
+// Resolving common ambiguities
+// - Still comment out abstract decls and cons_or_des_type
+// - make cons marker more like an actual type
+// - Get better at dismabiguating VN stuff, promatry, prefic, postfix including pre-restrictions. Use the recogniser.
+// - Overdo this. Think in terms of SDR columns (statement/declaration/expression) and anything that cannot use
+//   this due to conflicts needs its own "pocket syntax" i.e. prefix/postfix/primary VNs, disambiguated via recogniser
+//   such that its constructs are unambiguous as with the rule for types.
+// EXAMPLE: you can't use the SDE column for paraneters because it's ambiguous. You can't half use it either
+// so you need a pocket for parameters. Is this to be shared with class members? Find out...
+
 // NOTE
 // Lots of conflicts incl around declarators resolved by making pre-restriction refuse to switch between
 // type and norm. This breaks DeclarationOf which was trying to be unified (the PR was supposed to disambiguate).
