@@ -657,13 +657,13 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 }
 
 
-TreePtr<Node> VNLangActions::OnDeclaration( set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
+TreePtr<Node> VNLangActions::OnInstance( set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
 {
-	return OnDeclaration( specs_pre, type, declarator, declarator_loc, MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>() );
+	return OnInstance( specs_pre, type, declarator, declarator_loc, MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>() );
 }
 
 
-TreePtr<Node> VNLangActions::OnDeclaration( set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc, TreePtr<Node> init )
+TreePtr<Node> VNLangActions::OnInstance( set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc, TreePtr<Node> init )
 {
 	(void)specs_pre; // TODO first we need to determine whether to make a Field, Local or Global
 	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
@@ -685,6 +685,17 @@ TreePtr<Node> VNLangActions::OnDeclaration( set<TreePtr<Node>> specs_pre, TreePt
 			ASSERTFAIL(); // internal error because concrete decls are parsed separately
 	}
 	ASSERTFAIL();
+}
+
+
+TreePtr<Node> VNLangActions::OnInstanceInit( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init )
+{
+	auto o = TreePtr<CPPTree::Instance>::DynamicCast(instance);
+	ASSERT(o);
+	
+	o->initialiser = init;
+	
+	return o;
 }
 
 
@@ -1138,7 +1149,7 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // - Fix parse of my_type ( my_instanceidentifier ∧ ‽InstanceIdentifier ¬globals ) my_initialiser;
 //   - Good example of VN stuff in a decl: ∧ has caused () but parser don't like ( when expecting identifier here
 // - Fix remaining mis-parses with Instance::GetRender() enabled
-// - Fill in OnDeclaration() properly and pass parser test
+// - Fill in OnInstance() properly and pass parser test
 // - Re-enable render of member inits (MembInitSeq) and add parsing ability
 
 // Resolving common ambiguities

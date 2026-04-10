@@ -147,9 +147,9 @@ stmt_high
 %type <TreePtr<Node>> 				normal_boot expr_primary expr_postfix expr_prefix expr_relational norm_disjunction norm_conjunction  
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
-%type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expr_expression vn_primary vn_paren expr_id_value vn_wildcard
+%type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expression vn_primary vn_paren expr_id_value vn_wildcard
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_disjunction type_conjunction type_vn_prim type_with_ab
-%type <TreePtr<Node>> 				unified unified_prefix norm_primary
+%type <TreePtr<Node>> 				unified unified_prefix normal
 %type <TreePtr<Node>> 				bare_statement statement_nc stmt_decl         
 %type <TreePtr<Node>> 				bare_declaration declaration
 %type <TreePtr<Node>> 				compound compound_primary parameter type_boot compound_prefix 
@@ -158,6 +158,7 @@ stmt_high
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
 %type <TreePtr<Node>> 				class_spec base_spec access_spec access_spec_nw
+%type <TreePtr<Node>>				instance_proto
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named
 %type <YY::TokenMetadata> 			resolved_name resolved_type_name resolved_qual_name node_namespace
@@ -238,12 +239,12 @@ unified		: normal_boot
 normal_boot				: norm_disjunction
 
 norm_disjunction	: norm_conjunction
-					| norm_disjunction DISJUNCTION_OP norm_conjunction			{ $$ = vn->OnDisjunction($1, $3); }
+					| norm_disjunction DISJUNCTION_OP norm_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
 
-norm_conjunction 	: norm_primary       
-					| norm_conjunction CONJUNCTION_OP norm_primary       		{ $$ = vn->OnConjunction($1, $3); }
+norm_conjunction 	: normal       
+					| norm_conjunction CONJUNCTION_OP normal    			{ $$ = vn->OnConjunction($1, $3); }
 		
-norm_primary       	: expr_expression
+normal       		: expression
 					| stmt_decl			
 
 //////////////////////////////// COMPOUND ////////////////////////////////////         
@@ -272,20 +273,19 @@ stmt_decls	: stmt_decl														{ $$.push_back($1); }
 
 //////////////////////////////// DECLARATIONS ////////////////////////////////////         
 
-declaration	: bare_declaration ';'											{ $$ = $1; }      
-			| type_for_declarator declarator compound						{ $$ = vn->OnDeclaration({}, $1, $2, @2, $3); }	
-			| qualifiers type_for_declarator declarator compound			{ $$ = vn->OnDeclaration($1, $2, $3, @3, $4); }	
-			| XSTRUCTOR declarator compound									{ $$ = vn->OnDeclaration({}, nullptr, $2, @2, $3); }	
-			| qualifiers XSTRUCTOR declarator compound						{ $$ = vn->OnDeclaration($1, nullptr, $3, @3, $4); }	
+declaration	: bare_declaration ';'								{ $$ = $1; }      
+			| instance_proto compound							{ $$ = vn->OnInstanceInit($1, @1, $2); }	
 			| access_spec_nw ':' 										                                        
 
-bare_declaration: type_for_declarator declarator								{ $$ = vn->OnDeclaration({}, $1, $2, @2); }	
-				| qualifiers type_for_declarator declarator						{ $$ = vn->OnDeclaration($1, $2, $3, @3); }	
-				| type_for_declarator declarator ANY_NODE_OP					{ $$ = vn->OnDeclaration({}, $1, $2, @2, nullptr); } // note: ☆ has ; but no =
-				| qualifiers type_for_declarator declarator ANY_NODE_OP			{ $$ = vn->OnDeclaration($1, $2, $3, @3, nullptr); }
-				| type_for_declarator declarator C_ASSIGN expr_expression			 { $$ = vn->OnDeclaration({}, $1, $2, @2, $4); } // note: ☆ has ; but no =
-				| qualifiers type_for_declarator declarator C_ASSIGN expr_expression { $$ = vn->OnDeclaration($1, $2, $3, @3, $5); }
+bare_declaration: instance_proto
+				| instance_proto ANY_NODE_OP					{ $$ = vn->OnInstanceInit($1, @1, nullptr); } // note: ☆ has ; but no =
+				| instance_proto C_ASSIGN expression			{ $$ = vn->OnInstanceInit($1, @1, $3); } 
 				| class_spec		
+
+instance_proto	: type_for_declarator declarator								{ $$ = vn->OnInstance({}, $1, $2, @2); }	
+				| qualifiers type_for_declarator declarator						{ $$ = vn->OnInstance($1, $2, $3, @3); }	
+				| XSTRUCTOR declarator											{ $$ = vn->OnInstance({}, nullptr, $2, @2); }	
+				| qualifiers XSTRUCTOR declarator								{ $$ = vn->OnInstance($1, nullptr, $3, @3); }	
 
 // TODO what about more than one?
 qualifiers		: qualifier													{ $$.insert( $1 ); }
@@ -301,29 +301,29 @@ qual_explicit_op_named 		: explicit_op_scope resolved_qual_name			{ $$ = $2.as_a
          
 stmt_decl	: compound 
 			| statement_nc %prec ';'
-			| expr_expression ';'
+			| expression ';'
 			| declaration 
 			| ';'															{ $$ = vn->OnNop(@1); }      
 					
 // _nc here means "not a compound"							
-statement_nc: bare_statement ';'													{ $$ = $1; }      
-			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_decl				{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
-			| WHILE_KEYWORD '(' expr_expression ')' stmt_decl 						{ $$ = vn->OnWhile($3, @3, $5, @5); }
+statement_nc: bare_statement ';'												{ $$ = $1; }      
+			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_decl			{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
+			| WHILE_KEYWORD '(' expression ')' stmt_decl 						{ $$ = vn->OnWhile($3, @3, $5, @5); }
 			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_decl	
-			  %prec KEYWORD_ARGS_BODY_CHAIN_STMT									{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
+			  %prec KEYWORD_ARGS_BODY_CHAIN_STMT								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
 			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_decl
-			  CHAINING_KEYWORD stmt_decl											{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
-			| expr_expression ':'													{ $$ = vn->OnLabel($1, @1); } 
-			| CASE_KEYWORD expr_expression ':'										{ $$ = vn->OnCase($2, @2); } 
-			| CASE_KEYWORD expr_expression RANGE_OP expr_expression ':'				{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
-			| DEFAULT_KEYWORD ':'													{ $$ = vn->OnDefault(@$); } 
+			  CHAINING_KEYWORD stmt_decl										{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
+			| expression ':'													{ $$ = vn->OnLabel($1, @1); } 
+			| CASE_KEYWORD expression ':'										{ $$ = vn->OnCase($2, @2); } 
+			| CASE_KEYWORD expression RANGE_OP expression ':'					{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
+			| DEFAULT_KEYWORD ':'												{ $$ = vn->OnDefault(@$); } 
 
 bare_statement	: KEYWORD_SIMPLE_STMT											{ $$ = vn->OnSimpleStmt($1.as_ascii, @1); }
-				| KEYWORD_SPACE_SEP_STMT expr_expression						{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
-				| DO_KEYWORD stmt_decl WHILE_KEYWORD '(' expr_expression ')' 	{ $$ = vn->OnDo($2, @2, $5, @5); }
+				| KEYWORD_SPACE_SEP_STMT expression								{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
+				| DO_KEYWORD stmt_decl WHILE_KEYWORD '(' expression ')' 		{ $$ = vn->OnDo($2, @2, $5, @5); }
 
-semicolon_args	: expr_expression											{ $$.push_back($1); }
-				| semicolon_args ';' expr_expression						{ $$ = $1; $$.push_back($3); }
+semicolon_args	: expression										{ $$.push_back($1); }
+				| semicolon_args ';' expression						{ $$ = $1; $$.push_back($3); }
 
 //////////////////////////////// CONCRETE DECLARATORS /////////////////////////////////////         
                           		
@@ -388,7 +388,7 @@ access_spec_nw	: ACCESS_KEYWORD	                          				{ $$ = vn->OnAcces
                                                   
 //////////////////////////////// EXPRESSIONS ////////////////////////////////////         
 
-expr_expression		: expr_comma_op
+expression			: expr_comma_op
                                    
 expr_comma_op       : expr_no_comma_op
                     | expr_comma_op ',' expr_no_comma_op						{ $$ = vn->OnInfixOperator(",", $1, $3); }  
@@ -401,7 +401,7 @@ expr_id_value		: expr_assignment
 expr_assignment 	: expr_logical_or 
 					| 				   expr_logical_or C_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
 					|         expr_logical_or C_COMPOUND_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
-					|   expr_logical_or '?' expr_expression ':' expr_assignment	{ $$ = vn->OnConditionalOperator($1, $3, $5); }
+					|   	 expr_logical_or '?' expression ':' expr_assignment	{ $$ = vn->OnConditionalOperator($1, $3, $5); }
 
 expr_logical_or 	: expr_logical_and
 					| expr_logical_or C_LOGICAL_OR_OP expr_logical_and			{ $$ = vn->OnInfixOperator($2, $1, $3); }
