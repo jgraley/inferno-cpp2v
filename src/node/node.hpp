@@ -102,14 +102,18 @@ namespace VN
 	{
 	public:	
 		virtual string DoRender( const TreePtrInterface *tpi, 
-		                            Syntax::Production surround_prod, 
-		                            Syntax::Policy policy ) = 0;
-		virtual string DoRenderPreserve( TreePtr<Node> node, 
 		                         Syntax::Production surround_prod, 
 		                         Syntax::Policy policy ) = 0;
-		virtual string DoRenderTypeAndDeclarator( TreePtr<Node> type, string declarator, 
+		virtual string DoRenderPreserve( TreePtr<Node> node, 
+		                                 Syntax::Production surround_prod, 
+		                                 Syntax::Policy policy ) = 0;
+		                                 
+		virtual string DoRenderTypeAndDeclarator( const TreePtrInterface *tpi, string declarator, 
                                                   Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
 												  bool constant=false ) = 0;
+		virtual string DoRenderTypeAndDeclaratorPreserve( TreePtr<Node> type, string declarator, 
+                                                          Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+												          bool constant=false ) = 0;
 
 		virtual string RenderScopeResolvingPrefix( TreePtr<Node> id, Syntax::Policy ) = 0;
 		virtual string GetUniqueIdentifierName( TreePtr<Node> id ) const = 0;

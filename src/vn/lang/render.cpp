@@ -86,6 +86,14 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 		commands.push_back( unique_coupling_names.at(node) + 
 							" ⪮ " + 
 							AccomodateInit( node, Syntax::Production::VN_DESIGNATE_RHS, designation_policy ) );
+		// Alternative for declarator desaignators
+		//commands.push_back( " ⪮ " + 
+		//					AccomodateBootTypeAndDeclarator( node, 
+		//					                           unique_coupling_names.at(node), 
+		//					                           Syntax::Production::PURE_IDENTIFIER, 
+		//					                           Syntax::Production::VN_DESIGNATE_RHS, 
+		//					                           designation_policy,
+		//					                           false ) );
 	}
 
 	ASSERT( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() || !pattern->GetReplacePattern() )
@@ -487,9 +495,18 @@ string Render::GetUniqueIdentifierName( TreePtr<Node> ) const
 }
 
 
-string Render::DoRenderTypeAndDeclarator( TreePtr<Node> type, string declarator, 
+string Render::DoRenderTypeAndDeclarator( const TreePtrInterface *tpi, string declarator, 
                                           Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                           bool constant ) 
+{
+	policy.pointer_archetype = tpi->MakeValueArchetype(); // pointer_archetype applies to the type
+	return DoRenderTypeAndDeclaratorPreserve( (TreePtr<Node>)(*tpi), declarator, declarator_prod, surround_prod, policy, constant );
+}
+
+                                          
+string Render::DoRenderTypeAndDeclaratorPreserve( TreePtr<Node> type, string declarator, 
+                                                  Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                                  bool constant ) 
 {
 	if( !type )
 	{
@@ -509,14 +526,22 @@ string Render::AccomodateBootTypeAndDeclarator( TreePtr<Node> type, string decla
                                                 bool constant ) 
 {
 	ASSERT(type);
-    // Production passed in here comes from the current value of the delcarator string, not surrounding production.
-    Syntax::Production prod_surrounding_declarator = type->GetOperandInDeclaratorProduction();
-    ASSERT( Syntax::GetPrecedence(prod_surrounding_declarator) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) ); // Can't satisfy this production's precedence demand using parentheses
-    ASSERT( Syntax::GetPrecedence(declarator_prod) >= Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) ); // Can't put this node into parentheses
-    bool parenthesise = Syntax::GetPrecedence(declarator_prod) < Syntax::GetPrecedence(prod_surrounding_declarator);  
-    // Apply to object rather than recursing, because this is declarator    
-    if( parenthesise )
-        declarator = "(" + declarator + ")";
+    try
+    {
+		// Production passed in here comes from the current value of the delcarator string, not surrounding production.
+		Syntax::Production prod_surrounding_declarator = type->GetOperandInDeclaratorProduction();
+		ASSERT( Syntax::GetPrecedence(prod_surrounding_declarator) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) ); // Can't satisfy this production's precedence demand using parentheses
+		ASSERT( Syntax::GetPrecedence(declarator_prod) >= Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) ); // Can't put this node into parentheses
+		bool parenthesise = Syntax::GetPrecedence(declarator_prod) < Syntax::GetPrecedence(prod_surrounding_declarator);  
+		// Apply to object rather than recursing, because this is declarator    
+		if( parenthesise )
+			declarator = "(" + declarator + ")";
+    }
+    catch( Syntax::Unimplemented & )
+    {
+		// Assume that type also throws on RenderTypeAndDeclarator, and won't do anything
+		//ASSERT( false )(type)(" \"")(declarator)("\" type node prod=")((int)GetNodeProduction(type, Syntax::Production::SPACE_SEP_TYPE, policy));
+	}
         
     return DispatchTypeAndDeclarator( type, declarator, declarator_prod, surround_prod, policy, constant );
 }
@@ -526,38 +551,35 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
                                           Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                           bool constant )
 {
-	// high prec forces boot if VN pre- or post-ops present
-	bool abstract = (declarator == "");
-	Syntax::Production type_prod = abstract ? surround_prod  
-                                               : Syntax::Production::SPACE_SEP_TYPE; 
-
 	try
 	{
 		// Agents refuse in general to deal with declarators so if
 		// there is a pointer etc it'll default into an anonymous type
-		// which may require precdence booting. 
-		if( const Agent *type_agent = Agent::TryAsAgentConst(type) )
+		// which may require precedence booting. 
+		if( Agent::TryAsAgentConst(type) )
+		{
 			return (constant?"const ":"") + 
-		   type_agent->GetAgentRender( this, type_prod, policy ) + 
-		   (declarator != "" ? " "+declarator : "");
-		    // return agent->GetAgentRender( this, surround_prod, policy );
+		           DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) + 
+	        	   (declarator != "" ? " "+declarator : "");
+		}
 	}
 	catch( Syntax::Refusal & ) {}
 	
 	auto type_as_type = TreePtr<CPPTree::Type>::DynamicCast(type);
-	ASSERT( type_as_type )(type)(" needs to be a Type or an Agent that doesn't refuse");
-	
-	try 
-	{ 
-		return type_as_type->GetRenderTypeAndDeclarator( this, declarator, declarator_prod, surround_prod, policy, constant ); 
+	if( type_as_type )
+	{
+		try 
+		{ 
+			return type_as_type->GetRenderTypeAndDeclarator( this, declarator, declarator_prod, surround_prod, policy, constant ); 
+		}
+		catch( Syntax::Refusal & ) {}
 	}
-	catch( Syntax::Refusal & ) {}
-
+	
 	// This part duplicates Type::GetRenderTypeAndDeclarator
 	// We wouln't want to call a virtual on a NULL pointer, so the
 	// common part could be here or a static on Type
 	return (constant?"const ":"") + 
-		   RenderNodeExplicit(type_as_type, type_prod, policy) +
+		   DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) +
 		   (declarator != "" ? " "+declarator : "");
 }                                          
                
@@ -586,16 +608,19 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 		struct FakeRenderer : RendererInterface
 		{
 			string DoRender( const TreePtrInterface *, 
-								Syntax::Production, 
-								Syntax::Policy ) final { return "fake"; } 
+					 		 Syntax::Production, 
+							 Syntax::Policy ) final { return "fake"; } 
 			string DoRenderPreserve( TreePtr<Node>, 
 									 Syntax::Production, 
 									 Syntax::Policy ) final { return "fake"; } 
-			string RenderScopeResolvingPrefix( TreePtr<Node>, Syntax::Policy ) final { return ""; } 
-			string GetUniqueIdentifierName( TreePtr<Node> ) const final { return "fake"; }
-			string DoRenderTypeAndDeclarator( TreePtr<Node>, string, 
+			string DoRenderTypeAndDeclarator( const TreePtrInterface *, string, 
 											  Syntax::Production, Syntax::Production, Syntax::Policy,
 											  bool ) final { return "fake"; }
+			string DoRenderTypeAndDeclaratorPreserve ( TreePtr<Node>, string, 
+									         		   Syntax::Production, Syntax::Production, Syntax::Policy,
+											           bool ) final { return "fake"; }
+			string RenderScopeResolvingPrefix( TreePtr<Node>, Syntax::Policy ) final { return ""; } 
+			string GetUniqueIdentifierName( TreePtr<Node> ) const final { return "fake"; }
 			string RenderNodeExplicit( shared_ptr<const Node>, 
 									   Syntax::Production, 
 									   Syntax::Policy ) final { return "fake"; } 	

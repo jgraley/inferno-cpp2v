@@ -48,9 +48,12 @@ public:
 	string RenderScopeResolvingPrefix( TreePtr<Node> id, Syntax::Policy policy ) override;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const override;
 
-    string DoRenderTypeAndDeclarator( TreePtr<Node> type, string declarator, 
+    string DoRenderTypeAndDeclarator( const TreePtrInterface *tpi, string declarator, 
                                       Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                       bool constant=false ) final;
+    string DoRenderTypeAndDeclaratorPreserve( TreePtr<Node> type, string declarator, 
+                                              Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                              bool constant=false ) final;
     string AccomodateBootTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                             Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                             bool constant );

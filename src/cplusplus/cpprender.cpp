@@ -353,7 +353,7 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
     if( TreePtr<Typedef> t = DynamicTreePtrCast< Typedef >(declaration) )
     {
         auto id = DoRender( &t->identifier, starting_declarator_prod, id_policy );
-        return "typedef " + DoRenderTypeAndDeclarator( t->type, id, starting_declarator_prod, Syntax::Production::TYPE_IN_DECLARATION, policy );
+        return "typedef " + DoRenderTypeAndDeclarator( &(t->type), id, starting_declarator_prod, Syntax::Production::TYPE_IN_DECLARATION, policy );
     }
     else if( TreePtr<Enum> enum_ = DynamicTreePtrCast< Enum >(declaration) )
     {

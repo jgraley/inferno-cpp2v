@@ -857,7 +857,7 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
     
     bool constant = !!DynamicTreePtrCast<Const>(constancy);
     string declarator = renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy );
-    Append( ls, {renderer->DoRenderTypeAndDeclarator(type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, constant) } );
+    Append( ls, {renderer->DoRenderTypeAndDeclarator(&type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, constant) } );
 
 	// TODO const can appear in different places
 	//Append( ls, {renderer->DoRender(&constancy, Production::KEYWORD, policy)} );
@@ -1039,7 +1039,7 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
         {
 			// TODO Use Instance render?
 			string name = renderer->DoRender( &o->identifier, Production::PRIMARY_EXPR, id_policy);
-			strings.push_back( renderer->DoRenderTypeAndDeclarator( o->type, name, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, policy, false ) );
+			strings.push_back( renderer->DoRenderTypeAndDeclarator( &(o->type), name, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, policy, false ) );
 		}
 		else
 		{
@@ -1059,7 +1059,7 @@ string Function::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
 	string d2 = declarator + 
 	            GetRenderParameterisation(renderer, policy) +	             
 	            (constant?" const":"");
-    return renderer->DoRenderTypeAndDeclarator( return_type, 
+    return renderer->DoRenderTypeAndDeclarator( &return_type, 
                                                 d2,
                                                 Syntax::Production::POSTFIX, 
                                                 surround_prod, 
@@ -1118,7 +1118,7 @@ string Array::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, strin
 	            "[" + 
 	            renderer->DoRender( &size, Syntax::Production::BOTTOM_EXPR, policy) + 
 	            "]";
-    return renderer->DoRenderTypeAndDeclarator( element, 
+    return renderer->DoRenderTypeAndDeclarator( &element, 
 												d2, 
 												Syntax::Production::POSTFIX,
 												surround_prod,
@@ -1150,7 +1150,7 @@ string Pointer::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, str
 {
 	// TODO Pointer node to indicate constancy of pointed-to object - would go into this call to DoRenderTypeAndDeclarator
 	string d2 = string(DynamicTreePtrCast<Const>(constancy)?"const ":"") + "*" + (constant?" const ":"") + declarator;
-    return renderer->DoRenderTypeAndDeclarator( destination, 
+    return renderer->DoRenderTypeAndDeclarator( &destination, 
 											    d2,
 											    Syntax::Production::PREFIX, 
 											    surround_prod, 
@@ -1165,7 +1165,7 @@ string Reference::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, s
 											bool constant )
 {
 	string d2 = string(DynamicTreePtrCast<Const>(constancy)?"const ":"") + "&" + (constant?" const ":"") + declarator;
-    return renderer->DoRenderTypeAndDeclarator( destination, 
+    return renderer->DoRenderTypeAndDeclarator( &destination, 
 											    d2,
 											    Syntax::Production::PREFIX, 
 											    surround_prod, 
