@@ -40,7 +40,7 @@ public:
 		map<string, unique_ptr<AvailableNodeData::Block>> sub_blocks;
 	};
 
-	struct LeafBlock : Block
+	struct NodeBlock : Block
 	{
 		string What() const final 
 		{ 
@@ -65,8 +65,9 @@ public:
 	const AvailableNodeData::NamespaceBlock *GetNodeNamesRoot();
 	shared_ptr<Node> MakeNode(NodeEnum ne) const;
 	shared_ptr<TreePtrInterface> MakeTreePtr(NodeEnum ne) const;
-	bool IsQualifier(const LeafBlock *block) const;
-	bool IsType(const LeafBlock *block) const;
+	bool IsQualifier(const NodeBlock *block) const;
+	bool IsDeclaration(const NodeBlock *block) const;
+	bool IsType(const NodeBlock *block) const;
 	
 private:
 	static void InitialiseMap();

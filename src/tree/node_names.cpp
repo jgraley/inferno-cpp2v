@@ -75,29 +75,27 @@ shared_ptr<TreePtrInterface> AvailableNodeData::MakeTreePtr(NodeEnum ne) const
 }
 
 
-bool AvailableNodeData::IsQualifier(const LeafBlock *block) const
+bool AvailableNodeData::IsQualifier(const NodeBlock *block) const
 {
-	bool is_qualifier = false;
-	if( block->node_enum )
-	{
-		shared_ptr<Node> spn = MakeNode(block->node_enum.value());
-		if( dynamic_cast<const CPPTree::Qualifier *>(spn.get()) )
-			is_qualifier = true;
-	}
-	return is_qualifier;
+	ASSERT( block->node_enum );
+	shared_ptr<Node> spn = MakeNode(block->node_enum.value());
+	return !!dynamic_cast<const CPPTree::Qualifier *>(spn.get());
 }
 
 
-bool AvailableNodeData::IsType(const LeafBlock *block) const
+bool AvailableNodeData::IsDeclaration(const NodeBlock *block) const
 {
-	bool is_type = false;
-	if( block->node_enum )
-	{
-		shared_ptr<Node> spn = MakeNode(block->node_enum.value());
-		if( dynamic_cast<const CPPTree::Type *>(spn.get()) )
-			is_type = true;
-	}
-	return is_type;
+	ASSERT( block->node_enum );
+	shared_ptr<Node> spn = MakeNode(block->node_enum.value());
+	return !!dynamic_cast<const CPPTree::Declaration *>(spn.get());
+}
+
+
+bool AvailableNodeData::IsType(const NodeBlock *block) const
+{
+	ASSERT( block->node_enum );
+	shared_ptr<Node> spn = MakeNode(block->node_enum.value());
+	return !!dynamic_cast<const CPPTree::Type *>(spn.get());		
 }
 
 
@@ -133,9 +131,9 @@ void AvailableNodeData::InitialiseMap()
 		ASSERT(namespace_block);
 
 		if( !namespace_block->sub_blocks[flat_list.back()] ) // can create -> NULL
-			namespace_block->sub_blocks.at(flat_list.back()) = make_unique<LeafBlock>();
+			namespace_block->sub_blocks.at(flat_list.back()) = make_unique<NodeBlock>();
 
-		LeafBlock *node_block = dynamic_cast<LeafBlock *>(namespace_block->sub_blocks.at(flat_list.back()).get());
+		NodeBlock *node_block = dynamic_cast<NodeBlock *>(namespace_block->sub_blocks.at(flat_list.back()).get());
 		ASSERT( node_block );
 		node_block->node_enum = node_enum;		
 	}

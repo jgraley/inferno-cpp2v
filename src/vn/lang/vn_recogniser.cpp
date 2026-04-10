@@ -43,19 +43,19 @@ void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquoted(string text, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(string text, YY::VNLangParser::location_type loc) const
 {
-	return ProcessToken( ToUnicode(text), true, loc );
+	return ProcessLexeme( ToUnicode(text), true, loc );
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquoted(wstring text, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(wstring text, YY::VNLangParser::location_type loc) const
 {
-	return ProcessToken( text, false, loc );
+	return ProcessLexeme( text, false, loc );
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexeme(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
 {
 	// Where unicode is allowed, ascii is allowed too, so positive checks only
 	YY::TokenMetadata metadata;
@@ -66,9 +66,9 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 	const ScopeGnomon *scope = nullptr;
 	shared_ptr<const ScopeGnomon> spg = scope_gnomons.TryLockTop();
 	if( spg && dynamic_cast<const NodeNameScopeGnomon *>(spg.get()) )
-		return ProcessTokenInNodeNameScope(text, ascii, loc, metadata);
+		return ProcessLexemeInNodeNameScope(text, ascii, loc, metadata);
 	else if( spg && dynamic_cast<const TransformNameScopeGnomon *>(spg.get()) )
-		return ProcessTokenTransformNameScope(text, ascii, loc, metadata);		
+		return ProcessLexemeInTransformNameScope(text, ascii, loc, metadata);		
 	
 	shared_ptr<const DesignationGnomon> designation_gnomon;
 	if( designation_gnomons.count(text) > 0 )	
@@ -156,7 +156,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessToken(wstring text, bool 
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexemeInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
 {
 	if( !ascii )	
 		throw YY::VNLangParser::syntax_error( loc,
@@ -177,45 +177,19 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstr
 	if( namespace_block && namespace_block->sub_blocks.count(ToASCII(text)) > 0 )
 	{
 		const AvailableNodeData::Block *sub_block = namespace_block->sub_blocks.at(ToASCII(text)).get();
-		metadata.as_andata_block = sub_block; // return it to the parser whatever it is
-		if( auto lb = dynamic_cast<const AvailableNodeData::LeafBlock *>(sub_block) )
-		{
-			if( AvailableNodeData().IsQualifier(lb) )			
-				return YY::VNLangParser::make_RESOLVED_QUAL(metadata, loc);
-			else if( AvailableNodeData().IsType(lb) )			
-				return YY::VNLangParser::make_RESOLVED_TYPE(metadata, loc);
-			else
-				return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
-		}
-		else if( dynamic_cast<const AvailableNodeData::NamespaceBlock *>(sub_block) )
-			return YY::VNLangParser::make_NODE_NAMESPACE(metadata, loc);				
-		else
-			ASSERTFAIL("bad andata block");
+		return CreateBlockToken( sub_block, loc, metadata );
 	}
 		
 	if( default_namespace )
 	{
-		// Try the default
+		// Try the default namespace
 		const AvailableNodeData::Block *default_block = namespace_block->sub_blocks.at(DEFAULT_NODE_NAMESPACE).get();
 		namespace_block = dynamic_cast<const AvailableNodeData::NamespaceBlock *>(default_block);
 		ASSERT( namespace_block ); // Internal error: default block is not a namespace block
 		if( namespace_block && namespace_block->sub_blocks.count(ToASCII(text)) > 0 )
 		{
 			const AvailableNodeData::Block *sub_block = namespace_block->sub_blocks.at(ToASCII(text)).get();
-			metadata.as_andata_block = sub_block; // return it to the parser whatever it is
-			if( auto lb = dynamic_cast<const AvailableNodeData::LeafBlock *>(sub_block) )
-			{
-				if( AvailableNodeData().IsQualifier(lb) )			
-					return YY::VNLangParser::make_RESOLVED_QUAL(metadata, loc);
-				else if( AvailableNodeData().IsType(lb) )			
-					return YY::VNLangParser::make_RESOLVED_TYPE(metadata, loc);
-				else
-					return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
-			}
-			else if( dynamic_cast<const AvailableNodeData::NamespaceBlock *>(sub_block) )
-				return YY::VNLangParser::make_NODE_NAMESPACE(metadata, loc);				
-			else
-				ASSERTFAIL("bad andata block");			
+			return CreateBlockToken( sub_block, loc, metadata );
 		}
 	}
 			
@@ -225,7 +199,32 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenInNodeNameScope(wstr
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::ProcessTokenTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+YY::VNLangParser::symbol_type VNLangRecogniser::CreateBlockToken(const AvailableNodeData::Block *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+{
+	metadata.as_andata_block = block; // return it to the parser whatever it is
+	if( auto lb = dynamic_cast<const AvailableNodeData::NodeBlock *>(block) )
+		return CreateNodeToken(lb, loc, metadata);
+	else if( dynamic_cast<const AvailableNodeData::NamespaceBlock *>(block) )
+		return YY::VNLangParser::make_NODE_NAMESPACE(metadata, loc);				
+	else
+		ASSERTFAIL("bad andata block");
+}
+
+
+YY::VNLangParser::symbol_type VNLangRecogniser::CreateNodeToken(const AvailableNodeData::NodeBlock *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+{
+	if( AvailableNodeData().IsQualifier(block) )			
+		return YY::VNLangParser::make_RESOLVED_QUAL(metadata, loc);
+	else if( AvailableNodeData().IsDeclaration(block) )			
+		return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
+	else if( AvailableNodeData().IsType(block) )			
+		return YY::VNLangParser::make_RESOLVED_TYPE(metadata, loc);
+	else
+		return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
+}
+
+
+YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexemeInTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
 {
 	// Transformations that act on normal scopes (instances, in this case)
 	if( ascii && ToASCII(text)=="TypeOf" )

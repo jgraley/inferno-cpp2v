@@ -141,7 +141,7 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 
 TreePtr<Node> VNLangActions::OnExplicitNode( const AvailableNodeData::Block *block, any node_name_loc, Itemisation src_itemisation )
 {
-	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
+	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
 	NodeEnum ne = leaf_block->node_enum.value();
 	TreePtr<Node> dest = MakeStandardAgent(ne);
     YY::VNLangParser::location_type prev_loc = any_cast<YY::VNLangParser::location_type>(src_itemisation.loc);
@@ -233,7 +233,7 @@ TreePtr<Node> VNLangActions::OnExplicitNode( const AvailableNodeData::Block *blo
 
 TreePtr<Node> VNLangActions::OnRestrict( const AvailableNodeData::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc )
 {
-	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
+	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
 	NodeEnum ne = leaf_block->node_enum.value();
 	Agent *agent = Agent::TryAsAgent(target);
 	ASSERT( agent )("We are parsing a pattern so everything should be agents");
@@ -904,7 +904,7 @@ TreePtr<Node> VNLangActions::OnLookup( TreePtr<Node> object, TreePtr<Node> membe
 TreePtr<Node> VNLangActions::OnIdByName( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
-	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
+	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
 	NodeEnum ne = leaf_block->node_enum.value();
 
 	string name = Unquote(ToASCII(wname));
@@ -924,7 +924,7 @@ TreePtr<Node> VNLangActions::OnIdByName( const AvailableNodeData::Block *block, 
 TreePtr<Node> VNLangActions::OnBuildId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
-	auto leaf_block = dynamic_cast<const AvailableNodeData::LeafBlock *>(block);
+	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
 	NodeEnum ne = leaf_block->node_enum.value();
 
 	// Format is "" if omitted otherwise a quoted string with the quotes still on
