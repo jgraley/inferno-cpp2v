@@ -1234,11 +1234,6 @@ string Integral::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
     }
 
 	return Type::GetRenderTypeAndDeclarator( renderer, declarator, declarator_prod, surround_prod, policy, constant );
-	//string s = GetRenderTypeSpecSeq( renderer, policy ); // TODO could we not recurse via DoRenderTypeAndDeclarator() - once we've made the declarator string?
-
-    //s += " " + declarator;
-
-	//return (constant?"const ":"") + s;
 }
 
 
