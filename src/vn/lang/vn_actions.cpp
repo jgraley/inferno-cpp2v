@@ -1160,6 +1160,9 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // EXAMPLE: you can't use the SDE column for paraneters because it's ambiguous. You can't half use it either
 // so you need a pocket for parameters. Is this to be shared with class members? Find out...
 
+// - Add members to classes and move access_spec_nw across
+// - Give operator comma lower prio than ∧ etc and re-instate
+
 // NOTE
 // Lots of conflicts incl around declarators resolved by making pre-restriction refuse to switch between
 // type and norm. This breaks DeclarationOf which was trying to be unified (the PR was supposed to disambiguate).

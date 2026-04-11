@@ -83,11 +83,16 @@ bool AvailableNodeData::IsQualifier(const NodeBlock *block) const
 }
 
 
+#define EXCLUDE_LABEL_FROM_DECLARATION
 bool AvailableNodeData::IsDeclaration(const NodeBlock *block) const
 {
 	ASSERT( block->node_enum );
 	shared_ptr<Node> spn = MakeNode(block->node_enum.value());
+#ifdef EXCLUDE_LABEL_FROM_DECLARATION	
+	return dynamic_cast<const CPPTree::Declaration *>(spn.get()) && !dynamic_cast<const CPPTree::LabelDeclaration *>(spn.get());
+#else	
 	return !!dynamic_cast<const CPPTree::Declaration *>(spn.get());
+#endif	
 }
 
 

@@ -84,20 +84,27 @@ private:
 };
 		
 		
+class NormalDesignationGnomon : public DesignationGnomon
+{
+public:	
+	using DesignationGnomon::DesignationGnomon;
+};
+		
+		
 class TypeDesignationGnomon : public DesignationGnomon
 {
 public:	
 	using DesignationGnomon::DesignationGnomon;
 };
 		
-		
-class NonTypeDesignationGnomon : public DesignationGnomon
+
+class DeclarationDesignationGnomon : public DesignationGnomon
 {
 public:	
 	using DesignationGnomon::DesignationGnomon;
 };
 		
-		
+
 class ScopeGnomon : public Gnomon
 {
 public:	

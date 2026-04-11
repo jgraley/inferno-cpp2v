@@ -142,10 +142,12 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexeme(wstring text, bool
 		
 	if( designation_gnomon )
 	{
-		if( dynamic_cast<const NonTypeDesignationGnomon *>(designation_gnomon.get()) )
+		if( dynamic_cast<const NormalDesignationGnomon *>(designation_gnomon.get()) )
             return YY::VNLangParser::make_DESIGNATED_NORMAL(metadata, loc);
         else if( dynamic_cast<const TypeDesignationGnomon *>(designation_gnomon.get()) )
             return YY::VNLangParser::make_DESIGNATED_TYPE(metadata, loc);
+        else if( dynamic_cast<const DeclarationDesignationGnomon *>(designation_gnomon.get()) )
+            return YY::VNLangParser::make_DESIGNATED_DECL(metadata, loc);
         else 
 			ASSERTFAIL();
 	}
