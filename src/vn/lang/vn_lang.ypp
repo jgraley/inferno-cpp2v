@@ -151,7 +151,7 @@ stmt_high
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expression vn_primary vn_paren expr_id_value vn_wildcard
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_vn_prim 
-//%type <TreePtr<Node>> 				type_disjunction type_conjunction
+%type <TreePtr<Node>> 				type_disjunction type_conjunction
 %type <TreePtr<Node>> 				unified_boot unified_prefix 
 %type <TreePtr<Node>> 				normal_boot normal
 %type <TreePtr<Node>> 				bare_statement statement_nc statement stmt_decl         
@@ -161,7 +161,7 @@ stmt_high
 %type <TreePtr<Node>> 				type_for_declarator 
 %type <TreePtr<Node>> 				qualifier qualifier_nw
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
-%type <TreePtr<Node>> 				type_id_boot type_id_disjunction type_id_conjunction type_id 
+%type <TreePtr<Node>> 				type_id_boot type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
 %type <TreePtr<Node>> 				class_spec base_spec access_spec access_spec_nw
 %type <TreePtr<Node>>				instance_proto
@@ -572,36 +572,35 @@ transform_op_named  : transform_op_scope TRANSFORM_NAME_NORMAL { $$ = $2.as_asci
 //////////////////////////////// TYPE-ID ////////////////////////////////////         
 // type-id as seen in https://alx71hub.github.io/hcb/#type-id can be troublesome grammatically. Care advised.
 
-type_id_boot		: type_id_disjunction
+type_id_boot		: type_id
 
-type_id_disjunction	: type_id_conjunction
-					| type_id_disjunction DISJUNCTION_OP type_id_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
+//type_id_disjunction	: type_id_conjunction
+//					| type_id_disjunction DISJUNCTION_OP type_id_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
 
-type_id_conjunction	: type_id
-					| type_id_conjunction CONJUNCTION_OP type_id			{ $$ = vn->OnConjunction($1, $3); }
+//type_id_conjunction	: type_id
+//					| type_id_conjunction CONJUNCTION_OP type_id			{ $$ = vn->OnConjunction($1, $3); }
 
 type_id 			: ab_type
-					| type_specified
                       
 ab_type				: type_for_declarator ab_declarator 					{ $$ = vn->OnAbDeclType($1, $2, @2); }  
+					| type_for_declarator 				 					// abstract declarators can be "invisible"
 					| XSTRUCTOR parameterisation 							{ $$ = vn->OnConstructorType($2); } // TODO what about destructor?				                     
 
 //////////////////////////////// TYPES ////////////////////////////////////         
        
 // For now, booting into types will parse a type-id, which can use an abstract declarator      
-type_boot 			: type_specified
-					| TYPE_INDICATOR TYPE_INDICATOR type_id_boot							{ $$ = $3; }
-//	type_boot		: TYPE_INDICATOR TYPE_INDICATOR type_id_boot							{ $$ = $3; } #888
+type_boot 			: type_disjunction
 
-//type_disjunction	: type_conjunction
-//					| type_disjunction DISJUNCTION_OP type_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
+type_disjunction	: type_conjunction
+					| type_disjunction DISJUNCTION_OP type_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
 
-//type_conjunction 	: type_specified
-//					| type_conjunction CONJUNCTION_OP type_specified		{ $$ = vn->OnConjunction($1, $3); }
-                    				
-						 								 			                
+type_conjunction 	: type_specified
+					| type_conjunction CONJUNCTION_OP type_specified		{ $$ = vn->OnConjunction($1, $3); }
+                    										 								 			               
 // Not including types that require declarators (except via built-in, designation etc)          
 type_specified		: type_prefix          
+					| TYPE_INDICATOR TYPE_INDICATOR type_id_boot							{ $$ = $3; }
+//	type_specified	: TYPE_INDICATOR TYPE_INDICATOR type_id_boot							{ $$ = $3; } // for #888
           
 type_prefix : type_postfix
 			| 	DELTA_COMPARE_OP type_boot DELTA_REPLACE_OP type_prefix	{ $$ = vn->OnDelta($2, $4); }
