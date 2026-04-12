@@ -42,7 +42,7 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 
 %%
 
-// Comments TODO RE:LFEX always matches C_DIV_MOD_OP, prioritisation not working correctly
+// Comments 
 "//" 			{ matcher().skip('\n'); };
 "/*"    		{ matcher().skip("*/"); };
 

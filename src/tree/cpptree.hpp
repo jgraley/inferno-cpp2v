@@ -726,6 +726,11 @@ struct Callable : Type
     
 	Production GetMyProductionTerminal() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
+	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       bool constant ) override;
+	virtual string UpdateDeclarator( VN::RendererInterface *renderer, string declarator, Syntax::Policy policy, bool constant );
+    virtual string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy);
 };
 
 
@@ -739,7 +744,7 @@ struct CallableParams : Callable, Scope
     virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
 
 protected:    
-    string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy);
+    string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy) override;
 };
 
 
@@ -748,6 +753,10 @@ struct CallableParamsReturn : CallableParams
 {
     NODE_FUNCTIONS
     TreePtr<Type> return_type; ///< The return type
+
+	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       bool constant ) override;
 };
 
 
@@ -773,10 +782,6 @@ struct Procedure : CallableParams
 struct Function : CallableParamsReturn
 {
     NODE_FUNCTIONS_FINAL
-
-	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                       bool constant ) final;
 };
 
 

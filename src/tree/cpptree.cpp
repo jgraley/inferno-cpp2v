@@ -37,7 +37,9 @@ string Type::GetRender( VN::RendererInterface *renderer, Production surround_pro
 {	
 	// Declarator may be needed so enter declarator vcall but ask for anonymous by
 	// setting declarator string to "". This corresponds to a type-id in https://alx71hub.github.io/hcb/ 
-	return GetRenderTypeAndDeclarator( renderer, "", Syntax::Production::ANONYMOUS, surround_prod, policy, false ); 
+	// type-id is hard for the parser to differentiate from a declarator, potentially needing 
+	// lots of look-ahead. So clarify using ⍑ symbol. See #888
+	return "⍑⍑" + GetRenderTypeAndDeclarator( renderer, "", Syntax::Production::ANONYMOUS, surround_prod, policy, false ); 
 }
 
 
@@ -857,14 +859,14 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);
 
     list<string> ls;
-    if( policy.compound_uses_vn_separator ) // TODO hack, please remove
-		throw RefusedByPolicy();
+ //   if( policy.compound_uses_vn_separator ) // TODO hack, please remove
+	//	throw RefusedByPolicy();
         
     if( !policy.force_initialisation )
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
     
     bool constant = !!DynamicTreePtrCast<Const>(constancy);
-    string declarator = renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy );
+    string declarator = renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy );   
     Append( ls, {renderer->DoRenderTypeAndDeclarator(&type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, constant) } );
 
 	// TODO const can appear in different places
@@ -896,7 +898,7 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 
 	Append( ls, { renderer->DoRender(&initialiser, Production::INITIALISER, sub_policy) } );
 
-	return Join( ls, " " ) + (policy.force_initialisation?"\n":"");
+	return "/*I::GR()*/"+Join( ls, " " ) + (policy.force_initialisation?"\n":"");
 }
 
 
@@ -1033,6 +1035,33 @@ Syntax::Production Callable::GetOperandInDeclaratorProduction() const
 	return Production::POSTFIX; // eg int a();
 }
 
+
+string Callable::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+											 Syntax::Production , Syntax::Production, Syntax::Policy policy,
+											 bool constant )
+{
+	throw RefuseDifficultSyntax(); 
+	// This will render into something ambiguous with expressions
+	
+	// We have no return type, so we can't recurse and might as well complete the render here
+	return UpdateDeclarator( renderer, declarator, policy, constant );
+}
+
+
+string Callable::UpdateDeclarator( VN::RendererInterface *renderer, string declarator, Syntax::Policy policy,
+                                   bool constant ) 
+{
+	return declarator + 
+	       GetRenderParameterisation(renderer, policy) +	             
+	       (constant?" const":"");
+}                  
+
+
+string Callable::GetRenderParameterisation(VN::RendererInterface *, Policy )
+{ 
+	return "()";
+}
+
 //////////////////////////// CallableParams //////////////////////////////
 
 string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy)
@@ -1058,15 +1087,13 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
     return Join( strings, ", ", "(", ")" );
 }
 
-//////////////////////////// Function //////////////////////////////
+//////////////////////////// CallableParamsReturn //////////////////////////////
 
-string Function::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-											 Syntax::Production , Syntax::Production surround_prod, Syntax::Policy policy,
+string CallableParamsReturn::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+											 Syntax::Production, Syntax::Production surround_prod, Syntax::Policy policy,
 											 bool constant )
 {
-	string d2 = declarator + 
-	            GetRenderParameterisation(renderer, policy) +	             
-	            (constant?" const":"");
+	string d2 = UpdateDeclarator( renderer, declarator, policy, constant);
     return renderer->DoRenderTypeAndDeclarator( &return_type, 
                                                 d2,
                                                 Syntax::Production::POSTFIX, 
@@ -1078,27 +1105,29 @@ string Function::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
 
 string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 												Syntax::Production , Syntax::Production, Syntax::Policy policy,
-												bool )
+												bool constant )
 {
+	string d2 = UpdateDeclarator(renderer, declarator, policy, constant);
 	if( policy.use_vn_xstructor_symbol )
-		return "⨤" + declarator + GetRenderParameterisation(renderer, policy); 
+		return "⨤" + d2; 
 	else
-		return declarator + GetRenderParameterisation(renderer, policy); 
+		return d2; 
 }
 
 //////////////////////////// Destructor //////////////////////////////
 
-string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *, string declarator, 
+string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 											   Syntax::Production , Syntax::Production, Syntax::Policy policy,
-											   bool )
+											   bool constant)
 {
 	if( declarator.empty() )
 		declarator = "~";
-	
+		
+	string d2 = UpdateDeclarator(renderer, declarator, policy, constant);
 	if( policy.use_vn_xstructor_symbol )
-		return "⨤" + declarator + "()"; 
+		return "⨤" + d2;
 	else
-		return declarator + "()"; 
+		return d2; 
 }
 
 //////////////////////////// Array //////////////////////////////

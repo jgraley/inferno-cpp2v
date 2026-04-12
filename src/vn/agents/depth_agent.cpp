@@ -171,7 +171,10 @@ Syntax::Production StuffAgent::GetAgentProduction() const
 string StuffAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	(void)surround_prod;
-	string s = "⩨";
+	string s;
+	if( dynamic_pointer_cast<CPPTree::Type>( policy.pointer_archetype ) )		 
+		s += "⍑";			
+	s += "⩨";
 	if( recurse_restriction )
 		s += "⦅" + renderer->DoRender( &recurse_restriction, Syntax::Production::BOTTOM_EXPR, policy) + "⦆";
 	return s + renderer->DoRender( &terminus, Syntax::Production::PREFIX, policy ); 

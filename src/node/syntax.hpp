@@ -147,6 +147,7 @@ public:
     struct UnimplementedToken : Unimplemented {};
 	struct RefusedByPolicy : Refusal {};
 	struct RefuseDueLocal : Refusal {};
+	struct RefuseDifficultSyntax : Refusal {}; // Eg, might cause conflicts
 	struct TemporarilyDisabled : Refusal {};
 		
 	/// Produce the source-code-name of the corresponding SystemC construct

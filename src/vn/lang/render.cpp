@@ -558,31 +558,40 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
 		// Agents refuse in general to deal with declarators so if
 		// there is a pointer etc it'll default into an anonymous type
 		// which may require precedence booting. 
-		if( Agent::TryAsAgentConst(type) )
+		if( auto agent = Agent::TryAsAgentConst(type) )
 		{
-			return (constant?"const ":"") + 
-		           DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) + 
-	        	   (declarator != "" ? " "+declarator : "");
+			if( !dynamic_cast<const StandardAgent *>(agent) )
+				return string(constant?"const ":"") + 
+					   "/*Agent*/"+
+					   DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) + 
+					   (declarator != "" ? " "+declarator : "");
 		}
 	}
 	catch( Syntax::Refusal & ) {}
 	
 	auto type_as_type = TreePtr<CPPTree::Type>::DynamicCast(type);
-	if( type_as_type )
+	if( !type_as_type )
 	{
-		try 
-		{ 
-			return type_as_type->GetRenderTypeAndDeclarator( this, declarator, declarator_prod, surround_prod, policy, constant ); 
-		}
-		catch( Syntax::Refusal & ) {}
+		return string(constant?"const ":"") + 
+			   "/*Non-type*/" +	
+			   DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) +
+			   (declarator != "" ? " "+declarator : "");
 	}
 	
-	// This part duplicates Type::GetRenderTypeAndDeclarator
-	// We wouln't want to call a virtual on a NULL pointer, so the
-	// common part could be here or a static on Type
-	return (constant?"const ":"") + 
-		   DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) +
-		   (declarator != "" ? " "+declarator : "");
+	try 
+	{ 
+		return type_as_type->GetRenderTypeAndDeclarator( this, declarator, declarator_prod, surround_prod, policy, constant ); 
+	}
+	catch( Syntax::Refusal & ) 
+	{
+		// This part duplicates Type::GetRenderTypeAndDeclarator
+		// We wouln't want to call a virtual on a NULL pointer, so the
+		// common part could be here or a static on Type
+		return string(constant?"const ":"") + 
+			   "/*GRTaD() fail*/" +	
+			   DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) +
+			   (declarator != "" ? " "+declarator : "");
+	}	
 }                                          
                
 

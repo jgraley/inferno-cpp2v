@@ -669,6 +669,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> specs_pre, 
 	
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<const ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	FTRACE(spg)("\n");
 	TreePtr<CPPTree::Instance> instance;
 	if( spg && dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
@@ -678,10 +679,10 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> specs_pre, 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
 	else if( spg && dynamic_cast<const LocalScopeGnomon *>(spg.get()) ) 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Local>>(); 
+	else if( !spg ) 
+		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();  // wildcard
 	else
-		throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc),
-				"Cannot render C declaration without a scope.");
+		ASSERT(false)("Unknown gnomon: ")(spg);
 
 	// Now fill in fields derived from the declarator
 	Declarators::Result declarator_result = Declarators::Declarator::DoReduce(declarator, type);
