@@ -140,7 +140,7 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         
     // Due #969 we might have a standard agent, so fall back to a function that
     // definitely won't call any agent methods.
-    return RenderNodeExplicit( node, surround_prod, policy );      
+    return "\n#error Cannot render " + RenderNodeExplicit( node, surround_prod, policy ) + " to C++\n";      
 }
 
 
@@ -212,23 +212,6 @@ string CppRender::Sanitise( string s ) try
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderOperator( TreePtr<Operator> op, Syntax::Production surround_prod, Syntax::Policy policy ) try
-{
-    (void)surround_prod;
-    ASSERT(op);
-    
-    string s;
-    Sequence<Expression> operands;
-    if( auto n = DynamicTreePtrCast< New >(op) )
-    {
-        ASSERTFAIL(); // Hold this spot for resolving the map args to the constructor
-    }
-    else
-        return RenderNodeExplicit( op, surround_prod, policy );
-}
-DEFAULT_CATCH_CLAUSE
-
-
 string CppRender::RenderMacroStatement( TreePtr<MacroStatement> ms, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
 	(void)surround_prod;
@@ -256,9 +239,8 @@ string CppRender::RenderExpression( TreePtr<Initialiser> expression, Syntax::Pro
             s += DoRender( &st, Syntax::Production::STMT_DECL_LOW, policy );    
         return s + " })";
     }
-    else
-        return Render::Dispatch( expression, surround_prod, policy );
 
+    return "\n#error Cannot render " + RenderNodeExplicit( expression, surround_prod, policy ) + " to C++\n"; 
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -337,8 +319,8 @@ string CppRender::RenderPreProcDecl( TreePtr<PreProcDecl> ppd, Syntax::Productio
         return "#include <" + si->filename->GetString() + ">";
     else if( auto si = TreePtr<LocalInclude>::DynamicCast(ppd) )
         return "#include " + si->filename->GetRender(this, Syntax::Production::SPACE_SEP_PRE_PROC, policy);
-    else
-        return RenderNodeExplicit( ppd, surround_prod, policy );     
+
+    return "\n#error Cannot render " + RenderNodeExplicit( ppd, surround_prod, policy ) + " to C++\n"; 
 }
 DEFAULT_CATCH_CLAUSE
 
@@ -365,10 +347,8 @@ string CppRender::RenderDeclaration( TreePtr<Declaration> declaration, Syntax::P
 		}
 		return s;		
     }
-    else 
-		ASSERTFAIL();
     
-    return Render::Dispatch( declaration, surround_prod, policy );
+    return "\n#error Cannot render " + RenderNodeExplicit( declaration, surround_prod, policy ) + " to C++\n"; 
 }
 DEFAULT_CATCH_CLAUSE
 

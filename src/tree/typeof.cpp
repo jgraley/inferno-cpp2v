@@ -31,6 +31,20 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
         ASSERT(i);
         return GET_CHILD(i, type); 
     }
+    if( auto xi = AugTreePtr<SpecificConstructorIdentifier>::DynamicCast(o) ) // constructor instance
+    {        
+        AugTreePtr<Node> n = DeclarationOf().TryApplyTransformation(kit, xi);
+        auto i = AugTreePtr<Instance>::DynamicCast(n);
+        ASSERT(i);
+        return GET_CHILD(i, type); 
+    }
+    if( auto xi = AugTreePtr<SpecificDestructorIdentifier>::DynamicCast(o) ) // destructor instance
+    {        
+        AugTreePtr<Node> n = DeclarationOf().TryApplyTransformation(kit, xi);
+        auto i = AugTreePtr<Instance>::DynamicCast(n);
+        ASSERT(i);
+        return GET_CHILD(i, type); 
+    }
     else if( auto op = AugTreePtr<NonCommutativeOperator>::DynamicCast(o) ) // operator
     {
         // Get the types of all the operands to the operator first

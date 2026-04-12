@@ -27,7 +27,6 @@ private:
                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                       bool constant ) final;
     string Sanitise( string s );
-    string RenderOperator( TreePtr<CPPTree::Operator> op, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderMacroStatement( TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderExpression( TreePtr<CPPTree::Initialiser> expression, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderRecordInitialiser( TreePtr<CPPTree::RecordInitialiser> make_rec, Syntax::Production surround_prod, Syntax::Policy policy );

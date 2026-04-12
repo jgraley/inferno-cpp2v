@@ -32,15 +32,6 @@ class AvailableNodeData;
 namespace VN 
 {
 class VNLangActions;	
-class Gnomon : public Traceable
-{
-public:
-	virtual ~Gnomon()
-	{ 
-	}
-};
-
-
 class ResolverGnomon : public Gnomon
 {
 public:	
@@ -102,14 +93,7 @@ class DeclarationDesignationGnomon : public DesignationGnomon
 {
 public:	
 	using DesignationGnomon::DesignationGnomon;
-};
-		
-
-class ScopeGnomon : public Gnomon
-{
-public:	
-	virtual string GetMessageText() const = 0;	
-};
+};		
 
 
 class NodeNameScopeGnomon : public ScopeGnomon
@@ -129,7 +113,7 @@ public:
 	{
 		return "transformation name scope";
 	}
-};
+};	
 		
 		
 class VNLangRecogniser

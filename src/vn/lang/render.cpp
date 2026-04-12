@@ -63,7 +63,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 	Syntax::Policy designation_policy = default_policy;
 	string s;
 	if( ReadArgs::use.count("c") )
-		s += Trace(unique_coupling_names) + "\n\n";
+		s += "/* Unique coupling names: " + Trace(unique_coupling_names) + " */\n\n";
 
 	list<string> commands;
 
@@ -295,6 +295,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	string s;
+	string explain;
 
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
@@ -307,8 +308,7 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
         Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) &&
         node_prod != Syntax::Production::COMPOUND )
     {
-		if( ReadArgs::use.count("c") )
-			s += SSPrintf("/* Adding semicolon, reason 1, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
+		explain += SSPrintf("/* Adding semicolon, reason 1, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
         semicolon = true;
     }
         
@@ -320,20 +320,22 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
 			Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) &&
 			node_prod != Syntax::Production::COMPOUND )
 		{
-			if( ReadArgs::use.count("c") )
-				s += SSPrintf("/* Adding semicolon, reason 2, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
+			explain += SSPrintf("/* Adding semicolon, reason 2, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
 			semicolon = true;
 		}			
           
     if( !semicolon )
-    {
-		if( ReadArgs::use.count("c") )
-			s += SSPrintf("/* Not adding semicolon, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
-        return s + AccomodatePreRestriction( node, surround_prod, policy );
-	}
+		explain += SSPrintf("/* Not adding semicolon, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));	
+	
+	if( !ReadArgs::use.count("c") )
+		explain = ""; // shush!
+	
+    if( semicolon )
+		return s + AccomodatePreRestriction( node, Syntax::Production::BARE_STMT_DECL, policy ) + explain + ";\n";            
+	else
+        return s + AccomodatePreRestriction( node, surround_prod, policy ) + explain;	
 
- 	return s + AccomodatePreRestriction( node, Syntax::Production::BARE_STMT_DECL, policy ) +
-		   ";\n";                                  
+ 	                      
 }
 
 

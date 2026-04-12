@@ -447,8 +447,16 @@ TreePtr<Argumentation> MapArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expr
 	// and resolve the map into a sequence.
 
 	// Determine the type of the callee function or constructor
-	TreePtr<Type> callee_type = TypeOf::instance.Get(*renderer->GetTransKit(), callee).GetTreePtr();
-	ASSERT( callee_type );
+	TreePtr<Type> callee_type;
+	try
+	{
+		callee_type = TypeOf::instance.Get(*renderer->GetTransKit(), callee).GetTreePtr();
+		ASSERT( callee_type );
+	}
+	catch( ::Mismatch &ex )
+	{
+		ASSERT(false)("TypeOf failure: ")(ex.what())(" on ")(callee);
+	}	
 
 	// Convert f->params from Parameters to Declarations and settle on an arbitrary 
 	// ordering. This needs to be the same on each visit with a given callee.
@@ -1744,10 +1752,14 @@ string ConstructInit::GetRender( VN::RendererInterface *renderer, Production, Po
 {		
 	if( !policy.detect_and_render_constructor )
 		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang				
+
+	// We may need to convert the argumentation into a suitable form depending on policy.
+	// If a conversion occurs, the callee is needed in order to transform the arguments.
+	TreePtr<Argumentation> arg = argumentation->ConvertToSeqIfPolicyAllows(constructor_id, renderer, policy);
 			
 	// We never render the identifier for constructors - they are "invisible" and represent
 	// the choice of which overload we are bound to.		
-	return argumentation->DirectRenderArgumentation(renderer, policy);
+	return arg->DirectRenderArgumentation(renderer, policy);
 	
 	// TODO could use ConvertToSeqIfPolicyAllows() since we have a constructor_id
 }

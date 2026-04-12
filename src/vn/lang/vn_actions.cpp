@@ -657,34 +657,54 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 }
 
 
-TreePtr<Node> VNLangActions::OnInstance( set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
+TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator )
 {
-	return OnInstance( specs_pre, type, declarator, declarator_loc, MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>() );
+	return OnInstance( loc, specs_pre, type, declarator, MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>() );
 }
 
 
-TreePtr<Node> VNLangActions::OnInstance( set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc, TreePtr<Node> init )
+TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, TreePtr<Node> init )
 {
 	(void)specs_pre; // TODO first we need to determine whether to make a Field, Local or Global
-	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
-	switch( result.outcome )
+	
+	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
+	shared_ptr<const ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	TreePtr<CPPTree::Instance> instance;
+	if( spg && dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
+		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
+	else if( spg && dynamic_cast<const FieldScopeGnomon *>(spg.get()) ) 
+		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>(); // TODO fill in virt and access using specs_pre
+	else if( spg && dynamic_cast<const GlobalScopeGnomon *>(spg.get()) ) 
+		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
+	else if( spg && dynamic_cast<const LocalScopeGnomon *>(spg.get()) ) 
+		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Local>>(); 
+	else
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"Cannot render C declaration without a scope.");
+
+	// Now fill in fields derived from the declarator
+	Declarators::Result declarator_result = Declarators::Declarator::DoReduce(declarator, type);
+	switch( declarator_result.outcome )
 	{
 		case Declarators::Result::CONCRETE:
 		case Declarators::Result::WILDCARD:
 		{
 			// NOTE: innermost id == NULL => ☆ (not abstract)	
-			auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();
-			ret->type = result.type;
-			ret->identifier = result.leaf;
-			ret->initialiser = init;
-			ret->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>(); // TODO
-			return ret;
+			instance->type = declarator_result.type;
+			instance->identifier = declarator_result.leaf;
+			break;
 		}
 
 		default:
-			ASSERTFAIL(); // internal error because concrete decls are parsed separately
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"Expected concrete declaration but got abstract.");
 	}
-	ASSERTFAIL();
+	
+	instance->initialiser = init;
+	instance->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>(); // TODO
+	return instance;
 }
 
 
@@ -1037,6 +1057,17 @@ TreePtr<Node> VNLangActions::CreateIntegralLiteral( bool uns, bool lng, bool lng
 }
 
 
+void VNLangActions::AddGnomon( shared_ptr<Gnomon> gnomon )
+{
+	ASSERT( gnomon );
+	
+	if( auto scope_gnomon = dynamic_pointer_cast<const ScopeGnomon>(gnomon) )
+		declaration_scope_gnomons.Push( scope_gnomon ); // front is top
+	else 
+		ASSERT(false)("VNLangActions doesn't know about gnomon: ")(*gnomon);
+}
+
+
 static NodeEnum GetNodeEnum( list<string> typ, any loc )
 {
 	if( !AvailableNodeData().GetNameToEnumMap().count(typ) )
@@ -1154,7 +1185,7 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 
 // Resolving common ambiguities
 // - Get better at dismabiguating VN stuff, primary, prefix, postfix including pre-restrictions. Use the recogniser.
-// - Overdo this. Think in terms of SDR columns (statement/declaration/expression) and anything that cannot use
+// - Overdo this. Think in terms of SDE columns (statement/declaration/expression) and anything that cannot use
 //   this due to conflicts needs its own "pocket syntax" i.e. prefix/postfix/primary VNs, disambiguated via recogniser
 //   such that its constructs are unambiguous as with the rule for types.
 // EXAMPLE: you can't use the SDE column for paraneters because it's ambiguous. You can't half use it either
@@ -1162,6 +1193,14 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 
 // - Add members to classes and move access_spec_nw across
 // - Give operator comma lower prio than ∧ etc and re-instate
+
+// NOTE: ; is NOT required for any VN operators working on statements or declarations. This is
+// consistent with statements and declarations that end in {...} not requiring one either. We DO
+// provide essentially optional semicolons for various surroundings. At present these are normal and decl_open 
+// TODO name more consistently
+// This is less conflicty that one might expect, and some languages, like golang, do this as 
+// a matter of course.
+
 
 // NOTE
 // Lots of conflicts incl around declarators resolved by making pre-restriction refuse to switch between

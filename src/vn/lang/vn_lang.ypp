@@ -155,8 +155,8 @@ stmt_high
 %type <TreePtr<Node>> 				unified_boot unified_prefix 
 %type <TreePtr<Node>> 				normal_boot normal
 %type <TreePtr<Node>> 				bare_statement statement_nc statement stmt_decl         
-%type <TreePtr<Node>> 				decl_boot decl_disjunction decl_conjunction declaration bare_declaration  
-%type <TreePtr<Node>> 				decl_prefix decl_postfix decl_primary decl_vn_prim
+%type <TreePtr<Node>> 				decl_open decl_boot decl_disjunction decl_conjunction declaration bare_declaration  
+%type <TreePtr<Node>> 				decl_prefix_definite decl_prefix decl_postfix decl_primary decl_vn_prim
 %type <TreePtr<Node>> 				compound compound_primary parameter type_boot compound_prefix 
 %type <TreePtr<Node>> 				type_for_declarator 
 %type <TreePtr<Node>> 				qualifier qualifier_nw
@@ -175,7 +175,8 @@ stmt_high
 %type <VN::Item>					item
 %type <shared_ptr<VN::Gnomon>>		part_resolve designation_command 
 %type <shared_ptr<VN::Gnomon>>		transform_op_scope
-%type <shared_ptr<VN::Gnomon>>		explicit_op_scope prerestrict_op_scope id_by_name_op_scope builder_id_op_scope
+%type <shared_ptr<VN::Gnomon>>		explicit_op_scope prerestrict_op_scope id_by_name_op_scope builder_id_op_scope 
+%type <shared_ptr<VN::Gnomon>>		open_param_scope
 %type <list<TreePtr<Node>>>			stmt_decls 
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases 
@@ -249,7 +250,7 @@ unified_prefix	: expr_prefix
 				| decl_prefix
   
 //////////////////////////////// NORMALS ////////////////////////////////////         
-// Normal is basically anything other than a type
+// Normal is basically anything other than a type or declaration or qualifier
 
 normal_boot			: norm_disjunction
 
@@ -259,11 +260,11 @@ norm_disjunction	: norm_conjunction
 
 norm_conjunction 	: normal       
 					| norm_conjunction CONJUNCTION_OP normal    			{ $$ = vn->OnConjunction($1, $3); }
-					| norm_conjunction CONJUNCTION_OP declaration    			{ $$ = vn->OnConjunction($1, $3); }
+					| norm_conjunction CONJUNCTION_OP decl_open    			{ $$ = vn->OnConjunction($1, $3); }
 		
 normal       		: expression
-					| statement			
-
+					| statement		
+					
 //////////////////////////////// COMPOUND ////////////////////////////////////         
 
 // Because there's no separator in {{code} expr} the prefix ops would conflict with infix that use same symbol,
@@ -298,34 +299,43 @@ decl_boot	: decl_disjunction
 decl_disjunction	: decl_conjunction
 					| decl_disjunction DISJUNCTION_OP decl_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
 
-decl_conjunction 	: declaration       
-					| decl_conjunction CONJUNCTION_OP declaration    			{ $$ = vn->OnConjunction($1, $3); }
-					| decl_conjunction CONJUNCTION_OP normal	    			{ $$ = vn->OnConjunction($1, $3); }
+decl_conjunction 	: decl_open       
+					| decl_conjunction CONJUNCTION_OP decl_open    			{ $$ = vn->OnConjunction($1, $3); }
+					| decl_conjunction CONJUNCTION_OP bare_statement    			{ $$ = vn->OnConjunction($1, $3); }
+					| decl_conjunction CONJUNCTION_OP expression	    			{ $$ = vn->OnConjunction($1, $3); }
+
+decl_open	: declaration
+			| bare_declaration
 
 declaration	: bare_declaration ';'								{ $$ = $1; }      
 			| instance_proto compound							{ $$ = vn->OnInstanceInit($1, @1, $2); }	
 			| access_spec_nw ':' 		
-			| decl_prefix								                                        
 
 bare_declaration: instance_proto
 				| instance_proto ANY_NODE_OP					{ $$ = vn->OnInstanceInit($1, @1, nullptr); } // note: ☆ has ; but no =
 				| instance_proto C_ASSIGN expression			{ $$ = vn->OnInstanceInit($1, @1, $3); } 
 				| class_spec		
+				| decl_prefix								                                        
 
-instance_proto	: type_for_declarator declarator								{ $$ = vn->OnInstance({}, $1, $2, @2); }	
-				| qualifiers type_for_declarator declarator						{ $$ = vn->OnInstance($1, $2, $3, @3); }	
-				| XSTRUCTOR declarator											{ $$ = vn->OnInstance({}, nullptr, $2, @2); }	
-				| qualifiers XSTRUCTOR declarator								{ $$ = vn->OnInstance($1, nullptr, $3, @3); }	
+instance_proto	: type_for_declarator declarator								{ $$ = vn->OnInstance(@$, {}, $1, $2); }	
+				| qualifiers type_for_declarator declarator						{ $$ = vn->OnInstance(@$, $1, $2, $3); }	
+				| XSTRUCTOR declarator											{ $$ = vn->OnInstance(@$, {}, nullptr, $2); }	
+				| qualifiers XSTRUCTOR declarator								{ $$ = vn->OnInstance(@$, $1, nullptr, $3); }	
+
+decl_prefix_definite	: decl_prefix
+						|  						        STUFF_OP vn_paren { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+						| STUFF_OP OPEN_VN unified_boot CLOSE_VN vn_paren { $$ = vn->OnStuff($5, $3, VN::Limit()); }		
+						| vn_primary	   
 
 decl_prefix : decl_postfix
 			| 	DELTA_COMPARE_OP decl_boot DELTA_REPLACE_OP decl_prefix	{ $$ = vn->OnDelta($2, $4); }
 			| 						         GREEN_GRASS_OP decl_prefix	{ $$ = vn->OnGrass($2); }
 			| 							      POINTER_IS_OP decl_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP decl_prefix	{ $$ = vn->OnNegation($2); }
-			|                     decl_prerestrict_op_named decl_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|                     decl_prerestrict_op_named vn_primary	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|                     decl_prerestrict_op_named decl_prefix_definite	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|								 TYPE_INDICATOR decl_prefix { $$ = $2; }
-			   
+
+			   			   
 decl_postfix: decl_primary		   
 	                                       
 decl_primary: decl_vn_prim
@@ -411,14 +421,16 @@ ab_declarator_postfix	: ab_declarator_postfix parameterisation			{ $$ = make_sha
 					                         
 //////////////////////////////////////// PARAMETERS /////////////////////////////////////////////
 
-parameterisation	: '(' parameters ')'							{ $$ = $2; }
-					| '(' ')'										{ $$.clear(); }							
+parameterisation	: open_param_scope parameters ')'				{ $$ = $2; (void)$1; }
+					| open_param_scope ')'							{ $$.clear(); (void)$1;}							
+
+open_param_scope	: '('											{ $$ = make_shared<VN::ParameterScopeGnomon>(); 
+																	  vn->AddGnomon($$); }
 
 parameters	: parameter												{ $$.push_back($1); }
 			| parameters ',' parameter								{ $$ = $1; $$.push_back($3); }			
 				
-parameter   : type_for_declarator declarator 						{ $$ = vn->OnParameter($1, $2, @2); }	
-            | decl_boot           									// TODO open a parameters scope for the actions
+parameter   : decl_boot           									
                          
 //////////////////////////////// CLASSES ////////////////////////////////////                                  
                          

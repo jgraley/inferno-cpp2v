@@ -45,6 +45,59 @@ struct Itemisation
 class Command;
 class VNLangRecogniser;
 
+class Gnomon : public Traceable
+{
+public:
+	virtual ~Gnomon()
+	{ 
+	}
+};
+
+
+class ScopeGnomon : public Gnomon
+{
+public:	
+	virtual string GetMessageText() const = 0;	
+};
+
+
+class ParameterScopeGnomon : public ScopeGnomon
+{
+public:	
+	string GetMessageText() const final
+	{
+		return "parameters scope";
+	}
+};
+
+class FieldScopeGnomon : public ScopeGnomon
+{
+public:	
+	string GetMessageText() const final
+	{
+		return "fields scope";
+	}
+};
+
+class GlobalScopeGnomon : public ScopeGnomon
+{
+public:	
+	string GetMessageText() const final
+	{
+		return "global scope";
+	}
+};
+
+class LocalScopeGnomon : public ScopeGnomon
+{
+public:	
+	string GetMessageText() const final
+	{
+		return "local scope";
+	}
+};
+
+
 class VNLangActions	
 {
 public:
@@ -97,11 +150,11 @@ public:
 	
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
-	TreePtr<Node> OnInstance( set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
-	TreePtr<Node> OnInstance( set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc, TreePtr<Node> init );	
+	TreePtr<Node> OnInstance( any loc, set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator );	
+	TreePtr<Node> OnInstance( any loc, set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, TreePtr<Node> init );	
 	TreePtr<Node> OnInstanceInit( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init );	
 	TreePtr<Node> OnAbDeclType( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
-	TreePtr<Node> OnParameter( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
+	TreePtr<Node> OnParameter( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	// TODO should be unused - delete
 	TreePtr<Node> OnInheritanceRecord( string keyword, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	
 	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified
@@ -127,9 +180,14 @@ public:
 	
 	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
 	
+	void AddGnomon( shared_ptr<Gnomon> gnomon );
+	
 private: 
 	unique_ptr<AvailableNodeData> node_names;	
-
+	
+	// store with weak_ptr => these will expire when the parser exists the scope
+	WeakStack<const ScopeGnomon> declaration_scope_gnomons;
+	
 public: // TODO provide a getter	
 	Command::List top_level_commands;	
 };

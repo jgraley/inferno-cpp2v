@@ -42,6 +42,10 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 
 %%
 
+// Comments TODO RE:LFEX always matches C_DIV_MOD_OP, prioritisation not working correctly
+"//" 			{ matcher().skip('\n'); };
+"/*"    		{ matcher().skip("*/"); };
+
 \s          	// ignore space
 ꩜				{ return YY::VNLangParser::make_ENGINE_COMMAND(location()); };
 ‡				{ return YY::VNLangParser::make_ATTRIBUTE_COMMAND(location()); };
@@ -82,7 +86,6 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 \|\|		  	{ return YY::VNLangParser::make_C_LOGICAL_OR_OP(str(), location()); }
 &&			  	{ return YY::VNLangParser::make_C_LOGICAL_AND_OP(str(), location()); }
 <<|>>		  	{ return YY::VNLangParser::make_C_SHIFT_OP(str(), location()); }
-
 !|~				{ return YY::VNLangParser::make_C_PREFIX_OP(str(), location()); };
 \+\+|--			{ return YY::VNLangParser::make_C_PRE_OR_POSTFIX_OP(str(), location()); };
 =			  	{ return YY::VNLangParser::make_C_ASSIGN(str(), location()); }
@@ -92,7 +95,7 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 \^				{ return YY::VNLangParser::make_C_BITWISE_XOR_OP(str(), location()); }
 
 ::				{ return YY::VNLangParser::make_RESOLUTION_OP(location()); };
-\.\. 				{ return YY::VNLangParser::make_RANGE_OP(location()); };
+\.\. 			{ return YY::VNLangParser::make_RANGE_OP(location()); };
 
 [()\{\};?:\[\]\.,&\*]	{ return YY::VNLangParser::symbol_type(chr(), location()); }
 
@@ -100,5 +103,7 @@ comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 {integral_num}	{ return YY::VNLangParser::make_INTEGRAL_LITERAL(str(), location()); }
 {ascii_name}	{ return recogniser->OnUnquotedLexeme(str(), location()); }
 {unicode_name}	{ return recogniser->OnUnquotedLexeme(wstr(), location()); }
+
+
 
 %%
