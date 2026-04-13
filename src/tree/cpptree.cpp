@@ -33,8 +33,12 @@ Syntax::Production Type::GetOperandInDeclaratorProduction() const
 }
 
 
-string Type::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
-{	
+string Type::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) try
+{
+	return GetRenderTypeSpecSeq(renderer, policy);
+}
+catch( Unimplemented & )
+{
 	// Declarator may be needed so enter declarator vcall but ask for anonymous by
 	// setting declarator string to "". This corresponds to a type-id in https://alx71hub.github.io/hcb/ 
 	// type-id is hard for the parser to differentiate from a declarator, potentially needing 
