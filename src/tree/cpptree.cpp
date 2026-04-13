@@ -39,7 +39,10 @@ string Type::GetRender( VN::RendererInterface *renderer, Production surround_pro
 	// setting declarator string to "". This corresponds to a type-id in https://alx71hub.github.io/hcb/ 
 	// type-id is hard for the parser to differentiate from a declarator, potentially needing 
 	// lots of look-ahead. So clarify using ⍑ symbol. See #888
-	return "⍑⍑" + GetRenderTypeAndDeclarator( renderer, "", Syntax::Production::ANONYMOUS, surround_prod, policy, false ); 
+	string s = GetRenderTypeAndDeclarator( renderer, "", Syntax::Production::ANONYMOUS, surround_prod, policy, false );
+	if( policy.disambiguate_type_id )
+		s = "⍑⍑(" + s + ")"; 
+	return s;
 }
 
 
@@ -859,8 +862,8 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);
 
     list<string> ls;
- //   if( policy.compound_uses_vn_separator ) // TODO hack, please remove
-	//	throw RefusedByPolicy();
+    if( policy.compound_uses_vn_separator ) // TODO hack, please remove
+		throw RefusedByPolicy();
         
     if( !policy.force_initialisation )
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );

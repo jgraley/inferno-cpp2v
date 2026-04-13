@@ -90,6 +90,9 @@ Syntax::Policy CppRender::GetDefaultPolicy()
 		
 	// Render constructors and destructors per C++ standard
 	policy.use_vn_xstructor_symbol = false;
+	
+	// Just use type ids directly (aka abstract declarators)
+	policy.disambiguate_type_id = false;
 	return policy;
 }
 
