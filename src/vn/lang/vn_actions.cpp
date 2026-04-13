@@ -172,6 +172,12 @@ TreePtr<Node> VNLangActions::OnExplicitNode( const AvailableNodeData::Block *blo
 	list<Item>::const_iterator src_it = src_itemisation.items.begin();
     vector< Itemiser::Element * > dest_items = dest->Itemise();   
     
+    // Allow an empty itemisation to masquerade as one item being an empty container
+    if( src_itemisation.items.empty() && // nothing given
+		dest_items.size() == 1 && // Expecting one item
+		dynamic_cast<ContainerInterface *>(dest_items.front()) ) // Expected item is a container
+		return dest; // It's all good, just leave the container empty
+    
     string counts_msg = SSPrintf("%s expects %d %s, but %d %s given.",
                              DiagQuote(Traceable::TypeIdName( *dest )).c_str(),
                              dest_items.size(),

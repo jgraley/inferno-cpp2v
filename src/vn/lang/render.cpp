@@ -205,6 +205,9 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
     Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
+	// we only act inside an INITIALISER production and never on already-matching production
+	if( surround_prod != Syntax::Production::INITIALISER || node_prod == surround_prod )
+		return AccomodateBoot(node, surround_prod, policy ); 
 
 	string s;
 	if( ReadArgs::use.count("c") )
@@ -214,21 +217,22 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_p
 					  Syntax::GetPrecedence(surround_prod), 
 					  Syntax::GetPrecedence(node_prod) );		
 
-    if( node_prod == Syntax::Production::INITIALISER || node_prod == Syntax::Production::COMPOUND ||
-		surround_prod != Syntax::Production::INITIALISER )
-		return s + AccomodateBoot(node, surround_prod, policy );
-
 	// Deal with expression in initialiser production by prepending =
     switch(node_prod)
     {
-        case Syntax::Production::BOTTOM_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences			
-			if( ReadArgs::use.count("c") )
-				s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
-			return s + " = " + AccomodateBoot(node, Syntax::Production::ASSIGN, policy );
+		case Syntax::Production::BOTTOM_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences			
+			if( node_prod != Syntax::Production::COMPOUND ) // no = for COMPOUND
+			{
+				if( ReadArgs::use.count("c") )
+					s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
+				return s + " = " + AccomodateBoot(node, Syntax::Production::ASSIGN, policy );
+			}
 			
 		default:
-			return s + AccomodateBoot(node, surround_prod, policy ); 
+			break;
+			
 	}
+	return s + AccomodateBoot(node, surround_prod, policy ); 
 }
 
 
@@ -451,6 +455,7 @@ list<string> Render::PopulateItemStrings( shared_ptr<const Node> node, Syntax::P
 			}
 		}   
 	}
+
 	return sitems;
 }
 

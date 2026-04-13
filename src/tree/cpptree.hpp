@@ -89,7 +89,7 @@ struct Type : virtual Node
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
 
 	virtual string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                               Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                               Production object_prod, Production surround_prod, Policy policy,
                                                bool constant );
 
     // Render a simple type only, no declarators
@@ -105,7 +105,7 @@ struct Declaration : virtual Node
     
     virtual string GetColour() const { return "/set28/1"; }
 	Production GetMyProductionTerminal() const override;	
-	virtual bool ShouldSplitInstance( Syntax::Policy policy ) const;
+	virtual bool ShouldSplitInstance( Policy policy ) const;
 };
 
 
@@ -172,7 +172,7 @@ struct SpecificIdentifier : virtual Property
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) override;
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
     string GetIdentifierName() const override; /// This is relied upon to just return the identifier name 
     string GetDesignationNameHint() const override;
     bool IsDesignationNamedIdentifier() const override;
@@ -464,7 +464,7 @@ struct MembInitSeq : virtual Node
 	
 	Sequence<MembInitialisation> memb_inits;
 	
-	string RenderMemberInits( VN::RendererInterface *renderer, Syntax::Policy policy );	
+	string RenderMemberInits( VN::RendererInterface *renderer, Policy policy );	
 };
 
 
@@ -651,7 +651,7 @@ struct Temporary : Instance
     NODE_FUNCTIONS_FINAL
     
 	string GetRenderTerminal( Production ) const { throw Unimplemented(); }    
-	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Syntax::Policy policy ) const override;	
+	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;	
 };
 
 /// Node for a base class within a class declaration, specifies another class from which to inherit
@@ -727,9 +727,9 @@ struct Callable : Type
 	Production GetMyProductionTerminal() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       Production object_prod, Production surround_prod, Policy policy,
                                        bool constant ) override;
-	virtual string UpdateDeclarator( VN::RendererInterface *renderer, string declarator, Syntax::Policy policy, bool constant );
+	virtual string UpdateDeclarator( VN::RendererInterface *renderer, string declarator, Policy policy, bool constant );
     virtual string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy);
 };
 
@@ -755,7 +755,7 @@ struct CallableParamsReturn : CallableParams
     TreePtr<Type> return_type; ///< The return type
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       Production object_prod, Production surround_prod, Policy policy,
                                        bool constant ) override;
 };
 
@@ -791,7 +791,7 @@ struct Constructor : Procedure // TODO be CallableParams
 	NODE_FUNCTIONS_FINAL 
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       Production object_prod, Production surround_prod, Policy policy,
                                        bool constant ) final;
 };
 
@@ -802,7 +802,7 @@ struct Destructor : Subroutine // TODO be Callable
 	NODE_FUNCTIONS_FINAL 
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       Production object_prod, Production surround_prod, Policy policy,
                                        bool constant ) final;
 };
 
@@ -817,7 +817,7 @@ struct Array : Type
 	Production GetMyProductionTerminal() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       Production object_prod, Production surround_prod, Policy policy,
                                        bool constant ) final;	
 };
 
@@ -840,7 +840,7 @@ struct Pointer : Indirection
 	NODE_FUNCTIONS_FINAL
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       Production object_prod, Production surround_prod, Policy policy,
                                        bool constant ) final;
 };
 
@@ -851,7 +851,7 @@ struct Reference : Indirection
 	NODE_FUNCTIONS_FINAL 
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       Production object_prod, Production surround_prod, Policy policy,
                                        bool constant ) final;
 };
 
@@ -896,7 +896,7 @@ struct Integral : Numeric
 	struct UnimplementedIntegralType : Unimplemented {};
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
+                                       Production object_prod, Production surround_prod, Policy policy,
                                        bool constant ) final;
 	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
 	virtual bool IsSigned() { throw Unimplemented(); }
@@ -993,10 +993,10 @@ struct Record : TypeDeclaration,
     virtual string GetColour() const { return TypeDeclaration::GetColour(); } // TypeDeclaration wins
 	virtual TreePtr<AccessSpec> GetInitialAccess() const;    
 	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) override;     
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
     virtual string GetKeyword() const;
-    virtual string RenderExtras(VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
-	virtual string RenderBody( VN::RendererInterface *renderer, Syntax::Policy policy );
+    virtual string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
+	virtual string RenderBody( VN::RendererInterface *renderer, Policy policy );
 };
 
 /// A union, as per Record.
@@ -1015,7 +1015,7 @@ struct Enum : Record
 { 
 	NODE_FUNCTIONS_FINAL 
     string GetKeyword() const override;
-	string RenderBody( VN::RendererInterface *renderer, Syntax::Policy policy ) override;	
+	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	
 };
 
 /// A record that can inherit from other records and be inherited from. 
@@ -1026,7 +1026,7 @@ struct InheritanceRecord : Record
 
     Collection<Base> bases; ///< contains the InheritanceRecords from which we inherit   
 
-    string RenderExtras(VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy) override;
+    string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy) override;
 };
 
 /// Struct as per InheritanceRecord
@@ -1093,7 +1093,7 @@ struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
 	Production GetMyProductionTerminal() const final; \
-	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) final; \
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final; \
 }; \
 
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
@@ -1101,7 +1101,7 @@ struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
 	Production GetMyProductionTerminal() const final; \
-	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) final; \
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final; \
 }; \
 
 #define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
@@ -1109,7 +1109,7 @@ struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
 	Production GetMyProductionTerminal() const final; \
-	string GetRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Policy policy ) final; \
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final; \
 }; \
 
 #include "operator_data.inc"
