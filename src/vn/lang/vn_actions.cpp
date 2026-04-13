@@ -657,24 +657,26 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 }
 
 
-TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator )
-{
-	return OnInstance( loc, specs_pre, type, declarator, MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>() );
-}
-
-
-TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> specs_pre, TreePtr<Node> type, TreePtr<Node> declarator, TreePtr<Node> init )
-{
-	(void)specs_pre; // TODO first we need to determine whether to make a Field, Local or Global
-	
+TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> quals_pre, TreePtr<Node> type, TreePtr<Node> declarator )
+{	
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<const ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
 	FTRACE(spg)("\n");
 	TreePtr<CPPTree::Instance> instance;
 	if( spg && dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
-	else if( spg && dynamic_cast<const FieldScopeGnomon *>(spg.get()) ) 
-		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>(); // TODO fill in virt and access using specs_pre
+	else if( spg && dynamic_cast<const FieldScopeGnomon *>(spg.get()) )
+	{ 
+		auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
+		for( TreePtr<Node> q : quals_pre )
+		{
+			if( auto vq = TreePtr<CPPTree::Virtuality>::DynamicCast(q) )
+				field->virt = vq;
+			if( auto aq = TreePtr<CPPTree::AccessSpec>::DynamicCast(q) )
+				field->access = aq;
+		}
+		instance = field;
+	}
 	else if( spg && dynamic_cast<const GlobalScopeGnomon *>(spg.get()) ) 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
 	else if( spg && dynamic_cast<const LocalScopeGnomon *>(spg.get()) ) 
@@ -703,8 +705,14 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> specs_pre, 
 				"Expected concrete declaration but got abstract.");
 	}
 	
-	instance->initialiser = init;
-	instance->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>(); // TODO
+	instance->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
+	for( TreePtr<Node> q : quals_pre )
+		if( auto cq = TreePtr<CPPTree::Constancy>::DynamicCast(q) )
+			instance->constancy = q;
+	
+	// If indeed there is an initialiser, call OnInstanceInit() to over-ride this
+	instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
+
 	return instance;
 }
 
@@ -731,27 +739,6 @@ TreePtr<Node> VNLangActions::OnAbDeclType( TreePtr<Node> type, TreePtr<Node> dec
 		default:
 			ASSERTFAIL(); // internal error because abstract decls are parsed separately
 	}
-}
-
-
-TreePtr<Node> VNLangActions::OnParameter( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
-{
-	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
-	switch( result.outcome )
-	{
-		case Declarators::Result::ABSTRACT:
-			ASSERTFAIL();	 // TODO not good enough just to leave the identifier as NULL, need new node 
-		
-		case Declarators::Result::CONCRETE:
-		case Declarators::Result::WILDCARD:
-			auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
-			ret->type = result.type;
-			ret->identifier = result.leaf;
-			ret->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>(); // TODO but what if it does have initialiser?
-			ret->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
-			return ret;
-	}
-	ASSERTFAIL();
 }
 
 
