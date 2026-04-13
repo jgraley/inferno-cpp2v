@@ -43,7 +43,9 @@ catch( Unimplemented & )
 	// setting declarator string to "". This corresponds to a type-id in https://alx71hub.github.io/hcb/ 
 	// type-id is hard for the parser to differentiate from a declarator, potentially needing 
 	// lots of look-ahead. So clarify using ⍑ symbol. See #888
-	string s = GetRenderTypeAndDeclarator( renderer, "", Syntax::Production::ANONYMOUS, surround_prod, policy, false );
+	if( policy.disambiguate_type_id )
+		surround_prod = Production::BOOT_TYPE;
+	string s = GetRenderTypeAndDeclarator( renderer, "", Production::ANONYMOUS, surround_prod, policy, false );
 	if( policy.disambiguate_type_id )
 		s = "⍑⍑(" + s + ")"; 
 	return s;
@@ -51,7 +53,7 @@ catch( Unimplemented & )
 
 
 string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                         Syntax::Production, Syntax::Production, Syntax::Policy policy,
+                                         Production, Production, Policy policy,
                                          bool constant)
 {
 	return (constant?"const ":"") + 
