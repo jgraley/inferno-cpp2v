@@ -56,11 +56,10 @@ string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string
 }                                           
 
 
-string Type::GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy )
+string Type::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy  )
 {
 	// This would be a type-specifier-seq in https://alx71hub.github.io/hcb/ 
-	// TODO just throw?
-	return renderer->RenderNodeExplicit(shared_from_this(), Syntax::Production::EXPLICIT_NODE, policy);
+	throw Unimplemented();
 }
 
 //////////////////////////// Declaration ///////////////////////////////
