@@ -887,10 +887,10 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
     
     bool constant = !!DynamicTreePtrCast<Const>(constancy);
     string declarator = renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy );   
-    Append( ls, {renderer->DoRenderTypeAndDeclarator(&type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, constant) } );
+    ls.push_back( renderer->DoRenderTypeAndDeclarator(&type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, constant) );
 
 	// TODO const can appear in different places
-	//Append( ls, {renderer->DoRender(&constancy, Production::KEYWORD, policy)} );
+	//ls.push_back(renderer->DoRender(&constancy, Production::KEYWORD, policy) );
 
     if( !policy.force_initialisation )
 		Append( ls, RenderDeclSpecPost(renderer, sub_policy) );
@@ -909,17 +909,17 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 
 	if( auto mis = dynamic_cast<MembInitSeq *>(this) )
 	{
-		Append( ls, { mis->RenderMemberInits(renderer, sub_policy) } );							
+		ls.push_back( mis->RenderMemberInits(renderer, sub_policy) );							
 		if( policy.compound_uses_vn_separator ) // TODO hack, please remove
 			throw RefusedByPolicy(); 
 	}
 
  	if( ReadArgs::use.count("c") )
-		Append( ls, {string("/* Instance initialiser */")} );
+		ls.push_back( "/* Instance initialiser */" );
 		
 	// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
     if( !TreePtr<Uninitialised>::DynamicCast(initialiser) )
-		Append( ls, { renderer->DoRender(&initialiser, Production::DIRECT_INIT, sub_policy) } );
+		ls.push_back( renderer->DoRender(&initialiser, Production::DIRECT_INIT, sub_policy) );
 
 	return Join( ls, " " ) + (policy.force_initialisation?"\n":"");
 }

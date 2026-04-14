@@ -300,31 +300,28 @@ string CppRender::RenderEnum( TreePtr<CPPTree::Record> record, Syntax::Policy po
 	
 	if( policy.force_incomplete_records )
 		return s;
-		
-    s += "\n{\n";
-    bool first = true;
+	
+	list<string> ls;		
     for( TreePtr<Declaration> pe : record->members )
     {
 		// TODO make a new EnumValue member, derived from Instance, and replace its GetRender()
-        if( !first )
-            s += ",\n";
-            
         auto o = TreePtr<Instance>::DynamicCast(pe);
         if( !o )
         {
-			s += "\n#error Cannot render " + RenderNodeExplicit( pe, Syntax::Production::COMMA_SEP, policy ) + " into an enum\n";  
+			ls.push_back(  "\n#error Cannot render " + RenderNodeExplicit( pe, Syntax::Production::COMMA_SEP, policy ) + " into an enum\n" );  
 			continue;
         }
         
-        s += DoRender( &o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN), id_policy ); 
+        string s = DoRender( &o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN), id_policy ); 
         
 		// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
         if( !TreePtr<Uninitialised>::DynamicCast(o->initialiser) )      
 			s += " " + DoRender( &o->initialiser, Syntax::Production::DIRECT_INIT, policy );
-
-        first = false;    
+			
+		ls.push_back( s );			
     }
-    return s + "}\n";
+    
+    return s + "\n" + Join( ls, ",\n", "{\n", "}\n" );
 }
 DEFAULT_CATCH_CLAUSE
                  

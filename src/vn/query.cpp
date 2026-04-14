@@ -108,20 +108,17 @@ void DecidedQueryCommon::AssertMatchingNodes( const DecidedQueryCommon::Nodes &m
 
 string DecidedQueryCommon::TraceLinks( const DecidedQueryCommon::Links &links )
 {      
-    bool first = true;
-    string s = "Links[";
+	list<string> ls;
     for( LocatedLink link : links )
     {
-        if( !first )
-            s += ",\n";
-        first = false;                
-        s += Trace((PatternLink)link) + ":=";
+        string s = Trace((PatternLink)link) + ":=";
         if( auto xsc = dynamic_cast<SubContainer *>( link.GetChildTreePtr().get() ) )
             s += xsc->GetContentsTrace(); // normal trace is not enough info
         else
             s += Trace((XLink)link);
+        ls.push_back( s );
     }
-    return s + "]";
+    return Join( ls, ",\n", "Links[", "]" );
 }
 
 //////////////////////////// DecidedQuery ///////////////////////////////
@@ -135,21 +132,17 @@ string DecidedQuery::GetTrace() const
 
     ASSERT( choices.size() == decisions.size() );
 
-    bool first = true;
-    s += "Decisions: [";
+	list<string> ls;
     for( Ranges::size_type i=0; i<decisions.size(); i++ )
     {
-        if( !first )
-            s += ",\n";
-        first = false;
         Range d = decisions[i];
         Choice c = choices[i];
-        s += SSPrintf("(%d:", i);
-        s += Trace(d) + ", ";
-        s += "choice=" + c.GetTrace(d) + ")";
+        string ss = SSPrintf("(%d:", i);
+        ss += Trace(d) + ", ";
+        ss += "choice=" + c.GetTrace(d) + ")";
+        ls.push_back( ss );
     }
-    s += "]";
-    return s;
+    return s + Join( ls, ",\n", "Decisions: [", "]" );
 }
 
 
