@@ -80,7 +80,7 @@ public:
 		PREFIX, // C++ and VN: all prefix 
 		POSTFIX, // C++: all postfix including sub clauses
 		SPACE_SEP_TYPE, // eg unsigned long. Interestingly, the spaces take precedence
-		INITIALISER, // eg MyType thing <here>; prefix = may be inserted. Here to be near ASSIGN	
+		DIRECT_INIT, // eg MyType thing <here>; prefix = may be inserted. 
 		PRIMARY_EXPR, // one-token literal eg 12, 12.34, "foo"
 		PRIMARY_TYPE, // one-token type eg void, bool
 		COMPOUND, // excluded from added ;

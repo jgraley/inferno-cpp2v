@@ -268,8 +268,9 @@ string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production s
 	
 	// ---- Initialisation ----	    
     Append( ls, {md->RenderMemberInits( this, policy )} ); // TODO drop the :: and Declaration::Render...
+	// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
     if( !TreePtr<Uninitialised>::DynamicCast(md->initialiser) )
-		Append( ls, {DoRender( &md->initialiser, Syntax::Production::INITIALISER, policy )} );
+		Append( ls, {DoRender( &md->initialiser, Syntax::Production::DIRECT_INIT, policy )} );
 	return Join( ls, " " );
 }
 
@@ -317,8 +318,9 @@ string CppRender::RenderEnum( TreePtr<CPPTree::Record> record, Syntax::Policy po
         
         s += DoRender( &o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN), id_policy ); 
         
+		// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
         if( !TreePtr<Uninitialised>::DynamicCast(o->initialiser) )      
-			s += " " + DoRender( &o->initialiser, Syntax::Production::INITIALISER, policy );
+			s += " " + DoRender( &o->initialiser, Syntax::Production::DIRECT_INIT, policy );
 
         first = false;    
     }

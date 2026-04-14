@@ -917,8 +917,9 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
  	if( ReadArgs::use.count("c") )
 		Append( ls, {string("/* Instance initialiser */")} );
 		
+	// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
     if( !TreePtr<Uninitialised>::DynamicCast(initialiser) )
-		Append( ls, { renderer->DoRender(&initialiser, Production::INITIALISER, sub_policy) } );
+		Append( ls, { renderer->DoRender(&initialiser, Production::DIRECT_INIT, sub_policy) } );
 
 	return Join( ls, " " ) + (policy.force_initialisation?"\n":"");
 }
@@ -1684,15 +1685,14 @@ Syntax::Production ArrayInitialiser::GetMyProductionTerminal() const
 string ArrayInitialiser::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {
 	(void)surround_prod;
-	// Allow render if in an assignment, including initialiser case
+	// Allow render if in an assignment, which will be true in initialiser case due to accomodation
 	if( surround_prod != Production::ASSIGN )
 		throw RefuseDifficultSyntax(); 
 		
 	list<string> ls;    	
     for( TreePtr<Expression> e : elements )
 		ls.push_back( renderer->DoRender( &e, Production::COMMA_SEP, policy ) );
-    // Use of ={} in expressions is irregular so handle locally. = is used to disambiguate
-    // from a compound statement.
+
     return Join(ls, ", ", "{", "}"); 
 }
 
@@ -1802,7 +1802,7 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 Syntax::Production ConstructInit::GetMyProductionTerminal() const
 {
 	// Suppress the = when used with an Instance eg GlobalScope globals( "GlobalScope" )
-	return Production::INITIALISER; 
+	return Production::DIRECT_INIT; 
 }
 
 

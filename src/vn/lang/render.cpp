@@ -205,8 +205,8 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
     Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
-	// we only act inside an INITIALISER production and never on already-matching production
-	if( surround_prod != Syntax::Production::INITIALISER || node_prod == surround_prod )
+	// we only act inside an DIRECT_INIT production and never on already-matching production
+	if( surround_prod != Syntax::Production::DIRECT_INIT || node_prod == surround_prod )
 		return AccomodateBoot(node, surround_prod, policy ); 
 
 	string s;
