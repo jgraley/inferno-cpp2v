@@ -93,6 +93,10 @@ Syntax::Policy CppRender::GetDefaultPolicy()
 	
 	// Just use type ids directly (aka abstract declarators)
 	policy.disambiguate_type_id = false;
+
+	// Allow invisible things to be rendered as empty strings
+	policy.refuse_invisibles = false;
+
 	return policy;
 }
 

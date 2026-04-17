@@ -11,7 +11,7 @@ Result Declarator::DoReduce( TreePtr<Node> child, TreePtr<Node> type )
 		return Result { Result::ABSTRACT, type, nullptr }; // We're done and it's abstract
 		
 	auto declarator = dynamic_cast<const Declarator *>(child.get());
-	ASSERTS( declarator );
+	ASSERTS( declarator )("Tried to reduce ")(type)(" ")(child)(" as a delcarator");
 	return declarator->DeclaratorReduce(type); // We're not done
 }
 

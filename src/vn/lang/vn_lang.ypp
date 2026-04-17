@@ -143,6 +143,7 @@
 <YY::TokenMetadata> FUNC_ON_TYPE			_("function acting on a type")
 <YY::TokenMetadata> CLASS_KEYWORD			_("C class keyword")
 <YY::TokenMetadata> ACCESS_KEYWORD			_("C access keyword")
+<YY::TokenMetadata> CV_QUAL_KEYWORD			_("C cv-qualifier")
 stmt_low 
 stmt_high
 	
@@ -156,6 +157,7 @@ stmt_high
 %type <TreePtr<Node>> 				stmt_boot open_statement
 %type <TreePtr<Node>> 				bare_statement statement_nc statement stmt_decl         
 %type <TreePtr<Node>> 				open_declaration decl_boot decl_disjunction decl_conjunction declaration bare_declaration  
+%type <TreePtr<Node>> 				assign_init
 %type <TreePtr<Node>> 				decl_prefix_definite decl_prefix decl_postfix decl_primary decl_vn_prim
 %type <TreePtr<Node>> 				compound compound_primary parameter type_boot compound_prefix 
 %type <TreePtr<Node>> 				type_for_declarator 
@@ -256,7 +258,6 @@ unified_prefix	: expr_prefix
 compound		: compound_prefix
 
 compound_prefix : compound_primary 
-				|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP compound_prefix	{ $$ = vn->OnDelta($2, $4); }
 				| 								NEGATION_OP compound_prefix	{ $$ = vn->OnNegation($2); }
 				|       				 transform_op_named compound_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
 				|  								   STUFF_OP compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
@@ -303,9 +304,14 @@ declaration	: bare_declaration ';'								{ $$ = $1; }
 
 bare_declaration: instance_proto
 				| instance_proto ANY_NODE_OP					{ $$ = vn->OnInstanceInit($1, @1, nullptr); } // note: ☆ has ; but no =
-				| instance_proto C_ASSIGN expression			{ $$ = vn->OnInstanceInit($1, @1, $3); } 
+				| instance_proto C_ASSIGN assign_init			{ $$ = vn->OnInstanceInit($1, @1, $3); } 
 				| class_spec		
 				| decl_prefix								                                        
+
+assign_init		: expression
+				| '{' '}'             				  			{ $$ = vn->OnArrayInitialiser({}); } 
+				| '{' comma_sep_expr_decl '}'      				{ $$ = vn->OnArrayInitialiser($2); }               
+
 
 instance_proto	: type_for_declarator declarator								{ $$ = vn->OnInstance(@$, {}, $1, $2); }	
 				| qualifiers type_for_declarator declarator						{ $$ = vn->OnInstance(@$, $1, $2, $3); }	
@@ -351,10 +357,10 @@ declarator_prefix	: declarator_postfix
 
 declarator_postfix	: declarator_primary
 					| declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2); }               
-					| declarator_postfix '[' stmt_boot ']'		{ $$ = make_shared<Declarators::Array>($1, $3); } 
+					| declarator_postfix '[' stmt_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
                 
 declarator_primary	: vn_primary  									{ $$ = make_shared<Declarators::Concrete>($1); }  
-                    | '(' stmt_boot ')'							{ $$ = $2; }
+                    | '(' stmt_boot ')'								{ $$ = make_shared<Declarators::Concrete>($2); }
                      
 //////////////////////////////// ABSTRACT DECLARATORS /////////////////////////////////////         
                           		
@@ -400,7 +406,7 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 access_spec		: access_spec_nw	                          				
 				| qualifier 												
                           
-access_spec_nw	: ACCESS_KEYWORD	                          				{ $$ = vn->OnAccessSpec($1.as_ascii); }
+access_spec_nw	: ACCESS_KEYWORD	                          				{ $$ = vn->OnAccessSpecKeyword($1.as_ascii); }
 
 open_field_scope	: '{'													{ $$ = make_shared<VN::FieldScopeGnomon>(); 
 																			  vn->AddGnomon($$); }
@@ -504,6 +510,7 @@ expr_prefix : expr_postfix
 			| 						     GREEN_GRASS_OP expr_prefix	{ $$ = vn->OnGrass($2); }
 			| 						      POINTER_IS_OP expr_prefix	{ $$ = vn->OnPointerIs($2); }
 			|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP expr_prefix	{ $$ = vn->OnDelta($2, $4); }
+			|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP compound_prefix	{ $$ = vn->OnDelta($2, $4); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
 			|                      prerestrict_op_named expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|  						        STUFF_OP unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
@@ -530,7 +537,7 @@ expr_primary: vn_paren
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 			| KEYWORD_PRIMARY_OP								{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
 			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayInitialiser({}); } // ={...} dismbiguates against compound_primary
-			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayInitialiser($3); }               
+			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayInitialiser($3); } // TODO restrict these to sub-items              
 			| FUNC_ON_TYPE '(' type_boot ')'       				{ $$ = vn->OnFuncOnType($1.as_ascii, @1, $3, @3); }			
 
 vn_paren	: vn_primary
@@ -623,9 +630,11 @@ type_specifier_seq	: TYPE_SPECIFIER												{ $$.insert($1); }
 //////////////////////////////// QUALIFIERS ////////////////////////////////////         
 
 // TODO what about more than one?
-qualifiers		: qualifier													{ $$.insert( $1 ); }
+qualifiers		: qualifier													{ $$.insert($1); }
+				| qualifiers qualifier										{ $$ = $1; $$.insert($2); }			
 
 qualifier		: qualifier_nw
+				| CV_QUAL_KEYWORD											{ $$ = vn->OnCVQualifierKeyword($1.as_ascii); }
 
 // No wildcards version
 qualifier_nw	: qual_explicit_op_named itemisation						{ $$ = vn->OnExplicitNode($1, @1, $2); }

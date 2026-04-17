@@ -138,6 +138,11 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexeme(wstring text, bool
 	           ToASCII(text)=="private" ||
 	           ToASCII(text)=="protected" ) )
 		return YY::VNLangParser::make_ACCESS_KEYWORD(metadata, loc);
+	else if( ascii && 
+	         ( ToASCII(text)=="const" ||
+	           ToASCII(text)=="mutable" ||
+	           ToASCII(text)=="static" ) ) // TODO not a cv-qual keyword
+		return YY::VNLangParser::make_CV_QUAL_KEYWORD(metadata, loc);
 
 		
 	if( designation_gnomon )

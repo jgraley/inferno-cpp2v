@@ -182,7 +182,7 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
     string s;
 		
 	if( ReadArgs::use.count("c") )
-		s += SSPrintf("\n//%s Node %s called from %p\n", 
+		s += SSPrintf("\n//%s DoRenderPreserve Node %s called from %p\n", 
 				      Tracer::GetPrefix().c_str(), 
 					  node ? Traceable::TypeIdName(*node).c_str() : "NULL", // No serial numbers because we diff these
 					  RETURN_ADDR() );
@@ -190,8 +190,12 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 	if( unique_coupling_names.count(node) > 0 )			
 	{
 		s += unique_coupling_names.at(node);
-		// Does the designation need a semicolon?
-		// TODO duplicating AccomodateSemicolon(): resolve by having these act on strings rather than nodes
+		// These duplicate the accomodations partially: they depend on surround_prod but not the node. To 
+		// push them through the same functions, we should not provide the node as it's now irrelevent
+		// syntactially. Maybe pass node_prod in separately - this can be chosen to get the right accomodations
+		// and differentiate from NULL node meaning Nop.
+		if( surround_prod == Syntax::Production::DIRECT_INIT )
+			s = "= " + s;
 		if( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
             Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) )
             s += ";\n";
@@ -205,24 +209,25 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
     Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
-	// we only act inside an DIRECT_INIT production and never on already-matching production
-	if( surround_prod != Syntax::Production::DIRECT_INIT || node_prod == surround_prod )
-		return AccomodateBoot(node, surround_prod, policy ); 
 
 	string s;
 	if( ReadArgs::use.count("c") )
-		s += SSPrintf("\n//%s Node %s, surround prod: %d, node prod: %d\n", 
+		s += SSPrintf("\n//  %s Node %s, surround prod: %d, node prod: %d\n", 
 					  Tracer::GetPrefix().c_str(), 
 					  node ? Traceable::TypeIdName(*node).c_str() : "NULL", // No serial numbers because we diff these
 					  Syntax::GetPrecedence(surround_prod), 
 					  Syntax::GetPrecedence(node_prod) );		
+
+	// we only act inside an DIRECT_INIT production and never on already-matching production
+	if( surround_prod != Syntax::Production::DIRECT_INIT || node_prod == surround_prod )
+		return AccomodateBoot(node, surround_prod, policy ); 
 
 	// Deal with expression in initialiser production by prepending =
 	if( node_prod != Syntax::Production::COMPOUND ) // no = for COMPOUND
 	{
 		if( ReadArgs::use.count("c") )
 			s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
-		return s + " = " + AccomodateBoot(node, Syntax::Production::ASSIGN, policy );
+		return s + "= " + AccomodateBoot(node, Syntax::Production::ASSIGN, policy );
 	}
 
 	return s + AccomodateBoot(node, surround_prod, policy ); 
@@ -330,9 +335,7 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
     if( semicolon )
 		return s + AccomodatePreRestriction( node, Syntax::Production::BARE_STMT_DECL, policy ) + explain + ";\n";            
 	else
-        return s + AccomodatePreRestriction( node, surround_prod, policy ) + explain;	
-
- 	                      
+        return s + AccomodatePreRestriction( node, surround_prod, policy ) + explain;		                      
 }
 
 
@@ -559,8 +562,8 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
 		if( auto agent = Agent::TryAsAgentConst(type) )
 		{
 			if( !dynamic_cast<const StandardAgent *>(agent) )
-				return string(constant?"const ":"") + 
-					   "/*Agent*/"+
+				return //"/*Agent*/"+
+					   string(constant?"const ":"") + 
 					   DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) + 
 					   (declarator != "" ? " "+declarator : "");
 		}
@@ -570,8 +573,8 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
 	auto type_as_type = TreePtr<CPPTree::Type>::DynamicCast(type);
 	if( !type_as_type )
 	{
-		return string(constant?"const ":"") + 
-			   "/*Non-type*/" +	
+		return //"/*Non-type*/" +	
+			   string(constant?"const ":"") + 
 			   DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) +
 			   (declarator != "" ? " "+declarator : "");
 	}
@@ -585,8 +588,8 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
 		// This part duplicates Type::GetRenderTypeAndDeclarator
 		// We wouln't want to call a virtual on a NULL pointer, so the
 		// common part could be here or a static on Type
-		return string(constant?"const ":"") + 
-			   "/*GRTaD() fail*/" +	
+		return //"/*GRTaD() fail*/" +	
+			   string(constant?"const ":"") + 
 			   DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) +
 			   (declarator != "" ? " "+declarator : "");
 	}	

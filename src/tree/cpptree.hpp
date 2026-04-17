@@ -54,6 +54,7 @@ struct Uninitialised : Initialiser
 	NODE_FUNCTIONS_FINAL 
 	
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *, Production, Policy ) override;
 }; 
 
 /// Represents a statement as found inside a function body. 
@@ -547,11 +548,20 @@ struct Constancy : Qualifier
 };
 
 /// Property indicating the Instance is constant
-struct Const : Constancy { NODE_FUNCTIONS_FINAL };
+struct Const : Constancy 
+{ 
+	NODE_FUNCTIONS_FINAL 
+	
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;    		
+};
 
 /// Property indicating the Instance is not constant
-struct NonConst : Constancy { NODE_FUNCTIONS_FINAL };
-// TODO add mutable when supported by clang
+struct NonConst : Constancy 
+{ 
+	NODE_FUNCTIONS_FINAL 
+
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;    	
+};
 
 // TODO #853 put this in Instance, Indirection and New
 // The idea is that we specify const not in the types, but in the nodes

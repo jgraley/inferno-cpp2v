@@ -15,6 +15,14 @@ Syntax::Production Uninitialised::GetMyProductionTerminal() const
 	return Production::ANONYMOUS;
 }
 
+string Uninitialised::GetRender( VN::RendererInterface *, Production, Policy policy )
+{	
+	if( policy.refuse_invisibles )
+		throw RefusedByPolicy();
+		
+	return "";
+}
+
 //////////////////////////// Type ///////////////////////////////
 
 Syntax::Production Type::GetMyProductionTerminal() const
@@ -94,6 +102,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 {
     string s;
 	(void)surround_prod;
+ 	policy.permit_static_keyword = false; // TODO static has different meaning at top level
 	if( !policy.full_render_code_unit )
 	{
 		s += "∞{\n";
@@ -171,7 +180,8 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 	definition_policy.force_initialisation = true;
 	while( !my_definitions.empty() )
     {
-		auto def = (TreePtr<Node>)(dynamic_pointer_cast<Node>(my_definitions.front()));
+		// def points to Declaration so that Instances won't refuse due policy.pointer_archetype
+		TreePtr<Declaration> def = (TreePtr<Node>)(dynamic_pointer_cast<Node>(my_definitions.front()));
 		ASSERT(def);
         s += renderer->DoRender( &def, Production::STMT_DECL, definition_policy ); 
         s += "\n";
@@ -849,6 +859,24 @@ Syntax::Production Constancy::GetMyProductionTerminal() const
 	return Production::KEYWORD; 
 }
 
+//////////////////////////// Const //////////////////////////////
+
+string Const::GetRender( VN::RendererInterface *, Production surround_prod, Policy )
+{
+	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
+		throw RefuseDifficultSyntax(); // TODO be able to parse this (but not NonConst)
+	return "const";
+}
+
+//////////////////////////// NonConst //////////////////////////////
+
+string NonConst::GetRender( VN::RendererInterface *, Production surround_prod, Policy )
+{
+	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
+		throw RefuseDifficultSyntax(); 
+	return "";
+}
+
 //////////////////////////// Instance //////////////////////////////
 
 Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Policy policy) const
@@ -864,8 +892,21 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 }
 
 
-string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
-{
+string Instance::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+{        
+	// TODO parser will need to give scope gnomons to actions after parsing explicit class, enum, compound etc
+	// Then actions can disambiguate which type of Instance it has and not just put down Instance which is
+	// a wildcard, and wrong in replace-only contexts.
+	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
+		throw RefuseDifficultSyntax(); 
+		
+	// Don't render if the incoming pointer is not some kind of Declaration. This catches cases
+	// like Stuff terminus, where the parser won't have enough information to determine whether
+	// we have Local, Global, Field etc
+	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
+		throw RefuseDifficultSyntax(); 
+			
+    list<string> ls;
     Policy sub_policy = policy;
     sub_policy.force_initialisation = false; // stop at one level
 	Policy id_policy = sub_policy;
@@ -878,16 +919,13 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 	if( TreePtr<Destructor>::DynamicCast(type) )
 		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);
 
-    list<string> ls;
-    if( policy.compound_uses_vn_separator ) // TODO hack, please remove
-		throw RefusedByPolicy();
-        
     if( !policy.force_initialisation )
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
     
-    bool constant = !!DynamicTreePtrCast<Const>(constancy);
+    ls.push_back( renderer->DoRender(&constancy, Production::SPACE_SEP_TYPE, sub_policy) );
+    
     string declarator = renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy );   
-    ls.push_back( renderer->DoRenderTypeAndDeclarator(&type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, constant) );
+    ls.push_back( renderer->DoRenderTypeAndDeclarator(&type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, false) );
 
 	// TODO const can appear in different places
 	//ls.push_back(renderer->DoRender(&constancy, Production::KEYWORD, policy) );
@@ -955,7 +993,7 @@ list<string> Instance::RenderInitPre( VN::RendererInterface *, Policy )
 list<string> Global::RenderDeclSpecPre( VN::RendererInterface *, Policy policy ) const 
 { 
     if( policy.permit_static_keyword )
-        return {};
+        return {"static"};
     else
 		return {};
 }
@@ -1432,7 +1470,9 @@ string Labeley::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 {
 	if( policy.refuse_local_node_types ) 
 		throw RefuseDueLocal(); 
-	return "const void *"; // TODO lower Labely to const void * in a lowering step
+		
+	// Note: all instances must be const
+	return "void *"; // TODO lower Labely to const void * in a lowering step
 }
 
 //////////////////////////// Typedef ///////////////////////////////
@@ -1501,7 +1541,7 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 	type_index current_access_ti( typeid(*a) );
 
     policy.split_bulky_statics = true; // Our scope is a record body
-	policy.permit_static_keyword = true; // Our scope is a record body
+	policy.permit_static_keyword = true; // In a record body, static means global
 	
     Sequence<Declaration> sorted = SortDecls( members, true );
 	
@@ -1876,6 +1916,8 @@ Syntax::Production Compound::GetMyProductionTerminal() const
 string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
     string s = " { ";
+ 	policy.permit_static_keyword = true; // In a compound, static means global
+ 	
     for( TreePtr<Declaration> m : members )    
         s += renderer->DoRender( &m, Production::STMT_DECL, policy );    
     if( policy.compound_uses_vn_separator )

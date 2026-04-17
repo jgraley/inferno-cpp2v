@@ -665,11 +665,30 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 
 TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> quals_pre, TreePtr<Node> type, TreePtr<Node> declarator )
 {	
+	bool static_ = false;
+	for( TreePtr<Node> q : quals_pre )
+		if( !q )
+			static_ = true;
+
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<const ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
-	FTRACE(spg)("\n");
 	TreePtr<CPPTree::Instance> instance;
-	if( spg && dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
+	if( static_ )
+	{
+		if( dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"static is not allowed for parameters.");
+		if( dynamic_cast<const GlobalScopeGnomon *>(spg.get()) )
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"static is not supported at code unit level.");
+		// Remaining scopes are field and local. VN is a resolved form of C/C++
+		// so we don't need to constrain scope. We can just call these global 
+		// if static was specified.
+		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
+	}
+	else if( spg && dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
 	else if( spg && dynamic_cast<const FieldScopeGnomon *>(spg.get()) )
 	{ 
@@ -688,7 +707,10 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> quals_pre, 
 	else if( spg && dynamic_cast<const LocalScopeGnomon *>(spg.get()) ) 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Local>>(); 
 	else if( !spg ) 
+	{
+		// TODO check we're not in replace-only context #889
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();  // wildcard
+	}
 	else
 		ASSERT(false)("Unknown gnomon: ")(spg);
 
@@ -834,15 +856,26 @@ TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> type )
 }
 
 
-TreePtr<Node> VNLangActions::OnAccessSpec( string access )
+TreePtr<Node> VNLangActions::OnAccessSpecKeyword( string keyword )
 {
-	if( access=="public" )
+	if( keyword=="public" )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
-	else if( access=="private" )
+	else if( keyword=="private" )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Private>>();
-	else if( access=="protected" )
+	else if( keyword=="protected" )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Protected>>();
 	else
+		ASSERTFAIL();
+}
+
+
+TreePtr<Node> VNLangActions::OnCVQualifierKeyword( string keyword )
+{
+	if( keyword=="const" )
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Const>>();
+	else if( keyword=="static" )
+		return nullptr; // TODO don't use NULL here
+	else // todo Mutable node
 		ASSERTFAIL();
 }
 

@@ -132,6 +132,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     lr_state_decl->initialiser = lr_count;
     lr_count->container = l_enum_vals;
     lr_state_id->sources = (func_id, ls_label->identifier);
+    //l_lmap->constancy = MakePatternNode<Const>(); // TODO if I skip this, I should get ⯁Constancy⦅⦆ but I actually get nothing, which is wrong (means non-const)
     l_lmap->identifier = r_lmap_id;
     l_lmap->initialiser = l_mover;
     l_mover->through = ls_make;

@@ -38,7 +38,7 @@ unicode_name			\p{UnicodeIdentifierStart} \p{UnicodeIdentifierPart}*
 float_exp_suffix		[Ee] [-+]? \d+
 float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 integral_num			\d*[lLuU]*
-comp_assign				\|=|^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
+comp_assign				\|=|\^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 
 %%
 

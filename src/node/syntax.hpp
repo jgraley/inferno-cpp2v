@@ -114,7 +114,8 @@ public:
 			can_split_instances(false),
 			resolve_identifier_scope(true),
 			use_vn_xstructor_symbol(true),
-			disambiguate_type_id(true) {}
+			disambiguate_type_id(true),
+			refuse_invisibles(true) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
 		bool split_bulky_statics;
@@ -132,6 +133,7 @@ public:
 		bool resolve_identifier_scope;
 		bool use_vn_xstructor_symbol;
 		bool disambiguate_type_id;
+		bool refuse_invisibles;
 		shared_ptr<Syntax> pointer_archetype;
 	};
 	
