@@ -907,12 +907,10 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 		return Join( ls, " " );
 	}		
 
-	if( auto mis = dynamic_cast<MembInitSeq *>(this) )
-	{
-		ls.push_back( mis->RenderMemberInits(renderer, sub_policy) );							
-		if( policy.compound_uses_vn_separator ) // TODO hack, please remove
-			throw RefusedByPolicy(); 
-	}
+	if( auto mis = dynamic_cast<MembInitSeq *>(this) && policy.compound_uses_vn_separator ) // TODO hack, please remove
+		throw RefusedByPolicy(); 	
+
+	Append( ls, RenderInitPre(renderer, sub_policy) );
 
  	if( ReadArgs::use.count("c") )
 		ls.push_back( "/* Instance initialiser */" );
@@ -946,6 +944,12 @@ list<string> Instance::RenderDeclSpecPost( VN::RendererInterface *, Policy )
 	return {};
 }
 
+
+list<string> Instance::RenderInitPre( VN::RendererInterface *, Policy ) 
+{
+	return {};
+}
+
 //////////////////////////// Global //////////////////////////////
 
 list<string> Global::RenderDeclSpecPre( VN::RendererInterface *, Policy policy ) const 
@@ -974,6 +978,12 @@ bool Global::ShouldSplitInstance( Policy policy ) const
 list<string> Field::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy) const 
 { 
 	return { renderer->DoRender(&virt, Production::SPACE_SEP_STMT_DECL, policy) };
+}
+
+
+list<string> Field::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
+{
+	return { RenderMemberInits(renderer, policy) };
 }
 
 //////////////////////////// Temporary //////////////////////////////

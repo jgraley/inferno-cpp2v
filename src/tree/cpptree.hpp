@@ -591,10 +591,12 @@ struct Instance : Declaration,
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
 	bool ShouldSplitInstance( Policy policy ) const override;
 	
-	// Storage comes first
+	// Extras like static, virtual, const come before the type (techically among them, but we don't support that)
 	virtual list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const;
-	// Extras come before initialiser
+	// Extras like override, final, const come after declarator
 	virtual list<string> RenderDeclSpecPost( VN::RendererInterface *renderer, Policy policy );
+	// Extras like member inits come before the initialiser
+	virtual list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy );
 };
 
 /// A variable or function with one instance across the entire program. 
@@ -623,6 +625,7 @@ struct Field : Instance,
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
     
    	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
+	list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy ) override;
 };
 
 /// A local variable with automatic allocation
