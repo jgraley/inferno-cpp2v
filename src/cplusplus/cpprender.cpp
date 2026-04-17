@@ -308,7 +308,7 @@ string CppRender::RenderEnum( TreePtr<CPPTree::Record> record, Syntax::Policy po
 	list<string> ls;		
     for( TreePtr<Declaration> pe : record->members )
     {
-		// TODO make a new EnumValue member, derived from Instance, and replace its GetRender()
+		// TODO make a new Enumerator member, derived from Instance, and replace its GetRender()
         auto o = TreePtr<Instance>::DynamicCast(pe);
         if( !o )
         {
