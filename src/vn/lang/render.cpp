@@ -218,20 +218,13 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_p
 					  Syntax::GetPrecedence(node_prod) );		
 
 	// Deal with expression in initialiser production by prepending =
-    switch(node_prod)
-    {
-		case Syntax::Production::BOTTOM_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences			
-			if( node_prod != Syntax::Production::COMPOUND ) // no = for COMPOUND
-			{
-				if( ReadArgs::use.count("c") )
-					s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
-				return s + " = " + AccomodateBoot(node, Syntax::Production::ASSIGN, policy );
-			}
-			
-		default:
-			break;
-			
+	if( node_prod != Syntax::Production::COMPOUND ) // no = for COMPOUND
+	{
+		if( ReadArgs::use.count("c") )
+			s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
+		return s + " = " + AccomodateBoot(node, Syntax::Production::ASSIGN, policy );
 	}
+
 	return s + AccomodateBoot(node, surround_prod, policy ); 
 }
 
