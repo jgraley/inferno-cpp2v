@@ -860,24 +860,17 @@ TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> type )
 }
 
 
-TreePtr<Node> VNLangActions::OnAccessSpecKeyword( string keyword )
+TreePtr<Node> VNLangActions::OnQualifierNodeKeyword( string keyword )
 {
-	if( keyword=="public" )
+	if( keyword=="const" ) // todo Mutable node
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Const>>();
+	else if( keyword=="public" )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
 	else if( keyword=="private" )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Private>>();
 	else if( keyword=="protected" )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Protected>>();
-	else
-		ASSERTFAIL();
-}
-
-
-TreePtr<Node> VNLangActions::OnCVQualifierKeyword( string keyword )
-{
-	if( keyword=="const" )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Const>>();
-	else // todo Mutable node
+	else 
 		ASSERTFAIL();
 }
 

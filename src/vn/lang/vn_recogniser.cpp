@@ -136,12 +136,10 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexeme(wstring text, bool
 	else if( ascii && 
 	         ( ToASCII(text)=="public" ||
 	           ToASCII(text)=="private" ||
-	           ToASCII(text)=="protected" ) )
-		return YY::VNLangParser::make_ACCESS_KEYWORD(metadata, loc);
-	else if( ascii && 
-	         ( ToASCII(text)=="const" ||
+	           ToASCII(text)=="protected" ||
+	           ToASCII(text)=="const" ||
 	           ToASCII(text)=="mutable" ) )
-		return YY::VNLangParser::make_CV_QUAL_KEYWORD(metadata, loc);
+		return YY::VNLangParser::make_QUAL_NODE_KEYWORD(metadata, loc);
 	else if( ascii && 
 	         ( ToASCII(text)=="static" ) ) 
 		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);

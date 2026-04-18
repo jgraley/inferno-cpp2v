@@ -142,8 +142,7 @@
 <YY::TokenMetadata> DEFAULT_KEYWORD			_("C default keyword")
 <YY::TokenMetadata> FUNC_ON_TYPE			_("function acting on a type")
 <YY::TokenMetadata> CLASS_KEYWORD			_("C class keyword")
-<YY::TokenMetadata> ACCESS_KEYWORD			_("C access keyword")
-<YY::TokenMetadata> CV_QUAL_KEYWORD			_("C cv-qualifier")
+<YY::TokenMetadata> QUAL_NODE_KEYWORD		_("C qualifier")
 <YY::TokenMetadata> STATIC_KEYWORD			_("C static keyword")
 stmt_low 
 stmt_high
@@ -637,8 +636,7 @@ qualifier_nw	: qualifier_node											{ $$.cat = VN::QualCat::NODE; $$.node = 
 				| STATIC_KEYWORD											{ $$.cat = VN::QualCat::STATIC; }
 
 qualifier_node	: qual_explicit_op_named itemisation						{ $$ = vn->OnExplicitNode($1, @1, $2); }
-				| CV_QUAL_KEYWORD											{ $$ = vn->OnCVQualifierKeyword($1.as_ascii); }
-	            | ACCESS_KEYWORD	                          				{ $$ = vn->OnAccessSpecKeyword($1.as_ascii); }
+				| QUAL_NODE_KEYWORD											{ $$ = vn->OnQualifierNodeKeyword($1.as_ascii); }
 
 qual_explicit_op_named 		: explicit_op_scope resolved_qual_name			{ $$ = $2.as_andata_block; (void)$1; }
 

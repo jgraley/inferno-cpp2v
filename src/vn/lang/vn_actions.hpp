@@ -167,8 +167,7 @@ public:
 	TreePtr<Node> OnInheritanceRecord( string keyword, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	
 	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified
-	TreePtr<Node> OnAccessSpecKeyword( string keyword );		
-	TreePtr<Node> OnCVQualifierKeyword( string keyword );
+	TreePtr<Node> OnQualifierNodeKeyword( string keyword );
 	
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );
 	TreePtr<Node> OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );
