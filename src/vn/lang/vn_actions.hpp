@@ -97,6 +97,17 @@ public:
 	}
 };
 
+enum class QualCat
+{
+	NODE, // See the node itself
+	STATIC
+};
+
+struct QualifierData
+{
+	TreePtr<Node> node;
+	QualCat cat;
+};
 
 class VNLangActions	
 {
@@ -150,7 +161,7 @@ public:
 	
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
-	TreePtr<Node> OnInstance( any loc, set<TreePtr<Node>> quals_pre, TreePtr<Node> type, TreePtr<Node> declarator );	
+	TreePtr<Node> OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator );	
 	TreePtr<Node> OnInstanceInit( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init );	
 	TreePtr<Node> OnAbDeclType( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
 	TreePtr<Node> OnInheritanceRecord( string keyword, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	

@@ -663,11 +663,11 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 }
 
 
-TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> quals_pre, TreePtr<Node> type, TreePtr<Node> declarator )
+TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator )
 {	
 	bool static_ = false;
-	for( TreePtr<Node> q : quals_pre )
-		if( !q )
+	for( const QualifierData &q : quals_pre )
+		if( q.cat == QualCat::STATIC )
 			static_ = true;
 
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
@@ -693,12 +693,15 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> quals_pre, 
 	else if( spg && dynamic_cast<const FieldScopeGnomon *>(spg.get()) )
 	{ 
 		auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
-		for( TreePtr<Node> q : quals_pre )
+		for( const QualifierData &q : quals_pre )
 		{
-			if( auto vq = TreePtr<CPPTree::Virtuality>::DynamicCast(q) )
-				field->virt = vq;
-			if( auto aq = TreePtr<CPPTree::AccessSpec>::DynamicCast(q) )
-				field->access = aq;
+			if( q.cat == QualCat::NODE )
+			{
+				if( auto vq = TreePtr<CPPTree::Virtuality>::DynamicCast(q.node) )
+					field->virt = vq;
+				if( auto aq = TreePtr<CPPTree::AccessSpec>::DynamicCast(q.node) )
+					field->access = aq;
+			}
 		}
 		instance = field;
 	}
@@ -734,9 +737,10 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, set<TreePtr<Node>> quals_pre, 
 	}
 	
 	instance->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
-	for( TreePtr<Node> q : quals_pre )
-		if( auto cq = TreePtr<CPPTree::Constancy>::DynamicCast(q) )
-			instance->constancy = q;
+	for( const QualifierData &q : quals_pre )
+		if( q.cat == QualCat::NODE )
+			if( auto cq = TreePtr<CPPTree::Constancy>::DynamicCast(q.node) )
+				instance->constancy = cq;
 	
 	// If indeed there is an initialiser, call OnInstanceInit() to over-ride this
 	instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
@@ -873,8 +877,6 @@ TreePtr<Node> VNLangActions::OnCVQualifierKeyword( string keyword )
 {
 	if( keyword=="const" )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Const>>();
-	else if( keyword=="static" )
-		return nullptr; // TODO don't use NULL here
 	else // todo Mutable node
 		ASSERTFAIL();
 }

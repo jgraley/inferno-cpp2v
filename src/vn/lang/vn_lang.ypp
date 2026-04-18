@@ -144,6 +144,7 @@
 <YY::TokenMetadata> CLASS_KEYWORD			_("C class keyword")
 <YY::TokenMetadata> ACCESS_KEYWORD			_("C access keyword")
 <YY::TokenMetadata> CV_QUAL_KEYWORD			_("C cv-qualifier")
+<YY::TokenMetadata> STATIC_KEYWORD			_("C static keyword")
 stmt_low 
 stmt_high
 	
@@ -161,7 +162,6 @@ stmt_high
 %type <TreePtr<Node>> 				decl_prefix_definite decl_prefix decl_postfix decl_primary decl_vn_prim
 %type <TreePtr<Node>> 				compound compound_primary parameter type_boot compound_prefix 
 %type <TreePtr<Node>> 				type_for_declarator 
-%type <TreePtr<Node>> 				qualifier qualifier_nw
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
@@ -182,7 +182,8 @@ stmt_high
 %type <list<TreePtr<Node>>>			stmt_decls 
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases 
-%type <set<TreePtr<Node>>>			qualifiers 
+%type <VN::QualifierData> 			qualifier qualifier_nw
+%type <list<VN::QualifierData>>		qualifiers 
 %type <const AvailableNodeData::Block *> explicit_op_named prerestrict_op_named id_by_name_op_named build_id_named 
 %type <const AvailableNodeData::Block *> qual_explicit_op_named
 %type <const AvailableNodeData::Block *> decl_explicit_op_named decl_prerestrict_op_named
@@ -214,8 +215,8 @@ sep_commands 	: sep_commands COMMAND_TERM script_command		{ $$ = $1; $$.push_bac
 			
 // Add more commands here
 script_command	: ENGINE_COMMAND unified_boot   		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
-				| stmt_boot 			  				{ $$ = make_shared<VN::PatternCommand>($1, @$); } // in trivial cases, this decays back to the node
-				| ATTRIBUTE_COMMAND		  			{ $$ = make_shared<VN::AttributeCommand>(@$); }
+				| stmt_boot 			  					{ $$ = make_shared<VN::PatternCommand>($1, @$); } // in trivial cases, this decays back to the node
+				| ATTRIBUTE_COMMAND		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
 designation_command	: vn_name DESIGNATE_COMMAND stmt_boot	{ $$ = make_shared<VN::NormalDesignationGnomon>($1, $3); }
@@ -245,7 +246,7 @@ unified_boot	: stmt_boot
 				| type_boot
 				| decl_boot
 				| access_spec_nw // TODO access specs to be merged into stmt_boot column - no, they are qualifiers now I think
-				| qualifier_nw
+				| qualifier_nw						{ $$ = $1.node; } // TODO throw if $1.cat != NODE (see also in access_spec)
 
 unified_prefix	: expr_prefix
 				| type_prefix
@@ -274,7 +275,7 @@ compound_primary	: open_local_scope VN_SEP '}'                			{ $$ = vn->OnCo
 open_local_scope	: '{'													{ $$ = make_shared<VN::LocalScopeGnomon>(); 
 																			  vn->AddGnomon($$); }
 
-open_global_scope	: '{'											{ $$ = make_shared<VN::GlobalScopeGnomon>(); 
+open_global_scope	: '{'													{ $$ = make_shared<VN::GlobalScopeGnomon>(); 
 																			  vn->AddGnomon($$); }
 
 stmt_decls	: stmt_decl														{ $$.push_back($1); }
@@ -291,9 +292,9 @@ decl_disjunction	: decl_conjunction
 					| decl_disjunction DISJUNCTION_OP decl_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
 
 decl_conjunction 	: open_declaration       
-					| decl_conjunction CONJUNCTION_OP open_declaration    			{ $$ = vn->OnConjunction($1, $3); }
-					| decl_conjunction CONJUNCTION_OP bare_statement    			{ $$ = vn->OnConjunction($1, $3); }
-					| decl_conjunction CONJUNCTION_OP expression	    			{ $$ = vn->OnConjunction($1, $3); }
+					| decl_conjunction CONJUNCTION_OP open_declaration  	{ $$ = vn->OnConjunction($1, $3); }
+					| decl_conjunction CONJUNCTION_OP bare_statement    	{ $$ = vn->OnConjunction($1, $3); }
+					| decl_conjunction CONJUNCTION_OP expression	    	{ $$ = vn->OnConjunction($1, $3); }
 
 open_declaration	: declaration
 					| bare_declaration
@@ -319,8 +320,8 @@ instance_proto	: type_for_declarator declarator								{ $$ = vn->OnInstance(@$,
 				| qualifiers XSTRUCTOR declarator								{ $$ = vn->OnInstance(@$, $1, nullptr, $3); }	
 
 decl_prefix_definite	: decl_prefix
-						|  						        STUFF_OP vn_paren { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-						| STUFF_OP OPEN_VN unified_boot CLOSE_VN vn_paren { $$ = vn->OnStuff($5, $3, VN::Limit()); }		
+						| 	 				  		          STUFF_OP vn_paren { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+						| 		STUFF_OP OPEN_VN unified_boot CLOSE_VN vn_paren { $$ = vn->OnStuff($5, $3, VN::Limit()); }		
 						| vn_primary	   
 
 decl_prefix : decl_postfix
@@ -404,7 +405,7 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
                           
 access_spec		: access_spec_nw	                          				
-				| qualifier 												
+				| qualifier 												{ $$ = $1.node; } // TODO throw if $1.cat != NODE (see also in unified_boot)
                           
 access_spec_nw	: ACCESS_KEYWORD	                          				{ $$ = vn->OnAccessSpecKeyword($1.as_ascii); }
 
@@ -630,14 +631,15 @@ type_specifier_seq	: TYPE_SPECIFIER												{ $$.insert($1); }
 //////////////////////////////// QUALIFIERS ////////////////////////////////////         
 
 // TODO what about more than one?
-qualifiers		: qualifier													{ $$.insert($1); }
-				| qualifiers qualifier										{ $$ = $1; $$.insert($2); }			
+qualifiers		: qualifier													{ $$.push_back($1); }
+				| qualifiers qualifier										{ $$ = $1; $$.push_back($2); }			
 
 qualifier		: qualifier_nw
-				| CV_QUAL_KEYWORD											{ $$ = vn->OnCVQualifierKeyword($1.as_ascii); }
-
+				| CV_QUAL_KEYWORD											{ $$.cat = VN::QualCat::NODE; $$.node = vn->OnCVQualifierKeyword($1.as_ascii); }
+				| STATIC_KEYWORD											{ $$.cat = VN::QualCat::STATIC; }
+				
 // No wildcards version
-qualifier_nw	: qual_explicit_op_named itemisation						{ $$ = vn->OnExplicitNode($1, @1, $2); }
+qualifier_nw	: qual_explicit_op_named itemisation						{ $$.cat = VN::QualCat::NODE; $$.node = vn->OnExplicitNode($1, @1, $2); }
 
 qual_explicit_op_named 		: explicit_op_scope resolved_qual_name			{ $$ = $2.as_andata_block; (void)$1; }
 
