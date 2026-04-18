@@ -898,12 +898,14 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production surround
 	// like Stuff terminus, where the parser won't have enough information to determine whether
 	// we have Local, Global, Field etc
 	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
+	{
 		throw RefuseDifficultSyntax(); 
-		/*return "‽" + 
+		return "‽" + 
 		       VN::Render::RenderNodeTypeName(shared_from_this()) + 
 		       "(" +
 		       GetRenderImpl( renderer, policy ) + 
-		       ")";*/
+		       ")";
+	}
 		
 	return GetRenderImpl( renderer, policy );
 }

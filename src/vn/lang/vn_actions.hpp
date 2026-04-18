@@ -97,6 +97,15 @@ public:
 	}
 };
 
+class UnknownScopeGnomon : public ScopeGnomon
+{
+public:	
+	string GetMessageText() const final
+	{
+		return "local scope";
+	}
+};
+
 enum class QualCat
 {
 	NODE, // See the node itself

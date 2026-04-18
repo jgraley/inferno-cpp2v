@@ -688,10 +688,15 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		// so we don't need to constrain scope. We can just call these global 
 		// if static was specified.
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
+	}	
+	else if( !spg || dynamic_cast<const UnknownScopeGnomon *>(spg.get()) ) 
+	{
+		// TODO check we're not in replace-only context #889
+		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();  // wildcard
 	}
-	else if( spg && dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
+	else if( dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
-	else if( spg && dynamic_cast<const FieldScopeGnomon *>(spg.get()) )
+	else if( dynamic_cast<const FieldScopeGnomon *>(spg.get()) )
 	{ 
 		auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
 		for( const QualifierData &q : quals_pre )
@@ -706,16 +711,11 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		}
 		instance = field;
 	}
-	else if( spg && dynamic_cast<const GlobalScopeGnomon *>(spg.get()) ) 
+	else if( dynamic_cast<const GlobalScopeGnomon *>(spg.get()) ) 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
-	else if( spg && dynamic_cast<const LocalScopeGnomon *>(spg.get()) ) 
+	else if( dynamic_cast<const LocalScopeGnomon *>(spg.get()) ) 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Local>>(); 
-	else if( !spg ) 
-	{
-		// TODO check we're not in replace-only context #889
-		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();  // wildcard
-	}
-	else
+	else 
 		ASSERT(false)("Unknown gnomon: ")(spg);
 
 	// Now fill in fields derived from the declarator

@@ -177,8 +177,8 @@ stmt_high
 %type <VN::Item>					item
 %type <shared_ptr<VN::Gnomon>>		part_resolve designation_command 
 %type <shared_ptr<VN::Gnomon>>		transform_op_scope
-%type <shared_ptr<VN::Gnomon>>		explicit_op_scope prerestrict_op_scope id_by_name_op_scope builder_id_op_scope 
-%type <shared_ptr<VN::Gnomon>>		open_global_scope open_local_scope open_field_scope open_param_scope
+%type <shared_ptr<VN::Gnomon>>		explicit_op_scope prerestrict_op_scope id_by_name_op_scope builder_id_op_scope stuff_op_scope
+%type <shared_ptr<VN::Gnomon>>		open_global_scope open_local_scope open_field_scope open_param_scope 
 %type <list<TreePtr<Node>>>			stmt_decls 
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases 
@@ -261,9 +261,9 @@ compound		: compound_prefix
 compound_prefix : compound_primary 
 				| 								NEGATION_OP compound_prefix	{ $$ = vn->OnNegation($2); }
 				|       				 transform_op_named compound_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
-				|  								   STUFF_OP compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-				|    STUFF_OP OPEN_VN unified_boot CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-				|     STUFF_OP OPEN_VN stuff_depth CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+				|  								   stuff_op_scope compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+				|    stuff_op_scope OPEN_VN unified_boot CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+				|     stuff_op_scope OPEN_VN stuff_depth CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
 				|                      prerestrict_op_named compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 
 compound_primary	: open_local_scope VN_SEP '}'                			{ $$ = vn->OnCompound({}, @2, {}, @3); } 
@@ -320,8 +320,8 @@ instance_proto	: type_for_declarator declarator								{ $$ = vn->OnInstance(@$,
 				| qualifiers XSTRUCTOR declarator								{ $$ = vn->OnInstance(@$, $1, nullptr, $3); }	
 
 decl_prefix_definite	: decl_prefix
-						| 	 				  		          STUFF_OP vn_paren { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-						| 		STUFF_OP OPEN_VN unified_boot CLOSE_VN vn_paren { $$ = vn->OnStuff($5, $3, VN::Limit()); }		
+						| 	 				  		          stuff_op_scope vn_paren { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+						| 		stuff_op_scope OPEN_VN unified_boot CLOSE_VN vn_paren { $$ = vn->OnStuff($5, $3, VN::Limit()); }		
 						| vn_primary	   
 
 decl_prefix : decl_postfix
@@ -511,9 +511,9 @@ expr_prefix : expr_postfix
 			|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP compound_prefix	{ $$ = vn->OnDelta($2, $4); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
 			|                      prerestrict_op_named expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|  						        STUFF_OP unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			| STUFF_OP OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			|  STUFF_OP OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
+			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+			| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
+			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
 			|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
 			|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 
@@ -690,5 +690,8 @@ builder_id_op_scope		: BUILDER_ID_OP 	{ $$ = make_shared<VN::NodeNameScopeGnomon
 
 transform_op_scope		: TRANSFORM_OP		{ $$ = make_shared<VN::TransformNameScopeGnomon>(); 
 											  recogniser->AddGnomon($$); }
+
+stuff_op_scope			: STUFF_OP			{ $$ = make_shared<VN::UnknownScopeGnomon>(); 
+											  vn->AddGnomon($$); }
 
 %%
