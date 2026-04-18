@@ -787,20 +787,16 @@ string MembInitialisation::GetRender( VN::RendererInterface *renderer, Productio
 //////////////////////////// MembInitSeq ///////////////////////////////
 
 string MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Policy policy )
-{
-	string s;
-	//if( ReadArgs::use.count("c") )
-		s += "/* RenderMemberInits() */";
-		
+{	
 	list<string> ls; 
 	for( TreePtr<MembInitialisation> mi : memb_inits ) 
 		ls.push_back( "    " + renderer->DoRender( &mi, Production::COMMA_SEP, policy ) );		
 
     // Render the constructor initialisers if there are any
-    if( !ls.empty() )        
-        s += " :\n" + Join(ls, ",\n");		    
+    if( ls.empty() )        
+		return "";
 	
-    return s; 
+    return " :\n" + Join(ls, ",\n");		    
 }
 
 //////////////////////////// Virtuality //////////////////////////////
