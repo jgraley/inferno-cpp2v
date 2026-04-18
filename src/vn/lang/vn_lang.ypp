@@ -165,7 +165,7 @@ stmt_high
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
-%type <TreePtr<Node>> 				class_spec base_spec access_spec access_spec_nw
+%type <TreePtr<Node>> 				class_spec base_spec access_spec
 %type <TreePtr<Node>>				instance_proto
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named
@@ -245,7 +245,6 @@ item		: item VN_SUB_SEP unified_boot			{ $$ = $1; $$.nodes.push_back($3); $$.loc
 unified_boot	: stmt_boot
 				| type_boot
 				| decl_boot
-				| access_spec_nw // TODO access specs to be merged into stmt_boot column - no, they are qualifiers now I think
 				| qualifier_nw						{ $$ = $1.node; } // TODO throw if $1.cat != NODE (see also in access_spec)
 
 unified_prefix	: expr_prefix
@@ -301,7 +300,7 @@ open_declaration	: declaration
 
 declaration	: bare_declaration ';'								{ $$ = $1; }      
 			| instance_proto compound							{ $$ = vn->OnInstanceInit($1, @1, $2); }	
-			| access_spec_nw ':' 		
+			| qualifier_nw ':' 									{ $$ = $1.node; } // TODO throw if $1.cat != NODE (see also in access_spec)
 
 bare_declaration: instance_proto
 				| instance_proto ANY_NODE_OP					{ $$ = vn->OnInstanceInit($1, @1, nullptr); } // note: ☆ has ; but no =
@@ -404,11 +403,8 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 				| DESIGNATED_NORMAL       				  					{ $$ = $1.as_designated; } // To match a designated Star
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
                           
-access_spec		: access_spec_nw	                          				
-				| qualifier 												{ $$ = $1.node; } // TODO throw if $1.cat != NODE (see also in unified_boot)
+access_spec		: qualifier_nw 												{ $$ = $1.node; } // TODO throw if $1.cat != NODE (see also in unified_boot)
                           
-access_spec_nw	: ACCESS_KEYWORD	                          				{ $$ = vn->OnAccessSpecKeyword($1.as_ascii); }
-
 open_field_scope	: '{'													{ $$ = make_shared<VN::FieldScopeGnomon>(); 
 																			  vn->AddGnomon($$); }
                                                   
@@ -635,11 +631,12 @@ qualifiers		: qualifier													{ $$.push_back($1); }
 				| qualifiers qualifier										{ $$ = $1; $$.push_back($2); }			
 
 qualifier		: qualifier_nw
-				| CV_QUAL_KEYWORD											{ $$.cat = VN::QualCat::NODE; $$.node = vn->OnCVQualifierKeyword($1.as_ascii); }
-				| STATIC_KEYWORD											{ $$.cat = VN::QualCat::STATIC; }
 				
 // No wildcards version
 qualifier_nw	: qual_explicit_op_named itemisation						{ $$.cat = VN::QualCat::NODE; $$.node = vn->OnExplicitNode($1, @1, $2); }
+				| CV_QUAL_KEYWORD											{ $$.cat = VN::QualCat::NODE; $$.node = vn->OnCVQualifierKeyword($1.as_ascii); }
+				| STATIC_KEYWORD											{ $$.cat = VN::QualCat::STATIC; }
+	            | ACCESS_KEYWORD	                          				{ $$.cat = VN::QualCat::NODE; $$.node = vn->OnAccessSpecKeyword($1.as_ascii); }
 
 qual_explicit_op_named 		: explicit_op_scope resolved_qual_name			{ $$ = $2.as_andata_block; (void)$1; }
 
