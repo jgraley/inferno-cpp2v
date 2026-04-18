@@ -187,6 +187,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     over->through = s_program;
     over->overlay = r_program;
     s_program->members = (decls, s_instance);
+    s_instance->constancy = MakePatternNode<NonConst>();
     s_instance->identifier = s_token;        
     s_instance->type = MakePatternNode<Callable>(); // just narrow things a little        
     r_program->members = (decls);   
@@ -197,6 +198,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_cons->initialiser = ls_comp;
     ls_comp->members = l_cdecls;
     ls_comp->statements = (l_pre, ls_pcall, l_post);
+    ls_cons->constancy = MakePatternNode<NonConst>();
     ls_cons->type = l_ctype;
     ls_cons->identifier = l_ident;
     l_ctype->params = (MakePatternNode<Parameter>()); // one parameter
@@ -206,6 +208,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_arg->key = s_arg_id;
     ls_arg->value = ls_id;
     l_overcons->overlay = lr_cons;
+    lr_cons->constancy = MakePatternNode<NonConst>();    
     lr_cons->initialiser = lr_comp;
     lr_comp->members = l_cdecls;
     lr_comp->statements = (l_pre, l_post);
@@ -337,14 +340,17 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     r_module->identifier = module_typeid;
             
     // Embedded 1: dispense with any calls to s_constructor_id from member inits
+    ls_field->constancy = MakePatternNode<NonConst>();
     ls_field->type = ls_ctype;
     ls_ctype->params = (ls_params); // any parameters
     ls_field->memb_inits = (l_pre, l1s_memb_init, l_post);
 	l1s_memb_init->initialiser = l1s_cons_init;
 	l1s_cons_init->constructor_id = s_constructor_id;
+    lr_field->constancy = MakePatternNode<NonConst>();
     lr_field->memb_inits = (l_pre, l_post);
 
     // Embedded 3: dispense with any init constructs using s_constructor_id
+    l3_instance->constancy = MakePatternNode<NonConst>();
     l3_instance->type = module_typeid;
     l3_instance->initialiser = l3_delta;
 	
@@ -370,9 +376,11 @@ RemoveVoidInstances::RemoveVoidInstances()
     
     // Eliminate the declaration that came from isystemc.h
     s_program->members = (decls, s_instance);
+    s_instance->constancy = MakePatternNode<NonConst>();    
     s_instance->type = s_any;
     s_any->disjuncts = (s_callable, MakePatternNode<Void>() ); // match void instances (pointless) or functions as below...
     s_callable->params = (s_params, s_void_param); // one void param is enough, but don't match on zero params
+    s_void_param->constancy = MakePatternNode<NonConst>();    
     s_void_param->type = MakePatternNode<Void>();
     
     r_program->members = (decls);   
@@ -412,6 +420,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_any->disjuncts = (s_cease_inst, s_exit_inst, s_wait_inst, s_next_trigger_inst, s_delta_count_inst);
     
     // void cease( unsigned char exit_code );
+	s_cease_inst->constancy = MakePatternNode<NonConst>();        
     s_cease_inst->identifier = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "cease" ); 
     s_cease_inst->type = s_cease_type;
     s_cease_type->return_type = MakePatternNode<Void>();
@@ -421,6 +430,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_cease_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "exit_code" );   
     
     // void exit( int exit_code );
+	s_exit_inst->constancy = MakePatternNode<NonConst>();        
     s_exit_inst->identifier = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "exit" ); 
     s_exit_inst->type = s_exit_type;
     s_exit_type->return_type = MakePatternNode<Void>();
@@ -430,6 +440,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_exit_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "exit_code" );   
     
     // void wait( int p1 );
+	s_wait_inst->constancy = MakePatternNode<NonConst>();        
     s_wait_inst->identifier = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "wait" ); 
     s_wait_inst->type = s_wait_type;
     s_wait_type->return_type = MakePatternNode<Void>();
@@ -439,6 +450,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_wait_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "p1" );   
     
     // void next_trigger( int p1 );
+	s_next_trigger_inst->constancy = MakePatternNode<NonConst>();        
     s_next_trigger_inst->identifier = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "next_trigger" ); 
     s_next_trigger_inst->type = s_next_trigger_type;
     s_next_trigger_type->return_type = MakePatternNode<Void>();
@@ -448,6 +460,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_next_trigger_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "p1" );   
     
     // void sc_delta_count();
+	s_delta_count_inst->constancy = MakePatternNode<NonConst>();        
     s_delta_count_inst->identifier = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "sc_delta_count" ); 
     s_delta_count_inst->type = s_delta_count_type;
     s_delta_count_type->return_type = MakePatternNode<Integral>(); // Some kind of integer (in SC it's a sc_dt::uint64) 

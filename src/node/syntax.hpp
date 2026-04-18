@@ -39,12 +39,9 @@ public:
 		MAX_SURR_SEMICOLON,	// Note: surroundings lower than here /\ can get ";" added.
 
 		// ----- Parts of statements and declarations
-		CONDITION = 30,		// Use in surrounds like if( <here> ) ... which could be a decl etc. 
-		BRACED,		 // {} from the outside
-		LABEL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.
-		
+		LABEL = 40,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.		
 		MIN_NODE_SEMICOLON, // Note: nodes higher than here \/ can get ";" added.
-		BARE_STMT_DECL = 40, // Statement/declaration with no semicolon
+		BARE_STMT_DECL, // Statement/declaration with no semicolon
 		SPACE_SEP_STMT_DECL, // eg throw <here>;
 		TYPE_IN_DECLARATION, // the type in typedef <here>;
 		BASE_CLASS_SPEC, // A base class including public etc
@@ -84,7 +81,7 @@ public:
 		PRIMARY_EXPR, // one-token literal eg 12, 12.34, "foo"
 		PRIMARY_TYPE, // one-token type eg void, bool
 		COMPOUND, // excluded from added ;
-		BRACKETED, // (), {} from the outside		
+		PARENTHESISED, // (), {} from the outside		
 		TOP_EXPR, // Highest expression precedence 
 		
 		// ----- Abstract, lexer-ish productions of no particuler kind

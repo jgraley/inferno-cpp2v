@@ -434,7 +434,7 @@ Sequence<Expression> IdValuePair::SortMapById( Collection<IdValuePair> &id_value
 
 Syntax::Production MapArgumentation::GetMyProductionTerminal() const
 { 
-	return Production::BRACKETED; 
+	return Production::PARENTHESISED; 
 }
 
 
@@ -495,7 +495,7 @@ TreePtr<Argumentation> MapArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expr
 
 Syntax::Production SeqArgumentation::GetMyProductionTerminal() const
 { 
-	return Production::BRACKETED; 
+	return Production::PARENTHESISED; 
 }
 
 
@@ -890,9 +890,8 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 
 string Instance::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {        
-	// TODO parser will need to give scope gnomons to actions after parsing explicit class, enum, compound etc
-	// Then actions can disambiguate which type of Instance it has and not just put down Instance which is
-	// a wildcard, and wrong in replace-only contexts.
+	// TODO parser will need to give scope gnomons to actions after parsing EXPLICIT class, enum, compound etc
+	// so Actions can disambiguate.
 	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
 		throw RefuseDifficultSyntax(); 
 		
@@ -1134,19 +1133,8 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 	id_policy.resolve_identifier_scope = false;
 		
     list<string> strings;
-    for( auto d : params )
-	{
-        if( auto o = TreePtr<Instance>::DynamicCast(d) )
-        {
-			// TODO Use Instance render?
-			string name = renderer->DoRender( &o->identifier, Production::PRIMARY_EXPR, id_policy);
-			strings.push_back( renderer->DoRenderTypeAndDeclarator( &(o->type), name, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, policy, false ) );
-		}
-		else
-		{
-            strings.push_back( renderer->DoRender( &d, Production::BARE_STMT_DECL, policy ) );
-        }		
-	}					
+    for( auto d : params )	
+		strings.push_back( renderer->DoRender( &d, Production::BARE_STMT_DECL, policy ) );       
 
     return Join( strings, ", ", "(", ")" );
 }
@@ -1491,7 +1479,6 @@ Syntax::Production Record::GetMyProductionTerminal() const
 
 string Record::GetRender( VN::RendererInterface *renderer, Production, Policy policy ) 
 {
-	//throw TemporarilyDisabled(); // TODO fix DeclScope render
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
 		
@@ -1721,7 +1708,7 @@ string Subscript::GetRender( VN::RendererInterface *renderer, Production, Policy
 Syntax::Production ArrayInitialiser::GetMyProductionTerminal() const
 { 
 	// It looks like a Compound. When used as initialsier we want =
-	return Production::BRACKETED; // TODO rename these: BRACKETED is expressional and BRACED is statemental
+	return Production::PARENTHESISED; 
 }
 
 
@@ -1869,7 +1856,7 @@ string ConstructInit::GetRender( VN::RendererInterface *renderer, Production, Po
 
 Syntax::Production RecordInitialiser::GetMyProductionTerminal() const
 { 
-	return Production::BRACKETED; 
+	return Production::PARENTHESISED; 
 }
 
 //////////////////////////// SizeOf ///////////////////////////////
@@ -1925,7 +1912,7 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
 
 Syntax::Production StatementExpression::GetMyProductionTerminal() const
 { 
-	return Production::BRACKETED; 
+	return Production::PARENTHESISED; 
 }
 
 /*

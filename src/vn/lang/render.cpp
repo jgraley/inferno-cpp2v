@@ -248,12 +248,12 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 			if( policy.boot_statements_using_braces )
 			{
 				// Braces can actually work in expressions, eg in {}. The nodes are STATEMENT_SEQ and we boot to BOTTOM_STMT_DECL
-				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACED) ||			
+				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) ||			
 						Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) )
 					  ("Braces won't achieve high enough precedence for surrounding statement production\n")
 					  ("Node: ")(node)("\n")
 					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
-				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
+				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) )
 					  ("Braces won't achieve high enough precedence for surrounding expressional or higher production\n")
 					  ("Node: ")(node)("\n")
 					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
@@ -269,7 +269,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 			
         case Syntax::Production::BOTTOM_EXPR...Syntax::Production::TOP_EXPR: // Expression productions at different precedences
             // If current production has too-high precedence, boot back down using parentheses
-			ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) )
+			ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) )
 				  ("Parentheses won't achieve high enough precedence for surrounding production\n")
 				  ("Node: ")(node)("\n")
 				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
@@ -281,7 +281,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 				   AccomodateSemicolon( node, Syntax::Production::BOOT, policy ) +
 				   " )";            
 				   
-			// Node prod is now effectively BRACKETED... do we now need a semicolon?
+			// Node prod is now effectively PARENTHESISED... do we now need a semicolon?
 			if( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
 				Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) )
 				s += ";\n";		
@@ -533,7 +533,7 @@ string Render::AccomodateBootTypeAndDeclarator( TreePtr<Node> type, string decla
     {
 		// Production passed in here comes from the current value of the delcarator string, not surrounding production.
 		Syntax::Production prod_surrounding_declarator = type->GetOperandInDeclaratorProduction();
-		ASSERT( Syntax::GetPrecedence(prod_surrounding_declarator) <= Syntax::GetPrecedence(Syntax::Production::BRACKETED) ); // Can't satisfy this production's precedence demand using parentheses
+		ASSERT( Syntax::GetPrecedence(prod_surrounding_declarator) <= Syntax::GetPrecedence(Syntax::Production::PARENTHESISED) ); // Can't satisfy this production's precedence demand using parentheses
 		ASSERT( Syntax::GetPrecedence(declarator_prod) >= Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) ); // Can't put this node into parentheses
 		bool parenthesise = Syntax::GetPrecedence(declarator_prod) < Syntax::GetPrecedence(prod_surrounding_declarator);  
 		// Apply to object rather than recursing, because this is declarator    
