@@ -665,6 +665,9 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 
 TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator )
 {	
+	// TODO process the qualifiers in one loop at the top, with lots of checking. Check for:
+	// - wrong qualifier eg an access spec
+	// - duplication/conflict of qualifiers (<=1 in each category)
 	bool static_ = false;
 	for( const QualifierData &q : quals_pre )
 		if( q.cat == QualCat::STATIC )
@@ -823,7 +826,7 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( string keyword, TreePtr<Node> 
 		}
 		else
 		{
-			ASSERT(false)(member);
+			ASSERT(false)(member); // TODO could now be user error eg "const" qualifier used as an access spec.
 		}
 	}
 	
@@ -834,7 +837,7 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( string keyword, TreePtr<Node> 
 TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> access, TreePtr<Node> type )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Base>>();	
-	node->access = access;
+	node->access = access; // TODO could now be user error eg "const" qualifier used as an access spec.
 	node->record = type;
 	return node;
 }

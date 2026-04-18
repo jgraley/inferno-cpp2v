@@ -789,7 +789,7 @@ string MembInitialisation::GetRender( VN::RendererInterface *renderer, Productio
 string MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Policy policy )
 {
 	string s;
-	if( ReadArgs::use.count("c") )
+	//if( ReadArgs::use.count("c") )
 		s += "/* RenderMemberInits() */";
 		
 	list<string> ls; 
@@ -944,9 +944,6 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production surround
 		policy.definitions->push(TreePtr<Instance>(shared_from_this()));
 		return Join( ls, " " );
 	}		
-
-	if( auto mis = dynamic_cast<MembInitSeq *>(this) && policy.compound_uses_vn_separator ) // TODO hack, please remove
-		throw RefusedByPolicy(); 	
 
 	Append( ls, RenderInitPre(renderer, sub_policy) );
 
