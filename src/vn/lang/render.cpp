@@ -456,7 +456,7 @@ list<string> Render::PopulateItemStrings( shared_ptr<const Node> node, Syntax::P
 }
 
 
-string Render::RenderNodeTypeName( shared_ptr<const Node> node ) const
+string Render::RenderNodeTypeName( shared_ptr<const Node> node )
 {
 	list<string> parts = Split( GetInnermostTemplateParam(TYPE_ID_NAME(*node)), "::" );
 	

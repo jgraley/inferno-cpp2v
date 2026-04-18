@@ -599,6 +599,7 @@ struct Instance : Declaration,
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
+	string GetRenderImpl( VN::RendererInterface *renderer, Policy policy );
 	bool ShouldSplitInstance( Policy policy ) const override;
 	
 	// Extras like static, virtual, const come before the type (techically among them, but we don't support that)

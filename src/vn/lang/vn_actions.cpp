@@ -245,13 +245,11 @@ TreePtr<Node> VNLangActions::OnRestrict( const AvailableNodeData::Block *block, 
 	ASSERT( agent )("We are parsing a pattern so everything should be agents");
 		
 	auto pspecial = dynamic_cast<SpecialBase *>(agent);
-	if( !pspecial )
-		throw YY::VNLangParser::syntax_error(
-		     any_cast<YY::VNLangParser::location_type>(target_loc), 
-		     "‽ cannot be used with " + DiagQuote(agent->GetTypeName()));		
-		
-	pspecial->pre_restriction_archetype_node = node_names->MakeNode(ne);
-	pspecial->pre_restriction_archetype_ptr = node_names->MakeTreePtr(ne);
+	if( pspecial )
+	{
+		pspecial->pre_restriction_archetype_node = node_names->MakeNode(ne);
+		pspecial->pre_restriction_archetype_ptr = node_names->MakeTreePtr(ne);
+	}
 
 	return target;
 }

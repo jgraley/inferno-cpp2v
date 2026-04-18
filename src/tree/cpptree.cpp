@@ -2,6 +2,7 @@
 #include "cpptree.hpp"
 #include "common/read_args.hpp"
 #include "vn/lang/sort_decls.hpp"
+#include "vn/lang/render.hpp"
 #include "typeof.hpp"
 
 #define EXPLICIT_BASE 0
@@ -791,7 +792,7 @@ string MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Policy p
     // Render the constructor initialisers if there are any
     if( ls.empty() )        
 		return "";
-	
+
     return " :\n" + Join(ls, ",\n");		    
 }
 
@@ -877,7 +878,9 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 					  !policy.force_initialisation && 
 					  ShouldSplitInstance(policy);
 	
-	if( initialiser && DynamicTreePtrCast<Compound>(initialiser) && !will_split ) 
+	/*if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
+		return Production::PREFIX;
+	else*/ if( initialiser && DynamicTreePtrCast<Compound>(initialiser) && !will_split ) 
 		return Production::STMT_DECL; // won't get ; added
 	else
 		return Production::BARE_STMT_DECL; // will get ; added
@@ -896,9 +899,21 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production surround
 	// we have Local, Global, Field etc
 	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
 		throw RefuseDifficultSyntax(); 
+		/*return "‽" + 
+		       VN::Render::RenderNodeTypeName(shared_from_this()) + 
+		       "(" +
+		       GetRenderImpl( renderer, policy ) + 
+		       ")";*/
+		
+	return GetRenderImpl( renderer, policy );
+}
+
 			
-    list<string> ls;
-    Policy sub_policy = policy;
+string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
+{
+	list<string> ls;
+	
+	Policy sub_policy = policy;
     sub_policy.force_initialisation = false; // stop at one level
 	Policy id_policy = sub_policy;
 	if( !policy.force_initialisation )
@@ -937,6 +952,10 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production surround
 		policy.definitions->push(TreePtr<Instance>(shared_from_this()));
 		return Join( ls, " " );
 	}		
+
+	// Temporarily don't render member inits - I don't thing the grammar for them exists yet
+	if( auto mis = dynamic_cast<MembInitSeq *>(this) && policy.compound_uses_vn_separator ) 
+		throw RefusedByPolicy(); 	
 
 	Append( ls, RenderInitPre(renderer, sub_policy) );
 
