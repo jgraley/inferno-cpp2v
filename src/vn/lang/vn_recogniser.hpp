@@ -96,6 +96,13 @@ public:
 };		
 
 
+class QualifierDesignationGnomon : public DesignationGnomon
+{
+public:	
+	using DesignationGnomon::DesignationGnomon;
+};		
+
+
 class NodeNameScopeGnomon : public ScopeGnomon
 {
 public:	

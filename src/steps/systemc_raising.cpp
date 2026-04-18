@@ -182,6 +182,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( lr_scprocess->GetLoweredIdName() ); 
     auto s_arg_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "func" );
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, l_module, l_module );            
+    auto l_ctype_param = MakePatternNode<Parameter>();
     
     // Eliminate the declaration that came from isystemc.h
     over->through = s_program;
@@ -201,7 +202,9 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_cons->constancy = MakePatternNode<NonConst>();
     ls_cons->type = l_ctype;
     ls_cons->identifier = l_ident;
-    l_ctype->params = (MakePatternNode<Parameter>()); // one parameter
+    l_ctype->params = (l_ctype_param); // one parameter
+    l_ctype_param->constancy = MakePatternNode<NonConst>();
+    l_ctype_param->initialiser = MakePatternNode<Uninitialised>();
     ls_pcall->callee = s_token;
     ls_pcall->argumentation = ls_pargs;
     ls_pargs->arguments = (ls_arg);
@@ -215,6 +218,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     lr_cons->type = l_ctype;
     lr_cons->identifier = l_ident;
     
+    l_process->constancy = MakePatternNode<NonConst>();
     l_process->identifier = ls_id;
     l_process->type = l_overtype;
     l_overtype->through = MakePatternNode<Callable>();
@@ -425,19 +429,23 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_cease_inst->type = s_cease_type;
     s_cease_type->return_type = MakePatternNode<Void>();
     s_cease_type->params = (s_cease_param);
+	s_cease_param->constancy = MakePatternNode<NonConst>();        
     s_cease_param->type = s_unsigned_char;
     s_unsigned_char->width = MakePatternNode<SpecificInteger>((int)TypeDb::char_bits);
     s_cease_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "exit_code" );   
-    
+    s_cease_param->initialiser = MakePatternNode<Uninitialised>();   
+
     // void exit( int exit_code );
 	s_exit_inst->constancy = MakePatternNode<NonConst>();        
     s_exit_inst->identifier = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "exit" ); 
     s_exit_inst->type = s_exit_type;
     s_exit_type->return_type = MakePatternNode<Void>();
     s_exit_type->params = (s_exit_param);
+	s_exit_param->constancy = MakePatternNode<NonConst>();        
     s_exit_param->type = s_int;
     s_int->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
     s_exit_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "exit_code" );   
+    s_exit_param->initialiser = MakePatternNode<Uninitialised>();   
     
     // void wait( int p1 );
 	s_wait_inst->constancy = MakePatternNode<NonConst>();        
@@ -445,9 +453,11 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_wait_inst->type = s_wait_type;
     s_wait_type->return_type = MakePatternNode<Void>();
     s_wait_type->params = (s_wait_param);
+	s_wait_param->constancy = MakePatternNode<NonConst>();        
     s_wait_param->type = s_int2;
     s_int2->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
     s_wait_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "p1" );   
+    s_wait_param->initialiser = MakePatternNode<Uninitialised>();   
     
     // void next_trigger( int p1 );
 	s_next_trigger_inst->constancy = MakePatternNode<NonConst>();        
@@ -455,9 +465,11 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_next_trigger_inst->type = s_next_trigger_type;
     s_next_trigger_type->return_type = MakePatternNode<Void>();
     s_next_trigger_type->params = (s_next_trigger_param);
+	s_next_trigger_param->constancy = MakePatternNode<NonConst>();        
     s_next_trigger_param->type = s_int3;
     s_int3->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
     s_next_trigger_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "p1" );   
+    s_next_trigger_param->initialiser = MakePatternNode<Uninitialised>();   
     
     // void sc_delta_count();
 	s_delta_count_inst->constancy = MakePatternNode<NonConst>();        

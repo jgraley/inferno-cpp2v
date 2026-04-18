@@ -37,6 +37,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 	auto er_scope = MakePatternNode< CodeUnit >();
 	auto er_field = MakePatternNode<Field>();
 	auto es_id = MakePatternNode<InstanceIdentifier>();
+	auto es_constancy = MakePatternNode<Constancy>();
 #ifdef ALSO_MOVE_VARS
 	auto es_id_all = MakePatternNode<ConjunctionAgent, InstanceIdentifier>();
 	auto es_id_not = MakePatternNode<NegationAgent, InstanceIdentifier>();
@@ -60,6 +61,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 	es_scope->members = ( es_gmodule, es_instance, es_decls );
 	// Act on all Instance types, which includes functions, variable and 
 	// constants but excludes user types (incl classes) and labels
+	es_instance->constancy = es_constancy;
 #ifdef ALSO_MOVE_VARS
 	es_instance->type = MakePatternNode<Type>(); 
 #else
@@ -78,12 +80,12 @@ GlobalScopeToModule::GlobalScopeToModule()
 	er_scope->members = ( er_gmodule, es_decls );
 	er_gmodule->identifier = es_gmodule_name;
 	er_gmodule->members = ( es_gmodule_decls, er_field );
+	er_field->constancy = es_constancy;
 	er_field->type = es_instance->type;
 	er_field->identifier = es_id;
 	er_field->initialiser = es_instance->initialiser;
 	er_field->virt = MakePatternNode<NonVirtual>();
 	er_field->access = MakePatternNode<Public>();
-	er_field->constancy = MakePatternNode<NonConst>();
 	
 	// Through, search, replace
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Scope>( delta, es_scope, er_scope );
@@ -115,12 +117,14 @@ MainToThread::MainToThread()
 	gmodule->bases = ( MakePatternNode<StarAgent, Base>() );
 	gmodule->members = ( delta, MakePatternNode<StarAgent, Declaration>() );	
 	delta->through = s_field;
+	s_field->constancy = MakePatternNode<NonConst>();
 	s_field->identifier = s_identifier;
 	s_field->type = s_func;
 	s_field->initialiser = MakePatternNode< Initialiser >();
 	//s_func->members = ()        require no parameters
 	s_func->return_type = MakePatternNode<Integral>();
 	delta->overlay = r_field;
+	r_field->constancy = MakePatternNode<NonConst>();
 	r_field->identifier = s_identifier;
 	r_field->type = MakePatternNode<Thread>();
 	r_field->virt = MakePatternNode<NonVirtual>();

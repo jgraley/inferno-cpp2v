@@ -60,7 +60,8 @@ AutosToModule::AutosToModule()
     r_var->initialiser = init;
     r_var->virt = MakePatternNode<NonVirtual>();
     r_var->access = MakePatternNode<Private>();
-    r_var->constancy = MakePatternNode<NonConst>();
+    // If the local automatic var had been const, it could still change value from call to call
+    r_var->constancy = MakePatternNode<NonConst>(); 
     
     Configure( SEARCH_REPLACE, s_rec, r_rec );
 }

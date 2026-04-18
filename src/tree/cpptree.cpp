@@ -913,7 +913,9 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production surround
     if( !policy.force_initialisation )
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
     
-    ls.push_back( renderer->DoRender(&constancy, Production::SPACE_SEP_TYPE, sub_policy) );
+	string cs = renderer->DoRender(&constancy, Production::SPACE_SEP_TYPE, sub_policy);
+    if( !cs.empty() )
+		ls.push_back( cs );
     
     string declarator = renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy );   
     ls.push_back( renderer->DoRenderTypeAndDeclarator(&type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, false) );
