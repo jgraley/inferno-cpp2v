@@ -152,6 +152,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     
     //s_module->bases = (bases);
     //s_module->identifier = module_id;
+    func->constancy = MakePatternNode<NonConst>();
     func->type = gg;
     gg->through = thread;
     func->identifier = func_id;
@@ -635,6 +636,7 @@ InsertInferredYield::InsertInferredYield()
     auto sx_not = MakePatternNode< LogicalNot >();
     auto assign = MakePatternNode< Assign >();
           
+    fn->constancy = MakePatternNode<NonConst>();
     fn->type = thread;
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  

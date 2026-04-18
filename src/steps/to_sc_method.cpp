@@ -90,6 +90,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
 
     s_rec->members = (decls, fn);
     r_rec->members = (decls, fn, var);
+    fn->constancy = MakePatternNode<NonConst>();    
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
@@ -125,6 +126,7 @@ DeclsToModule::DeclsToModule()
     
     s_rec->members = (decls, fn);
     r_rec->members = (decls, fn, ut);
+    fn->constancy = MakePatternNode<NonConst>();    
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
@@ -172,6 +174,7 @@ ThreadToMethod::ThreadToMethod()
     auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_n, ms_wait_static, mr_nt_static);
     auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_m, ls_wait_dynamic, lr_nt_dynamic);
 
+    s_thread->constancy = MakePatternNode<NonConst>();    
     s_thread->type = s_thread_type;
     s_thread->initialiser = s_comp;
     s_thread->identifier = id;
@@ -181,6 +184,7 @@ ThreadToMethod::ThreadToMethod()
     s_loop->body = loop_comp;
     loop_comp->members = (loop_decls);
     loop_comp->statements = (loop_stmts);
+    r_method->constancy = MakePatternNode<NonConst>();        
     r_method->type = r_method_type;
     r_method->initialiser = embedded_l;
     r_method->identifier = id;

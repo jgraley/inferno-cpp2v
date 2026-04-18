@@ -567,6 +567,7 @@ MergeFunctions::MergeFunctions()
     
     s_module->members = (members, thread, s_func);
     r_module->members = (members, thread);
+    thread->constancy = MakePatternNode<NonConst>();    
     thread->type = thread_type;
     thread->initialiser = thread_over;
     thread_over->through = s_all;

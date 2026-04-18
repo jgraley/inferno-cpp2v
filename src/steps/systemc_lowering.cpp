@@ -278,8 +278,9 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     r_process_macro->identifier = token;
     r_process_macro->arguments = (id);
     
-    process->identifier = id;
+    process->constancy = MakePatternNode<NonConst>();    
     process->type = overtype;
+    process->identifier = id;
     overtype->through = s_scprocess;
     overtype->overlay = r_func;
     r_func->return_type = MakePatternNode<Void>();

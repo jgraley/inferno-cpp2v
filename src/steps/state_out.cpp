@@ -224,6 +224,7 @@ EnsureBootstrap::EnsureBootstrap()
     auto stop = MakePatternNode<NegationAgent, Statement>();
     auto sx_goto = MakePatternNode<Goto>();
         
+    fn->constancy = MakePatternNode<NonConst>();    
     fn->type = thread;
     fn->initialiser = over;
     over->through = s_all;
@@ -310,6 +311,7 @@ EnsureSuperLoop::EnsureSuperLoop()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto r_loop = MakePatternNode<Do>();
         
+    fn->constancy = MakePatternNode<NonConst>();    
     fn->type = thread;
     fn->initialiser = over;
     over->through = s_all;
@@ -577,6 +579,7 @@ AddInferredYield::AddInferredYield()
     auto sx_not = MakePatternNode< LogicalNot >();
     auto assign = MakePatternNode< Assign >();
           
+    fn->constancy = MakePatternNode<NonConst>();    
     fn->type = thread;
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  
@@ -628,6 +631,7 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     auto over = MakePatternNode<DeltaAgent, Compound>();
     auto first_init = MakePatternNode<Statement>();
                     
+    fn->constancy = MakePatternNode<NonConst>();    
     fn->type = thread;
     fn->initialiser = func_over;
     fn->identifier = fn_id;  
@@ -720,6 +724,7 @@ LoopRotation::LoopRotation()
     auto s_notmatch = MakePatternNode<NegationAgent, Compound>();
     auto inner_state = MakePatternNode<DisjunctionAgent, If>();
     
+    fn->constancy = MakePatternNode<NonConst>();    
     fn->type = thread;
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  
