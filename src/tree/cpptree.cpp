@@ -106,10 +106,8 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 	if( !policy.full_render_code_unit )
 	{
 		s += "∞{\n";
-		for( TreePtr<Node> m : members )
-		{
+		for( auto &m : members )
 			s += renderer->DoRender( &m, Production::STMT_DECL, policy ) + "\n";
-		}
 		s += "}";
 		return s;
 	}
@@ -126,7 +124,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 		s += "\n// Pre-proc and forward classes\n";   
 		
     // Emit preprocs and an incomplete for each record 
-    for( TreePtr<Declaration> pd : sorted )
+    for( auto &pd : sorted )
     {       
         if( auto ppd = DynamicTreePtrCast<PreProcDecl>(pd) )
         {
@@ -155,9 +153,8 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
     
     while( !require_complete.empty()  )
     {
-        TreePtr<Declaration> d = require_complete.front();
+        s += renderer->DoRender( &require_complete.front(), Production::STMT_DECL, my_policy );
         require_complete.pop();       		
-        s += renderer->DoRender( &d, Production::STMT_DECL, my_policy );
     }
     
     if( !general.empty()  )
@@ -165,9 +162,8 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 
     while( !general.empty()  )
     {
-        TreePtr<Declaration> d = general.front();
+        s += renderer->DoRender( &general.front(), Production::STMT_DECL, my_policy );
         general.pop();       		
-        s += renderer->DoRender( &d, Production::STMT_DECL, my_policy );
     }
 
     if( !my_definitions.empty() )
@@ -450,7 +446,7 @@ string MapArgumentation::DirectRenderArgumentation(VN::RendererInterface *render
 		throw RefusedByPolicy(); // Would output 〔, 〕 and ⦂, so C++ renderer needs to resolve into seq args
 			
 	list<string> ls;
-	for( TreePtr<Node> arg : arguments )
+	for( auto &arg : arguments )
 		ls.push_back( renderer->DoRender( &arg, Production::COMMA_SEP, policy ) );
 	
     return Join( ls, ", ", "〔", "〕" );	
@@ -508,7 +504,7 @@ string SeqArgumentation::GetRender( VN::RendererInterface *, Production, Policy 
 string SeqArgumentation::DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy)
 {
 	list<string> ls;
-	for( TreePtr<Node> arg : arguments )
+	for( auto &arg : arguments )
 		ls.push_back( renderer->DoRender( &arg, Production::COMMA_SEP, policy ) );	
 	
 	return Join( ls, ", ", "(", ")" );	
@@ -789,7 +785,7 @@ string MembInitialisation::GetRender( VN::RendererInterface *renderer, Productio
 string MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Policy policy )
 {	
 	list<string> ls; 
-	for( TreePtr<MembInitialisation> mi : memb_inits ) 
+	for( auto &mi : memb_inits ) 
 		ls.push_back( "    " + renderer->DoRender( &mi, Production::COMMA_SEP, policy ) );		
 
     // Render the constructor initialisers if there are any
@@ -1133,7 +1129,7 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 	id_policy.resolve_identifier_scope = false;
 		
     list<string> strings;
-    for( auto d : params )	
+    for( auto &d : params )	
 		strings.push_back( renderer->DoRender( &d, Production::BARE_STMT_DECL, policy ) );       
 
     return Join( strings, ", ", "(", ")" );
@@ -1526,7 +1522,7 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
     Sequence<Declaration> sorted = SortDecls( members, true );
 	
     // Emit preprocs and an incomplete for each record 
-    for( TreePtr<Declaration> d : sorted )
+    for( auto &d : sorted )
     {       
 		// Decide access spec for this declaration (explicit if instance, 
 		// otherwise force to Public because decls don't have an access spec). TODO fix this, #877
@@ -1578,7 +1574,7 @@ string Enum::RenderBody( VN::RendererInterface *, Policy  )
 string InheritanceRecord::RenderExtras(VN::RendererInterface *renderer, Production, Policy policy)
 {
 	list<string> ls;
-	for( TreePtr<Base> b : bases )
+	for( auto &b : bases )
 		ls.push_back( renderer->DoRender(&b, Production::BASE_CLASS_SPEC, policy ) );    	
 	
 	if( ls.empty() )
@@ -1720,7 +1716,7 @@ string ArrayInitialiser::GetRender( VN::RendererInterface *renderer, Production 
 		throw RefuseDifficultSyntax(); 
 		
 	list<string> ls;    	
-    for( TreePtr<Expression> e : elements )
+    for( auto &e : elements )
 		ls.push_back( renderer->DoRender( &e, Production::COMMA_SEP, policy ) );
 
     return Join(ls, ", ", "{", "}"); 
@@ -1898,11 +1894,11 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
     string s = " { ";
  	policy.permit_static_keyword = true; // In a compound, static means global
  	
-    for( TreePtr<Declaration> m : members )    
+    for( auto &m : members )    
         s += renderer->DoRender( &m, Production::STMT_DECL, policy );    
     if( policy.compound_uses_vn_separator )
 		s += "⚬";
-    for( TreePtr<Statement> st : statements )    
+    for( auto &st : statements )    
 		s += renderer->DoRender( &st, Production::STMT_DECL_LOW, policy );    
     s += " } ";
     return s;
