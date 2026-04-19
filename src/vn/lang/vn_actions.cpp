@@ -660,6 +660,26 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 	return ret;
 }
 
+shared_ptr<Gnomon> VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const
+{
+	auto nb = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
+	ASSERT( nb );
+	ASSERT( nb->node_enum );
+	NodeEnum ne = nb->node_enum.value();
+	// No need for StandardAgent or TreePtr, we're just analysing here
+	shared_ptr<Node> node = node_names->MakeNode(ne);
+	ASSERT( node );
+	if( dynamic_pointer_cast<CPPTree::CodeUnit>(node) )
+		return make_shared<GlobalScopeGnomon>();
+	else if( dynamic_pointer_cast<CPPTree::Compound>(node) )
+		return make_shared<LocalScopeGnomon>();
+	else if( dynamic_pointer_cast<CPPTree::Record>(node) )
+		return make_shared<FieldScopeGnomon>();
+	else if( dynamic_pointer_cast<CPPTree::CallableParams>(node) )
+		return make_shared<ParameterScopeGnomon>();
+	else
+		return make_shared<UnknownScopeGnomon>("non-scope explicit node");	
+}
 
 TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator )
 {	
@@ -707,18 +727,14 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 						any_cast<YY::VNLangParser::location_type>(loc),
 						"nearest prerestrict " + nb->GetTrace() + " cannot disambiguate an instance declaration" + note); // TODO			
 	}
-	else if( auto psg = dynamic_cast<const ExplicitScopeGnomon *>(spg.get()) ) 
-	{
-		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>(); // TODO 		
-	}
 	else if( !spg ) 
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
 			"Cannot disambiguate declaration because no surrounding scope." + note );
-	else if( dynamic_cast<const UnknownScopeGnomon *>(spg.get()) ) 
+	else if( auto usg = dynamic_cast<const UnknownScopeGnomon *>(spg.get()) ) 
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
-			"Cannot disambiguate declaration under stuff node." + note );
+			"Cannot disambiguate declaration under " + usg->reason + "." + note );
 	else if( dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
 	else if( dynamic_cast<const FieldScopeGnomon *>(spg.get()) )

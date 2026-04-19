@@ -180,7 +180,7 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		explicit_op_scope prerestrict_op_scope id_by_name_op_scope builder_id_op_scope stuff_op_scope
 %type <shared_ptr<VN::Gnomon>>		open_global_scope open_local_scope open_field_scope open_param_scope 
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
-%type <shared_ptr<VN::ExplicitScopeGnomon>>			decl_explicit_op_named
+%type <VN::ExplicitData>			decl_explicit_op_named
 %type <list<TreePtr<Node>>>			stmt_decls 
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases 
@@ -339,14 +339,14 @@ decl_primary: decl_vn_prim
 			| '(' decl_boot ')'													{ $$ = $2; } 
 			| '(' decl_commands ')'												{ $$ = vn->OnEmbeddedCommands($2); }
 
-decl_commands: decl_boot COMMAND_TERM commands					{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
+decl_commands: decl_boot COMMAND_TERM commands									{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 						
-decl_vn_prim: decl_explicit_op_named itemisation								{ $$ = vn->OnExplicitNode($1->block, @1, $2); }
+decl_vn_prim: decl_explicit_op_named itemisation								{ $$ = vn->OnExplicitNode($1.block, @1, $2); }
 			| DESIGNATED_DECL     									  			{ $$ = $1.as_designated; }	
 			| STAR_OP OPEN_VN decl_boot CLOSE_VN								{ $$ = vn->OnStar($3); }
 			
-decl_explicit_op_named 		: explicit_op_scope resolved_decl_name				{ $$ = make_shared<VN::ExplicitScopeGnomon>($2.as_andata_block); 
-                                                                                  vn->AddGnomon($$); }
+decl_explicit_op_named 		: explicit_op_scope resolved_decl_name				{ $$ = { $2.as_andata_block, vn->MakeScopeGnomonForNode($2.as_andata_block) }; 
+                                                                                  vn->AddGnomon($$.gnomon); }
 decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_name			{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2.as_andata_block); 
                                                                                   vn->AddGnomon($$); }
 
@@ -693,7 +693,7 @@ builder_id_op_scope		: BUILDER_ID_OP 	{ $$ = make_shared<VN::NodeNameScopeGnomon
 transform_op_scope		: TRANSFORM_OP		{ $$ = make_shared<VN::TransformNameScopeGnomon>(); 
 											  recogniser->AddGnomon($$); }
 
-stuff_op_scope			: STUFF_OP			{ $$ = make_shared<VN::UnknownScopeGnomon>(); 
+stuff_op_scope			: STUFF_OP			{ $$ = make_shared<VN::UnknownScopeGnomon>("stuff pattern"); 
 											  vn->AddGnomon($$); }
 
 %%
