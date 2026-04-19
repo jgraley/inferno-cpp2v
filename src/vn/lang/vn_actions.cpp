@@ -660,7 +660,8 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 	return ret;
 }
 
-shared_ptr<Gnomon> VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const
+
+BlockAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const
 {
 	auto nb = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
 	ASSERT( nb );
@@ -669,23 +670,30 @@ shared_ptr<Gnomon> VNLangActions::MakeScopeGnomonForNode( const AvailableNodeDat
 	// No need for StandardAgent or TreePtr, we're just analysing here
 	shared_ptr<Node> node = node_names->MakeNode(ne);
 	ASSERT( node );
+	shared_ptr<Gnomon> gnomon;
 	if( dynamic_pointer_cast<CPPTree::CodeUnit>(node) )
-		return make_shared<GlobalScopeGnomon>();
-	else if( dynamic_pointer_cast<CPPTree::Compound>(node) )
-		return make_shared<LocalScopeGnomon>();
+		gnomon = make_shared<GlobalScopeGnomon>();
+	else if( dynamic_pointer_cast<CPPTree::SequentialScope>(node) )
+		gnomon = make_shared<LocalScopeGnomon>();
+	else if( dynamic_pointer_cast<CPPTree::Enum>(node) )
+		gnomon = make_shared<EnumeratorScopeGnomon>();
 	else if( dynamic_pointer_cast<CPPTree::Record>(node) )
-		return make_shared<FieldScopeGnomon>();
+		gnomon = make_shared<FieldScopeGnomon>();
 	else if( dynamic_pointer_cast<CPPTree::CallableParams>(node) )
-		return make_shared<ParameterScopeGnomon>();
+		gnomon = make_shared<ParameterScopeGnomon>();
 	else
-		return make_shared<UnknownScopeGnomon>("non-scope explicit node");	
+		gnomon = make_shared<UnknownScopeGnomon>("non-scope explicit node " + nb->What());	
+		
+	// DeclScope and Scope are too broad, as they apply to more than one of the above categories	
+		
+	return { block, gnomon };
 }
 
 TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator )
 {	
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
-		"\nparams list, pre-restriction to a declaration node type or explicit declaration node";			
+		"\nparams list, explicit scope node or pre-restriction to a declaration node type";			
 	
 	// TODO process the qualifiers in one loop at the top, with lots of checking. Check for:
 	// - wrong qualifier eg an access spec
@@ -725,7 +733,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		if( !instance )
 			throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(loc),
-						"nearest prerestrict " + nb->GetTrace() + " cannot disambiguate an instance declaration" + note); // TODO			
+						"nearest prerestrict " + nb->What() + " cannot disambiguate an instance declaration" + note); // TODO			
 	}
 	else if( !spg ) 
 		throw YY::VNLangParser::syntax_error(
@@ -750,8 +758,21 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 					field->access = aq;
 			}
 		}
-		instance = field;
+#ifdef REJECT_NULL_QUALS
+		// can re-instate when #889 is done and we know we're in a replace-only context
+		if( !field->access )
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"No access given "+Trace(quals_pre) );
+		if( !field->virt )
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"No virt given "+Trace(quals_pre) );
+#endif				
+		instance = field; // TODO store current access in the gnomon after #890
 	}
+	else if( dynamic_cast<const EnumeratorScopeGnomon *>(spg.get()) ) 
+		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>();  //TODO change to Enumerator when do enums
 	else if( dynamic_cast<const GlobalScopeGnomon *>(spg.get()) ) 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
 	else if( dynamic_cast<const LocalScopeGnomon *>(spg.get()) ) 
@@ -1257,6 +1278,8 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 
 // - Add members to classes and move access_spec_nw across
 // - Give operator comma lower prio than ∧ etc and re-instate
+
+// See ReturnViaTemp: return ⯁Uninitialised⦅⦆; should just be return;
 
 // NOTE: ; is NOT required for any VN operators working on statements or declarations. This is
 // consistent with statements and declarations that end in {...} not requiring one either. We DO

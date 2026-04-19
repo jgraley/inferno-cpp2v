@@ -79,6 +79,15 @@ public:
 	}
 };
 
+class EnumeratorScopeGnomon : public ScopeGnomon
+{
+public:	
+	string GetMessageText() const final
+	{
+		return "enumerators scope";
+	}
+};
+
 class GlobalScopeGnomon : public ScopeGnomon
 {
 public:	
@@ -128,13 +137,24 @@ enum class QualCat
 	STATIC
 };
 
-struct QualifierData
+struct QualifierData : Traceable
 {
 	TreePtr<Node> node;
 	QualCat cat;
+	
+	string GetTrace() const final
+	{
+		switch( cat )
+		{
+			case QualCat::STATIC:
+				return "STATIC";
+			case QualCat::NODE:
+				return Trace(node);
+		}
+	}
 };
 
-struct ExplicitData
+struct BlockAndGnomon
 {
 	const AvailableNodeData::Block *block;
 	shared_ptr<Gnomon> gnomon;
@@ -192,7 +212,7 @@ public:
 	
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
-	shared_ptr<Gnomon> MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const;
+	BlockAndGnomon MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const;
 	TreePtr<Node> OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator );	
 	TreePtr<Node> OnInstanceInit( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init );	
 	TreePtr<Node> OnAbDeclType( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	

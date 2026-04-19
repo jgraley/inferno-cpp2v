@@ -44,18 +44,15 @@ public:
 	{
 		string What() const final 
 		{ 
-			list<string> ls;
-			if( node_enum )
-				ls.push_back( "node-name" );
-			return Join(ls, "/");
+			if( !node_enum )
+				return "no-node";
+			auto m = AvailableNodeData().GetEnumToNameMap();
+			return Join(m.at(node_enum.value()), "::");			
 		}
 		string GetTrace() const 
 		{ 
-			string s = node_enum ? "node#"+Trace((int)(node_enum.value())) : "no-node"; 
-			auto m = AvailableNodeData().GetEnumToNameMap();
-			auto l = m.at(node_enum.value());
-
-			return s + " " + Join( l, "::" );
+			string s = node_enum ? "#"+Trace((int)(node_enum.value())) : ""; 
+			return s + ":" + What();
 		}
 
 		optional<NodeEnum> node_enum;

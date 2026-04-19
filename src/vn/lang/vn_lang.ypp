@@ -180,15 +180,14 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		explicit_op_scope prerestrict_op_scope id_by_name_op_scope builder_id_op_scope stuff_op_scope
 %type <shared_ptr<VN::Gnomon>>		open_global_scope open_local_scope open_field_scope open_param_scope 
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
-%type <VN::ExplicitData>			decl_explicit_op_named
+%type <VN::BlockAndGnomon>			explicit_op_named type_explicit_op_named decl_explicit_op_named qual_explicit_op_named
 %type <list<TreePtr<Node>>>			stmt_decls 
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases 
 %type <VN::QualifierData> 			qualifier qualifier_nw
 %type <list<VN::QualifierData>>		qualifiers 
-%type <const AvailableNodeData::Block *> explicit_op_named prerestrict_op_named id_by_name_op_named build_id_named 
-%type <const AvailableNodeData::Block *> qual_explicit_op_named
-%type <const AvailableNodeData::Block *> type_explicit_op_named type_prerestrict_op_named type_id_by_name_op_named type_build_id_op_named
+%type <const AvailableNodeData::Block *> prerestrict_op_named id_by_name_op_named build_id_named 
+%type <const AvailableNodeData::Block *> type_prerestrict_op_named type_id_by_name_op_named type_build_id_op_named
 %type <multiset<string>>			type_specifier_seq
 
 // Solve the dangling-else amiguity by giving the "else" token a higher priority than the "if" token
@@ -345,7 +344,7 @@ decl_vn_prim: decl_explicit_op_named itemisation								{ $$ = vn->OnExplicitNod
 			| DESIGNATED_DECL     									  			{ $$ = $1.as_designated; }	
 			| STAR_OP OPEN_VN decl_boot CLOSE_VN								{ $$ = vn->OnStar($3); }
 			
-decl_explicit_op_named 		: explicit_op_scope resolved_decl_name				{ $$ = { $2.as_andata_block, vn->MakeScopeGnomonForNode($2.as_andata_block) }; 
+decl_explicit_op_named 		: explicit_op_scope resolved_decl_name				{ $$ = vn->MakeScopeGnomonForNode($2.as_andata_block); 
                                                                                   vn->AddGnomon($$.gnomon); }
 decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_name			{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2.as_andata_block); 
                                                                                   vn->AddGnomon($$); }
@@ -544,7 +543,7 @@ vn_paren	: vn_primary
 			| '(' commands ')'                          		{ $$ = vn->OnEmbeddedCommands($2); }
 
 vn_primary  : vn_wildcard
-			| explicit_op_named itemisation							{ $$ = vn->OnExplicitNode($1, @1, $2); }
+			| explicit_op_named itemisation							{ $$ = vn->OnExplicitNode($1.block, @1, $2); }
 			| DESIGNATED_NORMAL       				  				{ $$ = $1.as_designated; }
 			| id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN	{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
 			| build_id_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
@@ -559,7 +558,8 @@ vn_wildcard : STAR_OP											{ $$ = vn->OnStar(nullptr); }
 comma_sep_expr_decl	: expr_no_comma_op											{ $$.push_back($1); }
 					| comma_sep_expr_decl ',' expr_no_comma_op					{ $$ = $1; $$.push_back($3); }			
 
-explicit_op_named 	: explicit_op_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
+explicit_op_named 	: explicit_op_scope resolved_name		{ $$ = vn->MakeScopeGnomonForNode($2.as_andata_block); 
+                                                              vn->AddGnomon($$.gnomon); }
 prerestrict_op_named: prerestrict_op_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
 id_by_name_op_named : id_by_name_op_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
 build_id_named 		: builder_id_op_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
@@ -606,7 +606,7 @@ type_primary: type_vn_prim
 			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }				
 			| TYPE_INDICATOR TYPE_INDICATOR '(' type_id ')'						{ $$ = $4; } // See #888
 			
-type_vn_prim: type_explicit_op_named itemisation								{ $$ = vn->OnExplicitNode($1, @1, $2); }
+type_vn_prim: type_explicit_op_named itemisation								{ $$ = vn->OnExplicitNode($1.block, @1, $2); }
 			| DESIGNATED_TYPE     									  			{ $$ = $1.as_designated; }		
 			| type_id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
 			| type_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 	{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
@@ -616,7 +616,8 @@ type_vn_prim: type_explicit_op_named itemisation								{ $$ = vn->OnExplicitNod
 			| TYPE_INDICATOR STAR_OP OPEN_VN type_boot CLOSE_VN					{ $$ = vn->OnStar($4); }
 			| STAR_OP OPEN_VN type_boot CLOSE_VN								{ $$ = vn->OnStar($3); }
 			
-type_explicit_op_named 		: explicit_op_scope resolved_type_name				{ $$ = $2.as_andata_block; (void)$1; }
+type_explicit_op_named 		: explicit_op_scope resolved_type_name				{ $$ = vn->MakeScopeGnomonForNode($2.as_andata_block); 
+                                                                                  vn->AddGnomon($$.gnomon); }
 type_prerestrict_op_named 	: prerestrict_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
 type_id_by_name_op_named 	: id_by_name_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
 type_build_id_op_named 		: builder_id_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
@@ -639,11 +640,12 @@ qualifier		: qualifier_nw
 qualifier_nw	: qualifier_node											{ $$.cat = VN::QualCat::NODE; $$.node = $1; }
 				| STATIC_KEYWORD											{ $$.cat = VN::QualCat::STATIC; }
 
-qualifier_node	: qual_explicit_op_named itemisation						{ $$ = vn->OnExplicitNode($1, @1, $2); }
+qualifier_node	: qual_explicit_op_named itemisation						{ $$ = vn->OnExplicitNode($1.block, @1, $2); }
 				| QUAL_NODE_KEYWORD											{ $$ = vn->OnQualifierNodeKeyword($1.as_ascii); }
 				| DESIGNATED_QUAL       				  					{ $$ = $1.as_designated; } 
 
-qual_explicit_op_named 		: explicit_op_scope resolved_qual_name			{ $$ = $2.as_andata_block; (void)$1; }
+qual_explicit_op_named 		: explicit_op_scope resolved_qual_name			{ $$ = vn->MakeScopeGnomonForNode($2.as_andata_block); 
+                                                                              vn->AddGnomon($$.gnomon); }
 
 //////////////////////////////////////// RECOGNISER GLUE /////////////////////////////////////////////
 // 2 things going on here:

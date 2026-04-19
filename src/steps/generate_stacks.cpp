@@ -22,7 +22,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     auto module = MakePatternNode<Module>();
     auto other_decls = MakePatternNode<StarAgent, Declaration>();
     
-    auto fi = MakePatternNode< Instance >();
+    auto fi = MakePatternNode< Field >();
     auto s_comp = MakePatternNode<Compound>();
     auto sx_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
@@ -108,7 +108,7 @@ ReturnViaTemp::ReturnViaTemp()
 {
     auto s_module = MakePatternNode<Module>();
     auto r_module = MakePatternNode<Module>();
-    auto func = MakePatternNode<Instance>();
+    auto func = MakePatternNode<Field>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto cp = MakePatternNode<Function>();
@@ -127,7 +127,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto m_any = MakePatternNode<DisjunctionAgent, Expression>();
     auto m_lookup = MakePatternNode<Lookup>();
     auto m_operands = MakePatternNode<StarAgent, IdValuePair>();
-    auto r_temp = MakePatternNode<Temporary>();
+    auto r_retval = MakePatternNode<Field>();
     auto mr_assign = MakePatternNode<Assign>();
     auto lr_assign = MakePatternNode<Assign>();
     auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_return");
@@ -138,8 +138,10 @@ ReturnViaTemp::ReturnViaTemp()
     auto ms_gg = MakePatternNode<GreenGrassAgent, Call>();
     auto overcp = MakePatternNode<DeltaAgent, Type>();
     auto overi = MakePatternNode<DeltaAgent, Initialiser>();
+    auto func_access = MakePatternNode<AccessSpec>();
     
     auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( r_body, ls_return, lr_comp );
+    
     ls_return->return_value = l_return_value; // note this also pre-restricts away Return<Uninitialised>
     lr_comp->statements = (lr_assign, lr_return);
     lr_assign->operands = (r_temp_id, l_return_value);
@@ -155,9 +157,10 @@ ReturnViaTemp::ReturnViaTemp()
     auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Scope>( r_module, ms_gg, mr_comp );
     
     s_module->members = (decls, func);
-    r_module->members = (decls, func, r_temp);
+    r_module->members = (decls, func, r_retval);
     func->type = cp;
     func->initialiser = overi;
+    func->access = func_access;        
     overi->through = s_body;
     func->identifier = func_id;
     s_body->members = (locals);
@@ -170,10 +173,12 @@ ReturnViaTemp::ReturnViaTemp()
     r_body->members = (locals);
     r_body->statements = (statements);
     overcp->overlay = MakePatternNode<Void>();
-    r_temp->initialiser = MakePatternNode<Uninitialised>();
-    r_temp->type = return_type;
-    r_temp->identifier = r_temp_id;
-    r_temp->constancy = MakePatternNode<NonConst>();    
+    r_retval->initialiser = MakePatternNode<Uninitialised>();
+    r_retval->type = return_type;
+    r_retval->identifier = r_temp_id;
+    r_retval->constancy = MakePatternNode<NonConst>();    
+    r_retval->virt = MakePatternNode<NonVirtual>();    
+    r_retval->access = func_access;    
     r_temp_id->sources = (func_id);
     
     Configure( SEARCH_REPLACE, s_module, embedded_m );  
@@ -186,7 +191,7 @@ AddLinkAddress::AddLinkAddress()
     auto r_module = MakePatternNode<Module>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto bases = MakePatternNode<StarAgent, Base>();
-    auto r_retaddr = MakePatternNode<Temporary>();
+    auto r_retaddr = MakePatternNode<Field>();
     auto r_retaddr_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_link");
     auto lr_retaddr = MakePatternNode<Parameter>();
     auto lr_retaddr_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("link");
@@ -195,7 +200,7 @@ AddLinkAddress::AddLinkAddress()
     auto s_nm = MakePatternNode<NegationAgent, Declaration>();
     auto ls_nm = MakePatternNode<NegationAgent, Declaration>();
     auto gg = MakePatternNode<GreenGrassAgent, Declaration>();
-    auto l_inst = MakePatternNode<Instance>();
+    auto func = MakePatternNode<Field>();
     auto l_over = MakePatternNode<DeltaAgent, Compound>();
     auto ls_comp = MakePatternNode<Compound>();
     auto lr_comp = MakePatternNode<Compound>();
@@ -230,6 +235,7 @@ AddLinkAddress::AddLinkAddress()
     auto m_gg = MakePatternNode<GreenGrassAgent, Statement>();
     auto ll_gg = MakePatternNode<GreenGrassAgent, Statement>();
     auto mr_new_arg = MakePatternNode<IdValuePair>();
+    auto func_access = MakePatternNode<AccessSpec>();
 
     ll_gg->through = ll_return;
     ll_over->overlay = llr_comp;        
@@ -253,15 +259,16 @@ AddLinkAddress::AddLinkAddress()
     
     auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Scope>( r_module, m_gg, mr_comp );
     
-    l_inst->type = l_func_over;
+    func->type = l_func_over;
     l_func_over->through = ls_func;
     l_func_over->overlay = lr_func;    
     ls_func->return_type = MakePatternNode<Void>();
     ls_func->params = MakePatternNode<StarAgent, Parameter>(); // Params OK here, just not in MergeFunctions
     lr_func->return_type = ls_func->return_type;
     lr_func->params = (ls_func->params, lr_retaddr);
-    l_inst->initialiser = l_over;
-    l_inst->identifier = l_inst_id;
+    func->initialiser = l_over;
+    func->identifier = l_inst_id;
+    func->access = func_access;    
     l_over->through = ls_comp;
     ls_comp->members = (l_decls);
     ls_comp->statements = (l_stmts);
@@ -279,12 +286,12 @@ AddLinkAddress::AddLinkAddress()
     
     s_module->members = (gg, decls);
     r_module->members = (gg, decls, r_retaddr);
-    gg->through = l_inst;
+    gg->through = func;
     r_retaddr->identifier = r_retaddr_id;
     r_retaddr->type = MakePatternNode<Labeley>();
     r_retaddr->initialiser = MakePatternNode<Uninitialised>();
-    //r_retaddr->virt = MakePatternNode<NonVirtual>();
-    //r_retaddr->access = MakePatternNode<Private>();
+    r_retaddr->virt = MakePatternNode<NonVirtual>();
+    r_retaddr->access = func_access;
     r_retaddr->constancy = MakePatternNode<NonConst>();
     r_retaddr_id->sources = (l_inst_id);
     Configure( SEARCH_REPLACE, s_module, embedded_m );  
@@ -295,8 +302,8 @@ ParamsViaTemps::ParamsViaTemps()
 {
     auto s_module = MakePatternNode<Module>();
     auto r_module = MakePatternNode<Module>();
-    auto s_func = MakePatternNode<Instance>();
-    auto r_func = MakePatternNode<Instance>();
+    auto s_func = MakePatternNode<Field>();
+    auto r_func = MakePatternNode<Field>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto s_cp = MakePatternNode<Function>();
@@ -320,11 +327,12 @@ ParamsViaTemps::ParamsViaTemps()
     auto m_operands = MakePatternNode<StarAgent, IdValuePair>();
     auto r_param = MakePatternNode<Local>();
     auto param_type = MakePatternNode<Type>();
-    auto r_temp = MakePatternNode<Temporary>();
+    auto r_param_hold = MakePatternNode<Field>();
     auto mr_assign = MakePatternNode<Assign>();
     auto m_expr = MakePatternNode<Expression>();
     auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_%s");
     auto over = MakePatternNode<DeltaAgent, Declaration>();
+    auto func_access = MakePatternNode<AccessSpec>();
     
     ms_call->callee = func_id;
     ms_call->argumentation = ms_args;
@@ -339,7 +347,7 @@ ParamsViaTemps::ParamsViaTemps()
     auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Scope>( r_module, ms_call, mr_comp );
     
     s_module->members = (decls, over);
-    r_module->members = (decls, over, r_temp);
+    r_module->members = (decls, over, r_param_hold);
     over->through = s_func;
     over->overlay = r_func;
     s_func->type = s_cp;
@@ -348,6 +356,8 @@ ParamsViaTemps::ParamsViaTemps()
     r_func->initialiser = r_body;
     s_func->identifier = func_id;
     r_func->identifier = func_id;
+    s_func->access = func_access;
+    r_func->access = func_access;
     s_body->members = (locals);
     r_body->members = (locals);
     s_body->statements = (statements);
@@ -362,10 +372,12 @@ ParamsViaTemps::ParamsViaTemps()
     r_param->constancy = MakePatternNode<NonConst>();
     r_cp->params = (params);
     r_cp->return_type = return_type;
-    r_temp->type = param_type;
-    r_temp->initialiser = MakePatternNode<Uninitialised>();
-    r_temp->identifier = r_temp_id;
-    r_temp->constancy = MakePatternNode<NonConst>();    
+    r_param_hold->type = param_type;
+    r_param_hold->initialiser = MakePatternNode<Uninitialised>();
+    r_param_hold->identifier = r_temp_id;
+    r_param_hold->constancy = MakePatternNode<NonConst>();    
+    r_param_hold->access = func_access;    
+    r_param_hold->virt = MakePatternNode<NonVirtual>();    
     r_temp_id->sources = (func_id, param_id);
     
     Configure( SEARCH_REPLACE, s_module, embedded_m );  

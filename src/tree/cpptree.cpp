@@ -872,7 +872,7 @@ string NonConst::GetRender( VN::RendererInterface *, Production surround_prod, P
 
 //////////////////////////// Instance //////////////////////////////
 
-#define NEW_PRERESTRICT_INSTANCE_WHEN_POINTER_IS_NOT_DECL
+#define NEW_RENDER_INSTANCE_INSIDE_EXPLICIT
 
 Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Policy policy) const
 { 
@@ -880,12 +880,9 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 					  !policy.force_initialisation && 
 					  ShouldSplitInstance(policy);
 	
-#ifdef NEW_PRERESTRICT_INSTANCE_WHEN_POINTER_IS_NOT_DECL
 	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
 		return Production::PREFIX;
-	else
-#endif
-	 if( initialiser && DynamicTreePtrCast<Compound>(initialiser) && !will_split ) 
+	else if( initialiser && DynamicTreePtrCast<Compound>(initialiser) && !will_split ) 
 		return Production::STMT_DECL; // won't get ; added
 	else
 		return Production::BARE_STMT_DECL; // will get ; added
@@ -894,25 +891,24 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 
 string Instance::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {        
+	(void)surround_prod;
+#ifndef NEW_RENDER_INSTANCE_INSIDE_EXPLICIT	
 	// TODO parser will need to give scope gnomons to actions after parsing EXPLICIT class, enum, compound etc
 	// so Actions can disambiguate.
 	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
 		throw RefuseDifficultSyntax(); 
+#endif
 		
 	// Don't render if the incoming pointer is not some kind of Declaration. This catches cases
 	// like Stuff terminus, where the parser won't have enough information to determine whether
 	// we have Local, Global, Field etc
 	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
 	{
-#ifdef NEW_PRERESTRICT_INSTANCE_WHEN_POINTER_IS_NOT_DECL
 		return "‽" + 
 		       VN::Render::RenderNodeTypeName(shared_from_this()) + 
 		       "(" +
 		       GetRenderImpl( renderer, policy ) + 
 		       ")";
-#else
-		throw RefuseDifficultSyntax(); 
-#endif
 	}
 		
 	return GetRenderImpl( renderer, policy );
