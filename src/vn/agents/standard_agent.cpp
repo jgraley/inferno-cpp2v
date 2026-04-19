@@ -943,8 +943,8 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
         else if( TreePtrInterface *my_singular = dynamic_cast<TreePtrInterface *>(my_items[i]) )
         {
             TRACE("Copying single element\n");
-            ASSERT( *my_singular )("Singular item %d of ", i)(*this)(" was nullptr (not overlaying)\n");            
             TreePtrInterface *dest_singular = dynamic_cast<TreePtrInterface *>(dest_items[i]);
+            ASSERT( *my_singular )("Item %d (singular) of ", i)(*this)(" (pointer is ")(dest_singular->MakeValueArchetype())(") was nullptr (not overlaying)\n");            
             *dest_singular = Mutator::MakePlaceholder();
             zone.AddTerminus( Mutator::CreateFreeSingular(dest, dest_singular) );            
 

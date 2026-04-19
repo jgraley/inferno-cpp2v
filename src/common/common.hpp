@@ -840,7 +840,12 @@ public:
 		wl.PushFront(w);
 	}
 	
-	shared_ptr<T> TryLockTop() const // fails if empty after expiry
+	shared_ptr<const T> TryLockTop() const // fails if empty after expiry
+	{
+		return wl.TryLockFront();
+	}
+	
+	shared_ptr<T> TryLockTop() // fails if empty after expiry
 	{
 		return wl.TryLockFront();
 	}

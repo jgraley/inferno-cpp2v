@@ -12,8 +12,8 @@ using namespace Steps;
  
 AutosToModule::AutosToModule()
 {
-    auto s_rec = MakePatternNode<DeclScope>();
-    auto r_rec = MakePatternNode<DeclScope>();
+    auto s_rec = MakePatternNode<Record>();
+    auto r_rec = MakePatternNode<Record>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
     auto vstmts = MakePatternNode<StarAgent, Statement>();
@@ -69,8 +69,8 @@ AutosToModule::AutosToModule()
 
 TempsAndStaticsToModule::TempsAndStaticsToModule()
 {
-    auto s_rec = MakePatternNode<DeclScope>();
-    auto r_rec = MakePatternNode<DeclScope>();
+    auto s_rec = MakePatternNode<Record>();
+    auto r_rec = MakePatternNode<Record>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
     auto vstmts = MakePatternNode<StarAgent, Statement>();
@@ -110,8 +110,8 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
 
 DeclsToModule::DeclsToModule()
 {
-    auto s_rec = MakePatternNode<DeclScope>();
-    auto r_rec = MakePatternNode<DeclScope>();
+    auto s_rec = MakePatternNode<Record>();
+    auto r_rec = MakePatternNode<Record>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
     auto vstmts = MakePatternNode<StarAgent, Statement>();

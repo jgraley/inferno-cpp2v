@@ -472,7 +472,7 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
     string s = "⯁";
     			
     s += RenderNodeTypeName(node);
-
+   
 	if( ReadArgs::use.count("c") )
 		s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";
     

@@ -301,7 +301,7 @@ open_declaration	: declaration
 
 declaration	: bare_declaration ';'								{ $$ = $1; }      
 			| instance_proto compound							{ $$ = vn->OnInstanceInit($1, @1, $2); }	
-			| qualifier_node ':' 					
+			| qualifier_node ':' 								// TODO find the FieldScopeGnomon and update the access
 
 bare_declaration: instance_proto
 				| instance_proto ANY_NODE_OP					{ $$ = vn->OnInstanceInit($1, @1, nullptr); } // note: ☆ has ; but no =
@@ -407,8 +407,8 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
                           
 access_spec		: qualifier_node 											
                           
-open_field_scope	: '{'													{ $$ = make_shared<VN::FieldScopeGnomon>(); 
-																			  vn->AddGnomon($$); }
+open_field_scope	: '{'		{ $$ = make_shared<VN::FieldScopeGnomon>(MakeTreeNode<CPPTree::Public>()); // TODO get the correct value based on CLASS_KEYWORD
+								  vn->AddGnomon($$); }
                                                   
 //////////////////////////////// STATEMENTS ////////////////////////////////////                 
 

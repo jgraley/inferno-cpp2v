@@ -785,14 +785,14 @@ string MembInitialisation::GetRender( VN::RendererInterface *renderer, Productio
 
 string MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Policy policy )
 {	
+    if( memb_inits.empty() )        
+		return "";
+
+    // Render the constructor initialisers
 	list<string> ls; 
 	for( auto &mi : memb_inits ) 
 		ls.push_back( "    " + renderer->DoRender( &mi, Production::COMMA_SEP, policy ) );		
-
-    // Render the constructor initialisers if there are any
-    if( ls.empty() )        
-		return "";
-
+		
     return " :\n" + Join(ls, ",\n");		    
 }
 
@@ -959,9 +959,11 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 		return Join( ls, " " );
 	}		
 
-	// Temporarily don't render member inits - I don't thing the grammar for them exists yet
-	if( auto mis = dynamic_cast<MembInitSeq *>(this) && policy.compound_uses_vn_separator ) 
-		throw RefusedByPolicy(); 	
+	// Temporarily don't render non-empty member inits - I don't thing the grammar for them exists yet
+	if( policy.compound_uses_vn_separator ) // doing VN render
+		if( auto mis = dynamic_cast<MembInitSeq *>(this) ) // Has a member init capability..
+	//		if( !mis->memb_inits.empty() ) // ...which isn't empty 
+				throw TemporarilyDisabled(); 	
 
 	Append( ls, RenderInitPre(renderer, sub_policy) );
 
@@ -1490,7 +1492,7 @@ Syntax::Production Typedef::GetMyProductionTerminal() const
 
 TreePtr<AccessSpec> Record::GetInitialAccess() const
 {
-	return nullptr;
+	return nullptr; 
 }
 
 

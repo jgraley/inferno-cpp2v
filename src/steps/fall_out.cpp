@@ -15,8 +15,8 @@ using namespace Steps;
 
 PlaceLabelsInArray::PlaceLabelsInArray()
 {
-    auto s_module = MakePatternNode<DeclScope>();
-    auto r_module = MakePatternNode<DeclScope>();
+    auto s_module = MakePatternNode<Record>();
+    auto r_module = MakePatternNode<Record>();
     auto gg = MakePatternNode<GreenGrassAgent, Type>();
     auto func = MakePatternNode<Field>();
     auto m_func = MakePatternNode<Field>();
@@ -70,7 +70,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_over = MakePatternNode<DeltaAgent, Statement>();
     auto l_not = MakePatternNode<NegationAgent, Statement>();
     auto m_stuff_func = MakePatternNode<StuffAgent, Scope>();
-    auto l_module = MakePatternNode<DeclScope>();
+    auto l_module = MakePatternNode<Record>();
     auto l_func = MakePatternNode<Field>();
     auto r_lmap = MakePatternNode<Global>();
     auto l_lmap = MakePatternNode<Global>();

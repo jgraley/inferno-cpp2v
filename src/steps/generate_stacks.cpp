@@ -433,10 +433,10 @@ GenerateStacks::GenerateStacks()
     auto s_gg = MakePatternNode<GreenGrassAgent, Statement>();
     auto r_index_init = MakePatternNode<Assign>();
     auto members = MakePatternNode<StarAgent, Declaration>();
-    auto s_module = MakePatternNode<DeclScope>();
-    auto r_module = MakePatternNode<DeclScope>();
-    auto ls_module = MakePatternNode<DeclScope>();
-    auto lr_module = MakePatternNode<DeclScope>();
+    auto s_module = MakePatternNode<Record>();
+    auto r_module = MakePatternNode<Record>();
+    auto ls_module = MakePatternNode<Record>();
+    auto lr_module = MakePatternNode<Record>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto l_bases = MakePatternNode<StarAgent, Base>();
     auto module_id = MakePatternNode<TypeIdentifier>();
@@ -537,8 +537,8 @@ GenerateStacks::GenerateStacks()
 
 MergeFunctions::MergeFunctions()
 {
-    auto s_module = MakePatternNode<DeclScope>();
-    auto r_module = MakePatternNode<DeclScope>();
+    auto s_module = MakePatternNode<Record>();
+    auto r_module = MakePatternNode<Record>();
     auto thread = MakePatternNode<Field>();
     auto s_func = MakePatternNode<Field>();
     auto thread_type = MakePatternNode<Thread>();

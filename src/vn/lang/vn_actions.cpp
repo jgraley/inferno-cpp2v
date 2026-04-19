@@ -139,6 +139,20 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 }
 
 
+static TreePtr<Node> DuplicateToStandardAgent(TreePtr<Node> node)
+{
+	// A bit of a cop-out - TODO
+	if( TreePtr<CPPTree::Public>::DynamicCast(node) )
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
+	else if( TreePtr<CPPTree::Private>::DynamicCast(node) )
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Private>>();
+	else if( TreePtr<CPPTree::Protected>::DynamicCast(node) )
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Protected>>();
+	else 
+		ASSERTFAIL();
+}
+
+
 TreePtr<Node> VNLangActions::OnExplicitNode( const AvailableNodeData::Block *block, any node_name_loc, Itemisation src_itemisation )
 {
 	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
@@ -677,8 +691,8 @@ BlockAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::B
 		gnomon = make_shared<LocalScopeGnomon>();
 	else if( dynamic_pointer_cast<CPPTree::Enum>(node) )
 		gnomon = make_shared<EnumeratorScopeGnomon>();
-	else if( dynamic_pointer_cast<CPPTree::Record>(node) )
-		gnomon = make_shared<FieldScopeGnomon>();
+	else if( auto record = dynamic_pointer_cast<CPPTree::Record>(node) )
+		gnomon = make_shared<FieldScopeGnomon>( record->GetInitialAccess() );
 	else if( dynamic_pointer_cast<CPPTree::CallableParams>(node) )
 		gnomon = make_shared<ParameterScopeGnomon>();
 	else
@@ -704,7 +718,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 			static_ = true;
 
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
-	shared_ptr<const ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
 	TreePtr<CPPTree::Instance> instance;
 	if( static_ )
 	{
@@ -745,7 +759,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 			"Cannot disambiguate declaration under " + usg->reason + "." + note );
 	else if( dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
-	else if( dynamic_cast<const FieldScopeGnomon *>(spg.get()) )
+	else if( auto fspg = dynamic_cast<FieldScopeGnomon *>(spg.get()) )
 	{ 
 		auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
 		for( const QualifierData &q : quals_pre )
@@ -754,20 +768,32 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 			{
 				if( auto vq = TreePtr<CPPTree::Virtuality>::DynamicCast(q.node) )
 					field->virt = vq;
+					
+				// TODO this is Java...
 				if( auto aq = TreePtr<CPPTree::AccessSpec>::DynamicCast(q.node) )
-					field->access = aq;
+					fspg->current_access = aq;
 			}
 		}
+		if( !field->virt ) // absence of a vituality means non-virtual, for wild use ⯁Virtuality⦅⦆
+			field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();		
+		if( !fspg->current_access )
+			throw YY::VNLangParser::syntax_error(
+					any_cast<YY::VNLangParser::location_type>(loc),
+					"The field scope requires access to be specified before any instance declarations" );
+		
+		// TODO re-instate	
+		//field->access = DuplicateToStandardAgent( fspg->current_access );
+			
+//#define REJECT_NULL_QUALS		
 #ifdef REJECT_NULL_QUALS
 		// can re-instate when #889 is done and we know we're in a replace-only context
+		list<string> ls;		
 		if( !field->access )
+			ls.push_back("access");
+		if( !ls.empty() )	
 			throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc),
-				"No access given "+Trace(quals_pre) );
-		if( !field->virt )
-			throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc),
-				"No virt given "+Trace(quals_pre) );
+					any_cast<YY::VNLangParser::location_type>(loc),
+					"Left NULL: "+Join(ls)+" quals_pre:"+Trace(quals_pre) );
 #endif				
 		instance = field; // TODO store current access in the gnomon after #890
 	}
@@ -933,6 +959,8 @@ TreePtr<Node> VNLangActions::OnQualifierNodeKeyword( string keyword )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Private>>();
 	else if( keyword=="protected" )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Protected>>();
+	else if( keyword=="virtual" )
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::Virtual>>();
 	else 
 		ASSERTFAIL();
 }
@@ -1146,11 +1174,13 @@ void VNLangActions::AddGnomon( shared_ptr<Gnomon> gnomon )
 {
 	ASSERT( gnomon );
 	
-	if( auto scope_gnomon = dynamic_pointer_cast<const ScopeGnomon>(gnomon) )
+	if( auto scope_gnomon = dynamic_pointer_cast<ScopeGnomon>(gnomon) )
 		declaration_scope_gnomons.Push( scope_gnomon ); // front is top
 	else 
 		ASSERT(false)("VNLangActions doesn't know about gnomon: ")(*gnomon);
 }
+
+
 
 
 static NodeEnum GetNodeEnum( list<string> typ, any loc )

@@ -73,10 +73,13 @@ public:
 class FieldScopeGnomon : public ScopeGnomon
 {
 public:	
+	FieldScopeGnomon( TreePtr<CPPTree::AccessSpec> initial_access ) :
+		current_access( initial_access ) {}
 	string GetMessageText() const final
 	{
 		return "fields scope";
 	}
+	TreePtr<CPPTree::AccessSpec> current_access;
 };
 
 class EnumeratorScopeGnomon : public ScopeGnomon
@@ -151,6 +154,7 @@ struct QualifierData : Traceable
 			case QualCat::NODE:
 				return Trace(node);
 		}
+		ASSERTFAIL();
 	}
 };
 
@@ -246,7 +250,7 @@ private:
 	unique_ptr<AvailableNodeData> node_names;	
 	
 	// store with weak_ptr => these will expire when the parser exists the scope
-	WeakStack<const ScopeGnomon> declaration_scope_gnomons;
+	WeakStack<ScopeGnomon> declaration_scope_gnomons;
 	
 public: // TODO provide a getter	
 	Command::List top_level_commands;	
