@@ -239,8 +239,8 @@ TreePtr<Node> VNLangActions::OnExplicitNode( const AvailableNodeData::Block *blo
 
 TreePtr<Node> VNLangActions::OnRestrict( const AvailableNodeData::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc )
 {
-	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	NodeEnum ne = leaf_block->node_enum.value();
+	auto node_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
+	NodeEnum ne = node_block->node_enum.value();
 	Agent *agent = Agent::TryAsAgent(target);
 	ASSERT( agent )("We are parsing a pattern so everything should be agents");
 		
@@ -663,6 +663,10 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 
 TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator )
 {	
+	string note = 
+		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
+		"\nparams list, pre-restriction to a declaration node type or explicit declaration node";			
+	
 	// TODO process the qualifiers in one loop at the top, with lots of checking. Check for:
 	// - wrong qualifier eg an access spec
 	// - duplication/conflict of qualifiers (<=1 in each category)
@@ -689,11 +693,32 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		// if static was specified.
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
 	}	
-	else if( !spg || dynamic_cast<const UnknownScopeGnomon *>(spg.get()) ) 
+	else if( auto psg = dynamic_cast<const PrerestrictScopeGnomon *>(spg.get()) ) 
 	{
-		// TODO check we're not in replace-only context #889
-		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>();  // wildcard
+		auto nb = dynamic_cast<const AvailableNodeData::NodeBlock *>(psg->block);
+		ASSERT( nb );
+		ASSERT( nb->node_enum );
+		NodeEnum ne = nb->node_enum.value();
+		TreePtr<Node> node = MakeStandardAgent(ne);
+		ASSERT( node );
+		instance = TreePtr<CPPTree::Instance>::DynamicCast(node);
+		if( !instance )
+			throw YY::VNLangParser::syntax_error(
+						any_cast<YY::VNLangParser::location_type>(loc),
+						"nearest prerestrict " + nb->GetTrace() + " cannot disambiguate an instance declaration" + note); // TODO			
 	}
+	else if( auto psg = dynamic_cast<const ExplicitScopeGnomon *>(spg.get()) ) 
+	{
+		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Instance>>(); // TODO 		
+	}
+	else if( !spg ) 
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			"Cannot disambiguate declaration because no surrounding scope." + note );
+	else if( dynamic_cast<const UnknownScopeGnomon *>(spg.get()) ) 
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			"Cannot disambiguate declaration under stuff node." + note );
 	else if( dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
 	else if( dynamic_cast<const FieldScopeGnomon *>(spg.get()) )

@@ -106,6 +106,30 @@ public:
 	}
 };
 
+class PrerestrictScopeGnomon : public ScopeGnomon
+{
+public:	
+	PrerestrictScopeGnomon( const AvailableNodeData::Block *block_ ) :
+		block(block_) {}
+	string GetMessageText() const final
+	{
+		return "prerestrict scope";
+	}
+	const AvailableNodeData::Block * const block;
+};
+
+class ExplicitScopeGnomon : public ScopeGnomon
+{
+public:	
+	ExplicitScopeGnomon( const AvailableNodeData::Block *block_ ) :
+		block(block_) {}
+	string GetMessageText() const final
+	{
+		return "explicit scope";
+	}
+	const AvailableNodeData::Block * const block;
+};
+
 enum class QualCat
 {
 	NODE, // See the node itself
@@ -199,7 +223,6 @@ public:
 	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
 	
 	void AddGnomon( shared_ptr<Gnomon> gnomon );
-	
 private: 
 	unique_ptr<AvailableNodeData> node_names;	
 	

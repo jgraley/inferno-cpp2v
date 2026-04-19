@@ -52,7 +52,10 @@ public:
 		string GetTrace() const 
 		{ 
 			string s = node_enum ? "node#"+Trace((int)(node_enum.value())) : "no-node"; 
-			return s;
+			auto m = AvailableNodeData().GetEnumToNameMap();
+			auto l = m.at(node_enum.value());
+
+			return s + " " + Join( l, "::" );
 		}
 
 		optional<NodeEnum> node_enum;
