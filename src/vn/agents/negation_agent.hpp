@@ -43,7 +43,7 @@ public:
 
     string GetDesignationNameHint() const final
     {
-		return "not"; 
+		return "not_" + negand->GetDesignationNameHint(); 
 	}
 };
   
