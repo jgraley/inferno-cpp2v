@@ -398,9 +398,9 @@ GenerateStacks::GenerateStacks()
     // Using a sub-embedded pattern of the variable-finding pattern, look for usages of 
     // the variable. Replace with an indexing operation into the array using
     // the stack index.    
-    auto s_fi = MakePatternNode<Instance>();
-    auto r_fi = MakePatternNode<Instance>();
-    auto l_fi = MakePatternNode<Instance>();
+    auto s_fi = MakePatternNode<Field>();
+    auto r_fi = MakePatternNode<Field>();
+    auto l_fi = MakePatternNode<Field>();
     auto sx_thread = MakePatternNode<Thread>();
     auto sx_method = MakePatternNode<Method>();
     auto sx_any = MakePatternNode<DisjunctionAgent, Type>();
@@ -489,6 +489,8 @@ GenerateStacks::GenerateStacks()
     lr_module->members = (l_members, l_fi, r_instance);
     l_fi->initialiser = stuff;
     l_fi->identifier = fi_id;
+    l_fi->virt = MakePatternNode<NonVirtual>(); // TODO can we generalise?
+    l_fi->access = MakePatternNode<Public>(); // TODO can we generalise?
     
     auto r_mid = MakePatternNode<EmbeddedCompareReplaceAgent, Scope>( r_module, ls_module, lr_module ); // stuff, stuff
 
@@ -502,10 +504,16 @@ GenerateStacks::GenerateStacks()
     over->overlay = r_fi;    
     s_fi->identifier = r_fi->identifier = fi_id;
     s_fi->type = r_fi->type = s_not;
+    s_fi->virt = MakePatternNode<NonVirtual>();
+    s_fi->access = MakePatternNode<Public>();
+
     s_not->negand = sx_any;
     sx_any->disjuncts = (sx_thread, sx_method); // Do not provide stacks for these because they do not recurse
     s_fi->initialiser = s_and;   
     r_fi->initialiser = temp;   
+    r_fi->virt = MakePatternNode<NonVirtual>();
+    r_fi->access = MakePatternNode<Public>();
+
     s_top_comp->members = ( top_decls );
     s_top_comp->statements = ( top_pre );
 

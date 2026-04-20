@@ -24,6 +24,11 @@
 #include <fstream>
 #include <cctype>
 
+//#define ONINSTANCE_APPLY_CURRENT_ACCESS
+//#define ONINSTANCE_REJECT_NULL_ACCESS		
+#define ONRECORD_FILL_DIRECT_INST
+#define ONRECORD_REPORT_AGENT
+
 //using namespace CPPTree; // TODO should not need
 using namespace VN;
 using namespace reflex;
@@ -148,6 +153,8 @@ static TreePtr<Node> DuplicateToStandardAgent(TreePtr<Node> node)
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Private>>();
 	else if( TreePtr<CPPTree::Protected>::DynamicCast(node) )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Protected>>();
+	else if( TreePtr<CPPTree::AccessSpec>::DynamicCast(node) ) // Wildcard case
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::AccessSpec>>();
 	else 
 		ASSERTFAIL();
 }
@@ -769,9 +776,10 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 				if( auto vq = TreePtr<CPPTree::Virtuality>::DynamicCast(q.node) )
 					field->virt = vq;
 					
-				// TODO this is Java...
 				if( auto aq = TreePtr<CPPTree::AccessSpec>::DynamicCast(q.node) )
-					fspg->current_access = aq;
+					throw YY::VNLangParser::syntax_error(
+						any_cast<YY::VNLangParser::location_type>(loc),
+						"Java-like access spec detected: " + string(DiagQuote(Traceable::TypeIdName( *aq )).c_str()) );
 			}
 		}
 		if( !field->virt ) // absence of a vituality means non-virtual, for wild use ⯁Virtuality⦅⦆
@@ -781,11 +789,13 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 					any_cast<YY::VNLangParser::location_type>(loc),
 					"The field scope requires access to be specified before any instance declarations" );
 		
-		// TODO re-instate	
-		//field->access = DuplicateToStandardAgent( fspg->current_access );
+#ifdef ONINSTANCE_APPLY_CURRENT_ACCESS
+		field->access = DuplicateToStandardAgent( fspg->current_access );
+#else
+		field->access = DuplicateToStandardAgent( MakeTreeNode<CPPTree::AccessSpec>() );
+#endif
 			
-//#define REJECT_NULL_QUALS		
-#ifdef REJECT_NULL_QUALS
+#ifdef ONINSTANCE_REJECT_NULL_ACCESS
 		// can re-instate when #889 is done and we know we're in a replace-only context
 		list<string> ls;		
 		if( !field->access )
@@ -863,7 +873,7 @@ TreePtr<Node> VNLangActions::OnAbDeclType( TreePtr<Node> type, TreePtr<Node> dec
 }
 
 
-TreePtr<Node> VNLangActions::OnInheritanceRecord( string keyword, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
+TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, string keyword, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
 {
 	TreePtr<CPPTree::InheritanceRecord> node;
 	TreePtr<CPPTree::AccessSpec> current_access;
@@ -891,6 +901,7 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( string keyword, TreePtr<Node> 
 	
 	for( TreePtr<Node> member : members )
 	{
+#ifdef ONRECORD_FILL_DIRECT_INST
 		if( auto new_access = TreePtr<CPPTree::AccessSpec>::DynamicCast(member) )
 		{
 			current_access = new_access;
@@ -908,12 +919,24 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( string keyword, TreePtr<Node> 
 		}
 		else if( Agent::TryAsAgent(member) )
 		{
-			node->members.insert( member );							
+			node->members.insert( member );		
+#ifdef ONRECORD_REPORT_AGENT			
+			// An agent could have a declaration underneath it, and this method of doing access specs won't work
+			static int i=0; 
+			if( i++ > 6 )
+				throw YY::VNLangParser::syntax_error(
+					any_cast<YY::VNLangParser::location_type>(loc),
+					"Agent in record: " + string(DiagQuote(Traceable::TypeIdName( *member )).c_str()) );					
+#endif					
 		}
 		else
 		{
+			
 			ASSERT(false)(member); // TODO could now be user error eg "const" qualifier used as an access spec.
 		}
+#else
+		node->members.insert( member );		
+#endif		
 	}
 	
 	return node;

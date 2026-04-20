@@ -156,7 +156,7 @@ stmt_high
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
 %type <TreePtr<Node>> 				unified_boot unified_prefix 
 %type <TreePtr<Node>> 				stmt_boot open_statement
-%type <TreePtr<Node>> 				bare_statement statement_nc statement stmt_decl         
+%type <TreePtr<Node>> 				bare_statement statement_nc statement         
 %type <TreePtr<Node>> 				open_declaration decl_boot decl_disjunction decl_conjunction declaration bare_declaration  
 %type <TreePtr<Node>> 				assign_init
 %type <TreePtr<Node>> 				decl_prefix_definite decl_prefix decl_postfix decl_primary decl_vn_prim
@@ -181,7 +181,8 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		open_global_scope open_local_scope open_field_scope open_param_scope 
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
 %type <VN::BlockAndGnomon>			explicit_op_named type_explicit_op_named decl_explicit_op_named qual_explicit_op_named
-%type <list<TreePtr<Node>>>			stmt_decls 
+%type <TreePtr<Node>> 				stmt_decl member
+%type <list<TreePtr<Node>>>			stmt_decls members
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases 
 %type <VN::QualifierData> 			qualifier qualifier_nw
@@ -301,7 +302,6 @@ open_declaration	: declaration
 
 declaration	: bare_declaration ';'								{ $$ = $1; }      
 			| instance_proto compound							{ $$ = vn->OnInstanceInit($1, @1, $2); }	
-			| qualifier_node ':' 								// TODO find the FieldScopeGnomon and update the access
 
 bare_declaration: instance_proto
 				| instance_proto ANY_NODE_OP					{ $$ = vn->OnInstanceInit($1, @1, nullptr); } // note: ☆ has ; but no =
@@ -394,8 +394,8 @@ parameter   : decl_boot
                          
 //////////////////////////////// CLASSES ////////////////////////////////////                                  
                          
-class_spec		: CLASS_KEYWORD type_specified open_field_scope stmt_decls '}'			{ $$ = vn->OnInheritanceRecord( $1.as_ascii, $2, {}, $4 ); }
-				| CLASS_KEYWORD type_specified ':' bases open_field_scope stmt_decls '}'	{ $$ = vn->OnInheritanceRecord( $1.as_ascii, $2, $4, $6 ); }
+class_spec		: CLASS_KEYWORD type_specified open_field_scope members '}'			{ $$ = vn->OnInheritanceRecord( @$, $1.as_ascii, $2, {}, $4 ); }
+				| CLASS_KEYWORD type_specified ':' bases open_field_scope members '}'	{ $$ = vn->OnInheritanceRecord( @$, $1.as_ascii, $2, $4, $6 ); }
                                                   
 bases			: base_spec                                                 { $$.push_back($1); } 
 				| bases ',' base_spec										{ $$ = $1; $$.push_back($3); } 
@@ -404,12 +404,20 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 				| vn_wildcard												{ $$ = $1; }
 				| DESIGNATED_NORMAL       				  					{ $$ = $1.as_designated; } // To match a designated Star
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
-                          
-access_spec		: qualifier_node 											
-                          
-open_field_scope	: '{'		{ $$ = make_shared<VN::FieldScopeGnomon>(MakeTreeNode<CPPTree::Public>()); // TODO get the correct value based on CLASS_KEYWORD
+                                                                                                       
+open_field_scope: '{'		{ $$ = make_shared<VN::FieldScopeGnomon>(MakeTreeNode<CPPTree::Public>()); // TODO get the correct value based on CLASS_KEYWORD
 								  vn->AddGnomon($$); }
                                                   
+members			: member														{ $$.push_back($1); }
+				| members member 												{ $$ = $1; $$.push_back($2); }
+				| access_spec ':' 												{ $$.push_back($1); } // TODO don't push the access
+				| members access_spec ':' 										{ $$ = $1; $$.push_back($2); } // TODO don't push the access
+
+member			: declaration
+				| statement // to get wildcards etc TODO tighten this up?
+                          
+access_spec		: qualifier_node  											                                                  
+
 //////////////////////////////// STATEMENTS ////////////////////////////////////                 
 
 stmt_boot			: stmt_disjunction
