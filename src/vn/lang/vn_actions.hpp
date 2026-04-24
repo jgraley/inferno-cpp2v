@@ -247,6 +247,7 @@ public:
 	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
 	
 	void AddGnomon( shared_ptr<Gnomon> gnomon );
+	
 private: 
 	unique_ptr<AvailableNodeData> node_names;	
 	

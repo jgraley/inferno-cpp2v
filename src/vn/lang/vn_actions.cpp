@@ -23,6 +23,7 @@
 #include <iostream>
 #include <fstream>
 #include <cctype>
+#include <typeinfo>
 
 //#define ONINSTANCE_APPLY_CURRENT_ACCESS
 //#define ONINSTANCE_REJECT_NULL_ACCESS		
@@ -140,6 +141,26 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 	
 	// By design we should have a case for every value of the node enum
 	ASSERT(false)("Invalid value for node enum value %d", ne); 
+	ASSERTFAIL();
+}
+
+
+static TreePtr<Node> MakeStandardAgentFromTypeID(const type_info &ti)
+{
+#define NODE(NS, NAME) \
+	if( ti == typeid(NS::NAME) ) \
+		return MakeTreeNode<StandardAgentWrapper<NS::NAME>>(); \
+	else
+#include "tree/node_names.inc"			
+#define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
+#define POSTFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
+#define INFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
+#include "tree/operator_data.inc"
+#undef NODE
+		
+		// By design we should have a case for every value of the node enum
+		ASSERT(false)("Could not find node for type info: ")(Traceable::CPPFilt(ti.name()));  // be the last else clause
+		
 	ASSERTFAIL();
 }
 
@@ -683,7 +704,11 @@ BlockAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::B
 	else if( dynamic_pointer_cast<CPPTree::Enum>(node) )
 		gnomon = make_shared<EnumeratorScopeGnomon>();
 	else if( auto record = dynamic_pointer_cast<CPPTree::Record>(node) )
-		gnomon = make_shared<FieldScopeGnomon>( record->GetInitialAccess() );
+	{
+		TreePtr<Node> init_access = record->GetInitialAccess();
+		ASSERT( init_access ); // Records must always specify an initial access
+		gnomon = make_shared<FieldScopeGnomon>( MakeStandardAgentFromTypeID( typeid(*init_access) ) );
+	}
 	else if( dynamic_pointer_cast<CPPTree::CallableParams>(node) )
 		gnomon = make_shared<ParameterScopeGnomon>();
 	else
@@ -700,7 +725,10 @@ void VNLangActions::OnAccessSpec( any, TreePtr<Node> access )
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
 	if( auto fspg = dynamic_cast<FieldScopeGnomon *>(spg.get()) ) 	
+	{
+		FTRACE("Access spec for gnomon ")(fspg)(" becomes ")(access)("\n");
 		fspg->current_access = access;
+	}
 	else
 		return; // Let the declaration produce an error message
 }
@@ -784,7 +812,8 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 			throw YY::VNLangParser::syntax_error(
 					any_cast<YY::VNLangParser::location_type>(loc),
 					"The field scope requires access to be specified before any instance declarations" );
-		
+
+		FTRACE("Field ")(field)(" seeing gnomon ")(fspg)(" which is ")(fspg->current_access)("\n");
 #ifdef ONINSTANCE_APPLY_CURRENT_ACCESS
 		// Don't duplicate the subtree - we want coupling behaviour
 		field->access = fspg->current_access;
@@ -906,12 +935,14 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, string keyword, TreeP
 		else if( auto o = TreePtr<CPPTree::Instance>::DynamicCast(member) )
 		{
 			auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
+			ASSERT(field);
 			field->type = o->type;
 			field->identifier = o->identifier;
 			field->initialiser = o->initialiser;
 			field->constancy = o->constancy;
+			FTRACE("Field ")(field)(" gets cur_access which is ")(cur_access)("\n");
+			ASSERT(cur_access);
 			field->access = cur_access; // Don't duplicate the subtree - we want coupling behaviour
-			ASSERT(field->access);
 			node->members.insert( field );				
 		}
 		else if( Agent::TryAsAgent(member) )
@@ -1216,7 +1247,7 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 }
 
 
-//////////////////////////// Virtuality //////////////////////////////
+//////////////////////////// Virtuality ////////////////////////////// TODO don't put these here, use MakeStandardAgentFromTypeID
 
 TreePtr<Node> CPPTree::Virtuality::GetDefaultNode(TreePtr<Node>) const
 {

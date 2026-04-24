@@ -1492,7 +1492,7 @@ Syntax::Production Typedef::GetMyProductionTerminal() const
 
 TreePtr<AccessSpec> Record::GetInitialAccess() const
 {
-	return nullptr; 
+	return MakeTreeNode<Public>();
 }
 
 
