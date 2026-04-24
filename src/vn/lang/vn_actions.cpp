@@ -25,10 +25,7 @@
 #include <cctype>
 #include <typeinfo>
 
-//#define ONINSTANCE_APPLY_CURRENT_ACCESS
 //#define ONINSTANCE_REJECT_NULL_ACCESS		
-#define ONRECORD_FILL_DIRECT_INST
-#define ONRECORD_REPORT_AGENT
 
 //using namespace CPPTree; // TODO should not need
 using namespace VN;
@@ -808,29 +805,15 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		}
 		if( !field->virt ) // absence of a vituality means non-virtual, for wild use ⯁Virtuality⦅⦆
 			field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();		
-		if( !fspg->current_access ) // TODO surely an internal error, since there should be an initial access
-			throw YY::VNLangParser::syntax_error(
-					any_cast<YY::VNLangParser::location_type>(loc),
-					"The field scope requires access to be specified before any instance declarations" );
-
-		FTRACE("Field ")(field)(" seeing gnomon ")(fspg)(" which is ")(fspg->current_access)("\n");
-#ifdef ONINSTANCE_APPLY_CURRENT_ACCESS
-		// Don't duplicate the subtree - we want coupling behaviour
-		field->access = fspg->current_access;
-#else
-		field->access = MakeTreeNode<StandardAgentWrapper<CPPTree::AccessSpec>>();
-#endif
 			
-#ifdef ONINSTANCE_REJECT_NULL_ACCESS
-		// can re-instate when #889 is done and we know we're in a replace-only context
-		list<string> ls;		
-		if( !field->access )
-			ls.push_back("access");
-		if( !ls.empty() )	
-			throw YY::VNLangParser::syntax_error(
-					any_cast<YY::VNLangParser::location_type>(loc),
-					"Left NULL: "+Join(ls)+" quals_pre:"+Trace(quals_pre) );
-#endif				
+		ASSERT( fspg->current_access );
+		FTRACE("Field ")(field)(" seeing gnomon ")(fspg)(" which is ")(fspg->current_access)("\n");
+		static int i = 0;
+		if( i++ < 0 )
+			field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour
+		else
+			field->access = MakeTreeNode<StandardAgentWrapper<CPPTree::AccessSpec>>();
+			
 		instance = field; // TODO store current access in the gnomon after #890
 	}
 	else if( dynamic_cast<const EnumeratorScopeGnomon *>(spg.get()) ) 
@@ -916,13 +899,7 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, string keyword, TreeP
 		node->bases.insert( base );				
 	
 	for( TreePtr<Node> member : members )
-	{
-#ifdef ONRECORD_FILL_DIRECT_INST
-		node->members.insert( member );						
-#else
 		node->members.insert( member );		
-#endif		
-	}
 	
 	return node;
 }
