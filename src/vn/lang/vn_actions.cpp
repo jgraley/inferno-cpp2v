@@ -943,6 +943,7 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, string keyword, TreeP
 			FTRACE("Field ")(field)(" gets cur_access which is ")(cur_access)("\n");
 			ASSERT(cur_access);
 			field->access = cur_access; // Don't duplicate the subtree - we want coupling behaviour
+			ASSERT(false);
 			node->members.insert( field );				
 		}
 		else if( Agent::TryAsAgent(member) )
