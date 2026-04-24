@@ -902,22 +902,12 @@ TreePtr<Node> VNLangActions::OnAbDeclType( TreePtr<Node> type, TreePtr<Node> dec
 TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, string keyword, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
 {
 	TreePtr<CPPTree::InheritanceRecord> node;
-	TreePtr<CPPTree::AccessSpec> cur_access;
 	if( keyword=="class" )
-	{
 		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Class>>();
-		cur_access = MakeTreeNode<StandardAgentWrapper<CPPTree::Private>>();
-	}
 	else if( keyword=="struct" )
-	{
 		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Struct>>();
-		cur_access = MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
-	}
 	else if( keyword=="union" )
-	{
 		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Union>>();
-		cur_access = MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
-	}
 	else
 		ASSERTFAIL()
 	
@@ -928,41 +918,8 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, string keyword, TreeP
 	for( TreePtr<Node> member : members )
 	{
 #ifdef ONRECORD_FILL_DIRECT_INST
-		if( auto new_access = TreePtr<CPPTree::AccessSpec>::DynamicCast(member) )
-		{
-			cur_access = new_access;
-		}
-		else if( auto o = TreePtr<CPPTree::Instance>::DynamicCast(member) )
-		{
-			auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
-			ASSERT(field);
-			field->type = o->type;
-			field->identifier = o->identifier;
-			field->initialiser = o->initialiser;
-			field->constancy = o->constancy;
-			FTRACE("Field ")(field)(" gets cur_access which is ")(cur_access)("\n");
-			ASSERT(cur_access);
-			field->access = cur_access; // Don't duplicate the subtree - we want coupling behaviour
-			ASSERT(false);
-			node->members.insert( field );				
-		}
-		else if( Agent::TryAsAgent(member) )
-		{
-			node->members.insert( member );		
-#ifdef ONRECORD_REPORT_AGENT			
-			// An agent could have a declaration underneath it, and this method of doing access specs won't work
-			static int i=0; 
-			if( i++ > 6 )
-				throw YY::VNLangParser::syntax_error(
-					any_cast<YY::VNLangParser::location_type>(loc),
-					"Agent in record: " + string(DiagQuote(Traceable::TypeIdName( *member )).c_str()) );					
-#endif					
-		}
-		else
-		{
-			
-			ASSERT(false)(member); // TODO could now be user error eg "const" qualifier used as an access spec.
-		}
+		if( !TreePtr<CPPTree::AccessSpec>::DynamicCast(member) )
+			node->members.insert( member );						
 #else
 		node->members.insert( member );		
 #endif		
