@@ -144,22 +144,6 @@ static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
 }
 
 
-static TreePtr<Node> DuplicateToStandardAgent(TreePtr<Node> node)
-{
-	// A bit of a cop-out - TODO
-	if( TreePtr<CPPTree::Public>::DynamicCast(node) )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
-	else if( TreePtr<CPPTree::Private>::DynamicCast(node) )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Private>>();
-	else if( TreePtr<CPPTree::Protected>::DynamicCast(node) )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Protected>>();
-	else if( TreePtr<CPPTree::AccessSpec>::DynamicCast(node) ) // Wildcard case
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::AccessSpec>>();
-	else 
-		ASSERTFAIL();
-}
-
-
 TreePtr<Node> VNLangActions::OnExplicitNode( const AvailableNodeData::Block *block, any node_name_loc, Itemisation src_itemisation )
 {
 	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
@@ -710,6 +694,18 @@ BlockAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::B
 	return { block, gnomon };
 }
 
+
+void VNLangActions::OnAccessSpec( any, TreePtr<Node> access )
+{
+	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
+	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	if( auto fspg = dynamic_cast<FieldScopeGnomon *>(spg.get()) ) 	
+		fspg->current_access = access;
+	else
+		return; // Let the declaration produce an error message
+}
+
+
 TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator )
 {	
 	string note = 
@@ -742,6 +738,14 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		// if static was specified.
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
 	}	
+	else if( !spg ) 
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			"Cannot disambiguate declaration because no surrounding scope." + note );
+	else if( auto usg = dynamic_cast<const UnknownScopeGnomon *>(spg.get()) ) 
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			"Cannot disambiguate declaration under " + usg->reason + "." + note );
 	else if( auto psg = dynamic_cast<const PrerestrictScopeGnomon *>(spg.get()) ) 
 	{
 		auto nb = dynamic_cast<const AvailableNodeData::NodeBlock *>(psg->block);
@@ -754,16 +758,8 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		if( !instance )
 			throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(loc),
-						"nearest prerestrict " + nb->What() + " cannot disambiguate an instance declaration" + note); // TODO			
+						"nearest prerestrict " + nb->What() + " cannot disambiguate an instance declaration" + note); // TODO it could if the pre-restriction was to eg a Record etc			
 	}
-	else if( !spg ) 
-		throw YY::VNLangParser::syntax_error(
-			any_cast<YY::VNLangParser::location_type>(loc),
-			"Cannot disambiguate declaration because no surrounding scope." + note );
-	else if( auto usg = dynamic_cast<const UnknownScopeGnomon *>(spg.get()) ) 
-		throw YY::VNLangParser::syntax_error(
-			any_cast<YY::VNLangParser::location_type>(loc),
-			"Cannot disambiguate declaration under " + usg->reason + "." + note );
 	else if( dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
 	else if( auto fspg = dynamic_cast<FieldScopeGnomon *>(spg.get()) )
@@ -784,15 +780,16 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		}
 		if( !field->virt ) // absence of a vituality means non-virtual, for wild use ⯁Virtuality⦅⦆
 			field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();		
-		if( !fspg->current_access )
+		if( !fspg->current_access ) // TODO surely an internal error, since there should be an initial access
 			throw YY::VNLangParser::syntax_error(
 					any_cast<YY::VNLangParser::location_type>(loc),
 					"The field scope requires access to be specified before any instance declarations" );
 		
 #ifdef ONINSTANCE_APPLY_CURRENT_ACCESS
-		field->access = DuplicateToStandardAgent( fspg->current_access );
+		// Don't duplicate the subtree - we want coupling behaviour
+		field->access = fspg->current_access;
 #else
-		field->access = DuplicateToStandardAgent( MakeTreeNode<CPPTree::AccessSpec>() );
+		field->access = MakeTreeNode<StandardAgentWrapper<CPPTree::AccessSpec>>();
 #endif
 			
 #ifdef ONINSTANCE_REJECT_NULL_ACCESS
@@ -876,21 +873,21 @@ TreePtr<Node> VNLangActions::OnAbDeclType( TreePtr<Node> type, TreePtr<Node> dec
 TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, string keyword, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
 {
 	TreePtr<CPPTree::InheritanceRecord> node;
-	TreePtr<CPPTree::AccessSpec> current_access;
+	TreePtr<CPPTree::AccessSpec> cur_access;
 	if( keyword=="class" )
 	{
 		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Class>>();
-		current_access = MakeTreeNode<StandardAgentWrapper<CPPTree::Private>>();
+		cur_access = MakeTreeNode<StandardAgentWrapper<CPPTree::Private>>();
 	}
 	else if( keyword=="struct" )
 	{
 		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Struct>>();
-		current_access = MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
+		cur_access = MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
 	}
 	else if( keyword=="union" )
 	{
 		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Union>>();
-		current_access = MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
+		cur_access = MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
 	}
 	else
 		ASSERTFAIL()
@@ -904,7 +901,7 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, string keyword, TreeP
 #ifdef ONRECORD_FILL_DIRECT_INST
 		if( auto new_access = TreePtr<CPPTree::AccessSpec>::DynamicCast(member) )
 		{
-			current_access = new_access;
+			cur_access = new_access;
 		}
 		else if( auto o = TreePtr<CPPTree::Instance>::DynamicCast(member) )
 		{
@@ -913,7 +910,7 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, string keyword, TreeP
 			field->identifier = o->identifier;
 			field->initialiser = o->initialiser;
 			field->constancy = o->constancy;
-			field->access = dynamic_pointer_cast<StandardAgentWrapper<Node>>( current_access->Duplicate(current_access) );
+			field->access = cur_access; // Don't duplicate the subtree - we want coupling behaviour
 			ASSERT(field->access);
 			node->members.insert( field );				
 		}
