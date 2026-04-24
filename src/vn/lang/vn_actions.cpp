@@ -918,8 +918,7 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, string keyword, TreeP
 	for( TreePtr<Node> member : members )
 	{
 #ifdef ONRECORD_FILL_DIRECT_INST
-		if( !TreePtr<CPPTree::AccessSpec>::DynamicCast(member) )
-			node->members.insert( member );						
+		node->members.insert( member );						
 #else
 		node->members.insert( member );		
 #endif		

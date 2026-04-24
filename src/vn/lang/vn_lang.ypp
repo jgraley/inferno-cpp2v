@@ -417,13 +417,15 @@ open_field_scope: '{'		{ $$ = make_shared<VN::FieldScopeGnomon>(MakeTreeNode<CPP
                                                   
 members			: member														{ $$.push_back($1); }
 				| members member 												{ $$ = $1; $$.push_back($2); }
-				| access_spec ':' member										{ $$.push_back($1); $$.push_back($3); } // TODO don't push the access
-				| members access_spec ':' member								{ $$ = $1; $$.push_back($2); $$.push_back($4); } // TODO don't push the access
+				| access_spec ':' member										{ $$.push_back($3); } 
+				| members access_spec ':' member								{ $$ = $1; $$.push_back($4); }
 
 member			: declaration
 				| statement // to get wildcards etc TODO tighten this up?
-                          
-access_spec		: qualifier_node  											    { vn->OnAccessSpec(@1, $1); $$ = $1; }                                              
+
+// TODO move into c_declaration and deal with the extra calls from other productions
+// c_declaration is declaration syntac without eg decl_prefix                          
+access_spec		: qualifier_node  											    { vn->OnAccessSpec(@1, $1); $$ = $1; } 
 
 //////////////////////////////// STATEMENTS ////////////////////////////////////                 
 
