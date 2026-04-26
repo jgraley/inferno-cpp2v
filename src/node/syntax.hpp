@@ -112,7 +112,8 @@ public:
 			resolve_identifier_scope(true),
 			use_vn_xstructor_symbol(true),
 			disambiguate_type_id(true),
-			refuse_invisibles(true) {}
+			refuse_invisibles(true),
+			cur_access(nullptr) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
 		bool split_bulky_statics;
@@ -132,6 +133,7 @@ public:
 		bool disambiguate_type_id;
 		bool refuse_invisibles;
 		shared_ptr<Syntax> pointer_archetype;
+		shared_ptr<Syntax> *cur_access;
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:

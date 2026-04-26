@@ -6,6 +6,7 @@
 #include "typeof.hpp"
 
 #define EXPLICIT_BASE 0
+#define RENDER_ACCESS_FROM_RECORD
 
 using namespace CPPTree;
 
@@ -1032,6 +1033,8 @@ bool Global::ShouldSplitInstance( Policy policy ) const
 
 list<string> Field::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy) const 
 { 
+	if( policy.cur_access ) // We could be reached by a Stuff node, and never get a cur_access.
+		*policy.cur_access = access;
 	return { renderer->DoRender(&virt, Production::SPACE_SEP_STMT_DECL, policy) };
 }
 
@@ -1537,34 +1540,45 @@ string Record::RenderExtras(VN::RendererInterface *, Production, Policy)
 string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 {
 	string s;
+    Sequence<Declaration> sorted = SortDecls( members, true );
 
 	// Members
 	s += "{\n";
 
-	TreePtr<AccessSpec> a = GetInitialAccess();
-	ASSERT( a );
-	type_index current_access_ti( typeid(*a) );
-
-    policy.split_bulky_statics = true; // Our scope is a record body
-	policy.permit_static_keyword = true; // In a record body, static means global
-	
-    Sequence<Declaration> sorted = SortDecls( members, true );
+	shared_ptr<Syntax> cur_access = GetInitialAccess();
+	shared_ptr<Syntax> prev_access = GetInitialAccess();
+	ASSERT( cur_access );		
+	Policy member_policy = policy;
+	member_policy.cur_access = &cur_access;
+    member_policy.split_bulky_statics = true; // Our scope is a record body
+	member_policy.permit_static_keyword = true; // In a record body, static means global
 	
     // Emit preprocs and an incomplete for each record 
     for( auto &d : sorted )
     {       
+		// Do this before checking access spec, so that the cur_access can be updated
+		string rendered_member = renderer->DoRender( &d, Production::STMT_DECL, member_policy );	
+			
 		// Decide access spec for this declaration (explicit if instance, 
 		// otherwise force to Public because decls don't have an access spec). TODO fix this, #877
-		TreePtr<AccessSpec> this_access = MakeTreeNode<Public>();
+		shared_ptr<Node> this_access;
+		
+#ifdef THIS_ACCESS_FROM_SCOPE
+		this_access = cur_access;
+#else		
+		this_access = MakeTreeNode<Public>();
 		if( TreePtr<Field> f = DynamicTreePtrCast<Field>(d) )
 			this_access = f->access;
+#endif			
+			
+#ifdef RENDER_ACCESS_FROM_RECORD
+		type_index prev_access_ti( typeid(*prev_access) );
 		type_index this_access_ti( typeid(*this_access) );
-
-		if( this_access_ti != current_access_ti )
-			s += renderer->DoRender( &this_access, Production::BARE_STMT_DECL, policy ) + ":";
-		current_access_ti = this_access_ti;
-
-        s += renderer->DoRender( &d, Production::STMT_DECL, policy );
+		if( prev_access_ti != this_access_ti )
+			s += renderer->DoRenderPreserve( TreePtr<Node>(dynamic_pointer_cast<Node>(this_access)), Production::BARE_STMT_DECL, member_policy ) + ":";
+		prev_access = this_access;
+#endif
+        s += rendered_member;
     }
    
    	s += "}";
