@@ -26,7 +26,6 @@ private:
                                       bool constant ) final;
 	string DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy, Syntax::Refusal &ex );
     string RenderMacroStatement( TreePtr<CPPTree::MacroStatement> ms, Syntax::Production surround_prod, Syntax::Policy policy );
-    string RenderStatementExpression( TreePtr<CPPTree::StatementExpression> ce, Syntax::Production surround_prod, Syntax::Policy policy );
     string RenderRecordInitialiser( TreePtr<CPPTree::RecordInitialiser> make_rec, Syntax::Production surround_prod, Syntax::Policy policy );
 
 	string RenderMacroField( TreePtr<CPPTree::MacroField> md, Syntax::Production surround_prod, Syntax::Policy policy );

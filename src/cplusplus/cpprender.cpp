@@ -181,8 +181,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         return RenderMacroField( macro_decl, surround_prod, policy );
     else if( auto macro_stmt = TreePtr<MacroStatement>::DynamicCast(node) )
         return RenderMacroStatement( macro_stmt, surround_prod, policy );
-    else if( auto ce = TreePtr<StatementExpression>::DynamicCast(node) ) // Expression is a kind of Statement
-        return RenderStatementExpression( ce, surround_prod, policy );
     else if( auto si = TreePtr<SystemInclude>::DynamicCast(node) )
         return "#include <" + si->filename->GetString() + ">";
     else if( auto si = TreePtr<LocalInclude>::DynamicCast(node) )
@@ -213,22 +211,6 @@ string CppRender::RenderMacroStatement( TreePtr<MacroStatement> ms, Syntax::Prod
 DEFAULT_CATCH_CLAUSE
 
 
-string CppRender::RenderStatementExpression( TreePtr<StatementExpression> ce, Syntax::Production surround_prod, Syntax::Policy policy ) try
-{
-    (void)surround_prod;
-	INDENT("S");
-    
- 	policy.permit_static_keyword = true; // In a compound, static means global
-	policy.cur_access = nullptr; // No access specs here
-      
-    string s = "({ ";
-	for( TreePtr<Declaration> m : ce->members )    
-		s += DoRender( &m, Syntax::Production::STMT_DECL, policy );       
-	for( TreePtr<Statement> st : ce->statements )    
-		s += DoRender( &st, Syntax::Production::STMT_DECL_LOW, policy );    
-	return s + " })";
-}
-DEFAULT_CATCH_CLAUSE
 
 
 string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, Syntax::Production surround_prod, Syntax::Policy policy ) try

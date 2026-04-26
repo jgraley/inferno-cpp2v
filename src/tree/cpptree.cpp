@@ -2003,17 +2003,25 @@ Syntax::Production StatementExpression::GetMyProductionTerminal() const
 string StatementExpression::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
 {
 	INDENT("S");
-    // confusing: when DISBALED the code below will do explicit render, 
-    // OTHERWISE the throw will get us to CPPRender's syntactic render
-    // The confusion should stop when render is pulled in here
-    if( !policy.refuse_statement_expression )
-		throw TemporarilyDisabled(); 
-		
-	// If we can't render syntactially, call RenderNodeExplicit() directly so it
-	// gets the updated policy.
+
+    if( policy.refuse_statement_expression )
+	{
+		// If we can't render syntactially, call RenderNodeExplicit() directly so it
+		// gets the updated policy.
+		policy.permit_static_keyword = true; // In a compound, static means global
+		policy.cur_access = nullptr; // No access specs here
+		return renderer->RenderNodeExplicit(shared_from_this(), production, policy);
+	}
+	    
  	policy.permit_static_keyword = true; // In a compound, static means global
 	policy.cur_access = nullptr; // No access specs here
-	return renderer->RenderNodeExplicit(shared_from_this(), production, policy);
+      
+    string s = "({ ";
+	for( TreePtr<Declaration> m : members )    
+		s += renderer->DoRender( &m, Syntax::Production::STMT_DECL, policy );       
+	for( TreePtr<Statement> st : statements )    
+		s += renderer->DoRender( &st, Syntax::Production::STMT_DECL_LOW, policy );    
+	return s + " })";
 }
 
 //////////////////////////// Return ///////////////////////////////
