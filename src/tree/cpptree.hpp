@@ -1556,6 +1556,7 @@ struct MacroField : Declaration,
     TreePtr<PreprocessorIdentifier> identifier;
     Sequence<Node> arguments; ///< Args taken in order, macro so can be anything
     TreePtr<Initialiser> initialiser;
+    // TODO access, also see #877
     
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;        
 };

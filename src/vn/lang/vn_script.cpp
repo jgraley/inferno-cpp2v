@@ -93,9 +93,13 @@ void VNScript::ProcessVNPath( string spath )
 		for( string s : ss )
 			ProcessVNPath( s );
 	}
-	else
+	else if( filesystem::is_regular_file(path) )
 	{
 		ProcessVNFile(spath);
+	}
+	else
+	{
+		ASSERT(false)("Cannot open path: ")(spath);
 	}
 }
 

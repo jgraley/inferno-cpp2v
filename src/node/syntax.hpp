@@ -113,6 +113,7 @@ public:
 			use_vn_xstructor_symbol(true),
 			disambiguate_type_id(true),
 			refuse_invisibles(true),
+			missing_access_to_public(true),
 			cur_access(nullptr) {}
 		bool force_initialisation;
 		bool force_incomplete_records;
@@ -132,6 +133,7 @@ public:
 		bool use_vn_xstructor_symbol;
 		bool disambiguate_type_id;
 		bool refuse_invisibles;
+		bool missing_access_to_public; // See #877
 		shared_ptr<Syntax> pointer_archetype;
 		shared_ptr<Syntax> *cur_access;
 	};

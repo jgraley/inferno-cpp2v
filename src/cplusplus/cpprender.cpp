@@ -261,6 +261,10 @@ DEFAULT_CATCH_CLAUSE
 string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	(void)surround_prod;	
+
+	if( policy.missing_access_to_public && policy.cur_access )
+		*policy.cur_access = MakeTreeNode<Public>(); // see #877
+
     list<string> ls;
 
     // ---- Proto ----
@@ -282,6 +286,10 @@ string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production s
 string CppRender::RenderTypedef( TreePtr<Typedef> t, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
 	(void)surround_prod;
+
+	if( policy.missing_access_to_public && policy.cur_access )
+		*policy.cur_access = MakeTreeNode<Public>(); // see #877
+
 	Syntax::Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
     Syntax::Production starting_declarator_prod = Syntax::Production::PRIMARY_EXPR;

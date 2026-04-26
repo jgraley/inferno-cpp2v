@@ -161,6 +161,11 @@ Syntax::Policy Render::GetDefaultPolicy()
 	
 	policy.full_render_code_unit = false;
 	
+	// #877 we don't need to generate public: for nodes without an access when
+	// rendering to VN, because the parser will ignore the current_access for
+	// these nodes anyway - there is nothting it can do with the access value.
+	policy.missing_access_to_public = false;
+	
 	return policy;
 }
 

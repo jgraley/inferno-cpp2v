@@ -1507,6 +1507,9 @@ Syntax::Production Record::GetMyProductionTerminal() const
 
 string Record::GetRender( VN::RendererInterface *renderer, Production, Policy policy ) 
 {
+	if( policy.missing_access_to_public && policy.cur_access )
+		*policy.cur_access = MakeTreeNode<Public>(); // see #877
+	
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
 		
@@ -1561,15 +1564,8 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 			
 		// Decide access spec for this declaration (explicit if instance, 
 		// otherwise force to Public because decls don't have an access spec). TODO fix this, #877
-		shared_ptr<Node> this_access;
-		
-#ifdef THIS_ACCESS_FROM_SCOPE
-		this_access = cur_access;
-#else		
-		this_access = MakeTreeNode<Public>();
-		if( TreePtr<Field> f = DynamicTreePtrCast<Field>(d) )
-			this_access = f->access;
-#endif			
+		shared_ptr<Syntax> this_access = cur_access;
+		//if( ReadArgs::use.count("a") )
 			
 #ifdef RENDER_ACCESS_FROM_RECORD
 		type_index prev_access_ti( typeid(*prev_access) );
@@ -2211,4 +2207,3 @@ Syntax::Production PreProcDecl::GetMyProductionTerminal() const
 { 
 	return Production::PRE_PROC_DIRECTIVE; 
 }
-
