@@ -808,7 +808,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 			
 		ASSERT( fspg->current_access );
 		static int i = 0;
-		if( ReadArgs::use.count("a") && i++ < 1 )
+		if( ReadArgs::use.count("a") && i++ < 10000 )
 		{
 			stringstream ss;
 			ss << any_cast<YY::VNLangParser::location_type>(loc);
