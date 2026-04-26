@@ -25,8 +25,6 @@
 #include <cctype>
 #include <typeinfo>
 
-//#define ONINSTANCE_REJECT_NULL_ACCESS		
-
 //using namespace CPPTree; // TODO should not need
 using namespace VN;
 using namespace reflex;
@@ -717,13 +715,15 @@ BlockAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::B
 }
 
 
-void VNLangActions::OnAccessSpec( any, TreePtr<Node> access )
+void VNLangActions::OnAccessSpec( any loc, TreePtr<Node> access )
 {
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
 	if( auto fspg = dynamic_cast<FieldScopeGnomon *>(spg.get()) ) 	
 	{
-		FTRACE("Access spec for gnomon ")(fspg)(" becomes ")(access)("\n");
+		stringstream ss;
+		ss << any_cast<YY::VNLangParser::location_type>(loc);
+		FTRACE("Access spec for gnomon ")(fspg)(" becomes ")(access)(" at ")(ss.str())("\n");
 		fspg->current_access = access;
 	}
 	else
@@ -807,10 +807,14 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 			field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();		
 			
 		ASSERT( fspg->current_access );
-		FTRACE("Field ")(field)(" seeing gnomon ")(fspg)(" which is ")(fspg->current_access)("\n");
 		static int i = 0;
 		if( i++ < 0 )
+		{
+			stringstream ss;
+			ss << any_cast<YY::VNLangParser::location_type>(loc);
+			FTRACE("I'm putting in ")(fspg->current_access)(" at ")(ss.str())("\n");
 			field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour
+		}
 		else
 			field->access = MakeTreeNode<StandardAgentWrapper<CPPTree::AccessSpec>>();
 			
