@@ -301,6 +301,13 @@ struct Argumentation : virtual Node
 struct MapArgumentation : Argumentation
 {
     NODE_FUNCTIONS_FINAL	
+	struct RefuseDueUndeclared : Refusal 
+	{
+		RefuseDueUndeclared(TreePtr<Node> which_) : which(which_) {}
+		string What() const noexcept { return Refusal::What()+"("+Trace(which)+")"; }
+		TreePtr<Node> which;
+	};
+
 	Collection<IdValuePair> arguments;
 	
 	Production GetMyProductionTerminal() const override;

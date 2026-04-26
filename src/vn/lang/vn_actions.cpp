@@ -808,7 +808,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 			
 		ASSERT( fspg->current_access );
 		static int i = 0;
-		if( i++ < 0 )
+		if( ReadArgs::use.count("a") && i++ < 1 )
 		{
 			stringstream ss;
 			ss << any_cast<YY::VNLangParser::location_type>(loc);
@@ -817,7 +817,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		}
 		else
 			field->access = MakeTreeNode<StandardAgentWrapper<CPPTree::AccessSpec>>();
-			
+
 		instance = field; // TODO store current access in the gnomon after #890
 	}
 	else if( dynamic_cast<const EnumeratorScopeGnomon *>(spg.get()) ) 

@@ -105,6 +105,8 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
     string s;
 	(void)surround_prod;
  	policy.permit_static_keyword = false; // TODO static has different meaning at top level
+	policy.cur_access = nullptr; // No access specs here
+
 	if( !policy.full_render_code_unit )
 	{
 		s += "∞{\n";
@@ -469,6 +471,10 @@ TreePtr<Argumentation> MapArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expr
 	{
 		callee_type = TypeOf::instance.Get(*renderer->GetTransKit(), callee).GetTreePtr();
 		ASSERT( callee_type );
+	}
+	catch( BaseDeclarationOf::DeclarationNotFound &dnf )
+	{
+		throw RefuseDueUndeclared(callee);
 	}
 	catch( ::Mismatch &ex )
 	{
@@ -1157,9 +1163,8 @@ string Callable::GetRenderParameterisation(VN::RendererInterface *, Policy )
 
 string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy)
 {
-	Policy id_policy = policy;
-	id_policy.resolve_identifier_scope = false;
-		
+	policy.cur_access = nullptr; // No access spec here
+	
     list<string> strings;
     for( auto &d : params )	
 		strings.push_back( renderer->DoRender( &d, Production::BARE_STMT_DECL, policy ) );       
@@ -1565,7 +1570,6 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 		// Decide access spec for this declaration (explicit if instance, 
 		// otherwise force to Public because decls don't have an access spec). TODO fix this, #877
 		shared_ptr<Syntax> this_access = cur_access;
-		//if( ReadArgs::use.count("a") )
 			
 #ifdef RENDER_ACCESS_FROM_RECORD
 		type_index prev_access_ti( typeid(*prev_access) );
@@ -1932,7 +1936,8 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
 {
     string s = " { ";
  	policy.permit_static_keyword = true; // In a compound, static means global
- 	
+	policy.cur_access = nullptr; // No access specs here
+	
     for( auto &m : members )    
         s += renderer->DoRender( &m, Production::STMT_DECL, policy );    
     if( policy.compound_uses_vn_separator )

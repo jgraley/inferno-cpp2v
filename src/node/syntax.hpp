@@ -154,6 +154,7 @@ public:
 	struct RefuseDueLocal : Refusal {};
 	struct RefuseDifficultSyntax : Refusal {}; // Eg, might cause conflicts
 	struct TemporarilyDisabled : Refusal {};
+	struct TypeOfFailSyntax : Refusal {}; // Eg, might cause conflicts
 		
 	/// Produce the source-code-name of the corresponding SystemC construct
     virtual string GetLoweredIdName() const;

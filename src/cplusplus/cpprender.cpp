@@ -74,7 +74,12 @@ string CppRender::RenderToString( TreePtr<Node> root )
     unique_identifier_names = identifiers_uniqifier.UniquifyAll( trans_kit, context );
     
     Syntax::Policy top_policy = default_policy;
-    return DoRender( &root, Syntax::Production::PROGRAM, top_policy );
+    
+    nodes_not_rendered_to_c = 0;
+    string s = DoRender( &root, Syntax::Production::PROGRAM, top_policy );
+    if( nodes_not_rendered_to_c > 0 )
+        s = SSPrintf("#error %d nodes could not be rendered to C\n", nodes_not_rendered_to_c) + s;
+    return s;
 }	
 
 
@@ -120,9 +125,9 @@ string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod
 { 		
 	return node->GetRender( this, surround_prod, policy );		
 }
-catch( Syntax::Refusal & ) 
+catch( Syntax::Refusal &ex ) 
 {	
-	return DispatchInternal( node, surround_prod, policy );
+	return DispatchInternal( node, surround_prod, policy, ex );
 }
 
 
@@ -168,7 +173,7 @@ string CppRender::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarat
 }
 
 
-string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy, Syntax::Refusal &ex )
 {			
     if( auto make_rec = TreePtr<RecordInitialiser>::DynamicCast(node) )
         return RenderRecordInitialiser( make_rec, surround_prod, policy );
@@ -189,7 +194,8 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
         
     // Due #969 we might have a standard agent, so fall back to a function that
     // definitely won't call any agent methods.
-    return "\n#error Cannot render " + RenderNodeExplicit( node, surround_prod, policy ) + " to C++\n";      
+    nodes_not_rendered_to_c++;
+    return ex.What()+RenderNodeExplicit( node, surround_prod, policy );      
 }
 
 
@@ -320,7 +326,8 @@ string CppRender::RenderEnum( TreePtr<CPPTree::Record> record, Syntax::Policy po
         auto o = TreePtr<Instance>::DynamicCast(pe);
         if( !o )
         {
-			ls.push_back(  "\n#error Cannot render " + RenderNodeExplicit( pe, Syntax::Production::COMMA_SEP, policy ) + " into an enum\n" );  
+			nodes_not_rendered_to_c++;
+			ls.push_back( RenderNodeExplicit( pe, Syntax::Production::COMMA_SEP, policy ) );  
 			continue;
         }
         
