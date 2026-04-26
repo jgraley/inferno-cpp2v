@@ -596,6 +596,9 @@ struct Instance : Declaration,
                   Statement
 {
     NODE_FUNCTIONS
+ 
+	struct NonFieldInRecord : Unimplemented {};
+
     // Note: the order here determines the ordering of declarations in rendered code
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
     TreePtr<InstanceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
@@ -609,6 +612,8 @@ struct Instance : Declaration,
 	string GetRenderImpl( VN::RendererInterface *renderer, Policy policy );
 	bool ShouldSplitInstance( Policy policy ) const override;
 	
+	// Optional access spec - only called if in a Record scope
+	virtual list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy, shared_ptr<Syntax> &cur_access ) const;
 	// Extras like static, virtual, const come before the type (techically among them, but we don't support that)
 	virtual list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const;
 	// Extras like override, final, const come after declarator
@@ -642,6 +647,7 @@ struct Field : Instance,
     TreePtr<Virtuality> virt; ///< Is the field virtual?
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
     
+	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy, shared_ptr<Syntax> &cur_access ) const override;
    	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 	list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy ) override;
 };
@@ -1036,6 +1042,7 @@ struct Enum : Record
 { 
 	NODE_FUNCTIONS_FINAL 
     string GetKeyword() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	
 };
 
@@ -1354,7 +1361,7 @@ struct StatementExpression : Expression, ///< Evaluates to whatever the last sta
     
     virtual string GetColour() const { return Expression::GetColour(); } // Expression wins    
 	Production GetMyProductionTerminal() const override;	
-	//string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };                   
 
 

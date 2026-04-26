@@ -102,6 +102,7 @@ Syntax::Production CodeUnit::GetMyProductionTerminal() const
 
 string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {
+	INDENT("U");
     string s;
 	(void)surround_prod;
  	policy.permit_static_keyword = false; // TODO static has different meaning at top level
@@ -937,7 +938,10 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 		ASSERT( !identifier || TreePtr<ConstructorIdentifier>::DynamicCast(identifier) )(identifier);
 	if( TreePtr<Destructor>::DynamicCast(type) )
 		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);
-
+	
+	if( policy.cur_access ) // are we in a record scope
+		Append( ls, RenderAccessSpec(renderer, sub_policy, *policy.cur_access) );
+		
     if( !policy.force_initialisation )
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
     
@@ -995,6 +999,13 @@ bool Instance::ShouldSplitInstance( Policy ) const
 }
 
 
+list<string> Instance::RenderAccessSpec( VN::RendererInterface *, Policy , shared_ptr<Syntax> & ) const
+{
+	throw NonFieldInRecord(); 
+	// Patterns managed to get an Instance that isn't a Field into a Record body.
+}
+
+
 list<string> Instance::RenderDeclSpecPre( VN::RendererInterface *, Policy ) const 
 { 
 	return {}; 
@@ -1037,10 +1048,16 @@ bool Global::ShouldSplitInstance( Policy policy ) const
 
 //////////////////////////// Field //////////////////////////////
 
+list<string> Field::RenderAccessSpec( VN::RendererInterface *, Policy, shared_ptr<Syntax> &cur_access ) const
+{
+	// TODO render it here if it's changing and return it
+	cur_access = access;
+	return {};
+}
+
+
 list<string> Field::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy) const 
 { 
-	if( policy.cur_access ) // We could be reached by a Stuff node, and never get a cur_access.
-		*policy.cur_access = access;
 	return { renderer->DoRender(&virt, Production::SPACE_SEP_STMT_DECL, policy) };
 }
 
@@ -1052,8 +1069,11 @@ list<string> Field::RenderInitPre( VN::RendererInterface *renderer, Policy polic
 
 //////////////////////////// Temporary //////////////////////////////
 
-list<string> Temporary::RenderDeclSpecPre( VN::RendererInterface *, Policy ) const 
+list<string> Temporary::RenderDeclSpecPre( VN::RendererInterface *, Policy policy ) const 
 { 
+	if( policy.refuse_local_node_types )
+		throw RefuseDueLocal(); 
+		
 	return { "/*temp*/" };
 }
 
@@ -1163,6 +1183,7 @@ string Callable::GetRenderParameterisation(VN::RendererInterface *, Policy )
 
 string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy)
 {
+	INDENT("P");
 	policy.cur_access = nullptr; // No access spec here
 	
     list<string> strings;
@@ -1510,32 +1531,50 @@ Syntax::Production Record::GetMyProductionTerminal() const
 }
 
 
-string Record::GetRender( VN::RendererInterface *renderer, Production, Policy policy ) 
+string Record::GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) 
 {
+	INDENT("R");
+	// For when we are a record-in-a-record i.e. member class
 	if( policy.missing_access_to_public && policy.cur_access )
 		*policy.cur_access = MakeTreeNode<Public>(); // see #877
 	
+	// For our members
+	shared_ptr<Syntax> cur_access = GetInitialAccess();
+	ASSERT( cur_access );		
+	policy.cur_access = &cur_access;
+
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
 		
-	string s;
-	s += GetKeyword(); // class, struct etc
-	s += " ";
-	s += renderer->DoRender(&identifier, Production::PRIMARY_EXPR, id_policy); 
+	try
+	{
+		string s;
+		s += GetKeyword(); // class, struct etc
+		s += " ";
+		s += renderer->DoRender(&identifier, Production::PRIMARY_EXPR, id_policy); 
 
-	if( policy.force_incomplete_records )
+		if( policy.force_incomplete_records )
+			return s;
+
+		s += RenderExtras(renderer, Production::SPACE_SEP_STMT_DECL, policy);
+		s += "\n";
+		s += RenderBody(renderer, policy);
 		return s;
-
-	s += RenderExtras(renderer, Production::SPACE_SEP_STMT_DECL, policy);
-    s += "\n";
-	s += RenderBody(renderer, policy);
-	return s;
+	}
+	catch( Refusal & )
+	{
+		// Catch the exception so that our modified policy propagates into the explicit render
+		// TODO could we not put the modified policy into the exception object? We'd still have
+		// to catch, but could throw again with update policy.
+		return renderer->RenderNodeExplicit(shared_from_this(), production, policy);
+	}
+	
 }   
 
 
 string Record::GetKeyword() const
 {
-	throw UnimplementedToken();
+	throw UnimplementedKeyword();
 }
 
 
@@ -1553,15 +1592,12 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 	// Members
 	s += "{\n";
 
-	shared_ptr<Syntax> cur_access = GetInitialAccess();
-	shared_ptr<Syntax> prev_access = GetInitialAccess();
-	ASSERT( cur_access );		
 	Policy member_policy = policy;
-	member_policy.cur_access = &cur_access;
     member_policy.split_bulky_statics = true; // Our scope is a record body
 	member_policy.permit_static_keyword = true; // In a record body, static means global
 	
     // Emit preprocs and an incomplete for each record 
+	shared_ptr<Syntax> prev_access = GetInitialAccess();
     for( auto &d : sorted )
     {       
 		// Do this before checking access spec, so that the cur_access can be updated
@@ -1569,7 +1605,7 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 			
 		// Decide access spec for this declaration (explicit if instance, 
 		// otherwise force to Public because decls don't have an access spec). TODO fix this, #877
-		shared_ptr<Syntax> this_access = cur_access;
+		shared_ptr<Syntax> this_access = *policy.cur_access;
 			
 #ifdef RENDER_ACCESS_FROM_RECORD
 		type_index prev_access_ti( typeid(*prev_access) );
@@ -1604,6 +1640,11 @@ string Union::GetKeyword() const
 string Enum::GetKeyword() const
 {
 	return "enum";
+}
+
+string Enum::GetRender( VN::RendererInterface *, Production, Policy ) 
+{
+	throw TemporarilyDisabled(); // TODO delete this and use Record::GetRender()
 }
 
 
@@ -1934,6 +1975,7 @@ Syntax::Production Compound::GetMyProductionTerminal() const
 
 string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
+	INDENT("C");
     string s = " { ";
  	policy.permit_static_keyword = true; // In a compound, static means global
 	policy.cur_access = nullptr; // No access specs here
@@ -1955,10 +1997,22 @@ Syntax::Production StatementExpression::GetMyProductionTerminal() const
 	return Production::PARENTHESISED; 
 }
 
-/*
+
 string StatementExpression::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
 {
-}*/
+	INDENT("S");
+    // confusing: when DISBALED the code below will do explicit render, 
+    // OTHERWISE the throw will get us to CPPRender's syntactic render
+    // The confusion should stop when render is pulled in here
+    if( !policy.refuse_statement_expression )
+		throw TemporarilyDisabled(); 
+		
+	// If we can't render syntactially, call RenderNodeExplicit() directly so it
+	// gets the updated policy.
+ 	policy.permit_static_keyword = true; // In a compound, static means global
+	policy.cur_access = nullptr; // No access specs here
+	return renderer->RenderNodeExplicit(shared_from_this(), production, policy);
+}
 
 //////////////////////////// Return ///////////////////////////////
 

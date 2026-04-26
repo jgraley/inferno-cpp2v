@@ -216,6 +216,10 @@ DEFAULT_CATCH_CLAUSE
 string CppRender::RenderStatementExpression( TreePtr<StatementExpression> ce, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
     (void)surround_prod;
+	INDENT("S");
+    
+ 	policy.permit_static_keyword = true; // In a compound, static means global
+	policy.cur_access = nullptr; // No access specs here
       
     string s = "({ ";
 	for( TreePtr<Declaration> m : ce->members )    

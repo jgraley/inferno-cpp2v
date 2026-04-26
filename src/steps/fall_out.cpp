@@ -45,7 +45,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_over_enum = MakePatternNode<DeltaAgent, Enum>();
     auto ls_enum = MakePatternNode<Enum>();
     auto lr_enum = MakePatternNode<Enum>();
-    auto lr_state_decl = MakePatternNode<Global>();
+    auto lr_state_decl = MakePatternNode<Field>();
     auto lr_state_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_STATE_%s");
     auto lr_case = MakePatternNode<Case>();
     auto lr_int = MakePatternNode<Signed>();
@@ -130,6 +130,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     lr_state_decl->identifier = lr_state_id;
     lr_state_decl->type = r_enum_id;
     lr_state_decl->initialiser = lr_count;
+    lr_state_decl->access = MakePatternNode<Private>();
+    lr_state_decl->virt = MakePatternNode<NonVirtual>();
     lr_count->container = l_enum_vals;
     lr_state_id->sources = (func_id, ls_label->identifier);
     //l_lmap->constancy = MakePatternNode<Const>(); // TODO if I skip this, I should get ⯁Constancy⦅⦆ but I actually get nothing, which is wrong (means non-const)

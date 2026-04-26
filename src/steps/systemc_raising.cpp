@@ -170,9 +170,9 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto ls_arg = MakePatternNode< IdValuePair >();
     auto l_overcons = MakePatternNode<DeltaAgent, Instance>();
     auto l_overtype = MakePatternNode<DeltaAgent, Type>();
-    auto ls_cons = MakePatternNode< Instance >();
-    auto lr_cons = MakePatternNode< Instance >();
-    auto l_process = MakePatternNode< Instance >();
+    auto ls_cons = MakePatternNode< Field >();
+    auto lr_cons = MakePatternNode< Field >();
+    auto l_process = MakePatternNode< Field >();
     auto l_pre = MakePatternNode<StarAgent, Statement>();
     auto l_post = MakePatternNode<StarAgent, Statement>();
     auto ls_id = MakePatternNode< InstanceIdentifier >();

@@ -75,8 +75,9 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
     auto vstmts = MakePatternNode<StarAgent, Statement>();
     auto var = MakePatternNode<DisjunctionAgent, Instance>();
-    auto tempvar = MakePatternNode<Temporary>();
-    auto staticvar = MakePatternNode<Global>();
+    auto s_tempvar = MakePatternNode<Temporary>();
+    auto s_staticvar = MakePatternNode<Global>();
+    auto r_var = MakePatternNode<Field>();
     auto fn = MakePatternNode<Field>();
     auto ft = MakePatternNode<Thread>();
     auto stuff = MakePatternNode<StuffAgent, Initialiser>();
@@ -87,18 +88,36 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     auto type = MakePatternNode<Type>();
     auto var_id = MakePatternNode<InstanceIdentifier>();
     auto init = MakePatternNode<Initialiser>();
+    auto var_type = MakePatternNode<Type>();
+    auto var_identifier = MakePatternNode<InstanceIdentifier>();
+    auto var_initialiser = MakePatternNode<Initialiser>();
 
     s_rec->members = (decls, fn);
-    r_rec->members = (decls, fn, var);
+    r_rec->members = (decls, fn, r_var);
     fn->constancy = MakePatternNode<NonConst>();    
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
     stuff->terminus = over;
     over->through = s_comp;
-    s_comp->members = (vdecls, var);
+    s_comp->members = (vdecls, s_tempvar);
     s_comp->statements = (vstmts);
-    var->disjuncts = (tempvar, staticvar);
+    var->disjuncts = (s_tempvar, s_staticvar);
+     
+    s_tempvar->type = var_type;
+    s_tempvar->identifier = var_identifier;
+    s_tempvar->initialiser = var_initialiser;
+    
+    // TODO this is wrong, local static should be moved to top level i.e. code unit 
+    s_staticvar->type = var_type;
+    s_staticvar->identifier = var_identifier;
+    s_staticvar->initialiser = var_initialiser;
+    r_var->access = MakePatternNode<Private>();
+    r_var->virt = MakePatternNode<NonVirtual>();
+    r_var->constancy = MakePatternNode<NonConst>();
+    r_var->type = var_type;
+    r_var->identifier = var_identifier;
+    r_var->initialiser = var_initialiser;
      
     over->overlay = r_comp;
     r_comp->members = (vdecls);

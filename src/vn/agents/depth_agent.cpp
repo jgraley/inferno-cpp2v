@@ -171,6 +171,10 @@ Syntax::Production StuffAgent::GetAgentProduction() const
 string StuffAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	(void)surround_prod;
+	
+	// Refuse to treat restriction or terminus as being in a record, even if the Stuff node is	
+	policy.cur_access = nullptr; 
+	
 	string s;
 	if( dynamic_pointer_cast<CPPTree::Type>( policy.pointer_archetype ) )		 
 		s += "⍑";			

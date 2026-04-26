@@ -100,6 +100,7 @@ public:
 			split_bulky_statics(false),
 			permit_static_keyword(false),
 			refuse_c_style_cast(false),
+			refuse_statement_expression(false),
 			detect_and_render_constructor(true),
 			convert_argumentation_to_seq(true),
 			boot_statements_using_braces(true),
@@ -120,6 +121,7 @@ public:
 		bool split_bulky_statics;
 		bool permit_static_keyword;
 		bool refuse_c_style_cast;		
+		bool refuse_statement_expression;		
 		bool detect_and_render_constructor;
 		bool convert_argumentation_to_seq;
 		bool boot_statements_using_braces;
@@ -149,7 +151,7 @@ public:
 	
 	struct Refusal : Exception {};
 	struct Unimplemented : Refusal {};
-    struct UnimplementedToken : Unimplemented {};
+    struct UnimplementedKeyword : Unimplemented {};
 	struct RefusedByPolicy : Refusal {};
 	struct RefuseDueLocal : Refusal {};
 	struct RefuseDifficultSyntax : Refusal {}; // Eg, might cause conflicts

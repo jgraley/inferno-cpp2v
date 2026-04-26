@@ -137,6 +137,9 @@ Syntax::Policy Render::GetDefaultPolicy()
 	// our render allows eg (type1 ∧ type2) for grouping (aka parser booting) but
 	// this conflicts with c-style cast syntax.
 	policy.refuse_c_style_cast = true; 
+		
+	// No parse for this at the momnet, could be hard to parse TODO try
+	policy.refuse_statement_expression = true;
 	
 	// constructor syntax will probably ambiguate
 	policy.detect_and_render_constructor = false;
@@ -183,7 +186,7 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
                                  Syntax::Production surround_prod, 
                                  Syntax::Policy policy )
 {	
-    INDENT("R");
+    INDENT(">");
     string s;
 		
 	if( ReadArgs::use.count("c") )
@@ -476,7 +479,7 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
 {
     string s = "⯁";
     			
-    s += RenderNodeTypeName(node);
+    s += RenderNodeTypeName(node); 
    
 	if( ReadArgs::use.count("c") )
 		s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";
