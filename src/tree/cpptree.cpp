@@ -939,8 +939,7 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 	if( TreePtr<Destructor>::DynamicCast(type) )
 		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);
 	
-	if( policy.cur_access ) // are we in a record scope
-		Append( ls, RenderAccessSpec(renderer, sub_policy, *policy.cur_access) );
+	Append( ls, RenderAccessSpec(renderer, sub_policy) );
 		
     if( !policy.force_initialisation )
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
@@ -999,10 +998,12 @@ bool Instance::ShouldSplitInstance( Policy ) const
 }
 
 
-list<string> Instance::RenderAccessSpec( VN::RendererInterface *, Policy , shared_ptr<Syntax> & ) const
+list<string> Instance::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
 {
-	throw NonFieldInRecord(); 
+	if( policy.cur_access ) // are we in a record scope
+		throw NonFieldInRecord(); 
 	// Patterns managed to get an Instance that isn't a Field into a Record body.
+	return {};
 }
 
 
@@ -1048,10 +1049,11 @@ bool Global::ShouldSplitInstance( Policy policy ) const
 
 //////////////////////////// Field //////////////////////////////
 
-list<string> Field::RenderAccessSpec( VN::RendererInterface *, Policy, shared_ptr<Syntax> &cur_access ) const
+list<string> Field::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
 {
 	// TODO render it here if it's changing and return it
-	cur_access = access;
+	if( policy.cur_access ) // are we in a record scope
+		*policy.cur_access = access;
 	return {};
 }
 
