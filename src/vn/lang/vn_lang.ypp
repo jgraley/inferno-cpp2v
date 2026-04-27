@@ -182,6 +182,7 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		open_global_scope open_local_scope open_field_scope open_param_scope 
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
 %type <VN::BlockAndGnomon>			explicit_op_named type_explicit_op_named decl_explicit_op_named qual_explicit_op_named
+%type <VN::NodeAndGnomon>			class_named
 %type <TreePtr<Node>> 				stmt_decl member
 %type <list<TreePtr<Node>>>			stmt_decls members
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
@@ -401,8 +402,10 @@ parameter   : decl_boot
                          
 //////////////////////////////// CLASSES ////////////////////////////////////                                  
                          
-class_spec		: CLASS_KEYWORD type_specified open_field_scope members '}'			{ $$ = vn->OnInheritanceRecord( @$, $1.as_ascii, $2, {}, $4 ); }
-				| CLASS_KEYWORD type_specified ':' bases open_field_scope members '}'	{ $$ = vn->OnInheritanceRecord( @$, $1.as_ascii, $2, $4, $6 ); }
+class_spec		: class_named open_field_scope members '}'			   		{ $$ = vn->OnInheritanceRecord( @$, $1.node, {}, $3 ); }
+				| class_named ':' bases open_field_scope members '}'		{ $$ = vn->OnInheritanceRecord( @$, $1.node, $3, $5 ); }
+             
+class_named     : CLASS_KEYWORD type_specified        						{ $$ = vn->OnRecordNamed(@$, $1.as_ascii, $2); } 
                                                   
 bases			: base_spec                                                 { $$.push_back($1); } 
 				| bases ',' base_spec										{ $$ = $1; $$.push_back($3); } 

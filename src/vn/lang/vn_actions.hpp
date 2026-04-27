@@ -164,6 +164,12 @@ struct BlockAndGnomon
 	shared_ptr<Gnomon> gnomon;
 };
 
+struct NodeAndGnomon
+{
+	TreePtr<Node> node;
+	shared_ptr<Gnomon> gnomon;
+};
+
 class VNLangActions	
 {
 public:
@@ -221,7 +227,8 @@ public:
 	TreePtr<Node> OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator );	
 	TreePtr<Node> OnInstanceInit( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init );	
 	TreePtr<Node> OnAbDeclType( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
-	TreePtr<Node> OnInheritanceRecord( any loc, string keyword, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	
+	NodeAndGnomon OnRecordNamed( any loc, string keyword, TreePtr<Node> id );
+	TreePtr<Node> OnInheritanceRecord( any loc, TreePtr<Node> node, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	
 	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified
 	TreePtr<Node> OnQualifierNodeKeyword( string keyword );

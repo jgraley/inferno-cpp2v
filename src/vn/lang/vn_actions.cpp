@@ -881,7 +881,7 @@ TreePtr<Node> VNLangActions::OnAbDeclType( TreePtr<Node> type, TreePtr<Node> dec
 }
 
 
-TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, string keyword, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
+NodeAndGnomon VNLangActions::OnRecordNamed( any loc, string keyword, TreePtr<Node> id )
 {
 	TreePtr<CPPTree::InheritanceRecord> node;
 	if( keyword=="class" )
@@ -894,13 +894,27 @@ TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, string keyword, TreeP
 		ASSERTFAIL()
 	
 	node->identifier = id;
+	
+	auto gnomon = make_shared<FieldScopeGnomon>(MakeTreeNode<CPPTree::Public>());
+	//AddGnomon(gnomon);
+	
+	// Note: returning the gnomon allows parser to keep it alive until end of scope
+	return { node, gnomon };
+}
+
+
+TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, TreePtr<Node> node, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
+{
+	auto ir = TreePtr<CPPTree::InheritanceRecord>::DynamicCast(node);
+	ASSERT(ir);
+	
 	for( TreePtr<Node> base : bases )
-		node->bases.insert( base );				
+		ir->bases.insert( base );				
 	
 	for( TreePtr<Node> member : members )
-		node->members.insert( member );		
+		ir->members.insert( member );		
 	
-	return node;
+	return ir;
 }
 
 
