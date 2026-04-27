@@ -807,16 +807,11 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 			field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();		
 			
 		ASSERT( fspg->current_access );
-		static int i = 0;
-		if( ReadArgs::use.count("a") && i++ < 10000 )
-		{
-			stringstream ss;
-			ss << any_cast<YY::VNLangParser::location_type>(loc);
-			FTRACE("I'm putting in ")(fspg->current_access)(" at ")(ss.str())("\n");
-			field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour
-		}
-		else
-			field->access = MakeTreeNode<StandardAgentWrapper<CPPTree::AccessSpec>>();
+
+		stringstream ss;
+		ss << any_cast<YY::VNLangParser::location_type>(loc);
+		FTRACE("I'm putting in ")(fspg->current_access)(" at ")(ss.str())("\n");
+		field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour
 
 		instance = field; // TODO store current access in the gnomon after #890
 	}
