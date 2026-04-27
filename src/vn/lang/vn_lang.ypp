@@ -179,7 +179,7 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		part_resolve designation_command 
 %type <shared_ptr<VN::Gnomon>>		transform_op_scope
 %type <shared_ptr<VN::Gnomon>>		explicit_op_scope prerestrict_op_scope id_by_name_op_scope builder_id_op_scope stuff_op_scope
-%type <shared_ptr<VN::Gnomon>>		open_global_scope open_local_scope open_field_scope open_param_scope 
+%type <shared_ptr<VN::Gnomon>>		open_global_scope open_local_scope open_param_scope 
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
 %type <VN::BlockAndGnomon>			explicit_op_named type_explicit_op_named decl_explicit_op_named qual_explicit_op_named
 %type <VN::NodeAndGnomon>			class_named
@@ -402,8 +402,8 @@ parameter   : decl_boot
                          
 //////////////////////////////// CLASSES ////////////////////////////////////                                  
                          
-class_spec		: class_named open_field_scope members '}'			   		{ $$ = vn->OnInheritanceRecord( @$, $1.node, {}, $3 ); }
-				| class_named ':' bases open_field_scope members '}'		{ $$ = vn->OnInheritanceRecord( @$, $1.node, $3, $5 ); }
+class_spec		: class_named '{' members '}'			   		{ $$ = vn->OnInheritanceRecord( @$, $1.node, {}, $3 ); }
+				| class_named ':' bases '{' members '}'		{ $$ = vn->OnInheritanceRecord( @$, $1.node, $3, $5 ); }
              
 class_named     : CLASS_KEYWORD type_specified        						{ $$ = vn->OnRecordNamed(@$, $1.as_ascii, $2); } 
                                                   
@@ -414,10 +414,7 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 				| vn_wildcard												{ $$ = $1; }
 				| DESIGNATED_NORMAL       				  					{ $$ = $1.as_designated; } // To match a designated Star
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
-                                                                                                       
-open_field_scope: '{'		{ $$ = make_shared<VN::FieldScopeGnomon>(MakeTreeNode<CPPTree::Public>()); // TODO get the correct value based on CLASS_KEYWORD
-								  vn->AddGnomon($$); }
-                                                  
+                                                                                                                                                         
 members			: member														{ $$.push_back($1); }
 				| members member 												{ $$ = $1; $$.push_back($2); }
 				| sticky_access_spec ':' member									{ $$.push_back($3); } 

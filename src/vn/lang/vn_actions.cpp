@@ -895,8 +895,9 @@ NodeAndGnomon VNLangActions::OnRecordNamed( any loc, string keyword, TreePtr<Nod
 	
 	node->identifier = id;
 	
+	// TODO get the correct value based on CLASS_KEYWORD
 	auto gnomon = make_shared<FieldScopeGnomon>(MakeTreeNode<CPPTree::Public>());
-	//AddGnomon(gnomon);
+	AddGnomon(gnomon);
 	
 	// Note: returning the gnomon allows parser to keep it alive until end of scope
 	return { node, gnomon };
