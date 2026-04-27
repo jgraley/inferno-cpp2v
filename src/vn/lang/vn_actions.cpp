@@ -162,8 +162,8 @@ static TreePtr<Node> MakeStandardAgentFromTypeID(const type_info &ti)
 
 TreePtr<Node> VNLangActions::OnExplicitNode( const AvailableNodeData::Block *block, any node_name_loc, Itemisation src_itemisation )
 {
-	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	NodeEnum ne = leaf_block->node_enum.value();
+	auto node_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
+	NodeEnum ne = node_block->node_enum.value();
 	TreePtr<Node> dest = MakeStandardAgent(ne);
     YY::VNLangParser::location_type prev_loc = any_cast<YY::VNLangParser::location_type>(src_itemisation.loc);
 	
@@ -881,7 +881,7 @@ TreePtr<Node> VNLangActions::OnAbDeclType( TreePtr<Node> type, TreePtr<Node> dec
 }
 
 
-TreePtr<Node> VNLangActions::OnRecordNamed( any loc, string keyword, TreePtr<Node> id )
+TreePtr<Node> VNLangActions::StartRecord( any loc, string keyword )
 {
 	TreePtr<CPPTree::InheritanceRecord> node;
 	if( keyword=="class" )
@@ -893,35 +893,34 @@ TreePtr<Node> VNLangActions::OnRecordNamed( any loc, string keyword, TreePtr<Nod
 	else
 		ASSERTFAIL()
 	
-	node->identifier = id;
 	return node;
 }
 
 
-NodeAndGnomon VNLangActions::MakeFieldGnomon( TreePtr<Node> rec )
+shared_ptr<Gnomon> VNLangActions::MakeFieldGnomon( TreePtr<Node> rec )
 {
-	auto ir = TreePtr<CPPTree::InheritanceRecord>::DynamicCast(rec);
-	ASSERT(ir);
+	auto r = TreePtr<CPPTree::Record>::DynamicCast(rec);
+	ASSERT(r);
 	
-	auto gnomon = make_shared<FieldScopeGnomon>(ir->GetInitialAccess());
-	
-	// Note: returning the gnomon allows parser to keep it alive until end of scope
-	return { ir, gnomon };
+	return make_shared<FieldScopeGnomon>(r->GetInitialAccess());
 }
 
 
-TreePtr<Node> VNLangActions::OnInheritanceRecord( any loc, TreePtr<Node> node, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
+TreePtr<Node> VNLangActions::FinishRecord( any loc, TreePtr<Node> node, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
 {
-	auto ir = TreePtr<CPPTree::InheritanceRecord>::DynamicCast(node);
-	ASSERT(ir);
+	auto r = TreePtr<CPPTree::Record>::DynamicCast(node);
+	ASSERT(r);
+
+	r->identifier = id;
 	
-	for( TreePtr<Node> base : bases )
-		ir->bases.insert( base );				
+	if( auto ir = TreePtr<CPPTree::InheritanceRecord>::DynamicCast(r) )
+		for( TreePtr<Node> base : bases )
+			ir->bases.insert( base );				
 	
 	for( TreePtr<Node> member : members )
-		ir->members.insert( member );		
+		r->members.insert( member );		
 	
-	return ir;
+	return r;
 }
 
 

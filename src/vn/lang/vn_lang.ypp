@@ -166,7 +166,7 @@ stmt_high
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
-%type <TreePtr<Node>> 				class_spec base_spec access_spec sticky_access_spec qualifier_node
+%type <TreePtr<Node>> 				class_node class_spec base_spec access_spec sticky_access_spec qualifier_node
 %type <TreePtr<Node>>				instance_proto
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named
@@ -182,7 +182,7 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		open_global_scope open_local_scope open_param_scope 
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
 %type <VN::BlockAndGnomon>			explicit_op_named type_explicit_op_named decl_explicit_op_named qual_explicit_op_named
-%type <VN::NodeAndGnomon>			class_named
+%type <VN::NodeAndGnomon>			class_scope
 %type <TreePtr<Node>> 				stmt_decl member
 %type <list<TreePtr<Node>>>			stmt_decls members
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
@@ -402,11 +402,13 @@ parameter   : decl_boot
                          
 //////////////////////////////// CLASSES ////////////////////////////////////                                  
                          
-class_spec		: class_named '{' members '}'			   		{ $$ = vn->OnInheritanceRecord( @$, $1.node, {}, $3 ); }
-				| class_named ':' bases '{' members '}'		{ $$ = vn->OnInheritanceRecord( @$, $1.node, $3, $5 ); }
+class_spec		: class_scope type_specified '{' members '}'			 	{ $$ = vn->FinishRecord( @$, $1.node, $2, {}, $4 ); }
+				| class_scope type_specified ':' bases '{' members '}'		{ $$ = vn->FinishRecord( @$, $1.node, $2, $4, $6 ); }
              
-class_named     : CLASS_KEYWORD type_specified        						{ $$ = vn->MakeFieldGnomon( vn->OnRecordNamed(@$, $1.as_ascii, $2)); 
+class_scope     : class_node         										{ $$ = { $1, vn->MakeFieldGnomon($1) }; 
 																			  vn->AddGnomon($$.gnomon); } 
+																			  
+class_node		: CLASS_KEYWORD												{ $$ = vn->StartRecord(@$, $1.as_ascii); }
                                                   
 bases			: base_spec                                                 { $$.push_back($1); } 
 				| bases ',' base_spec										{ $$ = $1; $$.push_back($3); } 
