@@ -166,7 +166,7 @@ stmt_high
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
-%type <TreePtr<Node>> 				class_spec base_spec access_spec qualifier_node
+%type <TreePtr<Node>> 				class_spec base_spec access_spec sticky_access_spec qualifier_node
 %type <TreePtr<Node>>				instance_proto
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named
@@ -417,15 +417,15 @@ open_field_scope: '{'		{ $$ = make_shared<VN::FieldScopeGnomon>(MakeTreeNode<CPP
                                                   
 members			: member														{ $$.push_back($1); }
 				| members member 												{ $$ = $1; $$.push_back($2); }
-				| access_spec ':' member										{ $$.push_back($3); } 
-				| members access_spec ':' member								{ $$ = $1; $$.push_back($4); }
+				| sticky_access_spec ':' member									{ $$.push_back($3); } 
+				| members sticky_access_spec ':' member							{ $$ = $1; $$.push_back($4); }
 
 member			: declaration
 				| statement // to get wildcards etc TODO tighten this up?
 
-// TODO move into c_declaration and deal with the extra calls from other productions
-// c_declaration is declaration syntac without eg decl_prefix                          
-access_spec		: qualifier_node  											    { vn->OnAccessSpec(@1, $1); $$ = $1; } 
+sticky_access_spec : access_spec												{ vn->OnAccessSpec(@1, $1); $$ = $1; } 
+                         
+access_spec		: qualifier_node  											    
 
 //////////////////////////////// STATEMENTS ////////////////////////////////////                 
 
