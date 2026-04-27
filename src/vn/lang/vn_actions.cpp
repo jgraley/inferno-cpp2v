@@ -881,7 +881,7 @@ TreePtr<Node> VNLangActions::OnAbDeclType( TreePtr<Node> type, TreePtr<Node> dec
 }
 
 
-NodeAndGnomon VNLangActions::OnRecordNamed( any loc, string keyword, TreePtr<Node> id )
+TreePtr<Node> VNLangActions::OnRecordNamed( any loc, string keyword, TreePtr<Node> id )
 {
 	TreePtr<CPPTree::InheritanceRecord> node;
 	if( keyword=="class" )
@@ -894,13 +894,19 @@ NodeAndGnomon VNLangActions::OnRecordNamed( any loc, string keyword, TreePtr<Nod
 		ASSERTFAIL()
 	
 	node->identifier = id;
+	return node;
+}
+
+
+NodeAndGnomon VNLangActions::MakeFieldGnomon( TreePtr<Node> rec )
+{
+	auto ir = TreePtr<CPPTree::InheritanceRecord>::DynamicCast(rec);
+	ASSERT(ir);
 	
-	// TODO get the correct value based on CLASS_KEYWORD
-	auto gnomon = make_shared<FieldScopeGnomon>(MakeTreeNode<CPPTree::Public>());
-	AddGnomon(gnomon);
+	auto gnomon = make_shared<FieldScopeGnomon>(ir->GetInitialAccess());
 	
 	// Note: returning the gnomon allows parser to keep it alive until end of scope
-	return { node, gnomon };
+	return { ir, gnomon };
 }
 
 

@@ -405,7 +405,8 @@ parameter   : decl_boot
 class_spec		: class_named '{' members '}'			   		{ $$ = vn->OnInheritanceRecord( @$, $1.node, {}, $3 ); }
 				| class_named ':' bases '{' members '}'		{ $$ = vn->OnInheritanceRecord( @$, $1.node, $3, $5 ); }
              
-class_named     : CLASS_KEYWORD type_specified        						{ $$ = vn->OnRecordNamed(@$, $1.as_ascii, $2); } 
+class_named     : CLASS_KEYWORD type_specified        						{ $$ = vn->MakeFieldGnomon( vn->OnRecordNamed(@$, $1.as_ascii, $2)); 
+																			  vn->AddGnomon($$.gnomon); } 
                                                   
 bases			: base_spec                                                 { $$.push_back($1); } 
 				| bases ',' base_spec										{ $$ = $1; $$.push_back($3); } 
