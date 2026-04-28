@@ -158,7 +158,7 @@ stmt_high
 %type <TreePtr<Node>> 				stmt_boot open_statement
 %type <TreePtr<Node>> 				bare_statement statement_nc statement         
 %type <TreePtr<Node>> 				open_declaration decl_boot decl_disjunction decl_conjunction declaration 
-%type <TreePtr<Node>> 				bare_declaration c_declaration c_declaration_na 
+%type <TreePtr<Node>> 				bare_declaration c_declaration 
 %type <TreePtr<Node>> 				assign_init
 %type <TreePtr<Node>> 				decl_prefix_definite decl_prefix decl_postfix decl_primary decl_vn_prim
 %type <TreePtr<Node>> 				compound compound_primary parameter type_boot compound_prefix 
@@ -166,7 +166,7 @@ stmt_high
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
-%type <TreePtr<Node>> 				class_node class_spec base_spec access_spec sticky_access_spec qualifier_node
+%type <TreePtr<Node>> 				class_node class base_spec access_spec sticky_access_spec qualifier_node
 %type <TreePtr<Node>>				instance_proto
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named
@@ -179,7 +179,7 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		part_resolve designation_command 
 %type <shared_ptr<VN::Gnomon>>		transform_op_scope
 %type <shared_ptr<VN::Gnomon>>		explicit_op_scope prerestrict_op_scope id_by_name_op_scope builder_id_op_scope stuff_op_scope
-%type <shared_ptr<VN::Gnomon>>		open_global_scope open_local_scope open_param_scope 
+%type <shared_ptr<VN::Gnomon>>		code_unit_scope compound_scope params_scope 
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
 %type <VN::BlockAndGnomon>			explicit_op_named type_explicit_op_named decl_explicit_op_named qual_explicit_op_named
 %type <VN::NodeAndGnomon>			class_scope
@@ -269,16 +269,16 @@ compound_prefix : compound_primary
 				|     stuff_op_scope OPEN_VN stuff_depth CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
 				|                      prerestrict_op_named compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 
-compound_primary	: open_local_scope VN_SEP '}'                			{ $$ = vn->OnCompound({}, @2, {}, @3); } 
-					| open_local_scope stmt_decls VN_SEP '}'     			{ $$ = vn->OnCompound($2, @2, {}, @4); }
-					| open_local_scope VN_SEP stmt_decls '}'     			{ $$ = vn->OnCompound({}, @2, $3, @3); }
-					| open_local_scope stmt_decls VN_SEP stmt_decls '}'		{ $$ = vn->OnCompound($2, @2, $4, @4); }
-					| CODE_UNIT open_global_scope stmt_decls '}' 			{ $$ = vn->OnCodeUnit($3, @3); }
+compound_primary	: compound_scope '{' VN_SEP '}'                			{ $$ = vn->OnCompound({}, @3, {}, @3); } 
+					| compound_scope '{' stmt_decls VN_SEP '}'     			{ $$ = vn->OnCompound($3, @3, {}, @5); }
+					| compound_scope '{' VN_SEP stmt_decls '}'     			{ $$ = vn->OnCompound({}, @3, $4, @4); }
+					| compound_scope '{' stmt_decls VN_SEP stmt_decls '}'	{ $$ = vn->OnCompound($3, @3, $5, @5); }
+					| CODE_UNIT code_unit_scope '{' stmt_decls '}' 			{ $$ = vn->OnCodeUnit($4, @4); }
 
-open_local_scope	: '{'													{ $$ = make_shared<VN::LocalScopeGnomon>(); 
+compound_scope	: %empty													{ $$ = make_shared<VN::CompoundScopeGnomon>(); 
 																			  vn->AddGnomon($$); }
 
-open_global_scope	: '{'													{ $$ = make_shared<VN::GlobalScopeGnomon>(); 
+code_unit_scope	: %empty													{ $$ = make_shared<VN::CodeUnitScopeGnomon>(); 
 																			  vn->AddGnomon($$); }
 
 stmt_decls	: stmt_decl														{ $$.push_back($1); }
@@ -308,15 +308,10 @@ declaration	: bare_declaration ';'								{ $$ = $1; }
 bare_declaration: decl_prefix
 				| c_declaration
 
-// A run of declarations without access spec between them are coupled in the pattern.
-// Tie each access specs to a C declaration to ensure that there is at least one direct member with that
-// access spec. This way, any subsequent coupling into a multiplicity or negation is guaranteed to be keyed.
-c_declaration	: c_declaration_na
-
-c_declaration_na: instance_proto
+c_declaration	: instance_proto
 				| instance_proto ANY_NODE_OP					{ $$ = vn->OnInstanceInit($1, @1, nullptr); } // note: ☆ has ; but no =
 				| instance_proto C_ASSIGN assign_init			{ $$ = vn->OnInstanceInit($1, @1, $3); } 
-				| class_spec		
+				| class		
 
 assign_init		: expression
 				| '{' '}'             				  			{ $$ = vn->OnArrayInitialiser({}); } 
@@ -354,6 +349,7 @@ decl_vn_prim: decl_explicit_op_named itemisation								{ $$ = vn->OnExplicitNod
 			
 decl_explicit_op_named 		: explicit_op_scope resolved_decl_name				{ $$ = vn->MakeScopeGnomonForNode($2.as_andata_block); 
                                                                                   vn->AddGnomon($$.gnomon); }
+                                                                                  
 decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_name			{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2.as_andata_block); 
                                                                                   vn->AddGnomon($$); }
 
@@ -389,11 +385,11 @@ ab_declarator_postfix	: ab_declarator_postfix parameterisation			{ $$ = make_sha
 					                         
 //////////////////////////////////////// PARAMETERS /////////////////////////////////////////////
 
-parameterisation	: open_param_scope parameters ')'				{ $$ = $2; (void)$1; }
-					| open_param_scope ')'							{ $$.clear(); (void)$1;}							
+parameterisation	: params_scope '(' parameters ')'				{ $$ = $3; }
+					| params_scope '(' ')'							{ $$.clear(); }							
 
-open_param_scope	: '('											{ $$ = make_shared<VN::ParameterScopeGnomon>(); 
-																	  vn->AddGnomon($$); }
+params_scope	: %empty 											{ $$ = make_shared<VN::ParameterisationScopeGnomon>(); 
+																	  vn->AddGnomon($$); } 
 
 parameters	: parameter												{ $$.push_back($1); }
 			| parameters ',' parameter								{ $$ = $1; $$.push_back($3); }			
@@ -402,10 +398,10 @@ parameter   : decl_boot
                          
 //////////////////////////////// CLASSES ////////////////////////////////////                                  
                          
-class_spec		: class_scope type_specified '{' members '}'			 	{ $$ = vn->FinishRecord( @$, $1.node, $2, {}, $4 ); }
+class			: class_scope type_specified '{' members '}'			 	{ $$ = vn->FinishRecord( @$, $1.node, $2, {}, $4 ); }
 				| class_scope type_specified ':' bases '{' members '}'		{ $$ = vn->FinishRecord( @$, $1.node, $2, $4, $6 ); }
              
-class_scope     : class_node         										{ $$ = { $1, vn->MakeFieldGnomon($1) }; 
+class_scope     : class_node         										{ $$ = { $1, vn->MakeRecordScopeGnomon($1) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 class_node		: CLASS_KEYWORD												{ $$ = vn->StartRecord(@$, $1.as_ascii); }

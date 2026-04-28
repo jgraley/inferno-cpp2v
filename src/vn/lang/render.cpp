@@ -396,19 +396,16 @@ string Render::RenderNullPointer(Syntax::Production surround_prod, Syntax::Polic
 string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {	
 	try
-	{
+	{	
 		if( const Agent *agent = Agent::TryAsAgentConst(node) )
 			return agent->GetAgentRender( this, surround_prod, policy );
+		else
+			return node->GetRender(this, surround_prod, policy); 
 	}
-	catch( Syntax::Refusal & ) {}
-	
-	try 
-	{ 
-		return node->GetRender(this, surround_prod, policy); 
+	catch( Syntax::Refusal &ex ) 
+	{
+		return "/*"+ex.What()+"*/"+RenderNodeExplicit(node, surround_prod, policy);
 	}
-	catch( Syntax::Refusal & ) {}
-
-	return RenderNodeExplicit(node, surround_prod, policy);
 }		
 
 

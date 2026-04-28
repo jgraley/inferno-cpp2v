@@ -979,13 +979,11 @@ string StandardAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::P
     {
 		// SpecificIdentifiers appear rarely in patterns, and when they do they are not declared,
 		// so we should not try to render the C++ terminal	   
-		return renderer->RenderNodeExplicit(node, surround_prod, policy);
+		return renderer->RenderNodeExplicit(node, surround_prod, policy); // TODO decide this using policy inside SpecificIdentifier::GetRender()
 	}	
 	else
 	{
-		// Refusing to proceed on any other node type, forcing the renderer to consider
-		// rendering it using GetRender() etc
-		throw Unimplemented();
+		return const_cast<Node *>(node.get())->GetRender(renderer, surround_prod, policy);
 	}
 }
 

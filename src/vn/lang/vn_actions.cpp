@@ -693,19 +693,19 @@ BlockAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::B
 	ASSERT( node );
 	shared_ptr<Gnomon> gnomon;
 	if( dynamic_pointer_cast<CPPTree::CodeUnit>(node) )
-		gnomon = make_shared<GlobalScopeGnomon>();
+		gnomon = make_shared<CodeUnitScopeGnomon>();
 	else if( dynamic_pointer_cast<CPPTree::SequentialScope>(node) )
-		gnomon = make_shared<LocalScopeGnomon>();
+		gnomon = make_shared<CompoundScopeGnomon>();
 	else if( dynamic_pointer_cast<CPPTree::Enum>(node) )
 		gnomon = make_shared<EnumeratorScopeGnomon>();
 	else if( auto record = dynamic_pointer_cast<CPPTree::Record>(node) )
 	{
 		TreePtr<Node> init_access = record->GetInitialAccess();
 		ASSERT( init_access ); // Records must always specify an initial access
-		gnomon = make_shared<FieldScopeGnomon>( MakeStandardAgentFromTypeID( typeid(*init_access) ) );
+		gnomon = make_shared<RecordScopeGnomon>( MakeStandardAgentFromTypeID( typeid(*init_access) ) );
 	}
 	else if( dynamic_pointer_cast<CPPTree::CallableParams>(node) )
-		gnomon = make_shared<ParameterScopeGnomon>();
+		gnomon = make_shared<ParameterisationScopeGnomon>();
 	else
 		gnomon = make_shared<UnknownScopeGnomon>("non-scope explicit node " + nb->What());	
 		
@@ -719,7 +719,7 @@ void VNLangActions::OnAccessSpec( any loc, TreePtr<Node> access )
 {
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
-	if( auto fspg = dynamic_cast<FieldScopeGnomon *>(spg.get()) ) 	
+	if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) ) 	
 	{
 		stringstream ss;
 		ss << any_cast<YY::VNLangParser::location_type>(loc);
@@ -750,11 +750,11 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 	TreePtr<CPPTree::Instance> instance;
 	if( static_ )
 	{
-		if( dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
+		if( dynamic_cast<const ParameterisationScopeGnomon *>(spg.get()) )
 			throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(loc),
 				"static is not allowed for parameters.");
-		if( dynamic_cast<const GlobalScopeGnomon *>(spg.get()) )
+		if( dynamic_cast<const CodeUnitScopeGnomon *>(spg.get()) )
 			throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(loc),
 				"static is not supported at code unit level.");
@@ -785,9 +785,9 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 						any_cast<YY::VNLangParser::location_type>(loc),
 						"nearest prerestrict " + nb->What() + " cannot disambiguate an instance declaration" + note); // TODO it could if the pre-restriction was to eg a Record etc			
 	}
-	else if( dynamic_cast<const ParameterScopeGnomon *>(spg.get()) )
+	else if( dynamic_cast<const ParameterisationScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
-	else if( auto fspg = dynamic_cast<FieldScopeGnomon *>(spg.get()) )
+	else if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) )
 	{ 
 		auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
 		for( const QualifierData &q : quals_pre )
@@ -817,9 +817,9 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 	}
 	else if( dynamic_cast<const EnumeratorScopeGnomon *>(spg.get()) ) 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>();  //TODO change to Enumerator when do enums
-	else if( dynamic_cast<const GlobalScopeGnomon *>(spg.get()) ) 
+	else if( dynamic_cast<const CodeUnitScopeGnomon *>(spg.get()) ) 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
-	else if( dynamic_cast<const LocalScopeGnomon *>(spg.get()) ) 
+	else if( dynamic_cast<const CompoundScopeGnomon *>(spg.get()) ) 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Local>>(); 
 	else 
 		ASSERT(false)("Unknown gnomon: ")(spg);
@@ -897,12 +897,12 @@ TreePtr<Node> VNLangActions::StartRecord( any loc, string keyword )
 }
 
 
-shared_ptr<Gnomon> VNLangActions::MakeFieldGnomon( TreePtr<Node> rec )
+shared_ptr<Gnomon> VNLangActions::MakeRecordScopeGnomon( TreePtr<Node> rec )
 {
 	auto r = TreePtr<CPPTree::Record>::DynamicCast(rec);
 	ASSERT(r);
 	
-	return make_shared<FieldScopeGnomon>(r->GetInitialAccess());
+	return make_shared<RecordScopeGnomon>(r->GetInitialAccess());
 }
 
 

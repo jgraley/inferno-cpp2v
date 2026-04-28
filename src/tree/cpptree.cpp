@@ -6,7 +6,12 @@
 #include "typeof.hpp"
 
 #define EXPLICIT_BASE 0
+
+// Contraversial. We could instead render access from Instance (not coded) or
+// from both places with some strategy.
 #define RENDER_ACCESS_FROM_RECORD
+
+//#define NEW_RENDER_INSTANCE_INSIDE_EXPLICIT
 
 using namespace CPPTree;
 
@@ -880,8 +885,6 @@ string NonConst::GetRender( VN::RendererInterface *, Production surround_prod, P
 
 //////////////////////////// Instance //////////////////////////////
 
-#define NEW_RENDER_INSTANCE_INSIDE_EXPLICIT
-
 Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Policy policy) const
 { 
 	bool will_split = policy.can_split_instances && 
@@ -972,7 +975,7 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 	// Temporarily don't render non-empty member inits - I don't thing the grammar for them exists yet
 	if( policy.compound_uses_vn_separator ) // doing VN render
 		if( auto mis = dynamic_cast<MembInitSeq *>(this) ) // Has a member init capability..
-	//		if( !mis->memb_inits.empty() ) // ...which isn't empty 
+			if( !mis->memb_inits.empty() || !ReadArgs::use.count("f") ) // ...which isn't empty 
 				throw TemporarilyDisabled(); 	
 
 	Append( ls, RenderInitPre(renderer, sub_policy) );
