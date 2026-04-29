@@ -105,6 +105,7 @@ public:
 			convert_argumentation_to_seq(true),
 			boot_statements_using_braces(true),
 			compound_uses_vn_separator(false),
+			is_vn_render_for_temp_disables(false),
 			goto_uses_ref_and_deref(true),
 			refuse_local_node_types(false),
 			full_render_code_unit(true),
@@ -126,6 +127,7 @@ public:
 		bool convert_argumentation_to_seq;
 		bool boot_statements_using_braces;
 		bool compound_uses_vn_separator;
+		bool is_vn_render_for_temp_disables;
 		bool goto_uses_ref_and_deref;
 		bool refuse_local_node_types;
 		bool full_render_code_unit;

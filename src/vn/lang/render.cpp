@@ -154,6 +154,9 @@ Syntax::Policy Render::GetDefaultPolicy()
 	// Need to separate members from statements in Compound
 	policy.compound_uses_vn_separator = true;
 	
+	// TRUE for VN renders when temporarily disabling stuff
+	policy.is_vn_render_for_temp_disables = true;
+	
 	// Don't bother trying to use * and && with goto-a-variable
 	policy.goto_uses_ref_and_deref = false;
 	
@@ -404,7 +407,7 @@ string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, S
 	}
 	catch( Syntax::Refusal &ex ) 
 	{
-		return "/*"+ex.What()+"*/"+RenderNodeExplicit(node, surround_prod, policy);
+		return RenderNodeExplicit(node, surround_prod, policy);
 	}
 }		
 

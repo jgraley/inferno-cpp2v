@@ -247,9 +247,11 @@ const ContainerInterface::iterator &ContainerInterface::erase( const iterator &i
 }
 
 
-bool ContainerInterface::empty() 
+bool ContainerInterface::empty() const
 { 
-    return begin()==end(); 
+    // TODO support const_interator properly and get rid of this const_cast
+    ContainerInterface *nct = const_cast<ContainerInterface *>(this);
+    return nct->begin() == nct->end(); 
 }
 
 

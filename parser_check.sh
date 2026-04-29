@@ -8,7 +8,7 @@ P1=p1${I_NO_SPACES}
 GP1=gp1${I_NO_SPACES}
 P2=p2${I_NO_SPACES}
 GP2=gp2${I_NO_SPACES}
-rm -rf ${P1} gp1 p2 gp2
+rm -rf ${P1} ${GP1} ${P2} ${GP2}
 
 # Render the built-in patterns 
 mkdir -p ${P1} 

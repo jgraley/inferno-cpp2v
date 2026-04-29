@@ -104,7 +104,7 @@ public:
     virtual const TreePtrInterface &back();
     virtual const iterator &erase( const iterator_interface &it ) = 0;
     const iterator &erase( const iterator &it );
-    virtual bool empty();
+    virtual bool empty() const;
     virtual int size() const;
     //virtual int count( const TreePtrInterface &gx ) = 0;
     virtual void clear() = 0;
@@ -195,7 +195,7 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
 
     typedef iterator const_iterator;
 
-    bool empty() override
+    bool empty() const override
     {
         return Impl::empty();
     }

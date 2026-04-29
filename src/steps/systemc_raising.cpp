@@ -196,12 +196,12 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     l_module->members = (l_overcons, l_process, l_decls);
     l_module->bases = (l_bases);
     l_overcons->through = ls_cons;       
-    ls_cons->initialiser = ls_comp;
-    ls_comp->members = l_cdecls;
-    ls_comp->statements = (l_pre, ls_pcall, l_post);
     ls_cons->constancy = MakePatternNode<NonConst>();
     ls_cons->type = l_ctype;
     ls_cons->identifier = l_ident;
+    ls_cons->initialiser = ls_comp;
+    ls_comp->members = l_cdecls;
+    ls_comp->statements = (l_pre, ls_pcall, l_post);
     l_ctype->params = (l_ctype_param); // one parameter
     l_ctype_param->constancy = MakePatternNode<NonConst>();
     l_ctype_param->initialiser = MakePatternNode<Uninitialised>();
@@ -212,11 +212,11 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_arg->value = ls_id;
     l_overcons->overlay = lr_cons;
     lr_cons->constancy = MakePatternNode<NonConst>();    
+    lr_cons->type = l_ctype;
+    lr_cons->identifier = l_ident;
     lr_cons->initialiser = lr_comp;
     lr_comp->members = l_cdecls;
     lr_comp->statements = (l_pre, l_post);
-    lr_cons->type = l_ctype;
-    lr_cons->identifier = l_ident;
     
     l_process->constancy = MakePatternNode<NonConst>();
     l_process->identifier = ls_id;

@@ -7,12 +7,6 @@
 
 #define EXPLICIT_BASE 0
 
-// Contraversial. We could instead render access from Instance (not coded) or
-// from both places with some strategy.
-#define RENDER_ACCESS_FROM_RECORD
-
-//#define NEW_RENDER_INSTANCE_INSIDE_EXPLICIT
-
 using namespace CPPTree;
 
 //////////////////////////// Uninitialised ///////////////////////////////
@@ -903,26 +897,25 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 string Instance::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {        
 	(void)surround_prod;
-#ifndef NEW_RENDER_INSTANCE_INSIDE_EXPLICIT	
-	// TODO parser will need to give scope gnomons to actions after parsing EXPLICIT class, enum, compound etc
-	// so Actions can disambiguate.
-	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
-		throw RefuseDifficultSyntax(); 
-#endif
+	string s;
+	
+	//s += "/*" + to_string((int)surround_prod) + "*/";
+	
+	s += GetRenderImpl( renderer, policy );
 		
 	// Don't render if the incoming pointer is not some kind of Declaration. This catches cases
 	// like Stuff terminus, where the parser won't have enough information to determine whether
-	// we have Local, Global, Field etc
+	// we have Local, Global, Field etc. TODO better to use a scope-like thing?
 	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
 	{
-		return "‽" + 
-		       VN::Render::RenderNodeTypeName(shared_from_this()) + 
-		       "(" +
-		       GetRenderImpl( renderer, policy ) + 
-		       ")";
+		s = "‽" + 
+		    VN::Render::RenderNodeTypeName(shared_from_this()) + 
+		    "(" +
+		    s + 
+		    ")";
 	}
 		
-	return GetRenderImpl( renderer, policy );
+	return s;
 }
 
 			
@@ -971,12 +964,6 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 		policy.definitions->push(TreePtr<Instance>(shared_from_this()));
 		return Join( ls, " " );
 	}		
-
-	// Temporarily don't render non-empty member inits - I don't thing the grammar for them exists yet
-	if( policy.compound_uses_vn_separator ) // doing VN render
-		if( auto mis = dynamic_cast<MembInitSeq *>(this) ) // Has a member init capability..
-			if( !mis->memb_inits.empty() || !ReadArgs::use.count("f") ) // ...which isn't empty 
-				throw TemporarilyDisabled(); 	
 
 	Append( ls, RenderInitPre(renderer, sub_policy) );
 
@@ -1053,7 +1040,7 @@ bool Global::ShouldSplitInstance( Policy policy ) const
 //////////////////////////// Field //////////////////////////////
 
 list<string> Field::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
-{
+{		
 	// TODO render it here if it's changing and return it
 	if( policy.cur_access ) // are we in a record scope
 		*policy.cur_access = access;
@@ -1069,6 +1056,15 @@ list<string> Field::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy p
 
 list<string> Field::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
 {
+	// Temporarily don't render non-empty member inits - I don't thing the grammar for them exists yet
+	if( policy.is_vn_render_for_temp_disables ) // doing VN render
+	{
+		if( !ReadArgs::use.count("f") ) 
+			throw TemporarilyDisabled(); 	
+		if( !memb_inits.empty() )  
+			throw TemporarilyDisabled(); // Would render member inits TODO be able to parse these
+	}
+
 	return { RenderMemberInits(renderer, policy) };
 }
 
@@ -1578,8 +1574,17 @@ string Record::GetRender( VN::RendererInterface *renderer, Production production
 
 
 string Record::GetKeyword() const
-{
-	throw UnimplementedKeyword();
+{	
+	if( ReadArgs::use.count("k") )
+	{
+		// Short form of explicit has no VN parens and only serves to inject a 
+		// node name into a syntax we already know how to render.
+		return "⯁" + VN::Render::RenderNodeTypeName(shared_from_this());
+	}
+	else
+	{
+		throw UnimplementedKeyword();
+	}
 }
 
 
@@ -1602,7 +1607,7 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 	member_policy.permit_static_keyword = true; // In a record body, static means global
 	
     // Emit preprocs and an incomplete for each record 
-	shared_ptr<Syntax> prev_access = GetInitialAccess();
+	shared_ptr<Syntax> prev_access = *policy.cur_access;
     for( auto &d : sorted )
     {       
 		// Do this before checking access spec, so that the cur_access can be updated
@@ -1612,13 +1617,14 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 		// otherwise force to Public because decls don't have an access spec). TODO fix this, #877
 		shared_ptr<Syntax> this_access = *policy.cur_access;
 			
-#ifdef RENDER_ACCESS_FROM_RECORD
-		type_index prev_access_ti( typeid(*prev_access) );
-		type_index this_access_ti( typeid(*this_access) );
-		if( prev_access_ti != this_access_ti )
+		// We will render an access spec if the pointer changes, even if it's just switching
+		// to another access of the same type. This is because the renderer does not duplicate 
+		// accesses used more than once but instead couples the usage to the same access. 
+		//s += "/* "+Trace(prev_access)+" -> "+Trace(this_access)+" */";
+		if( prev_access != this_access )
 			s += renderer->DoRenderPreserve( TreePtr<Node>(dynamic_pointer_cast<Node>(this_access)), Production::BARE_STMT_DECL, member_policy ) + ":";
 		prev_access = this_access;
-#endif
+
         s += rendered_member;
     }
    
