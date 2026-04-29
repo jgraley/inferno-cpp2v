@@ -191,7 +191,7 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 {	
     INDENT(">");
     string s;
-		
+
 	if( ReadArgs::use.count("c") )
 		s += SSPrintf("\n//%s DoRenderPreserve Node %s called from %p\n", 
 				      Tracer::GetPrefix().c_str(), 
@@ -222,6 +222,7 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_p
     Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
 
 	string s;
+
 	if( ReadArgs::use.count("c") )
 		s += SSPrintf("\n//  %s Node %s, surround prod: %d, node prod: %d\n", 
 					  Tracer::GetPrefix().c_str(), 
@@ -231,7 +232,7 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_p
 
 	// we only act inside an DIRECT_INIT production and never on already-matching production
 	if( surround_prod != Syntax::Production::DIRECT_INIT || node_prod == surround_prod )
-		return AccomodateBoot(node, surround_prod, policy ); 
+		return s + AccomodateBoot(node, surround_prod, policy ); 
 
 	// Deal with expression in initialiser production by prepending =
 	if( node_prod != Syntax::Production::COMPOUND ) // no = for COMPOUND
@@ -249,9 +250,10 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 {
     Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
 							 		
-    if( !(Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod)) )
-		return AccomodateSemicolon( node, surround_prod, policy );
 	string s;
+		
+    if( !(Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod)) )
+		return s + AccomodateSemicolon( node, surround_prod, policy );
 
     switch(node_prod)
     {
@@ -300,7 +302,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 			return s;
         
         default:        
-			return AccomodateSemicolon( node, surround_prod, policy );         
+			return s + AccomodateSemicolon( node, surround_prod, policy );         
     }
 }
 
@@ -398,16 +400,18 @@ string Render::RenderNullPointer(Syntax::Production surround_prod, Syntax::Polic
 
 string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {	
+	string s;
+	
 	try
 	{	
 		if( const Agent *agent = Agent::TryAsAgentConst(node) )
-			return agent->GetAgentRender( this, surround_prod, policy );
+			return s + agent->GetAgentRender( this, surround_prod, policy );
 		else
-			return node->GetRender(this, surround_prod, policy); 
+			return s + node->GetRender(this, surround_prod, policy); 
 	}
 	catch( Syntax::Refusal &ex ) 
 	{
-		return RenderNodeExplicit(node, surround_prod, policy);
+		return s + RenderNodeExplicit(node, surround_prod, policy);
 	}
 }		
 
@@ -622,6 +626,10 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 
 	try
 	{
+		// Prevent side-effects on items pointed to by the policy
+		policy.cur_access = nullptr;
+		policy.definitions = nullptr;
+		
 		// A lot of nodes have GetMyProduction() but not GetRender(). If GetRender() is not
 		// implemented, we'll generate explicit (⯁) form, which is EXPLICIT_NODE.
 		// Passing in the real renderer would cause unwanted side-effects.

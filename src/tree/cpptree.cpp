@@ -102,28 +102,23 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, VN
 	// Note 2: access specs are attached to declarations, not the surrounding record, so that
 	// for example a delta pattern can be used to change the access spec of a field.
 	
-	list<string> ls;
-	bool render = false;
-	
+	list<string> ls;	
 	if( policy.cur_access )
 	{
-		ls.push_back( "/* "+Trace(*policy.cur_access)+" -> "+Trace(new_access)+" */" );
-		render = (new_access.get() != policy.cur_access->get());			
+		//ls.push_back( "/* "+Trace(*policy.cur_access)+" -> "+Trace(new_access)+" */" );
+#ifdef DEEP_ACCESS_SPECS
+		if( new_access.get() != policy.cur_access->get() )			
+			ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );
+#else
+		(void)renderer;
+#endif	
 		*policy.cur_access = new_access;
 	}
 	else
 	{
-		ls.push_back( "/* NO SCOPE -> "+Trace(new_access)+" NOT RENDERING */" );
+		//ls.push_back( "/* NO SCOPE -> "+Trace(new_access)+" NOT RENDERING */" );
 	}
-	
-#ifdef DEEP_ACCESS_SPECS
-	if( render )
-		ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );
-#else
-	(void)render;
-	(void)renderer;
-#endif		
-		
+
 	return ls;
 }
 
@@ -936,8 +931,6 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production surround
 	(void)surround_prod;
 	string s;
 	
-	//s += "/*" + to_string((int)surround_prod) + "*/";
-	
 	s += GetRenderImpl( renderer, policy );
 		
 	// Don't render if the incoming pointer is not some kind of Declaration. This catches cases
@@ -1578,6 +1571,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Production production
 	shared_ptr<Syntax> cur_access = GetInitialAccess();
 	ASSERT( cur_access );		
 	policy.cur_access = &cur_access;
+	//ls.push_back("/* start record with " + Trace(*policy.cur_access) + "*/");
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
@@ -1645,6 +1639,7 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 #endif
     for( auto &d : sorted )
     {       
+		//s += "/* in record with " + Trace(*member_policy.cur_access) + "*/";
 		// Do this before checking access spec, so that the cur_access can be updated
 		string rendered_member = renderer->DoRender( &d, Production::STMT_DECL, member_policy );	
 			
