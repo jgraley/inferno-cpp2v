@@ -254,10 +254,10 @@ string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production s
 {
 	(void)surround_prod;	
 
-	if( policy.missing_access_to_public && policy.cur_access )
-		*policy.cur_access = MakeTreeNode<Public>(); // see #877
-
     list<string> ls;
+
+	if( policy.missing_access_to_public )
+	    Append( ls, md->ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), this, policy ) ); // see #877
 
     // ---- Proto ----
 	Append( ls, {DoRender( &md->identifier, Syntax::Production::POSTFIX, policy )} );
@@ -278,16 +278,20 @@ string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production s
 string CppRender::RenderTypedef( TreePtr<Typedef> t, Syntax::Production surround_prod, Syntax::Policy policy ) try
 {
 	(void)surround_prod;
+    list<string> ls;
 
-	if( policy.missing_access_to_public && policy.cur_access )
-		*policy.cur_access = MakeTreeNode<Public>(); // see #877
+	if( policy.missing_access_to_public )
+	    Append( ls, t->ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), this, policy ) ); // see #877
 
 	Syntax::Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
     Syntax::Production starting_declarator_prod = Syntax::Production::PRIMARY_EXPR;
-
+	ls.push_back("typedef");
+	string s = Join(ls);
+	
     auto id = DoRender( &t->identifier, starting_declarator_prod, id_policy );
-    return "typedef " + DoRenderTypeAndDeclarator( &(t->type), id, starting_declarator_prod, Syntax::Production::TYPE_IN_DECLARATION, policy );    
+    ls.push_back( DoRenderTypeAndDeclarator( &(t->type), id, starting_declarator_prod, Syntax::Production::TYPE_IN_DECLARATION, policy ) );
+    return Join(ls);    
 }
 DEFAULT_CATCH_CLAUSE
 

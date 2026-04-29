@@ -7,6 +7,8 @@
 
 #define EXPLICIT_BASE 0
 
+#define DEEP_ACCESS_SPECS
+
 using namespace CPPTree;
 
 //////////////////////////// Uninitialised ///////////////////////////////
@@ -89,6 +91,41 @@ bool Declaration::ShouldSplitInstance( Policy ) const
 	// Splitting instances is generally unsafe, unless we know how to do it for a given kind of Declaration.
 	return false; 
 }	
+
+
+list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, VN::RendererInterface *renderer, Policy policy ) const
+{
+	// Note 1: we will render an access spec if the pointer changes, even if it's just switching
+	// to another access of the same type. This is because the renderer does not duplicate 
+	// accesses used more than once but instead couples the usage to the same access. 
+	
+	// Note 2: access specs are attached to declarations, not the surrounding record, so that
+	// for example a delta pattern can be used to change the access spec of a field.
+	
+	list<string> ls;
+	bool render = false;
+	
+	if( policy.cur_access )
+	{
+		ls.push_back( "/* "+Trace(*policy.cur_access)+" -> "+Trace(new_access)+" */" );
+		render = (new_access.get() != policy.cur_access->get());			
+		*policy.cur_access = new_access;
+	}
+	else
+	{
+		ls.push_back( "/* NO SCOPE -> "+Trace(new_access)+" NOT RENDERING */" );
+	}
+	
+#ifdef DEEP_ACCESS_SPECS
+	if( render )
+		ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );
+#else
+	(void)render;
+	(void)renderer;
+#endif		
+		
+	return ls;
+}
 
 //////////////////////////// DeclScope ///////////////////////////////
 
@@ -1039,12 +1076,9 @@ bool Global::ShouldSplitInstance( Policy policy ) const
 
 //////////////////////////// Field //////////////////////////////
 
-list<string> Field::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
+list<string> Field::RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const
 {		
-	// TODO render it here if it's changing and return it
-	if( policy.cur_access ) // are we in a record scope
-		*policy.cur_access = access;
-	return {};
+	return ApplyAndRenderAccessSpec( access, renderer, policy );
 }
 
 
@@ -1535,10 +1569,11 @@ Syntax::Production Record::GetMyProductionTerminal() const
 string Record::GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) 
 {
 	INDENT("R");
+	list<string> ls;
 	// For when we are a record-in-a-record i.e. member class
-	if( policy.missing_access_to_public && policy.cur_access )
-		*policy.cur_access = MakeTreeNode<Public>(); // see #877
-	
+	if( policy.missing_access_to_public )
+		Append( ls, ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), renderer, policy ) );// see #877
+
 	// For our members
 	shared_ptr<Syntax> cur_access = GetInitialAccess();
 	ASSERT( cur_access );		
@@ -1549,15 +1584,13 @@ string Record::GetRender( VN::RendererInterface *renderer, Production production
 		
 	try
 	{
-		string s;
-		s += GetKeyword(); // class, struct etc
-		s += " ";
-		s += renderer->DoRender(&identifier, Production::PRIMARY_EXPR, id_policy); 
-
+		ls.push_back( GetKeyword() ); // class, struct etc
+		ls.push_back( renderer->DoRender(&identifier, Production::PRIMARY_EXPR, id_policy) ); 
+		string s = Join(ls);
 		if( policy.force_incomplete_records )
 			return s;
 
-		s += RenderExtras(renderer, Production::SPACE_SEP_STMT_DECL, policy);
+		s += RenderExtras(renderer, Production::SPACE_SEP_STMT_DECL, policy);	
 		s += "\n";
 		s += RenderBody(renderer, policy);
 		return s;
@@ -1607,12 +1640,15 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 	member_policy.permit_static_keyword = true; // In a record body, static means global
 	
     // Emit preprocs and an incomplete for each record 
+#ifndef DEEP_ACCESS_SPECS
 	shared_ptr<Syntax> prev_access = *policy.cur_access;
+#endif
     for( auto &d : sorted )
     {       
 		// Do this before checking access spec, so that the cur_access can be updated
 		string rendered_member = renderer->DoRender( &d, Production::STMT_DECL, member_policy );	
 			
+#ifndef DEEP_ACCESS_SPECS
 		// Decide access spec for this declaration (explicit if instance, 
 		// otherwise force to Public because decls don't have an access spec). TODO fix this, #877
 		shared_ptr<Syntax> this_access = *policy.cur_access;
@@ -1624,7 +1660,7 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 		if( prev_access != this_access )
 			s += renderer->DoRenderPreserve( TreePtr<Node>(dynamic_pointer_cast<Node>(this_access)), Production::BARE_STMT_DECL, member_policy ) + ":";
 		prev_access = this_access;
-
+#endif
         s += rendered_member;
     }
    
