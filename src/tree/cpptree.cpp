@@ -93,7 +93,7 @@ bool Declaration::ShouldSplitInstance( Policy ) const
 }	
 
 
-list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, VN::RendererInterface *renderer, Policy policy ) const
+list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bool force, VN::RendererInterface *renderer, Policy policy ) const
 {
 	// Note 1: we will render an access spec if the pointer changes, even if it's just switching
 	// to another access of the same type. This is because the renderer does not duplicate 
@@ -114,9 +114,10 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, VN
 #endif	
 		*policy.cur_access = new_access;
 	}
-	else
+	else if( force )
 	{
-		//ls.push_back( "/* NO SCOPE -> "+Trace(new_access)+" NOT RENDERING */" );
+		// Parser cannot determine the access any other way, so treat as if always given
+		ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );
 	}
 
 	return ls;
@@ -963,12 +964,13 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 	if( TreePtr<Constructor>::DynamicCast(type) )
 		ASSERT( !identifier || TreePtr<ConstructorIdentifier>::DynamicCast(identifier) )(identifier);
 	if( TreePtr<Destructor>::DynamicCast(type) )
-		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);
-	
-	Append( ls, RenderAccessSpec(renderer, sub_policy) );
+		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);	
 		
     if( !policy.force_initialisation )
+    {
+		Append( ls, RenderAccessSpec(renderer, sub_policy) );
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
+	}
     
 	string cs = renderer->DoRender(&constancy, Production::SPACE_SEP_TYPE, sub_policy);
     if( !cs.empty() )
@@ -1071,7 +1073,9 @@ bool Global::ShouldSplitInstance( Policy policy ) const
 
 list<string> Field::RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const
 {		
-	return ApplyAndRenderAccessSpec( access, renderer, policy );
+	// If we don't have a current access, the fact that this is a field 
+	// over-rides, so force an access spec to be rendered.
+	return ApplyAndRenderAccessSpec( access, true, renderer, policy );
 }
 
 
@@ -1572,7 +1576,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Production production
 	list<string> ls;
 	// For when we are a record-in-a-record i.e. member class
 	if( policy.missing_access_to_public )
-		Append( ls, ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), renderer, policy ) );// see #877
+		Append( ls, ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, renderer, policy ) );// see #877
 
 	// For our members
 	shared_ptr<Syntax> cur_access = GetInitialAccess();

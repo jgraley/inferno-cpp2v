@@ -451,10 +451,10 @@ statement	: compound
 			| expression ';'
 			| ';'																{ $$ = vn->OnNop(@1); }      
 
-// TODO make these return list<TreePtr<Node>>
-// TODO make these stackable, probably need to to the same for access specs to avoid conflict through symmetry
-// Note: https://alx71hub.github.io/hcb/#labeled-statement: a statementless label is intolerable (and hard to 
-// parse because not symmetrical with access specs in declarations)
+// TODO support labelled statement (other than Nop) but it will not be possible to apply conj/disj 
+// because those can only operate on a single node and we'd be producing a pair {Label, Statement}
+// so such a thing would be reachable only from stmt_decls which will probably conflict due to loss of symmetry
+// with access specs on declarations.
 statement_nc: statement_nl
 			| CASE_KEYWORD expression ':' ';'							{ $$ = vn->OnCase($2, @2); } 
 			| CASE_KEYWORD expression RANGE_OP expression ':' ';'		{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 

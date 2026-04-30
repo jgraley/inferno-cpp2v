@@ -787,32 +787,8 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 	}
 	else if( dynamic_cast<const ParameterisationScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
-	else if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) )
-	{ 
-		auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
-		for( const QualifierData &q : quals_pre )
-		{
-			if( q.cat == QualCat::NODE )
-			{
-				if( auto vq = TreePtr<CPPTree::Virtuality>::DynamicCast(q.node) )
-					field->virt = vq;
-					
-				if( auto aq = TreePtr<CPPTree::AccessSpec>::DynamicCast(q.node) )
-					throw YY::VNLangParser::syntax_error(
-						any_cast<YY::VNLangParser::location_type>(loc),
-						"Java-like access spec detected: " + string(DiagQuote(Traceable::TypeIdName( *aq )).c_str()) );
-			}
-		}
-		if( !field->virt ) // absence of a vituality means non-virtual, for wild use ⯁Virtuality⦅⦆
-			field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();		
-			
-		stringstream ss;
-		ss << any_cast<YY::VNLangParser::location_type>(loc);
-		FTRACE("I'm putting in ")(fspg->current_access)(" at ")(ss.str())("\n");
-		field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour
-
-		instance = field; // TODO store current access in the gnomon after #890
-	}
+	else if( dynamic_cast<const RecordScopeGnomon *>(spg.get()) )
+		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
 	else if( dynamic_cast<const EnumeratorScopeGnomon *>(spg.get()) ) 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>();  //TODO change to Enumerator when do enums
 	else if( dynamic_cast<const CodeUnitScopeGnomon *>(spg.get()) ) 
@@ -841,6 +817,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 				"Expected concrete declaration but got abstract.");
 	}
 	
+	// Now fill in fields derived from the qualifiers	
 	instance->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
 	for( const QualifierData &q : quals_pre )
 		if( q.cat == QualCat::NODE )
@@ -849,6 +826,38 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 	
 	// If indeed there is an initialiser, call OnInstanceInit() to over-ride this
 	instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
+
+	// Now fill in any subclass-specific fields
+	if( auto field = TreePtr<CPPTree::Field>::DynamicCast(instance) )
+	{
+		for( const QualifierData &q : quals_pre )
+		{
+			if( q.cat == QualCat::NODE )
+			{
+				if( auto vq = TreePtr<CPPTree::Virtuality>::DynamicCast(q.node) )
+					field->virt = vq;
+					
+				if( auto aq = TreePtr<CPPTree::AccessSpec>::DynamicCast(q.node) )
+					throw YY::VNLangParser::syntax_error(
+						any_cast<YY::VNLangParser::location_type>(loc),
+						"Java-like access spec detected: " + string(DiagQuote(Traceable::TypeIdName( *aq )).c_str()) );
+			}
+		}
+		if( !field->virt ) // absence of a vituality means non-virtual, for wild use ⯁Virtuality⦅⦆
+			field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();		
+			
+		if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) )
+		{
+			stringstream ss;
+			ss << any_cast<YY::VNLangParser::location_type>(loc);
+			FTRACE("I'm putting in ")(fspg->current_access)(" at ")(ss.str())("\n");
+			field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour
+		}
+		else
+		{
+			ASSERTFAIL();// TODO here, we should just apply the access spec, or we would if we had it :(
+		}
+	}
 
 	return instance;
 }

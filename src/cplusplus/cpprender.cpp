@@ -257,7 +257,7 @@ string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production s
     list<string> ls;
 
 	if( policy.missing_access_to_public )
-	    Append( ls, md->ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), this, policy ) ); // see #877
+	    Append( ls, md->ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, this, policy ) ); // see #877
 
     // ---- Proto ----
 	Append( ls, {DoRender( &md->identifier, Syntax::Production::POSTFIX, policy )} );
@@ -281,7 +281,7 @@ string CppRender::RenderTypedef( TreePtr<Typedef> t, Syntax::Production surround
     list<string> ls;
 
 	if( policy.missing_access_to_public )
-	    Append( ls, t->ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), this, policy ) ); // see #877
+	    Append( ls, t->ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, this, policy ) ); // see #877
 
 	Syntax::Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
