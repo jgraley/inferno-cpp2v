@@ -449,16 +449,17 @@ open_statement    	: expression
 statement	: compound 
 			| statement_nc %prec ';'
 			| expression ';'
+			| ';'																{ $$ = vn->OnNop(@1); }      
 
 // TODO make these return list<TreePtr<Node>>
 // TODO make these stackable, probably need to to the same for access specs to avoid conflict through symmetry
 // Note: https://alx71hub.github.io/hcb/#labeled-statement: a statementless label is intolerable (and hard to 
 // parse because not symmetrical with access specs in declarations)
 statement_nc: statement_nl
-			| CASE_KEYWORD expression ':' statement_nl							{ $$ = vn->OnCase($2, @2); } 
-			| CASE_KEYWORD expression RANGE_OP expression ':' statement_nl		{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
-			| DEFAULT_KEYWORD ':' statement_nl									{ $$ = vn->OnDefault(@$); } 
-			| expr_prefix ':' statement_nl		 								{ $$ = vn->OnLabel($1, @1); } 
+			| CASE_KEYWORD expression ':' ';'							{ $$ = vn->OnCase($2, @2); } 
+			| CASE_KEYWORD expression RANGE_OP expression ':' ';'		{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
+			| DEFAULT_KEYWORD ':' ';'									{ $$ = vn->OnDefault(@$); } 
+			| expr_prefix ':' ';'		 								{ $$ = vn->OnLabel($1, @1); } 
 
 // _nc here means "not a compound"							
 statement_nl: bare_statement ';'												{ $$ = $1; }      
@@ -468,7 +469,6 @@ statement_nl: bare_statement ';'												{ $$ = $1; }
 			  %prec KEYWORD_ARGS_BODY_CHAIN_STMT								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
 			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' statement
 			  CHAINING_KEYWORD statement										{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
-			| ';'																{ $$ = vn->OnNop(@1); }      
 
 bare_statement	: KEYWORD_SIMPLE_STMT											{ $$ = vn->OnSimpleStmt($1.as_ascii, @1); }
 				| KEYWORD_SPACE_SEP_STMT expression								{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }

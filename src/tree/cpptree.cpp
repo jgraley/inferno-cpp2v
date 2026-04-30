@@ -1161,7 +1161,14 @@ string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production,
 {
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
-	return renderer->DoRender( &identifier, Production::PURE_IDENTIFIER, id_policy) + ":";
+	// Two reasons to add the semicolon at the end:
+	// 1. C syntax: a label at the end of a compound would otherwise render as a label 
+	//    without a statement which is not allowed, see https://alx71hub.github.io/hcb/#labeled-statement 
+	// 2. The parser rules for labels must be symmetrical to those for access specs
+	//    and the latter are tightly bound to declarations so that we can for example
+	//    change the access in a delta pattern. The ; gets around this by making the 
+	//    label a complete statement.
+	return renderer->DoRender( &identifier, Production::PURE_IDENTIFIER, id_policy) + ":" + ";";
 }
 
 //////////////////////////// Callable //////////////////////////////
@@ -2028,8 +2035,6 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
 		s += "⚬";
     for( auto &st : statements )    
 		s += renderer->DoRender( &st, Production::STMT_DECL_LOW, policy );    
-	if( s.back() == ':' )
-		s += ";"; // https://alx71hub.github.io/hcb/#labeled-statement: a statementless label is intolerable
     s += " } ";
     return s;
 }
@@ -2227,25 +2232,28 @@ Syntax::Production SwitchTarget::GetMyProductionTerminal() const
 
 string RangeCase::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
+	// See LabelDeclaration::GetRender() about the ;
 	return "case " + 
 	       renderer->DoRender( &value_lo, Production::EXPR_CONST, policy) + 
 	       ".." +
 	       renderer->DoRender( &value_hi, Production::EXPR_CONST, policy) + 
-	       ":";	
+	       ":" + ";";	
 }
 
 //////////////////////////// Case //////////////////////////////
 
 string Case::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return "case " + renderer->DoRender( &value, Production::EXPR_CONST, policy) + ":";	
+	// See LabelDeclaration::GetRender() about the ;
+	return "case " + renderer->DoRender( &value, Production::EXPR_CONST, policy) + ":" + ";";	
 }
 
 //////////////////////////// Default //////////////////////////////
 
 string Default::GetRender( VN::RendererInterface *, Production, Policy )
 {
-	return "default:";	
+	// See LabelDeclaration::GetRender() about the ;
+	return "default:" + string() + ";";	
 }
 
 //////////////////////////// Continue ///////////////////////////////
