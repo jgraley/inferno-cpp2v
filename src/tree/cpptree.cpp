@@ -2028,6 +2028,8 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
 		s += "⚬";
     for( auto &st : statements )    
 		s += renderer->DoRender( &st, Production::STMT_DECL_LOW, policy );    
+	if( s.back() == ':' )
+		s += ";"; // https://alx71hub.github.io/hcb/#labeled-statement: a statementless label is intolerable
     s += " } ";
     return s;
 }

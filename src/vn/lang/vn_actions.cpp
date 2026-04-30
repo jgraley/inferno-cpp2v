@@ -806,8 +806,6 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		if( !field->virt ) // absence of a vituality means non-virtual, for wild use ⯁Virtuality⦅⦆
 			field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();		
 			
-		ASSERT( fspg->current_access );
-
 		stringstream ss;
 		ss << any_cast<YY::VNLangParser::location_type>(loc);
 		FTRACE("I'm putting in ")(fspg->current_access)(" at ")(ss.str())("\n");
