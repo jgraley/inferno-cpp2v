@@ -210,7 +210,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
     // These are rendered here, inside program scope but outside any additional scopes
     // that were on the scope stack when the instance was seen. These could go in a .cpp file.
 	Policy definition_policy = policy;
-	definition_policy.force_initialisation = true;
+	definition_policy.rendering_definitions = true;
 	while( !my_definitions.empty() )
     {
 		// def points to Declaration so that Instances won't refuse due policy.pointer_archetype
@@ -915,7 +915,7 @@ string NonConst::GetRender( VN::RendererInterface *, Production surround_prod, P
 Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Policy policy) const
 { 
 	bool will_split = policy.can_split_instances && 
-					  !policy.force_initialisation && 
+					  !policy.rendering_definitions && 
 					  ShouldSplitInstance(policy);
 	
 	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
@@ -955,9 +955,9 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 	list<string> ls;
 	
 	Policy sub_policy = policy;
-    sub_policy.force_initialisation = false; // stop at one level
+    sub_policy.rendering_definitions = false; // stop at one level
 	Policy id_policy = sub_policy;
-	if( !policy.force_initialisation )
+	if( !policy.rendering_definitions )
 		id_policy.resolve_identifier_scope = false;
 
 	// Demand consistency between type and identifier
@@ -966,7 +966,7 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 	if( TreePtr<Destructor>::DynamicCast(type) )
 		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);	
 		
-    if( !policy.force_initialisation )
+    if( !policy.rendering_definitions )
     {
 		Append( ls, RenderAccessSpec(renderer, sub_policy) );
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
@@ -982,11 +982,11 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 	// TODO const can appear in different places
 	//ls.push_back(renderer->DoRender(&constancy, Production::KEYWORD, policy) );
 
-    if( !policy.force_initialisation )
+    if( !policy.rendering_definitions )
 		Append( ls, RenderDeclSpecPost(renderer, sub_policy) );
 		    
 	if( policy.can_split_instances && 
-		!policy.force_initialisation && 
+		!policy.rendering_definitions && 
 		!TreePtr<Uninitialised>::DynamicCast(initialiser) &&
 		ShouldSplitInstance(policy) )
 	{
@@ -1006,7 +1006,7 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
     if( !TreePtr<Uninitialised>::DynamicCast(initialiser) )
 		ls.push_back( renderer->DoRender(&initialiser, Production::DIRECT_INIT, sub_policy) );
 
-	return Join( ls, " " ) + (policy.force_initialisation?"\n":"");
+	return Join( ls, " " ) + (policy.rendering_definitions?"\n":"");
 }
 
 

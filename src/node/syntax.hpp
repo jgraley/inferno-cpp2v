@@ -95,7 +95,7 @@ public:
 	struct Policy
 	{
 		Policy() : 
-			force_initialisation(false), 
+			rendering_definitions(false), 
 			force_incomplete_records(false),
 			split_bulky_statics(false),
 			permit_static_keyword(false),
@@ -117,7 +117,7 @@ public:
 			refuse_invisibles(true),
 			missing_access_to_public(true),
 			cur_access(nullptr) {}
-		bool force_initialisation;
+		bool rendering_definitions;
 		bool force_incomplete_records;
 		bool split_bulky_statics;
 		bool permit_static_keyword;

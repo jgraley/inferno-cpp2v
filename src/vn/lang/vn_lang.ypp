@@ -166,7 +166,7 @@ stmt_high
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
-%type <TreePtr<Node>> 				class_node class base_spec access_spec sticky_access_spec qualifier_node
+%type <TreePtr<Node>> 				class_node class base_spec access_spec access_clause qualifier_node
 %type <TreePtr<Node>>				instance instance_proto instance_proto_a
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named
@@ -303,7 +303,7 @@ open_declaration	: declaration
 					| bare_declaration
 
 declaration	: bare_declaration ';'								{ $$ = $1; }      
-			| instance_proto_a compound							{ $$ = vn->OnInstanceInit($1, @1, $2); }	
+			| instance_proto_a compound							{ vn->ApplyInitialiser($1, @1, $2); $$ = $1; }	
 
 bare_declaration: decl_prefix
 				| c_declaration
@@ -311,20 +311,19 @@ bare_declaration: decl_prefix
 c_declaration	: instance
 				| class
 
+// Invent ApplyAccessSpec() like ApplyInitialiser()
+// OnInstance() will still try to program the current access. But the new fn will override it with the parsed acess, and then try to update the current access
 instance		: instance_proto_a
-				| instance_proto_a ANY_NODE_OP					{ $$ = vn->OnInstanceInit($1, @1, nullptr); } // note: ☆ has ; but no =
-				| instance_proto_a C_ASSIGN assign_init			{ $$ = vn->OnInstanceInit($1, @1, $3); } 
+				| instance_proto_a ANY_NODE_OP					{ vn->ApplyInitialiser($1, @1, nullptr); $$ = $1; } // note: ☆ has ; but no =
+				| instance_proto_a C_ASSIGN assign_init			{ vn->ApplyInitialiser($1, @1, $3); $$ = $1; } 
 			
-instance_proto_a: instance_proto
-				| sticky_access_spec instance_proto							{ $$ = $2; } 
+instance_proto_a: 							  instance_proto
+				|				access_clause instance_proto	{ vn->ApplyAccessSpec($2, @1, $1); $$ = $2; } 
 
-sticky_access_spec : access_spec ':'											{ vn->OnAccessSpec(@1, $1); $$ = $1; } 
-				   | expr_prefix ':'											{ vn->OnAccessSpec(@1, $1); $$ = $1; } 	
-
-instance_proto	: type_for_declarator declarator								{ $$ = vn->OnInstance(@$, {}, $1, $2); }	
-				| qualifiers type_for_declarator declarator						{ $$ = vn->OnInstance(@$, $1, $2, $3); }	
-				| XSTRUCTOR declarator											{ $$ = vn->OnInstance(@$, {}, nullptr, $2); }	
-				| qualifiers XSTRUCTOR declarator								{ $$ = vn->OnInstance(@$, $1, nullptr, $3); }	
+instance_proto	: type_for_declarator declarator				{ $$ = vn->OnInstance(@$, {}, $1, $2); }	
+				| qualifiers type_for_declarator declarator		{ $$ = vn->OnInstance(@$, $1, $2, $3); }	
+				| XSTRUCTOR declarator							{ $$ = vn->OnInstance(@$, {}, nullptr, $2); }	
+				| qualifiers XSTRUCTOR declarator				{ $$ = vn->OnInstance(@$, $1, nullptr, $3); }	
 
 assign_init		: expression
 				| '{' '}'             				  			{ $$ = vn->OnArrayInitialiser({}); } 
@@ -360,8 +359,6 @@ decl_explicit_op_named 		: explicit_op_scope resolved_decl_name				{ $$ = vn->Ma
 decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_name			{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2.as_andata_block); 
                                                                                   vn->AddGnomon($$); }
                          
-access_spec		: qualifier_node 
-
 //////////////////////////////// CONCRETE DECLARATORS /////////////////////////////////////         
                           		
 declarator			: declarator_prefix									 
@@ -423,10 +420,10 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 				| DESIGNATED_NORMAL       				  					{ $$ = $1.as_designated; } // To match a designated Star
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
                                                                                                                                                          
-members			: member														{ $$.push_back($1); }
-				| members member 												{ $$ = $1; $$.push_back($2); }
-//				| sticky_access_spec ':' member									{ $$.push_back($3); } 
-//				| members sticky_access_spec ':' member							{ $$ = $1; $$.push_back($4); }
+members			: member													{ $$.push_back($1); }
+				| members member 											{ $$ = $1; $$.push_back($2); }
+//				| access_clause member										{ $$.push_back($3); } 
+//				| members access_clause member								{ $$ = $1; $$.push_back($4); }
 
 member			: declaration
 				| statement // to get wildcards etc TODO tighten this up? 											    
@@ -451,7 +448,7 @@ statement	: compound
 			| expression ';'
 			| ';'																{ $$ = vn->OnNop(@1); }      
 
-// TODO support labelled statement (other than Nop) but it will not be possible to apply conj/disj 
+// TODO support labelled statement (other than Nop) but it will not be possible to apply any VN operators 
 // because those can only operate on a single node and we'd be producing a pair {Label, Statement}
 // so such a thing would be reachable only from stmt_decls which will probably conflict due to loss of symmetry
 // with access specs on declarations.
@@ -673,6 +670,11 @@ qualifier_node	: qual_explicit_op_named itemisation						{ $$ = vn->OnExplicitNo
 
 qual_explicit_op_named 		: explicit_op_scope resolved_qual_name			{ $$ = vn->MakeScopeGnomonForNode($2.as_andata_block); 
                                                                               vn->AddGnomon($$.gnomon); }
+
+access_clause	: qualifier_node ':'										
+				| expr_prefix ':'									
+
+access_spec		: qualifier_node 
 
 //////////////////////////////////////// RECOGNISER GLUE /////////////////////////////////////////////
 // 2 things going on here:

@@ -715,22 +715,6 @@ BlockAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::B
 }
 
 
-void VNLangActions::OnAccessSpec( any loc, TreePtr<Node> access )
-{
-	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
-	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
-	if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) ) 	
-	{
-		stringstream ss;
-		ss << any_cast<YY::VNLangParser::location_type>(loc);
-		FTRACE("Access spec for gnomon ")(fspg)(" becomes ")(access)(" at ")(ss.str())("\n");
-		fspg->current_access = access;
-	}
-	else
-		return; // Let the declaration produce an error message
-}
-
-
 TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator )
 {	
 	string note = 
@@ -824,7 +808,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 			if( auto cq = TreePtr<CPPTree::Constancy>::DynamicCast(q.node) )
 				instance->constancy = cq;
 	
-	// If indeed there is an initialiser, call OnInstanceInit() to over-ride this
+	// If indeed there is an initialiser, call ApplyInitialiser() to over-ride this
 	instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
 
 	// Now fill in any subclass-specific fields
@@ -840,22 +824,20 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 				if( auto aq = TreePtr<CPPTree::AccessSpec>::DynamicCast(q.node) )
 					throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(loc),
-						"Java-like access spec detected: " + string(DiagQuote(Traceable::TypeIdName( *aq )).c_str()) );
+						"Java-like access spec detected: " + DiagQuote(Traceable::TypeIdName( *aq )) );
 			}
 		}
 		if( !field->virt ) // absence of a vituality means non-virtual, for wild use ⯁Virtuality⦅⦆
 			field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();		
 			
+		// If we're in a record, use the currently stored access spec
+		// Note: the access spec set here can be overridden by ApplyAccessSpec()
 		if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) )
 		{
 			stringstream ss;
 			ss << any_cast<YY::VNLangParser::location_type>(loc);
 			FTRACE("I'm putting in ")(fspg->current_access)(" at ")(ss.str())("\n");
-			field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour
-		}
-		else
-		{
-			ASSERTFAIL();// TODO here, we should just apply the access spec, or we would if we had it :(
+			field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour			
 		}
 	}
 
@@ -863,14 +845,41 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 }
 
 
-TreePtr<Node> VNLangActions::OnInstanceInit( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init )
+void VNLangActions::ApplyAccessSpec( TreePtr<Node> instance, any loc, TreePtr<Node> access )
+{
+	auto field = TreePtr<CPPTree::Field>::DynamicCast(instance);
+	if( !field )
+	{
+		stringstream ss;
+		ss << any_cast<YY::VNLangParser::location_type>(loc);
+		FTRACE(ss.str())("\nIgnoring access spec applied to non-field "+DiagQuote(Traceable::TypeIdName( *instance )) );
+		return; // TODO should be a syntax error
+	}
+
+	// Overwrite the access spec of the field with the supplied access spec
+	stringstream ss;
+	ss << any_cast<YY::VNLangParser::location_type>(loc);
+	FTRACE("I'm putting in ")(access)(" at ")(ss.str())("\n");
+	field->access = access; // Don't duplicate the subtree - we want coupling behaviour
+
+	// If we're in a record scope, update the stored access spec for future fields to use
+	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) ) 	
+	{
+		stringstream ss;
+		ss << any_cast<YY::VNLangParser::location_type>(loc);
+		FTRACE("Access spec for gnomon ")(fspg)(" becomes ")(access)(" at ")(ss.str())("\n");
+		fspg->current_access = access;
+	}
+}
+
+
+void VNLangActions::ApplyInitialiser( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init )
 {
 	auto o = TreePtr<CPPTree::Instance>::DynamicCast(instance);
 	ASSERT(o);
 	
 	o->initialiser = init;
-	
-	return o;
 }
 
 
