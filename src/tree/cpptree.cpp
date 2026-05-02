@@ -960,12 +960,6 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 	if( !policy.rendering_definitions )
 		id_policy.resolve_identifier_scope = false;
 
-	// Demand consistency between type and identifier
-	if( TreePtr<Constructor>::DynamicCast(type) )
-		ASSERT( !identifier || TreePtr<ConstructorIdentifier>::DynamicCast(identifier) )(identifier);
-	if( TreePtr<Destructor>::DynamicCast(type) )
-		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);	
-		
     if( !policy.rendering_definitions )
     {
 		Append( ls, RenderAccessSpec(renderer, sub_policy) );
@@ -1081,6 +1075,20 @@ list<string> Field::RenderAccessSpec( VN::RendererInterface *renderer, Policy po
 
 list<string> Field::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy) const 
 { 
+	// Demand consistency between type and identifier, as well as limitations on qualifiers
+	if( TreePtr<Constructor>::DynamicCast(type) )
+	{
+		ASSERT( !identifier || TreePtr<ConstructorIdentifier>::DynamicCast(identifier) )(identifier);
+		ASSERT( TreePtr<NonConst>::DynamicCast(constancy) )(constancy);
+		ASSERT( TreePtr<NonVirtual>::DynamicCast(virt) )(virt);
+	}
+	if( TreePtr<Destructor>::DynamicCast(type) )
+	{
+		ASSERT( TreePtr<NonConst>::DynamicCast(constancy) )(constancy);
+		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);	
+		// Virtual is allowed for destructors
+	}
+
 	return { renderer->DoRender(&virt, Production::SPACE_SEP_STMT_DECL, policy) };
 }
 

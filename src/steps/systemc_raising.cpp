@@ -212,6 +212,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_arg->key = s_arg_id;
     ls_arg->value = ls_id;
     l_overcons->overlay = lr_cons;
+    lr_cons->virt = MakePatternNode<NonVirtual>();
     lr_cons->constancy = MakePatternNode<NonConst>();    
     lr_cons->type = l_ctype;
     lr_cons->identifier = l_ident;
