@@ -1619,16 +1619,9 @@ string Record::GetRender( VN::RendererInterface *renderer, Production production
 
 string Record::GetKeyword() const
 {	
-	if( ReadArgs::use.count("k") )
-	{
-		// Short form of explicit has no VN parens and only serves to inject a 
-		// node name into a syntax we already know how to render.
-		return "⯁" + VN::Render::RenderNodeTypeName(shared_from_this());
-	}
-	else
-	{
-		throw UnimplementedKeyword();
-	}
+	// Short form of explicit has no VN parens and only serves to inject a 
+	// node name into a syntax we already know how to render.
+	return "⯁" + VN::Render::RenderNodeTypeName(shared_from_this());
 }
 
 
