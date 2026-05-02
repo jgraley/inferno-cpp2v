@@ -691,10 +691,8 @@ TreePtr<Node> VNLangActions::NodeFromANDataBlock( const AvailableNodeData::Block
 }
 
 
-NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const
-{
-	TreePtr<Node> node = NodeFromANDataBlock(block);
-	
+NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
+{	
 	shared_ptr<Gnomon> gnomon;
 	if( dynamic_pointer_cast<CPPTree::CodeUnit>(node) )
 		gnomon = make_shared<CodeUnitScopeGnomon>();

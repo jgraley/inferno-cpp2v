@@ -223,7 +223,7 @@ public:
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
 	TreePtr<Node> NodeFromANDataBlock( const AvailableNodeData::Block *block ) const;
-	NodeAndGnomon MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const;
+	NodeAndGnomon MakeScopeGnomonForNode( TreePtr<Node> node ) const;
 	TreePtr<Node> OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator );	
 	TreePtr<Node> OnConstructorInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> id, list<TreePtr<Node>> params );	
 	void ApplyAccessSpec( TreePtr<Node> instance, any loc, TreePtr<Node> access );	

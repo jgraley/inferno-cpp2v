@@ -353,7 +353,7 @@ decl_vn_prim: decl_explicit_op_named itemisation					{ $$ = vn->FinishExplicitNo
 			| DESIGNATED_DECL     						  			{ $$ = $1.as_designated; }	
 			| STAR_OP OPEN_VN decl_boot CLOSE_VN					{ $$ = vn->OnStar($3); }
 			
-decl_explicit_op_named 		: explicit_op_scope resolved_decl_name	{ $$ = vn->MakeScopeGnomonForNode($2.as_andata_block); 
+decl_explicit_op_named 		: explicit_op_scope resolved_decl_name	{ $$ = vn->MakeScopeGnomonForNode(vn->NodeFromANDataBlock($2.as_andata_block)); 
                                                                       vn->AddGnomon($$.gnomon); }
                                                                                   
 decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_name	{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2.as_andata_block); 
@@ -582,7 +582,7 @@ vn_wildcard : STAR_OP											{ $$ = vn->OnStar(nullptr); }
 comma_sep_expr_decl	: expr_no_comma_op											{ $$.push_back($1); }
 					| comma_sep_expr_decl ',' expr_no_comma_op					{ $$ = $1; $$.push_back($3); }			
 
-explicit_op_named 	: explicit_op_scope resolved_name		{ $$ = vn->MakeScopeGnomonForNode($2.as_andata_block); 
+explicit_op_named 	: explicit_op_scope resolved_name		{ $$ = vn->MakeScopeGnomonForNode(vn->NodeFromANDataBlock($2.as_andata_block)); 
                                                               vn->AddGnomon($$.gnomon); }
 prerestrict_op_named: prerestrict_op_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
 id_by_name_op_named : id_by_name_op_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
@@ -640,7 +640,7 @@ type_vn_prim: type_explicit_op_named itemisation								{ $$ = vn->FinishExplici
 			| TYPE_INDICATOR STAR_OP OPEN_VN type_boot CLOSE_VN					{ $$ = vn->OnStar($4); }
 			| STAR_OP OPEN_VN type_boot CLOSE_VN								{ $$ = vn->OnStar($3); }
 			
-type_explicit_op_named 		: explicit_op_scope resolved_type_name				{ $$ = vn->MakeScopeGnomonForNode($2.as_andata_block); 
+type_explicit_op_named 		: explicit_op_scope resolved_type_name				{ $$ = vn->MakeScopeGnomonForNode(vn->NodeFromANDataBlock($2.as_andata_block)); 
                                                                                   vn->AddGnomon($$.gnomon); }
 type_prerestrict_op_named 	: prerestrict_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
 type_id_by_name_op_named 	: id_by_name_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
@@ -668,7 +668,7 @@ qualifier_node	: qual_explicit_op_named itemisation						{ $$ = vn->FinishExplic
 				| QUAL_NODE_KEYWORD											{ $$ = vn->OnQualifierNodeKeyword($1.as_ascii); }
 				| DESIGNATED_QUAL       				  					{ $$ = $1.as_designated; } 
 
-qual_explicit_op_named 		: explicit_op_scope resolved_qual_name			{ $$ = vn->MakeScopeGnomonForNode($2.as_andata_block); 
+qual_explicit_op_named 		: explicit_op_scope resolved_qual_name			{ $$ = vn->MakeScopeGnomonForNode(vn->NodeFromANDataBlock($2.as_andata_block)); 
                                                                               vn->AddGnomon($$.gnomon); }
 
 access_clause	: qualifier_node ':'										
