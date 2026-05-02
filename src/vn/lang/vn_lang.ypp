@@ -322,8 +322,7 @@ instance_proto_a: 							  instance_proto
 
 instance_proto	: type_for_declarator declarator				{ $$ = vn->OnInstance(@$, {}, $1, $2); }	
 				| qualifiers type_for_declarator declarator		{ $$ = vn->OnInstance(@$, $1, $2, $3); }	
-				| XSTRUCTOR declarator							{ $$ = vn->OnInstance(@$, {}, nullptr, $2); }	
-				| qualifiers XSTRUCTOR declarator				{ $$ = vn->OnInstance(@$, $1, nullptr, $3); }	
+				| XSTRUCTOR vn_primary parameterisation			{ $$ = vn->OnConstructorInstance(@$, $2, $3); }	
 
 assign_init		: expression
 				| '{' '}'             				  			{ $$ = vn->OnArrayInitialiser({}); } 

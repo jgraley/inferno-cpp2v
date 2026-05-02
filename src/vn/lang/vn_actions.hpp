@@ -224,6 +224,7 @@ public:
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
 	BlockAndGnomon MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const;
 	TreePtr<Node> OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator );	
+	TreePtr<Node> OnConstructorInstance( any loc, TreePtr<Node> id, list<TreePtr<Node>> params );	
 	void ApplyAccessSpec( TreePtr<Node> instance, any loc, TreePtr<Node> access );	
 	void ApplyInitialiser( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init );	
 	TreePtr<Node> OnAbDeclType( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	

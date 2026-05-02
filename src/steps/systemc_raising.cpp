@@ -196,6 +196,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     l_module->members = (l_overcons, l_process, l_decls);
     l_module->bases = (l_bases);
     l_overcons->through = ls_cons;       
+    ls_cons->virt = MakePatternNode<NonVirtual>();
     ls_cons->constancy = MakePatternNode<NonConst>();
     ls_cons->type = l_ctype;
     ls_cons->identifier = l_ident;
@@ -334,6 +335,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     s_module->members = (s_cons, decls);
     s_module->bases = (bases);
     s_module->identifier = module_typeid;
+    s_cons->virt = MakePatternNode<NonVirtual>();
     s_cons->constancy = MakePatternNode<NonConst>();
     s_cons->initialiser = s_comp;
     s_cons->identifier = s_constructor_id;
@@ -344,12 +346,14 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     r_module->identifier = module_typeid;
             
     // Embedded 1: dispense with any calls to s_constructor_id from member inits
+    ls_field->virt = MakePatternNode<NonVirtual>();
     ls_field->constancy = MakePatternNode<NonConst>();
     ls_field->type = ls_ctype;
     ls_ctype->params = (ls_params); // any parameters
     ls_field->memb_inits = (l_pre, l1s_memb_init, l_post);
 	l1s_memb_init->initialiser = l1s_cons_init;
 	l1s_cons_init->constructor_id = s_constructor_id;
+    lr_field->virt = MakePatternNode<NonVirtual>();
     lr_field->constancy = MakePatternNode<NonConst>();
     lr_field->memb_inits = (l_pre, l_post);
 

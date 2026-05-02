@@ -27,7 +27,7 @@ mkdir -p ${GP2}
 # All ensuing tests stop after this step
 QA=T130+
 
-# Smoke tests: for one test ccase and one quit-after, compare the transformed outputs
+# Smoke tests: for one test case and one quit-after, compare the transformed outputs
 #TC=small.c
 #./inferno.exe ${I} ${P1} -i test/examples/${TC} -q${QA} > out_p1.cpp
 #./inferno.exe ${I}       -i test/examples/${TC} -q${QA} > out_builtin.cpp

@@ -845,6 +845,31 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 }
 
 
+TreePtr<Node> VNLangActions::OnConstructorInstance( any loc, TreePtr<Node> id, list<TreePtr<Node>> params )
+{
+	auto cons_type = MakeTreeNode<StandardAgentWrapper<CPPTree::Constructor>>();
+	for( auto param : params )
+		cons_type->params.push_back(param);
+	
+	auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
+	field->identifier = id;
+	field->type = cons_type;
+	field->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
+	field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();
+
+	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) )
+	{
+		stringstream ss;
+		ss << any_cast<YY::VNLangParser::location_type>(loc);
+		FTRACE("I'm putting in ")(fspg->current_access)(" at ")(ss.str())("\n");
+		field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour			
+	}
+	
+	return field;
+}
+
+
 void VNLangActions::ApplyAccessSpec( TreePtr<Node> instance, any loc, TreePtr<Node> access )
 {
 	auto field = TreePtr<CPPTree::Field>::DynamicCast(instance);
