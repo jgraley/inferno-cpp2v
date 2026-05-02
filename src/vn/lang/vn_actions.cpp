@@ -845,7 +845,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 }
 
 
-TreePtr<Node> VNLangActions::OnConstructorInstance( any loc, TreePtr<Node> id, list<TreePtr<Node>> params )
+TreePtr<Node> VNLangActions::OnConstructorInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> id, list<TreePtr<Node>> params )
 {
 	auto cons_type = MakeTreeNode<StandardAgentWrapper<CPPTree::Constructor>>();
 	for( auto param : params )
@@ -856,6 +856,27 @@ TreePtr<Node> VNLangActions::OnConstructorInstance( any loc, TreePtr<Node> id, l
 	field->type = cons_type;
 	field->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
 	field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();
+
+	// Now fill in fields derived from the qualifiers	
+	for( const QualifierData &q : quals_pre )
+	{
+		switch( q.cat )
+		{
+		case QualCat::NODE:
+			if( TreePtr<CPPTree::Constancy>::DynamicCast(q.node) )				
+				throw YY::VNLangParser::syntax_error(
+						any_cast<YY::VNLangParser::location_type>(loc),
+						"Xstructor does not support constancy: " + DiagQuote(Traceable::TypeIdName( *q.node )) );
+			if( TreePtr<CPPTree::Virtuality>::DynamicCast(q.node) ) // TODO allow virutality for destructors
+				throw YY::VNLangParser::syntax_error(
+						any_cast<YY::VNLangParser::location_type>(loc),
+						"Constructor does not support virtuality: " + DiagQuote(Traceable::TypeIdName( *q.node )) );
+		case QualCat::STATIC:
+				throw YY::VNLangParser::syntax_error(
+						any_cast<YY::VNLangParser::location_type>(loc),
+						"Xstructor cannot be static" );		
+		}
+	}
 
 	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
 	if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) )
