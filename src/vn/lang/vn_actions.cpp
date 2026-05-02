@@ -691,7 +691,7 @@ TreePtr<Node> VNLangActions::NodeFromANDataBlock( const AvailableNodeData::Block
 }
 
 
-BlockAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const
+NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const
 {
 	TreePtr<Node> node = NodeFromANDataBlock(block);
 	
@@ -715,7 +715,7 @@ BlockAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::B
 		
 	// DeclScope and Scope are too broad, as they apply to more than one of the above categories	
 		
-	return { block, gnomon };
+	return { node, gnomon };
 }
 
 
