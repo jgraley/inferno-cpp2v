@@ -1231,6 +1231,8 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 	INDENT("P");
 	policy.cur_access = nullptr; // No access spec here
 	
+	FTRACE("rendering params\n");
+	
     list<string> strings;
     for( auto &d : params )	
 		strings.push_back( renderer->DoRender( &d, Production::BARE_STMT_DECL, policy ) );       

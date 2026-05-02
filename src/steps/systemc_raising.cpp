@@ -439,6 +439,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_unsigned_char->width = MakePatternNode<SpecificInteger>((int)TypeDb::char_bits);
     s_cease_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "exit_code" );   
     s_cease_param->initialiser = MakePatternNode<Uninitialised>();   
+    s_cease_param->constancy = MakePatternNode<NonConst>();
 
     // void exit( int exit_code );
 	s_exit_inst->constancy = MakePatternNode<NonConst>();        
@@ -451,6 +452,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_int->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
     s_exit_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "exit_code" );   
     s_exit_param->initialiser = MakePatternNode<Uninitialised>();   
+    s_exit_param->constancy = MakePatternNode<NonConst>();
     
     // void wait( int p1 );
 	s_wait_inst->constancy = MakePatternNode<NonConst>();        
@@ -463,6 +465,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_int2->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
     s_wait_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "p1" );   
     s_wait_param->initialiser = MakePatternNode<Uninitialised>();   
+    s_wait_param->constancy = MakePatternNode<NonConst>();
     
     // void next_trigger( int p1 );
 	s_next_trigger_inst->constancy = MakePatternNode<NonConst>();        
@@ -475,7 +478,8 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_int3->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
     s_next_trigger_param->identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>( "p1" );   
     s_next_trigger_param->initialiser = MakePatternNode<Uninitialised>();   
-    
+    s_next_trigger_param->constancy = MakePatternNode<NonConst>();
+
     // void sc_delta_count();
 	s_delta_count_inst->constancy = MakePatternNode<NonConst>();        
     s_delta_count_inst->identifier = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "sc_delta_count" ); 

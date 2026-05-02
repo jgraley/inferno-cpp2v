@@ -366,6 +366,7 @@ ParamsViaTemps::ParamsViaTemps()
     s_cp->return_type = return_type;
     s_param->identifier = param_id;
     s_param->type = param_type;
+    s_param->constancy = MakePatternNode<NonConst>();
     r_param->type = param_type;
     r_param->initialiser = r_temp_id;
     r_param->identifier = param_id;
