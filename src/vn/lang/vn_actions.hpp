@@ -183,7 +183,7 @@ public:
 	TreePtr<Node> OnStar( TreePtr<Node> restriction );
 	TreePtr<Node> OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit );
 	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
-	TreePtr<Node> OnExplicitNode( const AvailableNodeData::Block *block, any node_name_loc, Itemisation itemisation );
+	TreePtr<Node> FinishExplicitNode( TreePtr<Node> dest, any node_name_loc, Itemisation itemisation );
 	TreePtr<Node> OnEmbeddedCommands( list<shared_ptr<Command>> commands );
 	TreePtr<Node> OnRestrict( const AvailableNodeData::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc );
 	
@@ -222,6 +222,7 @@ public:
 	
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
+	TreePtr<Node> NodeFromANDataBlock( const AvailableNodeData::Block *block ) const;
 	BlockAndGnomon MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const;
 	TreePtr<Node> OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator );	
 	TreePtr<Node> OnConstructorInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> id, list<TreePtr<Node>> params );	

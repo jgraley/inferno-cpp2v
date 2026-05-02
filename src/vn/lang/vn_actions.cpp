@@ -160,11 +160,8 @@ static TreePtr<Node> MakeStandardAgentFromTypeID(const type_info &ti)
 }
 
 
-TreePtr<Node> VNLangActions::OnExplicitNode( const AvailableNodeData::Block *block, any node_name_loc, Itemisation src_itemisation )
+TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, any node_name_loc, Itemisation src_itemisation )
 {
-	auto node_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	NodeEnum ne = node_block->node_enum.value();
-	TreePtr<Node> dest = MakeStandardAgent(ne);
     YY::VNLangParser::location_type prev_loc = any_cast<YY::VNLangParser::location_type>(src_itemisation.loc);
 	
 	// Special case for specific identifiers
@@ -682,15 +679,22 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 }
 
 
-BlockAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const
+TreePtr<Node> VNLangActions::NodeFromANDataBlock( const AvailableNodeData::Block *block ) const
 {
 	auto nb = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
 	ASSERT( nb );
 	ASSERT( nb->node_enum );
 	NodeEnum ne = nb->node_enum.value();
-	// No need for StandardAgent or TreePtr, we're just analysing here
-	shared_ptr<Node> node = node_names->MakeNode(ne);
+	TreePtr<Node> node = MakeStandardAgent(ne);
 	ASSERT( node );
+	return node;
+}
+
+
+BlockAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::Block *block ) const
+{
+	TreePtr<Node> node = NodeFromANDataBlock(block);
+	
 	shared_ptr<Gnomon> gnomon;
 	if( dynamic_pointer_cast<CPPTree::CodeUnit>(node) )
 		gnomon = make_shared<CodeUnitScopeGnomon>();
@@ -707,7 +711,7 @@ BlockAndGnomon VNLangActions::MakeScopeGnomonForNode( const AvailableNodeData::B
 	else if( dynamic_pointer_cast<CPPTree::CallableParams>(node) )
 		gnomon = make_shared<ParameterisationScopeGnomon>();
 	else
-		gnomon = make_shared<UnknownScopeGnomon>("non-scope explicit node " + nb->What());	
+		gnomon = make_shared<UnknownScopeGnomon>("non-scope explicit node " + Trace(node));	
 		
 	// DeclScope and Scope are too broad, as they apply to more than one of the above categories	
 		

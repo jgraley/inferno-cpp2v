@@ -1097,9 +1097,7 @@ list<string> Field::RenderInitPre( VN::RendererInterface *renderer, Policy polic
 {
 	// Temporarily don't render non-empty member inits - I don't thing the grammar for them exists yet
 	if( policy.is_vn_render_for_temp_disables ) // doing VN render
-	{
-		if( !ReadArgs::use.count("f") ) 
-			throw TemporarilyDisabled(); 	
+	{	
 		if( !memb_inits.empty() )  
 			throw TemporarilyDisabled(); // Would render member inits TODO be able to parse these
 	}
