@@ -170,7 +170,10 @@ stmt_high
 %type <TreePtr<Node>>				instance instance_proto instance_proto_a
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named
-%type <YY::TokenMetadata> 			resolved_name resolved_type_name resolved_decl_name resolved_qual_name node_namespace
+%type <YY::TokenMetadata> 			node_namespace
+%type <YY::TokenMetadata> 			resolved_name resolved_type_name resolved_decl_name resolved_qual_name
+%type <TreePtr<Node>>	 			resolved_node resolved_type_node resolved_decl_node resolved_qual_node
+%type <TreePtr<Node>>	 			explicit_decl_node
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands decl_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
@@ -353,7 +356,7 @@ decl_vn_prim: decl_explicit_op_named itemisation					{ $$ = vn->FinishExplicitNo
 			| DESIGNATED_DECL     						  			{ $$ = $1.as_designated; }	
 			| STAR_OP OPEN_VN decl_boot CLOSE_VN					{ $$ = vn->OnStar($3); }
 			
-decl_explicit_op_named 		: explicit_op_scope resolved_decl_name	{ $$ = vn->MakeScopeGnomonForNode(vn->NodeFromANDataBlock($2.as_andata_block)); 
+decl_explicit_op_named 		: explicit_decl_node					{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                       vn->AddGnomon($$.gnomon); }
                                                                                   
 decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_name	{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2.as_andata_block); 
@@ -411,6 +414,7 @@ class_scope     : class_node         										{ $$ = { $1, vn->MakeRecordScopeG
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 class_node		: CLASS_KEYWORD												{ $$ = vn->StartRecord(@$, $1.as_ascii); }
+		 		| explicit_decl_node										{ $$ = $1; }
                                                   
 bases			: base_spec                                                 { $$.push_back($1); } 
 				| bases ',' base_spec										{ $$ = $1; $$.push_back($3); } 
@@ -582,7 +586,7 @@ vn_wildcard : STAR_OP											{ $$ = vn->OnStar(nullptr); }
 comma_sep_expr_decl	: expr_no_comma_op											{ $$.push_back($1); }
 					| comma_sep_expr_decl ',' expr_no_comma_op					{ $$ = $1; $$.push_back($3); }			
 
-explicit_op_named 	: explicit_op_scope resolved_name		{ $$ = vn->MakeScopeGnomonForNode(vn->NodeFromANDataBlock($2.as_andata_block)); 
+explicit_op_named 	: explicit_op_scope resolved_node		{ $$ = vn->MakeScopeGnomonForNode($2); 
                                                               vn->AddGnomon($$.gnomon); }
 prerestrict_op_named: prerestrict_op_scope resolved_name	{ $$ = $2.as_andata_block; (void)$1; }
 id_by_name_op_named : id_by_name_op_scope resolved_name		{ $$ = $2.as_andata_block; (void)$1; }
@@ -640,7 +644,7 @@ type_vn_prim: type_explicit_op_named itemisation								{ $$ = vn->FinishExplici
 			| TYPE_INDICATOR STAR_OP OPEN_VN type_boot CLOSE_VN					{ $$ = vn->OnStar($4); }
 			| STAR_OP OPEN_VN type_boot CLOSE_VN								{ $$ = vn->OnStar($3); }
 			
-type_explicit_op_named 		: explicit_op_scope resolved_type_name				{ $$ = vn->MakeScopeGnomonForNode(vn->NodeFromANDataBlock($2.as_andata_block)); 
+type_explicit_op_named 		: explicit_op_scope resolved_type_node				{ $$ = vn->MakeScopeGnomonForNode($2); 
                                                                                   vn->AddGnomon($$.gnomon); }
 type_prerestrict_op_named 	: prerestrict_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
 type_id_by_name_op_named 	: id_by_name_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
@@ -668,7 +672,7 @@ qualifier_node	: qual_explicit_op_named itemisation						{ $$ = vn->FinishExplic
 				| QUAL_NODE_KEYWORD											{ $$ = vn->OnQualifierNodeKeyword($1.as_ascii); }
 				| DESIGNATED_QUAL       				  					{ $$ = $1.as_designated; } 
 
-qual_explicit_op_named 		: explicit_op_scope resolved_qual_name			{ $$ = vn->MakeScopeGnomonForNode(vn->NodeFromANDataBlock($2.as_andata_block)); 
+qual_explicit_op_named 		: explicit_op_scope resolved_qual_node			{ $$ = vn->MakeScopeGnomonForNode($2); 
                                                                               vn->AddGnomon($$.gnomon); }
 
 access_clause	: qualifier_node ':'										
@@ -687,14 +691,24 @@ vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 // RESOLVED_X is strong i.e. there was definitely a ::. resolved_x is weak and
 // doesn't require this. See comment by part_resolve for why we don't need a value from 
 // part_resolve. The Gnomon is still around because we *could* use $1 here, so it must be valid.
-resolved_name	: part_resolve RESOLVED_NORMAL			{ $$ = $2; }
-				| RESOLVED_NORMAL						{ $$ = $1; }
+resolved_node		: resolved_name						{ $$ = vn->NodeFromANDataBlock($1.as_andata_block); }
+
+resolved_name		: part_resolve RESOLVED_NORMAL		{ $$ = $2; }
+					| RESOLVED_NORMAL					{ $$ = $1; }
+
+resolved_type_node	: resolved_type_name				{ $$ = vn->NodeFromANDataBlock($1.as_andata_block); }
 
 resolved_type_name	: part_resolve RESOLVED_TYPE		{ $$ = $2; }
 					| RESOLVED_TYPE						{ $$ = $1; }
 
+explicit_decl_node	: explicit_op_scope resolved_decl_node	{ $$ = $2; }
+
+resolved_decl_node	: resolved_decl_name				{ $$ = vn->NodeFromANDataBlock($1.as_andata_block); }
+
 resolved_decl_name	: part_resolve RESOLVED_DECL 		{ $$ = $2; }
 					| RESOLVED_DECL						{ $$ = $1; }
+
+resolved_qual_node	: resolved_qual_name				{ $$ = vn->NodeFromANDataBlock($1.as_andata_block); }
 
 resolved_qual_name	: part_resolve RESOLVED_QUAL		{ $$ = $2; }
 					| RESOLVED_QUAL						{ $$ = $1; }
