@@ -799,15 +799,15 @@ Syntax::Production False::GetMyProductionTerminal() const
 	return Production::PRIMARY_EXPR; 
 }
 
-//////////////////////////// MembInitialisation ///////////////////////////////
+//////////////////////////// MemberInitialiser ///////////////////////////////
 
-Syntax::Production MembInitialisation::GetMyProductionTerminal() const
+Syntax::Production MemberInitialiser::GetMyProductionTerminal() const
 { 
 	return Production::COMMA_SEP; 
 }
 
 
-string MembInitialisation::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	if( !policy.detect_and_render_constructor )
 		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang
@@ -823,17 +823,22 @@ string MembInitialisation::GetRender( VN::RendererInterface *renderer, Productio
 
 //////////////////////////// MembInitSeq ///////////////////////////////
 
-string MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Policy policy )
+list<string> MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Policy policy )
 {	
     if( memb_inits.empty() )        
-		return "";
+		return {};
 
     // Render the constructor initialisers
-	list<string> ls; 
-	for( auto &mi : memb_inits ) 
-		ls.push_back( "    " + renderer->DoRender( &mi, Production::COMMA_SEP, policy ) );		
-		
-    return " :\n" + Join(ls, ",\n");		    
+	list<string> ls = {":"}; 
+	bool first = true;
+	for( auto &initialiser : memb_inits ) 
+	{
+		if( !first )
+			ls.back() += ",";
+		first = false;
+		ls.push_back( renderer->DoRender( &initialiser, Production::COMMA_SEP, policy ) );		
+	}
+    return ls;		    
 }
 
 //////////////////////////// Virtuality //////////////////////////////
@@ -966,6 +971,8 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
 	}
     
+    // TODO this is wrong, consider const char *s; the char is const but the pointer isn't and that's what we're declaring
+    // Pass constancy into DoRenderTypeAndDeclarator() instead.
 	string cs = renderer->DoRender(&constancy, Production::SPACE_SEP_TYPE, sub_policy);
     if( !cs.empty() )
 		ls.push_back( cs );
@@ -991,6 +998,7 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 		return Join( ls, " " );
 	}		
 
+	// Member inits
 	Append( ls, RenderInitPre(renderer, sub_policy) );
 
  	if( ReadArgs::use.count("c") )
@@ -1102,7 +1110,7 @@ list<string> Field::RenderInitPre( VN::RendererInterface *renderer, Policy polic
 			throw TemporarilyDisabled(); // Would render member inits TODO be able to parse these
 	}
 
-	return { RenderMemberInits(renderer, policy) };
+	return RenderMemberInits(renderer, policy);
 }
 
 //////////////////////////// Temporary //////////////////////////////

@@ -454,7 +454,7 @@ struct False : Bool
 // identifier. 
 
 /// Initialise a member from inside a constructor body
-struct MembInitialisation : Statement // TODO not a Statement, just virtual Node now
+struct MemberInitialiser : Statement // TODO not a Statement, just virtual Node now
 {
 	NODE_FUNCTIONS_FINAL
 
@@ -471,9 +471,9 @@ struct MembInitSeq : virtual Node
 {
 	NODE_FUNCTIONS
 	
-	Sequence<MembInitialisation> memb_inits;
+	Sequence<MemberInitialiser> memb_inits;
 	
-	string RenderMemberInits( VN::RendererInterface *renderer, Policy policy );	
+	list<string> RenderMemberInits( VN::RendererInterface *renderer, Policy policy );	
 };
 
 

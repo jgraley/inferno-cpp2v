@@ -1505,7 +1505,7 @@ private:
 		ci->argumentation = CreateMapArgumentation( args, memb_cons->type );
 		ci->constructor_id = memb_cons->identifier;
 		
-		auto mi = MakeTreeNode<MembInitialisation>();
+		auto mi = MakeTreeNode<MemberInitialiser>();
 		mi->member_id = our_field->identifier;
 		mi->initialiser = ci;
 		
@@ -1530,7 +1530,7 @@ private:
 		ASSERT( mis );
         for( auto i : inits )
 		{
-			auto mi = TreePtr<MembInitialisation>::DynamicCast(i);
+			auto mi = TreePtr<MemberInitialiser>::DynamicCast(i);
 			ASSERT( mi );
 			mis->memb_inits.push_back( mi );
 		}		

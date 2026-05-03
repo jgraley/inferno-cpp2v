@@ -306,8 +306,8 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto over = MakePatternNode<DeltaAgent, Scope>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l_pre = MakePatternNode<StarAgent, MembInitialisation>();
-    auto l_post = MakePatternNode<StarAgent, MembInitialisation>();
+    auto l_pre = MakePatternNode<StarAgent, MemberInitialiser>();
+    auto l_post = MakePatternNode<StarAgent, MemberInitialiser>();
     auto s_cons = MakePatternNode< Field >();
     auto s_comp = MakePatternNode< Compound >();
     auto s_constructor_id = MakePatternNode< ConstructorIdentifier >();
@@ -317,7 +317,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto ls_params = MakePatternNode<StarAgent, Parameter>();
     auto s_module = MakePatternNode< Module >();
     auto r_module = MakePatternNode< Module >();
-    auto l1s_memb_init = MakePatternNode<MembInitialisation>();
+    auto l1s_memb_init = MakePatternNode<MemberInitialiser>();
     auto l1s_cons_init = MakePatternNode<ConstructInit>();    
     auto l3_instance = MakePatternNode<Instance>();  
     auto l3_delta = MakePatternNode<DeltaAgent, Initialiser>();  

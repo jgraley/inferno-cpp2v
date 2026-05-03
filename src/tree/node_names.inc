@@ -148,7 +148,7 @@ NODE(CPPTree, Case)
 NODE(CPPTree, Default)
 NODE(CPPTree, Continue)
 NODE(CPPTree, Break)
-NODE(CPPTree, MembInitialisation)
+NODE(CPPTree, MemberInitialiser)
 NODE(CPPTree, Nop)
 // Preprocessor stuff
 NODE(CPPTree, PreprocessorIdentifier)
