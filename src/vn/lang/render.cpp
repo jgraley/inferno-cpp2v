@@ -62,7 +62,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 	
 	Syntax::Policy designation_policy = default_policy;
 	string s;
-	if( ReadArgs::use.count("c") )
+	if( ReadArgs::use.contains("c") )
 		s += "/* Unique coupling names: " + Trace(unique_coupling_names) + " */\n\n";
 
 	list<string> commands;
@@ -192,7 +192,7 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
     INDENT(">");
     string s;
 
-	if( ReadArgs::use.count("c") )
+	if( ReadArgs::use.contains("c") )
 		s += SSPrintf("\n//%s DoRenderPreserve Node %s called from %p\n", 
 				      Tracer::GetPrefix().c_str(), 
 					  node ? Traceable::TypeIdName(*node).c_str() : "NULL", // No serial numbers because we diff these
@@ -223,7 +223,7 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_p
 
 	string s;
 
-	if( ReadArgs::use.count("c") )
+	if( ReadArgs::use.contains("c") )
 		s += SSPrintf("\n//  %s Node %s, surround prod: %d, node prod: %d\n", 
 					  Tracer::GetPrefix().c_str(), 
 					  node ? Traceable::TypeIdName(*node).c_str() : "NULL", // No serial numbers because we diff these
@@ -237,7 +237,7 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_p
 	// Deal with expression in initialiser production by prepending =
 	if( node_prod != Syntax::Production::COMPOUND ) // no = for COMPOUND
 	{
-		if( ReadArgs::use.count("c") )
+		if( ReadArgs::use.contains("c") )
 			s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
 		return s + "= " + AccomodateBoot(node, Syntax::Production::ASSIGN, policy );
 	}
@@ -271,7 +271,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 					  ("Node: ")(node)("\n")
 					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 					  
-				if( ReadArgs::use.count("c") )
+				if( ReadArgs::use.contains("c") )
 					s += SSPrintf("// Booting statement, surround prod to BOTTOM_STMT_DECL\n");
 					
 				return s + "{\n " + 
@@ -287,7 +287,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 				  ("Node: ")(node)("\n")
 				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 					  
-			if( ReadArgs::use.count("c") )
+			if( ReadArgs::use.contains("c") )
 				s += SSPrintf("// Booting expression, surround prod to BOTTOM_EXPR\n");
 
             s += "( " +
@@ -342,7 +342,7 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
     if( !semicolon )
 		explain += SSPrintf("/* Not adding semicolon, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));	
 	
-	if( !ReadArgs::use.count("c") )
+	if( !ReadArgs::use.contains("c") )
 		explain = ""; // shush!
 	
     if( semicolon )
@@ -485,7 +485,7 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
     			
     s += RenderNodeTypeName(node); 
    
-	if( ReadArgs::use.count("c") )
+	if( ReadArgs::use.contains("c") )
 		s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";
     
     list<string> sitems = PopulateItemStrings( node, policy );    

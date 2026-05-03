@@ -130,7 +130,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     lr_state_decl->identifier = lr_state_id;
     lr_state_decl->type = r_enum_id;
     lr_state_decl->initialiser = lr_count;
-    lr_state_decl->access = MakePatternNode<Private>();
+    lr_state_decl->access = nullptr; // matches the default for enums
     lr_state_decl->virt = MakePatternNode<NonVirtual>();
     lr_count->container = l_enum_vals;
     lr_state_id->sources = (func_id, ls_label->identifier);

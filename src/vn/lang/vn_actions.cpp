@@ -835,12 +835,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		// If we're in a record, use the currently stored access spec
 		// Note: the access spec set here can be overridden by ApplyAccessSpec()
 		if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) )
-		{
-			stringstream ss;
-			ss << any_cast<YY::VNLangParser::location_type>(loc);
-			FTRACE("I'm putting in ")(fspg->current_access)(" at ")(ss.str())("\n");
 			field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour			
-		}
 	}
 
 	return instance;
@@ -869,7 +864,7 @@ TreePtr<Node> VNLangActions::OnConstructorInstance( any loc, const list<Qualifie
 				throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(loc),
 						"Xstructor does not support constancy: " + DiagQuote(Traceable::TypeIdName( *q.node )) );
-			if( TreePtr<CPPTree::Virtuality>::DynamicCast(q.node) ) // TODO allow virutality for destructors
+			if( TreePtr<CPPTree::Virtuality>::DynamicCast(q.node) ) // TODO allow virtuality for destructors
 				throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(loc),
 						"Constructor does not support virtuality: " + DiagQuote(Traceable::TypeIdName( *q.node )) );
@@ -880,45 +875,29 @@ TreePtr<Node> VNLangActions::OnConstructorInstance( any loc, const list<Qualifie
 		}
 	}
 
-	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
-	if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) )
-	{
-		stringstream ss;
-		ss << any_cast<YY::VNLangParser::location_type>(loc);
-		FTRACE("I'm putting in ")(fspg->current_access)(" at ")(ss.str())("\n");
-		field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour			
-	}
+	if( shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop() )
+		if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) )
+			field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour			
 	
 	return field;
 }
 
 
-void VNLangActions::ApplyAccessSpec( TreePtr<Node> instance, any loc, TreePtr<Node> access )
+void VNLangActions::ApplyAccessSpec( TreePtr<Node> instance, any instance_loc, TreePtr<Node> access )
 {
 	auto field = TreePtr<CPPTree::Field>::DynamicCast(instance);
 	if( !field )
-	{
-		stringstream ss;
-		ss << any_cast<YY::VNLangParser::location_type>(loc);
-		FTRACE(ss.str())("\nIgnoring access spec applied to non-field "+DiagQuote(Traceable::TypeIdName( *instance )) );
-		return; // TODO should be a syntax error
-	}
+		throw YY::VNLangParser::syntax_error(
+	  		  any_cast<YY::VNLangParser::location_type>(instance_loc),
+			  "Access specifier given for non-field: "+DiagQuote(Traceable::TypeIdName( *access )) );		
 
-	// Overwrite the access spec of the field with the supplied access spec
-	stringstream ss;
-	ss << any_cast<YY::VNLangParser::location_type>(loc);
-	FTRACE("I'm putting in ")(access)(" at ")(ss.str())("\n");
+	// Overwrite the access spec of the field with the specified access spec
 	field->access = access; // Don't duplicate the subtree - we want coupling behaviour
 
 	// If we're in a record scope, update the stored access spec for future fields to use
-	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
-	if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) ) 	
-	{
-		stringstream ss;
-		ss << any_cast<YY::VNLangParser::location_type>(loc);
-		FTRACE("Access spec for gnomon ")(fspg)(" becomes ")(access)(" at ")(ss.str())("\n");
-		fspg->current_access = access;
-	}
+	if( shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop() )	
+		if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) ) 	
+			fspg->current_access = access; // Don't duplicate the subtree - we want coupling behaviour
 }
 
 
@@ -1396,3 +1375,6 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // we like the prefix syntax without any braces at all, but braces are likely needed for unified argument
 // and 2. for completeness there should be a Stuff-As-Type symbol although this isn't manifesting atm.
  
+// 		stringstream ss;
+//		ss << any_cast<YY::VNLangParser::location_type>(loc);
+//      ... ss.str() ...

@@ -105,17 +105,14 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 	list<string> ls;	
 	if( policy.cur_access )
 	{
-		//ls.push_back( "/* "+Trace(*policy.cur_access)+" -> "+Trace(new_access)+" */" );
-#ifdef DEEP_ACCESS_SPECS
+		ls.push_back( "/* "+Trace(*policy.cur_access)+" -> "+Trace(new_access)+" */" );
 		if( new_access.get() != policy.cur_access->get() )			
-			ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );
-#else
-		(void)renderer;
-#endif	
+			ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );	
 		*policy.cur_access = new_access;
 	}
 	else if( force )
 	{
+		ls.push_back( "/* forced */" );
 		// Parser cannot determine the access any other way, so treat as if always given
 		ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );
 	}
@@ -257,26 +254,16 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 	(void)order_property;
     auto &r = GET_THAT_REFERENCE(right);
         
-    //FTRACEC("Compare ")(*this)(" with ")(*r)(": ");
-
     if( &r == this )
-    {
-        //FTRACEC("0 (fast out)\n");
         return 0; // fast-out
-    }
         
     // Primary ordering on name due rule #528
     if( name != r.name )
-    {
-        //FTRACEC("%d (name)\n", name.compare(r->name));
         return name.compare(r.name);      
-    }
           
     // Optional over-ride of address compare for making ranges, see rule #528
     if( addr_bounding_role != BoundingRole::NONE || r.addr_bounding_role != BoundingRole::NONE )
-    {
-        return (int)addr_bounding_role - (int)(r.addr_bounding_role);
-    }    
+        return (int)addr_bounding_role - (int)(r.addr_bounding_role);  
     
     // Secondary ordering on identity due rule #528
     return Compare3WayIdentity(*this, r);
@@ -1001,7 +988,7 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 	// Member inits
 	Append( ls, RenderInitPre(renderer, sub_policy) );
 
- 	if( ReadArgs::use.count("c") )
+ 	if( ReadArgs::use.contains("c") )
 		ls.push_back( "/* Instance initialiser */" );
 		
 	// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
@@ -1104,7 +1091,7 @@ list<string> Field::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy p
 list<string> Field::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
 {
 	// Temporarily don't render non-empty member inits - I don't thing the grammar for them exists yet
-	if( policy.is_vn_render_for_temp_disables ) // doing VN render
+	if( policy.is_vn_render_for_temp_disables && !ReadArgs::use.contains("m") )
 	{	
 		if( !memb_inits.empty() )  
 			throw TemporarilyDisabled(); // Would render member inits TODO be able to parse these
@@ -1238,9 +1225,7 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 {
 	INDENT("P");
 	policy.cur_access = nullptr; // No access spec here
-	
-	FTRACE("rendering params\n");
-	
+		
     list<string> strings;
     for( auto &d : params )	
 		strings.push_back( renderer->DoRender( &d, Production::BARE_STMT_DECL, policy ) );       
@@ -1474,7 +1459,7 @@ string Integral::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
     else
 		throw UnimplementedIntegralType();
 		
-	if( ReadArgs::use.count("c") )
+	if( ReadArgs::use.contains("c") )
 		s += SSPrintf("/* %d bits */", width_bits );
 
     return s;	
@@ -1485,7 +1470,6 @@ string Integral::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
 SpecificFloatSemantics::SpecificFloatSemantics() 
 {
 }
-
 
 SpecificFloatSemantics::SpecificFloatSemantics( const llvm::fltSemantics *s ) : 
     value(s)
@@ -1654,28 +1638,11 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 	member_policy.permit_static_keyword = true; // In a record body, static means global
 	
     // Emit preprocs and an incomplete for each record 
-#ifndef DEEP_ACCESS_SPECS
-	shared_ptr<Syntax> prev_access = *policy.cur_access;
-#endif
     for( auto &d : sorted )
     {       
 		//s += "/* in record with " + Trace(*member_policy.cur_access) + "*/";
 		// Do this before checking access spec, so that the cur_access can be updated
-		string rendered_member = renderer->DoRender( &d, Production::STMT_DECL, member_policy );	
-			
-#ifndef DEEP_ACCESS_SPECS
-		// Decide access spec for this declaration (explicit if instance, 
-		// otherwise force to Public because decls don't have an access spec). TODO fix this, #877
-		shared_ptr<Syntax> this_access = *policy.cur_access;
-			
-		// We will render an access spec if the pointer changes, even if it's just switching
-		// to another access of the same type. This is because the renderer does not duplicate 
-		// accesses used more than once but instead couples the usage to the same access. 
-		//s += "/* "+Trace(prev_access)+" -> "+Trace(this_access)+" */";
-		if( prev_access != this_access )
-			s += renderer->DoRenderPreserve( TreePtr<Node>(dynamic_pointer_cast<Node>(this_access)), Production::BARE_STMT_DECL, member_policy ) + ":";
-		prev_access = this_access;
-#endif
+		string rendered_member = renderer->DoRender( &d, Production::STMT_DECL, member_policy );			
         s += rendered_member;
     }
    
