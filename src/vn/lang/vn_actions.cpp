@@ -901,12 +901,36 @@ void VNLangActions::ApplyAccessSpec( TreePtr<Node> instance, any instance_loc, T
 }
 
 
-void VNLangActions::ApplyInitialiser( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init )
+void VNLangActions::ApplyInitialiser( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init, any init_loc )
 {
 	auto o = TreePtr<CPPTree::Instance>::DynamicCast(instance);
-	ASSERT(o);
+	ASSERT(o); // Parser should enforce
 	
 	o->initialiser = init;
+}
+
+
+TreePtr<Node> VNLangActions::OnMemberInitialiser( TreePtr<Node> member_id, any member_loc, TreePtr<Node> initialiser, any initialiser_loc )
+{
+	auto memb_init = MakeTreeNode<StandardAgentWrapper<CPPTree::MemberInitialiser>>();
+	
+	memb_init->member_id = member_id;
+	memb_init->initialiser = initialiser;
+	
+	return memb_init;
+}
+
+
+void VNLangActions::ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc )
+{
+	auto field = TreePtr<CPPTree::Field>::DynamicCast(instance);
+	if( !field )
+		throw YY::VNLangParser::syntax_error(
+	  		  any_cast<YY::VNLangParser::location_type>(memb_inits_loc),
+			  "Member initialisers given for non-field: "+DiagQuote(Traceable::TypeIdName( *instance )) );		
+	
+	for( TreePtr<Node> memb_init : memb_inits )
+		field->memb_inits.push_back( memb_init );
 }
 
 

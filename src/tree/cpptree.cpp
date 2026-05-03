@@ -105,14 +105,14 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 	list<string> ls;	
 	if( policy.cur_access )
 	{
-		ls.push_back( "/* "+Trace(*policy.cur_access)+" -> "+Trace(new_access)+" */" );
+		//ls.push_back( "/* "+Trace(*policy.cur_access)+" -> "+Trace(new_access)+" */" );
 		if( new_access.get() != policy.cur_access->get() )			
 			ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );	
 		*policy.cur_access = new_access;
 	}
 	else if( force )
 	{
-		ls.push_back( "/* forced */" );
+		//ls.push_back( "/* forced */" );
 		// Parser cannot determine the access any other way, so treat as if always given
 		ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );
 	}

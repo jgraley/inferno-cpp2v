@@ -14,7 +14,7 @@ using namespace VN;
 /// `BuildContainerSizeAgent` is used in replace context to create an integer-valued
 /// constant that is the size of a `Star` node pointed to by `container`. The
 /// container should couple the star node.
-struct BuildContainerSizeAgent : public virtual BuilderAgent,
+struct BuildContainerSizeAgent : public virtual BuilderAgent, // TODO rename to BuildCardinalityAgent?
                                  Special<CPPTree::Integer>
 {
     SPECIAL_NODE_FUNCTIONS

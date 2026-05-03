@@ -227,7 +227,9 @@ public:
 	TreePtr<Node> OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator );	
 	TreePtr<Node> OnConstructorInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> id, list<TreePtr<Node>> params );	
 	void ApplyAccessSpec( TreePtr<Node> instance, any loc, TreePtr<Node> access );	
-	void ApplyInitialiser( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init );	
+	void ApplyInitialiser( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init, any init_loc );	
+	TreePtr<Node> OnMemberInitialiser( TreePtr<Node> member_id, any member_loc, TreePtr<Node> initialiser, any initialiser_loc );
+	void ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc );	
 	TreePtr<Node> OnAbDeclType( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
 	TreePtr<Node> StartRecord( any loc, string keyword );
 	shared_ptr<Gnomon> MakeRecordScopeGnomon( TreePtr<Node> rec );

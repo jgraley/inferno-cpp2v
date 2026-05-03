@@ -167,7 +167,7 @@ stmt_high
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
 %type <TreePtr<Node>> 				class_node class base_spec access_spec access_clause qualifier_node
-%type <TreePtr<Node>>				instance instance_proto instance_proto_a
+%type <TreePtr<Node>>				instance instance_proto instance_proto_a memb_init
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named
 %type <YY::TokenMetadata> 			node_namespace
@@ -187,9 +187,9 @@ stmt_high
 %type <VN::NodeAndGnomon>			explicit_op_named type_explicit_op_named decl_explicit_op_named qual_explicit_op_named
 %type <VN::NodeAndGnomon>			class_scope
 %type <TreePtr<Node>> 				stmt_decl member
-%type <list<TreePtr<Node>>>			stmt_decls members
+%type <list<TreePtr<Node>>>			stmt_decls members 
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
-%type <list<TreePtr<Node>>>			bases 
+%type <list<TreePtr<Node>>>			bases memb_inits
 %type <VN::QualifierData> 			qualifier qualifier_nw
 %type <list<VN::QualifierData>>		qualifiers 
 %type <const AvailableNodeData::Block *> prerestrict_op_named id_by_name_op_named build_id_named 
@@ -306,7 +306,7 @@ open_declaration	: declaration
 					| bare_declaration
 
 declaration	: bare_declaration ';'									{ $$ = $1; }      
-			| instance_proto_a compound								{ vn->ApplyInitialiser($1, @1, $2); $$ = $1; }	
+			| instance_proto_a compound								{ vn->ApplyInitialiser($1, @1, $2, @2); $$ = $1; }	
 
 bare_declaration: decl_prefix
 				| c_declaration
@@ -317,20 +317,22 @@ c_declaration	: instance
 // Invent ApplyAccessSpec() like ApplyInitialiser()
 // OnInstance() will still try to program the current access. But the new fn will override it with the parsed acess, and then try to update the current access
 instance		: instance_proto_a
-				| instance_proto_a ANY_NODE_OP						{ vn->ApplyInitialiser($1, @1, nullptr); $$ = $1; } // note: ☆ has ; but no =
-				| instance_proto_a C_ASSIGN assign_init				{ vn->ApplyInitialiser($1, @1, $3); $$ = $1; } 
+				| instance_proto_a ANY_NODE_OP							{ vn->ApplyInitialiser($1, @1, nullptr, @2); $$ = $1; } // note: ☆ has ; but no = TODO also seeing = ☆ being rendnered and parsed successfully, so get rid of this
+				| instance_proto_a C_ASSIGN assign_init					{ vn->ApplyInitialiser($1, @1, $3, @3); $$ = $1; } 
+				| instance_proto_a ':' memb_inits C_ASSIGN assign_init	{ vn->ApplyMemberInits($1, @1, $3, @3); 
+																		  vn->ApplyInitialiser($1, @1, $5, @5); $$ = $1; } 
 			
 instance_proto_a: 							  instance_proto
-				|				access_clause instance_proto		{ vn->ApplyAccessSpec($2, @2, $1); $$ = $2; } 
+				|				access_clause instance_proto			{ vn->ApplyAccessSpec($2, @2, $1); $$ = $2; } 
 
-instance_proto	: type_for_declarator declarator					{ $$ = vn->OnInstance(@$, {}, $1, $2); }	
-				| qualifiers type_for_declarator declarator			{ $$ = vn->OnInstance(@$, $1, $2, $3); }	
-				| XSTRUCTOR vn_primary parameterisation				{ $$ = vn->OnConstructorInstance(@$, {}, $2, $3); }	
-				| qualifiers XSTRUCTOR vn_primary parameterisation	{ $$ = vn->OnConstructorInstance(@$, $1, $3, $4); }	
+instance_proto	: type_for_declarator declarator						{ $$ = vn->OnInstance(@$, {}, $1, $2); }	
+				| qualifiers type_for_declarator declarator				{ $$ = vn->OnInstance(@$, $1, $2, $3); }	
+				| XSTRUCTOR vn_primary parameterisation					{ $$ = vn->OnConstructorInstance(@$, {}, $2, $3); }	
+				| qualifiers XSTRUCTOR vn_primary parameterisation		{ $$ = vn->OnConstructorInstance(@$, $1, $3, $4); }	// for virtual destructor but needs ~
 
 assign_init		: expression
-				| '{' '}'             				  				{ $$ = vn->OnArrayInitialiser({}); } 
-				| '{' comma_sep_expr_decl '}'      					{ $$ = vn->OnArrayInitialiser($2); }               
+				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser({}); } 
+				| '{' comma_sep_expr_decl '}'      						{ $$ = vn->OnArrayInitialiser($2); }               
 
 decl_prefix_definite	: decl_prefix
 						| 	 				  		          stuff_op_scope vn_paren { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
@@ -361,7 +363,13 @@ decl_explicit_op_named 		: explicit_decl_node					{ $$ = vn->MakeScopeGnomonForN
                                                                                   
 decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_name	{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2.as_andata_block); 
                                                                           vn->AddGnomon($$); }
-                         
+                                                                          
+memb_inits	: memb_inits ',' memb_init								{ $$ = $1; $$.push_back($3); }
+			| memb_init												{ $$ = {$1}; }
+
+memb_init	: vn_primary '(' expression ')'							{ $$ = vn->OnMemberInitialiser($1, @2, $3, @3); }
+			| vn_primary
+                      
 //////////////////////////////// CONCRETE DECLARATORS /////////////////////////////////////         
                           		
 declarator			: declarator_prefix									 
