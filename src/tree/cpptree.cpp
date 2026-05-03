@@ -1090,13 +1090,6 @@ list<string> Field::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy p
 
 list<string> Field::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
 {
-	// Temporarily don't render non-empty member inits - I don't thing the grammar for them exists yet
-	if( policy.is_vn_render_for_temp_disables && !ReadArgs::use.contains("m") )
-	{	
-		if( !memb_inits.empty() )  
-			throw TemporarilyDisabled(); // Would render member inits TODO be able to parse these
-	}
-
 	return RenderMemberInits(renderer, policy);
 }
 
