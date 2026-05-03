@@ -177,8 +177,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
 {			
     if( auto make_rec = TreePtr<RecordInitialiser>::DynamicCast(node) )
         return RenderRecordInitialiser( make_rec, surround_prod, policy );
-    else if( auto macro_stmt = TreePtr<MacroStatement>::DynamicCast(node) )
-        return RenderMacroStatement( macro_stmt, surround_prod, policy );
     else if( auto si = TreePtr<SystemInclude>::DynamicCast(node) )
         return "#include <" + si->filename->GetString() + ">";
     else if( auto si = TreePtr<LocalInclude>::DynamicCast(node) )
@@ -193,22 +191,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
     nodes_not_rendered_to_c++;
     return ex.What()+RenderNodeExplicit( node, surround_prod, policy );      
 }
-
-
-string CppRender::RenderMacroStatement( TreePtr<MacroStatement> ms, Syntax::Production surround_prod, Syntax::Policy policy ) try
-{
-	(void)surround_prod;
-	string s = DoRender( &ms->identifier, Syntax::Production::POSTFIX, policy );
-	
-    list<string> renders; // TODO duplicated code, factor out into RenderSeqMacroArgs()
-    for( TreePtr<Node> node : ms->arguments )
-        renders.push_back( DoRender( &node, Syntax::Production::COMMA_SEP, policy) );
-    s += Join(renders, ", ", "(", ");\n");
-    return s;
-}
-DEFAULT_CATCH_CLAUSE
-
-
 
 
 string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, Syntax::Production surround_prod, Syntax::Policy policy ) try

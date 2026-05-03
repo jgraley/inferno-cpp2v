@@ -1214,11 +1214,9 @@ struct New : Operator
     NODE_FUNCTIONS_FINAL
     TreePtr<Type> type; ///< Type of object to be constructed
     TreePtr<Argumentation> placement_argumentation; ///< arguments for placement usage
+	TreePtr<InstanceIdentifier> constructor_id; // We use resolved constructors, so it has an identifier
     TreePtr<Argumentation> constructor_argumentation; ///< arguments to the constructor
     TreePtr<Globality> global; ///< whether placement is global
-    // TODO we want constructors to be resolved, so there should be a construcotr_id in here - 
-    // we would use that to resolve map arguments (the type is no good for this - it's the type of 
-    // the constructed object, not the constructor)
 
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
@@ -1587,6 +1585,7 @@ struct MacroStatement : Statement
     Sequence<Node> arguments; ///< Args taken in order. Can be anything at all!
    	
    	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production, Policy policy );
 };
 
 

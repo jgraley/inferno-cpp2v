@@ -134,7 +134,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 	INDENT("U");
     string s;
 	(void)surround_prod;
- 	policy.permit_static_keyword = false; // TODO static has different meaning at top level
+ 	policy.permit_static_keyword = false; // No support for code-unit statics
 	policy.cur_access = nullptr; // No access specs here
 
 	if( !policy.full_render_code_unit )
@@ -510,7 +510,7 @@ TreePtr<Argumentation> MapArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expr
 
 	// Determine args sequence using param sequence
 	auto sa = MakeTreeNode<SeqArgumentation>();
-	sa->arguments = IdValuePair::SortMapById( arguments, decl_sequence ); // TODO could absorb
+	sa->arguments = IdValuePair::SortMapById( arguments, decl_sequence );
 	
 	return sa;
 }
@@ -798,7 +798,7 @@ string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production
 {
 	string s;
 	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
-		s += "‽MemberInitialiser ";  // As an item, this conflicts with a function call so disambiguate using pre-restriction
+		s += "‽" + VN::Render::RenderNodeTypeName(shared_from_this()) + " ";  // As an item, this conflicts with a function call so disambiguate using pre-restriction
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
@@ -887,10 +887,8 @@ Syntax::Production Constancy::GetMyProductionTerminal() const
 
 //////////////////////////// Const //////////////////////////////
 
-string Const::GetRender( VN::RendererInterface *, Production surround_prod, Policy )
+string Const::GetRender( VN::RendererInterface *, Production, Policy )
 {
-	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
-		throw RefuseInItemisation(); // TODO be able to parse this (but not NonConst)
 	return "const";
 }
 
@@ -899,7 +897,7 @@ string Const::GetRender( VN::RendererInterface *, Production surround_prod, Poli
 string NonConst::GetRender( VN::RendererInterface *, Production surround_prod, Policy )
 {
 	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
-		throw RefuseInItemisation(); 
+		throw RefuseInItemisation(); // Not defaulted in itemisations
 	return "";
 }
 
@@ -1852,13 +1850,15 @@ Syntax::Production New::GetMyProductionTerminal() const
 
 string New::GetRender( VN::RendererInterface *renderer, Production, Policy policy)
 {
+	// We may need to convert the argumentation into a suitable form depending on policy.
+	// If a conversion occurs, the callee is needed in order to transform the arguments.
+	TreePtr<Argumentation> constructor_arg = constructor_argumentation->ConvertToSeqIfPolicyAllows(constructor_id, renderer, policy);
+
 	return string (DynamicTreePtrCast<Global>(global) ? "::" : "") +
 		   "new" + placement_argumentation->DirectRenderArgumentation(renderer, policy) +
 		   " " +
 		   renderer->DoRender( &type, Production::TYPE_IN_NEW, policy ) +
-		   constructor_argumentation->DirectRenderArgumentation(renderer, policy);
-
-	// TODO could use ConvertToSeqIfPolicyAllows() once we have a constructor_id
+		   constructor_arg->DirectRenderArgumentation(renderer, policy);
 }
 
 //////////////////////////// Delete ///////////////////////////////
@@ -1950,9 +1950,7 @@ string ConstructInit::GetRender( VN::RendererInterface *renderer, Production, Po
 			
 	// We never render the identifier for constructors - they are "invisible" and represent
 	// the choice of which overload we are bound to.		
-	return arg->DirectRenderArgumentation(renderer, policy);
-	
-	// TODO could use ConvertToSeqIfPolicyAllows() since we have a constructor_id
+	return arg->DirectRenderArgumentation(renderer, policy);	
 }
 
 //////////////////////////// RecordInitialiser ///////////////////////////////
@@ -2287,6 +2285,7 @@ Syntax::Production MacroField::GetMyProduction(const VN::RendererInterface *, Po
 		return Production::BARE_STMT_DECL;
 }
 
+
 string MacroField::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
     list<string> ls;
@@ -2305,7 +2304,7 @@ string MacroField::GetRender( VN::RendererInterface *renderer, Production, Polic
 	ls.push_back( Join(renders, ", ", "(", ")") );
 	
 	// ---- Initialisation ----	    
-    Append( ls, {RenderMemberInits( renderer, policy )} ); // TODO drop the :: and Declaration::Render...
+    Append( ls, RenderMemberInits( renderer, policy ) ); 
 	// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
     if( !TreePtr<Uninitialised>::DynamicCast(initialiser) )
 		ls.push_back( renderer->DoRender( &initialiser, Syntax::Production::DIRECT_INIT, policy ) );
@@ -2317,6 +2316,21 @@ string MacroField::GetRender( VN::RendererInterface *renderer, Production, Polic
 Syntax::Production MacroStatement::GetMyProductionTerminal() const
 { 
 	return Production::STMT_DECL; 
+}
+
+
+string MacroStatement::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	if( policy.refuse_preprocessor )
+		throw RefusedByPolicy();
+
+	string s = renderer->DoRender( &identifier, Syntax::Production::POSTFIX, policy );
+	
+    list<string> renders; 
+    for( TreePtr<Node> node : arguments )
+        renders.push_back( renderer->DoRender( &node, Syntax::Production::COMMA_SEP, policy) );
+    s += Join(renders, ", ", "(", ");\n");
+    return s;
 }
 
 //////////////////////////// PreProcDecl ///////////////////////////////

@@ -826,7 +826,7 @@ private:
             auto our_inst = DynamicTreePtrCast<Instance> (d);
             ASSERT( our_inst )(d);
             ASSERT( our_inst->identifier );            
-            TreePtr<Instance> memb_o = GetConstructor( our_inst->type );
+            TreePtr<Field> memb_o = GetConstructor( our_inst->type );
             ASSERT( memb_o );
             ASSERT( memb_o->identifier );
 			auto ci = MakeTreeNode<ConstructInit>();
@@ -1487,23 +1487,15 @@ private:
 			
 		TRACE("ActOnMemInitializer() ConstructorDecl: ")(d)(" MemberOrBase:")(our_field)(" Args: ")(args)("\n");
 
-        auto memb_type = DynamicTreePtrCast<TypeIdentifier>(our_field->type);
 		ASSERT( our_field )("Didn't get type for ")(our_field);
         DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
-        TreePtr<Record> memb_decl = TryGetRecordDeclaration(kit, memb_type).GetTreePtr();
-		ASSERT( memb_decl )("Didn't get record decl for ")(memb_type)(" field: ")(our_field);
-        TreePtr<Instance> memb_cons;
-        for( TreePtr<Declaration> memb_d : memb_decl->members )
-			if( auto memb_f=DynamicTreePtrCast<Field>(memb_d) )
-				if( DynamicTreePtrCast<Constructor>(memb_f->type) ) // TODO add signature filtering here for overloads
-					memb_cons = memb_f;
 
-        TreePtr<InstanceIdentifier> memb_cons_id = memb_cons->identifier;
-
+        TreePtr<Field> memb_o = GetConstructor( our_field->type );
+        ASSERT( memb_o );
 		auto ci = MakeTreeNode<ConstructInit>();
-		ci->argumentation = CreateMapArgumentation( args, memb_cons->type );
-		ci->constructor_id = memb_cons->identifier;
+		ci->argumentation = CreateMapArgumentation( args, memb_o->type );
+		ci->constructor_id = memb_o->identifier;
 		
 		auto mi = MakeTreeNode<MemberInitialiser>();
 		mi->member_id = our_field->identifier;
@@ -2045,7 +2037,7 @@ private:
         ident_track.PopScope( S );       
     }
 
-    TreePtr<Instance> GetConstructor( TreePtr<Type> t ) // TODO return a field
+    TreePtr<Field> GetConstructor( TreePtr<Type> t ) 
     {
         TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(t);
         ASSERT(id);
@@ -2055,11 +2047,11 @@ private:
 
         for( TreePtr<Declaration> d : r->members )
         {
-            TreePtr<Instance> o( DynamicTreePtrCast<Instance>(d) );
-            if( !o )
+            TreePtr<Field> field( DynamicTreePtrCast<Instance>(d) );
+            if( !field )
                 continue;
-            if( DynamicTreePtrCast<Constructor>(o->type) )
-                return o;
+            if( DynamicTreePtrCast<Constructor>(field->type) )
+                return field;
         }
         ASSERTFAIL("missing constructor");
     }
@@ -2089,6 +2081,8 @@ private:
         auto pa = MakeTreeNode<SeqArgumentation>();
         n->placement_argumentation = pa;
         CollectArgs( &(pa->arguments), PlacementArgs, NumPlaceArgs );
+        TreePtr<Field> memb_o = GetConstructor( n->type );
+        n->constructor_id = memb_o->identifier;
         auto ca = MakeTreeNode<SeqArgumentation>();
         n->constructor_argumentation = ca;
         CollectArgs( &(ca->arguments), ConstructorArgs, NumConsArgs );
