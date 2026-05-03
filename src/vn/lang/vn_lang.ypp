@@ -130,6 +130,7 @@
 <YY::TokenMetadata>	RESOLVED_TYPE			_("resolved type node name")
 <YY::TokenMetadata>	RESOLVED_DECL			_("resolved declaration node name")
 <YY::TokenMetadata>	RESOLVED_QUAL			_("resolved qualifier node name")
+<YY::TokenMetadata>	RESOLVED_MEMB_INIT		_("resolved member initialiser node name")
 <YY::TokenMetadata>	NODE_NAMESPACE			_("scope resolving name")
 <YY::TokenMetadata> KEYWORD_PRIMARY_OP		_("open_statement keyword operator")
 <YY::TokenMetadata> KEYWORD_SIMPLE_STMT     _("keyword simple statement") // eg break;
@@ -152,7 +153,7 @@ stmt_high
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expression expr_id_value boot
-%type <TreePtr<Node>> 				vn_prefix vn_postfix vn_paren vn_primary vn_wildcard
+%type <TreePtr<Node>> 				vn_paren vn_primary vn_wildcard
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_vn_prim 
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
 %type <TreePtr<Node>> 				unified_boot unified_prefix 
@@ -168,13 +169,14 @@ stmt_high
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
 %type <TreePtr<Node>> 				class_node class base_spec access_spec access_clause qualifier_node
-%type <TreePtr<Node>>				instance instance_proto instance_proto_a memb_init
+%type <TreePtr<Node>>				instance instance_proto instance_proto_a 
+%type <TreePtr<Node>>				memb_init memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					vn_name
-%type <string>						transform_op_named type_transform_op_named
+%type <string>						transform_op_named type_transform_op_named mi_transform_op_named
 %type <YY::TokenMetadata> 			node_namespace
-%type <YY::TokenMetadata> 			resolved_name resolved_type_name resolved_decl_name resolved_qual_name
-%type <TreePtr<Node>>	 			resolved_node resolved_type_node resolved_decl_node resolved_qual_node
-%type <TreePtr<Node>>	 			explicit_node explicit_type_node explicit_decl_node explicit_qual_node
+%type <YY::TokenMetadata> 			resolved_name resolved_type_name resolved_decl_name resolved_qual_name resolved_mi_name
+%type <TreePtr<Node>>	 			resolved_node resolved_type_node resolved_decl_node resolved_qual_node resolved_mi_node
+%type <TreePtr<Node>>	 			explicit_node explicit_type_node explicit_decl_node explicit_qual_node explicit_mi_node
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands decl_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
@@ -185,7 +187,7 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		explicit_op_scope prerestrict_op_scope id_by_name_op_scope builder_id_op_scope stuff_op_scope
 %type <shared_ptr<VN::Gnomon>>		code_unit_scope compound_scope params_scope 
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
-%type <VN::NodeAndGnomon>			explicit_op_named type_explicit_op_named decl_explicit_op_named qual_explicit_op_named
+%type <VN::NodeAndGnomon>			explicit_op_named type_explicit_op_named decl_explicit_op_named qual_explicit_op_named mi_explicit_op_named
 %type <VN::NodeAndGnomon>			class_scope
 %type <TreePtr<Node>> 				stmt_decl member
 %type <list<TreePtr<Node>>>			stmt_decls members 
@@ -195,6 +197,7 @@ stmt_high
 %type <list<VN::QualifierData>>		qualifiers 
 %type <const AvailableNodeData::Block *> prerestrict_op_named id_by_name_op_named build_id_named 
 %type <const AvailableNodeData::Block *> type_prerestrict_op_named type_id_by_name_op_named type_build_id_op_named
+%type <const AvailableNodeData::Block *> mi_prerestrict_op_named mi_id_by_name_op_named mi_build_id_op_named
 %type <multiset<string>>			type_specifier_seq
 
 // Solve the dangling-else amiguity by giving the "else" token a higher priority than the "if" token
@@ -370,9 +373,39 @@ decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_name	{ $$ = make
 memb_inits	: memb_inits ',' memb_init								{ $$ = $1; $$.push_back($3); }
 			| memb_init												{ $$ = {$1}; }
 
-memb_init	: vn_postfix '(' boot ')'								{ $$ = vn->OnMemberInitialiser($1, @2, $3, @3); }
-			| vn_prefix
+memb_init	: memb_init_prefix
+        
+memb_init_prefix: memb_init_postfix
+				| 						        GREEN_GRASS_OP memb_init_prefix	{ $$ = vn->OnGrass($2); }
+				|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP memb_init_prefix	{ $$ = vn->OnDelta($2, $4); }
+				| 					               NEGATION_OP memb_init_prefix	{ $$ = vn->OnNegation($2); }
+				|                      mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+				|  						        stuff_op_scope memb_init_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+				|    stuff_op_scope OPEN_VN memb_init CLOSE_VN memb_init_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN memb_init_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+        
+memb_init_postfix	: memb_init_primary
+					| memb_init_primary '(' boot ')'						{ $$ = vn->OnMemberInitialiser($1, @2, $3, @3); }
+
+memb_init_primary	: '(' memb_init ')'                          			{ $$ = $2; }
+					| mi_explicit_op_named itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
+					| DESIGNATED_NORMAL       				  				{ $$ = $1.as_designated; }
+					| mi_id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN	{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+					| mi_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
+					| mi_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
+					| mi_build_id_op_named OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
+					| mi_transform_op_named OPEN_VN unified_prefix CLOSE_VN		{ $$ = vn->OnTransform($1, @1, $3, @3); }
+					| STAR_OP												{ $$ = vn->OnStar(nullptr); }
+					| STAR_OP OPEN_VN memb_init CLOSE_VN					{ $$ = vn->OnStar($3); }
+					| ANY_NODE_OP											{ $$ = nullptr; }
                       
+mi_explicit_op_named 	: explicit_mi_node							{ $$ = vn->MakeScopeGnomonForNode($1); 
+																	  vn->AddGnomon($$.gnomon); }
+mi_prerestrict_op_named	: prerestrict_op_scope resolved_mi_name		{ $$ = $2.as_andata_block; (void)$1; }                      
+mi_id_by_name_op_named 	: id_by_name_op_scope resolved_mi_name		{ $$ = $2.as_andata_block; (void)$1; }
+mi_build_id_op_named	: builder_id_op_scope resolved_mi_name		{ $$ = $2.as_andata_block; (void)$1; }
+mi_transform_op_named  	: transform_op_scope TRANSFORM_NAME_NORMAL	{ $$ = $2.as_ascii; (void)$1; }
+
 //////////////////////////////// CONCRETE DECLARATORS /////////////////////////////////////         
                           		
 declarator			: declarator_prefix									 
@@ -549,19 +582,7 @@ expr_prefix : expr_postfix
 			|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP compound_prefix	{ $$ = vn->OnDelta($2, $4); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
 			|                      prerestrict_op_named expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
-			|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
-			|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
-
-vn_prefix	: vn_postfix
-			| 						     GREEN_GRASS_OP vn_prefix	{ $$ = vn->OnGrass($2); }
-			| 						      POINTER_IS_OP vn_prefix	{ $$ = vn->OnPointerIs($2); }
-			|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP vn_prefix	{ $$ = vn->OnDelta($2, $4); }
-			|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP compound_prefix	{ $$ = vn->OnDelta($2, $4); }
-			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
-			|                      prerestrict_op_named expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|              mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 			| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
@@ -580,8 +601,6 @@ expr_postfix: expr_primary
 			| expr_postfix '(' ')'	 								{ $$ = vn->OnSeqArgsCall($1, list<TreePtr<Node>>()); }
 			| expr_postfix '.' expr_primary							{ $$ = vn->OnLookup($1, $3, @3); }
 		
-vn_postfix	: vn_paren
-
 expr_primary: vn_paren  
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
@@ -595,6 +614,7 @@ vn_paren	: vn_primary
 			| '(' boot ')'                          			{ $$ = $2; }
 
 vn_primary  : vn_wildcard
+			| mi_explicit_op_named itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| explicit_op_named itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DESIGNATED_NORMAL       				  				{ $$ = $1.as_designated; }
 			| id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN	{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
@@ -743,6 +763,13 @@ resolved_qual_node	: resolved_qual_name				{ $$ = vn->NodeFromANDataBlock($1.as_
 
 resolved_qual_name	: part_resolve RESOLVED_QUAL		{ $$ = $2; }
 					| RESOLVED_QUAL						{ $$ = $1; }
+
+explicit_mi_node	: explicit_op_scope resolved_mi_node	{ $$ = $2; }
+
+resolved_mi_node	: resolved_mi_name					{ $$ = vn->NodeFromANDataBlock($1.as_andata_block); }
+
+resolved_mi_name	: part_resolve RESOLVED_MEMB_INIT	{ $$ = $2; }
+					| RESOLVED_MEMB_INIT				{ $$ = $1; }
 
 // On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 
 // expire when the production is complete or an error forces unwind. The naming layer

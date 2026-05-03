@@ -256,7 +256,7 @@ void Fingerprinter::ProcessSequence( SequenceInterface *x_seq, int &index )
 {
     for( const TreePtrInterface &tpi : *x_seq )
     {
-		ASSERT((TreePtr<Node>)tpi)("Got NULL in a Sequence, which isn't allowed even for patterns");
+		ASSERT((TreePtr<Node>)tpi)("Saw NULL in a Sequence, which isn't allowed even for patterns ")(x_seq);
         ProcessTPI( &tpi, index );
     }
 }
@@ -266,7 +266,7 @@ void Fingerprinter::ProcessCollection( CollectionInterface *x_col, int &index )
 {
     for( const TreePtrInterface &tpi : *x_col )
     {
-		ASSERT((TreePtr<Node>)tpi)("Got NULL in a Collection, which isn't allowed even for patterns");		
+		ASSERT((TreePtr<Node>)tpi)("Saw NULL in a Collection, which isn't allowed even for patterns ")(x_col);		
 		incoming_links_map[(TreePtr<Node>)tpi].insert(&tpi);
 	}
 

@@ -157,6 +157,7 @@ public:
 	struct RefusedByPolicy : Refusal {};
 	struct RefuseDueLocal : Refusal {};
 	struct RefuseDifficultSyntax : Refusal {}; // Eg, might cause conflicts
+	struct RefuseInItemisation : Refusal {};
 	struct TemporarilyDisabled : Refusal {};
 	struct TypeOfFailSyntax : Refusal {}; // Eg, might cause conflicts
 		

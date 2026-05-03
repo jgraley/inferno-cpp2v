@@ -83,6 +83,14 @@ bool AvailableNodeData::IsQualifier(const NodeBlock *block) const
 }
 
 
+bool AvailableNodeData::IsMemberInit(const NodeBlock *block) const
+{
+	ASSERT( block->node_enum );
+	shared_ptr<Node> spn = MakeNode(block->node_enum.value());
+	return !!dynamic_cast<const CPPTree::MemberInitialiser *>(spn.get());
+}
+
+
 #define EXCLUDE_LABEL_FROM_DECLARATION
 bool AvailableNodeData::IsDeclaration(const NodeBlock *block) const
 {

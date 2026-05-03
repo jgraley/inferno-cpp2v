@@ -555,7 +555,9 @@ Graph::MyNodeBlock Graph::PreProcessBlock( const Graphable::NodeBlock &block,
             // Auto-determination of link trace string
             if( link->pptr && my_block.node )   
             {
-                if( pspecial )         
+				if( !*link->pptr )
+					my_link->trace_labels.push_back( "NULL" );        
+                else if( pspecial )         
                     my_link->trace_labels.push_back( PatternLink( link->pptr ).GetShortName() );        
                 else
                     my_link->trace_labels.push_back( XLink( link->pptr ).GetShortName() ); 
@@ -1008,7 +1010,10 @@ string Graph::LinkStyleAtt(shared_ptr<const MyLink> my_link)
 
 string Graph::GetRegionGraphId(const Region *region, const GraphIdable *g)
 {
-    return GetRegionGraphId(region, g->GetGraphId());
+    if( g )
+		return GetRegionGraphId(region, g->GetGraphId());
+	else
+		return "NULL";
 }
 
 

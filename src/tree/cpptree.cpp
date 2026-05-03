@@ -794,10 +794,10 @@ Syntax::Production MemberInitialiser::GetMyProductionTerminal() const
 }
 
 
-string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {
-	if( !policy.detect_and_render_constructor )
-		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang
+	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
+		throw RefuseInItemisation(); // As an item, this conflicts with a function call
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
@@ -889,7 +889,7 @@ Syntax::Production Constancy::GetMyProductionTerminal() const
 string Const::GetRender( VN::RendererInterface *, Production surround_prod, Policy )
 {
 	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
-		throw RefuseDifficultSyntax(); // TODO be able to parse this (but not NonConst)
+		throw RefuseInItemisation(); // TODO be able to parse this (but not NonConst)
 	return "const";
 }
 
@@ -898,7 +898,7 @@ string Const::GetRender( VN::RendererInterface *, Production surround_prod, Poli
 string NonConst::GetRender( VN::RendererInterface *, Production surround_prod, Policy )
 {
 	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
-		throw RefuseDifficultSyntax(); 
+		throw RefuseInItemisation(); 
 	return "";
 }
 
