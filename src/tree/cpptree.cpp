@@ -796,13 +796,14 @@ Syntax::Production MemberInitialiser::GetMyProductionTerminal() const
 
 string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {
+	string s;
 	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
-		throw RefuseInItemisation(); // As an item, this conflicts with a function call
+		s += "‽MemberInitialiser ";  // As an item, this conflicts with a function call so disambiguate using pre-restriction
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
 
-	return renderer->DoRender( &member_id, Production::PRIMARY_EXPR, id_policy ) +
+	return s + renderer->DoRender( &member_id, Production::PRIMARY_EXPR, id_policy ) +
 		   "(" + 
 		   renderer->DoRender( &initialiser, Production::BOOT, policy ) + 
 		   ")";
@@ -2284,6 +2285,31 @@ Syntax::Production MacroField::GetMyProduction(const VN::RendererInterface *, Po
 		return Production::STMT_DECL;
 	else
 		return Production::BARE_STMT_DECL;
+}
+
+string MacroField::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+    list<string> ls;
+
+	if( policy.refuse_preprocessor )
+		throw RefusedByPolicy();
+
+	if( policy.missing_access_to_public )
+	    Append( ls, ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, renderer, policy ) ); // see #877
+
+    // ---- Proto ----
+	ls.push_back( renderer->DoRender( &identifier, Syntax::Production::POSTFIX, policy ) );
+	list<string> renders;
+	for( TreePtr<Node> node : arguments )
+		renders.push_back( renderer->DoRender(&node, Syntax::Production::COMMA_SEP, policy) );
+	ls.push_back( Join(renders, ", ", "(", ")") );
+	
+	// ---- Initialisation ----	    
+    Append( ls, {RenderMemberInits( renderer, policy )} ); // TODO drop the :: and Declaration::Render...
+	// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
+    if( !TreePtr<Uninitialised>::DynamicCast(initialiser) )
+		ls.push_back( renderer->DoRender( &initialiser, Syntax::Production::DIRECT_INIT, policy ) );
+	return Join( ls, " " );
 }
 
 //////////////////////////// MacroStatement ///////////////////////////////

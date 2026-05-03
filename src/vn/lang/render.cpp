@@ -172,6 +172,8 @@ Syntax::Policy Render::GetDefaultPolicy()
 	// these nodes anyway - there is nothting it can do with the access value.
 	policy.missing_access_to_public = false;
 	
+	// VN (and other parsers) can't differentiate preprocessor from other stuff
+	policy.refuse_preprocessor = true;
 	return policy;
 }
 

@@ -1574,6 +1574,7 @@ struct MacroField : Declaration,
     // TODO access, also see #877
     
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;        
+	string GetRender( VN::RendererInterface *renderer, Production, Policy policy );
 };
 
 

@@ -177,8 +177,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
 {			
     if( auto make_rec = TreePtr<RecordInitialiser>::DynamicCast(node) )
         return RenderRecordInitialiser( make_rec, surround_prod, policy );
-    else if( auto macro_decl = TreePtr<MacroField>::DynamicCast(node) )
-        return RenderMacroField( macro_decl, surround_prod, policy );
     else if( auto macro_stmt = TreePtr<MacroStatement>::DynamicCast(node) )
         return RenderMacroStatement( macro_stmt, surround_prod, policy );
     else if( auto si = TreePtr<SystemInclude>::DynamicCast(node) )
@@ -248,31 +246,6 @@ string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, 
     return s;
 }
 DEFAULT_CATCH_CLAUSE
-
-
-string CppRender::RenderMacroField( TreePtr<MacroField> md, Syntax::Production surround_prod, Syntax::Policy policy )
-{
-	(void)surround_prod;	
-
-    list<string> ls;
-
-	if( policy.missing_access_to_public )
-	    Append( ls, md->ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, this, policy ) ); // see #877
-
-    // ---- Proto ----
-	Append( ls, {DoRender( &md->identifier, Syntax::Production::POSTFIX, policy )} );
-	list<string> renders;
-	for( TreePtr<Node> node : md->arguments )
-		renders.push_back( DoRender(&node, Syntax::Production::COMMA_SEP, policy) );
-	Append( ls, {Join(renders, ", ", "(", ")")} );
-	
-	// ---- Initialisation ----	    
-    Append( ls, {md->RenderMemberInits( this, policy )} ); // TODO drop the :: and Declaration::Render...
-	// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
-    if( !TreePtr<Uninitialised>::DynamicCast(md->initialiser) )
-		Append( ls, {DoRender( &md->initialiser, Syntax::Production::DIRECT_INIT, policy )} );
-	return Join( ls, " " );
-}
 
 
 string CppRender::RenderTypedef( TreePtr<Typedef> t, Syntax::Production surround_prod, Syntax::Policy policy ) try
