@@ -958,16 +958,13 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 	}
     
     // TODO this is wrong, consider const char *s; the char is const but the pointer isn't and that's what we're declaring
-    // Pass constancy into DoRenderTypeAndDeclarator() instead.
+    // Pass constancy into DoRenderTypeAndDeclarator() instead. This means these functions need to be able to accept a TreePtr<Constancy> instead of bool
 	string cs = renderer->DoRender(&constancy, Production::SPACE_SEP_TYPE, sub_policy);
     if( !cs.empty() )
 		ls.push_back( cs );
     
     string declarator = renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy );   
     ls.push_back( renderer->DoRenderTypeAndDeclarator(&type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, false) );
-
-	// TODO const can appear in different places
-	//ls.push_back(renderer->DoRender(&constancy, Production::KEYWORD, policy) );
 
     if( !policy.rendering_definitions )
 		Append( ls, RenderDeclSpecPost(renderer, sub_policy) );
@@ -1596,7 +1593,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Production production
 	{
 		// Catch the exception so that our modified policy propagates into the explicit render
 		// TODO could we not put the modified policy into the exception object? We'd still have
-		// to catch, but could throw again with update policy.
+		// to catch, but could throw again with updated policy.
 		return renderer->RenderNodeExplicit(shared_from_this(), production, policy);
 	}
 	
@@ -1665,13 +1662,13 @@ string Enum::GetKeyword() const
 
 string Enum::GetRender( VN::RendererInterface *, Production, Policy ) 
 {
-	throw TemporarilyDisabled(); // TODO delete this and use Record::GetRender()
+	throw TemporarilyDisabled(); // TODO implement enum render
 }
 
 
 string Enum::RenderBody( VN::RendererInterface *, Policy  )
 {
-	throw TemporarilyDisabled(); // TODO implement enum render
+	throw TemporarilyDisabled(); 
 }
 
 //////////////////////////// InheritanceRecord ///////////////////////////////
@@ -1930,19 +1927,19 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	return s;
 }
 
-//////////////////////////// ConstructInit ///////////////////////////////
+//////////////////////////// ConstructInitialiser ///////////////////////////////
 
-Syntax::Production ConstructInit::GetMyProductionTerminal() const
+Syntax::Production ConstructInitialiser::GetMyProductionTerminal() const
 {
 	// Suppress the = when used with an Instance eg GlobalScope globals( "GlobalScope" )
 	return Production::DIRECT_INIT; 
 }
 
 
-string ConstructInit::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string ConstructInitialiser::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {		
 	if( !policy.detect_and_render_constructor )
-		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang				
+		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang, see MemberInitialiser for ideas				
 
 	// We may need to convert the argumentation into a suitable form depending on policy.
 	// If a conversion occurs, the callee is needed in order to transform the arguments.

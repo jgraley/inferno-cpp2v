@@ -1278,7 +1278,7 @@ struct Call : GoSub, Expression
 
 
 /// Initialiser that will require a constructor call eg the (a) in MyType x(a);
-struct ConstructInit : Initialiser
+struct ConstructInitialiser : Initialiser
 {
 	NODE_FUNCTIONS_FINAL
 	TreePtr<InstanceIdentifier> constructor_id; // We use resolved constructors, so it has an identifier

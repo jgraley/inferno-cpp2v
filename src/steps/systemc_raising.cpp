@@ -318,10 +318,10 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto s_module = MakePatternNode< Module >();
     auto r_module = MakePatternNode< Module >();
     auto l1s_memb_init = MakePatternNode<MemberInitialiser>();
-    auto l1s_cons_init = MakePatternNode<ConstructInit>();    
+    auto l1s_cons_init = MakePatternNode<ConstructInitialiser>();    
     auto l3_instance = MakePatternNode<Instance>();  
     auto l3_delta = MakePatternNode<DeltaAgent, Initialiser>();  
-    auto l3s_construct_init = MakePatternNode<ConstructInit>();
+    auto l3s_construct_init = MakePatternNode<ConstructInitialiser>();
     auto ls_field = MakePatternNode<Field>();  
     auto lr_field = MakePatternNode<Field>();  
 

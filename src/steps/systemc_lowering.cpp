@@ -90,7 +90,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l1s_macro_field = MakePatternNode< MacroField >(); 
     auto l1r_macro_field = MakePatternNode< MacroField >(); 
     auto l1r_memb_init = MakePatternNode<MemberInitialiser>();
-    auto l1r_cons_init = MakePatternNode<ConstructInit>();
+    auto l1r_cons_init = MakePatternNode<ConstructInitialiser>();
     auto l1r_args = MakePatternNode<SeqArgumentation>();
 	auto l1r_arg = MakePatternNode< StringizeAgent >();
     auto l1_memb_inits = MakePatternNode< StarAgent, MemberInitialiser >();
@@ -102,7 +102,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l2_instance = MakePatternNode<Instance>();  
     auto l2_inst_id = MakePatternNode<InstanceIdentifier>();  
     auto l2_delta = MakePatternNode<DeltaAgent, Initialiser>();  
-    auto l2r_cons_init = MakePatternNode<ConstructInit>();
+    auto l2r_cons_init = MakePatternNode<ConstructInitialiser>();
     auto l2r_args = MakePatternNode<SeqArgumentation>();
 	auto l2r_arg = MakePatternNode< StringizeAgent >();
     

@@ -1073,7 +1073,7 @@ TreePtr<Node> VNLangActions::OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<N
 
 TreePtr<Node> VNLangActions::OnMapArgsConsInit( TreePtr<Node> constructor_id, list<TreePtr<Node>> arguments )
 {
-	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::ConstructInit>>();
+	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::ConstructInitialiser>>();
 	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::MapArgumentation>>();
 	call->constructor_id = constructor_id;
 	call->argumentation = args;
@@ -1085,7 +1085,7 @@ TreePtr<Node> VNLangActions::OnMapArgsConsInit( TreePtr<Node> constructor_id, li
 
 TreePtr<Node> VNLangActions::OnSeqArgsConsInit( TreePtr<Node> constructor_id, list<TreePtr<Node>> arguments )
 {
-	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::ConstructInit>>();
+	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::ConstructInitialiser>>();
 	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::SeqArgumentation>>();
 	call->constructor_id = constructor_id;
 	call->argumentation = args;
