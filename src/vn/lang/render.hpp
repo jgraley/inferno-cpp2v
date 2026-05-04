@@ -50,16 +50,16 @@ public:
 
     string DoRenderTypeAndDeclarator( const TreePtrInterface *tpi, string declarator, 
                                       Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                      bool constant=false ) final;
+                                      TreePtr<Node> constant ) final;
     string DoRenderTypeAndDeclaratorPreserve( TreePtr<Node> type, string declarator, 
                                               Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                              bool constant=false ) final;
+                                              TreePtr<Node> constant ) final;
     string AccomodateBootTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                             Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                            bool constant );
+                                            TreePtr<Node> constant );
 	virtual string DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                               Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                              bool constant );	
+                                              TreePtr<CPPTree::Constancy> constant );	
 
 	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const;						 
 	TreePtr<Node> TryGetScope( TreePtr<Node> node ) const override;

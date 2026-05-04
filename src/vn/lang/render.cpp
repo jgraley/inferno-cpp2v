@@ -389,12 +389,16 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 }
 
 
-string Render::RenderNullPointer(Syntax::Production surround_prod, Syntax::Policy policy)
+string Render::RenderNullPointer(Syntax::Production surround_prod, Syntax::Policy policy) // TODO turn NULL into wildcard before sending to centralised stuff. This function should just be an ASSERTFAIL()
 {	
 	if( auto arch = dynamic_pointer_cast<Qualifier>( policy.pointer_archetype ) )
 		return Dispatch( (TreePtr<Node>)arch, surround_prod, policy );
 	else if( dynamic_pointer_cast<Type>( policy.pointer_archetype ) )
-		return "⍑☆";
+	{
+		static int i=0; 		
+		return SSPrintf("⍑/*RenderNullPtr(type %d)*/☆", i++);
+		
+	}
 	else 
 		return "☆";
 }
@@ -514,7 +518,7 @@ string Render::GetUniqueIdentifierName( TreePtr<Node> ) const
 
 string Render::DoRenderTypeAndDeclarator( const TreePtrInterface *tpi, string declarator, 
                                           Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                          bool constant ) 
+                                          TreePtr<Node> constant ) 
 {
 	policy.pointer_archetype = tpi->MakeValueArchetype(); // pointer_archetype applies to the type
 	return DoRenderTypeAndDeclaratorPreserve( (TreePtr<Node>)(*tpi), declarator, declarator_prod, surround_prod, policy, constant );
@@ -523,7 +527,7 @@ string Render::DoRenderTypeAndDeclarator( const TreePtrInterface *tpi, string de
                                           
 string Render::DoRenderTypeAndDeclaratorPreserve( TreePtr<Node> type, string declarator, 
                                                   Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                                  bool constant ) 
+                                                  TreePtr<Node> constant ) 
 {
 	if( !type )
 	{
@@ -540,7 +544,7 @@ string Render::DoRenderTypeAndDeclaratorPreserve( TreePtr<Node> type, string dec
 
 string Render::AccomodateBootTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                                 Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                                bool constant ) 
+                                                TreePtr<Node> constant ) 
 {
 	ASSERT(type);
     try
@@ -566,7 +570,7 @@ string Render::AccomodateBootTypeAndDeclarator( TreePtr<Node> type, string decla
 
 string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                           Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                          bool constant )
+                                          TreePtr<CPPTree::Constancy> constant )
 {
 	try
 	{
@@ -577,19 +581,22 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
 		{
 			if( !dynamic_cast<const StandardAgent *>(agent) )
 				return //"/*Agent*/"+
-					   string(constant?"const ":"") + 
 					   DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) + 
+					   " " +
+					   DoRender(&constant, Syntax::Production::SPACE_SEP_STMT_DECL, policy) + 
 					   (declarator != "" ? " "+declarator : "");
 		}
 	}
 	catch( Syntax::Refusal & ) {}
 	
 	auto type_as_type = TreePtr<CPPTree::Type>::DynamicCast(type);
+	auto dc = TreePtr<Constancy>::DynamicCast(constant);	
 	if( !type_as_type )
 	{
 		return //"/*Non-type*/" +	
-			   string(constant?"const ":"") + 
 			   DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) +
+			   " " +
+			   DoRender(&dc, Syntax::Production::SPACE_SEP_STMT_DECL, policy) + 
 			   (declarator != "" ? " "+declarator : "");
 	}
 	
@@ -603,8 +610,9 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
 		// We wouln't want to call a virtual on a NULL pointer, so the
 		// common part could be here or a static on Type
 		return //"/*GRTaD() fail*/" +	
-			   string(constant?"const ":"") + 
 			   DoRenderPreserve(type, Syntax::Production::SPACE_SEP_TYPE, policy) +
+			   " " +
+			   DoRender(&dc, Syntax::Production::SPACE_SEP_STMT_DECL, policy) + 
 			   (declarator != "" ? " "+declarator : "");
 	}	
 }                                          
@@ -645,10 +653,10 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 									 Syntax::Policy ) final { return "fake"; } 
 			string DoRenderTypeAndDeclarator( const TreePtrInterface *, string, 
 											  Syntax::Production, Syntax::Production, Syntax::Policy,
-											  bool ) final { return "fake"; }
+											  TreePtr<Node> ) final { return "fake"; }
 			string DoRenderTypeAndDeclaratorPreserve ( TreePtr<Node>, string, 
 									         		   Syntax::Production, Syntax::Production, Syntax::Policy,
-											           bool ) final { return "fake"; }
+											           TreePtr<Node> ) final { return "fake"; }
 			string RenderScopeResolvingPrefix( TreePtr<Node>, Syntax::Policy ) final { return ""; } 
 			string GetUniqueIdentifierName( TreePtr<Node> ) const final { return "fake"; }
 			string RenderNodeExplicit( shared_ptr<const Node>, 

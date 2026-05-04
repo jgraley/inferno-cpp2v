@@ -55,7 +55,7 @@ catch( Unimplemented & )
 	// lots of look-ahead. So clarify using ⍑ symbol. See #888
 	if( policy.disambiguate_type_id )
 		surround_prod = Production::BOOT_TYPE;
-	string s = GetRenderTypeAndDeclarator( renderer, "", Production::ANONYMOUS, surround_prod, policy, false );
+	string s = GetRenderTypeAndDeclarator( renderer, "", Production::ANONYMOUS, surround_prod, policy, MakeTreeNode<NonConst>() );
 	if( policy.disambiguate_type_id )
 		s = "⍑⍑(" + s + ")"; 
 	return s;
@@ -64,10 +64,11 @@ catch( Unimplemented & )
 
 string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                          Production, Production, Policy policy,
-                                         bool constant)
+                                         TreePtr<Node> constant)
 {
-	return (constant?"const ":"") + 
-	       GetRenderTypeSpecSeq( renderer, policy ) + 
+	auto dc = TreePtr<Constancy>::DynamicCast(constant);	
+	return GetRenderTypeSpecSeq( renderer, policy ) + 
+		   renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
 	       (declarator != "" ? " "+declarator : "");
 }                                           
 
@@ -959,12 +960,12 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
     
     // TODO this is wrong, consider const char *s; the char is const but the pointer isn't and that's what we're declaring
     // Pass constancy into DoRenderTypeAndDeclarator() instead. This means these functions need to be able to accept a TreePtr<Constancy> instead of bool
-	string cs = renderer->DoRender(&constancy, Production::SPACE_SEP_TYPE, sub_policy);
-    if( !cs.empty() )
-		ls.push_back( cs );
+	//string cs = renderer->DoRender(&constancy, Production::SPACE_SEP_TYPE, sub_policy);
+    //if( !cs.empty() )
+	//	ls.push_back( cs );
     
     string declarator = renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy );   
-    ls.push_back( renderer->DoRenderTypeAndDeclarator(&type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, false) );
+    ls.push_back( renderer->DoRenderTypeAndDeclarator(&type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, constancy) );
 
     if( !policy.rendering_definitions )
 		Append( ls, RenderDeclSpecPost(renderer, sub_policy) );
@@ -1184,7 +1185,7 @@ Syntax::Production Callable::GetOperandInDeclaratorProduction() const
 
 string Callable::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 											 Production , Production, Policy policy,
-											 bool constant )
+											 TreePtr<Node> constant )
 {
 	throw RefuseDifficultSyntax(); 
 	// This will render into something ambiguous with expressions
@@ -1195,11 +1196,12 @@ string Callable::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
 
 
 string Callable::UpdateDeclarator( VN::RendererInterface *renderer, string declarator, Policy policy,
-                                   bool constant ) 
+                                   TreePtr<Node> constant ) 
 {
+	auto dc = TreePtr<Constancy>::DynamicCast(constant);	
 	return declarator + 
 	       GetRenderParameterisation(renderer, policy) +	             
-	       (constant?" const":"");
+	       renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy);
 }                  
 
 
@@ -1226,21 +1228,22 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 
 string CallableParamsReturn::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 											 Production, Production surround_prod, Policy policy,
-											 bool constant )
+											 TreePtr<Node> constant )
 {
 	string d2 = UpdateDeclarator( renderer, declarator, policy, constant);
     return renderer->DoRenderTypeAndDeclarator( &return_type, 
                                                 d2,
                                                 Production::POSTFIX, 
                                                 surround_prod, 
-                                                policy );
+                                                policy,
+                                                MakeTreeNode<NonConst>() );
 }
 
 //////////////////////////// Constructor //////////////////////////////
 
 string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 												Production , Production, Policy policy,
-												bool constant )
+												TreePtr<Node> constant )
 {
 	string d2 = UpdateDeclarator(renderer, declarator, policy, constant);
 	if( policy.use_vn_xstructor_symbol )
@@ -1253,7 +1256,7 @@ string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer,
 
 string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 											   Production , Production, Policy policy,
-											   bool constant)
+											   TreePtr<Node> constant)
 {
 	if( declarator.empty() )
 		declarator = "~";
@@ -1283,8 +1286,8 @@ Syntax::Production Array::GetOperandInDeclaratorProduction() const
 
 
 string Array::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                   Production, Production surround_prod, Policy policy,
-                                   bool constant )
+										  Production, Production surround_prod, Policy policy,
+										  TreePtr<Node> constant )
 {
 	string d2 = declarator + 
 	            "[" + 
@@ -1318,31 +1321,39 @@ Syntax::Production Indirection::GetOperandInDeclaratorProduction() const
 
 string Pointer::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 											Production, Production surround_prod, Policy policy,
-											bool constant )
+											TreePtr<Node> constant )
 {
 	// TODO Pointer node to indicate constancy of pointed-to object - would go into this call to DoRenderTypeAndDeclarator
-	string d2 = string(DynamicTreePtrCast<Const>(constancy)?"const ":"") + "*" + (constant?" const ":"") + declarator;
+	auto dc = TreePtr<Constancy>::DynamicCast(constant);	
+	string d2 = "*" + 
+	            renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
+	            " " + 
+	            declarator;
     return renderer->DoRenderTypeAndDeclarator( &destination, 
 											    d2,
 											    Production::PREFIX, 
 											    surround_prod, 
 											    policy, 
-											    false ); 
+											    constancy ); 
 }                                       
 
 //////////////////////////// Reference //////////////////////////////
 
 string Reference::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 											Production, Production surround_prod, Policy policy,
-											bool constant )
+											TreePtr<Node> constant )
 {
-	string d2 = string(DynamicTreePtrCast<Const>(constancy)?"const ":"") + "&" + (constant?" const ":"") + declarator;
+	auto dc = TreePtr<Constancy>::DynamicCast(constant);
+	string d2 = "&" + 
+	            renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
+	            " " + 
+	            declarator;
     return renderer->DoRenderTypeAndDeclarator( &destination, 
 											    d2,
 											    Production::PREFIX, 
 											    surround_prod, 
 											    policy, 
-											    false ); 
+											    constancy ); 
 }                                       
 
 //////////////////////////// Void ///////////////////////////////
@@ -1381,7 +1392,7 @@ Syntax::Production Numeric::GetMyProductionTerminal() const
 
 string Integral::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                              Production declarator_prod, Production surround_prod, Policy policy,
-                                             bool constant)
+                                             TreePtr<Node> constant)
 {
     int64_t width_val;
     auto ic = DynamicTreePtrCast<SpecificInteger>( width );

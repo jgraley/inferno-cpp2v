@@ -164,7 +164,7 @@ string CppRender::GetUniqueIdentifierName( TreePtr<Node> id ) const
 
 string CppRender::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                              Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                             bool constant )
+                                             TreePtr<CPPTree::Constancy> constant )
 { 		
 	auto type_as_type = TreePtr<CPPTree::Type>::DynamicCast(type);
 	ASSERT( type_as_type )(type)(" needs to be a Type"); // Must supply a type
@@ -245,7 +245,7 @@ string CppRender::RenderTypedef( TreePtr<Typedef> t, Syntax::Production surround
 	string s = Join(ls);
 	
     auto id = DoRender( &t->identifier, starting_declarator_prod, id_policy );
-    ls.push_back( DoRenderTypeAndDeclarator( &(t->type), id, starting_declarator_prod, Syntax::Production::TYPE_IN_DECLARATION, policy ) );
+    ls.push_back( DoRenderTypeAndDeclarator( &(t->type), id, starting_declarator_prod, Syntax::Production::TYPE_IN_DECLARATION, policy, MakeTreeNode<NonConst>() ) );
     return Join(ls);    
 }
 DEFAULT_CATCH_CLAUSE

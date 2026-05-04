@@ -91,7 +91,7 @@ struct Type : virtual Node
 
 	virtual string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                                Production object_prod, Production surround_prod, Policy policy,
-                                               bool constant );
+                                               TreePtr<Node> constant );
 
     // Render a simple type only, no declarators
 	virtual string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy );    
@@ -756,8 +756,8 @@ struct Callable : Type
 	Production GetOperandInDeclaratorProduction() const override;
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
-                                       bool constant ) override;
-	virtual string UpdateDeclarator( VN::RendererInterface *renderer, string declarator, Policy policy, bool constant );
+                                       TreePtr<Node> constant ) override;
+	virtual string UpdateDeclarator( VN::RendererInterface *renderer, string declarator, Policy policy, TreePtr<Node> constant );
     virtual string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy);
 };
 
@@ -784,7 +784,7 @@ struct CallableParamsReturn : CallableParams
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
-                                       bool constant ) override;
+                                       TreePtr<Node> constant ) override;
 };
 
 
@@ -820,7 +820,7 @@ struct Constructor : Procedure // TODO be CallableParams
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
-                                       bool constant ) final;
+                                       TreePtr<Node> constant ) final;
 };
 
 
@@ -831,7 +831,7 @@ struct Destructor : Subroutine // TODO be Callable
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
-                                       bool constant ) final;
+                                       TreePtr<Node> constant ) final;
 };
 
 
@@ -846,7 +846,7 @@ struct Array : Type
 	Production GetOperandInDeclaratorProduction() const override;
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
-                                       bool constant ) final;	
+                                       TreePtr<Node> constant ) final;	
 };
 
 
@@ -869,7 +869,7 @@ struct Pointer : Indirection
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
-                                       bool constant ) final;
+                                       TreePtr<Node> constant ) final;
 };
 
 
@@ -880,7 +880,7 @@ struct Reference : Indirection
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
-                                       bool constant ) final;
+                                       TreePtr<Node> constant ) final;
 };
 
 
@@ -925,7 +925,7 @@ struct Integral : Numeric
 
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
-                                       bool constant ) final;
+                                       TreePtr<Node> constant ) final;
 	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
 	virtual bool IsSigned() { throw Unimplemented(); }
 };

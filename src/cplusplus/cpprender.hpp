@@ -23,7 +23,7 @@ private:
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const final;
     string DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                      bool constant ) final;
+                                      TreePtr<CPPTree::Constancy> constant ) final;
 	string DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy, Syntax::Refusal &ex );
     string RenderRecordInitialiser( TreePtr<CPPTree::RecordInitialiser> make_rec, Syntax::Production surround_prod, Syntax::Policy policy );
 

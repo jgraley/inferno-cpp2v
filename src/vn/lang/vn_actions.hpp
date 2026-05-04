@@ -170,6 +170,12 @@ struct NodeAndGnomon
 	shared_ptr<Gnomon> gnomon;
 };
 
+struct View // See #853
+{
+	TreePtr<Node> type;
+	list<VN::QualifierData> quals;
+};
+
 class VNLangActions	
 {
 public:
