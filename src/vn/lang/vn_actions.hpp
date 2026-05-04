@@ -10,6 +10,7 @@
 #include "indenter.hpp"
 #include "vn_commands.hpp"
 #include "tree/node_names.hpp"
+#include "declarators.hpp"
 #include <any> // to dep-break the generated headers
 
 namespace YY
@@ -156,6 +157,17 @@ struct QualifierData : Traceable
 		}
 		ASSERTFAIL();
 	}
+	string GetDiagnostic() const
+	{
+		switch( cat )
+		{
+			case QualCat::STATIC:
+				return "static";
+			case QualCat::NODE:
+				return Traceable::TypeIdName( *node );
+		}
+		ASSERTFAIL();
+	}
 };
 
 struct BlockAndGnomon
@@ -168,12 +180,6 @@ struct NodeAndGnomon
 {
 	TreePtr<Node> node;
 	shared_ptr<Gnomon> gnomon;
-};
-
-struct View // See #853
-{
-	TreePtr<Node> type;
-	list<VN::QualifierData> quals;
 };
 
 class VNLangActions	
@@ -243,6 +249,7 @@ public:
 	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified
 	TreePtr<Node> OnQualifierNodeKeyword( string keyword );
+	Declarators::CVQuals OnCVQuals( const list<QualifierData> &quals, any loc, bool nice=false );
 	
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );
 	TreePtr<Node> OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );

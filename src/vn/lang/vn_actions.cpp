@@ -784,16 +784,20 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 	else 
 		ASSERT(false)("Unknown gnomon: ")(spg);
 
+	// Get the CV-qualifiers for declarator reduction
+	Declarators::CVQuals cv_quals = OnCVQuals(quals_pre, loc, true);
+	
 	// Now fill in fields derived from the declarator
-	Declarators::Result declarator_result = Declarators::Declarator::DoReduce(declarator, type);
+	Declarators::Result declarator_result = Declarators::Declarator::DoReduce(declarator, type, cv_quals);
 	switch( declarator_result.outcome )
 	{
 		case Declarators::Result::CONCRETE:
 		case Declarators::Result::WILDCARD:
 		{
 			// NOTE: innermost id == NULL => ☆ (not abstract)	
-			instance->type = declarator_result.type;
-			instance->identifier = declarator_result.leaf;
+			instance->type = declarator_result.type_view;
+			instance->constancy = declarator_result.cv_quals_view.constancy; 
+			instance->identifier = declarator_result.leaf;		
 			break;
 		}
 
@@ -802,14 +806,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 				any_cast<YY::VNLangParser::location_type>(loc),
 				"Expected concrete declaration but got abstract.");
 	}
-	
-	// Now fill in fields derived from the qualifiers	
-	instance->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
-	for( const QualifierData &q : quals_pre )
-		if( q.cat == QualCat::NODE )
-			if( auto cq = TreePtr<CPPTree::Constancy>::DynamicCast(q.node) )
-				instance->constancy = cq;
-	
+		
 	// If indeed there is an initialiser, call ApplyInitialiser() to over-ride this
 	instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
 
@@ -863,11 +860,11 @@ TreePtr<Node> VNLangActions::OnConstructorInstance( any loc, const list<Qualifie
 			if( TreePtr<CPPTree::Constancy>::DynamicCast(q.node) )				
 				throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(loc),
-						"Xstructor does not support constancy: " + DiagQuote(Traceable::TypeIdName( *q.node )) );
+						"Xstructor does not support constancy: " + DiagQuote(q.GetDiagnostic()) );
 			if( TreePtr<CPPTree::Virtuality>::DynamicCast(q.node) ) // TODO allow virtuality for destructors
 				throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(loc),
-						"Constructor does not support virtuality: " + DiagQuote(Traceable::TypeIdName( *q.node )) );
+						"Constructor does not support virtuality: " + DiagQuote(q.GetDiagnostic()) );
 		case QualCat::STATIC:
 				throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(loc),
@@ -936,11 +933,12 @@ void VNLangActions::ApplyMemberInits( TreePtr<Node> instance, any instance_loc, 
 
 TreePtr<Node> VNLangActions::OnAbDeclType( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
 {
-	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type);
+	Declarators::CVQuals cv_quals = OnCVQuals({}, declarator_loc, true); // TODO route in some actual quals
+	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type, cv_quals);
 	switch( result.outcome )
 	{
 		case Declarators::Result::ABSTRACT:
-			return result.type;	
+			return result.type_view;	// TODO do something with result.cv_quals_view
 		
 		default:
 			ASSERTFAIL(); // internal error because abstract decls are parsed separately
@@ -1034,6 +1032,42 @@ TreePtr<Node> VNLangActions::OnQualifierNodeKeyword( string keyword )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Virtual>>();
 	else 
 		ASSERTFAIL();
+}
+
+
+Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals, any loc, bool nice )
+{
+	Declarators::CVQuals cv_quals
+	{
+		MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>()
+	};
+		
+	bool got_const = false;
+	for( const QualifierData &q : quals )
+	{
+		switch( q.cat )
+		{
+		case QualCat::NODE:
+			if( TreePtr<CPPTree::Constancy>::DynamicCast(q.node) )	// Add volatile here
+			{
+				if( got_const )
+					throw YY::VNLangParser::syntax_error(
+						any_cast<YY::VNLangParser::location_type>(loc),
+						"Excess " + DiagQuote(q.GetDiagnostic()) );
+				cv_quals.constancy = q.node;
+				got_const = true;
+				continue;
+			}
+			break;
+		default:
+			break;
+		}
+		if( !nice )
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"Expected CV qualifier, got: " + DiagQuote(q.GetDiagnostic()) );
+	}
+	return cv_quals;
 }
 
 
