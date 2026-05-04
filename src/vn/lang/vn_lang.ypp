@@ -157,8 +157,9 @@ stmt_high
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_vn_prim 
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
 %type <TreePtr<Node>> 				unified_boot unified_prefix 
-%type <TreePtr<Node>> 				stmt_boot open_statement
-%type <TreePtr<Node>> 				bare_statement statement_nl statement_nc statement         
+%type <TreePtr<Node>> 				stmt_boot open_statement arrival
+%type <TreePtr<Node>> 				bare_statement statement_nl statement         
+%type <list<TreePtr<Node>>>			statement_l statement_nc
 %type <TreePtr<Node>> 				open_declaration decl_boot decl_disjunction decl_conjunction declaration 
 %type <TreePtr<Node>> 				bare_declaration c_declaration 
 %type <TreePtr<Node>> 				assign_init
@@ -189,7 +190,7 @@ stmt_high
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
 %type <VN::NodeAndGnomon>			explicit_op_named type_explicit_op_named decl_explicit_op_named qual_explicit_op_named mi_explicit_op_named
 %type <VN::NodeAndGnomon>			class_scope
-%type <TreePtr<Node>> 				stmt_decl member
+%type <TreePtr<Node>> 				member
 %type <list<TreePtr<Node>>>			stmt_decls members 
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases memb_inits
@@ -290,11 +291,10 @@ compound_scope	: %empty													{ $$ = make_shared<VN::CompoundScopeGnomon>(
 code_unit_scope	: %empty													{ $$ = make_shared<VN::CodeUnitScopeGnomon>(); 
 																			  vn->AddGnomon($$); }
 
-stmt_decls	: stmt_decl														{ $$.push_back($1); }
-			| stmt_decl stmt_decls											{ $$ = $2; $$.push_front($1); }
-
-stmt_decl	: statement
-			| declaration
+stmt_decls	: statement_l													{ $$ = $1; }
+			| declaration													{ $$.push_back($1); }
+			| statement_l stmt_decls										{ $$ = $1 + $2; }
+			| declaration stmt_decls										{ $$ = $2; $$.push_front($1); }
 
 //////////////////////////////// DECLARATIONS ////////////////////////////////////         
 
@@ -497,20 +497,22 @@ stmt_conjunction 	: open_statement
 open_statement    	: expression
 					| statement		
 					
-statement	: compound 
-			| statement_nc %prec ';'
-			| expression ';'
-			| ';'																{ $$ = vn->OnNop(@1); }      
+statement	: statement_l														{ $$ = vn->OnNeedSoloStatement($1, @1); }
 
-// TODO support labelled statement (other than Nop) but it will not be possible to apply any VN operators 
-// because those can only operate on a single node and we'd be producing a pair {Label, Statement}
-// so such a thing would be reachable only from stmt_decls which will probably conflict due to loss of symmetry
-// with access specs on declarations.
-statement_nc: statement_nl
-			| CASE_KEYWORD expression ':' ';'							{ $$ = vn->OnCase($2, @2); } 
-			| CASE_KEYWORD expression RANGE_OP expression ':' ';'		{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
-			| DEFAULT_KEYWORD ':' ';'									{ $$ = vn->OnDefault(@$); } 
-			| expr_prefix ':' ';'		 								{ $$ = vn->OnLabel($1, @1); } 
+// TODO putting arrivals on compound or expression causes conflicts, need to look at symmetry
+statement_l	: compound 															{ $$ = {$1}; } 
+			| statement_nc %prec ';'											
+			| expression ';'													{ $$ = {$1}; } 
+			| ';'																{ $$ = { vn->OnNop(@1) }; }      
+
+statement_nc: statement_nl												{ $$ = {$1}; }
+			| arrival statement_nl										{ $$ = {$1, $2}; } 
+			| arrival ';'		 										{ $$ = {$1}; } // Note no Nop
+
+arrival		: CASE_KEYWORD expression ':'								{ $$ = vn->OnCase($2, @2); } 
+			| CASE_KEYWORD expression RANGE_OP expression ':' 			{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
+			| DEFAULT_KEYWORD ':'										{ $$ = vn->OnDefault(@$); } 
+			| expr_prefix ':' 			 								{ $$ = vn->OnLabel($1, @1); } 
 
 // _nc here means "not a compound"							
 statement_nl: bare_statement ';'												{ $$ = $1; }      
@@ -615,7 +617,7 @@ expr_primary: vn_paren
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
 			| KEYWORD_PRIMARY_OP								{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
 			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayInitialiser({}); } // ={...} dismbiguates against compound_primary
-			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayInitialiser($3); } // TODO restrict these to sub-items              
+			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayInitialiser($3); }             
 			| FUNC_ON_TYPE '(' type_boot ')'       				{ $$ = vn->OnFuncOnType($1.as_ascii, @1, $3, @3); }			
 
 vn_paren	: vn_primary
@@ -650,11 +652,12 @@ transform_op_named  : transform_op_scope TRANSFORM_NAME_NORMAL { $$ = $2.as_asci
 
 type_id 			: ab_type
                       
-ab_type				: type_for_declarator ab_declarator 				 	{ $$ = vn->OnAbDeclType($1, $2, @2); }
-ab_type				: qualifiers type_for_declarator ab_declarator 		 	{ $$ = vn->OnAbDeclType($2, $3, @3); }  // TODO use the qual $1
-ab_type				: type_for_declarator qualifiers ab_declarator 		 	{ $$ = vn->OnAbDeclType($1, $3, @3); }  // TODO use the qual $2
-					| type_for_declarator 				 					// abstract declarators can be "invisible"
-					| XSTRUCTOR parameterisation 							{ $$ = vn->OnConstructorType($2); } // TODO what about destructor?				                     
+ab_type				: type_for_declarator ab_declarator 				 		{ $$ = vn->OnAbDeclType(@$, {}, $1, $2); }
+ab_type				: qualifiers type_for_declarator ab_declarator 		 		{ $$ = vn->OnAbDeclType(@$, $1, $2, $3); }  
+ab_type				: type_for_declarator qualifiers ab_declarator 		 		{ $$ = vn->OnAbDeclType(@$, $2, $1, $3); } 
+ab_type				: qualifiers type_for_declarator qualifiers ab_declarator	{ $$ = vn->OnAbDeclType(@$, $1+$3, $2, $4); } 
+					| type_for_declarator 				 						// abstract declarators can be "invisible"
+					| XSTRUCTOR parameterisation 								{ $$ = vn->OnConstructorType($2); } // TODO what about destructor?				                     
 
 //////////////////////////////// TYPES ////////////////////////////////////         
        
@@ -712,7 +715,6 @@ type_specifier_seq	: TYPE_SPECIFIER												{ $$.insert($1); }
 
 //////////////////////////////// QUALIFIERS ////////////////////////////////////         
 
-// TODO what about more than one?
 qualifiers		: qualifier													{ $$.push_back($1); }
 				| qualifiers qualifier										{ $$ = $1; $$.push_back($2); }			
 

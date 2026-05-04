@@ -717,7 +717,7 @@ NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 }
 
 
-TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator )
+TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator )
 {	
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
@@ -727,7 +727,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 	// - wrong qualifier eg an access spec
 	// - duplication/conflict of qualifiers (<=1 in each category)
 	bool static_ = false;
-	for( const QualifierData &q : quals_pre )
+	for( const QualifierData &q : quals )
 		if( q.cat == QualCat::STATIC )
 			static_ = true;
 
@@ -785,7 +785,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		ASSERT(false)("Unknown gnomon: ")(spg);
 
 	// Get the CV-qualifiers for declarator reduction
-	Declarators::CVQuals cv_quals = OnCVQuals(quals_pre, loc, true);
+	Declarators::CVQuals cv_quals = OnCVQuals(quals, loc, true);
 	
 	// Now fill in fields derived from the declarator
 	Declarators::Result declarator_result = Declarators::Declarator::DoReduce(declarator, type, cv_quals);
@@ -813,7 +813,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 	// Now fill in any subclass-specific fields
 	if( auto field = TreePtr<CPPTree::Field>::DynamicCast(instance) )
 	{
-		for( const QualifierData &q : quals_pre )
+		for( const QualifierData &q : quals )
 		{
 			if( q.cat == QualCat::NODE )
 			{
@@ -839,7 +839,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 }
 
 
-TreePtr<Node> VNLangActions::OnConstructorInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> id, list<TreePtr<Node>> params )
+TreePtr<Node> VNLangActions::OnConstructorInstance( any loc, const list<QualifierData> &quals, TreePtr<Node> id, list<TreePtr<Node>> params )
 {
 	auto cons_type = MakeTreeNode<StandardAgentWrapper<CPPTree::Constructor>>();
 	for( auto param : params )
@@ -852,7 +852,7 @@ TreePtr<Node> VNLangActions::OnConstructorInstance( any loc, const list<Qualifie
 	field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();
 
 	// Now fill in fields derived from the qualifiers	
-	for( const QualifierData &q : quals_pre )
+	for( const QualifierData &q : quals )
 	{
 		switch( q.cat )
 		{
@@ -931,9 +931,9 @@ void VNLangActions::ApplyMemberInits( TreePtr<Node> instance, any instance_loc, 
 }
 
 
-TreePtr<Node> VNLangActions::OnAbDeclType( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc )
+TreePtr<Node> VNLangActions::OnAbDeclType( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator )
 {
-	Declarators::CVQuals cv_quals = OnCVQuals({}, declarator_loc, true); // TODO route in some actual quals
+	Declarators::CVQuals cv_quals = OnCVQuals(quals, loc, true); 
 	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type, cv_quals);
 	switch( result.outcome )
 	{
@@ -1255,6 +1255,17 @@ TreePtr<Node> VNLangActions::OnStringize( TreePtr<Node> source )
 }
 
 
+TreePtr<Node> VNLangActions::OnNeedSoloStatement( list<TreePtr<Node>> source, any loc )
+{
+	ASSERT( !source.empty() );
+	if( source.size() > 1 )
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"Cannot label this statement without a compound block (VN limitiation)" );
+	return SoloElementOf(source);
+}
+
+
 TreePtr<Node> VNLangActions::CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc )
 {
 	int bits;
@@ -1286,8 +1297,6 @@ void VNLangActions::AddGnomon( shared_ptr<Gnomon> gnomon )
 }
 
 
-
-
 static NodeEnum GetNodeEnum( list<string> typ, any loc )
 {
 	if( !AvailableNodeData().GetNameToEnumMap().count(typ) )
@@ -1299,7 +1308,6 @@ static NodeEnum GetNodeEnum( list<string> typ, any loc )
 	
 	return AvailableNodeData().GetNameToEnumMap().at(typ);	
 }
-
 
 //////////////////////////// Virtuality ////////////////////////////// TODO don't put these here, use MakeStandardAgentFromTypeID
 

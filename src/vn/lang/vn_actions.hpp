@@ -236,13 +236,13 @@ public:
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
 	TreePtr<Node> NodeFromANDataBlock( const AvailableNodeData::Block *block ) const;
 	NodeAndGnomon MakeScopeGnomonForNode( TreePtr<Node> node ) const;
-	TreePtr<Node> OnInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> type, TreePtr<Node> declarator );	
-	TreePtr<Node> OnConstructorInstance( any loc, const list<QualifierData> &quals_pre, TreePtr<Node> id, list<TreePtr<Node>> params );	
+	TreePtr<Node> OnInstance( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	
+	TreePtr<Node> OnConstructorInstance( any loc, const list<QualifierData> &quals, TreePtr<Node> id, list<TreePtr<Node>> params );	
 	void ApplyAccessSpec( TreePtr<Node> instance, any loc, TreePtr<Node> access );	
 	void ApplyInitialiser( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init, any init_loc );	
 	TreePtr<Node> OnMemberInitialiser( TreePtr<Node> member_id, any member_loc, TreePtr<Node> initialiser, any initialiser_loc );
 	void ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc );	
-	TreePtr<Node> OnAbDeclType( TreePtr<Node> type, TreePtr<Node> declarator, any declarator_loc );	
+	TreePtr<Node> OnAbDeclType( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	
 	TreePtr<Node> StartRecord( any loc, string keyword );
 	shared_ptr<Gnomon> MakeRecordScopeGnomon( TreePtr<Node> rec );
 	TreePtr<Node> FinishRecord( any loc, TreePtr<Node> node, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	
@@ -268,6 +268,7 @@ public:
 	TreePtr<Node> OnPointerIs( TreePtr<Node> pointer );
 	TreePtr<Node> OnBuildSize( TreePtr<Node> container );
 	TreePtr<Node> OnStringize( TreePtr<Node> source );
+	TreePtr<Node> OnNeedSoloStatement( list<TreePtr<Node>> source, any loc );
 	
 	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
 	
