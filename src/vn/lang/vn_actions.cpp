@@ -1422,7 +1422,9 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // - Add members to classes and move access_spec_nw across
 // - Give operator comma lower prio than ∧ etc and re-instate
 
-// See ReturnViaTemp: return ⯁Uninitialised⦅⦆; should just be return;
+// Do something about destructors, try them out in pattern and x
+
+// Putting arrivals on compound or expression causes conflicts, need to look at symmetry
 
 // NOTE: ; is NOT required for any VN operators working on statements or declarations. This is
 // consistent with statements and declarations that end in {...} not requiring one either. We DO
@@ -1441,6 +1443,7 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // we like the prefix syntax without any braces at all, but braces are likely needed for unified argument
 // and 2. for completeness there should be a Stuff-As-Type symbol although this isn't manifesting atm.
  
+// NOTE to get a source location for TRACE etc 
 // 		stringstream ss;
 //		ss << any_cast<YY::VNLangParser::location_type>(loc);
 //      ... ss.str() ...

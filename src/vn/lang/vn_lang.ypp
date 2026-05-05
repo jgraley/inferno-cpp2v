@@ -161,7 +161,7 @@ stmt_high
 %type <TreePtr<Node>> 				bare_statement statement_nl statement         
 %type <list<TreePtr<Node>>>			statement_l statement_nc
 %type <TreePtr<Node>> 				open_declaration decl_boot decl_disjunction decl_conjunction declaration 
-%type <TreePtr<Node>> 				bare_declaration c_declaration 
+%type <TreePtr<Node>> 				bare_declaration 
 %type <TreePtr<Node>> 				assign_init
 %type <TreePtr<Node>> 				decl_prefix_definite decl_prefix decl_postfix decl_primary decl_vn_prim
 %type <TreePtr<Node>> 				compound compound_primary parameter type_boot compound_prefix 
@@ -315,15 +315,12 @@ declaration	: bare_declaration ';'									{ $$ = $1; }
 			| instance_proto_a compound								{ vn->ApplyInitialiser($1, @1, $2, @2); $$ = $1; }	
 
 bare_declaration: decl_prefix
-				| c_declaration
-
-c_declaration	: instance
+				| instance
 				| class
 
 // Invent ApplyAccessSpec() like ApplyInitialiser()
 // OnInstance() will still try to program the current access. But the new fn will override it with the parsed acess, and then try to update the current access
 instance		: instance_proto_a
-//				| instance_proto_a ANY_NODE_OP							{ vn->ApplyInitialiser($1, @1, nullptr, @2); $$ = $1; } // note: ☆ has ; but no = TODO also seeing = ☆ being rendnered and parsed successfully, so get rid of this
 				| instance_proto_a C_ASSIGN assign_init					{ vn->ApplyInitialiser($1, @1, $3, @3); $$ = $1; } 
 				| instance_proto_a ':' memb_inits C_ASSIGN assign_init	{ vn->ApplyMemberInits($1, @1, $3, @3); 
 																		  vn->ApplyInitialiser($1, @1, $5, @5); $$ = $1; } 
@@ -480,7 +477,7 @@ members			: member													{ $$.push_back($1); }
 				| members member 											{ $$ = $1; $$.push_back($2); }
 
 member			: declaration
-				| statement // to get wildcards etc TODO tighten this up? 											    
+				| expr_prefix ';' // to get wildcards etc					    
 
 //////////////////////////////// STATEMENTS ////////////////////////////////////                 
 
@@ -491,28 +488,28 @@ stmt_disjunction	: stmt_conjunction
 					| stmt_disjunction DISJUNCTION_OP decl_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
 
 stmt_conjunction 	: open_statement       
-					| stmt_conjunction CONJUNCTION_OP open_statement    			{ $$ = vn->OnConjunction($1, $3); }
-					| stmt_conjunction CONJUNCTION_OP open_declaration    			{ $$ = vn->OnConjunction($1, $3); }
+					| stmt_conjunction CONJUNCTION_OP open_statement   		{ $$ = vn->OnConjunction($1, $3); }
+					| stmt_conjunction CONJUNCTION_OP open_declaration 		{ $$ = vn->OnConjunction($1, $3); }
 		
 open_statement    	: expression
 					| statement		
 					
-statement	: statement_l														{ $$ = vn->OnNeedSoloStatement($1, @1); }
+statement	: statement_l													{ $$ = vn->OnNeedSoloStatement($1, @1); }
 
-// TODO putting arrivals on compound or expression causes conflicts, need to look at symmetry
-statement_l	: compound 															{ $$ = {$1}; } 
+// Putting arrivals on compound or expression causes conflicts
+statement_l	: compound 														{ $$ = {$1}; } 
 			| statement_nc %prec ';'											
-			| expression ';'													{ $$ = {$1}; } 
-			| ';'																{ $$ = { vn->OnNop(@1) }; }      
+			| expression ';'												{ $$ = {$1}; } 
+			| ';'															{ $$ = { vn->OnNop(@1) }; }      
 
-statement_nc: statement_nl												{ $$ = {$1}; }
-			| arrival statement_nl										{ $$ = {$1, $2}; } 
-			| arrival ';'		 										{ $$ = {$1}; } // Note no Nop
+statement_nc: statement_nl													{ $$ = {$1}; }
+			| arrival statement_nl											{ $$ = {$1, $2}; } 
+			| arrival ';'		 											{ $$ = {$1}; } // Note no Nop
 
-arrival		: CASE_KEYWORD expression ':'								{ $$ = vn->OnCase($2, @2); } 
-			| CASE_KEYWORD expression RANGE_OP expression ':' 			{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
-			| DEFAULT_KEYWORD ':'										{ $$ = vn->OnDefault(@$); } 
-			| expr_prefix ':' 			 								{ $$ = vn->OnLabel($1, @1); } 
+arrival		: CASE_KEYWORD expression ':'									{ $$ = vn->OnCase($2, @2); } 
+			| CASE_KEYWORD expression RANGE_OP expression ':' 				{ $$ = vn->OnRangeCase($2, @2, $4, @4); } 
+			| DEFAULT_KEYWORD ':'											{ $$ = vn->OnDefault(@$); } 
+			| expr_prefix ':' 			 									{ $$ = vn->OnLabel($1, @1); } 
 
 // _nc here means "not a compound"							
 statement_nl: bare_statement ';'												{ $$ = $1; }      
@@ -657,7 +654,7 @@ ab_type				: qualifiers type_for_declarator ab_declarator 		 		{ $$ = vn->OnAbDe
 ab_type				: type_for_declarator qualifiers ab_declarator 		 		{ $$ = vn->OnAbDeclType(@$, $2, $1, $3); } 
 ab_type				: qualifiers type_for_declarator qualifiers ab_declarator	{ $$ = vn->OnAbDeclType(@$, $1+$3, $2, $4); } 
 					| type_for_declarator 				 						// abstract declarators can be "invisible"
-					| XSTRUCTOR parameterisation 								{ $$ = vn->OnConstructorType($2); } // TODO what about destructor?				                     
+					| XSTRUCTOR parameterisation 								{ $$ = vn->OnConstructorType($2); } 				                     
 
 //////////////////////////////// TYPES ////////////////////////////////////         
        
