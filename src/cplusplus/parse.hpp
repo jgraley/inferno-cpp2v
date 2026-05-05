@@ -801,8 +801,10 @@ private:
 				// change it.
                 if( auto ti = DynamicTreePtrCast<TypeIdentifier>(o->type) )
                     if( TreePtr<Record> r = TryGetRecordDeclaration(kit, ti).GetTreePtr() )
-                        o->initialiser = CreateRecordLiteralFromArrayLiteral(
-                                ai, r);
+                        ASSERTFAIL("Dropped RecordLiteral as it was never under test");
+						// If brought back, suggest using the Argumentation hierarchy for seq and map variants
+						// I.e. treat like a function call with args. Re-use the code.
+			
 			}
         }
 
@@ -1771,23 +1773,6 @@ private:
         return hold_expr.ToRaw( ao );
     }
 
-    // Create a RecordInitialiser using the elements of the supplied ArrayInitialiser and matching
-    // them against the members of the supplied record. Records are stored using an unordered
-    // collection for the members, so we have to use the ordered backing map. Array inits are ordered.
-    TreePtr<RecordInitialiser> CreateRecordLiteralFromArrayLiteral( TreePtr<ArrayInitialiser> ai,
-            TreePtr<Record> r )
-    {
-        // Make new record initialiser and fill in the type
-        auto ri = MakeTreeNode<RecordInitialiser>();
-        ri->type = r->identifier;
-
-        // Fill in the RecordInitialiser operands collection with pairs that relate operands to their member ids
-        TreePtr<Scope> s = r;
-        PopulateMapOperator( ri->operands, ai->elements, s );
-
-        return ri;
-    }
-
     // Populate a map operator using elements from a sequence of expressions
     void PopulateMapOperator( Collection<IdValuePair> &id_value_map, // MapOperands corresponding to the elements of ai go in here
             Sequence<Expression> &seq, // Operands to insert, ordered as per the input program
@@ -2135,7 +2120,10 @@ private:
         if( TreePtr<ArrayInitialiser> ai = DynamicTreePtrCast<ArrayInitialiser>(e) )
             if( TreePtr<TypeIdentifier> ti = DynamicTreePtrCast<TypeIdentifier>(t) )
                 if( TreePtr<Record> r = TryGetRecordDeclaration(kit, ti).GetTreePtr() )
-                    e = CreateRecordLiteralFromArrayLiteral( ai, r );
+                    ASSERTFAIL("Dropped RecordLiteral as it was never under test");
+					// If brought back, suggest using the Argumentation hierarchy for seq and map variants
+					// I.e. treat like a function call with args. Re-use the code.
+
 
         return hold_expr.ToRaw( e );
     }

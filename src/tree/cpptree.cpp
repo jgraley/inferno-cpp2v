@@ -1955,13 +1955,6 @@ string ConstructInitialiser::GetRender( VN::RendererInterface *renderer, Product
 	return arg->DirectRenderArgumentation(renderer, policy);	
 }
 
-//////////////////////////// RecordInitialiser ///////////////////////////////
-
-Syntax::Production RecordInitialiser::GetMyProductionTerminal() const
-{ 
-	return Production::PARENTHESISED; 
-}
-
 //////////////////////////// SizeOf ///////////////////////////////
 
 Syntax::Production SizeOf::GetMyProductionTerminal() const

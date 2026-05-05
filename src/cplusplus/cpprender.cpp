@@ -175,9 +175,7 @@ string CppRender::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarat
 
 string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy, Syntax::Refusal &ex )
 {			
-    if( auto make_rec = TreePtr<RecordInitialiser>::DynamicCast(node) )
-        return RenderRecordInitialiser( make_rec, surround_prod, policy );
-    else if( auto si = TreePtr<SystemInclude>::DynamicCast(node) )
+    if( auto si = TreePtr<SystemInclude>::DynamicCast(node) )
         return "#include <" + si->filename->GetString() + ">";
     else if( auto si = TreePtr<LocalInclude>::DynamicCast(node) )
         return "#include " + si->filename->GetRender(this, Syntax::Production::SPACE_SEP_PRE_PROC, policy);
@@ -191,43 +189,6 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
     nodes_not_rendered_to_c++;
     return ex.What()+RenderNodeExplicit( node, surround_prod, policy );      
 }
-
-
-string CppRender::RenderRecordInitialiser( TreePtr<RecordInitialiser> make_rec, Syntax::Production surround_prod, Syntax::Policy policy ) try
-{
-	(void)surround_prod;
-    string s;
-
-    // Get the record
-    TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(make_rec->type);
-    ASSERT(id);
-    
-    // We have an interesting problem: there are two collections, but an ordering
-    // is implied in the generalised case: the record type has a collection of 
-    // fields, but they need to be sorted based on dependency order when rendering
-    // the records (we also aim for repeatability here). This ordering must then
-    // be applied to the Collection<IdValuePair> in order to get a match-up between sub-expressions
-    // and fields. I think C++ side-steps this by diallowing the RecordInitialiser syntax
-    // in classes where dependencies might matter.
-
-    TreePtr<Record> r = TryGetRecordDeclaration(trans_kit, id).GetTreePtr();
-    // Make sure we have the same ordering as when the record was rendered
-    Sequence<Declaration> sorted_members = SortDecls( r->members, true );
-
-    // Determine args sequence using param sequence
-    Sequence<Expression> sub_expr_sequence = IdValuePair::SortMapById( make_rec->operands, sorted_members );
-    
-    // Render to strings
-    list<string> ls;
-    for( TreePtr<Expression> e : sub_expr_sequence )
-        ls.push_back( DoRender( &e, Syntax::Production::COMMA_SEP, policy ) );
-
-    // Do the syntax
-    s += "(" + DoRender( &make_rec->type, Syntax::Production::BOTTOM_EXPR, policy ) + ")"; 
-    s += Join( ls, ", ", "{", "}" );   // Use of {} in expressions is irregular so handle locally 
-    return s;
-}
-DEFAULT_CATCH_CLAUSE
 
 
 string CppRender::RenderTypedef( TreePtr<Typedef> t, Syntax::Production surround_prod, Syntax::Policy policy ) try

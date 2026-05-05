@@ -148,7 +148,7 @@ Syntax::Policy Render::GetDefaultPolicy()
 	policy.convert_argumentation_to_seq = false;
 
 	// Don't insert {} into patterns because they imply Compound or StatementExpression
-	// or ArrayInitialiser or RecordInitialiser. Use () instead, which are purely for disamiguation.
+	// or ArrayInitialiser. Use () instead, which are purely for disamiguation.
 	policy.boot_statements_using_braces = false;
 	
 	// Need to separate members from statements in Compound

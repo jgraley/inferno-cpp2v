@@ -88,10 +88,6 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
     {
         return GET_CHILD(c, type);
     }
-    else if( auto rl = AugTreePtr<RecordInitialiser>::DynamicCast(o) )
-    {
-        return GET_CHILD(rl, type);
-    }
     else if( AugTreePtr<LabelIdentifier>::DynamicCast(o) )
     {
         return kit.utils->MakeAugTreeNode<Labeley>(); 

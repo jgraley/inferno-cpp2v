@@ -1289,20 +1289,6 @@ struct ConstructInitialiser : Initialiser
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
-
-/// Initialiser for a record 
-/** Uses a map to associate elements with corresponding record 
- members. We also give the record type explicitly since the map is
- not enough information. */
-struct RecordInitialiser : Expression
-{
-    NODE_FUNCTIONS_FINAL
-    TreePtr<TypeIdentifier> type; ///< handle of the type of the record we are making
-	Collection<IdValuePair> operands;
-	
-	Production GetMyProductionTerminal() const override;
-};
-
 /// Operator that operates on data types as parameters. 
 /** Where either is allowed we use the type one, since it's more concise. */
 struct TemplateExpression : Expression

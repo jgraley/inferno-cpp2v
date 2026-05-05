@@ -25,7 +25,6 @@ private:
                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                       TreePtr<CPPTree::Constancy> constant ) final;
 	string DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy, Syntax::Refusal &ex );
-    string RenderRecordInitialiser( TreePtr<CPPTree::RecordInitialiser> make_rec, Syntax::Production surround_prod, Syntax::Policy policy );
 
     string RenderTypedef( TreePtr<CPPTree::Typedef> t, Syntax::Production surround_prod, Syntax::Policy policy );
 	string RenderEnum( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
