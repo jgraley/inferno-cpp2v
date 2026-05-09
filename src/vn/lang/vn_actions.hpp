@@ -138,7 +138,8 @@ public:
 enum class QualCat
 {
 	NODE, // See the node itself
-	STATIC
+	STATIC,
+	TYPEDEF
 };
 
 struct QualifierData : Traceable
@@ -152,6 +153,8 @@ struct QualifierData : Traceable
 		{
 			case QualCat::STATIC:
 				return "STATIC";
+			case QualCat::TYPEDEF:
+				return "TYPEDEF";
 			case QualCat::NODE:
 				return Trace(node);
 		}
@@ -163,6 +166,8 @@ struct QualifierData : Traceable
 		{
 			case QualCat::STATIC:
 				return "static";
+			case QualCat::TYPEDEF:
+				return "typedef";
 			case QualCat::NODE:
 				return Traceable::TypeIdName( *node );
 		}
@@ -236,10 +241,12 @@ public:
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
 	TreePtr<Node> NodeFromANDataBlock( const AvailableNodeData::Block *block ) const;
 	NodeAndGnomon MakeScopeGnomonForNode( TreePtr<Node> node ) const;
-	TreePtr<Node> OnInstance( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	
-	TreePtr<Node> OnConstructorInstance( any loc, const list<QualifierData> &quals, TreePtr<Node> id, list<TreePtr<Node>> params );	
-	void ApplyAccessSpec( TreePtr<Node> instance, any loc, TreePtr<Node> access );	
-	void ApplyInitialiser( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init, any init_loc );	
+	TreePtr<Node> OnDeclaratorDecl( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );
+	TreePtr<Node> OnTypedef( any loc, const list<QualifierData> &quals, Declarators::Result declarator_result );	
+	TreePtr<Node> OnInstance( any loc, const list<QualifierData> &quals, Declarators::Result declarator_result );	
+	TreePtr<Node> OnConstructorDecl( any loc, const list<QualifierData> &quals, TreePtr<Node> id, list<TreePtr<Node>> params );	
+	void ApplyAccessSpec( TreePtr<Node> declaration, any loc, TreePtr<Node> access );	
+	void ApplyInitialiser( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> init, any init_loc );	
 	TreePtr<Node> OnMemberInitialiser( TreePtr<Node> member_id, any member_loc, TreePtr<Node> initialiser, any initialiser_loc );
 	void ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc );	
 	TreePtr<Node> OnAbDeclType( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	

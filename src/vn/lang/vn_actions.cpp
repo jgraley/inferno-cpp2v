@@ -25,7 +25,6 @@
 #include <cctype>
 #include <typeinfo>
 
-//using namespace CPPTree; // TODO should not need
 using namespace VN;
 using namespace reflex;
 
@@ -67,7 +66,7 @@ TreePtr<Node> VNLangActions::OnBuildSize( TreePtr<Node> container )
 
 TreePtr<Node> VNLangActions::OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit )
 {
-	string note = "\nNote: Only 《=1... as a depth condition is supported at present (TODO).";
+	string note = "\nNote: Only =1 as a depth condition is supported at present (TODO).";
 	if( limit.cond.empty() )
 	{
 		auto stuff = MakeTreeNode<StuffAgent>();
@@ -717,7 +716,46 @@ NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 }
 
 
-TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator )
+TreePtr<Node> VNLangActions::OnDeclaratorDecl( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator )
+{
+	bool typedef_ = false;
+	for( const QualifierData &q : quals )
+		if( q.cat == QualCat::TYPEDEF )
+			typedef_ = true;
+			
+	// Get the CV-qualifiers for declarator reduction
+	Declarators::CVQuals cv_quals = OnCVQuals(quals, loc, true);
+	
+	// Now fill in fields derived from the declarator
+	Declarators::Result declarator_result = Declarators::Declarator::DoReduce(declarator, type, cv_quals);
+	switch( declarator_result.outcome )
+	{
+		case Declarators::Result::CONCRETE:
+		case Declarators::Result::WILDCARD:
+			if( typedef_ )
+				return OnTypedef(loc, quals, declarator_result);
+			else
+				return OnInstance(loc, quals, declarator_result);
+
+		default:
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"Expected concrete declaration but got abstract.");
+	}
+}
+
+
+TreePtr<Node> VNLangActions::OnTypedef( any loc, const list<QualifierData> &quals, Declarators::Result declarator_result )
+{
+	auto typedef_ = MakeTreeNode<StandardAgentWrapper<CPPTree::Typedef>>(); 
+	typedef_->type = declarator_result.type_view;
+	typedef_->identifier = declarator_result.leaf;	
+	
+	return typedef_;
+}
+
+
+TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &quals, Declarators::Result declarator_result )
 {	
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
@@ -784,28 +822,9 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 	else 
 		ASSERT(false)("Unknown gnomon: ")(spg);
 
-	// Get the CV-qualifiers for declarator reduction
-	Declarators::CVQuals cv_quals = OnCVQuals(quals, loc, true);
-	
-	// Now fill in fields derived from the declarator
-	Declarators::Result declarator_result = Declarators::Declarator::DoReduce(declarator, type, cv_quals);
-	switch( declarator_result.outcome )
-	{
-		case Declarators::Result::CONCRETE:
-		case Declarators::Result::WILDCARD:
-		{
-			// NOTE: innermost id == NULL => ☆ (not abstract)	
-			instance->type = declarator_result.type_view;
-			instance->constancy = declarator_result.cv_quals_view.constancy; 
-			instance->identifier = declarator_result.leaf;		
-			break;
-		}
-
-		default:
-			throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc),
-				"Expected concrete declaration but got abstract.");
-	}
+	instance->type = declarator_result.type_view;
+	instance->constancy = declarator_result.cv_quals_view.constancy; 
+	instance->identifier = declarator_result.leaf;		
 		
 	// If indeed there is an initialiser, call ApplyInitialiser() to over-ride this
 	instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
@@ -839,7 +858,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 }
 
 
-TreePtr<Node> VNLangActions::OnConstructorInstance( any loc, const list<QualifierData> &quals, TreePtr<Node> id, list<TreePtr<Node>> params )
+TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierData> &quals, TreePtr<Node> id, list<TreePtr<Node>> params )
 {
 	auto cons_type = MakeTreeNode<StandardAgentWrapper<CPPTree::Constructor>>();
 	for( auto param : params )
@@ -880,16 +899,11 @@ TreePtr<Node> VNLangActions::OnConstructorInstance( any loc, const list<Qualifie
 }
 
 
-void VNLangActions::ApplyAccessSpec( TreePtr<Node> instance, any instance_loc, TreePtr<Node> access )
+void VNLangActions::ApplyAccessSpec( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> access )
 {
-	auto field = TreePtr<CPPTree::Field>::DynamicCast(instance);
-	if( !field )
-		throw YY::VNLangParser::syntax_error(
-	  		  any_cast<YY::VNLangParser::location_type>(instance_loc),
-			  "Access specifier given for non-field: "+DiagQuote(Traceable::TypeIdName( *access )) );		
-
 	// Overwrite the access spec of the field with the specified access spec
-	field->access = access; // Don't duplicate the subtree - we want coupling behaviour
+	if( auto field = TreePtr<CPPTree::Field>::DynamicCast(declaration) )
+		field->access = access; // Don't duplicate the subtree - we want coupling behaviour
 
 	// If we're in a record scope, update the stored access spec for future fields to use
 	if( shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop() )	
@@ -898,9 +912,9 @@ void VNLangActions::ApplyAccessSpec( TreePtr<Node> instance, any instance_loc, T
 }
 
 
-void VNLangActions::ApplyInitialiser( TreePtr<Node> instance, any instance_loc, TreePtr<Node> init, any init_loc )
+void VNLangActions::ApplyInitialiser( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> init, any init_loc )
 {
-	auto o = TreePtr<CPPTree::Instance>::DynamicCast(instance);
+	auto o = TreePtr<CPPTree::Instance>::DynamicCast(declaration);
 	ASSERT(o); // Parser should enforce
 	
 	o->initialiser = init;
@@ -1361,13 +1375,25 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // - Labels will need their own "stuff" I think, otherwise it will be too hard to disambiguate with things like : and && hanging around
 // Organisation: stuff from the C++ BNF
 
-// {} is always an explicit Compound
-// and ({}) is StatementExpression so {} should be available wherever () is
+// Don't support StatementExpression directly, the ({...}) is nasty. Try to get to it using pre-restriction plus Compound syntax
+// eg ‽StatementExpression⦅ ⦆ { ...; r; }
 
-// Note: ▲⯈ stays at low prec so we can have ꩜⩨▲ uninterupted. Luckily both () and {} are lower and can be used directly, 
-// each booting the parser so we can put a wide range of stuff in them. If we keep ∧ and ∨ at low precidence, the remaining 
-// VN ops are all unops. This means the primary only appears once. Thus, we can safely duplicate the rules of them for any 
-// "awkward" primaries (like compounds). 
+// Can we generally differentiate between VN syntax that takes the place of C syntax eg ⯁ and that doesn't eg all the VN operators?
+// Could ⯁ use () instead of ⦅ ⦆?
+
+// The VN parse tree avoids couplings by the use of designations. But couplings can re-create stem context. So, a VN source file
+// has a simple structure: start at stem, stem -> search, stem -> replace. One ambiguity is designations that are only used in
+// entirely in search or entirely in replace context. Maybe designations could qualify themselves to be search-side or replace 
+// side by borrowing ▲ and ⯈ symbols. A pain to render though.
+
+// ▲⯈ is currently at PREFIX precedence and it's RHS is needing () most of the time. Try to drop it to below that of ∧ and ∨.
+// Note: ∧ and ∨ are not valid in replace-only context so would not appear on RHS anyway.
+// Note: ꩜ is a command and so already very low precidence
+// Because ▲ exists we then have a gap in the syntax for any PREFIX op on the left, including eg ⩨▲. 
+// Maybe we can fill it by allowing the precidence of PREFIX ops to be "pulled down" by the ▲. If this doesn't
+// work just set ⩨ the same as ▲ (because they are prefix syntax) and go to the pub. Then again, how often is ⩨
+// used outside of ⩨▲ or ꩜⩨? Maybe not many.
+// Maybe also re-evaluate how often the current low-precs (∧ and ∨) are duplicated vs the high precs (the VN prefix ops)
 
 // Review the virt-specifiers and const on the node methods for rendering
 
@@ -1425,6 +1451,10 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // Do something about destructors, try them out in pattern and x
 
 // Putting arrivals on compound or expression causes conflicts, need to look at symmetry
+
+// According to https://alx71hub.github.io/hcb/#assignment-expression, the RHS of any assignment
+// operator including = is actual an initialiser. That might reduce pressure in the grammar
+// by making = more symmetrical.
 
 // NOTE: ; is NOT required for any VN operators working on statements or declarations. This is
 // consistent with statements and declarations that end in {...} not requiring one either. We DO

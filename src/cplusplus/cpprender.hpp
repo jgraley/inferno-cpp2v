@@ -26,7 +26,6 @@ private:
                                       TreePtr<CPPTree::Constancy> constant ) final;
 	string DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy, Syntax::Refusal &ex );
 
-    string RenderTypedef( TreePtr<CPPTree::Typedef> t, Syntax::Production surround_prod, Syntax::Policy policy );
 	string RenderEnum( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
 
 	UniquifyNames::NodeToNameMap unique_identifier_names;

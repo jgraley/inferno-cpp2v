@@ -175,42 +175,14 @@ string CppRender::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarat
 
 string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy, Syntax::Refusal &ex )
 {			
-    if( auto si = TreePtr<SystemInclude>::DynamicCast(node) )
-        return "#include <" + si->filename->GetString() + ">";
-    else if( auto si = TreePtr<LocalInclude>::DynamicCast(node) )
-        return "#include " + si->filename->GetRender(this, Syntax::Production::SPACE_SEP_PRE_PROC, policy);
-    else if( TreePtr<Enum> enum_ = TreePtr<Enum>::DynamicCast(node) )
+    if( TreePtr<Enum> enum_ = TreePtr<Enum>::DynamicCast(node) )
 		return RenderEnum( enum_, policy );        	
-    else if( auto t = TreePtr<Typedef>::DynamicCast(node) )
-        return RenderTypedef( t, surround_prod, policy );
         
     // Due #969 we might have a standard agent, so fall back to a function that
     // definitely won't call any agent methods.
     nodes_not_rendered_to_c++;
-    return ex.What()+RenderNodeExplicit( node, surround_prod, policy );      
+    return RenderNodeExplicit( node, surround_prod, policy ) + " // " + ex.What() + "\n";      
 }
-
-
-string CppRender::RenderTypedef( TreePtr<Typedef> t, Syntax::Production surround_prod, Syntax::Policy policy ) try
-{
-	(void)surround_prod;
-    list<string> ls;
-
-	if( policy.missing_access_to_public )
-	    Append( ls, t->ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, this, policy ) ); // see #877
-
-	Syntax::Policy id_policy = policy;
-	id_policy.resolve_identifier_scope = false;
-    Syntax::Production starting_declarator_prod = Syntax::Production::PRIMARY_EXPR;
-	ls.push_back("typedef");
-	string s = Join(ls);
-	
-    auto id = DoRender( &t->identifier, starting_declarator_prod, id_policy );
-    ls.push_back( DoRenderTypeAndDeclarator( &(t->type), id, starting_declarator_prod, Syntax::Production::TYPE_IN_DECLARATION, policy, MakeTreeNode<NonConst>() ) );
-    return Join(ls);    
-}
-DEFAULT_CATCH_CLAUSE
-
 
 
 string CppRender::RenderEnum( TreePtr<CPPTree::Record> record, Syntax::Policy policy ) try

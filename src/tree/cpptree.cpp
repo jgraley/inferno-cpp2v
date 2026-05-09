@@ -1550,6 +1550,23 @@ Syntax::Production Typedef::GetMyProductionTerminal() const
 	return Production::BARE_STMT_DECL; 
 }
 
+
+string Typedef::GetRender( VN::RendererInterface *renderer, Production, Policy policy ) 
+{
+    list<string> ls;
+	if( policy.missing_access_to_public )
+	    Append( ls, ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, renderer, policy ) ); // see #877
+
+	Syntax::Policy id_policy = policy;
+	id_policy.resolve_identifier_scope = false;
+    Syntax::Production starting_declarator_prod = Syntax::Production::PRIMARY_EXPR;
+    auto id = renderer->DoRender( &identifier, starting_declarator_prod, id_policy );
+    
+	ls.push_back("typedef");
+    ls.push_back( renderer->DoRenderTypeAndDeclarator( &type, id, starting_declarator_prod, Syntax::Production::TYPE_IN_DECLARATION, policy, MakeTreeNode<NonConst>() ) );
+    return Join(ls);    
+}
+
 //////////////////////////// Record ///////////////////////////////
 
 TreePtr<AccessSpec> Record::GetInitialAccess() const
@@ -2334,3 +2351,33 @@ Syntax::Production PreProcDecl::GetMyProductionTerminal() const
 { 
 	return Production::PRE_PROC_DIRECTIVE; 
 }
+
+string PreProcDecl::RenderPreProcDirective(string s, Policy policy) const
+{
+	if( policy.refuse_preprocessor )
+		throw RefusedByPolicy();
+
+	return "#" + s + "\n";
+}
+
+//////////////////////////// Include ///////////////////////////////
+
+string Include::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return RenderPreProcDirective("include "+CustomiseFilenameForInclude(filename, renderer, policy), policy);
+}
+
+//////////////////////////// SystemInclude ///////////////////////////////
+
+string SystemInclude::CustomiseFilenameForInclude( TreePtr<String> name, VN::RendererInterface *, Policy  )
+{
+	return "<" + name->GetString() + ">"; 
+}
+
+//////////////////////////// LocalInclude ///////////////////////////////             
+
+string LocalInclude::CustomiseFilenameForInclude( TreePtr<String> name, VN::RendererInterface *renderer, Policy policy )
+{
+	return renderer->DoRender(&name, Syntax::Production::SPACE_SEP_PRE_PROC, policy);
+}
+

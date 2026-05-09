@@ -1007,6 +1007,7 @@ struct Typedef : TypeDeclaration
     TreePtr<Type> type; ///< emulate this type
 
 	Production GetMyProductionTerminal() const override;	    
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
 }; 
 
 /// Intermediate for declaration of a struct, class, union or enum. 
@@ -1579,7 +1580,10 @@ struct MacroStatement : Statement
 struct PreProcDecl : virtual Declaration 
 {
     NODE_FUNCTIONS
-   	Production GetMyProductionTerminal() const override;
+   	Production GetMyProductionTerminal() const override;   	
+
+protected:
+    string RenderPreProcDirective(string s, Policy policy) const;
 };
 
 
@@ -1587,7 +1591,9 @@ struct PreProcDecl : virtual Declaration
 struct Include : virtual PreProcDecl 
 {
     NODE_FUNCTIONS
-    TreePtr<String> filename;
+    TreePtr<String> filename;   
+	string GetRender( VN::RendererInterface *renderer, Production, Policy policy );
+	virtual string CustomiseFilenameForInclude(TreePtr<String>, VN::RendererInterface *, Policy) { ASSERTFAIL() };
 };
 
 
@@ -1595,6 +1601,7 @@ struct Include : virtual PreProcDecl
 struct SystemInclude : virtual Include 
 {
     NODE_FUNCTIONS_FINAL
+	string CustomiseFilenameForInclude(TreePtr<String> name, VN::RendererInterface *renderer, Policy policy) override;
 };
 
 
@@ -1602,6 +1609,7 @@ struct SystemInclude : virtual Include
 struct LocalInclude : virtual Include 
 {
     NODE_FUNCTIONS_FINAL
+	string CustomiseFilenameForInclude(TreePtr<String> name, VN::RendererInterface *renderer, Policy policy) override;
 };
 
 }; // end namespace  
