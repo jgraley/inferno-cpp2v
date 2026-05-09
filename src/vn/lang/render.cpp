@@ -85,7 +85,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 			
 		commands.push_back( unique_coupling_names.at(node) + 
 							" ⪮ " + 
-							AccomodateInit( node, Syntax::Production::VN_DESIGNATE_RHS, designation_policy ) );
+							RenderNoDesignation( node, Syntax::Production::VN_DESIGNATE_RHS, designation_policy ) );
 		// Alternative for declarator desaignators
 		//commands.push_back( " ⪮ " + 
 		//					AccomodateBootTypeAndDeclarator( node, 
@@ -214,15 +214,32 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
             s += ";\n";
 		return s;
 	}
-	else 
-		return s + AccomodateInit(node, surround_prod, policy);
+	else
+	{
+		return s + RenderNoDesignation( node, surround_prod, policy );
+	}
+	
 }
 
 
-string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::RenderNoDesignation( TreePtr<Node> node, 
+									Syntax::Production surround_prod, 
+									Syntax::Policy policy )
 {
-    Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
+	//try
+	{
+	    Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
+		return AccomodateInit(node, node_prod, surround_prod, policy);
+	}
+	//catch( Syntax::Refusal &ex ) 
+	{
+	}
+	
+}   
+                            
 
+string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy )
+{
 	string s;
 
 	if( ReadArgs::use.contains("c") )
@@ -234,28 +251,26 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production surround_p
 
 	// we only act inside an DIRECT_INIT production and never on already-matching production
 	if( surround_prod != Syntax::Production::DIRECT_INIT || node_prod == surround_prod )
-		return s + AccomodateBoot(node, surround_prod, policy ); 
+		return s + AccomodateBoot(node, node_prod, surround_prod, policy ); 
 
 	// Deal with expression in initialiser production by prepending =
 	if( node_prod != Syntax::Production::COMPOUND ) // no = for COMPOUND
 	{
 		if( ReadArgs::use.contains("c") )
 			s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
-		return s + "= " + AccomodateBoot(node, Syntax::Production::ASSIGN, policy );
+		return s + "= " + AccomodateBoot(node, node_prod, Syntax::Production::ASSIGN, policy );
 	}
 
-	return s + AccomodateBoot(node, surround_prod, policy ); 
+	return s + AccomodateBoot(node, node_prod, surround_prod, policy ); 
 }
 
 
-string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
-{
-    Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
-							 		
+string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy )
+{							 		
 	string s;
 		
     if( !(Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod)) )
-		return s + AccomodateSemicolon( node, surround_prod, policy );
+		return s + AccomodateSemicolon( node, node_prod, surround_prod, policy );
 
     switch(node_prod)
     {
@@ -277,7 +292,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 					s += SSPrintf("// Booting statement, surround prod to BOTTOM_STMT_DECL\n");
 					
 				return s + "{\n " + 
-					   AccomodateSemicolon( node, Syntax::Production::BOOT, policy ) +	
+					   AccomodateSemicolon( node, node_prod, Syntax::Production::BOOT, policy ) +	
 					   "}\n";         
 			}   
 			[[fallthrough]]; // ELSE FALL THOROUGH INTO PARENS CASE
@@ -293,7 +308,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 				s += SSPrintf("// Booting expression, surround prod to BOTTOM_EXPR\n");
 
             s += "( " +
-				   AccomodateSemicolon( node, Syntax::Production::BOOT, policy ) +
+				   AccomodateSemicolon( node, node_prod, Syntax::Production::BOOT, policy ) +
 				   " )";            
 				   
 			// Node prod is now effectively PARENTHESISED... do we now need a semicolon?
@@ -304,12 +319,12 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_p
 			return s;
         
         default:        
-			return s + AccomodateSemicolon( node, surround_prod, policy );         
+			return s + AccomodateSemicolon( node, node_prod, surround_prod, policy );         
     }
 }
 
 							
-string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	string s;
 	string explain;
@@ -317,7 +332,6 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
     // Production surround_prod relates to the surrounding grammar production and can be 
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
-    Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
 		
 	bool semicolon = false;					 		    
     if( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
@@ -348,14 +362,15 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surro
 		explain = ""; // shush!
 	
     if( semicolon )
-		return s + AccomodatePreRestriction( node, Syntax::Production::BARE_STMT_DECL, policy ) + explain + ";\n";            
+		return s + AccomodatePreRestriction( node, node_prod, Syntax::Production::BARE_STMT_DECL, policy ) + explain + ";\n";            
 	else
-        return s + AccomodatePreRestriction( node, surround_prod, policy ) + explain;		                      
+        return s + AccomodatePreRestriction( node, node_prod, surround_prod, policy ) + explain;		                      
 }
 
 
-string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy )
 {   
+	(void)node_prod;
     if( !node )
 		return RenderNullPointer(surround_prod, policy);	
 			

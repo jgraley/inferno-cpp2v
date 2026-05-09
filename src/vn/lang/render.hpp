@@ -34,10 +34,13 @@ public:
 	string DoRenderPreserve( TreePtr<Node> node, 
 							 Syntax::Production surround_prod, 
 							 Syntax::Policy policy ) final;
-	string AccomodateInit( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
-	string AccomodateBoot( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
-	string AccomodateSemicolon( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
-	string AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
+	string RenderNoDesignation( TreePtr<Node> node, 
+								Syntax::Production surround_prod, 
+								Syntax::Policy policy );
+	string AccomodateInit( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );
+	string AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );
+	string AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );
+	string AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );
 	string RenderNullPointer(Syntax::Production surround_prod, Syntax::Policy policy);
 
 	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
