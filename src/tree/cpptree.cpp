@@ -81,12 +81,6 @@ string Type::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy  )
 
 //////////////////////////// Declaration ///////////////////////////////
 
-Syntax::Production Declaration::GetMyProductionTerminal() const
-{
-	return Production::BARE_STMT_DECL;
-}
-
-
 bool Declaration::ShouldSplitInstance( Policy ) const 
 { 
 	// Splitting instances is generally unsafe, unless we know how to do it for a given kind of Declaration.

@@ -105,7 +105,6 @@ struct Declaration : virtual Node
     NODE_FUNCTIONS 
     
     virtual string GetColour() const { return "/set28/1"; }
-	Production GetMyProductionTerminal() const override;	
 	virtual bool ShouldSplitInstance( Policy policy ) const;
 	virtual list<string> ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bool force, VN::RendererInterface *renderer, Policy policy ) const;
 };

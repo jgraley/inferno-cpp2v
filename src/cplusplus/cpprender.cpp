@@ -127,7 +127,10 @@ string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod
 }
 catch( Syntax::Refusal &ex ) 
 {	
-	return DispatchInternal( node, surround_prod, policy, ex );
+	// Due #969 we might have a standard agent, so fall back to a function that
+    // definitely won't call any agent methods.
+    nodes_not_rendered_to_c++;
+    return RenderNodeExplicit( node, surround_prod, policy ) + " // " + ex.What() + "\n";      
 }
 
 
@@ -172,15 +175,3 @@ string CppRender::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarat
 	return type_as_type->GetRenderTypeAndDeclarator( this, declarator, declarator_prod, surround_prod, policy, constant );		
 }
 
-
-string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy, Syntax::Refusal &ex )
-{			
-    // Due #969 we might have a standard agent, so fall back to a function that
-    // definitely won't call any agent methods.
-    nodes_not_rendered_to_c++;
-    return RenderNodeExplicit( node, surround_prod, policy ) + " // " + ex.What() + "\n";      
-}
-
-
-
-                 

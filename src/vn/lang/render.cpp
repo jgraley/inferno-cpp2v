@@ -636,6 +636,16 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 
 	try
 	{
+		(void)node->GetMyProduction(this, policy); 
+	}
+	catch( Syntax::Refusal & ) 
+	{
+		// Out of ideas so it will have to render explicitly
+		return Syntax::Production::EXPLICIT_NODE;
+	}	    	
+	
+	try
+	{
 		// Prevent side-effects on items pointed to by the policy
 		policy.cur_access = nullptr;
 		policy.definitions = nullptr;
@@ -669,14 +679,16 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 		// Can it render?
 		(void)surround_prod;
 		(void) node->GetRender(&fake_renderer, surround_prod, policy); 
-		
-		return node->GetMyProduction(this, policy); 
 	}
-	catch( Syntax::Refusal & ) 
+	catch( Syntax::Refusal &ex ) 
 	{
 		// Out of ideas so it will have to render explicitly
+		//ASSERT(false)(node)(" didn't throw in GetMyProduction() but threw ")(ex.What())(" in GetRender()");
 		return Syntax::Production::EXPLICIT_NODE;
 	}	    
+	
+	return node->GetMyProduction(this, policy); 
+	
 }
 
 

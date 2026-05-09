@@ -24,9 +24,6 @@ private:
     string DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                       TreePtr<CPPTree::Constancy> constant ) final;
-	string DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy, Syntax::Refusal &ex );
-
-	string RenderEnum( TreePtr<CPPTree::Record> record, Syntax::Policy policy );
 
 	UniquifyNames::NodeToNameMap unique_identifier_names;
 	int nodes_not_rendered_to_c;
