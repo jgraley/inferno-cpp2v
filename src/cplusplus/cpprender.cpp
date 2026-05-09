@@ -175,9 +175,6 @@ string CppRender::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarat
 
 string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy, Syntax::Refusal &ex )
 {			
-    if( TreePtr<Enum> enum_ = TreePtr<Enum>::DynamicCast(node) )
-		return RenderEnum( enum_, policy );        	
-        
     // Due #969 we might have a standard agent, so fall back to a function that
     // definitely won't call any agent methods.
     nodes_not_rendered_to_c++;
@@ -185,40 +182,5 @@ string CppRender::DispatchInternal( TreePtr<Node> node, Syntax::Production surro
 }
 
 
-string CppRender::RenderEnum( TreePtr<CPPTree::Record> record, Syntax::Policy policy ) try
-{
-	Syntax::Policy id_policy = policy;
-	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
-		
-    string s = "enum";
-    s += " ";    
-    s += DoRender( &record->identifier, Syntax::Production::PRIMARY_EXPR, id_policy); 
-	
-	if( policy.force_incomplete_records )
-		return s;
-	
-	list<string> ls;		
-    for( TreePtr<Declaration> pe : record->members )
-    {
-		// TODO make a new Enumerator member, derived from Instance, and replace its GetRender()
-        auto o = TreePtr<Instance>::DynamicCast(pe);
-        if( !o )
-        {
-			nodes_not_rendered_to_c++;
-			ls.push_back( RenderNodeExplicit( pe, Syntax::Production::COMMA_SEP, policy ) );  
-			continue;
-        }
-        
-        string s = DoRender( &o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN), id_policy ); 
-        
-		// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
-        if( !TreePtr<Uninitialised>::DynamicCast(o->initialiser) )      
-			s += " " + DoRender( &o->initialiser, Syntax::Production::DIRECT_INIT, policy );
-			
-		ls.push_back( s );			
-    }
-    
-    return s + "\n" + Join( ls, ",\n", "{\n", "}\n" );
-}
-DEFAULT_CATCH_CLAUSE
+
                  

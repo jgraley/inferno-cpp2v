@@ -1682,9 +1682,42 @@ string Enum::GetKeyword() const
 	return "enum";
 }
 
-string Enum::GetRender( VN::RendererInterface *, Production, Policy ) 
+string Enum::GetRender( VN::RendererInterface *renderer, Production, Policy policy ) 
 {
-	throw TemporarilyDisabled(); // TODO implement enum render
+	if( policy.is_vn_render_for_temp_disables )
+		throw TemporarilyDisabled();
+		
+	Syntax::Policy id_policy = policy;
+	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
+		
+    string s = "enum";
+    s += " ";    
+    s += renderer->DoRender( &identifier, Syntax::Production::PRIMARY_EXPR, id_policy); 
+	
+	if( policy.force_incomplete_records )
+		return s;
+	
+	list<string> ls;		
+    for( TreePtr<Declaration> pe : members )
+    {
+		// TODO make a new Enumerator member, derived from Instance, and replace its GetRender()
+        auto o = TreePtr<Instance>::DynamicCast(pe);
+        if( !o )
+        {
+			ls.push_back( renderer->RenderNodeExplicit( pe, Syntax::Production::COMMA_SEP, policy ) );  
+			continue;
+        }
+        
+        string s = renderer->DoRender( &o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN), id_policy ); 
+        
+		// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
+        if( !TreePtr<Uninitialised>::DynamicCast(o->initialiser) )      
+			s += " " + renderer->DoRender( &o->initialiser, Syntax::Production::DIRECT_INIT, policy );
+			
+		ls.push_back( s );			
+    }
+    
+    return s + "\n" + Join( ls, ",\n", "{\n", "}\n" );
 }
 
 
