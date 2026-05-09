@@ -16,6 +16,7 @@ private:
 	static Syntax::Policy GetDefaultPolicy();
 	Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const final;
 	
+	string OnRefusal( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) override;
 	string Dispatch( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy ) override;
 	
     string RenderLiteral( TreePtr<CPPTree::Literal> sp, Syntax::Production surround_prod, Syntax::Policy policy ); 

@@ -120,20 +120,22 @@ Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Pol
 }
 
 
+string CppRender::OnRefusal( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+{
+	// If render was unsuccessful, TRY AGAIN but this time with node_prod set to 
+	// EXPLICIT_NODE which means the render will be explicit (i.e. with ⯁) and
+	// won't throw.
+	nodes_not_rendered_to_c++;
+	return AccomodateInit(node, Syntax::Production::EXPLICIT_NODE, surround_prod, policy) + " // " + ex.What() + "\n"; 
+}
+
+
 string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy ) 
 { 		
 	if( node_prod==Syntax::Production::EXPLICIT_NODE )
-	{
-		// Due #969 we might have a standard agent, so fall back to a function that
-		// definitely won't call any agent methods. 
-		nodes_not_rendered_to_c++;
 		return RenderNodeExplicit( node, surround_prod, policy );      
-		//+ " // " + ex.What() + "\n";    
-	}
 	else
-	{
 		return node->GetRender( this, surround_prod, policy );		
-	}
 }
 
 

@@ -233,13 +233,19 @@ string Render::RenderNoDesignation( TreePtr<Node> node,
 	}
 	catch( Syntax::Refusal &ex ) 
 	{
-		// If that was unsuccessful, TRY AGAIN but this time with node_prod set to 
-		// EXPLICIT_NODE which means the render will be explicit (i.e. with ⯁) and
-		// won't throw.
-		return AccomodateInit(node, Syntax::Production::EXPLICIT_NODE, surround_prod, policy);
+		return OnRefusal(ex, node, surround_prod, policy);
 	}	
 }   
                             
+
+string Render::OnRefusal( Syntax::Refusal &, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+{
+	// If render was unsuccessful, TRY AGAIN but this time with node_prod set to 
+	// EXPLICIT_NODE which means the render will be explicit (i.e. with ⯁) and
+	// won't throw.
+	return AccomodateInit(node, Syntax::Production::EXPLICIT_NODE, surround_prod, policy);
+}
+
 
 string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy )
 {
@@ -424,9 +430,8 @@ string Render::RenderNullPointer(Syntax::Production node_prod, Syntax::Productio
 string Render::Dispatch( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy )
 {	
 	if( node_prod==Syntax::Production::EXPLICIT_NODE )
-		return RenderNodeExplicit(node, surround_prod, policy);
-	
-	if( const Agent *agent = Agent::TryAsAgentConst(node) )
+		return RenderNodeExplicit(node, surround_prod, policy);	
+	else if( const Agent *agent = Agent::TryAsAgentConst(node) )
 		return agent->GetAgentRender( this, surround_prod, policy );
 	else
 		return node->GetRender(this, surround_prod, policy); 
