@@ -226,15 +226,18 @@ string Render::RenderNoDesignation( TreePtr<Node> node,
 									Syntax::Production surround_prod, 
 									Syntax::Policy policy )
 {
-	//try
+	try
 	{
-	    Syntax::Production node_prod = GetNodeProduction(node, surround_prod, policy);
+	    Syntax::Production node_prod = GetNodeProduction(node, policy);
 		return AccomodateInit(node, node_prod, surround_prod, policy);
 	}
-	//catch( Syntax::Refusal &ex ) 
+	catch( Syntax::Refusal &ex ) 
 	{
-	}
-	
+		// If that was unsuccessful, TRY AGAIN but this time with node_prod set to 
+		// EXPLICIT_NODE which means the render will be explicit (i.e. with ⯁) and
+		// won't throw.
+		return AccomodateInit(node, Syntax::Production::EXPLICIT_NODE, surround_prod, policy);
+	}	
 }   
                             
 
@@ -372,15 +375,15 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 {   
 	(void)node_prod;
     if( !node )
-		return RenderNullPointer(surround_prod, policy);	
+		return RenderNullPointer(node_prod, surround_prod, policy);	
 			
 	const Agent *agent = Agent::TryAsAgentConst(node);
 	if( !agent )
-		return Dispatch( node, surround_prod, policy );
+		return Dispatch( node, node_prod, surround_prod, policy );
 		
 	auto pspecial = dynamic_cast<const SpecialBase *>(agent);
 	if( !pspecial )
-		return Dispatch( node, surround_prod, policy );
+		return Dispatch( node, node_prod, surround_prod, policy );
 	
 	bool prerestricted = false;
 	ASSERT( incoming_links_map.count(node)>0 )(incoming_links_map)("\nNode: ")(node);
@@ -388,7 +391,7 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 		prerestricted |= agent->IsNonTrivialPreRestriction(tpi);
 		
 	if(!prerestricted)
-		return Dispatch( node, surround_prod, policy );
+		return Dispatch( node, node_prod, surround_prod, policy );
 		
 	// We need the archetype because otherwise we'll just get the name 
 	// of the special agent. We might be able to extract node name out
@@ -400,40 +403,33 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 	return "‽" + 
 	       RenderNodeTypeName(archetype_node) + 
 	       " " +
-	       Dispatch( node, Syntax::Production::PREFIX, policy );	
+	       Dispatch( node, node_prod, Syntax::Production::PREFIX, policy );	
 }
 
 
-string Render::RenderNullPointer(Syntax::Production surround_prod, Syntax::Policy policy) // TODO turn NULL into wildcard before sending to centralised stuff. This function should just be an ASSERTFAIL()
+string Render::RenderNullPointer(Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy) // TODO turn NULL into wildcard before sending to centralised stuff. This function should just be an ASSERTFAIL()
 {	
 	if( auto arch = dynamic_pointer_cast<Qualifier>( policy.pointer_archetype ) )
-		return Dispatch( (TreePtr<Node>)arch, surround_prod, policy );
+		return Dispatch( (TreePtr<Node>)arch, node_prod, surround_prod, policy );
 	else if( dynamic_pointer_cast<Type>( policy.pointer_archetype ) )
 	{
 		static int i=0; 		
-		return SSPrintf("⍑/*RenderNullPtr(type %d)*/☆", i++);
-		
+		return SSPrintf("⍑/*RenderNullPtr(type %d)*/☆", i++);		
 	}
 	else 
 		return "☆";
 }
 
 
-string Render::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::Dispatch( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy )
 {	
-	string s;
+	if( node_prod==Syntax::Production::EXPLICIT_NODE )
+		return RenderNodeExplicit(node, surround_prod, policy);
 	
-	try
-	{	
-		if( const Agent *agent = Agent::TryAsAgentConst(node) )
-			return s + agent->GetAgentRender( this, surround_prod, policy );
-		else
-			return s + node->GetRender(this, surround_prod, policy); 
-	}
-	catch( Syntax::Refusal &ex ) 
-	{
-		return s + RenderNodeExplicit(node, surround_prod, policy);
-	}
+	if( const Agent *agent = Agent::TryAsAgentConst(node) )
+		return agent->GetAgentRender( this, surround_prod, policy );
+	else
+		return node->GetRender(this, surround_prod, policy); 
 }		
 
 
@@ -576,7 +572,7 @@ string Render::AccomodateBootTypeAndDeclarator( TreePtr<Node> type, string decla
     catch( Syntax::Unimplemented & )
     {
 		// Assume that type also throws on RenderTypeAndDeclarator, and won't do anything
-		//ASSERT( false )(type)(" \"")(declarator)("\" type node prod=")((int)GetNodeProduction(type, Syntax::Production::SPACE_SEP_TYPE, policy));
+		//ASSERT( false )(type)(" \"")(declarator)("\" type node prod=")((int)GetNodeProduction(type, policy));
 	}
         
     return DispatchTypeAndDeclarator( type, declarator, declarator_prod, surround_prod, policy, constant );
@@ -634,7 +630,7 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
                
 
 // We will deal with NULL, Agents and nodes that refuse to render given surround_prod and policy
-Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const 
+Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const 
 {
 	if( !node )
 		return Syntax::Production::NULLPTR;
@@ -659,48 +655,6 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Produc
 		return Syntax::Production::EXPLICIT_NODE;
 	}	    	
 	
-	try
-	{
-		// Prevent side-effects on items pointed to by the policy
-		policy.cur_access = nullptr;
-		policy.definitions = nullptr;
-		
-		// A lot of nodes have GetMyProduction() but not GetRender(). If GetRender() is not
-		// implemented, we'll generate explicit (⯁) form, which is EXPLICIT_NODE.
-		// Passing in the real renderer would cause unwanted side-effects.
-		struct FakeRenderer : RendererInterface
-		{
-			string DoRender( const TreePtrInterface *, 
-					 		 Syntax::Production, 
-							 Syntax::Policy ) final { return "fake"; } 
-			string DoRenderPreserve( TreePtr<Node>, 
-									 Syntax::Production, 
-									 Syntax::Policy ) final { return "fake"; } 
-			string DoRenderTypeAndDeclarator( const TreePtrInterface *, string, 
-											  Syntax::Production, Syntax::Production, Syntax::Policy,
-											  TreePtr<Node> ) final { return "fake"; }
-			string DoRenderTypeAndDeclaratorPreserve ( TreePtr<Node>, string, 
-									         		   Syntax::Production, Syntax::Production, Syntax::Policy,
-											           TreePtr<Node> ) final { return "fake"; }
-			string RenderScopeResolvingPrefix( TreePtr<Node>, Syntax::Policy ) final { return ""; } 
-			string GetUniqueIdentifierName( TreePtr<Node> ) const final { return "fake"; }
-			string RenderNodeExplicit( shared_ptr<const Node>, 
-									   Syntax::Production, 
-									   Syntax::Policy ) final { return "fake"; } 	
-			TreePtr<Node> TryGetScope( TreePtr<Node> ) const final { return nullptr; }
-			const TransKit *GetTransKit() const override { return nullptr; }
-		} fake_renderer;
-
-		// Can it render?
-		(void)surround_prod;
-		(void) node->GetRender(&fake_renderer, surround_prod, policy); 
-	}
-	catch( Syntax::Refusal &ex ) 
-	{
-		// Out of ideas so it will have to render explicitly
-		//ASSERT(false)(node)(" didn't throw in GetMyProduction() but threw ")(ex.What())(" in GetRender()");
-		return Syntax::Production::EXPLICIT_NODE;
-	}	    
 	
 	return node->GetMyProduction(this, policy); 
 	

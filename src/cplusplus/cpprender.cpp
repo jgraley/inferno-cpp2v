@@ -106,9 +106,8 @@ Syntax::Policy CppRender::GetDefaultPolicy()
 }
 
 
-Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const
+Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const
 {
-	(void)surround_prod;
 	try
 	{
 		return node->GetMyProduction(this, policy);       
@@ -121,16 +120,20 @@ Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Pro
 }
 
 
-string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) try 
+string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy ) 
 { 		
-	return node->GetRender( this, surround_prod, policy );		
-}
-catch( Syntax::Refusal &ex ) 
-{	
-	// Due #969 we might have a standard agent, so fall back to a function that
-    // definitely won't call any agent methods.
-    nodes_not_rendered_to_c++;
-    return RenderNodeExplicit( node, surround_prod, policy ) + " // " + ex.What() + "\n";      
+	if( node_prod==Syntax::Production::EXPLICIT_NODE )
+	{
+		// Due #969 we might have a standard agent, so fall back to a function that
+		// definitely won't call any agent methods. 
+		nodes_not_rendered_to_c++;
+		return RenderNodeExplicit( node, surround_prod, policy );      
+		//+ " // " + ex.What() + "\n";    
+	}
+	else
+	{
+		return node->GetRender( this, surround_prod, policy );		
+	}
 }
 
 

@@ -41,9 +41,9 @@ public:
 	string AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );
 	string AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );
 	string AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );
-	string RenderNullPointer(Syntax::Production surround_prod, Syntax::Policy policy);
+	string RenderNullPointer( Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );
 
-	virtual string Dispatch( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
+	virtual string Dispatch( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );
 
 	list<string> PopulateItemStrings( shared_ptr<const Node> node, Syntax::Policy policy );
 	static string RenderNodeTypeName( shared_ptr<const Node> node ); 
@@ -64,7 +64,7 @@ public:
                                               Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
                                               TreePtr<CPPTree::Constancy> constant );	
 
-	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) const;						 
+	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const;						 
 	TreePtr<Node> TryGetScope( TreePtr<Node> node ) const override;
 	bool IsDeclared( TreePtr<CPPTree::Identifier> id );
 							 
