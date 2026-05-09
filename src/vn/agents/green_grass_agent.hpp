@@ -27,7 +27,7 @@ public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual SYM::Lazy<SYM::BooleanExpression> SymbolicAutolocatingQuery(PatternLink keyer_plink) const; 
 
-	Syntax::Production GetAgentProduction() const override;
+	Syntax::Production GetAgentProduction( const VN::RendererInterface *renderer, Syntax::Policy policy ) const override;
 	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const final;
 	
 	NodeBlock GetGraphBlockInfo() const final;

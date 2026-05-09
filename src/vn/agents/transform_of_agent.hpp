@@ -150,7 +150,7 @@ public:
     bool IsExtenderChannelLess( const Extender &r ) const override;
     int GetExtenderChannelOrdinal() const override;
 
-	Syntax::Production GetAgentProduction() const override;
+	Syntax::Production GetAgentProduction( const VN::RendererInterface *renderer, Syntax::Policy policy ) const override;
 	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const final;
     string GetDesignationNameHint() const final;
     NodeBlock GetGraphBlockInfo() const final;

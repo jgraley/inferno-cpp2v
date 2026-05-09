@@ -63,7 +63,7 @@ SYM::Lazy<SYM::BooleanExpression> DisjunctionAgent::SymbolicNormalLinkedQuery(Pa
 }
 
 
-Syntax::Production DisjunctionAgent::GetAgentProduction() const
+Syntax::Production DisjunctionAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::VN_DISJUNCTION;
 }

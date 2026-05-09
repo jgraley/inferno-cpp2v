@@ -635,29 +635,10 @@ Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Policy
 	if( !node )
 		return Syntax::Production::NULLPTR;
 		
-	try
-	{
-		if( const Agent *agent = Agent::TryAsAgentConst(node) )
-			return agent->GetAgentProduction();
-	}
-	catch( Syntax::Refusal & ) 
-	{
-		// Still might work a regular node so fall through
-	}	
-
-	try
-	{
-		(void)node->GetMyProduction(this, policy); 
-	}
-	catch( Syntax::Refusal & ) 
-	{
-		// Out of ideas so it will have to render explicitly
-		return Syntax::Production::EXPLICIT_NODE;
-	}	    	
-	
-	
-	return node->GetMyProduction(this, policy); 
-	
+	if( const Agent *agent = Agent::TryAsAgentConst(node) )
+		return agent->GetAgentProduction( this, policy );
+	else
+		return node->GetMyProduction(this, policy);	
 }
 
 

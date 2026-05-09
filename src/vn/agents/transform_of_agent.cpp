@@ -327,7 +327,7 @@ int TransformOfAgent::GetExtenderChannelOrdinal() const
 }
 
 
-Syntax::Production TransformOfAgent::GetAgentProduction() const
+Syntax::Production TransformOfAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::PRIMARY_EXPR;
 }

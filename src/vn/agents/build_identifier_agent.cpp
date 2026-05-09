@@ -70,7 +70,7 @@ string BuildIdentifierAgent::GetNewName(const SCREngine *acting_engine)
 }
 
 
-Syntax::Production BuildIdentifierAgent::GetAgentProduction() const
+Syntax::Production BuildIdentifierAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::PRIMARY_EXPR;
 }

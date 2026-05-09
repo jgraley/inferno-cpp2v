@@ -37,7 +37,7 @@ Agent::ReplacePatchPtr ConjunctionAgent::GenReplaceLayoutImpl( const ReplaceKit 
 } 
 
 
-Syntax::Production ConjunctionAgent::GetAgentProduction() const
+Syntax::Production ConjunctionAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::VN_CONJUNCTION;
 }

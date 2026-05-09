@@ -59,7 +59,7 @@ struct IdentifierByNameAgent : public virtual NonlocatingAgent
         const string name;
     };
 
-	Syntax::Production GetAgentProduction() const override;
+	Syntax::Production GetAgentProduction( const VN::RendererInterface *renderer, Syntax::Policy policy ) const override;
 	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const final;
     string GetDesignationNameHint() const final;
 	bool IsDesignationNamedIdentifier() const final;

@@ -57,7 +57,7 @@ int PointerIsAgent::GetExtenderChannelOrdinal() const
 }
 
 
-Syntax::Production PointerIsAgent::GetAgentProduction() const
+Syntax::Production PointerIsAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::PREFIX;
 }

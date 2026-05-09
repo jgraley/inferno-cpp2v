@@ -24,7 +24,7 @@ Lazy<BooleanExpression> GreenGrassAgent::SymbolicAutolocatingQuery(PatternLink k
 }
 
 
-Syntax::Production GreenGrassAgent::GetAgentProduction() const
+Syntax::Production GreenGrassAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::PREFIX;
 }

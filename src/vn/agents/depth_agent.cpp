@@ -81,7 +81,7 @@ SYM::Lazy<SYM::BooleanExpression> ChildAgent::SymbolicNormalLinkedQueryPRed(Patt
 }
 
 
-Syntax::Production ChildAgent::GetAgentProduction() const
+Syntax::Production ChildAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::PREFIX;
 }
@@ -162,7 +162,7 @@ void StuffAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
     
     
-Syntax::Production StuffAgent::GetAgentProduction() const
+Syntax::Production StuffAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::PREFIX; 
 }

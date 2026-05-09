@@ -22,7 +22,7 @@ TreePtr<Node> StringizeAgent::BuildNewSubtree(const SCREngine *acting_engine)
 }
 
 
-Syntax::Production StringizeAgent::GetAgentProduction() const
+Syntax::Production StringizeAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::PREFIX;
 }

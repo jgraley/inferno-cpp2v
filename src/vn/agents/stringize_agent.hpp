@@ -28,7 +28,7 @@ struct StringizeAgent : Special<CPPTree::String>,
 
 private:
     TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) final;    
-	Syntax::Production GetAgentProduction() const override;
+	Syntax::Production GetAgentProduction( const VN::RendererInterface *renderer, Syntax::Policy policy ) const override;
 	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const final;
     string GetDesignationNameHint() const final;
     bool IsFixedType() const final;    

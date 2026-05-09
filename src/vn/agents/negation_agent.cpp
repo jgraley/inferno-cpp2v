@@ -42,7 +42,7 @@ void NegationAgent::RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,
 }
 
 
-Syntax::Production NegationAgent::GetAgentProduction() const
+Syntax::Production NegationAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::PREFIX;
 }

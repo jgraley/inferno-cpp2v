@@ -57,7 +57,7 @@ Agent::ReplacePatchPtr DeltaAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
 }                                         
 
 
-Syntax::Production DeltaAgent::GetAgentProduction() const
+Syntax::Production DeltaAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::PREFIX;
 }

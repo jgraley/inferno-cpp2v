@@ -92,7 +92,7 @@ public:
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        
     virtual bool ShouldGenerateCategoryClause(const TreePtrInterface *tpi) const = 0;                                
 
-	virtual Syntax::Production GetAgentProduction() const = 0;
+	virtual Syntax::Production GetAgentProduction( const VN::RendererInterface *renderer, Syntax::Policy policy ) const = 0;
 	virtual string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const = 0;
 
     static Agent *AsAgent( shared_ptr<Node> node );

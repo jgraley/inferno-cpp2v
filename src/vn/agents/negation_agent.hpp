@@ -31,7 +31,7 @@ public:
                                            PatternLink keyer_plink,
                                            const XTreeDatabase *x_tree_db ) const;                                              
 
-	Syntax::Production GetAgentProduction() const override;
+	Syntax::Production GetAgentProduction( const VN::RendererInterface *renderer, Syntax::Policy policy ) const override;
 	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const final;
     NodeBlock GetGraphBlockInfo() const final;
 

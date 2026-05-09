@@ -32,6 +32,10 @@ OPTIONS += -fPIC
 # Generate include deps
 OPTIONS += -MMD
 
+# Use named pipes instead of temp files during compilation
+OPTIONS += -pipe
+
+
 # -------------------- Options applied to Inferno/Vida Nova executable only --------------------
 
 EXE_OPTIONS =

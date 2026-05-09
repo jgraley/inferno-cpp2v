@@ -961,14 +961,14 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
 }
 
 
-Syntax::Production StandardAgent::GetAgentProduction() const
+Syntax::Production StandardAgent::GetAgentProduction( const VN::RendererInterface *renderer, Syntax::Policy policy ) const
 {
 	// Be similar to GetAgentRender()
 	shared_ptr<const Node> node = GetPatternPtr();
 	if( dynamic_cast<const CPPTree::SpecificIdentifier *>(node.get()) )
 		return Syntax::Production::PRIMARY_EXPR;
 	else
-		throw Unimplemented();
+		return const_cast<Node *>(node.get())->GetMyProduction(renderer, policy);
 }		
 
 

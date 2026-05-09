@@ -78,7 +78,7 @@ TreePtr<Node> EmbeddedSCRAgent::EvolveIntoEmbeddedCompareReplace()
 }
 
 
-Syntax::Production EmbeddedSCRAgent::GetAgentProduction() const
+Syntax::Production EmbeddedSCRAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::VN_SEP_SCRIPTY;
 }

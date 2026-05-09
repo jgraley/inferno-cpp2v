@@ -26,7 +26,7 @@ TreePtr<Node> BuildContainerSizeAgent::BuildNewSubtree(const SCREngine *acting_e
 }                                                   
 
 
-Syntax::Production BuildContainerSizeAgent::GetAgentProduction() const
+Syntax::Production BuildContainerSizeAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::PREFIX;
 }

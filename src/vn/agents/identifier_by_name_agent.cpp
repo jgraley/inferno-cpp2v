@@ -101,7 +101,7 @@ SYM::Expression::Precedence IdentifierByNameAgent::IsIdentifierNamedOperator::Ge
 }
 
 
-Syntax::Production IdentifierByNameAgent::GetAgentProduction() const
+Syntax::Production IdentifierByNameAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
 	return Syntax::Production::PRIMARY_EXPR;
 }

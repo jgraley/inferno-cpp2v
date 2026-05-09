@@ -28,7 +28,7 @@ struct BuildContainerSizeAgent : public virtual BuilderAgent, // TODO rename to 
 private:
     virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
     
-	Syntax::Production GetAgentProduction() const override;
+	Syntax::Production GetAgentProduction( const VN::RendererInterface *renderer, Syntax::Policy policy ) const override;
 	string GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const final;
     string GetDesignationNameHint() const final; 
     bool IsFixedType() const final;           
