@@ -24,6 +24,7 @@ struct Property : virtual Node
 { 
     NODE_FUNCTIONS 
     virtual string GetColour() const { return "/set28/7"; }
+   	string RenderScopeResolvingPrefix( VN::RendererInterface *renderer, Syntax::Policy policy );
 };
 
 

@@ -11,6 +11,30 @@
 
 using namespace CPPTree;
 
+//////////////////////////// Property ///////////////////////////////
+
+string Property::RenderScopeResolvingPrefix( VN::RendererInterface *renderer, Syntax::Policy policy )
+{
+	auto me = TreePtr<Identifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
+	ASSERT(me);			
+    TreePtr<Node> scope = renderer->TryGetScope(me);
+              
+    if( !scope )
+        return ""; // either we're not in a scope or id is undeclared
+    else if( DynamicTreePtrCast<CodeUnit>( scope ) )
+        return "";
+    else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
+        return e->identifier->RenderScopeResolvingPrefix( renderer, policy );    // omit scope for the enum itself
+    else if( auto r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
+        return r->identifier->GetRender( renderer, Syntax::Production::PRIMARY_EXPR, policy ) + "::"; 
+    else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
+             DynamicTreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
+             DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
+        return "";
+    else
+        return scope->GetTrace()+"::"; // unknown scope
+}
+
 //////////////////////////// Uninitialised ///////////////////////////////
 
 Syntax::Production Uninitialised::GetMyProductionTerminal() const
@@ -267,17 +291,15 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 
 string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production, Policy policy) 
 {		
-	// Vcall on what kind of id this is
-	string s = GetRenderWithoutScope(renderer, policy);          
-
-    if( policy.resolve_identifier_scope) 
-    {
-		auto me = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
-		ASSERT(me);			
-        s = renderer->RenderScopeResolvingPrefix( me, policy ) + s;   
-	}
-                                     
-    return s;
+	if( policy.refuse_identifiers )
+		throw RefusedByPolicy();
+	
+	string s;
+	
+    if( policy.resolve_identifier_scope)     		
+        s = RenderScopeResolvingPrefix( renderer, policy ) + s;   	
+        
+    return s + GetRenderWithoutScope(renderer, policy);
 }
 
 
@@ -1772,10 +1794,10 @@ string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	Sequence<Expression>::iterator operands_it = operands.begin(); \
 	string s = TEXT; \
 	bool paren = false; \
-	/* Prevent interpretation as a member function pointer literal */ \
+	/* Prevent interpretation as a member function pointer literal: &scope::id becomes &(scope::id) */ \
 	if( dynamic_cast<AddressOf *>(shared_from_this().get()) ) \
-		if( auto id = TreePtr<Identifier>::DynamicCast(*operands_it) ) \
-			paren = !renderer->RenderScopeResolvingPrefix( id, policy ).empty(); \
+		if( auto scope = renderer->TryGetScope(*operands_it) ) \
+			paren = !!DynamicTreePtrCast<Record>( scope ); \
 	return s + (paren?"(":"") + renderer->DoRender( &*operands_it, Production::PROD, policy) + (paren?")":""); \
 } \
 

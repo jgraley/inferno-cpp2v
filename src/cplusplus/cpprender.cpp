@@ -130,37 +130,6 @@ string CppRender::OnRefusal( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Pr
 }
 
 
-string CppRender::Dispatch( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy ) 
-{ 		
-	if( node_prod==Syntax::Production::EXPLICIT_NODE )
-		return RenderNodeExplicit( node, surround_prod, policy );      
-	else
-		return node->GetRender( this, surround_prod, policy );		
-}
-
-
-string CppRender::RenderScopeResolvingPrefix( TreePtr<Node> node, Syntax::Policy policy ) try
-{
-    TreePtr<Node> scope = TryGetScope(node);
-              
-    if( !scope )
-        return ""; // either we're not in a scope or id is undeclared
-    else if( DynamicTreePtrCast<CodeUnit>( scope ) )
-        return "";
-    else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
-        return RenderScopeResolvingPrefix( e->identifier, policy );    // omit scope for the enum itself
-    else if( auto r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
-        return r->identifier->GetRender(this, Syntax::Production::PRIMARY_EXPR, policy) + "::"; 
-    else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
-             DynamicTreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
-             DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
-        return "";
-    else
-        return scope->GetTrace()+"::"; // unknown scope
-}
-DEFAULT_CATCH_CLAUSE
-
-
 string CppRender::GetUniqueIdentifierName( TreePtr<Node> id ) const 
 {
 	ASSERT( unique_identifier_names.count(id) > 0 )

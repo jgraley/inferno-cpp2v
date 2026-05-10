@@ -115,7 +115,6 @@ namespace VN
                                                           Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
 												          TreePtr<Node> constant ) = 0;
 
-		virtual string RenderScopeResolvingPrefix( TreePtr<Node> id, Syntax::Policy ) = 0;
 		virtual string GetUniqueIdentifierName( TreePtr<Node> id ) const = 0;
 		virtual string RenderNodeExplicit( shared_ptr<const Node> node, 
 										   Syntax::Production surround_prod, 

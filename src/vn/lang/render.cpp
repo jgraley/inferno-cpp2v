@@ -174,6 +174,9 @@ Syntax::Policy Render::GetDefaultPolicy()
 	
 	// VN (and other parsers) can't differentiate preprocessor from other stuff
 	policy.refuse_preprocessor = true;
+	
+	// Identifiers won't generally have been declared in VN language
+	policy.refuse_identifiers = true;
 	return policy;
 }
 
@@ -520,12 +523,6 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
 }
 
 
-string Render::RenderScopeResolvingPrefix( TreePtr<Node>, Syntax::Policy )
-{
-	ASSERTFAIL("VN renderer doesn't do scope resolution");
-}
-
-
 string Render::GetUniqueIdentifierName( TreePtr<Node> ) const 
 {
 	ASSERTFAIL("VN renderer never renders identifiers directly");
@@ -638,9 +635,8 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
 Syntax::Production Render::GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const 
 {
 	if( !node )
-		return Syntax::Production::NULLPTR;
-		
-	if( const Agent *agent = Agent::TryAsAgentConst(node) )
+		return Syntax::Production::NULLPTR;		
+	else if( const Agent *agent = Agent::TryAsAgentConst(node) )
 		return agent->GetAgentProduction( this, policy );
 	else
 		return node->GetMyProduction(this, policy);	

@@ -49,7 +49,6 @@ public:
 	list<string> PopulateItemStrings( shared_ptr<const Node> node, Syntax::Policy policy );
 	static string RenderNodeTypeName( shared_ptr<const Node> node ); 
 	string RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) final;
-	string RenderScopeResolvingPrefix( TreePtr<Node> id, Syntax::Policy policy ) override;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const override;
 
     string DoRenderTypeAndDeclarator( const TreePtrInterface *tpi, string declarator, 

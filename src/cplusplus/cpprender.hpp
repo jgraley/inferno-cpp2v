@@ -17,10 +17,7 @@ private:
 	Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const final;
 	
 	string OnRefusal( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) override;
-	string Dispatch( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy ) override;
 	
-    string RenderLiteral( TreePtr<CPPTree::Literal> sp, Syntax::Production surround_prod, Syntax::Policy policy ); 
-    string RenderScopeResolvingPrefix( TreePtr<Node> node, Syntax::Policy policy ) final;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const final;
     string DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,

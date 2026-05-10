@@ -117,6 +117,7 @@ public:
 			refuse_invisibles(true),
 			missing_access_to_public(true),
 			refuse_preprocessor(false),
+			refuse_identifiers(false),
 			cur_access(nullptr) {}
 		bool rendering_definitions;
 		bool force_incomplete_records;
@@ -140,6 +141,7 @@ public:
 		bool refuse_invisibles;
 		bool missing_access_to_public; // See #877
 		bool refuse_preprocessor;
+		bool refuse_identifiers;
 		shared_ptr<Syntax> pointer_archetype;
 		shared_ptr<Syntax> *cur_access;
 	};
