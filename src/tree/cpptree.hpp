@@ -13,7 +13,7 @@ namespace CPPTree {
 
 /// Property is the base class for property nodes. 
 /** Each kind of property has an
- intermediate which can represent any value of the property. Enum-like and
+ intermediate which can represent any value of the property. Enumeration-like and
  bool-like are implemented by choosing one of a choice of empty nodes derived
  from the intermediate. Other properties that cannot be represented this way
  have a Specific<Foo> node that actually contains the datatype (eg int, string
@@ -1051,10 +1051,10 @@ struct Union : Record
     string GetKeyword() const override;	
 };
 
-/// An Enum, as per record. 
+/// An Enumeration, as per record. 
 /** We regard enumerations as static const variables, initialised as per 
  the given value. Values are always explicit. */
-struct Enum : Record 
+struct Enumeration : Record 
 { 
 	NODE_FUNCTIONS_FINAL 
 	void InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const override;

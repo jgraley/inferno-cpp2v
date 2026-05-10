@@ -23,7 +23,7 @@ string Property::RenderScopeResolvingPrefix( VN::RendererInterface *renderer, Sy
         return ""; // either we're not in a scope or id is undeclared
     else if( DynamicTreePtrCast<CodeUnit>( scope ) )
         return "";
-    else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
+    else if( auto e = DynamicTreePtrCast<Enumeration>( scope ) ) // <- for enum
         return e->identifier->RenderScopeResolvingPrefix( renderer, policy );    // omit scope for the enum itself
     else if( auto r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
         return renderer->DoRender( &r->identifier, Syntax::Production::PRIMARY_EXPR, policy ) + "::"; 
@@ -185,7 +185,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
             continue;
         }
         
-        if( DynamicTreePtrCast<Record>(pd) && !DynamicTreePtrCast<Enum>(pd) ) 
+        if( DynamicTreePtrCast<Record>(pd) && !DynamicTreePtrCast<Enumeration>(pd) ) 
         {    
 			// A record within our scope
 			Policy record_policy = my_policy;
@@ -1716,9 +1716,9 @@ string Union::GetKeyword() const
 	return "union";
 }
 
-//////////////////////////// Enum ///////////////////////////////
+//////////////////////////// Enumeration ///////////////////////////////
 
-void Enum::InitialiseAccess( shared_ptr<Syntax> *, Policy &policy ) const
+void Enumeration::InitialiseAccess( shared_ptr<Syntax> *, Policy &policy ) const
 {
 	if( policy.is_vn_render_for_temp_disables )
 		throw TemporarilyDisabled();
@@ -1728,13 +1728,13 @@ void Enum::InitialiseAccess( shared_ptr<Syntax> *, Policy &policy ) const
 } 
 
 
-string Enum::GetKeyword() const
+string Enumeration::GetKeyword() const
 {
 	return "enum";
 }
 
 
-string Enum::RenderBody( VN::RendererInterface *renderer, Policy policy )
+string Enumeration::RenderBody( VN::RendererInterface *renderer, Policy policy )
 {
 	list<string> ls;		
     for( TreePtr<Declaration> d : members )

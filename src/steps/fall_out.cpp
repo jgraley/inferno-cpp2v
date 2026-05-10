@@ -26,7 +26,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto module_decls = MakePatternNode<StarAgent, Declaration>();
     auto func_stmts = MakePatternNode<StarAgent, Statement>();
     auto bases = MakePatternNode<StarAgent, Base>();
-    auto r_module_enum = MakePatternNode<Enum>();
+    auto r_module_enum = MakePatternNode<Enumeration>();
     auto r_enum_id = MakePatternNode<BuildSpecificTypeIdentifierAgent>("%sStates");
     auto var_id = MakePatternNode<InstanceIdentifier>();
     auto module_id = MakePatternNode<TypeIdentifier>();
@@ -42,9 +42,9 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_stmts = MakePatternNode<StarAgent, Statement>();
     auto l_dead_gotos = MakePatternNode<StarAgent, Statement>();
     auto l_switch = MakePatternNode<Switch>();
-    auto l_over_enum = MakePatternNode<DeltaAgent, Enum>();
-    auto ls_enum = MakePatternNode<Enum>();
-    auto lr_enum = MakePatternNode<Enum>();
+    auto l_over_enum = MakePatternNode<DeltaAgent, Enumeration>();
+    auto ls_enum = MakePatternNode<Enumeration>();
+    auto lr_enum = MakePatternNode<Enumeration>();
     auto lr_state_decl = MakePatternNode<Enumerator>();
     auto lr_state_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_STATE_%s");
     auto lr_case = MakePatternNode<Case>();

@@ -1580,7 +1580,7 @@ private:
             h = MakeTreeNode<Class>();
             break;
             case clang::DeclSpec::TST_enum:
-            h = MakeTreeNode<Enum>();
+            h = MakeTreeNode<Enumeration>();
             break;
             default:
             ASSERTFAIL("Unknown type spec type");
@@ -1846,7 +1846,7 @@ private:
             clang::SourceLocation, ExprTy *Val)
     {
         TreePtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
-        TreePtr<Enum> en( DynamicTreePtrCast<Enum>(d) );
+        TreePtr<Enumeration> en( DynamicTreePtrCast<Enumeration>(d) );
 		auto er = MakeTreeNode<Enumerator>();
         all_decls->members.insert(er);
         er->identifier = CreateInstanceIdentifier(Id);
@@ -1880,7 +1880,7 @@ private:
             DeclTy **Elements, unsigned NumElements)
     {
         TreePtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
-        TreePtr<Enum> e( DynamicTreePtrCast<Enum>(d) );
+        TreePtr<Enumeration> e( DynamicTreePtrCast<Enumeration>(d) );
         ASSERT( e )( "expected the declaration to be an enum");
         for( unsigned i=0; i<NumElements; i++ )
             e->members.insert( hold_decl.FromRaw( Elements[i] ) );

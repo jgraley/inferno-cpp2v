@@ -705,7 +705,7 @@ LoopRotation::LoopRotation()
     auto func_over = MakePatternNode<DeltaAgent, Compound>();
     auto over = MakePatternNode<DeltaAgent, Compound>();
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
-    auto s_enum = MakePatternNode<Enum>();
+    auto s_enum = MakePatternNode<Enumeration>();
     auto s_enum_id = MakePatternNode<TypeIdentifier>();
     auto loop_top_stuff = MakePatternNode<StuffAgent, Expression>();
     auto outer_top_stuff = MakePatternNode<StuffAgent, Expression>();

@@ -697,7 +697,7 @@ NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 		gnomon = make_shared<CodeUnitScopeGnomon>();
 	else if( dynamic_pointer_cast<CPPTree::SequentialScope>(node) )
 		gnomon = make_shared<CompoundScopeGnomon>();
-	else if( dynamic_pointer_cast<CPPTree::Enum>(node) )
+	else if( dynamic_pointer_cast<CPPTree::Enumeration>(node) )
 		gnomon = make_shared<EnumeratorScopeGnomon>();
 	else if( auto record = dynamic_pointer_cast<CPPTree::Record>(node) )
 	{
