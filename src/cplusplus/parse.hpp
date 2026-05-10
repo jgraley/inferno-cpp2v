@@ -527,6 +527,7 @@ private:
 			}
 			else // top level
 			{
+				
 				o = MakeTreeNode<Global> ();
 			}
 
@@ -1846,7 +1847,11 @@ private:
     {
         TreePtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
         TreePtr<Enum> e( DynamicTreePtrCast<Enum>(d) );
-        auto o = MakeTreeNode<Global>();
+        TreePtr<Instance> o;
+		if( ReadArgs::use.contains("e") )
+			o = MakeTreeNode<Enumerator>();
+		else
+			o = MakeTreeNode<Global>();
         all_decls->members.insert(o);
         o->identifier = CreateInstanceIdentifier(Id);
         o->constancy = MakeTreeNode<Const>(); // static const member need not consume storage!!
@@ -1857,6 +1862,7 @@ private:
         }
         else if( LastEnumConstant )
         {
+			// TODO this is terrible
             TreePtr<Declaration> lastd( hold_decl.FromRaw( LastEnumConstant ) );
             TreePtr<Instance> lasto( DynamicTreePtrCast<Instance>(lastd) );
             ASSERT(lasto)( "unexpected kind of declaration inside an enum");

@@ -78,7 +78,7 @@ fi
 echo Transform... 
 # Always do self-test
 #gdb -ex run --args $inferno -s -i$input_x_path -o$output_x_path $iargs
-time $inferno -i$input_x_path -o$output_x_path $iargs
+time $inferno -i$input_x_path $iargs -o$output_x_path
 ires=$?
 
 if test $ires -eq 0

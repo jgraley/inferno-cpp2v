@@ -598,7 +598,7 @@ struct Instance : Declaration,
 {
     NODE_FUNCTIONS
  
-	struct NonFieldInRecord : Unimplemented {};
+	struct NoAccessInstanceInAccessRecord : Unimplemented {};
 
     // Note: the order here determines the ordering of declarations in rendered code
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
@@ -617,6 +617,8 @@ struct Instance : Declaration,
 	virtual list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const;
 	// Extras like static, virtual, const come before the type (techically among them, but we don't support that)
 	virtual list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const;
+	// The main type/declarator goes here, if using declarator syntax
+	virtual list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;
 	// Extras like override, final, const come after declarator
 	virtual list<string> RenderDeclSpecPost( VN::RendererInterface *renderer, Policy policy );
 	// Extras like member inits come before the initialiser
@@ -668,6 +670,17 @@ struct Parameter : Instance
 {
     NODE_FUNCTIONS_FINAL
 };
+
+
+/// A member of an enum
+/** Enumerators are constant */
+struct Enumerator : Instance
+{
+    NODE_FUNCTIONS_FINAL
+	Syntax::Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;
+	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;
+};
+
 
 /// A local temp variable not preserved across function calls
 /** A local variable with unspecified storage which may be used within a function but is not preserved
@@ -1043,6 +1056,7 @@ struct Union : Record
 struct Enum : Record 
 { 
 	NODE_FUNCTIONS_FINAL 
+	TreePtr<AccessSpec> GetInitialAccess() const override;    
     string GetKeyword() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	

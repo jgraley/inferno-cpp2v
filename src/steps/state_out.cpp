@@ -491,7 +491,6 @@ AddYieldFlag::AddYieldFlag()
     auto ms_if = MakePatternNode<If>();
     auto mr_if = MakePatternNode<If>();
     auto m_wait = MakePatternNode<Wait>();
-    auto enum_decl = MakePatternNode<Enum>();
     auto l_equal = MakePatternNode<Equal>();
     auto lr_and = MakePatternNode<LogicalAnd>();
     auto lr_not = MakePatternNode<LogicalNot>();
@@ -675,7 +674,8 @@ LoopRotation::LoopRotation()
     auto comp_loop_decls = MakePatternNode<StarAgent, Declaration>();
     auto comp_yield_decls = MakePatternNode<StarAgent, Declaration>();
     auto x_comp_decls = MakePatternNode<StarAgent, Declaration>();
-    auto s_cur_enum = MakePatternNode<Global>();
+    auto s_cur_enum_global = MakePatternNode<Global>();
+    auto s_cur_enum = MakePatternNode<Enumerator>();
     auto s_outer_enum = MakePatternNode<Global>();
     auto inits = MakePatternNode<StarAgent, Statement>();
     auto stmts = MakePatternNode<StarAgent, Statement>();
@@ -730,8 +730,15 @@ LoopRotation::LoopRotation()
     fn->identifier = fn_id;  
     func_comp->members = (func_decls, /*s_enum,*/ s_var_decl); // enum removed because it is class member, not local to the function
     s_enum->identifier = s_enum_id;
-    s_enum->members = (s_enums, s_cur_enum);
+    if( ReadArgs::use.contains("e") )
+		s_enum->members = (s_enums, s_cur_enum);
+	else
+		s_enum->members = (s_enums, s_cur_enum_global);
+    
+    s_cur_enum_global->identifier = s_cur_enum_id;
+    
     s_cur_enum->identifier = s_cur_enum_id;
+    
     s_outer_enum->identifier = s_outer_enum_id;
     s_var_decl->type = s_enum_id;
     s_var_decl->identifier = s_var_id;

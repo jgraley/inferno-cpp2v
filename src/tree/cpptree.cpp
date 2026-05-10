@@ -26,7 +26,7 @@ string Property::RenderScopeResolvingPrefix( VN::RendererInterface *renderer, Sy
     else if( auto e = DynamicTreePtrCast<Enum>( scope ) ) // <- for enum
         return e->identifier->RenderScopeResolvingPrefix( renderer, policy );    // omit scope for the enum itself
     else if( auto r = DynamicTreePtrCast<Record>( scope ) ) // <- for class, struct, union
-        return r->identifier->GetRender( renderer, Syntax::Production::PRIMARY_EXPR, policy ) + "::"; 
+        return renderer->DoRender( &r->identifier, Syntax::Production::PRIMARY_EXPR, policy ) + "::"; 
     else if( DynamicTreePtrCast<CallableParams>( scope ) ||  // <- this is for params
              DynamicTreePtrCast<Compound>( scope ) ||    // <- this is for locals in body
              DynamicTreePtrCast<StatementExpression>( scope ) )    // <- this is for locals in body
@@ -974,8 +974,7 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
 	}
     
-    string declarator = renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy );   
-    ls.push_back( renderer->DoRenderTypeAndDeclarator(&type, declarator, Production::PRIMARY_EXPR, Production::BARE_STMT_DECL, sub_policy, constancy) );
+	Append( ls, RenderMiddlePart(renderer, sub_policy, id_policy) );
 
     if( !policy.rendering_definitions )
 		Append( ls, RenderDeclSpecPost(renderer, sub_policy) );
@@ -1018,8 +1017,9 @@ bool Instance::ShouldSplitInstance( Policy ) const
 
 list<string> Instance::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
 {
-	if( policy.cur_access ) // are we in a record scope
-		throw NonFieldInRecord(); 
+	if( policy.cur_access ) // are we in a record scope that maintains access spec, and yet are not a field
+		throw NoAccessInstanceInAccessRecord(); 
+		
 	// Patterns managed to get an Instance that isn't a Field into a Record body.
 	return {};
 }
@@ -1028,6 +1028,20 @@ list<string> Instance::RenderAccessSpec( VN::RendererInterface *, Policy policy 
 list<string> Instance::RenderDeclSpecPre( VN::RendererInterface *, Policy ) const 
 { 
 	return {}; 
+}
+
+
+list<string> Instance::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+{
+    string declarator = renderer->DoRender( &identifier, 
+                                            Production::PRIMARY_EXPR, 
+                                            id_policy );   
+    return { renderer->DoRenderTypeAndDeclarator(&type, 
+                                                      declarator, 
+                                                      Production::PRIMARY_EXPR, 
+                                                      Production::BARE_STMT_DECL, 
+                                                      policy, 
+                                                      constancy) };	
 }
 
 
@@ -1098,6 +1112,22 @@ list<string> Field::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy p
 list<string> Field::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
 {
 	return RenderMemberInits(renderer, policy);
+}
+
+//////////////////////////// Enumerator //////////////////////////////
+
+Syntax::Production Enumerator::GetMyProduction(const VN::RendererInterface *, Policy) const
+{ 
+	return Production::COMMA_SEP;
+}
+
+
+list<string> Enumerator::RenderMiddlePart( VN::RendererInterface *renderer, Policy, Policy id_policy ) const
+{
+	// No attmept at declarator, just produce the id
+    return { renderer->DoRender( &identifier, 
+                                 Production::PRIMARY_EXPR, 
+                                 id_policy ) };   
 }
 
 //////////////////////////// Temporary //////////////////////////////
@@ -1607,7 +1637,6 @@ string Record::GetRender( VN::RendererInterface *renderer, Production production
 
 	// For our members
 	shared_ptr<Syntax> cur_access = GetInitialAccess();
-	ASSERT( cur_access );		
 	policy.cur_access = &cur_access;
 	//ls.push_back("/* start record with " + Trace(*policy.cur_access) + "*/");
 
@@ -1693,6 +1722,12 @@ string Union::GetKeyword() const
 
 //////////////////////////// Enum ///////////////////////////////
 
+TreePtr<AccessSpec> Enum::GetInitialAccess() const
+{
+	return nullptr; // Access specs not supported
+}
+
+
 string Enum::GetKeyword() const
 {
 	return "enum";
@@ -1702,6 +1737,8 @@ string Enum::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 {
 	if( policy.is_vn_render_for_temp_disables )
 		throw TemporarilyDisabled();
+
+	policy.cur_access = nullptr;
 		
 	Syntax::Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
@@ -1717,23 +1754,28 @@ string Enum::GetRender( VN::RendererInterface *renderer, Production, Policy poli
     for( TreePtr<Declaration> pe : members )
     {
 		// TODO make a new Enumerator member, derived from Instance, and replace its GetRender()
-        auto o = TreePtr<Instance>::DynamicCast(pe);
-        if( !o )
+        if( auto er = TreePtr<Enumerator>::DynamicCast(pe) )
+        {
+			ls.push_back( renderer->DoRender( &er, Syntax::Production::COMMA_SEP, policy ) );  
+		}
+        else if( auto o = TreePtr<Instance>::DynamicCast(pe) )
+        {
+			string s = renderer->DoRender( &o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN), id_policy ); 
+			
+			// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
+			if( !TreePtr<Uninitialised>::DynamicCast(o->initialiser) )      
+				s += " " + renderer->DoRender( &o->initialiser, Syntax::Production::DIRECT_INIT, policy );
+				
+			ls.push_back( s );						
+		}
+		else
         {
 			ls.push_back( renderer->RenderNodeExplicit( pe, Syntax::Production::COMMA_SEP, policy ) );  
 			continue;
-        }
-        
-        string s = renderer->DoRender( &o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN), id_policy ); 
-        
-		// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
-        if( !TreePtr<Uninitialised>::DynamicCast(o->initialiser) )      
-			s += " " + renderer->DoRender( &o->initialiser, Syntax::Production::DIRECT_INIT, policy );
-			
-		ls.push_back( s );			
+        }        
     }
     
-    return s + "\n" + Join( ls, ",\n", "{\n", "}\n" );
+    return s + "\n" + Join( ls, ",\n", "{\n", "\n}" );
 }
 
 
