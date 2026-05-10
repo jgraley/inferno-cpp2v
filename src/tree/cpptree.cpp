@@ -1758,16 +1758,6 @@ string Enum::GetRender( VN::RendererInterface *renderer, Production, Policy poli
         {
 			ls.push_back( renderer->DoRender( &er, Syntax::Production::COMMA_SEP, policy ) );  
 		}
-        else if( auto o = TreePtr<Instance>::DynamicCast(pe) )
-        {
-			string s = renderer->DoRender( &o->identifier, Syntax::BoostPrecedence(Syntax::Production::ASSIGN), id_policy ); 
-			
-			// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
-			if( !TreePtr<Uninitialised>::DynamicCast(o->initialiser) )      
-				s += " " + renderer->DoRender( &o->initialiser, Syntax::Production::DIRECT_INIT, policy );
-				
-			ls.push_back( s );						
-		}
 		else
         {
 			ls.push_back( renderer->RenderNodeExplicit( pe, Syntax::Production::COMMA_SEP, policy ) );  
