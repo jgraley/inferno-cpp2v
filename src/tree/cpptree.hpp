@@ -1034,6 +1034,7 @@ struct Record : TypeDeclaration,
        
     virtual string GetColour() const { return TypeDeclaration::GetColour(); } // TypeDeclaration wins
 	virtual TreePtr<AccessSpec> GetInitialAccess() const;    
+	virtual void InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const;    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
     virtual string GetKeyword() const;
@@ -1056,9 +1057,8 @@ struct Union : Record
 struct Enum : Record 
 { 
 	NODE_FUNCTIONS_FINAL 
-	TreePtr<AccessSpec> GetInitialAccess() const override;    
+	void InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const override;
     string GetKeyword() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	
 };
 

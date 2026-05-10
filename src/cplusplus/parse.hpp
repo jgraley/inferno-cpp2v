@@ -1846,19 +1846,15 @@ private:
             clang::SourceLocation, ExprTy *Val)
     {
         TreePtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
-        TreePtr<Enum> e( DynamicTreePtrCast<Enum>(d) );
-        TreePtr<Instance> o;
-		if( ReadArgs::use.contains("e") )
-			o = MakeTreeNode<Enumerator>();
-		else
-			o = MakeTreeNode<Global>();
-        all_decls->members.insert(o);
-        o->identifier = CreateInstanceIdentifier(Id);
-        o->constancy = MakeTreeNode<Const>(); // static const member need not consume storage!!
-        o->type = e->identifier;//CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
+        TreePtr<Enum> en( DynamicTreePtrCast<Enum>(d) );
+		auto er = MakeTreeNode<Enumerator>();
+        all_decls->members.insert(er);
+        er->identifier = CreateInstanceIdentifier(Id);
+        er->constancy = MakeTreeNode<Const>(); // static const member need not consume storage!!
+        er->type = en->identifier;//CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
         if( Val )
         {
-            o->initialiser = hold_expr.FromRaw( Val );
+            er->initialiser = hold_expr.FromRaw( Val );
         }
         else if( LastEnumConstant )
         {
@@ -1870,14 +1866,14 @@ private:
             TreePtr<Expression> ei = lasto->identifier;
             inf->operands.insert( ei );
             inf->operands.insert( CreateNumericConstant( 1 ) );
-            o->initialiser = inf;
+            er->initialiser = inf;
         }
         else
         {
-            o->initialiser = CreateNumericConstant( 0 );
+            er->initialiser = CreateNumericConstant( 0 );
         }
-        ident_track.Add(Id, o, S);
-        return hold_decl.ToRaw( o );
+        ident_track.Add(Id, er, S);
+        return hold_decl.ToRaw( er );
     }
 
     virtual void ActOnEnumBody(clang::SourceLocation, DeclTy *EnumDecl,

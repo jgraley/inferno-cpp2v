@@ -1621,6 +1621,13 @@ TreePtr<AccessSpec> Record::GetInitialAccess() const
 }
 
 
+void Record::InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const
+{
+	*local_access = GetInitialAccess();
+	policy.cur_access = local_access;
+}  
+
+
 Syntax::Production Record::GetMyProductionTerminal() const
 {
 	return Production::BARE_STMT_DECL;
@@ -1636,9 +1643,8 @@ string Record::GetRender( VN::RendererInterface *renderer, Production production
 		Append( ls, ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, renderer, policy ) );// see #877
 
 	// For our members
-	shared_ptr<Syntax> cur_access = GetInitialAccess();
-	policy.cur_access = &cur_access;
-	//ls.push_back("/* start record with " + Trace(*policy.cur_access) + "*/");
+	shared_ptr<Syntax> local_access = GetInitialAccess();
+	InitialiseAccess( &local_access, policy );
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
@@ -1660,7 +1666,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Production production
 	{
 		// Catch the exception so that our modified policy propagates into the explicit render
 		// TODO could we not put the modified policy into the exception object? We'd still have
-		// to catch, but could throw again with updated policy.
+		// to catch, but could rethrow with updated policy.
 		return renderer->RenderNodeExplicit(shared_from_this(), production, policy);
 	}
 	
@@ -1683,28 +1689,18 @@ string Record::RenderExtras(VN::RendererInterface *, Production, Policy)
 
 string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 {
-	string s;
     Sequence<Declaration> sorted = SortDecls( members, true );
-
-	// Members
-	s += "{\n";
 
 	Policy member_policy = policy;
     member_policy.split_bulky_statics = true; // Our scope is a record body
 	member_policy.permit_static_keyword = true; // In a record body, static means global
 	
     // Emit preprocs and an incomplete for each record 
+	list<string> ls;		    
     for( auto &d : sorted )
-    {       
-		//s += "/* in record with " + Trace(*member_policy.cur_access) + "*/";
-		// Do this before checking access spec, so that the cur_access can be updated
-		string rendered_member = renderer->DoRender( &d, Production::STMT_DECL, member_policy );			
-        s += rendered_member;
-    }
-   
-   	s += "}";
-		
-	return s;
+		ls.push_back( renderer->DoRender( &d, Production::STMT_DECL, member_policy ) );
+  		
+	return Join( ls, "\n", "{\n", "\n}" );
 }
 
 //////////////////////////// Union ///////////////////////////////
@@ -1722,10 +1718,14 @@ string Union::GetKeyword() const
 
 //////////////////////////// Enum ///////////////////////////////
 
-TreePtr<AccessSpec> Enum::GetInitialAccess() const
+void Enum::InitialiseAccess( shared_ptr<Syntax> *, Policy &policy ) const
 {
-	return nullptr; // Access specs not supported
-}
+	if( policy.is_vn_render_for_temp_disables )
+		throw TemporarilyDisabled();
+
+	// Don't use the local access pointer, just disable the mechanism in this scope
+	policy.cur_access = nullptr;
+} 
 
 
 string Enum::GetKeyword() const
@@ -1733,45 +1733,14 @@ string Enum::GetKeyword() const
 	return "enum";
 }
 
-string Enum::GetRender( VN::RendererInterface *renderer, Production, Policy policy ) 
-{
-	if( policy.is_vn_render_for_temp_disables )
-		throw TemporarilyDisabled();
 
-	policy.cur_access = nullptr;
-		
-	Syntax::Policy id_policy = policy;
-	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
-		
-    string s = "enum";
-    s += " ";    
-    s += renderer->DoRender( &identifier, Syntax::Production::PRIMARY_EXPR, id_policy); 
-	
-	if( policy.force_incomplete_records )
-		return s;
-	
+string Enum::RenderBody( VN::RendererInterface *renderer, Policy policy )
+{
 	list<string> ls;		
-    for( TreePtr<Declaration> pe : members )
-    {
-		// TODO make a new Enumerator member, derived from Instance, and replace its GetRender()
-        if( auto er = TreePtr<Enumerator>::DynamicCast(pe) )
-        {
-			ls.push_back( renderer->DoRender( &er, Syntax::Production::COMMA_SEP, policy ) );  
-		}
-		else
-        {
-			ls.push_back( renderer->RenderNodeExplicit( pe, Syntax::Production::COMMA_SEP, policy ) );  
-			continue;
-        }        
-    }
+    for( TreePtr<Declaration> d : members )
+		ls.push_back( renderer->DoRender( &d, Syntax::Production::COMMA_SEP, policy ) );       
     
-    return s + "\n" + Join( ls, ",\n", "{\n", "\n}" );
-}
-
-
-string Enum::RenderBody( VN::RendererInterface *, Policy  )
-{
-	throw TemporarilyDisabled(); 
+    return Join( ls, ",\n", "{\n", "\n}" );
 }
 
 //////////////////////////// InheritanceRecord ///////////////////////////////

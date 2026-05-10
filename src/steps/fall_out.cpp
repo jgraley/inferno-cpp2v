@@ -45,7 +45,6 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_over_enum = MakePatternNode<DeltaAgent, Enum>();
     auto ls_enum = MakePatternNode<Enum>();
     auto lr_enum = MakePatternNode<Enum>();
-    auto lr_state_decl_field = MakePatternNode<Field>();
     auto lr_state_decl = MakePatternNode<Enumerator>();
     auto lr_state_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_STATE_%s");
     auto lr_case = MakePatternNode<Case>();
@@ -118,10 +117,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     ls_goto->destination = var_id;
     ls_label->identifier = ls_label_id;
     ls_enum->members = (l_enum_vals);
-    if( ReadArgs::use.contains("e") )
-		lr_enum->members = (l_enum_vals, lr_state_decl);
-	else
-		lr_enum->members = (l_enum_vals, lr_state_decl_field);
+	lr_enum->members = (l_enum_vals, lr_state_decl);
     lr_enum->identifier = ls_enum->identifier = r_enum_id;
     l_block->restriction = l_not;
     l_not->negand = MakePatternNode<Goto>();
@@ -130,19 +126,10 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     l_over_enum->through = ls_enum;
     l_over_enum->overlay = lr_enum;
     l_module->members = (l_module_decls, l_over_enum, l_func);
-    
-    lr_state_decl_field->constancy = MakePatternNode<Const>();
-    lr_state_decl_field->identifier = lr_state_id;
-    lr_state_decl_field->type = r_enum_id;
-    lr_state_decl_field->initialiser = lr_count;
-    lr_state_decl_field->access = nullptr; // matches the default for enums
-    lr_state_decl_field->virt = MakePatternNode<NonVirtual>();
-    
     lr_state_decl->constancy = MakePatternNode<Const>();
     lr_state_decl->identifier = lr_state_id;
     lr_state_decl->type = r_enum_id;
     lr_state_decl->initialiser = lr_count;
-   
     lr_count->container = l_enum_vals;
     lr_state_id->sources = (func_id, ls_label->identifier);
     //l_lmap->constancy = MakePatternNode<Const>(); // TODO if I skip this, I should get ⯁Constancy⦅⦆ but I actually get nothing, which is wrong (means non-const)
