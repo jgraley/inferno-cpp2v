@@ -40,9 +40,13 @@ Command::~Command()
 }
 
 
-TreePtr<Node> Command::DecayToPattern( TreePtr<Node> node, VNLangActions *vn )
+TreePtr<Node> Command::OnParseEmbedded( TreePtr<Node> node, VNLangActions *vn )
 {
-	return nullptr; // by default, I can't decay
+	if( node )
+		throw YY::VNLangParser::syntax_error(
+		     any_cast<YY::VNLangParser::location_type>(loc), 
+		     "Unexpected pattern before " + DiagQuote(Traceable::TypeIdName( *this )));
+	return node; 
 }
 
 
@@ -60,7 +64,7 @@ EngineCommand::EngineCommand( TreePtr<Node> stem_, any loc_ ) :
 }
 
 
-TreePtr<Node> EngineCommand::DecayToPattern( TreePtr<Node> node, VNLangActions *vn )
+TreePtr<Node> EngineCommand::OnParseEmbedded( TreePtr<Node> node, VNLangActions *vn )
 {
 	if( !node )
 		throw YY::VNLangParser::syntax_error(
@@ -99,12 +103,12 @@ PatternCommand::PatternCommand( TreePtr<Node> pattern_, any loc_ ) :
 }
 
 
-TreePtr<Node> PatternCommand::DecayToPattern( TreePtr<Node> node, VNLangActions *vn )
+TreePtr<Node> PatternCommand::OnParseEmbedded( TreePtr<Node> node, VNLangActions *vn )
 {
 	if( node )
 		throw YY::VNLangParser::syntax_error(
 		     any_cast<YY::VNLangParser::location_type>(loc), 
-		     "Only the first command in an embedded command sequence may be a pattern");
+		     "Unexpected pair of patterns in command sequence");
 	return pattern; 
 }
 
@@ -123,11 +127,11 @@ AttributeCommand::AttributeCommand( any loc_ ) :
 }
 
 
-TreePtr<Node> AttributeCommand::DecayToPattern( TreePtr<Node> node, VNLangActions *vn )
+TreePtr<Node> AttributeCommand::OnParseEmbedded( TreePtr<Node> node, VNLangActions *vn )
 {
 	throw YY::VNLangParser::syntax_error(
 	     any_cast<YY::VNLangParser::location_type>(loc), 
-	     "Attributes only at top level");	
+	     "Attribute command may only be used at top level");	
 }
 
 

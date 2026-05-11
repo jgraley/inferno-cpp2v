@@ -108,12 +108,14 @@ TreePtr<Node> VNLangActions::OnDelta( TreePtr<Node> through, TreePtr<Node> overl
 TreePtr<Node> VNLangActions::OnEmbeddedCommands( list<shared_ptr<Command>> commands )
 {
 	TreePtr<Node> node;
+	ASSERT(!commands.empty()); // should not parse
 	TRACE("Decaying embedded commands: ")(commands)("\n");
 	for( shared_ptr<Command> c : commands )
 	{
-		node = c->DecayToPattern(node, this); // node can be NULL for singular wildcard
+		node = c->OnParseEmbedded(node, this); // node can be NULL for singular wildcard
 		// TODO could generalise to things that can Execute from within SCREngine
 	}
+
 	return node;
 }
 
@@ -208,12 +210,9 @@ TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, any node_na
 				prev_loc, 
 				"In ⯁, insufficient items given. " + counts_msg );
 		const Item &src_item = *src_it;
-        if( SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_item) ) // TODO could roll together as Container?
+        if( auto dest_con = dynamic_cast<ContainerInterface *>(dest_item) ) 
             for( TreePtr<Node> src : src_item.nodes )
-				dest_seq->insert( src );				
-        else if( CollectionInterface *dest_col = dynamic_cast<CollectionInterface *>(dest_item) )
-            for( TreePtr<Node> src : src_item.nodes )
-				dest_col->insert( src );	
+				dest_con->insert( src );				
         else if( TreePtrInterface *dest_sing = dynamic_cast<TreePtrInterface *>(dest_item) )
         {
 			if( src_item.nodes.size() == 1 )
@@ -227,20 +226,20 @@ TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, any node_na
 				else
 					throw YY::VNLangParser::syntax_error( 
 						any_cast<YY::VNLangParser::location_type>(src_item.loc),
-						SSPrintf("In ⯁, optional singular item requires zero or one sub-pattern but %d were given.",
+						SSPrintf("In ⯁, optional singular item requires zero or one pattern but %d were given.",
 						src_item.nodes.size() ) ); 
 			}
 			else
 			{
 				throw YY::VNLangParser::syntax_error( 
 					any_cast<YY::VNLangParser::location_type>(src_item.loc),
-					SSPrintf("In ⯁, non-optional singular item requires exactly one sub-pattern but %d were given.",
+					SSPrintf("In ⯁, non-optional singular item requires exactly one pattern but %d were given.",
 					src_item.nodes.size() ) ); 
 			}
             
 		}
         else
-            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a singular TreePtr");
+            ASSERTFAIL("got something from itemise that isn't a Container or a singular TreePtr");
         src_it++;
         prev_loc = any_cast<YY::VNLangParser::location_type>(src_item.loc);
     }
@@ -362,7 +361,7 @@ TreePtr<Node> VNLangActions::OnPrefixOperator( string tok, TreePtr<Node> operand
 	}
 #include "tree/operator_data.inc"
 	{
-		ASSERTFAIL(); // TODO use operator_data.inc
+		ASSERTFAIL("Operator parsed but not found in operator_data.inc"); 
 	}
 }
 
@@ -378,7 +377,7 @@ TreePtr<Node> VNLangActions::OnPostfixOperator( string tok, TreePtr<Node> operan
 	}
 #include "tree/operator_data.inc"
 	{
-		ASSERTFAIL(); // TODO use operator_data.inc
+		ASSERTFAIL("Operator parsed but not found in operator_data.inc"); 
 	}
 }
 
@@ -395,7 +394,7 @@ TreePtr<Node> VNLangActions::OnInfixOperator( string tok, TreePtr<Node> left, Tr
 	}
 #include "tree/operator_data.inc"
 	{
-		ASSERTFAIL(); // TODO use operator_data.inc
+		ASSERTFAIL("Operator parsed but not found in operator_data.inc"); 
 	}
 }
 
@@ -716,15 +715,18 @@ NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 }
 
 
-TreePtr<Node> VNLangActions::OnDeclaratorDecl( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator )
+TreePtr<Node> VNLangActions::OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, any type_loc, TreePtr<Node> declarator, any decl_loc )
 {
-	bool typedef_ = false;
+	YY::VNLangParser::location_type middle_loc = any_cast<YY::VNLangParser::location_type>(type_loc) +
+												 any_cast<YY::VNLangParser::location_type>(decl_loc);
+	
+	const QualifierData *q_typedef = nullptr;
 	for( const QualifierData &q : quals )
 		if( q.cat == QualCat::TYPEDEF )
-			typedef_ = true;
+			q_typedef = &q;
 			
 	// Get the CV-qualifiers for declarator reduction
-	Declarators::CVQuals cv_quals = OnCVQuals(quals, loc, true);
+	Declarators::CVQuals cv_quals = OnCVQuals(quals, true);
 	
 	// Now fill in fields derived from the declarator
 	Declarators::Result declarator_result = Declarators::Declarator::DoReduce(declarator, type, cv_quals);
@@ -732,20 +734,20 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( any loc, const list<QualifierData
 	{
 		case Declarators::Result::CONCRETE:
 		case Declarators::Result::WILDCARD:
-			if( typedef_ )
-				return OnTypedef(loc, quals, declarator_result);
+			if( q_typedef )
+				return OnTypedef(quals, declarator_result, middle_loc);
 			else
-				return OnInstance(loc, quals, declarator_result);
+				return OnInstance(quals, declarator_result, middle_loc);
 
 		default:
 			throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc),
+				any_cast<YY::VNLangParser::location_type>(middle_loc),
 				"Expected concrete declaration but got abstract.");
 	}
 }
 
 
-TreePtr<Node> VNLangActions::OnTypedef( any loc, const list<QualifierData> &quals, Declarators::Result declarator_result )
+TreePtr<Node> VNLangActions::OnTypedef( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc )
 {
 	auto typedef_ = MakeTreeNode<StandardAgentWrapper<CPPTree::Typedef>>(); 
 	typedef_->type = declarator_result.type_view;
@@ -755,7 +757,7 @@ TreePtr<Node> VNLangActions::OnTypedef( any loc, const list<QualifierData> &qual
 }
 
 
-TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &quals, Declarators::Result declarator_result )
+TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc )
 {	
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
@@ -764,24 +766,24 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 	// TODO process the qualifiers in one loop at the top, with lots of checking. Check for:
 	// - wrong qualifier eg an access spec
 	// - duplication/conflict of qualifiers (<=1 in each category)
-	bool static_ = false;
+	const QualifierData *q_static = nullptr;
 	for( const QualifierData &q : quals )
 		if( q.cat == QualCat::STATIC )
-			static_ = true;
+			q_static = &q;
 
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
 	TreePtr<CPPTree::Instance> instance;
-	if( static_ )
+	if( q_static )
 	{
 		if( dynamic_cast<const ParameterisationScopeGnomon *>(spg.get()) )
 			throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc),
+				any_cast<YY::VNLangParser::location_type>(q_static->loc),
 				"static is not allowed for parameters.");
 		if( dynamic_cast<const CodeUnitScopeGnomon *>(spg.get()) )
 			throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc),
-				"static is not supported at code unit level.");
+				any_cast<YY::VNLangParser::location_type>(q_static->loc),
+				"static is not supported at code unit level (TODO).");
 		// Remaining scopes are field and local. VN is a resolved form of C/C++
 		// so we don't need to constrain scope. We can just call these global 
 		// if static was specified.
@@ -789,11 +791,11 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 	}	
 	else if( !spg ) 
 		throw YY::VNLangParser::syntax_error(
-			any_cast<YY::VNLangParser::location_type>(loc),
+			any_cast<YY::VNLangParser::location_type>(middle_loc),
 			"Cannot disambiguate declaration because no surrounding scope." + note );
 	else if( auto usg = dynamic_cast<const UnknownScopeGnomon *>(spg.get()) ) 
 		throw YY::VNLangParser::syntax_error(
-			any_cast<YY::VNLangParser::location_type>(loc),
+			any_cast<YY::VNLangParser::location_type>(middle_loc),
 			"Cannot disambiguate declaration under " + usg->reason + "." + note );
 	else if( auto psg = dynamic_cast<const PrerestrictScopeGnomon *>(spg.get()) ) 
 	{
@@ -806,7 +808,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 		instance = TreePtr<CPPTree::Instance>::DynamicCast(node);
 		if( !instance )
 			throw YY::VNLangParser::syntax_error(
-						any_cast<YY::VNLangParser::location_type>(loc),
+						any_cast<YY::VNLangParser::location_type>(middle_loc),
 						"nearest prerestrict " + nb->What() + " cannot disambiguate an instance declaration" + note); // TODO it could if the pre-restriction was to eg a Record etc			
 	}
 	else if( dynamic_cast<const ParameterisationScopeGnomon *>(spg.get()) )
@@ -841,7 +843,7 @@ TreePtr<Node> VNLangActions::OnInstance( any loc, const list<QualifierData> &qua
 					
 				if( auto aq = TreePtr<CPPTree::AccessSpec>::DynamicCast(q.node) )
 					throw YY::VNLangParser::syntax_error(
-						any_cast<YY::VNLangParser::location_type>(loc),
+						any_cast<YY::VNLangParser::location_type>(q.loc),
 						"Java-like access spec detected: " + DiagQuote(Traceable::TypeIdName( *aq )) );
 			}
 		}
@@ -945,9 +947,9 @@ void VNLangActions::ApplyMemberInits( TreePtr<Node> instance, any instance_loc, 
 }
 
 
-TreePtr<Node> VNLangActions::OnAbDeclType( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator )
+TreePtr<Node> VNLangActions::OnAbDeclType( any , const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator )
 {
-	Declarators::CVQuals cv_quals = OnCVQuals(quals, loc, true); 
+	Declarators::CVQuals cv_quals = OnCVQuals(quals, true); 
 	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type, cv_quals);
 	switch( result.outcome )
 	{
@@ -1049,7 +1051,7 @@ TreePtr<Node> VNLangActions::OnQualifierNodeKeyword( string keyword )
 }
 
 
-Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals, any loc, bool nice )
+Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals, bool nice )
 {
 	Declarators::CVQuals cv_quals
 	{
@@ -1066,7 +1068,7 @@ Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals,
 			{
 				if( got_const )
 					throw YY::VNLangParser::syntax_error(
-						any_cast<YY::VNLangParser::location_type>(loc),
+						any_cast<YY::VNLangParser::location_type>(q.loc),
 						"Excess " + DiagQuote(q.GetDiagnostic()) );
 				cv_quals.constancy = q.node;
 				got_const = true;
@@ -1078,7 +1080,7 @@ Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals,
 		}
 		if( !nice )
 			throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc),
+				any_cast<YY::VNLangParser::location_type>(q.loc),
 				"Expected CV qualifier, got: " + DiagQuote(q.GetDiagnostic()) );
 	}
 	return cv_quals;

@@ -329,10 +329,10 @@ declarator_decl	: prototype_access
 prototype_access: 											  prototype
 				|								access_clause prototype	{ vn->ApplyAccessSpec($2, @2, $1); $$ = $2; } 
 
-prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl(@$, {}, $1, $2); }	
-				| qualifiers type_for_declarator declarator				{ $$ = vn->OnDeclaratorDecl(@$, $1, $2, $3); } // eg const int a	
-				| type_for_declarator qualifiers declarator				{ $$ = vn->OnDeclaratorDecl(@$, $2, $1, $3); } // eg int const a 	
-				| qualifiers type_for_declarator qualifiers declarator	{ $$ = vn->OnDeclaratorDecl(@$, $1+$3, $2, $4); } 
+prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({}, $1, @1, $2, @2); }	
+				| qualifiers type_for_declarator declarator				{ $$ = vn->OnDeclaratorDecl($1, $2, @2, $3, @3); } // eg const int a	
+				| type_for_declarator qualifiers declarator				{ $$ = vn->OnDeclaratorDecl($2, $1, @1, $3, @3); } // eg int const a 	
+				| qualifiers type_for_declarator qualifiers declarator	{ $$ = vn->OnDeclaratorDecl($1+$3, $2, @2, $4, @4); } 
 				| XSTRUCTOR vn_primary parameterisation					{ $$ = vn->OnConstructorDecl(@$, {}, $2, $3); }	
 				| qualifiers XSTRUCTOR vn_primary parameterisation		{ $$ = vn->OnConstructorDecl(@$, $1, $3, $4); }	// for virtual destructor but needs ~
 
@@ -412,12 +412,12 @@ declarator			: declarator_prefix
 
 declarator_prefix	: declarator_postfix
 					|                          '&' declarator_prefix { $$ = make_shared<Declarators::Reference>($2); } 
-					|                          '*' declarator_prefix { $$ = make_shared<Declarators::Pointer>(vn->OnCVQuals({}, @1), $2); } 
-					|               '*' qualifiers declarator_prefix { $$ = make_shared<Declarators::Pointer>(vn->OnCVQuals($2, @2), $3); } 
+					|                          '*' declarator_prefix { $$ = make_shared<Declarators::Pointer>(vn->OnCVQuals({}), $2); } 
+					|               '*' qualifiers declarator_prefix { $$ = make_shared<Declarators::Pointer>(vn->OnCVQuals($2), $3); } 
 
 declarator_postfix	: declarator_primary
-					| declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2, vn->OnCVQuals({}, @2)); }               
-					| declarator_postfix parameterisation qualifiers{ $$ = make_shared<Declarators::Function>($1, $2, vn->OnCVQuals($3, @3)); } 
+					| declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2, vn->OnCVQuals({})); }               
+					| declarator_postfix parameterisation qualifiers{ $$ = make_shared<Declarators::Function>($1, $2, vn->OnCVQuals($3)); } 
 					| declarator_postfix '[' stmt_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
                 
 declarator_primary	: vn_primary  									{ $$ = make_shared<Declarators::Concrete>($1); }  
@@ -429,17 +429,17 @@ ab_declarator			: ab_declarator_prefix
 
 ab_declarator_prefix	: ab_declarator_postfix
 						|                          '&' ab_declarator_prefix { $$ = make_shared<Declarators::Reference>($2); } 
-						|                          '*' ab_declarator_prefix { $$ = make_shared<Declarators::Pointer>(vn->OnCVQuals({}, @1), $2); } 
-						|               '*' qualifiers ab_declarator_prefix { $$ = make_shared<Declarators::Pointer>(vn->OnCVQuals($2, @2), $3); } 
+						|                          '*' ab_declarator_prefix { $$ = make_shared<Declarators::Pointer>(vn->OnCVQuals({}), $2); } 
+						|               '*' qualifiers ab_declarator_prefix { $$ = make_shared<Declarators::Pointer>(vn->OnCVQuals($2), $3); } 
 						|                      	      		 		 	'&' { $$ = make_shared<Declarators::Reference>(nullptr); }  
-						|                           				 	'*' { $$ = make_shared<Declarators::Pointer>(vn->OnCVQuals({}, @1), nullptr); } 
-						|                          		  	 '*' qualifiers { $$ = make_shared<Declarators::Pointer>(vn->OnCVQuals($2, @2), nullptr); } 
+						|                           				 	'*' { $$ = make_shared<Declarators::Pointer>(vn->OnCVQuals({}), nullptr); } 
+						|                          		  	 '*' qualifiers { $$ = make_shared<Declarators::Pointer>(vn->OnCVQuals($2), nullptr); } 
 
-ab_declarator_postfix	: ab_declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2, vn->OnCVQuals({}, @2)); }          
-ab_declarator_postfix	: ab_declarator_postfix parameterisation qualifiers	{ $$ = make_shared<Declarators::Function>($1, $2, vn->OnCVQuals($3, @3)); }        
+ab_declarator_postfix	: ab_declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2, vn->OnCVQuals({})); }          
+ab_declarator_postfix	: ab_declarator_postfix parameterisation qualifiers	{ $$ = make_shared<Declarators::Function>($1, $2, vn->OnCVQuals($3)); }        
 						| ab_declarator_postfix '[' stmt_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
-						| parameterisation									{ $$ = make_shared<Declarators::Function>(nullptr, $1, vn->OnCVQuals({}, @1)); }   
-						| parameterisation qualifiers						{ $$ = make_shared<Declarators::Function>(nullptr, $1, vn->OnCVQuals($2, @2)); }   
+						| parameterisation									{ $$ = make_shared<Declarators::Function>(nullptr, $1, vn->OnCVQuals({})); }   
+						| parameterisation qualifiers						{ $$ = make_shared<Declarators::Function>(nullptr, $1, vn->OnCVQuals($2)); }   
 						| '[' stmt_boot ']'									{ $$ = make_shared<Declarators::Array>(nullptr, $2); }                 		
 					                         
 //////////////////////////////////////// PARAMETERS /////////////////////////////////////////////
@@ -719,9 +719,9 @@ qualifiers		: qualifier													{ $$.push_back($1); }
 qualifier		: qualifier_nw
 				
 // No wildcards version
-qualifier_nw	: qualifier_node											{ $$.cat = VN::QualCat::NODE; $$.node = $1; }
-				| STATIC_KEYWORD											{ $$.cat = VN::QualCat::STATIC; }
-				| TYPEDEF_KEYWORD											{ $$.cat = VN::QualCat::TYPEDEF; }
+qualifier_nw	: qualifier_node											{ $$ = VN::QualifierData($$, VN::QualCat::NODE, $1); }
+				| STATIC_KEYWORD											{ $$ = VN::QualifierData($$, VN::QualCat::STATIC); }
+				| TYPEDEF_KEYWORD											{ $$ = VN::QualifierData($$, VN::QualCat::TYPEDEF); }
 
 qualifier_node	: qual_explicit_op_named itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 				| QUAL_NODE_KEYWORD											{ $$ = vn->OnQualifierNodeKeyword($1.as_ascii); }

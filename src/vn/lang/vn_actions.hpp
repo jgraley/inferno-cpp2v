@@ -137,6 +137,7 @@ public:
 
 enum class QualCat
 {
+	UNDEFINED, 
 	NODE, // See the node itself
 	STATIC,
 	TYPEDEF
@@ -144,8 +145,14 @@ enum class QualCat
 
 struct QualifierData : Traceable
 {
-	TreePtr<Node> node;
-	QualCat cat;
+	QualifierData(  ) : cat(QualCat::UNDEFINED), node(nullptr) {}
+
+	QualifierData( any loc_, QualCat cat_, TreePtr<Node> node_=nullptr ) :
+		loc(loc_),
+		cat(cat_),
+		node(node_)
+	{
+	}
 	
 	string GetTrace() const final
 	{
@@ -157,6 +164,8 @@ struct QualifierData : Traceable
 				return "TYPEDEF";
 			case QualCat::NODE:
 				return Trace(node);
+			case QualCat::UNDEFINED:
+				ASSERTFAIL();
 		}
 		ASSERTFAIL();
 	}
@@ -170,9 +179,15 @@ struct QualifierData : Traceable
 				return "typedef";
 			case QualCat::NODE:
 				return Traceable::TypeIdName( *node );
+			case QualCat::UNDEFINED:
+				ASSERTFAIL();
 		}
 		ASSERTFAIL();
 	}
+	
+	any loc;	
+	QualCat cat;
+	TreePtr<Node> node;
 };
 
 struct BlockAndGnomon
@@ -241,9 +256,9 @@ public:
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
 	TreePtr<Node> NodeFromANDataBlock( const AvailableNodeData::Block *block ) const;
 	NodeAndGnomon MakeScopeGnomonForNode( TreePtr<Node> node ) const;
-	TreePtr<Node> OnDeclaratorDecl( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );
-	TreePtr<Node> OnTypedef( any loc, const list<QualifierData> &quals, Declarators::Result declarator_result );	
-	TreePtr<Node> OnInstance( any loc, const list<QualifierData> &quals, Declarators::Result declarator_result );	
+	TreePtr<Node> OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, any type_loc, TreePtr<Node> declarator, any decl_loc );
+	TreePtr<Node> OnTypedef( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc );	
+	TreePtr<Node> OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc );	
 	TreePtr<Node> OnConstructorDecl( any loc, const list<QualifierData> &quals, TreePtr<Node> id, list<TreePtr<Node>> params );	
 	void ApplyAccessSpec( TreePtr<Node> declaration, any loc, TreePtr<Node> access );	
 	void ApplyInitialiser( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> init, any init_loc );	
@@ -256,7 +271,7 @@ public:
 	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified
 	TreePtr<Node> OnQualifierNodeKeyword( string keyword );
-	Declarators::CVQuals OnCVQuals( const list<QualifierData> &quals, any loc, bool nice=false );
+	Declarators::CVQuals OnCVQuals( const list<QualifierData> &quals, bool nice=false );
 	
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );
 	TreePtr<Node> OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );
