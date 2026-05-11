@@ -472,7 +472,7 @@ bases			: base_spec                                                 { $$.push_ba
 base_spec		: type_specified											{ $$ = vn->OnBase($1); } 
 				| vn_wildcard												{ $$ = $1; }
 				| DESIGNATED_NORMAL       				  					{ $$ = $1.as_designated; } // To match a designated Star
-				| access_spec type_specified								{ $$ = vn->OnBase($1, $2); }
+				| access_spec type_specified								{ $$ = vn->OnBase($1, $2, @$); }
                                                                                                                                                          
 members			: member													{ $$.push_back($1); }
 				| members member 											{ $$ = $1; $$.push_back($2); }

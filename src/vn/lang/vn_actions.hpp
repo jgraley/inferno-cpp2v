@@ -268,7 +268,7 @@ public:
 	TreePtr<Node> StartRecord( any loc, string keyword );
 	shared_ptr<Gnomon> MakeRecordScopeGnomon( TreePtr<Node> rec );
 	TreePtr<Node> FinishRecord( any loc, TreePtr<Node> node, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	
-	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type );	
+	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type, any loc );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified
 	TreePtr<Node> OnQualifierNodeKeyword( string keyword );
 	Declarators::CVQuals OnCVQuals( const list<QualifierData> &quals, bool nice=false );

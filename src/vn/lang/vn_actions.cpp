@@ -66,7 +66,7 @@ TreePtr<Node> VNLangActions::OnBuildSize( TreePtr<Node> container )
 
 TreePtr<Node> VNLangActions::OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit )
 {
-	string note = "\nNote: Only =1 as a depth condition is supported at present (TODO).";
+	string note = "\nNote: Only `=1' as a depth condition is supported at present.";
 	if( limit.cond.empty() )
 	{
 		auto stuff = MakeTreeNode<StuffAgent>();
@@ -111,10 +111,7 @@ TreePtr<Node> VNLangActions::OnEmbeddedCommands( list<shared_ptr<Command>> comma
 	ASSERT(!commands.empty()); // should not parse
 	TRACE("Decaying embedded commands: ")(commands)("\n");
 	for( shared_ptr<Command> c : commands )
-	{
 		node = c->OnParseEmbedded(node, this); // node can be NULL for singular wildcard
-		// TODO could generalise to things that can Execute from within SCREngine
-	}
 
 	return node;
 }
@@ -947,17 +944,21 @@ void VNLangActions::ApplyMemberInits( TreePtr<Node> instance, any instance_loc, 
 }
 
 
-TreePtr<Node> VNLangActions::OnAbDeclType( any , const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator )
+TreePtr<Node> VNLangActions::OnAbDeclType( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator )
 {
 	Declarators::CVQuals cv_quals = OnCVQuals(quals, true); 
 	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type, cv_quals);
 	switch( result.outcome )
 	{
 		case Declarators::Result::ABSTRACT:
-			return result.type_view;	// TODO do something with result.cv_quals_view
+			// §5.2.8 from ISO/IEC 14882:2003 tells us to ignore cv-qualifiers when forming a type-id
+			// In terms of #583 this is a Type and not a View
+			return result.type_view;	
 		
 		default:
-			ASSERTFAIL(); // internal error because abstract decls are parsed separately
+			throw YY::VNLangParser::syntax_error(
+				  any_cast<YY::VNLangParser::location_type>(loc),
+				  "Saw concrete declarator when expecting abstract." );		
 	}
 }
 
@@ -1005,23 +1006,24 @@ TreePtr<Node> VNLangActions::FinishRecord( any loc, TreePtr<Node> node, TreePtr<
 }
 
 
-TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> access, TreePtr<Node> type )
+TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> access, TreePtr<Node> type, any loc )
 {
+	if( !TreePtr<CPPTree::AccessSpec>::DynamicCast(access) )
+		throw YY::VNLangParser::syntax_error(
+	  		  any_cast<YY::VNLangParser::location_type>(loc),
+			  "Unexpected qualifier: "+DiagQuote(Traceable::TypeIdName( *access ))+"; was expecting an access spec" );		
+
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Base>>();	
-	node->access = access; // TODO could now be user error eg "const" qualifier used as an access spec.
+	node->access = access; 
 	node->record = type;
 	return node;
 }
 
 
 TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> type )
-{
-	// TODO zipping syntax:
-	// ★ ★ parses to unrestricted Star
-	//   ★  would be Star restricted to Base(default access, ☆)
-
+{	
 	// if Star was given without an access, make it apply to the whole base. 
-	// (this is the only legal way to interpret Star here)
+	// (this is the only legal way to interpret Star here). But see #883
 	Agent *agent = Agent::AsAgent(type);
 	if( agent->IsSubContainer() )
 		return type;
@@ -1177,7 +1179,7 @@ TreePtr<Node> VNLangActions::OnIdByName( const AvailableNodeData::Block *block, 
 
 TreePtr<Node> VNLangActions::OnBuildId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources )
 {
-	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
+	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?
 	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
 	NodeEnum ne = leaf_block->node_enum.value();
 
