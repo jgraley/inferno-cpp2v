@@ -834,6 +834,7 @@ private:
             ASSERT( memb_o->identifier );
 			auto ci = MakeTreeNode<ConstructInitialiser>();
 			ci->argumentation = CreateMapArgumentation( args, memb_o->type );
+			ASSERT( ci->argumentation );
 			ci->constructor_id = memb_o->identifier;
 			our_inst->initialiser = ci;				
         }
@@ -1498,6 +1499,7 @@ private:
         ASSERT( memb_o );
 		auto ci = MakeTreeNode<ConstructInitialiser>();
 		ci->argumentation = CreateMapArgumentation( args, memb_o->type );
+		ASSERT( ci->argumentation );
 		ci->constructor_id = memb_o->identifier;
 		
 		auto mi = MakeTreeNode<MemberInitialiser>();

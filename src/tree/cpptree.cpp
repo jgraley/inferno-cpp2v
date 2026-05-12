@@ -942,9 +942,9 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production surround
 	
 	s += GetRenderImpl( renderer, policy );
 		
-	// Don't render if the incoming pointer is not some kind of Declaration. This catches cases
+	// Pre-restrict if the incoming pointer is not some kind of Declaration. This catches cases
 	// like Stuff terminus, where the parser won't have enough information to determine whether
-	// we have Local, Global, Field etc. TODO better to use a scope-like thing?
+	// we have Local, Global, Field etc. TODO reduce these by keeping a scope stack just like the parser
 	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
 	{
 		s = "‽" + 
@@ -1363,7 +1363,6 @@ string Pointer::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, str
 											Production, Production surround_prod, Policy policy,
 											TreePtr<Node> constant )
 {
-	// TODO Pointer node to indicate constancy of pointed-to object - would go into this call to DoRenderTypeAndDeclarator
 	auto dc = TreePtr<Constancy>::DynamicCast(constant);	
 	string d2 = "*" + 
 	            renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
@@ -1586,7 +1585,11 @@ string Labeley::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 		throw RefuseDueLocal(); 
 		
 	// Note: all instances must be const
-	return "void *"; // TODO lower Labely to const void * in a lowering step
+	// TODO Labely should be a local node, maybe raised and definitely lowered 
+	// back to const void *.
+	// Raising requires usage analysis but only needed if goto-a-variable is 
+	// accepted as input.
+	return "void *"; 
 }
 
 //////////////////////////// Typedef ///////////////////////////////
@@ -1634,7 +1637,7 @@ Syntax::Production Record::GetMyProductionTerminal() const
 }
 
 
-string Record::GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) 
+string Record::GetRender( VN::RendererInterface *renderer, Production, Policy policy ) 
 {
 	INDENT("R");
 	list<string> ls;
@@ -1649,27 +1652,16 @@ string Record::GetRender( VN::RendererInterface *renderer, Production production
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
 		
-	try
-	{
-		ls.push_back( GetKeyword() ); // class, struct etc
-		ls.push_back( renderer->DoRender(&identifier, Production::PRIMARY_EXPR, id_policy) ); 
-		string s = Join(ls);
-		if( policy.force_incomplete_records )
-			return s;
-
-		s += RenderExtras(renderer, Production::SPACE_SEP_STMT_DECL, policy);	
-		s += "\n";
-		s += RenderBody(renderer, policy);
+	ls.push_back( GetKeyword() ); // class, struct etc
+	ls.push_back( renderer->DoRender(&identifier, Production::PRIMARY_EXPR, id_policy) ); 
+	string s = Join(ls);
+	if( policy.force_incomplete_records )
 		return s;
-	}
-	catch( Refusal & )
-	{
-		// Catch the exception so that our modified policy propagates into the explicit render
-		// TODO could we not put the modified policy into the exception object? We'd still have
-		// to catch, but could rethrow with updated policy.
-		return renderer->RenderNodeExplicit(shared_from_this(), production, policy);
-	}
-	
+
+	s += RenderExtras(renderer, Production::SPACE_SEP_STMT_DECL, policy);	
+	s += "\n";
+	s += RenderBody(renderer, policy);
+	return s;
 }   
 
 
@@ -2010,8 +2002,16 @@ Syntax::Production ConstructInitialiser::GetMyProductionTerminal() const
 
 string ConstructInitialiser::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {		
+	// TODO find a way of disambiguating from a Call in VN lang, see MemberInitialiser for ideas	
+	// Prefactors: put a Star in an Argumentation for the ConstructInitialiser in 019-RemoveEmptyModuleConstructors 
+	// and maybe other steps. We *should* be able to parse ConstructInitialiser when 
+	// parens are present because there's no = although it's going to be harder under VN 
+	// nodes. So maybe only render in DIRECT_INIT production. The new grammar might live near Compound.
 	if( !policy.detect_and_render_constructor )
-		throw RefusedByPolicy(); // TODO find a way of disambiguating from a Call in VN lang, see MemberInitialiser for ideas				
+		throw RefusedByPolicy(); 			
+
+	if( !argumentation )
+		throw RefuseDifficultSyntax(); // Nothing would be rendered to disambiguate the ☆ 
 
 	// We may need to convert the argumentation into a suitable form depending on policy.
 	// If a conversion occurs, the callee is needed in order to transform the arguments.
@@ -2088,7 +2088,7 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
     if( policy.refuse_statement_expression )
 	{
 		// If we can't render syntactially, call RenderNodeExplicit() directly so it
-		// gets the updated policy.
+		// gets the updated policy. 
 		policy.permit_static_keyword = true; // In a compound, static means global
 		policy.cur_access = nullptr; // No access specs here
 		return renderer->RenderNodeExplicit(shared_from_this(), production, policy);
