@@ -74,23 +74,17 @@ public:
 class RecordScopeGnomon : public ScopeGnomon
 {
 public:	
-	RecordScopeGnomon( TreePtr<CPPTree::AccessSpec> initial_access ) :
-		current_access( initial_access ) {}
+	RecordScopeGnomon( TreePtr<CPPTree::AccessSpec> initial_access, TreePtr<Node> record_type_ ) :
+		current_access( initial_access ),
+		record_type( record_type_ ) {}
 	string GetMessageText() const final
 	{
-		return "fields scope";
+		return "record scope";
 	}
-	TreePtr<CPPTree::AccessSpec> current_access;
+	TreePtr<CPPTree::AccessSpec> current_access; // changes as we parse the scope
+	TreePtr<Node> record_type;
 };
 
-class EnumeratorScopeGnomon : public ScopeGnomon
-{
-public:	
-	string GetMessageText() const final
-	{
-		return "enumerators scope";
-	}
-};
 
 class CodeUnitScopeGnomon : public ScopeGnomon
 {
@@ -100,6 +94,7 @@ public:
 		return "global scope";
 	}
 };
+
 
 class CompoundScopeGnomon : public ScopeGnomon
 {
@@ -259,6 +254,7 @@ public:
 	TreePtr<Node> OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, any type_loc, TreePtr<Node> declarator, any decl_loc );
 	TreePtr<Node> OnTypedef( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc );	
 	TreePtr<Node> OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc );	
+	TreePtr<Node> OnEnumerator( any loc, TreePtr<Node> id );
 	TreePtr<Node> OnConstructorDecl( any loc, const list<QualifierData> &quals, TreePtr<Node> id, list<TreePtr<Node>> params );	
 	void ApplyAccessSpec( TreePtr<Node> declaration, any loc, TreePtr<Node> access );	
 	void ApplyInitialiser( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> init, any init_loc );	
@@ -266,7 +262,8 @@ public:
 	void ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc );	
 	TreePtr<Node> OnAbDeclType( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	
 	TreePtr<Node> StartRecord( any loc, string keyword );
-	shared_ptr<Gnomon> MakeRecordScopeGnomon( TreePtr<Node> rec );
+	shared_ptr<Gnomon> MakeRecordScopeGnomon( TreePtr<Node> rec, TreePtr<Node> type );
+	TreePtr<Node> FinishRecord( any loc, TreePtr<Node> node, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	
 	TreePtr<Node> FinishRecord( any loc, TreePtr<Node> node, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	
 	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type, any loc );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified

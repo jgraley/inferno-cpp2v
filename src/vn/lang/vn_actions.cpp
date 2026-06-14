@@ -693,13 +693,11 @@ NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 		gnomon = make_shared<CodeUnitScopeGnomon>();
 	else if( dynamic_pointer_cast<CPPTree::SequentialScope>(node) )
 		gnomon = make_shared<CompoundScopeGnomon>();
-	else if( dynamic_pointer_cast<CPPTree::Enumeration>(node) )
-		gnomon = make_shared<EnumeratorScopeGnomon>();
 	else if( auto record = dynamic_pointer_cast<CPPTree::Record>(node) )
 	{
 		TreePtr<Node> init_access = record->GetInitialAccess();
 		ASSERT( init_access ); // Records must always specify an initial access
-		gnomon = make_shared<RecordScopeGnomon>( MakeStandardAgentFromTypeID( typeid(*init_access) ) );
+		gnomon = make_shared<RecordScopeGnomon>( MakeStandardAgentFromTypeID( typeid(*init_access) ), record->identifier );
 	}
 	else if( dynamic_pointer_cast<CPPTree::CallableParams>(node) )
 		gnomon = make_shared<ParameterisationScopeGnomon>();
@@ -812,8 +810,6 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
 	else if( dynamic_cast<const RecordScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
-	else if( dynamic_cast<const EnumeratorScopeGnomon *>(spg.get()) ) 
-		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>();  //TODO change to Enumerator when do enums
 	else if( dynamic_cast<const CodeUnitScopeGnomon *>(spg.get()) ) 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
 	else if( dynamic_cast<const CompoundScopeGnomon *>(spg.get()) ) 
@@ -854,6 +850,28 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	}
 
 	return instance;
+}
+
+
+TreePtr<Node> VNLangActions::OnEnumerator( any loc, TreePtr<Node> id )
+{
+	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	ASSERT( spg );
+	auto rsg = dynamic_pointer_cast<RecordScopeGnomon>(spg);
+	if( !rsg )
+		throw YY::VNLangParser::syntax_error(
+						any_cast<YY::VNLangParser::location_type>(loc),
+						"Enumerator not inside a record" );
+	
+	auto er = MakeTreeNode<StandardAgentWrapper<CPPTree::Enumerator>>(); 
+	er->identifier = id;		
+	er->type = rsg->record_type;
+	er->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::Const>>(); // per parse.hpp
+
+	// If indeed there is an initialiser, call ApplyInitialiser() to over-ride this
+	er->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
+	
+	return er;
 }
 
 
@@ -972,6 +990,8 @@ TreePtr<Node> VNLangActions::StartRecord( any loc, string keyword )
 		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Struct>>();
 	else if( keyword=="union" )
 		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Union>>();
+	else if( keyword=="enum" )
+		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Enumeration>>();
 	else
 		ASSERTFAIL()
 	
@@ -979,12 +999,22 @@ TreePtr<Node> VNLangActions::StartRecord( any loc, string keyword )
 }
 
 
-shared_ptr<Gnomon> VNLangActions::MakeRecordScopeGnomon( TreePtr<Node> rec )
+shared_ptr<Gnomon> VNLangActions::MakeRecordScopeGnomon( TreePtr<Node> rec, TreePtr<Node> type )
 {
 	auto r = TreePtr<CPPTree::Record>::DynamicCast(rec);
 	ASSERT(r);
 	
-	return make_shared<RecordScopeGnomon>(r->GetInitialAccess());
+	return make_shared<RecordScopeGnomon>(r->GetInitialAccess(), type);
+}
+
+
+TreePtr<Node> VNLangActions::FinishRecord( any loc, TreePtr<Node> node, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
+{
+	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	ASSERT( spg );
+	auto rsg = dynamic_pointer_cast<RecordScopeGnomon>(spg);
+	ASSERT( rsg );
+	return FinishRecord( loc, node, rsg->record_type, bases, members );
 }
 
 
