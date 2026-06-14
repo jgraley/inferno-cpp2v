@@ -460,10 +460,10 @@ parameter   : decl_boot
                          
 //////////////////////////////// CLASSES ////////////////////////////////////                                  
                          
-class			: class_scope type_specified '{' members '}'			 	{ $$ = vn->FinishRecord( @$, $1.node, $2, {}, $4 ); }
-				| class_scope type_specified ':' bases '{' members '}'		{ $$ = vn->FinishRecord( @$, $1.node, $2, $4, $6 ); }
+class			: class_scope '{' members '}'			 					{ $$ = vn->FinishRecord( @$, $1.node, {}, $3 ); }
+				| class_scope ':' bases '{' members '}'						{ $$ = vn->FinishRecord( @$, $1.node, $3, $5 ); }
              
-class_scope     : class_node         										{ $$ = { $1, vn->MakeRecordScopeGnomon($1, nullptr) }; 
+class_scope     : class_node type_specified        							{ $$ = { $1, vn->MakeRecordScopeGnomon($1, $2) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 class_node		: CLASS_KEYWORD												{ $$ = vn->StartRecord(@$, $1.as_ascii); }

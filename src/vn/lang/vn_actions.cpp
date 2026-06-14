@@ -1014,12 +1014,8 @@ TreePtr<Node> VNLangActions::FinishRecord( any loc, TreePtr<Node> node, list<Tre
 	ASSERT( spg );
 	auto rsg = dynamic_pointer_cast<RecordScopeGnomon>(spg);
 	ASSERT( rsg );
-	return FinishRecord( loc, node, rsg->record_type, bases, members );
-}
+	TreePtr<Node> id = rsg->record_type;
 
-
-TreePtr<Node> VNLangActions::FinishRecord( any loc, TreePtr<Node> node, TreePtr<Node> id, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
-{
 	auto r = TreePtr<CPPTree::Record>::DynamicCast(node);
 	ASSERT(r);
 
@@ -1463,6 +1459,9 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // Note: 🞊  《》 ⸨⸩ are free now
 
 // Labels and &&: use policy, as seen with resolvers, and get rid of PURE_IDENTIFIER (now only used to control && generation)
+
+// Make more use of gnomons, for example storing the Record node itself so it can be picked up by FinishRecord
+// and then we only have to pass the gnomon in the parser, which is good because it must remain existant
 
 // Constructors etc:
 // - Fix parse of my_type ( my_instanceidentifier ∧ ‽InstanceIdentifier ¬globals ) my_initialiser;
