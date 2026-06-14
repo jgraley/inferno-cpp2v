@@ -262,7 +262,8 @@ public:
 	void ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc );	
 	TreePtr<Node> OnAbDeclType( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	
 	TreePtr<Node> StartRecord( any loc, string keyword );
-	shared_ptr<Gnomon> MakeRecordScopeGnomon( TreePtr<Node> rec, TreePtr<Node> type );
+	TreePtr<Node> ApplyIdentifier( TreePtr<Node> record, any loc, TreePtr<Node> id );
+	shared_ptr<Gnomon> MakeRecordScopeGnomon( TreePtr<Node> record, TreePtr<Node> type );
 	TreePtr<Node> FinishRecord( any loc, TreePtr<Node> node, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	
 	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type, any loc );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified

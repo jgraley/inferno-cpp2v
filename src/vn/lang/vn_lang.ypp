@@ -463,7 +463,8 @@ parameter   : decl_boot
 class			: class_scope '{' members '}'			 					{ $$ = vn->FinishRecord( @$, $1.node, {}, $3 ); }
 				| class_scope ':' bases '{' members '}'						{ $$ = vn->FinishRecord( @$, $1.node, $3, $5 ); }
              
-class_scope     : class_node type_specified        							{ $$ = { $1, vn->MakeRecordScopeGnomon($1, $2) }; 
+class_scope     : class_node type_specified        							{ $$ = { vn->ApplyIdentifier($1, @2, $2), 
+																		             vn->MakeRecordScopeGnomon($1, $2) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 class_node		: CLASS_KEYWORD												{ $$ = vn->StartRecord(@$, $1.as_ascii); }
@@ -488,11 +489,12 @@ member			: declaration
 enum			: enum_scope '{' enumerators '}'		 					{ $$ = vn->FinishRecord( @$, $1.node, {}, $3 ); }
 				| enum_scope '{' '}'		 								{ $$ = vn->FinishRecord( @$, $1.node, {}, {} ); }
              
-enum_scope      : enum_node type_specified       							{ $$ = { $1, vn->MakeRecordScopeGnomon($1, $2) }; 
+enum_scope      : enum_node type_specified       							{ $$ = { vn->ApplyIdentifier($1, @2, $2), 
+																		             vn->MakeRecordScopeGnomon($1, $2) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 enum_node		: ENUM_KEYWORD												{ $$ = vn->StartRecord(@$, $1.as_ascii); }
-//		 		| explicit_decl_node										{ $$ = $1; } // TODO bring back explicit support
+//		 		| explicit_decl_node										{ $$ = $1; } // TODO bring back explicit support but differentiate
                                                                                                                                                        
 enumerators		: enumerator												{ $$.push_back($1); }
 				| enumerators ',' enumerator 								{ $$ = $1; $$.push_back($3); }

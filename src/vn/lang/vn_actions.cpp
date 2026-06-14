@@ -999,9 +999,23 @@ TreePtr<Node> VNLangActions::StartRecord( any loc, string keyword )
 }
 
 
-shared_ptr<Gnomon> VNLangActions::MakeRecordScopeGnomon( TreePtr<Node> rec, TreePtr<Node> type )
+TreePtr<Node> VNLangActions::ApplyIdentifier( TreePtr<Node> record, any loc, TreePtr<Node> id )
 {
-	auto r = TreePtr<CPPTree::Record>::DynamicCast(rec);
+	auto r = TreePtr<CPPTree::Record>::DynamicCast(record);
+	ASSERT(r);
+	
+	if( id ) // can be null, ie due to ☆
+		// ASSERT( TreePtr<CPPTree::Identifier>::DynamicCast(id) ); TODO failing, which means we're putting a non-Identifier here sometimes
+	
+	r->identifier = id;
+	
+	return r;
+}
+	
+	
+shared_ptr<Gnomon> VNLangActions::MakeRecordScopeGnomon( TreePtr<Node> record, TreePtr<Node> type )
+{
+	auto r = TreePtr<CPPTree::Record>::DynamicCast(record);
 	ASSERT(r);
 	
 	return make_shared<RecordScopeGnomon>(r->GetInitialAccess(), type);
@@ -1010,16 +1024,8 @@ shared_ptr<Gnomon> VNLangActions::MakeRecordScopeGnomon( TreePtr<Node> rec, Tree
 
 TreePtr<Node> VNLangActions::FinishRecord( any loc, TreePtr<Node> node, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
 {
-	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
-	ASSERT( spg );
-	auto rsg = dynamic_pointer_cast<RecordScopeGnomon>(spg);
-	ASSERT( rsg );
-	TreePtr<Node> id = rsg->record_type;
-
 	auto r = TreePtr<CPPTree::Record>::DynamicCast(node);
 	ASSERT(r);
-
-	r->identifier = id;
 	
 	if( auto ir = TreePtr<CPPTree::InheritanceRecord>::DynamicCast(r) )
 		for( TreePtr<Node> base : bases )
@@ -1460,8 +1466,6 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 
 // Labels and &&: use policy, as seen with resolvers, and get rid of PURE_IDENTIFIER (now only used to control && generation)
 
-// Make more use of gnomons, for example storing the Record node itself so it can be picked up by FinishRecord
-// and then we only have to pass the gnomon in the parser, which is good because it must remain existant
 
 // Constructors etc:
 // - Fix parse of my_type ( my_instanceidentifier ∧ ‽InstanceIdentifier ¬globals ) my_initialiser;
@@ -1493,6 +1497,7 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // This is less conflicty that one might expect, and some languages, like golang, do this as 
 // a matter of course.
 
+// Try to apply scope gnomons correctly, i.e. at the { or whatever. Fill in record identifier using an Apply...() method. 
 
 // NOTE
 // Lots of conflicts incl around declarators resolved by making pre-restriction refuse to switch between
