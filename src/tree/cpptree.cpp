@@ -1712,9 +1712,6 @@ string Union::GetKeyword() const
 
 void Enumeration::InitialiseAccess( shared_ptr<Syntax> *, Policy &policy ) const
 {
-	//if( policy.is_vn_render_for_temp_disables )
-	//	throw TemporarilyDisabled();
-
 	// Don't use the local access pointer, just disable the mechanism in this scope
 	policy.cur_access = nullptr;
 } 
