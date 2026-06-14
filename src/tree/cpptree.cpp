@@ -2011,7 +2011,7 @@ string ConstructInitialiser::GetRender( VN::RendererInterface *renderer, Product
 		throw RefusedByPolicy(); 			
 
 	if( !argumentation )
-		throw RefuseDifficultSyntax(); // Nothing would be rendered to disambiguate the ☆ 
+		throw RefuseDifficultSyntax(); // Nothing would be rendered to disambiguate the ☆ into ConstructInitialiser
 
 	// We may need to convert the argumentation into a suitable form depending on policy.
 	// If a conversion occurs, the callee is needed in order to transform the arguments.

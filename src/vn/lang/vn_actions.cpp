@@ -1368,7 +1368,7 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 
 // NOTE ON CONSTRUCTORS
 // Since VN uses "bound" C++, we will always need to specify which of possibly overloaded constructors we are
-// referring to when constructing. So pure C++ is basically not possible here. Falling back to built-in node syntax herde.
+// referring to when constructing. So pure C++ is basically not possible here. 
 
 // Note: comma operator can stay in: C-productions that use commas are all expressional and come in at norm_no_comma_op
 
@@ -1432,7 +1432,7 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 
 // Note: 🞊  《》 ⸨⸩ are free now
 
-// Labels an &&: use policy, as seen with resolvers, and get rid of PURE_IDENTIFIER (now only used to control && generation)
+// Labels and &&: use policy, as seen with resolvers, and get rid of PURE_IDENTIFIER (now only used to control && generation)
 
 // Constructors etc:
 // - Fix parse of my_type ( my_instanceidentifier ∧ ‽InstanceIdentifier ¬globals ) my_initialiser;
@@ -1448,9 +1448,6 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 //   such that its constructs are unambiguous as with the rule for types.
 // EXAMPLE: you can't use the SDE column for paraneters because it's ambiguous. You can't half use it either
 // so you need a pocket for parameters. Is this to be shared with class members? Find out...
-
-// - Add members to classes and move access_spec_nw across
-// - Give operator comma lower prio than ∧ etc and re-instate
 
 // Do something about destructors, try them out in pattern and x
 

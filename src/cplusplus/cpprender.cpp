@@ -17,29 +17,8 @@
 using namespace std;
 using namespace CPPTree;
 
-// TODO indent back to previous level at end of string
-#define ERROR_UNKNOWN(V) \
-    ( string( "\n❌" ) + \
-      string( V ) + \
-      string( " not supported in " ) + \
-      string( __func__ ) + \
-      string( "()❌\n" ) )
-
-#define ERROR_UNSUPPORTED(P) \
-    ERROR_UNKNOWN( P ? TYPE_ID_NAME(*P) : "<nullptr>" )
-
 // Don't like the layout of rendered code?
 // There's a .clang-format in repo root.
-
-
-// For #400 make methods that return strings try-functions
-// and use this for the catch clause.
-#define DEFAULT_CATCH_CLAUSE \
-    catch( const ::Mismatch &e ) \
-    { \
-        return RenderMismatchException( __func__, e ); \
-    } 
-
 
 CppRender::CppRender( string of ) :
 	Render( GetDefaultPolicy(), of ) // default policy when rendering to pure C++
@@ -61,7 +40,7 @@ string CppRender::RenderToString( TreePtr<Node> root )
     // identifiers - to rename them would be unsafe because we assume there's
     // a declaration ouside of our tree. This actually gets other nodes too but 
     // we'll only look up identifiers.
-    UniquifyNames::Policy un_policy {
+    UniquifyNames::Policy uniquifier_policy {
 	    .name_getter = &Syntax::GetIdentifierName, 
 		.include_single_parent = true,
 		.include_multi_parent = true,
@@ -69,7 +48,7 @@ string CppRender::RenderToString( TreePtr<Node> root )
 		.preserve_undeclared_ids = true
 	};
 	
-	UniquifyNames identifiers_uniqifier(un_policy); 
+	UniquifyNames identifiers_uniqifier(uniquifier_policy); 
 
     unique_identifier_names = identifiers_uniqifier.UniquifyAll( trans_kit, context );
     
@@ -105,7 +84,7 @@ Syntax::Policy CppRender::GetDefaultPolicy()
 	return policy;
 }
 
-
+/*
 Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const
 {
 	try
@@ -118,7 +97,7 @@ Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Pol
 	}
 	ASSERTFAIL();
 }
-
+*/
 
 string CppRender::OnRefusal( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {

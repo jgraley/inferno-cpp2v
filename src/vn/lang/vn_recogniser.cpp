@@ -134,6 +134,9 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexeme(wstring text, bool
 	           ToASCII(text)=="union" ) )
 		return YY::VNLangParser::make_CLASS_KEYWORD(metadata, loc);
 	else if( ascii && 
+	         ( ToASCII(text)=="enum" ) )
+		return YY::VNLangParser::make_CLASS_KEYWORD(metadata, loc);
+	else if( ascii && 
 	         ( ToASCII(text)=="public" ||
 	           ToASCII(text)=="private" ||
 	           ToASCII(text)=="protected" ||

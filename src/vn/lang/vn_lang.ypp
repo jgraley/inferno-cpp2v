@@ -144,6 +144,7 @@
 <YY::TokenMetadata> DEFAULT_KEYWORD			_("C default keyword")
 <YY::TokenMetadata> FUNC_ON_TYPE			_("function acting on a type")
 <YY::TokenMetadata> CLASS_KEYWORD			_("C class keyword")
+<YY::TokenMetadata> ENUM_KEYWORD			_("C enumeration keyword")
 <YY::TokenMetadata> QUAL_NODE_KEYWORD		_("C qualifier")
 <YY::TokenMetadata> STATIC_KEYWORD			_("C static keyword")
 <YY::TokenMetadata> TYPEDEF_KEYWORD			_("C typedef keyword")
@@ -171,6 +172,7 @@ stmt_high
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
 %type <TreePtr<Node>> 				class_node class base_spec access_spec access_clause qualifier_node
+%type <TreePtr<Node>> 				enum_node enum
 %type <TreePtr<Node>>				declarator_decl prototype prototype_access 
 %type <TreePtr<Node>>				memb_init memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					vn_name
@@ -190,9 +192,9 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		code_unit_scope compound_scope params_scope 
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
 %type <VN::NodeAndGnomon>			explicit_op_named type_explicit_op_named decl_explicit_op_named qual_explicit_op_named mi_explicit_op_named
-%type <VN::NodeAndGnomon>			class_scope
-%type <TreePtr<Node>> 				member
-%type <list<TreePtr<Node>>>			stmt_decls members 
+%type <VN::NodeAndGnomon>			class_scope enum_scope
+%type <TreePtr<Node>> 				member enumerator
+%type <list<TreePtr<Node>>>			stmt_decls members enumerators
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases memb_inits
 %type <VN::QualifierData> 			qualifier qualifier_nw
@@ -318,6 +320,7 @@ declaration	: bare_declaration ';'									{ $$ = $1; }
 bare_declaration: decl_prefix
 				| declarator_decl
 				| class
+				| enum
 
 // Invent ApplyAccessSpec() like ApplyInitialiser()
 // OnInstance() will still try to program the current access. But the new fn will override it with the parsed acess, and then try to update the current access
@@ -464,7 +467,7 @@ class_scope     : class_node         										{ $$ = { $1, vn->MakeRecordScopeG
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 class_node		: CLASS_KEYWORD												{ $$ = vn->StartRecord(@$, $1.as_ascii); }
-		 		| explicit_decl_node										{ $$ = $1; }
+		 		| explicit_decl_node										{ $$ = $1; } 
                                                   
 bases			: base_spec                                                 { $$.push_back($1); } 
 				| bases ',' base_spec										{ $$ = $1; $$.push_back($3); } 
@@ -479,6 +482,21 @@ members			: member													{ $$.push_back($1); }
 
 member			: declaration
 				| expr_prefix ';' // to get wildcards etc					    
+
+//////////////////////////////// ENUMERATIONS ////////////////////////////////////                                  
+                         
+enum			: enum_scope type_specified '{' enumerators '}'		 		{ $$ = vn->FinishRecord( @$, $1.node, $2, {}, $4 ); }
+             
+enum_scope      : enum_node         										{ $$ = { $1, vn->MakeRecordScopeGnomon($1) }; 
+																			  vn->AddGnomon($$.gnomon); } 
+																			  
+enum_node		: ENUM_KEYWORD												{ $$ = vn->StartRecord(@$, $1.as_ascii); }
+//		 		| explicit_decl_node										{ $$ = $1; } // TODO bring back explicit support
+                                                                                                                                                       
+enumerators		: enumerator												{ $$.push_back($1); }
+				| enumerators ',' enumerator 								{ $$ = $1; $$.push_back($3); }
+
+enumerator		: expr_prefix 			    
 
 //////////////////////////////// STATEMENTS ////////////////////////////////////                 
 
