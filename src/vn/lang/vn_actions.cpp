@@ -1426,11 +1426,13 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // Note: ∧ and ∨ are not valid in replace-only context so would not appear on RHS anyway.
 // Note: ꩜ is a command and so already very low precidence
 // Because ▲ exists we then have a gap in the syntax for any PREFIX op on the left, including eg ⩨▲. 
-// Maybe we can fill it by allowing the precidence of PREFIX ops to be "pulled down" by the ▲. If this doesn't
-// work just set ⩨ the same as ▲ (because they are prefix syntax) and go to the pub. Then again, how often is ⩨
-// used outside of ⩨▲ or ꩜⩨? Maybe not many.
-// Maybe also re-evaluate how often the current low-precs (∧ and ∨) are duplicated vs the high precs (the VN prefix ops)
-
+// Maybe we can fill it by allowing the precidence of PREFIX ops to be "pulled down" by the ▲. No! ⩨a+b binds to a only 
+// but ⩨▲c⯈a+b would change the binding so the # would bind to (a+b). This is illogical. So just set ⩨ the same as ▲ 
+// (because they are prefix syntax) and go to the pub. No! this will increasingly require () around the whole thing
+// when embedding in a higher precedence (which would be most).
+// THE ANSWER IS TO CLOSE OFF ▲⯈ with a final symbol eg ▲⯈▼ OR ▲⯈⯇ (see #875). It will now boot both subexpressions from
+// high precedence (primary) and never require ()
+ 
 // Review the virt-specifiers and const on the node methods for rendering
 
 // MAYBE Move conj and disj back to original precidences. The lowered precs require two syntaxes, statement and expression. So we can
