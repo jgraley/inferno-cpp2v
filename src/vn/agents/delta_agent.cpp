@@ -72,11 +72,11 @@ string DeltaAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Prod
 	// And we do, despite the asymmetry, because search and replace are different anyway
 	// with search much more likely to begin with ∧ or ∨.
 	string st = renderer->DoRenderPreserve( (TreePtr<Node>)(*GetThrough()), Syntax::Production::BOOT, policy );
-	string so = renderer->DoRenderPreserve( (TreePtr<Node>)(*GetOverlay()), Syntax::Production::PREFIX, policy );
-	if( st.size() > Syntax::GetLineBreakThreshold() )
-		return "▲" + st + "\n⯈" + so;
-	else
-		return "▲" + st + "⯈" + so;
+	string so = renderer->DoRenderPreserve( (TreePtr<Node>)(*GetOverlay()), Syntax::Production::BOOT, policy );
+	//if( max(st.size(), so.size()) > Syntax::GetLineBreakThreshold() )
+		return "▲" + st + "\n⯈" + so + "\n⯇";
+	//else
+	//	return "▲" + st + "⯈" + so + "⯇";
 }    
     
 

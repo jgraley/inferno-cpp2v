@@ -78,6 +78,7 @@
 	STUFF_OP		 					        _("stuff operator ⩨")
 	DELTA_COMPARE_OP 					        _("delta-compare operator ▲")
 	DELTA_REPLACE_OP 					        _("delta-replace operator ⯈")
+	DELTA_END_OP 					 	        _("delta-end operator ⯇")
 	EXPLICIT_OP 						        _("explicit node operator ⯁")
 	ANY_NODE_OP 						        _("any node operator ☆")
 	STAR_OP 							        _("star operator ★")
@@ -349,7 +350,8 @@ decl_prefix_definite	: decl_prefix
 						| vn_primary	   
 
 decl_prefix : decl_postfix
-			| 	DELTA_COMPARE_OP decl_boot DELTA_REPLACE_OP decl_prefix	{ $$ = vn->OnDelta($2, $4); }
+			| 	DELTA_COMPARE_OP decl_boot DELTA_REPLACE_OP decl_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
+			| 	DELTA_COMPARE_OP decl_boot DELTA_REPLACE_OP decl_commands DELTA_END_OP	{ $$ = vn->OnDelta($2, vn->OnEmbeddedCommands($4)); } // TODO refactor
 			| 						         GREEN_GRASS_OP decl_prefix	{ $$ = vn->OnGrass($2); }
 			| 							      POINTER_IS_OP decl_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP decl_prefix	{ $$ = vn->OnNegation($2); }
@@ -380,7 +382,7 @@ memb_init	: memb_init_prefix
         
 memb_init_prefix: memb_init_postfix
 				| 						        GREEN_GRASS_OP memb_init_prefix	{ $$ = vn->OnGrass($2); }
-				|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP memb_init_prefix	{ $$ = vn->OnDelta($2, $4); }
+				|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP stmt_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } // TODO why not memb_init?
 				| 					               NEGATION_OP memb_init_prefix	{ $$ = vn->OnNegation($2); }
 				|                      mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 				|  						        stuff_op_scope memb_init_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
@@ -612,8 +614,7 @@ expr_prefix : expr_postfix
 			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
 			| 						     GREEN_GRASS_OP expr_prefix	{ $$ = vn->OnGrass($2); }
 			| 						      POINTER_IS_OP expr_prefix	{ $$ = vn->OnPointerIs($2); }
-			|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP expr_prefix	{ $$ = vn->OnDelta($2, $4); }
-			|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP compound_prefix	{ $$ = vn->OnDelta($2, $4); }
+			|  DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
 			|                      prerestrict_op_named expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|              mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
@@ -698,7 +699,7 @@ type_conjunction 	: type_specified
 type_specified		: type_prefix          
           
 type_prefix : type_postfix
-			| 	DELTA_COMPARE_OP type_boot DELTA_REPLACE_OP type_prefix	{ $$ = vn->OnDelta($2, $4); }
+			| 	DELTA_COMPARE_OP type_boot DELTA_REPLACE_OP type_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 			| 						         GREEN_GRASS_OP type_prefix	{ $$ = vn->OnGrass($2); }
 			| 							      POINTER_IS_OP type_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP type_prefix	{ $$ = vn->OnNegation($2); }

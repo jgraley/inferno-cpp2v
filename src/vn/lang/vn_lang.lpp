@@ -61,6 +61,7 @@ comp_assign				\|=|\^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 ⩨				{ return YY::VNLangParser::make_STUFF_OP(location()); };
 ▲				{ return YY::VNLangParser::make_DELTA_COMPARE_OP(location()); };
 ⯈				{ return YY::VNLangParser::make_DELTA_REPLACE_OP(location()); };
+⯇				{ return YY::VNLangParser::make_DELTA_END_OP(location()); };
 ⯁				{ return YY::VNLangParser::make_EXPLICIT_OP(location()); };
 ☆				{ return YY::VNLangParser::make_ANY_NODE_OP(location()); };
 ★				{ return YY::VNLangParser::make_STAR_OP(location()); };
