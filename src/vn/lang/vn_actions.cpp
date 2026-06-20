@@ -1422,9 +1422,11 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // entirely in search or entirely in replace context. Maybe designations could qualify themselves to be search-side or replace 
 // side by borrowing ▲ and ⯈ symbols. A pain to render though.
 
-// After ▲⯈⯇ some of the boot_x aren't really boot tokens because they aren't what's in primary ( boot_x ) (which is how 
-// grammar booting is defined, so no argument there). Fix and de-duplicate the () and ▲⯈⯇. Then ensure the (newly fixed) boot is used in
+// After ▲⯈⯇ some of the boot_x aren't really stmt_boot tokens because they aren't what's in primary ( boot_x ) (which is how 
+// grammar booting is defined, so no argument there). Fix and de-duplicate the () and ▲⯈⯇. Then ensure the (newly fixed) stmt_boot is used in
 // all ()-like places eg BOTH parts of ▲⯈⯇
+ 
+// ▲⯈⯇ is now primary so move it 
  
 // Review the virt-specifiers and const on the node methods for rendering
 

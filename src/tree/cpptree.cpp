@@ -55,7 +55,7 @@ string Uninitialised::GetRender( VN::RendererInterface *, Production, Policy pol
 Syntax::Production Type::GetMyProductionTerminal() const
 {
 	// GetMyProductionTerminal on types is for non-booted anonymous types eg with auto a = new <here>;
-	// Default shall be to boot (i.e. force parentheses).
+	// Default shall be to stmt_boot (i.e. force parentheses).
 	return Production::BOTTOM_EXPR;
 }
 

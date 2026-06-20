@@ -230,7 +230,7 @@ EnsureBootstrap::EnsureBootstrap()
     over->through = s_all;
     s_all->conjuncts = (s_not, s_body);
     s_not->negand = sx_body;
-    // only exclude if there is a goto; a goto to anywhere will suffice to boot the state machine
+    // only exclude if there is a goto; a goto to anywhere will suffice to stmt_boot the state machine
     sx_body->members = (MakePatternNode<StarAgent, Declaration>());
     sx_body->statements = (sx_pre, sx_goto, MakePatternNode<StarAgent, Statement>());     
     sx_pre->restriction = MakeResetAssignmentPattern();
