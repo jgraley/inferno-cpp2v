@@ -96,7 +96,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 
 MainToThread::MainToThread()
 {
-	auto e_stuff = MakePatternNode<StuffAgent, Initialiser>();
+	auto e_stuff = MakePatternNode<StuffAgent, Compound>();
 	auto e_delta = MakePatternNode<DeltaAgent, Statement>();
 	auto es_return = MakePatternNode<Return>();
 	auto er_cease = MakePatternNode<Cease>();
@@ -109,6 +109,7 @@ MainToThread::MainToThread()
 	
 	auto gmodule = MakePatternNode< LocalTree::GlobalsModule >();
     auto delta = MakePatternNode<DeltaAgent, Instance>();
+    auto body = MakePatternNode<Compound>();
 	auto s_field = MakePatternNode< Field >();
     auto s_func = MakePatternNode<Function>();
     auto s_identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>("main");
@@ -120,7 +121,9 @@ MainToThread::MainToThread()
 	s_field->constancy = MakePatternNode<NonConst>();
 	s_field->identifier = s_identifier;
 	s_field->type = s_func;
-	s_field->initialiser = MakePatternNode< Initialiser >();
+	s_field->initialiser = body;
+	body->members = ( MakePatternNode<StarAgent, Declaration>() );
+	body->statements = ( MakePatternNode<StarAgent, Statement>() );
 	//s_func->members = ()        require no parameters
 	s_func->return_type = MakePatternNode<Integral>();
 	delta->overlay = r_field;
@@ -130,7 +133,7 @@ MainToThread::MainToThread()
 	r_field->virt = MakePatternNode<NonVirtual>();
 	r_field->access = MakePatternNode<Public>();
 	r_field->constancy = MakePatternNode<NonConst>();
-	auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Initialiser>( s_field->initialiser, e_stuff );
+	auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( body, e_stuff );
 	r_field->initialiser = r_embedded;
 
     Configure( SEARCH_REPLACE, gmodule );

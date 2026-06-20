@@ -28,7 +28,7 @@ AutosToModule::AutosToModule()
     auto bases = MakePatternNode<StarAgent, Base>();
     auto type = MakePatternNode<Type>();
     auto var_id = MakePatternNode<InstanceIdentifier>();
-    auto init = MakePatternNode<Initialiser>();
+    auto var_init = MakePatternNode<Initialiser>();
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto sx_not = MakePatternNode<NegationAgent, Compound>();
     auto sx_stuff = MakePatternNode<StuffAgent, Compound>();
@@ -50,14 +50,14 @@ AutosToModule::AutosToModule()
     s_comp->statements = (vstmts);
     s_var->type = type;
     s_var->identifier = var_id;
-    s_var->initialiser = init;
+    s_var->initialiser = var_init;
      
     over->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
     r_var->type = type;
     r_var->identifier = var_id;
-    r_var->initialiser = init;
+    r_var->initialiser = var_init;
     r_var->virt = MakePatternNode<NonVirtual>();
     r_var->access = MakePatternNode<Private>();
     // If the local automatic var had been const, it could still change value from call to call
@@ -87,7 +87,6 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     auto bases = MakePatternNode<StarAgent, Base>();
     auto type = MakePatternNode<Type>();
     auto var_id = MakePatternNode<InstanceIdentifier>();
-    auto init = MakePatternNode<Initialiser>();
     auto var_type = MakePatternNode<Type>();
     auto var_identifier = MakePatternNode<InstanceIdentifier>();
     auto var_initialiser = MakePatternNode<Initialiser>();

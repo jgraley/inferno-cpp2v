@@ -137,7 +137,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto mr_comp = MakePatternNode<StatementExpression>();
     auto ms_gg = MakePatternNode<GreenGrassAgent, Call>();
     auto overcp = MakePatternNode<DeltaAgent, Type>();
-    auto overi = MakePatternNode<DeltaAgent, Initialiser>();
+    auto over_comp = MakePatternNode<DeltaAgent, Compound>();
     auto func_access = MakePatternNode<AccessSpec>();
     
     auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( r_body, ls_return, lr_comp );
@@ -159,9 +159,9 @@ ReturnViaTemp::ReturnViaTemp()
     s_module->members = (decls, func);
     r_module->members = (decls, func, r_retval);
     func->type = cp;
-    func->initialiser = overi;
-    func->access = func_access;        
-    overi->through = s_body;
+    func->initialiser = over_comp;
+	func->access = func_access;        
+    over_comp->through = s_body;
     func->identifier = func_id;
     s_body->members = (locals);
     s_body->statements = (statements);
@@ -169,7 +169,7 @@ ReturnViaTemp::ReturnViaTemp()
     cp->return_type = overcp;
     overcp->through = return_type;
     return_type->negand = sx_void;
-    overi->overlay = embedded_l;
+    over_comp->overlay = embedded_l;
     r_body->members = (locals);
     r_body->statements = (statements);
     overcp->overlay = MakePatternNode<Void>();
@@ -406,14 +406,14 @@ GenerateStacks::GenerateStacks()
     auto sx_method = MakePatternNode<Method>();
     auto sx_any = MakePatternNode<DisjunctionAgent, Type>();
     auto s_not = MakePatternNode<NegationAgent, Type>();
-    auto s_and = MakePatternNode<ConjunctionAgent, Initialiser>();
+    auto s_and = MakePatternNode<ConjunctionAgent, Compound>();
     auto s_top_comp = MakePatternNode<Compound>();
     auto r_top_comp = MakePatternNode<Compound>();
     auto r_ret_comp = MakePatternNode<Compound>();
     auto temp = MakePatternNode<Compound>();
     auto top_decls = MakePatternNode<StarAgent, Declaration>();
     auto top_pre = MakePatternNode<StarAgent, Statement>();
-    auto stuff = MakePatternNode<StuffAgent, Initialiser>();
+    auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto cs_stuff = MakePatternNode<StuffAgent, Compound>();
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
     auto over = MakePatternNode<DeltaAgent, Declaration>();

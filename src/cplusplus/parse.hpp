@@ -914,11 +914,11 @@ private:
         ASSERT(cb); // function body must be a scope or 0
 
         if( DynamicTreePtrCast<Uninitialised>( o->initialiser ) )
-        o->initialiser = cb;
+			o->initialiser = cb;
         else if( TreePtr<Compound> c = DynamicTreePtrCast<Compound>( o->initialiser ) )
-        c->statements = c->statements + cb->statements;
+			c->statements = c->statements + cb->statements;
         else
-        ASSERTFAIL("wrong thing in function instance");
+			ASSERTFAIL("wrong thing in function instance");
 
         TRACE("finish fn %d statements %d total\n", cb->statements.size(), (DynamicTreePtrCast<Compound>(o->initialiser))->statements.size() );
 
