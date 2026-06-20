@@ -367,7 +367,7 @@ decl_primary: decl_vn_prim
 			| '(' decl_boot ')'														{ $$ = $2; } 
 						
 decl_vn_prim: decl_explicit_op_named itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
-			| DELTA_COMPARE_OP decl_entry DELTA_REPLACE_OP decl_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
+			| DELTA_COMPARE_OP decl_boot DELTA_REPLACE_OP decl_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 			| DESIGNATED_DECL     						  			{ $$ = $1.as_designated; }	
 			| STAR_OP OPEN_VN decl_entry CLOSE_VN					{ $$ = vn->OnStar($3); }
 			
@@ -652,7 +652,7 @@ vn_paren	: vn_primary
 			| '(' stmt_boot ')'                          			{ $$ = $2; }
 
 vn_primary  : vn_wildcard
-			| DELTA_COMPARE_OP stmt_entry DELTA_REPLACE_OP stmt_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
+			| DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP stmt_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 			| mi_explicit_op_named itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| explicit_op_named itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DESIGNATED_NORMAL       				  				{ $$ = $1.as_designated; }
