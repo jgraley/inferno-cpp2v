@@ -161,8 +161,8 @@ stmt_high
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
 %type <TreePtr<Node>> 				unified_entry unified_prefix 
 %type <TreePtr<Node>> 				stmt_entry open_statement arrival
-%type <TreePtr<Node>> 				bare_statement statement_nl statement         
-%type <list<TreePtr<Node>>>			statement_l statement_nc
+%type <TreePtr<Node>> 				bare_statement statement_nl stmt_comp statement         
+%type <list<TreePtr<Node>>>			statement_l stmt_comp_l statement_nc
 %type <TreePtr<Node>> 				open_declaration decl_boot decl_entry decl_disjunction decl_conjunction declaration 
 %type <TreePtr<Node>> 				bare_declaration 
 %type <TreePtr<Node>> 				assign_init
@@ -296,9 +296,9 @@ compound_scope	: %empty													{ $$ = make_shared<VN::CompoundScopeGnomon>(
 code_unit_scope	: %empty													{ $$ = make_shared<VN::CodeUnitScopeGnomon>(); 
 																			  vn->AddGnomon($$); }
 
-stmt_decls	: statement_l													{ $$ = $1; }
+stmt_decls	: stmt_comp_l													{ $$ = $1; }
 			| declaration													{ $$.push_back($1); }
-			| statement_l stmt_decls										{ $$ = $1 + $2; }
+			| stmt_comp_l stmt_decls										{ $$ = $1 + $2; }
 			| declaration stmt_decls										{ $$ = $2; $$.push_front($1); }
 
 //////////////////////////////// DECLARATIONS ////////////////////////////////////         
@@ -526,12 +526,17 @@ stmt_conjunction 	: open_statement
 		
 open_statement    	: expr_entry
 					| statement		
+					| compound
 					
+stmt_comp	: stmt_comp_l													{ $$ = vn->OnNeedSoloStatement($1, @1); }
+
 statement	: statement_l													{ $$ = vn->OnNeedSoloStatement($1, @1); }
 
+stmt_comp_l	: statement_l													
+			| compound														{ $$ = {$1}; } 
+
 // Putting arrivals on compound or expr_entry causes conflicts
-statement_l	: compound 														{ $$ = {$1}; } 
-			| statement_nc %prec ';'											
+statement_l	: statement_nc %prec ';'											
 			| expr_entry ';'												{ $$ = {$1}; } 
 			| ';'															{ $$ = { vn->OnNop(@1) }; }      
 
@@ -546,16 +551,16 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); }
 
 // _nc here means "not a compound"							
 statement_nl: bare_statement ';'												{ $$ = $1; }      
-			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' statement			{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
-			| WHILE_KEYWORD '(' stmt_boot ')' statement 								{ $$ = vn->OnWhile($3, @3, $5, @5); }
-			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' statement	
+			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp			{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
+			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 								{ $$ = vn->OnWhile($3, @3, $5, @5); }
+			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_comp	
 			  %prec KEYWORD_ARGS_BODY_CHAIN_STMT								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
-			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' statement
-			  CHAINING_KEYWORD statement										{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
+			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_comp
+			  CHAINING_KEYWORD stmt_comp										{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
 
 bare_statement	: KEYWORD_SIMPLE_STMT											{ $$ = vn->OnSimpleStmt($1.as_ascii, @1); }
 				| KEYWORD_SPACE_SEP_STMT expr_entry								{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
-				| DO_KEYWORD statement WHILE_KEYWORD '(' stmt_boot ')' 				{ $$ = vn->OnDo($2, @2, $5, @5); }
+				| DO_KEYWORD stmt_comp WHILE_KEYWORD '(' stmt_boot ')' 				{ $$ = vn->OnDo($2, @2, $5, @5); }
 
 semicolon_args	: expr_entry										{ $$.push_back($1); }
 				| semicolon_args ';' expr_entry						{ $$ = $1; $$.push_back($3); }
