@@ -916,7 +916,7 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 }
 
 
-void VNLangActions::ApplyAccessSpec( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> access )
+TreePtr<Node> VNLangActions::ApplyAccessSpec( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> access )
 {
 	// Overwrite the access spec of the field with the specified access spec
 	if( auto field = TreePtr<CPPTree::Field>::DynamicCast(declaration) )
@@ -926,15 +926,19 @@ void VNLangActions::ApplyAccessSpec( TreePtr<Node> declaration, any instance_loc
 	if( shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop() )	
 		if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) ) 	
 			fspg->current_access = access; // Don't duplicate the subtree - we want coupling behaviour
+			
+	return declaration;
 }
 
 
-void VNLangActions::ApplyInitialiser( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> init, any init_loc )
+TreePtr<Node> VNLangActions::ApplyInitialiser( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> init, any init_loc )
 {
 	auto o = TreePtr<CPPTree::Instance>::DynamicCast(declaration);
 	ASSERT(o); // Parser should enforce
 	
 	o->initialiser = init;
+	
+	return o;
 }
 
 
@@ -949,7 +953,7 @@ TreePtr<Node> VNLangActions::OnMemberInitialiser( TreePtr<Node> member_id, any m
 }
 
 
-void VNLangActions::ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc )
+TreePtr<Node> VNLangActions::ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc )
 {
 	auto field = TreePtr<CPPTree::Field>::DynamicCast(instance);
 	if( !field )
@@ -959,6 +963,8 @@ void VNLangActions::ApplyMemberInits( TreePtr<Node> instance, any instance_loc, 
 	
 	for( TreePtr<Node> memb_init : memb_inits )
 		field->memb_inits.push_back( memb_init );
+
+	return instance;
 }
 
 

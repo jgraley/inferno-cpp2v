@@ -322,22 +322,22 @@ open_declaration	: declaration
 					| bare_declaration
 
 declaration	: bare_declaration ';'									{ $$ = $1; }      
-			| prototype_access compound								{ vn->ApplyInitialiser($1, @1, $2, @2); $$ = $1; }	
+			| prototype_access compound								{ $$ = vn->ApplyInitialiser($1, @1, $2, @2); }	
+			| prototype_access DESIGNATED_NORMAL  					{ $$ = vn->ApplyInitialiser($1, @1, $2.as_designated, @2); }
 
 bare_declaration: decl_prefix
 				| declarator_decl
 				| class
 				| enum
 
-// Invent ApplyAccessSpec() like ApplyInitialiser()
 // OnInstance() will still try to program the current access. But the new fn will override it with the parsed acess, and then try to update the current access
 declarator_decl	: prototype_access
-				| prototype_access C_ASSIGN assign_init					{ vn->ApplyInitialiser($1, @1, $3, @3); $$ = $1; } 
-				| prototype_access ':' memb_inits C_ASSIGN assign_init	{ vn->ApplyMemberInits($1, @1, $3, @3); 
-																		  vn->ApplyInitialiser($1, @1, $5, @5); $$ = $1; } 
+				| prototype_access C_ASSIGN assign_init					{ $$ = vn->ApplyInitialiser($1, @1, $3, @3); } 
+				| prototype_access ':' memb_inits C_ASSIGN assign_init	{ $$ = vn->ApplyMemberInits($1, @1, $3, @3); 
+																		  $$ = vn->ApplyInitialiser($$, @1, $5, @5); } 
 			
 prototype_access: 											  prototype
-				|								access_clause prototype	{ vn->ApplyAccessSpec($2, @2, $1); $$ = $2; } 
+				|								access_clause prototype	{ $$ = vn->ApplyAccessSpec($2, @2, $1); } 
 
 prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({}, $1, @1, $2, @2); }	
 				| qualifiers type_for_declarator declarator				{ $$ = vn->OnDeclaratorDecl($1, $2, @2, $3, @3); } // eg const int a	
@@ -507,7 +507,7 @@ enumerators		: enumerator												{ $$.push_back($1); }
 
 // TODO Eventually to resemble the cyclic structure of declarations
 enumerator		: prototype_enumerator
-				| prototype_enumerator C_ASSIGN assign_init					{ vn->ApplyInitialiser($1, @1, $3, @3); $$ = $1; } 
+				| prototype_enumerator C_ASSIGN assign_init					{ $$ = vn->ApplyInitialiser($1, @1, $3, @3); } 
 				| DESIGNATED_DECL			 								{ $$ = $1.as_designated; }	   
 
 prototype_enumerator 		: vn_primary 									{ $$ = vn->OnEnumerator(@1, $1); }
