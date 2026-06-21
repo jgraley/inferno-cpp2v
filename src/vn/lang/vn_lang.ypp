@@ -162,7 +162,7 @@ stmt_high
 %type <TreePtr<Node>> 				unified_entry unified_prefix 
 %type <TreePtr<Node>> 				stmt_entry open_statement arrival
 %type <TreePtr<Node>> 				bare_statement statement_nl stmt_comp statement         
-%type <list<TreePtr<Node>>>			statement_l stmt_comp_l statement_nc
+%type <list<TreePtr<Node>>>			statement_l stmt_decl_l statement_nc
 %type <TreePtr<Node>> 				open_declaration decl_boot decl_entry decl_disjunction decl_conjunction declaration 
 %type <TreePtr<Node>> 				bare_declaration 
 %type <TreePtr<Node>> 				assign_init
@@ -296,10 +296,12 @@ compound_scope	: %empty													{ $$ = make_shared<VN::CompoundScopeGnomon>(
 code_unit_scope	: %empty													{ $$ = make_shared<VN::CodeUnitScopeGnomon>(); 
 																			  vn->AddGnomon($$); }
 
-stmt_decls	: stmt_comp_l													{ $$ = $1; }
-			| declaration													{ $$.push_back($1); }
-			| stmt_comp_l stmt_decls										{ $$ = $1 + $2; }
-			| declaration stmt_decls										{ $$ = $2; $$.push_front($1); }
+stmt_decls	: stmt_decl_l													{ $$ = $1; }
+			| stmt_decl_l stmt_decls										{ $$ = $1 + $2; }
+
+stmt_decl_l	: statement_l													
+			| compound														{ $$ = {$1}; } 
+			| declaration													{ $$ = {$1}; } 
 
 //////////////////////////////// DECLARATIONS ////////////////////////////////////         
 
@@ -528,12 +530,10 @@ open_statement    	: expr_entry
 					| statement		
 					| compound
 					
-stmt_comp	: stmt_comp_l													{ $$ = vn->OnNeedSoloStatement($1, @1); }
-
+stmt_comp	: statement_l													{ $$ = vn->OnNeedSoloStatement($1, @1); }
+			| compound	
+			
 statement	: statement_l													{ $$ = vn->OnNeedSoloStatement($1, @1); }
-
-stmt_comp_l	: statement_l													
-			| compound														{ $$ = {$1}; } 
 
 // Putting arrivals on compound or expr_entry causes conflicts
 statement_l	: statement_nc %prec ';'											

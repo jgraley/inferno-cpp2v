@@ -1491,7 +1491,7 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // This is less conflicty that one might expect, and some languages, like golang, do this as 
 // a matter of course.
 
-// Try to apply scope gnomons correctly, i.e. at the { or whatever. Fill in record identifier using an Apply...() method. 
+// TODO Try to apply scope gnomons correctly, i.e. at the { or whatever. Fill in record identifier using an Apply...() method. 
 
 // NOTE
 // Lots of conflicts incl around declarators resolved by making pre-restriction refuse to switch between
