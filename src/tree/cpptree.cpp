@@ -161,7 +161,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 		s += "∞{\n";
 		for( auto &m : members )
 			s += renderer->DoRender( &m, Production::STMT_DECL, policy ) + "\n";
-		s += "}";
+		s += "}\n";
 		return s;
 	}
 
@@ -1882,7 +1882,7 @@ string ArrayInitialiser::GetRender( VN::RendererInterface *renderer, Production 
     for( auto &e : elements )
 		ls.push_back( renderer->DoRender( &e, Production::COMMA_SEP, policy ) );
 
-    return Join(ls, ", ", "{", "}"); 
+    return Join(ls, ", ", "{", "}\n"); 
 }
 
 //////////////////////////// This ///////////////////////////////
@@ -2056,7 +2056,7 @@ Syntax::Production Compound::GetMyProductionTerminal() const
 string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	INDENT("C");
-    string s = " { ";
+    string s = "{\n";
  	policy.permit_static_keyword = true; // In a compound, static means global
 	policy.cur_access = nullptr; // No access specs here
 	
@@ -2066,7 +2066,7 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
 		s += "⚬";
     for( auto &st : statements )    
 		s += renderer->DoRender( &st, Production::STMT_DECL_LOW, policy );    
-    s += " } ";
+    s += "}\n";
     return s;
 }
 

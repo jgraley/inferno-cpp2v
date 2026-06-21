@@ -47,7 +47,11 @@ string Indenter::GetString() const
 	// Unicode (which makes spaces vary for some reason)
 	string s;
 	for( const Line &line : lines )
+	{
+		if( line.text.empty() && line.depth>0 ) 
+			continue; // skip blank lines that would have been indented
 		s += string(line.depth, '\t') + line.text + "\n";
+	}
 	return s;
 }
 

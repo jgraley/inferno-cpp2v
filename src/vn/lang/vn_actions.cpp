@@ -1411,9 +1411,6 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // - Labels will need their own "stuff" I think, otherwise it will be too hard to disambiguate with things like : and && hanging around
 // Organisation: stuff from the C++ BNF
 
-// Don't support StatementExpression directly, the ({...}) is nasty. Try to get to it using pre-restriction plus Compound syntax
-// eg ‽StatementExpression⦅ ⦆ { ...; r; }
-
 // Can we generally differentiate between VN syntax that takes the place of C syntax eg ⯁ and that doesn't eg all the VN operators?
 // Could ⯁ use () instead of ⦅ ⦆?
 
@@ -1421,12 +1418,6 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // has a simple structure: start at stem, stem -> search, stem -> replace. One ambiguity is designations that are only used in
 // entirely in search or entirely in replace context. Maybe designations could qualify themselves to be search-side or replace 
 // side by borrowing ▲ and ⯈ symbols. A pain to render though.
-
-// After ▲⯈⯇ some of the boot_x aren't really stmt_boot tokens because they aren't what's in primary ( boot_x ) (which is how 
-// grammar booting is defined, so no argument there). Fix and de-duplicate the () and ▲⯈⯇. Then ensure the (newly fixed) stmt_boot is used in
-// all ()-like places eg BOTH parts of ▲⯈⯇
- 
-// ▲⯈⯇ is now primary so move it 
  
 // Review the virt-specifiers and const on the node methods for rendering
 
