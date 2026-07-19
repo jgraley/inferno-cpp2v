@@ -71,12 +71,12 @@ public:
 		EQ_COMP,
 		MAG_COMP,
 		SHIFT, 
-		ADD_SUB,
+		ADD_SUB,//80
 		MUL_DIV,
 		TYPE_IN_NEW, // new(args) <here>(args)
 		PREFIX, // C++ and VN: all prefix 
 		POSTFIX, // C++: all postfix including sub clauses
-		SPACE_SEP_TYPE, // eg unsigned long. Interestingly, the spaces take precedence
+		SPACE_SEP_TYPE, // 85 eg unsigned long. Interestingly, the spaces take precedence
 		DIRECT_INIT, // eg MyType thing <here>; prefix = may be inserted. 
 		PRIMARY_EXPR, // one-token literal eg 12, 12.34, "foo"
 		PRIMARY_TYPE, // one-token type eg void, bool

@@ -162,7 +162,9 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexeme(wstring text, bool
             return YY::VNLangParser::make_DESIGNATED_DECL(metadata, loc);
         else if( dynamic_cast<const QualifierDesignationGnomon *>(designation_gnomon.get()) )
             return YY::VNLangParser::make_DESIGNATED_QUAL(metadata, loc);
-        else 
+        else if( dynamic_cast<const CompoundDesignationGnomon *>(designation_gnomon.get()) )
+            return YY::VNLangParser::make_DESIGNATED_COMPOUND(metadata, loc);
+		else 
 			ASSERTFAIL();
 	}
     else if( ascii )

@@ -937,6 +937,7 @@ TreePtr<Node> VNLangActions::ApplyInitialiser( TreePtr<Node> declaration, any in
 	ASSERT(o); // Parser should enforce
 	
 	o->initialiser = init;
+	FTRACE(init)("\n");
 	
 	return o;
 }
@@ -1479,7 +1480,7 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // Do something about destructors, try them out in pattern and x
 
 // Putting arrivals on compound or expression causes conflicts, need to look at symmetry
-
+ 
 // According to https://alx71hub.github.io/hcb/#assignment-expression, the RHS of any assignment
 // operator including = is actual an initialiser. That might reduce pressure in the grammar
 // by making = more symmetrical.
@@ -1506,3 +1507,8 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // 		stringstream ss;
 //		ss << any_cast<YY::VNLangParser::location_type>(loc);
 //      ... ss.str() ...
+
+// NOTE on use of general statement syntax for initialisers (function bodies)
+// - You have to get past Nop i.e. empty statement, just ;
+// - Labels can conflict 
+// - When designated compound is used, no = mbut sill trailing ;

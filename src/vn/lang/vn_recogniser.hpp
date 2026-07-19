@@ -103,6 +103,13 @@ public:
 };		
 
 
+class CompoundDesignationGnomon : public DesignationGnomon
+{
+public:	
+	using DesignationGnomon::DesignationGnomon;
+};
+
+
 class NodeNameScopeGnomon : public ScopeGnomon
 {
 public:	

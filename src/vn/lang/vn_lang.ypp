@@ -123,10 +123,11 @@
 <YY::TokenMetadata> TRANSFORM_NAME_NORMAL	_("open_statement transform name")
 <YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
 <YY::TokenMetadata> UNICODE_NAME 			_("Unicode name")
-<YY::TokenMetadata>	DESIGNATED_NORMAL		_("designated name")
+<YY::TokenMetadata>	DESIGNATED_NORMAL		_("designated statement/expression name")
 <YY::TokenMetadata>	DESIGNATED_TYPE			_("designated type name")
 <YY::TokenMetadata>	DESIGNATED_DECL			_("designated declaration name")
 <YY::TokenMetadata>	DESIGNATED_QUAL			_("designated qualifier name")
+<YY::TokenMetadata>	DESIGNATED_COMPOUND		_("designated compound name")
 <YY::TokenMetadata>	RESOLVED_NORMAL			_("resolved open_statement node name")
 <YY::TokenMetadata>	RESOLVED_TYPE			_("resolved type node name")
 <YY::TokenMetadata>	RESOLVED_DECL			_("resolved declaration node name")
@@ -152,7 +153,9 @@
 stmt_low 
 stmt_high
 	
-%type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational stmt_disjunction stmt_conjunction  
+%type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational 
+%type <TreePtr<Node>> 				stmt_entry stmt_disjunction stmt_conjunction open_statement 
+%type <TreePtr<Node>> 				stmt_entry_nc stmt_disjunction_nc stmt_conjunction_nc open_statement_nc 
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expr_entry expr_id_value stmt_boot
@@ -160,9 +163,9 @@ stmt_high
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_vn_prim 
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
 %type <TreePtr<Node>> 				unified_entry unified_prefix 
-%type <TreePtr<Node>> 				stmt_entry open_statement arrival
+%type <TreePtr<Node>> 				arrival
 %type <TreePtr<Node>> 				bare_statement statement_nl stmt_comp statement         
-%type <list<TreePtr<Node>>>			statement_l stmt_decl_l statement_nc
+%type <list<TreePtr<Node>>>			statement_l statement_e stmt_decl_l statement_nc
 %type <TreePtr<Node>> 				open_declaration decl_boot decl_entry decl_disjunction decl_conjunction declaration 
 %type <TreePtr<Node>> 				bare_declaration 
 %type <TreePtr<Node>> 				assign_init
@@ -236,10 +239,11 @@ script_command	: ENGINE_COMMAND unified_entry   		 	{ $$ = make_shared<VN::Engin
 				| ATTRIBUTE_COMMAND		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
-designation_command	: vn_name DESIGNATE_COMMAND stmt_entry		{ $$ = make_shared<VN::NormalDesignationGnomon>($1, $3); }
-					| vn_name DESIGNATE_COMMAND type_entry		{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
-					| vn_name DESIGNATE_COMMAND decl_entry		{ $$ = make_shared<VN::DeclarationDesignationGnomon>($1, $3); }
-					| vn_name DESIGNATE_COMMAND qualifier_node	{ $$ = make_shared<VN::QualifierDesignationGnomon>($1, $3); }
+designation_command	: vn_name DESIGNATE_COMMAND stmt_entry_nc		{ $$ = make_shared<VN::NormalDesignationGnomon>($1, $3); }
+					| vn_name DESIGNATE_COMMAND type_entry			{ $$ = make_shared<VN::TypeDesignationGnomon>($1, $3); }
+					| vn_name DESIGNATE_COMMAND decl_entry			{ $$ = make_shared<VN::DeclarationDesignationGnomon>($1, $3); }
+					| vn_name DESIGNATE_COMMAND qualifier_node		{ $$ = make_shared<VN::QualifierDesignationGnomon>($1, $3); }
+					| vn_name DESIGNATE_COMMAND compound        	{ $$ = make_shared<VN::CompoundDesignationGnomon>($1, $3); }
 
 //////////////////////////////////// ITEMISATION ///////////////////////////////////////////
 // For explicit/built-in nodes mostly
@@ -325,7 +329,7 @@ open_declaration	: declaration
 
 declaration	: bare_declaration ';'									{ $$ = $1; }      
 			| prototype_access compound								{ $$ = vn->ApplyInitialiser($1, @1, $2, @2); }	
-			| prototype_access DESIGNATED_NORMAL  					{ $$ = vn->ApplyInitialiser($1, @1, $2.as_designated, @2); }
+			| prototype_access DESIGNATED_COMPOUND ';'				{ $$ = vn->ApplyInitialiser($1, @1, $2.as_designated, @2); }
 
 bare_declaration: decl_prefix
 				| declarator_decl
@@ -526,19 +530,33 @@ stmt_conjunction 	: open_statement
 					| stmt_conjunction CONJUNCTION_OP open_statement   		{ $$ = vn->OnConjunction($1, $3); }
 					| stmt_conjunction CONJUNCTION_OP open_declaration 		{ $$ = vn->OnConjunction($1, $3); }
 		
-open_statement    	: expr_entry
-					| statement		
+open_statement    	: open_statement_nc		
 					| compound
+					
+stmt_entry_nc		: stmt_disjunction_nc
+
+stmt_disjunction_nc	: stmt_conjunction_nc
+					| stmt_disjunction_nc DISJUNCTION_OP stmt_conjunction_nc		{ $$ = vn->OnDisjunction($1, $3); }
+					| stmt_disjunction_nc DISJUNCTION_OP decl_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
+
+stmt_conjunction_nc : open_statement_nc       
+					| stmt_conjunction_nc CONJUNCTION_OP open_statement_nc   		{ $$ = vn->OnConjunction($1, $3); }
+					| stmt_conjunction_nc CONJUNCTION_OP open_declaration 		{ $$ = vn->OnConjunction($1, $3); }
+		
+open_statement_nc 	: expr_entry
+					| statement		
 					
 stmt_comp	: statement_l													{ $$ = vn->OnNeedSoloStatement($1, @1); }
 			| compound	
 			
 statement	: statement_l													{ $$ = vn->OnNeedSoloStatement($1, @1); }
 
-// Putting arrivals on compound or expr_entry causes conflicts
-statement_l	: statement_nc %prec ';'											
-			| expr_entry ';'												{ $$ = {$1}; } 
+statement_l : statement_e									
 			| ';'															{ $$ = { vn->OnNop(@1) }; }      
+
+// Putting arrivals on compound or expr_entry causes conflicts
+statement_e : statement_nc %prec ';'											
+			| expr_entry ';'												{ $$ = {$1}; } // Should come in under bare_statement, #892
 
 statement_nc: statement_nl													{ $$ = {$1}; }
 			| arrival statement_nl											{ $$ = {$1, $2}; } 
@@ -648,9 +666,9 @@ expr_primary: vn_paren
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
-			| KEYWORD_PRIMARY_OP								{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); }
-			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayInitialiser({}); } // ={...} dismbiguates against compound_primary
-			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayInitialiser($3); }             
+			| KEYWORD_PRIMARY_OP								{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); } 
+			| C_ASSIGN '{' '}'             				  		{ $$ = vn->OnArrayInitialiser({}); } // ={...} dismbiguates against compound_primary, no #894
+			| C_ASSIGN '{' comma_sep_expr_decl '}'      		{ $$ = vn->OnArrayInitialiser($3); } // no, #894
 			| FUNC_ON_TYPE '(' type_boot ')'       				{ $$ = vn->OnFuncOnType($1.as_ascii, @1, $3, @3); }			
 
 vn_paren	: vn_primary
@@ -658,9 +676,9 @@ vn_paren	: vn_primary
 
 vn_primary  : vn_wildcard
 			| DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP stmt_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
-			| mi_explicit_op_named itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| explicit_op_named itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DESIGNATED_NORMAL       				  				{ $$ = $1.as_designated; }
+			| DESIGNATED_COMPOUND      				  				{ $$ = $1.as_designated; }   // TODO move up into the statement rules once we don't need to support eg int main() = my_compound
 			| id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN	{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
 			| build_id_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| build_id_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }

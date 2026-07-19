@@ -202,18 +202,36 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 				      Tracer::GetPrefix().c_str(), 
 					  node ? Traceable::TypeIdName(*node).c_str() : "NULL", // No serial numbers because we diff these
 					  RETURN_ADDR() );
-
+	
 	if( unique_coupling_names.count(node) > 0 )			
 	{
+		Syntax::Production node_prod;
+		try
+		{
+			node_prod = GetNodeProduction(node, policy);
+		}
+		catch( Syntax::Refusal &ex ) 
+		{
+			node_prod = Syntax::Production::EXPLICIT_NODE; // Must have been designated as an explicit, see OnRefusal()
+		}
+
 		s += unique_coupling_names.at(node);
 		// These duplicate the accomodations partially: they depend on surround_prod but not the node. To 
 		// push them through the same functions, we should not provide the node as it's now irrelevent
 		// syntactially. Maybe pass node_prod in separately - this can be chosen to get the right accomodations
-		// and differentiate from NULL node meaning Nop.
+		// and differentiate from NULL node meaning Nop. 
 		if( surround_prod == Syntax::Production::DIRECT_INIT )
-			s = "= " + s;
-		if( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
-            Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) )
+		{
+			if( node_prod != Syntax::Production::COMPOUND )
+				s = "= " + s;
+			else
+				s = "\n" + s; // more readable with newline before initialiser when initialiser is compound
+		}
+			
+		// See Instance::GetMyProduction()
+		if( (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
+             Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON)) ||
+             (surround_prod == Syntax::Production::DIRECT_INIT && node_prod == Syntax::Production::COMPOUND) )
             s += ";\n";
 		return s;
 	}
@@ -272,8 +290,11 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production node_prod,
 			s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
 		return s + "= " + AccomodateBoot(node, node_prod, Syntax::Production::ASSIGN, policy );
 	}
-
-	return s + AccomodateBoot(node, node_prod, surround_prod, policy ); 
+	else
+	{
+		// more readable with newline before initialiser when initialiser is compound
+		return s + "\n" + AccomodateBoot(node, node_prod, surround_prod, policy ); 
+	}
 }
 
 
@@ -423,7 +444,7 @@ string Render::RenderNullPointer(Syntax::Production node_prod, Syntax::Productio
 	else if( dynamic_pointer_cast<Type>( policy.pointer_archetype ) )
 	{
 		static int i=0; 		
-		return SSPrintf("⍑/*RenderNullPtr(type %d)*/☆", i++);		
+		return SSPrintf("⍑☆", i++);		
 	}
 	else 
 		return "☆";
