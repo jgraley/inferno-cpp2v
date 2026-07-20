@@ -1,0 +1,25 @@
+main ⪮ ⊛SpecificInstanceIdentifier⦅"main"⦆⨟
+my_compound ⪮ {
+	★⦅⯁Declaration⦅⦆⦆;
+	⚬★;
+}
+⨟
+my_expression ⪮ ⯁Expression⦅⦆⨟
+
+// demonstrates ability to designate a body with commands, and then use it without =, see rule #896
+my_body ⪮ ( my_compound⨟
+			꩜⩨‽Compound ⩨▲return my_expression;
+				⯈⯁SCTree::Cease⦅my_expression⦆
+		⯇ )⨟
+꩜⩨⯁LocalTree::GlobalsModule⦅
+	⍑☆⚬
+	▲☆: ⯁Virtuality⦅⦆ ⯁Integral⦅☆⦆  main() 
+		my_compound;
+		⯈public: 
+		 
+		⯁SCTree::Thread⦅⦆  main 
+		my_body;
+	⯇🞄
+	★⦅⯁Declaration⦅⦆⦆⚬
+	★
+⦆

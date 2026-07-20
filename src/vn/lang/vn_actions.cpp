@@ -1520,3 +1520,4 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // It can be resolved with 
 // int a = (compound initialiser⨟ other commands...);
 // But the user can also use a designation to capture the (compound initialiser⨟ other commands...) and then apply the designation without =
+// This is now rule #896
