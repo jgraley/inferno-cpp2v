@@ -939,7 +939,7 @@ TreePtr<Node> VNLangActions::ApplyInitialiser( TreePtr<Node> declaration, any in
 	o->initialiser = init;
 	FTRACE(init)("\n");
 	
-	return o;
+	return o; 
 }
 
 
@@ -1511,4 +1511,12 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // NOTE on use of general statement syntax for initialisers (function bodies)
 // - You have to get past Nop i.e. empty statement, just ;
 // - Labels can conflict 
-// - When designated compound is used, no = mbut sill trailing ;
+// - When designated compound is used, no = but sill trailing ;
+
+// There is a fundamental conflict between
+// int a(args...);
+// and 
+// int a (compound initialiser⨟ other commands...);
+// It can be resolved with 
+// int a = (compound initialiser⨟ other commands...);
+// But the user can also use a designation to capture the (compound initialiser⨟ other commands...) and then apply the designation without =

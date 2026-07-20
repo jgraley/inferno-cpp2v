@@ -245,7 +245,7 @@ designation_command	: vn_name DESIGNATE_COMMAND stmt_entry_nc		{ $$ = make_share
 					| vn_name DESIGNATE_COMMAND decl_entry			{ $$ = make_shared<VN::DeclarationDesignationGnomon>($1, $3); }
 					| vn_name DESIGNATE_COMMAND qualifier_node		{ $$ = make_shared<VN::QualifierDesignationGnomon>($1, $3); }
 					| vn_name DESIGNATE_COMMAND compound_entry    	{ $$ = make_shared<VN::CompoundDesignationGnomon>($1, $3); }
-
+					
 //////////////////////////////////// ITEMISATION ///////////////////////////////////////////
 // For explicit/built-in nodes mostly
 
@@ -284,7 +284,7 @@ unified_prefix	: expr_prefix
 
 // Because there's no separator in {{code} expr} the prefix ops would conflict with infix that use same symbol,
 // so we'll need to complete a branch of the syntax for compounds with a copy of the unary VN operators (none are postfix).
-compound_entry		: compound_prefix
+compound_entry	: compound_prefix
 
 compound_prefix : compound_primary 
 				| 								NEGATION_OP compound_prefix	{ $$ = vn->OnNegation($2); }
@@ -299,7 +299,6 @@ compound_primary	: compound_scope '{' VN_SEP '}'                			{ $$ = vn->On
 					| compound_scope '{' VN_SEP stmt_decls '}'     			{ $$ = vn->OnCompound({}, @3, $4, @4); }
 					| compound_scope '{' stmt_decls VN_SEP stmt_decls '}'	{ $$ = vn->OnCompound($3, @3, $5, @5); }
 					| CODE_UNIT code_unit_scope '{' stmt_decls '}' 			{ $$ = vn->OnCodeUnit($4, @4); }
-//					| '(' compound_boot ')'									{ $$ = $2; }
 
 compound_scope	: %empty													{ $$ = make_shared<VN::CompoundScopeGnomon>(); 
 																			  vn->AddGnomon($$); }
@@ -337,6 +336,7 @@ open_declaration	: declaration
 declaration	: bare_declaration ';'									{ $$ = $1; }      
 			| prototype_access compound_entry						{ $$ = vn->ApplyInitialiser($1, @1, $2, @2); }	
 			| prototype_access DESIGNATED_COMPOUND ';'				{ $$ = vn->ApplyInitialiser($1, @1, $2.as_designated, @2); }
+			| prototype_access DESIGNATED_NORMAL ';'				{ $$ = vn->ApplyInitialiser($1, @1, $2.as_designated, @2); }
 
 bare_declaration: decl_prefix
 				| declarator_decl
