@@ -753,7 +753,7 @@ TreePtr<Node> VNLangActions::OnTypedef( const list<QualifierData> &quals, Declar
 
 
 TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc )
-{	
+{		
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
 		"\nparams list, explicit scope node or pre-restriction to a declaration node type";			
@@ -918,9 +918,16 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 
 TreePtr<Node> VNLangActions::ApplyAccessSpec( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> access )
 {
+	// OnInstance() will still try to program the current access. But this fn will override it with the parsed 
+	// access, and then try to update the current access
+	
 	// Overwrite the access spec of the field with the specified access spec
 	if( auto field = TreePtr<CPPTree::Field>::DynamicCast(declaration) )
 		field->access = access; // Don't duplicate the subtree - we want coupling behaviour
+	else
+		throw YY::VNLangParser::syntax_error(
+						any_cast<YY::VNLangParser::location_type>(instance_loc),
+						"access specs not yet supported for "+DiagQuote(Traceable::TypeIdName(*declaration)) );		
 
 	// If we're in a record scope, update the stored access spec for future fields to use
 	if( shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop() )	
