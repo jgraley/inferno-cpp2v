@@ -511,6 +511,11 @@ bare_member		: bare_decl_na
 				| access_clause bare_decl_na								{ $$ = vn->ApplyAccessSpec($2, @2, $1); } 
 				| expr_prefix  // to get wildcards etc (doesn't conflict because we're definitely in a class)
 
+access_clause	: qualifier_node ':'										
+				| expr_prefix ':'									
+
+access_spec		: qualifier_node 
+
 //////////////////////////////// ENUMERATIONS ////////////////////////////////////                                  
                          
 enum			: enum_scope '{' enumerators '}'		 					{ $$ = vn->FinishRecord( @$, $1.node, {}, $3 ); }
@@ -796,11 +801,6 @@ qualifier_node	: qual_explicit_op_named itemisation						{ $$ = vn->FinishExplic
 
 qual_explicit_op_named 		: explicit_qual_node							{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                               vn->AddGnomon($$.gnomon); }
-
-access_clause	: qualifier_node ':'										
-				| expr_prefix ':'									
-
-access_spec		: qualifier_node 
 
 //////////////////////////////////////// RECOGNISER GLUE /////////////////////////////////////////////
 // 2 things going on here:
