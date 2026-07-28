@@ -167,7 +167,7 @@ stmt_high
 %type <TreePtr<Node>> 				bare_statement statement_nl stmt_comp statement         
 %type <list<TreePtr<Node>>>			statement_l statement_e stmt_decl_l statement_nc
 %type <TreePtr<Node>> 				open_declaration decl_boot decl_entry decl_disjunction decl_conjunction declaration 
-%type <TreePtr<Node>> 				prototype bare_decl_na comp_decl_na bare_declaration bare_initialiser
+%type <TreePtr<Node>> 				prototype bare_decl_nvn comp_decl_nvn bare_declaration bare_initialiser
 %type <TreePtr<Node>> 				assign_init
 %type <TreePtr<Node>> 				decl_prefix_definite decl_prefix decl_postfix decl_primary decl_vn_prim
 %type <TreePtr<Node>> 				compound_primary parameter type_boot type_entry compound_prefix compound_entry 
@@ -197,8 +197,10 @@ stmt_high
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
 %type <VN::NodeAndGnomon>			explicit_op_named type_explicit_op_named decl_explicit_op_named qual_explicit_op_named mi_explicit_op_named
 %type <VN::NodeAndGnomon>			class_scope enum_scope
-%type <TreePtr<Node>> 				member bare_member enumerator prototype_enumerator
+%type <TreePtr<Node>> 				acc_memb_boot member comp_member bare_member bare_member_nvn 
+%type <TreePtr<Node>> 				acc_memb_prefix acc_memb_postfix acc_memb_paren acc_memb_primary
 %type <list<TreePtr<Node>>>			stmt_decls members enumerators
+%type <TreePtr<Node>> 				enumerator prototype_enumerator
 %type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases memb_inits
 %type <VN::QualifierData> 			qualifier qualifier_nw
@@ -333,20 +335,18 @@ open_declaration	: declaration
 					| bare_declaration
 
 declaration	: bare_declaration ';'									{ $$ = $1; }      
-			| comp_decl_na		
-			| access_clause comp_decl_na							{ $$ = vn->ApplyAccessSpec($2, @2, $1); }	
+			| comp_decl_nvn		
 
 // OnInstance() will still try to program the current access. But the new fn will override it with the parsed acess, and then try to update the current access
-bare_declaration: bare_decl_na
-				| access_clause bare_decl_na							{ $$ = vn->ApplyAccessSpec($2, @2, $1); } 
+bare_declaration: bare_decl_nvn
+				| decl_prefix
 				
-comp_decl_na	: prototype compound_entry							{ $$ = vn->ApplyInitialiser($1, @1, $2, @2); }	
+comp_decl_nvn	: prototype compound_entry							{ $$ = vn->ApplyInitialiser($1, @1, $2, @2); }	
 
-bare_decl_na	: prototype
+bare_decl_nvn	: prototype
 				| prototype bare_initialiser							{ $$ = vn->ApplyInitialiser($1, @1, $2, @2); } 
 				| prototype ':' memb_inits bare_initialiser				{ $$ = vn->ApplyMemberInits($1, @1, $3, @3); 
 																		  $$ = vn->ApplyInitialiser($$, @1, $4, @4); } 
-				| decl_prefix
 				| class
 				| enum				
 			
@@ -502,19 +502,58 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 members			: member													{ $$.push_back($1); }
 				| members member 											{ $$ = $1; $$.push_back($2); }
 
-member			: bare_member ';'											{ $$ = $1; }      
-				| comp_decl_na		
-				| access_clause comp_decl_na								{ $$ = vn->ApplyAccessSpec($2, @2, $1); }	
-				
-// OnInstance() will still try to program the current access. But the new fn will override it with the parsed acess, and then try to update the current access
-bare_member		: bare_decl_na
-				| access_clause bare_decl_na								{ $$ = vn->ApplyAccessSpec($2, @2, $1); } 
-				| expr_prefix  // to get wildcards etc (doesn't conflict because we're definitely in a class)
+acc_memb_boot	: bare_member_nvn
+				| comp_member
+				| acc_memb_prefix
 
-access_clause	: qualifier_node ':'										
-				| expr_prefix ':'									
+member			: bare_member ';'											{ $$ = $1; }      
+				| comp_member
+				
+// access_clause: OnInstance() will still try to program the current access. But the new fn will override it with the parsed acess, and then try to update the current access
+comp_member		: comp_decl_nvn		
+				| access_clause comp_decl_nvn								{ $$ = vn->ApplyAccessSpec($2, @2, $1); }	
+				
+bare_member		: bare_member_nvn
+				| acc_memb_prefix  
+
+bare_member_nvn : bare_decl_nvn
+				| access_clause bare_decl_nvn								{ $$ = vn->ApplyAccessSpec($2, @2, $1); } 
+
+access_clause	: acc_memb_prefix ':'									
 
 access_spec		: qualifier_node 
+
+// Acc Memb column includes access specifiers and full member declarations. We combine both because
+// a member can start with both, and the parser has limited lookahead. By being explicit, we avoid the 
+// brittleness of symmetrical columns. This will make eg (int a) : char b; syntactical (i.e. if 
+// legitimised by a VN or paren, a declaration could be used as an access specifier). TODO prevent in Actions.
+acc_memb_prefix	: acc_memb_postfix
+				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
+				| 						      POINTER_IS_OP acc_memb_prefix	{ $$ = vn->OnPointerIs($2); }
+				| 					         	NEGATION_OP	acc_memb_prefix	{ $$ = vn->OnNegation($2); }
+				|                      prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+				|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+				| stuff_op_scope OPEN_VN unified_entry CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
+				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
+				|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
+				|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
+
+
+acc_memb_postfix: acc_memb_paren     
+		
+acc_memb_paren	: acc_memb_primary
+				| '(' acc_memb_boot ')'                          			{ $$ = $2; } 
+
+acc_memb_primary: qualifier_node // Gets us the access specs 
+				| DELTA_COMPARE_OP acc_memb_boot DELTA_REPLACE_OP acc_memb_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
+				| decl_explicit_op_named itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); } 
+				| DESIGNATED_DECL       				  				{ $$ = $1.as_designated; }
+				| DESIGNATED_NORMAL       				  				{ $$ = $1.as_designated; }
+				| DESIGNATED_COMPOUND      				  				{ $$ = $1.as_designated; }   // TODO want declarations and access specs
+				| transform_op_named OPEN_VN unified_prefix CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
+				| STAR_OP												{ $$ = vn->OnStar(nullptr); }
+				| STAR_OP OPEN_VN acc_memb_primary CLOSE_VN					{ $$ = vn->OnStar($3); }
+				| ANY_NODE_OP											{ $$ = nullptr; }
 
 //////////////////////////////// ENUMERATIONS ////////////////////////////////////                                  
                          

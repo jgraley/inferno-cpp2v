@@ -944,7 +944,7 @@ TreePtr<Node> VNLangActions::ApplyInitialiser( TreePtr<Node> declaration, any in
 	ASSERT(o); // Parser should enforce
 	
 	o->initialiser = init;
-	FTRACE(init)("\n");
+	//FTRACE(init)("\n");
 	
 	return o; 
 }
