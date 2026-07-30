@@ -322,20 +322,25 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l3_instance = MakePatternNode<Instance>();  
     auto l3_delta = MakePatternNode<DeltaAgent, Initialiser>();  
     auto l3s_construct_init = MakePatternNode<ConstructInitialiser>();
+    auto ls_record = MakePatternNode<Module>();  
+    auto lr_record = MakePatternNode<Module>();  
+    auto l_record_typeid = MakePatternNode<TypeIdentifier>();
+    auto l_record_bases = MakePatternNode<StarAgent, Base>();
+    auto l_record_decls = MakePatternNode<StarAgent, Declaration>();
     auto ls_field = MakePatternNode<Field>();  
     auto lr_field = MakePatternNode<Field>();  
 
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_embedded_3 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( stuff, l3_instance, l3_instance );            
-    auto r_embedded_1 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( r_embedded_3, ls_field, lr_field );            
+    auto r_embedded_1 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( r_embedded_3, ls_record, lr_record );            
                     
     // dispense with an empty constructor                 
     stuff->terminus = over;
     over->through = s_module;
     over->overlay = r_module;
-    s_module->members = (s_cons, decls);
-    s_module->bases = (bases);
     s_module->identifier = module_typeid;
+    s_module->bases = (bases);
+    s_module->members = (s_cons, decls);
     s_cons->virt = MakePatternNode<NonVirtual>();
     s_cons->constancy = MakePatternNode<NonConst>();
     s_cons->initialiser = s_comp;
@@ -347,6 +352,9 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     r_module->identifier = module_typeid;
             
     // Embedded 1: dispense with any calls to s_constructor_id from member inits
+    ls_record->identifier = l_record_typeid;
+    ls_record->bases = (l_record_bases);
+    ls_record->members = (ls_field, l_record_decls);
     ls_field->virt = MakePatternNode<NonVirtual>();
     ls_field->constancy = MakePatternNode<NonConst>();
     ls_field->type = ls_ctype;
@@ -354,6 +362,9 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     ls_field->memb_inits = (l_pre, l1s_memb_init, l_post);
 	l1s_memb_init->initialiser = l1s_cons_init;
 	l1s_cons_init->constructor_id = s_constructor_id;
+    lr_record->identifier = l_record_typeid;
+    lr_record->bases = (l_record_bases);
+    lr_record->members = (lr_field, l_record_decls);
     lr_field->virt = MakePatternNode<NonVirtual>();
     lr_field->constancy = MakePatternNode<NonConst>();
     lr_field->memb_inits = (l_pre, l_post);
