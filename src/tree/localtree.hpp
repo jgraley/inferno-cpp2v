@@ -9,10 +9,10 @@
 #define RENDER_MACRO(BASE) \
     string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override \
     { \
-		if( policy.refuse_local_node_types ) \
-			throw RefuseDueLocal(); \
 		return BASE::GetRender(renderer, surround_prod, policy); \
 	}
+
+// Was: 		if( policy.refuse_local_node_types ) throw RefuseDueLocal(); 
 
 
 // Nodes that are only used locally to a transformaiton or sequence of transformtions. All

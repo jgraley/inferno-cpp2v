@@ -483,6 +483,8 @@ parameter   : decl_entry
                          
 class			: class_scope '{' members '}'			 					{ $$ = vn->FinishRecord( @$, $1.node, {}, $3 ); }
 				| class_scope ':' bases '{' members '}'						{ $$ = vn->FinishRecord( @$, $1.node, $3, $5 ); }
+				| class_scope '{' '}'			 							{ $$ = vn->FinishRecord( @$, $1.node, {}, {} ); }
+				| class_scope ':' bases '{' '}'								{ $$ = vn->FinishRecord( @$, $1.node, $3, {} ); }
              
 class_scope     : class_node type_specified        							{ $$ = { vn->ApplyIdentifier($1, @2, $2), 
 																		             vn->MakeRecordScopeGnomon($1, $2) }; 
@@ -502,7 +504,8 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 members			: member													{ $$.push_back($1); }
 				| members member 											{ $$ = $1; $$.push_back($2); }
 
-acc_memb_boot	: bare_member_nvn
+acc_memb_boot	: bare_member_nvn     // TODO better to drop this if possible since we accept comp_member
+				| bare_member_nvn ';'	
 				| comp_member
 				| acc_memb_prefix
 
