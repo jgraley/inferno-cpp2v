@@ -365,7 +365,7 @@ assign_init		: expr_entry
 				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser({}); } 
 				| '{' comma_sep_expr_decl '}'      						{ $$ = vn->OnArrayInitialiser($2); }               
 
-decl_prefix_definite	: acc_memb_prefix // Allows ‽Field to actually get us into members column so can have access spec
+decl_prefix_definite	: acc_memb_prefix // Allows ‽Field to actually get us into members column so can have access spec TODO tidy up
 //						| 	 				  		          stuff_op_scope vn_paren { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 //						| 		stuff_op_scope OPEN_VN unified_entry CLOSE_VN vn_paren { $$ = vn->OnStuff($5, $3, VN::Limit()); }		
 //						| vn_primary	   
@@ -534,7 +534,7 @@ acc_memb_prefix	: acc_memb_postfix
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
 				| 						      POINTER_IS_OP acc_memb_prefix	{ $$ = vn->OnPointerIs($2); }
 				| 					         	NEGATION_OP	acc_memb_prefix	{ $$ = vn->OnNegation($2); }
-				|                      prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+				|         	      decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict($1->block, @1, $2, @2); }
 				|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				| stuff_op_scope OPEN_VN unified_entry CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
