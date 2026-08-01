@@ -169,7 +169,7 @@ stmt_high
 %type <TreePtr<Node>> 				open_declaration decl_boot decl_entry decl_disjunction decl_conjunction declaration 
 %type <TreePtr<Node>> 				prototype bare_decl_nvn comp_decl_nvn bare_declaration bare_initialiser
 %type <TreePtr<Node>> 				assign_init
-%type <TreePtr<Node>> 				decl_prefix_definite decl_prefix decl_postfix decl_primary decl_vn_prim
+%type <TreePtr<Node>> 				decl_prefix decl_postfix decl_primary decl_vn_prim
 %type <TreePtr<Node>> 				compound_primary parameter type_boot type_entry compound_prefix compound_entry 
 //%type <TreePtr<Node>> 			compound_commands compound_boot
 %type <TreePtr<Node>> 				type_for_declarator 
@@ -365,17 +365,13 @@ assign_init		: expr_entry
 				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser({}); } 
 				| '{' comma_sep_expr_decl '}'      						{ $$ = vn->OnArrayInitialiser($2); }               
 
-decl_prefix_definite	: acc_memb_prefix // Allows ‽Field to actually get us into members column so can have access spec TODO tidy up
-//						| 	 				  		          stuff_op_scope vn_paren { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-//						| 		stuff_op_scope OPEN_VN unified_entry CLOSE_VN vn_paren { $$ = vn->OnStuff($5, $3, VN::Limit()); }		
-//						| vn_primary	   
-
 decl_prefix : decl_postfix
 			| 						         GREEN_GRASS_OP decl_prefix	{ $$ = vn->OnGrass($2); }
 			| 							      POINTER_IS_OP decl_prefix	{ $$ = vn->OnPointerIs($2); }
-			| 							        NEGATION_OP decl_prefix	{ $$ = vn->OnNegation($2); }
-			|            decl_prerestrict_op_named decl_prefix_definite	{ $$ = vn->OnRestrict($1->block, @1, $2, @2); }
-			   			   
+			| 							        NEGATION_OP decl_prefix	{ $$ = vn->OnNegation($2); }			
+			// Allows ‽Field to actually get us into access/member column so can have access spec
+			|            decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict($1->block, @1, $2, @2); }
+			   			 
 decl_postfix: decl_primary		   
 	                                       
 decl_primary: decl_vn_prim

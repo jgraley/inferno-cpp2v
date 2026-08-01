@@ -21,11 +21,6 @@ namespace LocalTree {
 
 // From Simple C to SC
 struct GlobalsModule : SCTree::Module { NODE_FUNCTIONS_FINAL };
-// Removed RENDER_MACRO() here because Record::GetRender() now uses GetKeyword() for the keyword
-// which renders as a short-form explicit eg 
-// LocalTree::GlobalsModule GlobalScope {	};
-// and is fine. TODO can we drop RENDER_MACRO() in more places? Full explicit nodes are unreadable
-// and it's difficult to parse the items in the correct column.
 
 // From Lower Control Flow 
 // Local nodes let us designate switch and for nodes as uncombable
