@@ -365,10 +365,10 @@ assign_init		: expr_entry
 				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser({}); } 
 				| '{' comma_sep_expr_decl '}'      						{ $$ = vn->OnArrayInitialiser($2); }               
 
-decl_prefix_definite	: decl_prefix
-						| 	 				  		          stuff_op_scope vn_paren { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-						| 		stuff_op_scope OPEN_VN unified_entry CLOSE_VN vn_paren { $$ = vn->OnStuff($5, $3, VN::Limit()); }		
-						| vn_primary	   
+decl_prefix_definite	: acc_memb_prefix // Allows ‽Field to actually get us into members column so can have access spec
+//						| 	 				  		          stuff_op_scope vn_paren { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+//						| 		stuff_op_scope OPEN_VN unified_entry CLOSE_VN vn_paren { $$ = vn->OnStuff($5, $3, VN::Limit()); }		
+//						| vn_primary	   
 
 decl_prefix : decl_postfix
 			| 						         GREEN_GRASS_OP decl_prefix	{ $$ = vn->OnGrass($2); }
