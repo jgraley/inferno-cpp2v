@@ -119,7 +119,7 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 	// accesses used more than once but instead couples the usage to the same access. 
 	
 	// Note 2: access specs are attached to declarations, not the surrounding record, so that
-	// for example a delta pattern can be used to change the access spec of a field.
+	// for example a delta pattern can be used to change the access spec of a member.
 	
 	list<string> ls;	
 	if( policy.cur_access )
@@ -1017,7 +1017,7 @@ bool Instance::ShouldSplitInstance( Policy ) const
 
 list<string> Instance::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
 {
-	if( policy.cur_access ) // are we in a record scope that maintains access spec, and yet are not a field
+	if( policy.cur_access ) // are we in a record scope that maintains access spec, and yet are not a member
 		throw NoAccessInstanceInAccessRecord(); 
 		
 	// Patterns managed to get an Instance that isn't a Member into a Record body.
@@ -1083,7 +1083,7 @@ bool Global::ShouldSplitInstance( Policy policy ) const
 
 list<string> Member::RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const
 {		
-	// If we don't have a current access, the fact that this is a field 
+	// If we don't have a current access, the fact that this is a member 
 	// over-rides, so force an access spec to be rendered.
 	return ApplyAndRenderAccessSpec( access, true, renderer, policy );
 }

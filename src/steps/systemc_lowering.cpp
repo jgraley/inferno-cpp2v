@@ -39,7 +39,7 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
 
 	// TODO not restricting properly: as per our name EnsureConstructorsInSCRecordUsers
 	// we should add constructors to the USERS of SC classes (i.e. those that declare
-	// one as a field). This will be the same set if every class is now an SC class.
+	// one as a member). This will be the same set if every class is now an SC class.
 	// But one day they may not be, as with small pod-resembling utility classes.
 	// Actually we want the union of *is* SC and *uses* SC
 	
@@ -125,7 +125,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     // Looking for: 
     // - some random unrelated fields
     // - the macro field for parent class constructor - to which which we need to add a member init for child class
-    // - the instance field of the child class
+    // - the instance member of the child class
     l1_class->members = (l1_fields, l1_delta, l1_member_inst_field); 
     l1_class->bases = (l1_bases);
     l1_delta->through = l1s_macro_field;

@@ -466,7 +466,7 @@ struct MemberInitialiser : Statement // TODO not a Statement, just virtual Node 
 };
 
 
-/// All the member initialsiers needed for a field etc. Order in which objects are intialised is established here.
+/// All the member initialsiers needed for a member etc. Order in which objects are intialised is established here.
 struct MembInitSeq : virtual Node 
 {
 	NODE_FUNCTIONS
@@ -647,7 +647,7 @@ struct Member : Instance,
 {
     NODE_FUNCTIONS_FINAL
     
-    TreePtr<Virtuality> virt; ///< Is the field virtual?
+    TreePtr<Virtuality> virt; ///< Is the member virtual?
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
     
 	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;

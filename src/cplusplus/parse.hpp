@@ -2036,11 +2036,11 @@ private:
 
         for( TreePtr<Declaration> d : r->members )
         {
-            TreePtr<Member> field( DynamicTreePtrCast<Instance>(d) );
-            if( !field )
+            TreePtr<Member> member( DynamicTreePtrCast<Instance>(d) );
+            if( !member )
                 continue;
-            if( DynamicTreePtrCast<Constructor>(field->type) )
-                return field;
+            if( DynamicTreePtrCast<Constructor>(member->type) )
+                return member;
         }
         ASSERTFAIL("missing constructor");
     }

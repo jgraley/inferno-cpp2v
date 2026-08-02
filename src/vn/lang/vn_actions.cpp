@@ -779,7 +779,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 			throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(q_static->loc),
 				"static is not supported at code unit level (TODO).");
-		// Remaining scopes are field and local. VN is a resolved form of C/C++
+		// Remaining scopes are member and local. VN is a resolved form of C/C++
 		// so we don't need to constrain scope. We can just call these global 
 		// if static was specified.
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
@@ -825,14 +825,14 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
 
 	// Now fill in any subclass-specific fields
-	if( auto field = TreePtr<CPPTree::Member>::DynamicCast(instance) )
+	if( auto member = TreePtr<CPPTree::Member>::DynamicCast(instance) )
 	{
 		for( const QualifierData &q : quals )
 		{
 			if( q.cat == QualCat::NODE )
 			{
 				if( auto vq = TreePtr<CPPTree::Virtuality>::DynamicCast(q.node) )
-					field->virt = vq;
+					member->virt = vq;
 					
 				if( auto aq = TreePtr<CPPTree::AccessSpec>::DynamicCast(q.node) )
 					throw YY::VNLangParser::syntax_error(
@@ -840,13 +840,13 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 						"Java-like access spec detected: " + DiagQuote(Traceable::TypeIdName( *aq )) );
 			}
 		}
-		if( !field->virt ) // absence of a vituality means non-virtual, for wild use ⯁Virtuality⦅⦆
-			field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();		
+		if( !member->virt ) // absence of a vituality means non-virtual, for wild use ⯁Virtuality⦅⦆
+			member->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();		
 			
 		// If we're in a record, use the currently stored access spec
 		// Note: the access spec set here can be overridden by ApplyAccessSpec()
 		if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) )
-			field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour			
+			member->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour			
 	}
 
 	return instance;
@@ -881,11 +881,11 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 	for( auto param : params )
 		cons_type->params.push_back(param);
 	
-	auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Member>>();
-	field->identifier = id;
-	field->type = cons_type;
-	field->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
-	field->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();
+	auto member = MakeTreeNode<StandardAgentWrapper<CPPTree::Member>>();
+	member->identifier = id;
+	member->type = cons_type;
+	member->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
+	member->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();
 
 	// Now fill in fields derived from the qualifiers	
 	for( const QualifierData &q : quals )
@@ -910,9 +910,9 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 
 	if( shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop() )
 		if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) )
-			field->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour			
+			member->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour			
 	
-	return field;
+	return member;
 }
 
 
@@ -921,9 +921,9 @@ TreePtr<Node> VNLangActions::ApplyAccessSpec( TreePtr<Node> declaration, any ins
 	// OnInstance() will still try to program the current access. But this fn will override it with the parsed 
 	// access, and then try to update the current access
 	
-	// Overwrite the access spec of the field with the specified access spec
-	if( auto field = TreePtr<CPPTree::Member>::DynamicCast(declaration) )
-		field->access = access; // Don't duplicate the subtree - we want coupling behaviour
+	// Overwrite the access spec of the member with the specified access spec
+	if( auto member = TreePtr<CPPTree::Member>::DynamicCast(declaration) )
+		member->access = access; // Don't duplicate the subtree - we want coupling behaviour
 	else
 		throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(instance_loc),
@@ -963,14 +963,14 @@ TreePtr<Node> VNLangActions::OnMemberInitialiser( TreePtr<Node> member_id, any m
 
 TreePtr<Node> VNLangActions::ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc )
 {
-	auto field = TreePtr<CPPTree::Member>::DynamicCast(instance);
-	if( !field )
+	auto member = TreePtr<CPPTree::Member>::DynamicCast(instance);
+	if( !member )
 		throw YY::VNLangParser::syntax_error(
 	  		  any_cast<YY::VNLangParser::location_type>(memb_inits_loc),
-			  "Member initialisers given for non-field: "+DiagQuote(Traceable::TypeIdName( *instance )) );		
+			  "Member initialisers given for non-member: "+DiagQuote(Traceable::TypeIdName( *instance )) );		
 	
 	for( TreePtr<Node> memb_init : memb_inits )
-		field->memb_inits.push_back( memb_init );
+		member->memb_inits.push_back( memb_init );
 
 	return instance;
 }

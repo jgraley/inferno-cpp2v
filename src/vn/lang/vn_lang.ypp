@@ -500,7 +500,7 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 members			: member													{ $$.push_back($1); }
 				| members member 											{ $$ = $1; $$.push_back($2); }
 
-acc_memb_boot	: bare_member_nvn     // TODO better to drop this if possible since we accept comp_member
+acc_memb_boot	: bare_member_nvn     
 				| bare_member_nvn ';'	
 				| comp_member
 				| acc_memb_prefix

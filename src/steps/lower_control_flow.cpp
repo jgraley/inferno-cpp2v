@@ -631,7 +631,7 @@ ExtractCallParams::ExtractCallParams()
     auto other_decls = MakePatternNode<StarAgent, Declaration>();
     auto stuff = MakePatternNode<StuffAgent, Declaration>();
     auto delta = MakePatternNode<DeltaAgent, Node>();
-    auto field = MakePatternNode<Member>();
+    auto member = MakePatternNode<Member>();
     auto func = MakePatternNode<Function>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     
@@ -653,13 +653,13 @@ ExtractCallParams::ExtractCallParams()
     auto x_not = MakePatternNode<NegationAgent, Expression>();
     auto x_id = MakePatternNode<InstanceIdentifier>();
     
-    module->members = (stuff, field, other_decls);
+    module->members = (stuff, member, other_decls);
     stuff->terminus = delta;
     delta->through =    MakeCheckUncombable(s_call);
     delta->overlay =    r_ce;
-    field->type = func; 
+    member->type = func; 
     func->params = MakePatternNode<StarAgent, Parameter>();
-    field->identifier = func_id;
+    member->identifier = func_id;
     
     s_call->argumentation = s_args;
     s_args->arguments = (params, s_param);
