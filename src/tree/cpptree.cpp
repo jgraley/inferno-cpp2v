@@ -944,7 +944,7 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production surround
 		
 	// Pre-restrict if the incoming pointer is not some kind of Declaration. This catches cases
 	// like Stuff terminus, where the parser won't have enough information to determine whether
-	// we have Local, Global, Field etc. TODO reduce these by keeping a scope stack just like the parser
+	// we have Local, Global, Member etc. TODO reduce these by keeping a scope stack just like the parser
 	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
 	{
 		s = "‽" + 
@@ -1020,7 +1020,7 @@ list<string> Instance::RenderAccessSpec( VN::RendererInterface *, Policy policy 
 	if( policy.cur_access ) // are we in a record scope that maintains access spec, and yet are not a field
 		throw NoAccessInstanceInAccessRecord(); 
 		
-	// Patterns managed to get an Instance that isn't a Field into a Record body.
+	// Patterns managed to get an Instance that isn't a Member into a Record body.
 	return {};
 }
 
@@ -1079,9 +1079,9 @@ bool Global::ShouldSplitInstance( Policy policy ) const
 	return false;
 }
 
-//////////////////////////// Field //////////////////////////////
+//////////////////////////// Member //////////////////////////////
 
-list<string> Field::RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const
+list<string> Member::RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const
 {		
 	// If we don't have a current access, the fact that this is a field 
 	// over-rides, so force an access spec to be rendered.
@@ -1089,7 +1089,7 @@ list<string> Field::RenderAccessSpec( VN::RendererInterface *renderer, Policy po
 }
 
 
-list<string> Field::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy) const 
+list<string> Member::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy) const 
 { 
 	// Demand consistency between type and identifier, as well as limitations on qualifiers
 	if( TreePtr<Constructor>::DynamicCast(type) )
@@ -1109,7 +1109,7 @@ list<string> Field::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy p
 }
 
 
-list<string> Field::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
+list<string> Member::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
 {
 	return RenderMemberInits(renderer, policy);
 }

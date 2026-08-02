@@ -84,7 +84,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l1_fields = MakePatternNode<StarAgent, Declaration>();
     auto l1_bases = MakePatternNode<StarAgent, Base>();
     auto l1_macro_args = MakePatternNode<StarAgent, Node>();    
-    auto l1_member_inst_field = MakePatternNode< Field >();
+    auto l1_member_inst_field = MakePatternNode< Member >();
     auto l1_field_id = MakePatternNode< InstanceIdentifier >();
     auto l1_delta = MakePatternNode<DeltaAgent, MacroField>();  
     auto l1s_macro_field = MakePatternNode< MacroField >(); 
@@ -119,7 +119,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     r_base->record = r_token;
     r_base->access = MakePatternNode< Public >();
        
-    // Field decl of our module in some OTHER class: add call to all constructors
+    // Member decl of our module in some OTHER class: add call to all constructors
     l1_class->identifier = MakePatternNode< TypeIdentifier >(); // not tid, the OTHER class
     
     // Looking for: 
@@ -153,7 +153,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     // static decl of our module: init to call
     // Not fields: they can't have constructor calls as intiialisers
     l2_conjunction->conjuncts = (l2_instance, l2_negation);
-    l2_negation->negand = MakePatternNode<Field>();
+    l2_negation->negand = MakePatternNode<Member>();
     l2_instance->type = tid;
     l2_instance->initialiser = l2_delta;
     l2_instance->identifier = l2_inst_id;
@@ -246,7 +246,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto s_cons_macro = MakePatternNode< MacroField >();
     auto r_cons_macro = MakePatternNode< MacroField >();
     auto macro_args = MakePatternNode<StarAgent, Node>();
-    auto process = MakePatternNode< Field >();
+    auto process = MakePatternNode< Member >();
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto statements_negation = MakePatternNode<NegationAgent, Statement>();    
     auto sx_process_macro = MakePatternNode< MacroStatement >();

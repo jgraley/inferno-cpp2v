@@ -641,8 +641,8 @@ struct Global : Instance
  non-static members. Functions have a "this" pointer. Note that access and constancy
  are intended to control the generation of read/write lines for modules. This usage of
  Constancy differs from that in Global, so we do not try to introduce a common intermediate.
- Note that static members are Global, not Field */
-struct Field : Instance,
+ Note that static members are Global, not Member */
+struct Member : Instance,
                MembInitSeq
 {
     NODE_FUNCTIONS_FINAL
@@ -685,7 +685,7 @@ struct Enumerator : Instance
 /// A local temp variable not preserved across function calls
 /** A local variable with unspecified storage which may be used within a function but is not preserved
  across recursion or between calls (such a variable could safely be implemented as any of
- Global, Field or Local since it supports only those guarantees common to all). */
+ Global, Member or Local since it supports only those guarantees common to all). */
 // TODO Really a local node, move out of here
 struct Temporary : Instance
 {
@@ -1024,7 +1024,7 @@ struct Typedef : TypeDeclaration
 }; 
 
 /// Intermediate for declaration of a struct, class, union or enum. 
-/** The set of member Declaration (which will be Field
+/** The set of member Declaration (which will be Member
  or Global) is in the Scope. They can be variables/objects in all 
  cases and additionally Callable instances in Struct/Class. */
 struct Record : TypeDeclaration,

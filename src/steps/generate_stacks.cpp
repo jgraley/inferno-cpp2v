@@ -22,7 +22,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     auto module = MakePatternNode<Module>();
     auto other_decls = MakePatternNode<StarAgent, Declaration>();
     
-    auto fi = MakePatternNode< Field >();
+    auto fi = MakePatternNode< Member >();
     auto s_comp = MakePatternNode<Compound>();
     auto sx_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
@@ -108,7 +108,7 @@ ReturnViaTemp::ReturnViaTemp()
 {
     auto s_module = MakePatternNode<Module>();
     auto r_module = MakePatternNode<Module>();
-    auto func = MakePatternNode<Field>();
+    auto func = MakePatternNode<Member>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto cp = MakePatternNode<Function>();
@@ -127,7 +127,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto m_any = MakePatternNode<DisjunctionAgent, Expression>();
     auto m_lookup = MakePatternNode<Lookup>();
     auto m_operands = MakePatternNode<StarAgent, IdValuePair>();
-    auto r_retval = MakePatternNode<Field>();
+    auto r_retval = MakePatternNode<Member>();
     auto mr_assign = MakePatternNode<Assign>();
     auto lr_assign = MakePatternNode<Assign>();
     auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_return");
@@ -191,7 +191,7 @@ AddLinkAddress::AddLinkAddress()
     auto r_module = MakePatternNode<Module>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto bases = MakePatternNode<StarAgent, Base>();
-    auto r_retaddr = MakePatternNode<Field>();
+    auto r_retaddr = MakePatternNode<Member>();
     auto r_retaddr_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_link");
     auto lr_retaddr = MakePatternNode<Parameter>();
     auto lr_retaddr_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("link");
@@ -200,7 +200,7 @@ AddLinkAddress::AddLinkAddress()
     auto s_nm = MakePatternNode<NegationAgent, Declaration>();
     auto ls_nm = MakePatternNode<NegationAgent, Declaration>();
     auto gg = MakePatternNode<GreenGrassAgent, Declaration>();
-    auto func = MakePatternNode<Field>();
+    auto func = MakePatternNode<Member>();
     auto l_over = MakePatternNode<DeltaAgent, Compound>();
     auto ls_comp = MakePatternNode<Compound>();
     auto lr_comp = MakePatternNode<Compound>();
@@ -302,8 +302,8 @@ ParamsViaTemps::ParamsViaTemps()
 {
     auto s_module = MakePatternNode<Module>();
     auto r_module = MakePatternNode<Module>();
-    auto s_func = MakePatternNode<Field>();
-    auto r_func = MakePatternNode<Field>();
+    auto s_func = MakePatternNode<Member>();
+    auto r_func = MakePatternNode<Member>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto s_cp = MakePatternNode<Function>();
@@ -327,7 +327,7 @@ ParamsViaTemps::ParamsViaTemps()
     auto m_operands = MakePatternNode<StarAgent, IdValuePair>();
     auto r_param = MakePatternNode<Local>();
     auto param_type = MakePatternNode<Type>();
-    auto r_param_hold = MakePatternNode<Field>();
+    auto r_param_hold = MakePatternNode<Member>();
     auto mr_assign = MakePatternNode<Assign>();
     auto m_expr = MakePatternNode<Expression>();
     auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_%s");
@@ -399,9 +399,9 @@ GenerateStacks::GenerateStacks()
     // Using a sub-embedded pattern of the variable-finding pattern, look for usages of 
     // the variable. Replace with an indexing operation into the array using
     // the stack index.    
-    auto s_fi = MakePatternNode<Field>();
-    auto r_fi = MakePatternNode<Field>();
-    auto l_fi = MakePatternNode<Field>();
+    auto s_fi = MakePatternNode<Member>();
+    auto r_fi = MakePatternNode<Member>();
+    auto l_fi = MakePatternNode<Member>();
     auto sx_thread = MakePatternNode<Thread>();
     auto sx_method = MakePatternNode<Method>();
     auto sx_any = MakePatternNode<DisjunctionAgent, Type>();
@@ -419,8 +419,8 @@ GenerateStacks::GenerateStacks()
     auto over = MakePatternNode<DeltaAgent, Declaration>();
     auto cs_instance = MakePatternNode<Local>();
     auto s_instance = MakePatternNode<Local>();
-    auto r_index = MakePatternNode<Field>();
-    auto r_instance = MakePatternNode<Field>();
+    auto r_index = MakePatternNode<Member>();
+    auto r_instance = MakePatternNode<Member>();
     auto r_index_type = MakePatternNode<Unsigned>();
     auto r_inc = MakePatternNode<PostIncrement>();
     auto r_ret_dec = MakePatternNode<PostDecrement>();
@@ -548,8 +548,8 @@ MergeFunctions::MergeFunctions()
 {
     auto s_module = MakePatternNode<Record>();
     auto r_module = MakePatternNode<Record>();
-    auto thread = MakePatternNode<Field>();
-    auto s_func = MakePatternNode<Field>();
+    auto thread = MakePatternNode<Member>();
+    auto s_func = MakePatternNode<Member>();
     auto thread_type = MakePatternNode<Thread>();
     auto func_type = MakePatternNode<Callable>();
     auto members = MakePatternNode<StarAgent, Declaration>();

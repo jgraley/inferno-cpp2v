@@ -170,9 +170,9 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto ls_arg = MakePatternNode< IdValuePair >();
     auto l_overcons = MakePatternNode<DeltaAgent, Instance>();
     auto l_overtype = MakePatternNode<DeltaAgent, Type>();
-    auto ls_cons = MakePatternNode< Field >();
-    auto lr_cons = MakePatternNode< Field >();
-    auto l_process = MakePatternNode< Field >();
+    auto ls_cons = MakePatternNode< Member >();
+    auto lr_cons = MakePatternNode< Member >();
+    auto l_process = MakePatternNode< Member >();
     auto l_pre = MakePatternNode<StarAgent, Statement>();
     auto l_post = MakePatternNode<StarAgent, Statement>();
     auto ls_id = MakePatternNode< InstanceIdentifier >();
@@ -308,7 +308,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
     auto l_pre = MakePatternNode<StarAgent, MemberInitialiser>();
     auto l_post = MakePatternNode<StarAgent, MemberInitialiser>();
-    auto s_cons = MakePatternNode< Field >();
+    auto s_cons = MakePatternNode< Member >();
     auto s_comp = MakePatternNode< Compound >();
     auto s_constructor_id = MakePatternNode< ConstructorIdentifier >();
     auto s_ctype = MakePatternNode<Constructor>();
@@ -327,8 +327,8 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l_record_typeid = MakePatternNode<TypeIdentifier>();
     auto l_record_bases = MakePatternNode<StarAgent, Base>();
     auto l_record_decls = MakePatternNode<StarAgent, Declaration>();
-    auto ls_field = MakePatternNode<Field>();  
-    auto lr_field = MakePatternNode<Field>();  
+    auto ls_field = MakePatternNode<Member>();  
+    auto lr_field = MakePatternNode<Member>();  
 
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_embedded_3 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( stuff, l3_instance, l3_instance );            

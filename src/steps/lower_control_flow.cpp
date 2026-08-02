@@ -631,7 +631,7 @@ ExtractCallParams::ExtractCallParams()
     auto other_decls = MakePatternNode<StarAgent, Declaration>();
     auto stuff = MakePatternNode<StuffAgent, Declaration>();
     auto delta = MakePatternNode<DeltaAgent, Node>();
-    auto field = MakePatternNode<Field>();
+    auto field = MakePatternNode<Member>();
     auto func = MakePatternNode<Function>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     

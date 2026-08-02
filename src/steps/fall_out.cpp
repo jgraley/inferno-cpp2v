@@ -18,8 +18,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto s_module = MakePatternNode<Record>();
     auto r_module = MakePatternNode<Record>();
     auto gg = MakePatternNode<GreenGrassAgent, Type>();
-    auto func = MakePatternNode<Field>();
-    auto m_func = MakePatternNode<Field>();
+    auto func = MakePatternNode<Member>();
+    auto m_func = MakePatternNode<Member>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto thread = MakePatternNode<Thread>();
     auto func_decls = MakePatternNode<StarAgent, Declaration>();
@@ -71,7 +71,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_not = MakePatternNode<NegationAgent, Statement>();
     auto m_stuff_func = MakePatternNode<StuffAgent, Scope>();
     auto l_module = MakePatternNode<Record>();
-    auto l_func = MakePatternNode<Field>();
+    auto l_func = MakePatternNode<Member>();
     auto r_lmap = MakePatternNode<Global>();
     auto l_lmap = MakePatternNode<Global>();
     auto r_lmap_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("lmap");

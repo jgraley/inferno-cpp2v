@@ -809,7 +809,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	else if( dynamic_cast<const ParameterisationScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
 	else if( dynamic_cast<const RecordScopeGnomon *>(spg.get()) )
-		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
+		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Member>>();
 	else if( dynamic_cast<const CodeUnitScopeGnomon *>(spg.get()) ) 
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
 	else if( dynamic_cast<const CompoundScopeGnomon *>(spg.get()) ) 
@@ -825,7 +825,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
 
 	// Now fill in any subclass-specific fields
-	if( auto field = TreePtr<CPPTree::Field>::DynamicCast(instance) )
+	if( auto field = TreePtr<CPPTree::Member>::DynamicCast(instance) )
 	{
 		for( const QualifierData &q : quals )
 		{
@@ -881,7 +881,7 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 	for( auto param : params )
 		cons_type->params.push_back(param);
 	
-	auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Field>>();
+	auto field = MakeTreeNode<StandardAgentWrapper<CPPTree::Member>>();
 	field->identifier = id;
 	field->type = cons_type;
 	field->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
@@ -922,7 +922,7 @@ TreePtr<Node> VNLangActions::ApplyAccessSpec( TreePtr<Node> declaration, any ins
 	// access, and then try to update the current access
 	
 	// Overwrite the access spec of the field with the specified access spec
-	if( auto field = TreePtr<CPPTree::Field>::DynamicCast(declaration) )
+	if( auto field = TreePtr<CPPTree::Member>::DynamicCast(declaration) )
 		field->access = access; // Don't duplicate the subtree - we want coupling behaviour
 	else
 		throw YY::VNLangParser::syntax_error(
@@ -963,7 +963,7 @@ TreePtr<Node> VNLangActions::OnMemberInitialiser( TreePtr<Node> member_id, any m
 
 TreePtr<Node> VNLangActions::ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc )
 {
-	auto field = TreePtr<CPPTree::Field>::DynamicCast(instance);
+	auto field = TreePtr<CPPTree::Member>::DynamicCast(instance);
 	if( !field )
 		throw YY::VNLangParser::syntax_error(
 	  		  any_cast<YY::VNLangParser::location_type>(memb_inits_loc),

@@ -35,7 +35,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 	auto es_gmodule_decls = MakePatternNode<StarAgent, Declaration>();
 	auto er_gmodule = MakePatternNode< LocalTree::GlobalsModule >();
 	auto er_scope = MakePatternNode< CodeUnit >();
-	auto er_field = MakePatternNode<Field>();
+	auto er_field = MakePatternNode<Member>();
 	auto es_id = MakePatternNode<InstanceIdentifier>();
 	auto es_constancy = MakePatternNode<Constancy>();
 #ifdef ALSO_MOVE_VARS
@@ -110,10 +110,10 @@ MainToThread::MainToThread()
 	auto gmodule = MakePatternNode< LocalTree::GlobalsModule >();
     auto delta = MakePatternNode<DeltaAgent, Instance>();
     auto body = MakePatternNode<Compound>();
-	auto s_field = MakePatternNode< Field >();
+	auto s_field = MakePatternNode< Member >();
     auto s_func = MakePatternNode<Function>();
     auto s_identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>("main");
-	auto r_field = MakePatternNode< Field >();
+	auto r_field = MakePatternNode< Member >();
 	
 	gmodule->bases = ( MakePatternNode<StarAgent, Base>() );
 	gmodule->members = ( delta, MakePatternNode<StarAgent, Declaration>() );	

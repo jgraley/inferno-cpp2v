@@ -18,8 +18,8 @@ AutosToModule::AutosToModule()
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
     auto vstmts = MakePatternNode<StarAgent, Statement>();
     auto s_var = MakePatternNode<Local>();
-    auto fn = MakePatternNode<Field>();
-    auto r_var = MakePatternNode<Field>();
+    auto fn = MakePatternNode<Member>();
+    auto r_var = MakePatternNode<Member>();
     auto ft = MakePatternNode<Callable>();
     auto stuff = MakePatternNode<StuffAgent, Initialiser>();
     auto s_comp = MakePatternNode<Compound>();
@@ -77,8 +77,8 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     auto var = MakePatternNode<DisjunctionAgent, Instance>();
     auto s_tempvar = MakePatternNode<Temporary>();
     auto s_staticvar = MakePatternNode<Global>();
-    auto r_var = MakePatternNode<Field>();
-    auto fn = MakePatternNode<Field>();
+    auto r_var = MakePatternNode<Member>();
+    auto fn = MakePatternNode<Member>();
     auto ft = MakePatternNode<Thread>();
     auto stuff = MakePatternNode<StuffAgent, Initialiser>();
     auto s_comp = MakePatternNode<Compound>();
@@ -133,7 +133,7 @@ DeclsToModule::DeclsToModule()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
     auto vstmts = MakePatternNode<StarAgent, Statement>();
-    auto fn = MakePatternNode<Field>();
+    auto fn = MakePatternNode<Member>();
     auto ut = MakePatternNode<TypeDeclaration>();
     auto ft = MakePatternNode<Thread>();
     auto stuff = MakePatternNode<StuffAgent, Initialiser>();

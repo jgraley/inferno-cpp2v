@@ -369,7 +369,7 @@ decl_prefix : decl_postfix
 			| 						         GREEN_GRASS_OP decl_prefix	{ $$ = vn->OnGrass($2); }
 			| 							      POINTER_IS_OP decl_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP decl_prefix	{ $$ = vn->OnNegation($2); }			
-			// Allows ‽Field to actually get us into access/member column so can have access spec
+			// Allows ‽Member to actually get us into access/member column so can have access spec
 			|            decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict($1->block, @1, $2, @2); }
 			   			 
 decl_postfix: decl_primary		   

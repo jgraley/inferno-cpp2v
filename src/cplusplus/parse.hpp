@@ -509,7 +509,7 @@ private:
             TRACE("scope flags 0x%x\n", S->getFlags());
             if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
 			{
-				TreePtr<Field> no = MakeTreeNode<Field> ();
+				TreePtr<Member> no = MakeTreeNode<Member> ();
 				o = no;
 				if (DS.isVirtualSpecified())
 				{
@@ -822,14 +822,14 @@ private:
             Sequence<Expression> args;
             CollectArgs( &args, Args, NumArgs );
             // Free-standing direct initialiser: we initialise with
-            // a call to the InstanceIdentifier of a Field of type 
+            // a call to the InstanceIdentifier of a Member of type 
             // Constructor. We don't bother with a Lookup since the
             // obejct is obviously the one we're delclaring.
             TreePtr<Declaration> d = hold_decl.FromRaw(Dcl);
             auto our_inst = DynamicTreePtrCast<Instance> (d);
             ASSERT( our_inst )(d);
             ASSERT( our_inst->identifier );            
-            TreePtr<Field> memb_o = GetConstructor( our_inst->type );
+            TreePtr<Member> memb_o = GetConstructor( our_inst->type );
             ASSERT( memb_o );
             ASSERT( memb_o->identifier );
 			auto ci = MakeTreeNode<ConstructInitialiser>();
@@ -1483,8 +1483,8 @@ private:
 		// MemberOrBase -> our field -> type -> memb record -> a suitable constructor -> a call to it		
 		TreePtr<Declaration> d = hold_decl.FromRaw(ConstructorDecl);
 		TreePtr<Node> our_field_node( ident_track.Get( MemberOrBase ) );
-		auto our_field( DynamicTreePtrCast<Field>(our_field_node) );
-		ASSERT( our_field )("Didn't get a Field for the thing being initialised - is it a base? TODO!!");
+		auto our_field( DynamicTreePtrCast<Member>(our_field_node) );
+		ASSERT( our_field )("Didn't get a Member for the thing being initialised - is it a base? TODO!!");
 
 		Sequence<Expression> args;
 		CollectArgs( &args, Args, NumArgs );
@@ -1495,7 +1495,7 @@ private:
         DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
 
-        TreePtr<Field> memb_o = GetConstructor( our_field->type );
+        TreePtr<Member> memb_o = GetConstructor( our_field->type );
         ASSERT( memb_o );
 		auto ci = MakeTreeNode<ConstructInitialiser>();
 		ci->argumentation = CreateMapArgumentation( args, memb_o->type );
@@ -2026,7 +2026,7 @@ private:
         ident_track.PopScope( S );       
     }
 
-    TreePtr<Field> GetConstructor( TreePtr<Type> t ) 
+    TreePtr<Member> GetConstructor( TreePtr<Type> t ) 
     {
         TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(t);
         ASSERT(id);
@@ -2036,7 +2036,7 @@ private:
 
         for( TreePtr<Declaration> d : r->members )
         {
-            TreePtr<Field> field( DynamicTreePtrCast<Instance>(d) );
+            TreePtr<Member> field( DynamicTreePtrCast<Instance>(d) );
             if( !field )
                 continue;
             if( DynamicTreePtrCast<Constructor>(field->type) )
@@ -2070,7 +2070,7 @@ private:
         auto pa = MakeTreeNode<SeqArgumentation>();
         n->placement_argumentation = pa;
         CollectArgs( &(pa->arguments), PlacementArgs, NumPlaceArgs );
-        TreePtr<Field> memb_o = GetConstructor( n->type );
+        TreePtr<Member> memb_o = GetConstructor( n->type );
         n->constructor_id = memb_o->identifier;
         auto ca = MakeTreeNode<SeqArgumentation>();
         n->constructor_argumentation = ca;
