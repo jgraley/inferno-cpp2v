@@ -33,7 +33,7 @@ GotoAfterWait::GotoAfterWait()
     auto notmatch = MakePatternNode<NegationAgent, Statement>();
     auto all = MakePatternNode<ConjunctionAgent, Statement>();
     auto anynode = MakePatternNode<ChildAgent, Statement>();
-    auto over = MakePatternNode<DeltaAgent, Statement>();
+    auto delta = MakePatternNode<DeltaAgent, Statement>();
     auto all_over = MakePatternNode<DeltaAgent, Statement>();
     auto sx_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
@@ -43,13 +43,13 @@ GotoAfterWait::GotoAfterWait()
     all_over->through = all;
     all_over->overlay = anynode;
     all->conjuncts = (anynode, notmatch);
-    anynode->terminus = over;
-    over->through = wait;
+    anynode->terminus = delta;
+    delta->through = wait;
     notmatch->negand = sx_comp;
     sx_comp->members = sx_decls;
     sx_comp->statements = (sx_pre, wait, sx_goto, sx_post);    
     
-    over->overlay = r_comp;
+    delta->overlay = r_comp;
     //r_comp->members = ();
     r_comp->statements = (wait, r_goto, r_label);
     r_goto->destination = r_labelid;
@@ -208,7 +208,7 @@ EnsureBootstrap::EnsureBootstrap()
 {
     auto fn = MakePatternNode<Instance>();
     auto thread = MakePatternNode<Thread>();
-    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto s_not = MakePatternNode<NegationAgent, Compound>();
     auto s_body = MakePatternNode<Compound>();
@@ -226,8 +226,8 @@ EnsureBootstrap::EnsureBootstrap()
         
     fn->constancy = MakePatternNode<NonConst>();    
     fn->type = thread;
-    fn->initialiser = over;
-    over->through = s_all;
+    fn->initialiser = delta;
+    delta->through = s_all;
     s_all->conjuncts = (s_not, s_body);
     s_not->negand = sx_body;
     // only exclude if there is a goto; a goto to anywhere will suffice to stmt_boot the state machine
@@ -236,7 +236,7 @@ EnsureBootstrap::EnsureBootstrap()
     sx_pre->restriction = MakeResetAssignmentPattern();
     sx_goto->destination = MakePatternNode<LabelIdentifier>(); // must be a hard goto to exclude - otherwise might 
                                                            // have calculations in it which is no good for bootstrapping
-    over->overlay = r_body;
+    delta->overlay = r_body;
     s_body->members = decls;
     s_body->statements = (pre, stop, post);
     pre->restriction = MakeResetAssignmentPattern();    
@@ -296,7 +296,7 @@ EnsureSuperLoop::EnsureSuperLoop()
 {   
     auto fn = MakePatternNode<Instance>();
     auto thread = MakePatternNode<Thread>();
-    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto sx_not = MakePatternNode<NegationAgent, Statement>();
     auto s_limit = MakePatternNode<NegationAgent, Statement>();
@@ -313,8 +313,8 @@ EnsureSuperLoop::EnsureSuperLoop()
         
     fn->constancy = MakePatternNode<NonConst>();    
     fn->type = thread;
-    fn->initialiser = over;
-    over->through = s_all;
+    fn->initialiser = delta;
+    delta->through = s_all;
     s_all->conjuncts = (sx_stuff, s_body);
     sx_stuff->terminus = sx_goto;
     sx_stuff->recurse_restriction = sx_not;
@@ -324,7 +324,7 @@ EnsureSuperLoop::EnsureSuperLoop()
     pre->restriction = s_limit;
     s_limit->negand = MakePatternNode<Goto>();
     
-    over->overlay = r_body;
+    delta->overlay = r_body;
     r_body->members = (decls);
     r_body->statements = (pre, r_loop);
     r_loop->body = r_loop_body;
@@ -337,7 +337,7 @@ EnsureSuperLoop::EnsureSuperLoop()
 ShareGotos::ShareGotos()
 {   
     auto loop = MakePatternNode<Do>();
-    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto s_body = MakePatternNode<Compound>();
     auto r_body = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
@@ -348,13 +348,13 @@ ShareGotos::ShareGotos()
     auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("ITERATE");
                     
-    loop->body = over;
+    loop->body = delta;
     loop->condition = MakePatternNode<SpecificInteger>(1);
-    over->through = s_body;
+    delta->through = s_body;
     s_body->members = (decls);
     s_body->statements = (first_goto, pre, first_goto, post);    
 
-    over->overlay = r_body;
+    delta->overlay = r_body;
     r_body->members = (decls);
     r_body->statements = (first_goto, pre, r_goto, post, r_label);    
     r_label->identifier = r_labelid;
@@ -495,7 +495,7 @@ AddYieldFlag::AddYieldFlag()
     auto lr_and = MakePatternNode<LogicalAnd>();
     auto lr_not = MakePatternNode<LogicalNot>();
     auto func_over = MakePatternNode<DeltaAgent, Compound>();
-    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto r_flag_decl = MakePatternNode<Temporary>();
     auto r_flag_init = MakePatternNode<Assign>();
     auto mr_assign = MakePatternNode<Assign>();
@@ -513,8 +513,8 @@ AddYieldFlag::AddYieldFlag()
     func_over->through = s_func_comp;    
     s_func_comp->members = (func_decls);
     s_func_comp->statements = (func_pre, loop);
-    loop->body = over;
-    over->through = s_comp;
+    loop->body = delta;
+    delta->through = s_comp;
     s_comp->members = decls;
     s_comp->statements = (stmts);
     stmts->restriction = MakePatternNode<If>(); // anti-spin
@@ -526,7 +526,7 @@ AddYieldFlag::AddYieldFlag()
     r_flag_decl->type = MakePatternNode<Boolean>();
     r_flag_decl->initialiser = MakePatternNode<Uninitialised>();
     r_flag_decl->constancy = MakePatternNode<NonConst>();        
-    over->overlay = embedded;
+    delta->overlay = embedded;
     r_comp->members = (decls, r_flag_decl);
     r_comp->statements = (r_flag_init, stmts);
 
@@ -565,7 +565,7 @@ AddInferredYield::AddInferredYield()
     auto func_pre = MakePatternNode<StarAgent, Statement>();
     auto stmts = MakePatternNode<StarAgent, Statement>();
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
-    auto over = MakePatternNode<DeltaAgent, Statement>();
+    auto delta = MakePatternNode<DeltaAgent, Statement>();
     auto flag_decl = MakePatternNode<Local>();
     auto flag_id = MakePatternNode<InstanceIdentifier>();
     auto r_yield = MakePatternNode<WaitDelta>();
@@ -587,8 +587,8 @@ AddInferredYield::AddInferredYield()
     flag_decl->initialiser = MakePatternNode<Uninitialised>();
     flag_decl->identifier = flag_id;
     func_comp->statements = (func_pre, loop);
-    loop->body = over;
-    over->through = s_all;
+    loop->body = delta;
+    delta->through = s_all;
     s_all->conjuncts = (s_comp, s_notmatch);
     s_comp->members = (flag_decl);
     s_comp->statements = (stmts);
@@ -598,7 +598,7 @@ AddInferredYield::AddInferredYield()
     sx_if->condition = sx_not;
     sx_not->operands = (flag_id);
     
-    over->overlay = r_comp;
+    delta->overlay = r_comp;
     r_comp->members = (flag_decl);
     r_comp->statements = (stmts, r_if);
     r_if->condition = r_not;
@@ -627,7 +627,7 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     auto r_if = MakePatternNode<If>();
     auto r_equal = MakePatternNode<Equal>();
     auto func_over = MakePatternNode<DeltaAgent, Compound>();
-    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto first_init = MakePatternNode<Statement>();
                     
     fn->constancy = MakePatternNode<NonConst>();    
@@ -637,15 +637,15 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     func_over->through = s_func_comp;
     s_func_comp->members = (func_decls);
     s_func_comp->statements = (first_init, inits, loop);
-    loop->body = over;
-    over->through = s_comp;
+    loop->body = delta;
+    delta->through = s_comp;
 //    s_comp->members = ();
     s_comp->statements = (stmts);    
     
     func_over->overlay = r_func_comp;
     r_func_comp->members = (func_decls);
     r_func_comp->statements = (loop);
-    over->overlay = r_comp;
+    delta->overlay = r_comp;
 //    r_comp->members = ();
     r_comp->statements = (r_if, stmts);
     r_if->condition = r_equal;
@@ -703,7 +703,7 @@ LoopRotation::LoopRotation()
     auto post_yield = MakePatternNode<StarAgent, If>();
     auto r_equal = MakePatternNode<Equal>();
     auto func_over = MakePatternNode<DeltaAgent, Compound>();
-    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto s_enum = MakePatternNode<Enumeration>();
     auto s_enum_id = MakePatternNode<TypeIdentifier>();
@@ -735,8 +735,8 @@ LoopRotation::LoopRotation()
     s_var_decl->type = s_enum_id;
     s_var_decl->identifier = s_var_id;
     func_comp->statements = (inits, loop);
-    loop->body = over;
-    over->through = s_all;
+    loop->body = delta;
+    delta->through = s_all;
     s_all->conjuncts = (s_comp_loop, s_comp_yield, s_notmatch);
     s_comp_loop->members = (comp_loop_decls);
     // Search for a loop. Assume that a state enum value in a body means "could transition to the state" and one in
@@ -775,7 +775,7 @@ LoopRotation::LoopRotation()
     outer_bottom_stuff_noyield->terminus = MakePatternNode<Wait>();    
     inner_state->disjuncts = (loop_top, loop_bottom); // outer loop can share top or bottom state with inner loop; but not both, so at least one must be here
    
-    over->overlay = r_comp;
+    delta->overlay = r_comp;
     r_comp->members = (comp_loop_decls);
     r_comp->statements = (comp_loop_pre, loop_bottom, loop_top, loop_body, comp_loop_post);    // rotated version of s_comp_loop
         

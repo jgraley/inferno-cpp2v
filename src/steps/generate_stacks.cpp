@@ -30,7 +30,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto sx_decls = MakePatternNode<StarAgent, Declaration>();
-    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto sx_return = MakePatternNode<Return>();
     auto r_return = MakePatternNode<Return>();
     auto s_any = MakePatternNode<DisjunctionAgent, Callable>();
@@ -46,16 +46,16 @@ ExplicitiseReturn::ExplicitiseReturn()
     s_proc->params = MakePatternNode<StarAgent, Parameter>();
     s_func->params = MakePatternNode<StarAgent, Parameter>();
     s_func->return_type = MakePatternNode< Void >();
-    fi->initialiser = over;
+    fi->initialiser = delta;
     s_comp->members = decls;
     s_comp->statements = (pre);
-    over->through = s_all;
+    delta->through = s_all;
     s_all->conjuncts = (s_comp, s_not);
     s_not->negand = sx_comp;
     sx_comp->members = sx_decls;
     sx_comp->statements = (sx_pre, sx_return);
     
-    over->overlay = r_comp;
+    delta->overlay = r_comp;
     r_comp->members = decls;
     r_comp->statements = (pre, r_return);
     r_return->return_value = MakePatternNode<Uninitialised>();
@@ -137,7 +137,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto mr_comp = MakePatternNode<StatementExpression>();
     auto ms_gg = MakePatternNode<GreenGrassAgent, Call>();
     auto overcp = MakePatternNode<DeltaAgent, Type>();
-    auto over_comp = MakePatternNode<DeltaAgent, Compound>();
+    auto l_delta_comp = MakePatternNode<DeltaAgent, Compound>();
     auto func_access = MakePatternNode<AccessSpec>();
     
     auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( r_body, ls_return, lr_comp );
@@ -159,9 +159,9 @@ ReturnViaTemp::ReturnViaTemp()
     s_module->members = (decls, func);
     r_module->members = (decls, func, r_retval);
     func->type = cp;
-    func->initialiser = over_comp;
+    func->initialiser = l_delta_comp;
 	func->access = func_access;        
-    over_comp->through = s_body;
+    l_delta_comp->through = s_body;
     func->identifier = func_id;
     s_body->members = (locals);
     s_body->statements = (statements);
@@ -169,7 +169,7 @@ ReturnViaTemp::ReturnViaTemp()
     cp->return_type = overcp;
     overcp->through = return_type;
     return_type->negand = sx_void;
-    over_comp->overlay = embedded_l;
+    l_delta_comp->overlay = embedded_l;
     r_body->members = (locals);
     r_body->statements = (statements);
     overcp->overlay = MakePatternNode<Void>();
@@ -331,7 +331,7 @@ ParamsViaTemps::ParamsViaTemps()
     auto mr_assign = MakePatternNode<Assign>();
     auto m_expr = MakePatternNode<Expression>();
     auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_%s");
-    auto over = MakePatternNode<DeltaAgent, Declaration>();
+    auto delta = MakePatternNode<DeltaAgent, Declaration>();
     auto func_access = MakePatternNode<AccessSpec>();
     
     ms_call->callee = func_id;
@@ -346,10 +346,10 @@ ParamsViaTemps::ParamsViaTemps()
     mr_args->arguments = (m_operands);
     auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Scope>( r_module, ms_call, mr_comp );
     
-    s_module->members = (decls, over);
-    r_module->members = (decls, over, r_param_hold);
-    over->through = s_func;
-    over->overlay = r_func;
+    s_module->members = (decls, delta);
+    r_module->members = (decls, delta, r_param_hold);
+    delta->through = s_func;
+    delta->overlay = r_func;
     s_func->type = s_cp;
     r_func->type = r_cp;
     s_func->initialiser = s_body;
@@ -416,7 +416,7 @@ GenerateStacks::GenerateStacks()
     auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto cs_stuff = MakePatternNode<StuffAgent, Compound>();
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
-    auto over = MakePatternNode<DeltaAgent, Declaration>();
+    auto delta = MakePatternNode<DeltaAgent, Declaration>();
     auto cs_instance = MakePatternNode<Local>();
     auto s_instance = MakePatternNode<Local>();
     auto r_index = MakePatternNode<Member>();
@@ -499,10 +499,10 @@ GenerateStacks::GenerateStacks()
     temp->statements = (r_embedded_3);
     
     // Master search - look for functions satisfying the construct limitation and get
-    s_module->members = (over, members); // #580 here
-    r_module->members = (over, members, r_index);
-    over->through = s_fi;
-    over->overlay = r_fi;    
+    s_module->members = (delta, members); // #580 here
+    r_module->members = (delta, members, r_index);
+    delta->through = s_fi;
+    delta->overlay = r_fi;    
     s_fi->identifier = r_fi->identifier = fi_id;
     s_fi->type = r_fi->type = s_not;
     s_fi->virt = MakePatternNode<NonVirtual>();

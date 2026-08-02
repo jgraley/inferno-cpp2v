@@ -42,7 +42,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_stmts = MakePatternNode<StarAgent, Statement>();
     auto l_dead_gotos = MakePatternNode<StarAgent, Statement>();
     auto l_switch = MakePatternNode<Switch>();
-    auto l_over_enum = MakePatternNode<DeltaAgent, Enumeration>();
+    auto l_delta_enum = MakePatternNode<DeltaAgent, Enumeration>();
     auto ls_enum = MakePatternNode<Enumeration>();
     auto lr_enum = MakePatternNode<Enumeration>();
     auto lr_state_decl = MakePatternNode<Enumerator>();
@@ -88,7 +88,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto l_comp = MakePatternNode<Compound>();
-    auto over_comp = MakePatternNode<DeltaAgent, Compound>();
+    auto l_delta_comp = MakePatternNode<DeltaAgent, Compound>();
     auto l_overll = MakePatternNode<DeltaAgent, Statement>();
     auto l_state_label = MakePatternNode< LocalTree::StateLabel >();
     auto comp_membs = MakePatternNode<StarAgent, Declaration>();
@@ -123,9 +123,9 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     l_not->negand = MakePatternNode<Goto>();
     l_post->restriction = MakePatternNode<If>();    
     l_dead_gotos->restriction = MakePatternNode<Goto>();
-    l_over_enum->through = ls_enum;
-    l_over_enum->overlay = lr_enum;
-    l_module->members = (l_module_decls, l_over_enum, l_func);
+    l_delta_enum->through = ls_enum;
+    l_delta_enum->overlay = lr_enum;
+    l_module->members = (l_module_decls, l_delta_enum, l_func);
     lr_state_decl->constancy = MakePatternNode<Const>();
     lr_state_decl->identifier = lr_state_id;
     lr_state_decl->type = r_enum_id;
@@ -156,9 +156,9 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     func->type = gg;
     gg->through = thread;
     func->identifier = func_id;
-    func->initialiser = over_comp;
-    over_comp->through = s_comp;
-    over_comp->overlay = r_comp;
+    func->initialiser = l_delta_comp;
+    l_delta_comp->through = s_comp;
+    l_delta_comp->overlay = r_comp;
     s_comp->members = (comp_membs);
     r_comp->members = (comp_membs, r_lmap);
     r_comp->statements = s_comp->statements = (MakePatternNode<StarAgent, Statement>());
@@ -580,13 +580,13 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     auto cond = MakePatternNode<Expression>();
     auto sx_not = MakePatternNode<NegationAgent, Statement>();
     auto r_do = MakePatternNode<Do>();
-    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto delta = MakePatternNode<DeltaAgent, Compound>();
     
     auto embedded_ll = MakePatternNode<EmbeddedSearchReplaceAgent, Statement>( r_body_comp, MakePatternNode<Goto>(), MakePatternNode<Continue>() );    
     
     inst->type = MakePatternNode<Callable>();
-    inst->initialiser = over;
-    over->through = s_comp;
+    inst->initialiser = delta;
+    delta->through = s_comp;
     s_comp->members = (decls);
     s_comp->statements = (s_label, body, is_conditional_goto 
                                          ? TreePtr<Statement>(s_ifgoto) 
@@ -597,7 +597,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     s_ifgoto->body = s_goto;
     s_ifgoto->body_else = MakePatternNode<Nop>();
     
-    over->overlay = r_comp;
+    delta->overlay = r_comp;
     r_comp->members = (decls);
     r_comp->statements = (r_do);
     r_do->condition = is_conditional_goto 
@@ -624,7 +624,7 @@ InsertInferredYield::InsertInferredYield()
     auto loop_decls = MakePatternNode<StarAgent, Declaration>();
     auto stmts = MakePatternNode<StarAgent, Statement>();
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
-    auto over = MakePatternNode<DeltaAgent, Statement>();
+    auto delta = MakePatternNode<DeltaAgent, Statement>();
     auto flag_id = MakePatternNode<InstanceIdentifier>();
     auto r_yield = MakePatternNode<WaitDelta>();
     auto loop = MakePatternNode<Loop>();
@@ -642,13 +642,13 @@ InsertInferredYield::InsertInferredYield()
     fn->identifier = fn_id;  
     func_comp->members = (func_decls);
     func_comp->statements = (loop);
-    loop->body = over;
-    over->through = s_comp;
+    loop->body = delta;
+    delta->through = s_comp;
     s_comp->members = (loop_decls);
     s_comp->statements = (stmts);
     stmts->restriction = MakePatternNode<If>();
     
-    over->overlay = r_comp;
+    delta->overlay = r_comp;
     r_comp->members = (loop_decls);
     r_comp->statements = (stmts, r_yield);
     

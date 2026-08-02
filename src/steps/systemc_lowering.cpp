@@ -81,14 +81,14 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetLoweredIdName() ); 
     
     auto l1_class = MakePatternNode< InheritanceRecord >();
-    auto l1_fields = MakePatternNode<StarAgent, Declaration>();
+    auto l1_members = MakePatternNode<StarAgent, Declaration>();
     auto l1_bases = MakePatternNode<StarAgent, Base>();
     auto l1_macro_args = MakePatternNode<StarAgent, Node>();    
-    auto l1_member_inst_field = MakePatternNode< Member >();
-    auto l1_field_id = MakePatternNode< InstanceIdentifier >();
+    auto l1_member_inst_member = MakePatternNode< Member >();
+    auto l1_member_id = MakePatternNode< InstanceIdentifier >();
     auto l1_delta = MakePatternNode<DeltaAgent, MacroField>();  
-    auto l1s_macro_field = MakePatternNode< MacroField >(); 
-    auto l1r_macro_field = MakePatternNode< MacroField >(); 
+    auto l1s_macro_member = MakePatternNode< MacroField >(); 
+    auto l1r_macro_member = MakePatternNode< MacroField >(); 
     auto l1r_memb_init = MakePatternNode<MemberInitialiser>();
     auto l1r_cons_init = MakePatternNode<ConstructInitialiser>();
     auto l1r_args = MakePatternNode<SeqArgumentation>();
@@ -126,24 +126,24 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     // - some random unrelated fields
     // - the macro field for parent class constructor - to which which we need to add a member init for child class
     // - the instance member of the child class
-    l1_class->members = (l1_fields, l1_delta, l1_member_inst_field); 
+    l1_class->members = (l1_members, l1_delta, l1_member_inst_member); 
     l1_class->bases = (l1_bases);
-    l1_delta->through = l1s_macro_field;
-    l1_delta->overlay = l1r_macro_field;
-    l1s_macro_field->identifier = MakePatternNode< PreprocessorIdentifier >();
-    l1s_macro_field->arguments = l1_macro_args;
-    l1s_macro_field->memb_inits = (l1_memb_inits);
-    l1r_macro_field->arguments = l1_macro_args;
-    l1r_macro_field->memb_inits = (l1_memb_inits, l1r_memb_init); 
+    l1_delta->through = l1s_macro_member;
+    l1_delta->overlay = l1r_macro_member;
+    l1s_macro_member->identifier = MakePatternNode< PreprocessorIdentifier >();
+    l1s_macro_member->arguments = l1_macro_args;
+    l1s_macro_member->memb_inits = (l1_memb_inits);
+    l1r_macro_member->arguments = l1_macro_args;
+    l1r_macro_member->memb_inits = (l1_memb_inits, l1r_memb_init); 
     
-    l1_member_inst_field->type = tid;
-    l1_member_inst_field->identifier = l1_field_id;
+    l1_member_inst_member->type = tid;
+    l1_member_inst_member->identifier = l1_member_id;
     
 	l1_memb_inits->restriction = l1_memb_inits_negation;
 	l1_memb_inits_negation->negand = l1x_memb_init;
-	l1x_memb_init->member_id = l1_field_id; // this should be enough to prevent spin
+	l1x_memb_init->member_id = l1_member_id; // this should be enough to prevent spin
 	
-	l1r_memb_init->member_id = l1_field_id;
+	l1r_memb_init->member_id = l1_member_id;
 	l1r_memb_init->initialiser = l1r_cons_init;
 	l1r_cons_init->constructor_id = MakePatternNode< SpecificInstanceIdentifier >("constructor_id_should_not_appear_in_code");
 	l1r_cons_init->argumentation = l1r_args;

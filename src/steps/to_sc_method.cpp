@@ -24,7 +24,7 @@ AutosToModule::AutosToModule()
     auto stuff = MakePatternNode<StuffAgent, Initialiser>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto type = MakePatternNode<Type>();
     auto var_id = MakePatternNode<InstanceIdentifier>();
@@ -40,8 +40,8 @@ AutosToModule::AutosToModule()
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
-    stuff->terminus = over;
-    over->through = s_all;
+    stuff->terminus = delta;
+    delta->through = s_all;
     s_all->conjuncts = (sx_not, s_comp);
     sx_not->negand = sx_stuff;
     sx_stuff->terminus = sx_call;
@@ -52,7 +52,7 @@ AutosToModule::AutosToModule()
     s_var->identifier = var_id;
     s_var->initialiser = var_init;
      
-    over->overlay = r_comp;
+    delta->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
     r_var->type = type;
@@ -83,7 +83,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     auto stuff = MakePatternNode<StuffAgent, Initialiser>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto type = MakePatternNode<Type>();
     auto var_id = MakePatternNode<InstanceIdentifier>();
@@ -97,8 +97,8 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
-    stuff->terminus = over;
-    over->through = s_comp;
+    stuff->terminus = delta;
+    delta->through = s_comp;
     s_comp->members = (vdecls, s_tempvar);
     s_comp->statements = (vstmts);
     var->disjuncts = (s_tempvar, s_staticvar);
@@ -118,7 +118,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     r_var->identifier = var_identifier;
     r_var->initialiser = var_initialiser;
      
-    over->overlay = r_comp;
+    delta->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
     
@@ -139,7 +139,7 @@ DeclsToModule::DeclsToModule()
     auto stuff = MakePatternNode<StuffAgent, Initialiser>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto over = MakePatternNode<DeltaAgent, Compound>();
+    auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto bases = MakePatternNode<StarAgent, Base>();
     
     s_rec->members = (decls, fn);
@@ -148,12 +148,12 @@ DeclsToModule::DeclsToModule()
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
-    stuff->terminus = over;
-    over->through = s_comp;
+    stuff->terminus = delta;
+    delta->through = s_comp;
     s_comp->members = (vdecls, ut);
     s_comp->statements = (vstmts);
      
-    over->overlay = r_comp;
+    delta->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
     
@@ -221,7 +221,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto m_comp = MakePatternNode<Compound>();
-    auto over_comp = MakePatternNode<DeltaAgent, Compound>();
+    auto l_delta_comp = MakePatternNode<DeltaAgent, Compound>();
     auto s_all = MakePatternNode<ConjunctionAgent, Instance>();
     auto s_stuff = MakePatternNode<StuffAgent, Instance>();
     auto s_return = MakePatternNode<Return>();
@@ -260,7 +260,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     mr_if->body = ms_affected;
     mr_if->body_else = MakePatternNode<Nop>();
     
-    auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( over_comp, m_comp );
+    auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( l_delta_comp, m_comp );
     
     ls_return->return_value = ls_uninit;
     lr_assign->operands = (r_flag_id, lr_false);
@@ -272,8 +272,8 @@ ExplicitiseReturns::ExplicitiseReturns()
     inst->initialiser = embedded_l;
     s_stuff->terminus = s_return;
     s_return->return_value = s_uninit;
-    over_comp->through = s_comp;
-    over_comp->overlay = r_comp;
+    l_delta_comp->through = s_comp;
+    l_delta_comp->overlay = r_comp;
     s_comp->members = (decls);
     r_comp->members = (decls, r_flag);
     s_comp->statements = r_comp->statements = (stmts);

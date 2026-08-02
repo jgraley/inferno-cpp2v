@@ -137,16 +137,16 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     auto sx_not = MakePatternNode<NegationAgent, Node>();
     auto sx_instance = MakePatternNode<Instance>();
     auto node = MakePatternNode<ChildAgent, Node>();
-    auto over = MakePatternNode<DeltaAgent, Node>();
+    auto delta = MakePatternNode<DeltaAgent, Node>();
     auto s_comp = MakePatternNode<Compound>();
     auto body = MakePatternNode< Statement >();
 
     all->conjuncts = (node, sx_not);
-    node->terminus = over;
+    node->terminus = delta;
     sx_not->negand = sx_instance;
     sx_instance->initialiser = s_comp;
-    over->through = s_comp;
-    over->overlay = body;
+    delta->through = s_comp;
+    delta->overlay = body;
 
     s_comp->statements = body;
     // Note: leaving s_comp empty meaning no decls allowed
@@ -188,7 +188,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     // and replace by a reference to the new label.
     //
     // Notes:
-    // - The embedded pattern must operate over the entire function, not just the 
+    // - The embedded pattern must operate delta the entire function, not just the 
     // compound that containes the labels, because labels have function 
     // scope and the gotos can be anywhere.
     // - Do not assume the usages of the labels will be gotos. We support
@@ -249,7 +249,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     // and replace by a reference to a new merged one.
     //
     // Notes:
-    // - The embedded pattern must operate over the entire function, not just the 
+    // - The embedded pattern must operate delta the entire function, not just the 
     // compound that containes the labels, because labels have function 
     // scope and the gotos can be anywhere.
     // - Do not assume the usages of the labels will be gotos. We support
@@ -438,7 +438,7 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     auto s_all = MakePatternNode<ConjunctionAgent, Scope>();
     auto s_scope = MakePatternNode<DeclScope>();
     auto r_scope = MakePatternNode<DeclScope>();
-    auto over_scope = MakePatternNode<DeltaAgent, Scope>();
+    auto delta_scope = MakePatternNode<DeltaAgent, Scope>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto inst = MakePatternNode<Instance>();
     auto nested_array = MakePatternNode<StuffAgent, Type>();
@@ -455,9 +455,9 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     auto s_nscope = MakePatternNode<NegationAgent, Scope>();
     
     s_all->conjuncts = (stuff1, s_nscope);
-    stuff1->terminus = over_scope;
-    over_scope->through = s_scope;
-    over_scope->overlay = r_scope;
+    stuff1->terminus = delta_scope;
+    delta_scope->through = s_scope;
+    delta_scope->overlay = r_scope;
     s_scope->members = (inst, decls);
     r_scope->members = (decls);
     inst->type = nested_array;

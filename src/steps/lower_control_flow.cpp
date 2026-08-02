@@ -174,7 +174,7 @@ DetectCombableBreak::DetectCombableBreak()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
-    auto over = MakePatternNode<DeltaAgent, Break>();
+    auto delta = MakePatternNode<DeltaAgent, Break>();
     auto s_ubreak = MakePatternNode<UncombableBreak>();
     auto r_break = MakePatternNode<CombableBreak>();
     
@@ -183,9 +183,9 @@ DetectCombableBreak::DetectCombableBreak()
     swtch->condition = expr;
     swtch->body = comp;
     comp->members = decls;
-    comp->statements = (pre, over, post);
-    over->through = s_ubreak;
-    over->overlay = r_break;
+    comp->statements = (pre, delta, post);
+    delta->through = s_ubreak;
+    delta->overlay = r_break;
     
     Configure( SEARCH_REPLACE, all, swtch );
 }
@@ -274,7 +274,7 @@ IfToIfGoto::IfToIfGoto()
     // laep-frogging gotos. Since we are converting from a general kind of if
     // to a more specific kind (the condiitonal goto pattern) we have to 
     // exclude the conditional goto explicitly using and-not in the search 
-    // pattern. Otherwise we would spin forever expanding them over and over.
+    // pattern. Otherwise we would spin forever expanding them delta and delta.
     auto s_and = MakePatternNode<ConjunctionAgent, Statement>();
     auto s_if = MakePatternNode<If>();
     auto l_r_if = MakePatternNode<If>();

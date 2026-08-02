@@ -12,19 +12,19 @@ using namespace Steps;
 
 RaiseSCClass::RaiseSCClass( TreePtr< Type > lr_sctype )
 {
-    auto over = MakePatternNode<DeltaAgent, Node>();
+    auto delta = MakePatternNode<DeltaAgent, Node>();
     auto s_program = MakePatternNode< CodeUnit >();
     auto r_program = MakePatternNode< CodeUnit >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto s_class = MakePatternNode< Class >();
     auto s_token = MakePatternNode< SpecificTypeIdentifierByNameAgent >( lr_sctype->GetLoweredIdName() );                
-    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, s_token, lr_sctype );    
+    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( delta, s_token, lr_sctype );    
     auto s_decls = MakePatternNode<StarAgent, Declaration>();
     auto s_bases = MakePatternNode<StarAgent, Base>();
         
     // Eliminate the declaration that came from isystemc.h
-    over->through = s_program;
-    over->overlay = r_program;
+    delta->through = s_program;
+    delta->overlay = r_program;
     s_program->members = (decls, s_class);
     s_class->identifier = s_token;
     s_class->members = (s_decls);
@@ -32,13 +32,13 @@ RaiseSCClass::RaiseSCClass( TreePtr< Type > lr_sctype )
         
     r_program->members = (decls);          
        
-    Configure( COMPARE_REPLACE, over, r_embedded );
+    Configure( COMPARE_REPLACE, delta, r_embedded );
 }
 
 
 RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_scclass )
 {
-    auto over = MakePatternNode<DeltaAgent, Node>();
+    auto delta = MakePatternNode<DeltaAgent, Node>();
     auto s_program = MakePatternNode< CodeUnit >();
     auto r_program = MakePatternNode< CodeUnit >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
@@ -49,13 +49,13 @@ RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_sccla
     auto ls_base = MakePatternNode< Base >();
     auto l_tid = MakePatternNode< TypeIdentifier >();
     auto s_token = MakePatternNode< SpecificTypeIdentifierByNameAgent >( lr_scclass->GetLoweredIdName() ); 
-    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, ls_class, lr_scclass );    
+    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( delta, ls_class, lr_scclass );    
     auto s_decls = MakePatternNode<StarAgent, Declaration>();
     auto s_bases = MakePatternNode<StarAgent, Base>();
 
     // Eliminate the declaration that came from isystemc.h
-    over->through = s_program;
-    over->overlay = r_program;
+    delta->through = s_program;
+    delta->overlay = r_program;
     s_program->members = (decls, s_class);
     s_class->identifier = s_token;        
     s_class->members = (s_decls);
@@ -70,7 +70,7 @@ RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_sccla
     lr_scclass->members = (l_decls);
     lr_scclass->bases = (l_bases);
        
-    Configure( COMPARE_REPLACE, over, r_embedded );
+    Configure( COMPARE_REPLACE, delta, r_embedded );
 }
 
 
@@ -155,7 +155,7 @@ RaiseTerminationFunction::RaiseTerminationFunction( TreePtr<TerminationFunction>
 
 RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
 {
-    auto over = MakePatternNode<DeltaAgent, Node>();
+    auto delta = MakePatternNode<DeltaAgent, Node>();
     auto s_program = MakePatternNode< CodeUnit >();
     auto r_program = MakePatternNode< CodeUnit >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
@@ -181,12 +181,12 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto l_ident = MakePatternNode<ConstructorIdentifier>();
     auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( lr_scprocess->GetLoweredIdName() ); 
     auto s_arg_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "func" );
-    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( over, l_module, l_module );            
+    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( delta, l_module, l_module );            
     auto l_ctype_param = MakePatternNode<Parameter>();
     
     // Eliminate the declaration that came from isystemc.h
-    over->through = s_program;
-    over->overlay = r_program;
+    delta->through = s_program;
+    delta->overlay = r_program;
     s_program->members = (decls, s_instance);
     s_instance->constancy = MakePatternNode<NonConst>();
     s_instance->identifier = s_token;        
@@ -226,7 +226,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     l_overtype->through = MakePatternNode<Callable>();
     l_overtype->overlay = lr_scprocess;
     
-    Configure( COMPARE_REPLACE, over, r_embedded );
+    Configure( COMPARE_REPLACE, delta, r_embedded );
 }
 
 
@@ -303,7 +303,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
 {
     auto module_typeid = MakePatternNode< TypeIdentifier >();
     auto stuff = MakePatternNode<StuffAgent, Scope>();
-    auto over = MakePatternNode<DeltaAgent, Scope>();
+    auto delta = MakePatternNode<DeltaAgent, Scope>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
     auto l_pre = MakePatternNode<StarAgent, MemberInitialiser>();
@@ -322,22 +322,22 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l3_instance = MakePatternNode<Instance>();  
     auto l3_delta = MakePatternNode<DeltaAgent, Initialiser>();  
     auto l3s_construct_init = MakePatternNode<ConstructInitialiser>();
-    auto ls_record = MakePatternNode<Module>();  
-    auto lr_record = MakePatternNode<Module>();  
+    auto l_record = MakePatternNode<Module>();  
     auto l_record_typeid = MakePatternNode<TypeIdentifier>();
     auto l_record_bases = MakePatternNode<StarAgent, Base>();
     auto l_record_decls = MakePatternNode<StarAgent, Declaration>();
-    auto ls_field = MakePatternNode<Member>();  
-    auto lr_field = MakePatternNode<Member>();  
+    auto ls_member = MakePatternNode<Member>();  
+    auto lr_member = MakePatternNode<Member>();  
+    auto l_delta = MakePatternNode<DeltaAgent, Member>();
 
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_embedded_3 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( stuff, l3_instance, l3_instance );            
-    auto r_embedded_1 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( r_embedded_3, ls_record, lr_record );            
+    auto r_embedded_1 = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( r_embedded_3, l_record );            
                     
     // dispense with an empty constructor                 
-    stuff->terminus = over;
-    over->through = s_module;
-    over->overlay = r_module;
+    stuff->terminus = delta;
+    delta->through = s_module;
+    delta->overlay = r_module;
     s_module->identifier = module_typeid;
     s_module->bases = (bases);
     s_module->members = (s_cons, decls);
@@ -352,22 +352,21 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     r_module->identifier = module_typeid;
             
     // Embedded 1: dispense with any calls to s_constructor_id from member inits
-    ls_record->identifier = l_record_typeid;
-    ls_record->bases = (l_record_bases);
-    ls_record->members = (ls_field, l_record_decls);
-    ls_field->virt = MakePatternNode<NonVirtual>();
-    ls_field->constancy = MakePatternNode<NonConst>();
-    ls_field->type = ls_ctype;
+    l_record->identifier = l_record_typeid;
+    l_record->bases = (l_record_bases);
+    l_record->members = (l_delta, l_record_decls);
+    l_delta->through = ls_member;
+    ls_member->virt = MakePatternNode<NonVirtual>();
+    ls_member->constancy = MakePatternNode<NonConst>();
+    ls_member->type = ls_ctype;
     ls_ctype->params = (ls_params); // any parameters
-    ls_field->memb_inits = (l_pre, l1s_memb_init, l_post);
+    ls_member->memb_inits = (l_pre, l1s_memb_init, l_post);
 	l1s_memb_init->initialiser = l1s_cons_init;
 	l1s_cons_init->constructor_id = s_constructor_id;
-    lr_record->identifier = l_record_typeid;
-    lr_record->bases = (l_record_bases);
-    lr_record->members = (lr_field, l_record_decls);
-    lr_field->virt = MakePatternNode<NonVirtual>();
-    lr_field->constancy = MakePatternNode<NonConst>();
-    lr_field->memb_inits = (l_pre, l_post);
+    l_delta->overlay = lr_member;
+    lr_member->virt = MakePatternNode<NonVirtual>();
+    lr_member->constancy = MakePatternNode<NonConst>();
+    lr_member->memb_inits = (l_pre, l_post);
 
     // Embedded 3: dispense with any init constructs using s_constructor_id
     l3_instance->constancy = MakePatternNode<NonConst>();
