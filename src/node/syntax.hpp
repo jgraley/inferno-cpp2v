@@ -182,6 +182,8 @@ public:
     static Production BoostPrecedence( Production prec );
     static int GetPrecedence( Production prec );
     static string::size_type GetLineBreakThreshold();
+    virtual string GetKeyword() const;    
+	static string RenderNodeTypeName( const Syntax *that ); 
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"

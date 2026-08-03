@@ -431,7 +431,7 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 
 	// This assumes no action is required in order to render a prefix operation
 	return "‽" + 
-	       RenderNodeTypeName(archetype_node) + 
+	       Syntax::RenderNodeTypeName(archetype_node.get()) + 
 	       " " +
 	       Dispatch( node, node_prod, Syntax::Production::PREFIX, policy );	
 }
@@ -514,22 +514,11 @@ list<string> Render::PopulateItemStrings( shared_ptr<const Node> node, Syntax::P
 }
 
 
-string Render::RenderNodeTypeName( shared_ptr<const Node> node )
-{
-	list<string> parts = Split( GetInnermostTemplateParam(TYPE_ID_NAME(*node)), "::" );
-	
-	if( parts.front()==DEFAULT_NODE_NAMESPACE )
-		parts.pop_front();		
-			
-    return Join( parts, "::" );    
-}
-
-
 string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Production, Syntax::Policy policy )
 {
     string s = "⯁";
     			
-    s += RenderNodeTypeName(node); 
+    s += Syntax::RenderNodeTypeName(node.get()); 
    
 	if( ReadArgs::use.contains("c") )
 		s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";

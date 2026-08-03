@@ -1037,7 +1037,6 @@ struct Record : TypeDeclaration,
 	virtual void InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const;    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
-    virtual string GetKeyword() const;
     virtual string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
 	virtual string RenderBody( VN::RendererInterface *renderer, Policy policy );
 };

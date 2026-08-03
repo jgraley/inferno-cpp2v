@@ -815,7 +815,7 @@ string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production
 {
 	string s;
 	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
-		s += "‽" + VN::Render::RenderNodeTypeName(shared_from_this()) + " ";  // As an item, this conflicts with a function call so disambiguate using pre-restriction
+		s += "‽" + Syntax::RenderNodeTypeName(this) + " ";  // As an item, this conflicts with a function call so disambiguate using pre-restriction
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
@@ -948,7 +948,7 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production surround
 	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
 	{
 		s = "‽" + 
-		    VN::Render::RenderNodeTypeName(shared_from_this()) + 
+		    Syntax::RenderNodeTypeName(this) + 
 		    "(" +
 		    s + 
 		    ")";
@@ -1663,14 +1663,6 @@ string Record::GetRender( VN::RendererInterface *renderer, Production, Policy po
 	s += RenderBody(renderer, policy);
 	return s;
 }   
-
-
-string Record::GetKeyword() const
-{	
-	// Short form of explicit has no VN parens and only serves to inject a 
-	// node name into a syntax we already know how to render.
-	return "⯁" + VN::Render::RenderNodeTypeName(shared_from_this());
-}
 
 
 string Record::RenderExtras(VN::RendererInterface *, Production, Policy)

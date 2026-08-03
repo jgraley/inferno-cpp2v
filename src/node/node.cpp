@@ -143,3 +143,6 @@ string Node::GetTrace() const
 {
     return GetName() + GetSerialString();
 }
+
+
+
