@@ -614,7 +614,6 @@ statement_l : statement_e
 
 // Putting arrivals on compound or expr_entry causes conflicts
 statement_e : statement_nc %prec ';'											
-			| expr_entry ';'												{ $$ = {$1}; } // Should come in under bare_statement, #892
 
 statement_nc: statement_nl													{ $$ = {$1}; }
 			| arrival statement_nl											{ $$ = {$1, $2}; } 
@@ -626,6 +625,7 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); }
 			| expr_prefix ':' 			 									{ $$ = vn->OnLabel($1, @1); } 
 
 statement_nl: bare_statement ';'												{ $$ = $1; }      
+			| expr_entry ';'													{ $$ = $1; } // TODO Should come in under bare_statement but conflicts
 			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp			{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
 			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 						{ $$ = vn->OnWhile($3, @3, $5, @5); }
 			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_comp	
