@@ -93,13 +93,13 @@ string Syntax::GetKeyword() const
 {	
 	// Short form of explicit has no VN parens and only serves to inject a 
 	// node name into a syntax we already know how to render.
-	return "⯁" + RenderNodeTypeName(this);
+	return "⯁" + RenderNodeTypeName();
 }
 
 
-string Syntax::RenderNodeTypeName( const Syntax *that )
+string Syntax::RenderNodeTypeName() const
 {
-	list<string> parts = Split( GetInnermostTemplateParam(TYPE_ID_NAME(*that)), "::" );
+	list<string> parts = Split( GetInnermostTemplateParam(TYPE_ID_NAME(*this)), "::" );
 	
 	if( parts.front()==DEFAULT_NODE_NAMESPACE )
 		parts.pop_front();		

@@ -815,7 +815,7 @@ string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production
 {
 	string s;
 	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
-		s += "‽" + Syntax::RenderNodeTypeName(this) + " ";  // As an item, this conflicts with a function call so disambiguate using pre-restriction
+		s += "‽" + RenderNodeTypeName() + " ";  // As an item, this conflicts with a function call so disambiguate using pre-restriction
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
@@ -948,7 +948,7 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production surround
 	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
 	{
 		s = "‽" + 
-		    Syntax::RenderNodeTypeName(this) + 
+		    RenderNodeTypeName() + 
 		    "(" +
 		    s + 
 		    ")";
@@ -1134,7 +1134,7 @@ list<string> Enumerator::RenderMiddlePart( VN::RendererInterface *renderer, Poli
 
 list<string> Temporary::RenderDeclSpecPre( VN::RendererInterface *, Policy policy ) const 
 { 
-	if( policy.refuse_local_node_types )
+	if( policy.refuse_local_nodes_without_overridden_syntax )
 		throw RefuseDueLocal(); 
 		
 	return { "/*temp*/" };
@@ -1581,7 +1581,7 @@ Syntax::Production Labeley::GetMyProductionTerminal() const
 
 string Labeley::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 {
-	if( policy.refuse_local_node_types ) 
+	if( policy.refuse_local_nodes_without_overridden_syntax ) 
 		throw RefuseDueLocal(); 
 		
 	// Note: all instances must be const
@@ -2104,7 +2104,13 @@ Syntax::Production Return::GetMyProductionTerminal() const
 
 string Return::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return "return " + renderer->DoRender( &return_value, Production::SPACE_SEP_STMT_DECL, policy );
+	return GetKeyword() + " " + renderer->DoRender( &return_value, Production::SPACE_SEP_STMT_DECL, policy );
+}
+
+
+string Return::GetKeyword() const 
+{
+	return "return";
 }
 
 //////////////////////////// Goto ///////////////////////////////
@@ -2117,7 +2123,7 @@ Syntax::Production Goto::GetMyProductionTerminal() const
 
 string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	string s = "goto ";
+	string s = GetKeyword() + " ";
 	bool star = false;
 	bool remove_double_deref = false;
 	Production prod = Production::SPACE_SEP_STMT_DECL;
@@ -2143,6 +2149,12 @@ string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	return s + label;
 }
 
+
+string Goto::GetKeyword() const 
+{
+	return "goto";
+}
+
 //////////////////////////// If ///////////////////////////////
 
 Syntax::Production If::GetMyProductionTerminal() const
@@ -2157,7 +2169,8 @@ Syntax::Production If::GetMyProductionTerminal() const
 string If::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	bool has_else_clause = !DynamicTreePtrCast<Nop>(body_else); // Nop means no else clause
-	string s = "if( " +
+	string s = GetKeyword() +
+			   "( " +
 		       renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
 		       " )\n" +
 		       renderer->DoRender( &body, has_else_clause ? Production::STMT_DECL_HIGH : Production::STMT_DECL_LOW, policy );
@@ -2166,6 +2179,12 @@ string If::GetRender( VN::RendererInterface *renderer, Production, Policy policy
         s += "else\n" + renderer->DoRender( &body_else, Production::STMT_DECL_LOW, policy);
         
     return s;		       
+}
+
+
+string If::GetKeyword() const 
+{
+	return "if";
 }
 
 //////////////////////////// Breakable ///////////////////////////////
@@ -2185,10 +2204,16 @@ Syntax::Production While::GetMyProductionTerminal() const
 
 string While::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return "while( " +
+	return GetKeyword() + 
+	       "( " +
 		   renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
 		   renderer->DoRender( &body, Production::STMT_DECL, policy );
+}
+
+string While::GetKeyword() const 
+{
+	return "while";
 }
 
 //////////////////////////// Do ///////////////////////////////
@@ -2201,11 +2226,17 @@ Syntax::Production Do::GetMyProductionTerminal() const
 
 string Do::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return "do\n" +
+	return GetKeyword() + "\n" +
 		   renderer->DoRender( &body, Production::STMT_DECL_LOW, policy ) +
 		   "while( " +
 		   renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
 		   " )" ;
+}
+
+
+string Do::GetKeyword() const 
+{
+	return "do";
 }
 
 //////////////////////////// For ///////////////////////////////
@@ -2218,7 +2249,8 @@ Syntax::Production For::GetMyProductionTerminal() const
 
 string For::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return "for( " +
+	return GetKeyword() + 
+	       "( " +
 		   renderer->DoRender( &initialisation, Production::BOTTOM_EXPR, policy ) +
 		   "; " +
 		   renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
@@ -2226,6 +2258,12 @@ string For::GetRender( VN::RendererInterface *renderer, Production, Policy polic
 		   renderer->DoRender( &increment, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
 		   renderer->DoRender( &body, Production::STMT_DECL, policy );
+}
+
+
+string For::GetKeyword() const 
+{
+	return "for";
 }
 
 //////////////////////////// Switch ///////////////////////////////
@@ -2238,10 +2276,17 @@ Syntax::Production Switch::GetMyProductionTerminal() const
 
 string Switch::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return "switch( " +
+	return GetKeyword() + 
+	       "( " +
 		   renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
 		   renderer->DoRender( &body, Production::STMT_DECL, policy );
+}
+
+
+string Switch::GetKeyword() const 
+{
+	return "switch";
 }
 
 //////////////////////////// SwitchTarget ///////////////////////////////
@@ -2256,11 +2301,18 @@ Syntax::Production SwitchTarget::GetMyProductionTerminal() const
 string RangeCase::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	// See LabelDeclaration::GetRender() about the ;
-	return "case " + 
+	return GetKeyword() + 
+	       " " + 
 	       renderer->DoRender( &value_lo, Production::EXPR_CONST, policy) + 
 	       ".." +
 	       renderer->DoRender( &value_hi, Production::EXPR_CONST, policy) + 
 	       ":" + ";";	
+}
+
+
+string RangeCase::GetKeyword() const 
+{
+	return "case";
 }
 
 //////////////////////////// Case //////////////////////////////
@@ -2268,7 +2320,13 @@ string RangeCase::GetRender( VN::RendererInterface *renderer, Production, Policy
 string Case::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	// See LabelDeclaration::GetRender() about the ;
-	return "case " + renderer->DoRender( &value, Production::EXPR_CONST, policy) + ":" + ";";	
+	return GetKeyword() + " " + renderer->DoRender( &value, Production::EXPR_CONST, policy) + ":" + ";";	
+}
+
+
+string Case::GetKeyword() const 
+{
+	return "case";
 }
 
 //////////////////////////// Default //////////////////////////////
@@ -2276,7 +2334,13 @@ string Case::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 string Default::GetRender( VN::RendererInterface *, Production, Policy )
 {
 	// See LabelDeclaration::GetRender() about the ;
-	return "default:" + string() + ";";	
+	return GetKeyword() + ":" + ";";	
+}
+
+
+string Default::GetKeyword() const 
+{
+	return "default";
 }
 
 //////////////////////////// Continue ///////////////////////////////
@@ -2289,9 +2353,14 @@ Syntax::Production Continue::GetMyProductionTerminal() const
 
 string Continue::GetRenderTerminal( Production ) const
 {
-	return "continue";
+	return GetKeyword();
 }
 
+
+string Continue::GetKeyword() const 
+{
+	return "continue";
+}
 
 //////////////////////////// Break ///////////////////////////////
 
@@ -2302,6 +2371,12 @@ Syntax::Production Break::GetMyProductionTerminal() const
 
 
 string Break::GetRenderTerminal( Production ) const
+{
+	return GetKeyword();
+}
+
+
+string Break::GetKeyword() const 
 {
 	return "break";
 }
@@ -2315,6 +2390,12 @@ Syntax::Production Nop::GetMyProductionTerminal() const
 
 
 string Nop::GetRender( VN::RendererInterface *, Production, Policy )
+{
+	return GetKeyword();
+}
+
+
+string Nop::GetKeyword() const 
 {
 	return "";
 }

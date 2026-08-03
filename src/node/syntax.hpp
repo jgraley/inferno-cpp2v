@@ -107,7 +107,7 @@ public:
 			compound_uses_vn_separator(false),
 			is_vn_render_for_temp_disables(false),
 			goto_uses_ref_and_deref(true),
-			refuse_local_node_types(false),
+			refuse_local_nodes_without_overridden_syntax(false),
 			full_render_code_unit(true),
 			definitions(nullptr),
 			can_split_instances(false),
@@ -131,7 +131,7 @@ public:
 		bool compound_uses_vn_separator;
 		bool is_vn_render_for_temp_disables;
 		bool goto_uses_ref_and_deref;
-		bool refuse_local_node_types;
+		bool refuse_local_nodes_without_overridden_syntax;
 		bool full_render_code_unit;
 	    queue<shared_ptr<Syntax>> *definitions;
 		bool can_split_instances;
@@ -183,7 +183,7 @@ public:
     static int GetPrecedence( Production prec );
     static string::size_type GetLineBreakThreshold();
     virtual string GetKeyword() const;    
-	static string RenderNodeTypeName( const Syntax *that ); 
+	string RenderNodeTypeName() const; 
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"

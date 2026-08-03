@@ -163,7 +163,7 @@ Syntax::Policy Render::GetDefaultPolicy()
 	// Rendering local node types that don't have their own syntax will just
 	// use the parent class's render which will be parsed back as the parent class,
 	// which is an error. Or, the render is ambiguous in vn files.
-	policy.refuse_local_node_types = true;
+	policy.refuse_local_nodes_without_overridden_syntax = true;
 	
 	policy.full_render_code_unit = false;
 	
@@ -431,7 +431,7 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 
 	// This assumes no action is required in order to render a prefix operation
 	return "‽" + 
-	       Syntax::RenderNodeTypeName(archetype_node.get()) + 
+	       archetype_node->RenderNodeTypeName() + 
 	       " " +
 	       Dispatch( node, node_prod, Syntax::Production::PREFIX, policy );	
 }
@@ -518,7 +518,7 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
 {
     string s = "⯁";
     			
-    s += Syntax::RenderNodeTypeName(node.get()); 
+    s += node->RenderNodeTypeName(); 
    
 	if( ReadArgs::use.contains("c") )
 		s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";
