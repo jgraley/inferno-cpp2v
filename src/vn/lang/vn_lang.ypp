@@ -626,6 +626,7 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); }
 
 statement_nl: bare_statement ';'												{ $$ = $1; }      
 			| expr_entry ';'													{ $$ = $1; } // TODO Should come in under bare_statement but conflicts
+// #899			| explicit_node '(' semicolon_args ')' stmt_comp				{ $$ = vn->OnArgsBodyStmt($1, @1, $3, @3, $5, @5); }
 			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp			{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
 			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 						{ $$ = vn->OnWhile($3, @3, $5, @5); }
 			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_comp	

@@ -6,27 +6,22 @@
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 
-#ifndef NEWS
-
 #define RENDER_AS_BASE_IN_CPP_ONLY(BASE) \
     string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override \
     { \
 		if( policy.refuse_local_nodes_without_overridden_syntax ) \
-			throw RefuseDueLocal(); \
+			throw RefuseDueLocal(); /* Produce full explicit node */ \
 		return BASE::GetRender(renderer, surround_prod, policy); \
 	}
 
-#else
-
-#define RENDER_AS_BASE_IN_CPP_ONLY(BASE) \
+// See #899 about using this macro
+#define KEYWORD_AS_BASE_IN_CPP_ONLY(BASE) \
     string GetKeyword(Policy policy) const override \
     { \
 		if( policy.refuse_local_nodes_without_overridden_syntax ) \
-			throw UnimplementedKeyword; \
+			throw UnimplementedKeyword(); /* Produce short-form explicit node */ \
 		return BASE::GetKeyword(policy); \
 	}
-
-#endif
 
 // Nodes that are only used locally to a transformaiton or sequence of transformtions. All
 // this is temporary - these are the first candidates to become soft nodes.

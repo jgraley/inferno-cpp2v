@@ -1528,3 +1528,7 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // int a = (compound initialiser⨟ other commands...);
 // But the user can also use a designation to capture the (compound initialiser⨟ other commands...) and then apply the designation without =
 // This is now rule #896 (sort of)
+
+// common up cases in recogniser eg "for" and "switch" do same thing
+// Renaming: clarify parse paths for full vs short explicits by renaming/moving
+// 
