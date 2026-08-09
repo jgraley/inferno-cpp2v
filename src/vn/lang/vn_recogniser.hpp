@@ -139,13 +139,16 @@ public:
 	
 	YY::VNLangParser::symbol_type OnUnquotedLexeme(string text, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type OnUnquotedLexeme(wstring text, YY::VNLangParser::location_type loc) const;
+    YY::VNLangParser::symbol_type RecogniseKeyword(string text, const YY::TokenMetadata &metadata, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type ProcessLexeme(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type CreateBlockToken(const AvailableNodeData::Block *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
 	YY::VNLangParser::symbol_type CreateNodeToken(const AvailableNodeData::NodeBlock *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
 	YY::VNLangParser::symbol_type ProcessLexemeInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
 	YY::VNLangParser::symbol_type ProcessLexemeInTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
 
-private:	
+private:
+	class Unrecognised : Exception {};
+	
 	string GetContextText() const;
 
 	// store with weak_ptr => these will expire when the parser exists the scope

@@ -55,6 +55,71 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(wstring text, Y
 }
 
 
+YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(string text, const YY::TokenMetadata &metadata, YY::VNLangParser::location_type loc) const
+{
+	if(  text=="this" )
+		return YY::VNLangParser::make_KEYWORD_PRIMARY_OP(metadata, loc);
+	else if( text=="break" ||
+			 text=="continue" ) 
+		return YY::VNLangParser::make_KEYWORD_SIMPLE_STMT(metadata, loc);
+	else if( text=="return" ||
+	         text=="goto" ) 
+		return YY::VNLangParser::make_KEYWORD_SPACE_SEP_STMT(metadata, loc);
+	else if( text=="switch" ||
+	         text=="for" ) 
+		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_STMT(metadata, loc);
+	else if( text=="if" )
+		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_CHAIN_STMT(metadata, loc);
+	else if( text=="else" )
+		return YY::VNLangParser::make_CHAINING_KEYWORD(metadata, loc);
+	else if( text=="while" )
+		return YY::VNLangParser::make_WHILE_KEYWORD(metadata, loc);
+	else if( text=="do" )
+		return YY::VNLangParser::make_DO_KEYWORD(metadata, loc);
+	else if( text=="case" )
+		return YY::VNLangParser::make_CASE_KEYWORD(metadata, loc);
+	else if( text=="default" )
+		return YY::VNLangParser::make_DEFAULT_KEYWORD(metadata, loc);
+	else if( text=="true" ||
+			 text=="false" )
+		return YY::VNLangParser::make_BOOL_LITERAL(text=="true", loc);
+	else if( text=="typename" )
+		return YY::VNLangParser::make_TYPENAME(text, loc);
+	else if( text=="char" ||
+	         text=="bool" ||
+	         text=="short" ||
+	         text=="int" ||
+	         text=="long" ||
+	         text=="signed" ||
+	         text=="unsigned" ||
+	         text=="float" ||
+	         text=="double" ||
+	         text=="void" )
+		return YY::VNLangParser::make_TYPE_SPECIFIER(text, loc);
+	else if( text=="sizeof" ||
+	         text=="alignof" ) 
+		return YY::VNLangParser::make_FUNC_ON_TYPE(metadata, loc);
+	else if( text=="class" ||
+	         text=="struct" ||
+	         text=="union" )
+		return YY::VNLangParser::make_CLASS_KEYWORD(metadata, loc);
+	else if( text=="enum" ) 
+		return YY::VNLangParser::make_ENUM_KEYWORD(metadata, loc);
+	else if( text=="public" ||
+	         text=="private" ||
+	         text=="protected" ||
+	         text=="const" ||
+	         text=="mutable" ||
+	         text=="virtual" )
+		return YY::VNLangParser::make_QUAL_NODE_KEYWORD(metadata, loc);
+	else if( text=="static" )
+		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);
+	else if( text=="typedef" )
+		return YY::VNLangParser::make_TYPEDEF_KEYWORD(metadata, loc);
+	else 
+		throw Unrecognised();
+}
+
 YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexeme(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
 {
 	// Where unicode is allowed, ascii is allowed too, so positive checks only
@@ -79,77 +144,15 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexeme(wstring text, bool
 	else
 		metadata.as_designated = nullptr;
 		
-	// Pick off keywords
-	if( ascii && ToASCII(text)=="this" )
-		return YY::VNLangParser::make_KEYWORD_PRIMARY_OP(metadata, loc);
-	else if( ascii && ToASCII(text)=="break" )
-		return YY::VNLangParser::make_KEYWORD_SIMPLE_STMT(metadata, loc);
-	else if( ascii && ToASCII(text)=="continue" )
-		return YY::VNLangParser::make_KEYWORD_SIMPLE_STMT(metadata, loc);
-	else if( ascii && ToASCII(text)=="return" )
-		return YY::VNLangParser::make_KEYWORD_SPACE_SEP_STMT(metadata, loc);
-	else if( ascii && ToASCII(text)=="goto" )
-		return YY::VNLangParser::make_KEYWORD_SPACE_SEP_STMT(metadata, loc);
-	else if( ascii && ToASCII(text)=="switch" )
-		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_STMT(metadata, loc);
-	else if( ascii && ToASCII(text)=="for" )
-		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_STMT(metadata, loc);
-	else if( ascii && ToASCII(text)=="if" )
-		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_CHAIN_STMT(metadata, loc);
-	else if( ascii && ToASCII(text)=="else" )
-		return YY::VNLangParser::make_CHAINING_KEYWORD(metadata, loc);
-	else if( ascii && ToASCII(text)=="while" )
-		return YY::VNLangParser::make_WHILE_KEYWORD(metadata, loc);
-	else if( ascii && ToASCII(text)=="do" )
-		return YY::VNLangParser::make_DO_KEYWORD(metadata, loc);
-	else if( ascii && ToASCII(text)=="case" )
-		return YY::VNLangParser::make_CASE_KEYWORD(metadata, loc);
-	else if( ascii && ToASCII(text)=="default" )
-		return YY::VNLangParser::make_DEFAULT_KEYWORD(metadata, loc);
-	else if( ascii && ToASCII(text)=="true" )
-		return YY::VNLangParser::make_BOOL_LITERAL(true, loc);
-	else if( ascii && ToASCII(text)=="false" )
-		return YY::VNLangParser::make_BOOL_LITERAL(false, loc);
-	else if( ascii && ToASCII(text)=="typename" )
-		return YY::VNLangParser::make_TYPENAME(ToASCII(text), loc);
-	else if( ascii && 
-	         ( ToASCII(text)=="char" ||
-	           ToASCII(text)=="bool" ||
-	           ToASCII(text)=="short" ||
-	           ToASCII(text)=="int" ||
-	           ToASCII(text)=="long" ||
-	           ToASCII(text)=="signed" ||
-	           ToASCII(text)=="unsigned" ||
-	           ToASCII(text)=="float" ||
-	           ToASCII(text)=="double" ||
-	           ToASCII(text)=="void" ) )	           
-		return YY::VNLangParser::make_TYPE_SPECIFIER(ToASCII(text), loc);
-	else if( ascii && 
-	         ( ToASCII(text)=="sizeof" ||
-	           ToASCII(text)=="alignof" ) )
-		return YY::VNLangParser::make_FUNC_ON_TYPE(metadata, loc);
-	else if( ascii && 
-	         ( ToASCII(text)=="class" ||
-	           ToASCII(text)=="struct" ||
-	           ToASCII(text)=="union" ) )
-		return YY::VNLangParser::make_CLASS_KEYWORD(metadata, loc);
-	else if( ascii && 
-	         ( ToASCII(text)=="enum" ) )
-		return YY::VNLangParser::make_ENUM_KEYWORD(metadata, loc);
-	else if( ascii && 
-	         ( ToASCII(text)=="public" ||
-	           ToASCII(text)=="private" ||
-	           ToASCII(text)=="protected" ||
-	           ToASCII(text)=="const" ||
-	           ToASCII(text)=="mutable" ||
-	           ToASCII(text)=="virtual" ) )
-		return YY::VNLangParser::make_QUAL_NODE_KEYWORD(metadata, loc);
-	else if( ascii && 
-	         ( ToASCII(text)=="static" ) ) 
-		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);
-	else if( ascii && 
-	         ( ToASCII(text)=="typedef" ) ) 
-		return YY::VNLangParser::make_TYPEDEF_KEYWORD(metadata, loc);
+	try
+	{
+		if( ascii ) // Keywords are only ASCII
+			return RecogniseKeyword( ToASCII(text), metadata, loc );
+	}
+	catch( Unrecognised& )
+	{
+		// Just carry on
+	}
 		
 	if( designation_gnomon )
 	{
