@@ -150,7 +150,6 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexeme(wstring text, bool
 	else if( ascii && 
 	         ( ToASCII(text)=="typedef" ) ) 
 		return YY::VNLangParser::make_TYPEDEF_KEYWORD(metadata, loc);
-
 		
 	if( designation_gnomon )
 	{

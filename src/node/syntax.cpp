@@ -91,9 +91,7 @@ string::size_type Syntax::GetLineBreakThreshold()
 
 string Syntax::GetKeyword() const
 {	
-	// Short form of explicit has no VN parens and only serves to inject a 
-	// node name into a syntax we already know how to render.
-	return "⯁" + RenderNodeTypeName();
+	throw UnimplementedKeyword();
 }
 
 

@@ -1525,7 +1525,7 @@ struct Continue : Statement, Uncombable
 	NODE_FUNCTIONS_FINAL 
 
 	Production GetMyProductionTerminal() const override;
-	string GetRenderTerminal( Production production ) const override;	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword() const override;	
 };
 
@@ -1535,7 +1535,7 @@ struct Break : Statement
 	NODE_FUNCTIONS_FINAL 
 
 	Production GetMyProductionTerminal() const override;
-	string GetRenderTerminal( Production production ) const override;	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword() const override;	
 };
 

@@ -121,6 +121,8 @@ namespace VN
 		                                   Syntax::Policy policy ) = 0;
 		virtual TreePtr<Node> TryGetScope( TreePtr<Node> node ) const = 0;
 		virtual const TransKit *GetTransKit() const = 0;
+		virtual string GetKeyword( const Node *node, 
+		                           Syntax::Policy policy ) = 0;
 	};
 };
 

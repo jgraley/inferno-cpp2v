@@ -1652,7 +1652,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Production, Policy po
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
 		
-	ls.push_back( GetKeyword() ); // class, struct etc
+	ls.push_back( renderer->GetKeyword(this, policy) ); // class, struct etc
 	ls.push_back( renderer->DoRender(&identifier, Production::PRIMARY_EXPR, id_policy) ); 
 	string s = Join(ls);
 	if( policy.force_incomplete_records )
@@ -2104,7 +2104,7 @@ Syntax::Production Return::GetMyProductionTerminal() const
 
 string Return::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return GetKeyword() + " " + renderer->DoRender( &return_value, Production::SPACE_SEP_STMT_DECL, policy );
+	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender( &return_value, Production::SPACE_SEP_STMT_DECL, policy );
 }
 
 
@@ -2123,7 +2123,7 @@ Syntax::Production Goto::GetMyProductionTerminal() const
 
 string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	string s = GetKeyword() + " ";
+	string s = renderer->GetKeyword(this, policy) + " ";
 	bool star = false;
 	bool remove_double_deref = false;
 	Production prod = Production::SPACE_SEP_STMT_DECL;
@@ -2169,7 +2169,7 @@ Syntax::Production If::GetMyProductionTerminal() const
 string If::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	bool has_else_clause = !DynamicTreePtrCast<Nop>(body_else); // Nop means no else clause
-	string s = GetKeyword() +
+	string s = renderer->GetKeyword(this, policy) +
 			   "( " +
 		       renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
 		       " )\n" +
@@ -2204,7 +2204,7 @@ Syntax::Production While::GetMyProductionTerminal() const
 
 string While::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return GetKeyword() + 
+	return renderer->GetKeyword(this, policy) + 
 	       "( " +
 		   renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
@@ -2226,7 +2226,7 @@ Syntax::Production Do::GetMyProductionTerminal() const
 
 string Do::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return GetKeyword() + "\n" +
+	return renderer->GetKeyword(this, policy) + "\n" +
 		   renderer->DoRender( &body, Production::STMT_DECL_LOW, policy ) +
 		   "while( " +
 		   renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
@@ -2249,7 +2249,7 @@ Syntax::Production For::GetMyProductionTerminal() const
 
 string For::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return GetKeyword() + 
+	return renderer->GetKeyword(this, policy) + 
 	       "( " +
 		   renderer->DoRender( &initialisation, Production::BOTTOM_EXPR, policy ) +
 		   "; " +
@@ -2276,7 +2276,7 @@ Syntax::Production Switch::GetMyProductionTerminal() const
 
 string Switch::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return GetKeyword() + 
+	return renderer->GetKeyword(this, policy) + 
 	       "( " +
 		   renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
@@ -2301,7 +2301,7 @@ Syntax::Production SwitchTarget::GetMyProductionTerminal() const
 string RangeCase::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	// See LabelDeclaration::GetRender() about the ;
-	return GetKeyword() + 
+	return renderer->GetKeyword(this, policy) + 
 	       " " + 
 	       renderer->DoRender( &value_lo, Production::EXPR_CONST, policy) + 
 	       ".." +
@@ -2320,7 +2320,7 @@ string RangeCase::GetKeyword() const
 string Case::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	// See LabelDeclaration::GetRender() about the ;
-	return GetKeyword() + " " + renderer->DoRender( &value, Production::EXPR_CONST, policy) + ":" + ";";	
+	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender( &value, Production::EXPR_CONST, policy) + ":" + ";";	
 }
 
 
@@ -2331,10 +2331,10 @@ string Case::GetKeyword() const
 
 //////////////////////////// Default //////////////////////////////
 
-string Default::GetRender( VN::RendererInterface *, Production, Policy )
+string Default::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	// See LabelDeclaration::GetRender() about the ;
-	return GetKeyword() + ":" + ";";	
+	return renderer->GetKeyword(this, policy) + ":" + ";";	
 }
 
 
@@ -2351,9 +2351,9 @@ Syntax::Production Continue::GetMyProductionTerminal() const
 }
 
 
-string Continue::GetRenderTerminal( Production ) const
+string Continue::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return GetKeyword();
+	return renderer->GetKeyword(this, policy);
 }
 
 
@@ -2370,9 +2370,9 @@ Syntax::Production Break::GetMyProductionTerminal() const
 }
 
 
-string Break::GetRenderTerminal( Production ) const
+string Break::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return GetKeyword();
+	return renderer->GetKeyword(this, policy);
 }
 
 
@@ -2389,9 +2389,9 @@ Syntax::Production Nop::GetMyProductionTerminal() const
 }
 
 
-string Nop::GetRender( VN::RendererInterface *, Production, Policy )
+string Nop::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return GetKeyword();
+	return renderer->GetKeyword(this, policy);
 }
 
 

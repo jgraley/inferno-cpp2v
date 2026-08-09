@@ -69,6 +69,8 @@ public:
 							 
 	string RenderMismatchException( string fname, const Mismatch &me );
 	const TransKit *GetTransKit() const override;
+	string GetKeyword( const Node *node, 
+	                   Syntax::Policy policy ) override;
 
     const Syntax::Policy default_policy;
     TreePtr<Node> context;

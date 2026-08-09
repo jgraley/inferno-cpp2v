@@ -700,3 +700,21 @@ const TransKit *Render::GetTransKit() const
 {
 	return &trans_kit;
 }
+
+
+string Render::GetKeyword( const Node *node, 
+						   Syntax::Policy )
+{
+    try
+    {
+		return node->GetKeyword();
+		// If no keyword, usually throw UnimplementedKeyword
+	}
+	catch( Syntax::Refusal & ) 
+	{
+		// Short form of explicit has no VN parens and only serves to inject a 
+		// node name into a syntax we already know how to render.
+		return "⯁" + node->RenderNodeTypeName();		
+	}
+}						   
+
