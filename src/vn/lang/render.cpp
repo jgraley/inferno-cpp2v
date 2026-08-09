@@ -703,11 +703,11 @@ const TransKit *Render::GetTransKit() const
 
 
 string Render::GetKeyword( const Node *node, 
-						   Syntax::Policy )
+						   Syntax::Policy policy )
 {
     try
     {
-		return node->GetKeyword();
+		return node->GetKeyword(policy);
 		// If no keyword, usually throw UnimplementedKeyword
 	}
 	catch( Syntax::Refusal & ) 

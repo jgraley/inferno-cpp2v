@@ -182,7 +182,7 @@ public:
     static Production BoostPrecedence( Production prec );
     static int GetPrecedence( Production prec );
     static string::size_type GetLineBreakThreshold();
-    virtual string GetKeyword() const;    
+    virtual string GetKeyword( Policy policy ) const;    
 	string RenderNodeTypeName() const; 
 };
 

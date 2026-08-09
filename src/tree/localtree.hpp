@@ -19,11 +19,11 @@
 #else
 
 #define RENDER_AS_BASE_IN_CPP_ONLY(BASE) \
-    string GetKeyword() const override \
+    string GetKeyword(Policy policy) const override \
     { \
 		if( policy.refuse_local_nodes_without_overridden_syntax ) \
 			throw UnimplementedKeyword; \
-		return BASE::GetKeyword(); \
+		return BASE::GetKeyword(policy); \
 	}
 
 #endif

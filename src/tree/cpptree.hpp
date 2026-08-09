@@ -1047,7 +1047,7 @@ struct Union : Record
 	NODE_FUNCTIONS_FINAL 
 	
 	TreePtr<AccessSpec> GetInitialAccess() const override;    
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 /// An Enumeration, as per record. 
@@ -1057,7 +1057,7 @@ struct Enumeration : Record
 { 
 	NODE_FUNCTIONS_FINAL 
 	void InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const override;
-    string GetKeyword() const override;
+    string GetKeyword( Policy ) const override;
 	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	
 };
 
@@ -1078,7 +1078,7 @@ struct Struct : InheritanceRecord
 	NODE_FUNCTIONS_FINAL 
 	
 	TreePtr<AccessSpec> GetInitialAccess() const override;    
-    string GetKeyword() const override;
+    string GetKeyword( Policy ) const override;
 };
 
 /// Class as per InheritanceRecord
@@ -1087,7 +1087,7 @@ struct Class : InheritanceRecord
 	NODE_FUNCTIONS_FINAL 
 	
 	TreePtr<AccessSpec> GetInitialAccess() const override;    
-    string GetKeyword() const override;
+    string GetKeyword( Policy ) const override;
 };
 
 //////////////////////////// Expressions ////////////////////////////
@@ -1374,7 +1374,7 @@ struct Return : Statement
 
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 
@@ -1392,7 +1392,7 @@ struct Goto : Statement, Uncombable
 
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 /// If statement
@@ -1405,7 +1405,7 @@ struct If : Statement
 
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 /// Designate a statement that may be broken out of
@@ -1435,7 +1435,7 @@ struct While : Loop, Uncombable
 
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 /// Do loop (first iteration always runs)
@@ -1446,7 +1446,7 @@ struct Do : Loop, Uncombable // a do..while() construct
 
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 /// C-style for loop. 
@@ -1462,7 +1462,7 @@ struct For : Loop
 
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 /// Switch statement. 
@@ -1477,7 +1477,7 @@ struct Switch : Breakable
 
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 /// Intermediate for labels in a switch statement.
@@ -1497,7 +1497,7 @@ struct RangeCase : SwitchTarget
     TreePtr<Expression> value_hi; ///< end of range, inclusive
 
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 }; 
 
 /// Case label
@@ -1507,7 +1507,7 @@ struct Case : SwitchTarget
     TreePtr<Expression> value; ///< Switch jumps here when condition is this value
 
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 /// Default label in a switch statement
@@ -1516,7 +1516,7 @@ struct Default : SwitchTarget
 	NODE_FUNCTIONS_FINAL
 	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 /// Continue (to innermost Loop)
@@ -1526,7 +1526,7 @@ struct Continue : Statement, Uncombable
 
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 /// Break (from innermost Breakable)
@@ -1536,7 +1536,7 @@ struct Break : Statement
 
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 /// Do nothing; these get optimised out where possible
@@ -1546,7 +1546,7 @@ struct Nop : Statement
 
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword() const override;	
+    string GetKeyword( Policy ) const override;	
 };
   
 //////////////////////////// Preprocessor stuff ////////////////////////////

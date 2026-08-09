@@ -89,7 +89,7 @@ string::size_type Syntax::GetLineBreakThreshold()
 }
 
 
-string Syntax::GetKeyword() const
+string Syntax::GetKeyword(Policy) const
 {	
 	throw UnimplementedKeyword();
 }

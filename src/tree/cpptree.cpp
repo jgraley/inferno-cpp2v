@@ -1695,7 +1695,7 @@ TreePtr<AccessSpec> Union::GetInitialAccess() const
 }
 
 
-string Union::GetKeyword() const
+string Union::GetKeyword( Policy ) const
 {
 	return "union";
 }
@@ -1709,7 +1709,7 @@ void Enumeration::InitialiseAccess( shared_ptr<Syntax> *, Policy &policy ) const
 } 
 
 
-string Enumeration::GetKeyword() const
+string Enumeration::GetKeyword( Policy ) const
 {
 	return "enum";
 }
@@ -1746,7 +1746,7 @@ TreePtr<AccessSpec> Struct::GetInitialAccess() const
 }
 
 
-string Struct::GetKeyword() const
+string Struct::GetKeyword( Policy ) const
 {
 	return "struct";
 }
@@ -1759,7 +1759,7 @@ TreePtr<AccessSpec> Class::GetInitialAccess() const
 }
 
 
-string Class::GetKeyword() const
+string Class::GetKeyword( Policy ) const
 {
 	return "class";
 }
@@ -2108,7 +2108,7 @@ string Return::GetRender( VN::RendererInterface *renderer, Production, Policy po
 }
 
 
-string Return::GetKeyword() const 
+string Return::GetKeyword( Policy ) const 
 {
 	return "return";
 }
@@ -2150,7 +2150,7 @@ string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 }
 
 
-string Goto::GetKeyword() const 
+string Goto::GetKeyword( Policy ) const 
 {
 	return "goto";
 }
@@ -2182,7 +2182,7 @@ string If::GetRender( VN::RendererInterface *renderer, Production, Policy policy
 }
 
 
-string If::GetKeyword() const 
+string If::GetKeyword( Policy ) const 
 {
 	return "if";
 }
@@ -2211,7 +2211,7 @@ string While::GetRender( VN::RendererInterface *renderer, Production, Policy pol
 		   renderer->DoRender( &body, Production::STMT_DECL, policy );
 }
 
-string While::GetKeyword() const 
+string While::GetKeyword( Policy ) const 
 {
 	return "while";
 }
@@ -2234,7 +2234,7 @@ string Do::GetRender( VN::RendererInterface *renderer, Production, Policy policy
 }
 
 
-string Do::GetKeyword() const 
+string Do::GetKeyword( Policy ) const 
 {
 	return "do";
 }
@@ -2261,7 +2261,7 @@ string For::GetRender( VN::RendererInterface *renderer, Production, Policy polic
 }
 
 
-string For::GetKeyword() const 
+string For::GetKeyword( Policy ) const 
 {
 	return "for";
 }
@@ -2284,7 +2284,7 @@ string Switch::GetRender( VN::RendererInterface *renderer, Production, Policy po
 }
 
 
-string Switch::GetKeyword() const 
+string Switch::GetKeyword( Policy ) const 
 {
 	return "switch";
 }
@@ -2310,7 +2310,7 @@ string RangeCase::GetRender( VN::RendererInterface *renderer, Production, Policy
 }
 
 
-string RangeCase::GetKeyword() const 
+string RangeCase::GetKeyword( Policy ) const 
 {
 	return "case";
 }
@@ -2324,7 +2324,7 @@ string Case::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 }
 
 
-string Case::GetKeyword() const 
+string Case::GetKeyword( Policy ) const 
 {
 	return "case";
 }
@@ -2338,7 +2338,7 @@ string Default::GetRender( VN::RendererInterface *renderer, Production, Policy p
 }
 
 
-string Default::GetKeyword() const 
+string Default::GetKeyword( Policy ) const 
 {
 	return "default";
 }
@@ -2357,7 +2357,7 @@ string Continue::GetRender( VN::RendererInterface *renderer, Production, Policy 
 }
 
 
-string Continue::GetKeyword() const 
+string Continue::GetKeyword( Policy ) const 
 {
 	return "continue";
 }
@@ -2376,7 +2376,7 @@ string Break::GetRender( VN::RendererInterface *renderer, Production, Policy pol
 }
 
 
-string Break::GetKeyword() const 
+string Break::GetKeyword( Policy ) const 
 {
 	return "break";
 }
@@ -2395,7 +2395,7 @@ string Nop::GetRender( VN::RendererInterface *renderer, Production, Policy polic
 }
 
 
-string Nop::GetKeyword() const 
+string Nop::GetKeyword( Policy ) const 
 {
 	return "";
 }
