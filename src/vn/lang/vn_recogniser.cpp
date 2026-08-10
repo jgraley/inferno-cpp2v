@@ -45,138 +45,48 @@ void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 
 YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(string text, YY::VNLangParser::location_type loc) const
 {
-	return ProcessLexeme( ToUnicode(text), true, loc );
+	return Recognise( ToUnicode(text), true, loc );
 }
 
 
 YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(wstring text, YY::VNLangParser::location_type loc) const
 {
-	return ProcessLexeme( text, false, loc );
+	return Recognise( text, false, loc );
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(string text, const YY::TokenMetadata &metadata, YY::VNLangParser::location_type loc) const
-{
-	if(  text=="this" )
-		return YY::VNLangParser::make_KEYWORD_PRIMARY_OP(metadata, loc);
-	else if( text=="break" ||
-			 text=="continue" ) 
-		return YY::VNLangParser::make_KEYWORD_SIMPLE_STMT(metadata, loc);
-	else if( text=="return" ||
-	         text=="goto" ) 
-		return YY::VNLangParser::make_KEYWORD_SPACE_SEP_STMT(metadata, loc);
-	else if( text=="switch" ||
-	         text=="for" ) 
-		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_STMT(metadata, loc);
-	else if( text=="if" )
-		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_CHAIN_STMT(metadata, loc);
-	else if( text=="else" )
-		return YY::VNLangParser::make_CHAINING_KEYWORD(metadata, loc);
-	else if( text=="while" )
-		return YY::VNLangParser::make_WHILE_KEYWORD(metadata, loc);
-	else if( text=="do" )
-		return YY::VNLangParser::make_DO_KEYWORD(metadata, loc);
-	else if( text=="case" )
-		return YY::VNLangParser::make_CASE_KEYWORD(metadata, loc);
-	else if( text=="default" )
-		return YY::VNLangParser::make_DEFAULT_KEYWORD(metadata, loc);
-	else if( text=="true" ||
-			 text=="false" )
-		return YY::VNLangParser::make_BOOL_LITERAL(text=="true", loc);
-	else if( text=="typename" )
-		return YY::VNLangParser::make_TYPENAME(text, loc);
-	else if( text=="char" ||
-	         text=="bool" ||
-	         text=="short" ||
-	         text=="int" ||
-	         text=="long" ||
-	         text=="signed" ||
-	         text=="unsigned" ||
-	         text=="float" ||
-	         text=="double" ||
-	         text=="void" )
-		return YY::VNLangParser::make_TYPE_SPECIFIER(text, loc);
-	else if( text=="sizeof" ||
-	         text=="alignof" ) 
-		return YY::VNLangParser::make_FUNC_ON_TYPE(metadata, loc);
-	else if( text=="class" ||
-	         text=="struct" ||
-	         text=="union" )
-		return YY::VNLangParser::make_CLASS_KEYWORD(metadata, loc);
-	else if( text=="enum" ) 
-		return YY::VNLangParser::make_ENUM_KEYWORD(metadata, loc);
-	else if( text=="public" ||
-	         text=="private" ||
-	         text=="protected" ||
-	         text=="const" ||
-	         text=="mutable" ||
-	         text=="virtual" )
-		return YY::VNLangParser::make_QUAL_NODE_KEYWORD(metadata, loc);
-	else if( text=="static" )
-		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);
-	else if( text=="typedef" )
-		return YY::VNLangParser::make_TYPEDEF_KEYWORD(metadata, loc);
-	else 
-		throw Unrecognised();
-}
-
-YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexeme(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
 {
 	// Where unicode is allowed, ascii is allowed too, so positive checks only
 	YY::TokenMetadata metadata;
 	metadata.as_unicode = text;
 	metadata.as_ascii = ToASCII(text);
 	metadata.as_andata_block = nullptr;
+	metadata.as_designated = nullptr;
 	
 	const ScopeGnomon *scope = nullptr;
 	shared_ptr<const ScopeGnomon> spg = scope_gnomons.TryLockTop();
 	if( spg && dynamic_cast<const NodeNameScopeGnomon *>(spg.get()) )
-		return ProcessLexemeInNodeNameScope(text, ascii, loc, metadata);
+		return RecogniseInNodeNameScope(text, ascii, loc, metadata);
 	else if( spg && dynamic_cast<const TransformNameScopeGnomon *>(spg.get()) )
-		return ProcessLexemeInTransformNameScope(text, ascii, loc, metadata);		
-	
-	shared_ptr<const DesignationGnomon> designation_gnomon;
-	if( designation_gnomons.count(text) > 0 )	
-	    designation_gnomon = designation_gnomons.at(text);
-	    
-	if( designation_gnomon )
-		metadata.as_designated = designation_gnomon->pattern;
-	else
-		metadata.as_designated = nullptr;
+		return RecogniseInTransformNameScope(text, ascii, loc, metadata);				
 		
-	try
-	{
-		if( ascii ) // Keywords are only ASCII
-			return RecogniseKeyword( ToASCII(text), metadata, loc );
-	}
-	catch( Unrecognised& )
-	{
-		// Just carry on
-	}
+	try	{
+		return RecogniseKeyword( text, ascii, metadata, loc );
+	} catch( Unrecognised& ) {}	
 		
-	if( designation_gnomon )
-	{
-		if( dynamic_cast<const NormalDesignationGnomon *>(designation_gnomon.get()) )
-            return YY::VNLangParser::make_DESIGNATED_NORMAL(metadata, loc);
-        else if( dynamic_cast<const TypeDesignationGnomon *>(designation_gnomon.get()) )
-            return YY::VNLangParser::make_DESIGNATED_TYPE(metadata, loc);
-        else if( dynamic_cast<const DeclarationDesignationGnomon *>(designation_gnomon.get()) )
-            return YY::VNLangParser::make_DESIGNATED_DECL(metadata, loc);
-        else if( dynamic_cast<const QualifierDesignationGnomon *>(designation_gnomon.get()) )
-            return YY::VNLangParser::make_DESIGNATED_QUAL(metadata, loc);
-        else if( dynamic_cast<const CompoundDesignationGnomon *>(designation_gnomon.get()) )
-            return YY::VNLangParser::make_DESIGNATED_COMPOUND(metadata, loc);
-		else 
-			ASSERTFAIL();
-	}
-    else if( ascii )
+	try	{
+		return RecogniseDesignation( text, metadata, loc );
+	} catch( Unrecognised& ) {}
+		
+	if( ascii )
          return YY::VNLangParser::make_ASCII_NAME(metadata, loc);
     else
          return YY::VNLangParser::make_UNICODE_NAME(metadata, loc);
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexemeInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
 {
 	if( !ascii )	
 		throw YY::VNLangParser::syntax_error( loc,
@@ -246,7 +156,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::CreateNodeToken(const AvailableN
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexemeInTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
 {
 	// Transformations that act on normal scopes (instances, in this case)
 	if( ascii && ToASCII(text)=="TypeOf" )
@@ -263,6 +173,102 @@ YY::VNLangParser::symbol_type VNLangRecogniser::ProcessLexemeInTransformNameScop
 	// In these scopes, there are no designations so we must succeed and can raise an error here if we don#t
 	throw YY::VNLangParser::syntax_error( loc,
 	    SSPrintf("Unrecognised: %s %s", DiagQuote(text).c_str(), GetContextText().c_str()) ); 
+}
+
+
+YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, bool ascii, const YY::TokenMetadata &metadata, YY::VNLangParser::location_type loc) const
+{
+	if( !ascii ) // Keywords are only ASCII
+		throw Unrecognised();
+
+	string ascii_text = ToASCII(text);
+
+	if( ascii_text=="this" )
+		return YY::VNLangParser::make_KEYWORD_PRIMARY_OP(metadata, loc);
+	else if( ascii_text=="break" ||
+			 ascii_text=="continue" ) 
+		return YY::VNLangParser::make_KEYWORD_SIMPLE_STMT(metadata, loc);
+	else if( ascii_text=="return" ||
+	         ascii_text=="goto" ) 
+		return YY::VNLangParser::make_KEYWORD_SPACE_SEP_STMT(metadata, loc);
+	else if( ascii_text=="switch" ||
+	         ascii_text=="for" ) 
+		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_STMT(metadata, loc);
+	else if( ascii_text=="if" )
+		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_CHAIN_STMT(metadata, loc);
+	else if( ascii_text=="else" )
+		return YY::VNLangParser::make_CHAINING_KEYWORD(metadata, loc);
+	else if( ascii_text=="while" )
+		return YY::VNLangParser::make_WHILE_KEYWORD(metadata, loc);
+	else if( ascii_text=="do" )
+		return YY::VNLangParser::make_DO_KEYWORD(metadata, loc);
+	else if( ascii_text=="case" )
+		return YY::VNLangParser::make_CASE_KEYWORD(metadata, loc);
+	else if( ascii_text=="default" )
+		return YY::VNLangParser::make_DEFAULT_KEYWORD(metadata, loc);
+	else if( ascii_text=="true" ||
+			 ascii_text=="false" )
+		return YY::VNLangParser::make_BOOL_LITERAL(ascii_text=="true", loc);
+	else if( ascii_text=="typename" )
+		return YY::VNLangParser::make_TYPENAME(ascii_text, loc);
+	else if( ascii_text=="char" ||
+	         ascii_text=="bool" ||
+	         ascii_text=="short" ||
+	         ascii_text=="int" ||
+	         ascii_text=="long" ||
+	         ascii_text=="signed" ||
+	         ascii_text=="unsigned" ||
+	         ascii_text=="float" ||
+	         ascii_text=="double" ||
+	         ascii_text=="void" )
+		return YY::VNLangParser::make_TYPE_SPECIFIER(ascii_text, loc);
+	else if( ascii_text=="sizeof" ||
+	         ascii_text=="alignof" ) 
+		return YY::VNLangParser::make_FUNC_ON_TYPE(metadata, loc);
+	else if( ascii_text=="class" ||
+	         ascii_text=="struct" ||
+	         ascii_text=="union" )
+		return YY::VNLangParser::make_CLASS_KEYWORD(metadata, loc);
+	else if( ascii_text=="enum" ) 
+		return YY::VNLangParser::make_ENUM_KEYWORD(metadata, loc);
+	else if( ascii_text=="public" ||
+	         ascii_text=="private" ||
+	         ascii_text=="protected" ||
+	         ascii_text=="const" ||
+	         ascii_text=="mutable" ||
+	         ascii_text=="virtual" )
+		return YY::VNLangParser::make_QUAL_NODE_KEYWORD(metadata, loc);
+	else if( ascii_text=="static" )
+		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);
+	else if( ascii_text=="typedef" )
+		return YY::VNLangParser::make_TYPEDEF_KEYWORD(metadata, loc);
+	else 
+		throw Unrecognised();
+}
+
+
+YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring text, YY::TokenMetadata metadata, YY::VNLangParser::location_type loc) const
+{
+	shared_ptr<const DesignationGnomon> designation_gnomon;
+	if( designation_gnomons.count(text) > 0 )	
+	    designation_gnomon = designation_gnomons.at(text);
+	else
+		throw Unrecognised();
+	
+	metadata.as_designated = designation_gnomon->pattern;
+	
+	if( dynamic_cast<const NormalDesignationGnomon *>(designation_gnomon.get()) )
+		return YY::VNLangParser::make_DESIGNATED_NORMAL(metadata, loc);
+	else if( dynamic_cast<const TypeDesignationGnomon *>(designation_gnomon.get()) )
+		return YY::VNLangParser::make_DESIGNATED_TYPE(metadata, loc);
+	else if( dynamic_cast<const DeclarationDesignationGnomon *>(designation_gnomon.get()) )
+		return YY::VNLangParser::make_DESIGNATED_DECL(metadata, loc);
+	else if( dynamic_cast<const QualifierDesignationGnomon *>(designation_gnomon.get()) )
+		return YY::VNLangParser::make_DESIGNATED_QUAL(metadata, loc);
+	else if( dynamic_cast<const CompoundDesignationGnomon *>(designation_gnomon.get()) )
+		return YY::VNLangParser::make_DESIGNATED_COMPOUND(metadata, loc);
+	else 
+		ASSERTFAIL();
 }
 
 
