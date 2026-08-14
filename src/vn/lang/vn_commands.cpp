@@ -13,9 +13,9 @@
 #include "vn_actions.hpp"
 #include "vn_script.hpp"
 #include "agents/embedded_scr_agent.hpp"
-#include "vn_lang.ypp.hpp"
-#include "vn_lang.lpp.hpp"
-#include "vn_lang.location.hpp"
+#include "vn/lang/vn_lang.ypp.hpp"
+#include "vn/lang/vn_lang.lpp.hpp"
+#include "vn/lang/vn_lang.location.hpp"
 #include "vn_recogniser.hpp"
 
 #include <iostream>

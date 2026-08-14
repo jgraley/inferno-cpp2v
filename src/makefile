@@ -16,7 +16,7 @@ CPLUSPLUS = $(SRC)/cplusplus
 STEPS = $(SRC)/steps
 MAIN = $(SRC)/main
 
-SRC_OPTIONS = $(OPTIONS) $(EXE_OPTIONS) $(IVN_OPTIONS) -I$(SRC)
+SRC_OPTIONS = $(OPTIONS) $(EXE_OPTIONS) $(IVN_OPTIONS) -I$(SRC) -Ibuild/$(SRC)
 SRC_VN_OPTIONS = $(SRC_OPTIONS) -I$(VN)
 
 COMMON_MODULES = $(COMMON)/standard $(COMMON)/common $(COMMON)/read_args $(COMMON)/trace $(COMMON)/hit_count $(COMMON)/mismatch $(COMMON)/serial $(COMMON)/progress $(COMMON)/orderable
@@ -58,7 +58,7 @@ ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULE
 # include dependencies.
 -include $(ALL_MODULES:%=build/%.d)
 
-build/inferno.a : $(ALL_MODULES:%=build/%.o) build/src/lang.a
+build/inferno.a : $(ALL_MODULES:%=build/%.o) 
 	@mkdir -p build$(NODE)/type_db 
 	$(AR) -r build/src.a $(ALL_MODULES:%=build/%.o)
 	# Merge .a files created in subdirectories, which seems to require a command script
@@ -76,7 +76,7 @@ $(HELPERS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_OPTIONS) -o $@ 
 
-$(TREE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
+$(TREE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS) build/src/lang.a
 	@mkdir -p $(dir $@)
 	$(ICC) $< -c $(SRC_OPTIONS) -o $@
 

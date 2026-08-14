@@ -10,7 +10,7 @@ BISON = bison
 
 # We need to be more relaxed than we are for most VN code.
 VNL_OPTIONS = $(OPTIONS) -std=c++20
-VNL_OPTIONS += -Ibuild/$(VNL_DIR) -I$(REFLEX_INC) -I. 
+VNL_OPTIONS += -Ibuild/src -I$(REFLEX_INC) -I. 
 
 VNL_LYPP_MODULES=$(VNL_DIR)/vn_lang
 

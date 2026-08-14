@@ -8,9 +8,9 @@
 #include "helpers/simple_compare.hpp"
 #include "tree/misc.hpp"
 #include "indenter.hpp"
-#include "vn_lang.ypp.hpp"
-#include "vn_lang.lpp.hpp"
-#include "vn_lang.location.hpp"
+#include "vn/lang/vn_lang.ypp.hpp"
+#include "vn/lang/vn_lang.lpp.hpp"
+#include "vn/lang/vn_lang.location.hpp"
 
 // WHAT WE NEED
 // A "name info" struct containing a variety of handy info relating to a name we saw:

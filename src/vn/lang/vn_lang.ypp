@@ -19,8 +19,9 @@
 
 %code requires {
   // Appears high-ish in the generated .hpp file
-  #include "vn_actions.hpp" 
-  #include "declarators.hpp" 
+  // Use full paths because we can be included from elsewhere and build/src/x is not "near" src/x
+  #include "vn/lang/vn_actions.hpp" 
+  #include "vn/lang/declarators.hpp" 
   #include "node/tree_ptr.hpp"
   #include "tree/node_names.hpp"
   #include <string>

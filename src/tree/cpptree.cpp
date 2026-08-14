@@ -3,6 +3,8 @@
 #include "common/read_args.hpp"
 #include "vn/lang/sort_decls.hpp"
 #include "vn/lang/render.hpp"
+#include "vn/lang/vn_lang.ypp.hpp"
+#include "vn/lang/vn_lang.location.hpp"
 #include "typeof.hpp"
 
 #define EXPLICIT_BASE 0
