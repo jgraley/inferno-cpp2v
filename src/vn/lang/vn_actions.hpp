@@ -6,9 +6,7 @@
 #include "helpers/transformation.hpp"
 #include "uniquify_identifiers.hpp"
 #include "helpers/simple_compare.hpp"
-#include "tree/misc.hpp"
 #include "indenter.hpp"
-#include "vn_commands.hpp"
 #include "tree/node_names.hpp"
 #include "declarators.hpp"
 #include <any> // to dep-break the generated headers
@@ -74,14 +72,14 @@ public:
 class RecordScopeGnomon : public ScopeGnomon
 {
 public:	
-	RecordScopeGnomon( TreePtr<CPPTree::AccessSpec> initial_access, TreePtr<Node> record_type_ ) :
+	RecordScopeGnomon( TreePtr<Node> initial_access, TreePtr<Node> record_type_ ) :
 		current_access( initial_access ),
 		record_type( record_type_ ) {}
 	string GetMessageText() const final
 	{
 		return "record scope";
 	}
-	TreePtr<CPPTree::AccessSpec> current_access; // changes as we parse the scope
+	TreePtr<Node> current_access; // changes as we parse the scope
 	TreePtr<Node> record_type;
 };
 
@@ -300,7 +298,7 @@ private:
 	WeakStack<ScopeGnomon> declaration_scope_gnomons;
 	
 public: // TODO provide a getter	
-	Command::List top_level_commands;	
+	list<shared_ptr<Command>> top_level_commands;	
 };
 	
 };

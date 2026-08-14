@@ -42,7 +42,7 @@ VNLangActions::~VNLangActions()
 }
 
 
-void VNLangActions::OnVNScript( Command::List top_level_commands_ )
+void VNLangActions::OnVNScript( list<shared_ptr<Command>> top_level_commands_ )
 {
 	top_level_commands = top_level_commands_;
 }

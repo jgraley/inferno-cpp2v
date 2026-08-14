@@ -98,7 +98,7 @@ struct Array : UniDeclarator // NOT a lookup - gives size of array not index
 
    	Result DeclaratorReduce( TreePtr<Node> type_view, CVQuals cv_quals_view ) const override;
 
-    TreePtr<CPPTree::Initialiser> size; ///< evaluates to the size or Uninitialised if not given eg []
+    TreePtr<Node> size; ///< evaluates to the size or Uninitialised if not given eg []
 };
 
 
