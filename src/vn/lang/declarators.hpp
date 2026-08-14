@@ -3,7 +3,6 @@
 
 #include "node/specialise_oostd.hpp"
 #include "tree/type_data.hpp"
-#include "tree/cpptree.hpp"
 #include <string>
 
 namespace Declarators {
