@@ -3,6 +3,7 @@
 
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
+#include "tree/node_names.hpp"
 #include "helpers/transformation.hpp"
 #include "uniquify_identifiers.hpp"
 #include "helpers/simple_compare.hpp"
@@ -35,7 +36,7 @@ class VNLangActions;
 class ResolverGnomon : public Gnomon
 {
 public:	
-	ResolverGnomon( const AvailableNodeData::Block *andata_block ) : 
+	ResolverGnomon( const ANDBlock *andata_block ) : 
 		namespace_block(dynamic_cast<const AvailableNodeData::NamespaceBlock *>(andata_block))
 	{
 		ASSERT( namespace_block );
@@ -143,7 +144,7 @@ public:
 private:
 	YY::VNLangParser::symbol_type Recognise(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type RecogniseInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
-	YY::VNLangParser::symbol_type CreateBlockToken(const AvailableNodeData::Block *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
+	YY::VNLangParser::symbol_type CreateBlockToken(const ANDBlock *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
 	YY::VNLangParser::symbol_type CreateNodeToken(const AvailableNodeData::NodeBlock *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
 	YY::VNLangParser::symbol_type RecogniseInTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
     YY::VNLangParser::symbol_type RecogniseKeyword(wstring text, bool ascii, const YY::TokenMetadata &metadata, YY::VNLangParser::location_type loc) const;

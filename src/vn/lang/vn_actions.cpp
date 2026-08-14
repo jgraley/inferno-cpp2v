@@ -250,7 +250,7 @@ TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, any node_na
 }
 
 
-TreePtr<Node> VNLangActions::OnRestrict( const AvailableNodeData::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc )
+TreePtr<Node> VNLangActions::OnRestrict( const ANDBlock *block, any node_name_loc, TreePtr<Node> target, any target_loc )
 {
 	auto node_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
 	NodeEnum ne = node_block->node_enum.value();
@@ -674,7 +674,7 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 }
 
 
-TreePtr<Node> VNLangActions::NodeFromANDataBlock( const AvailableNodeData::Block *block ) const
+TreePtr<Node> VNLangActions::NodeFromANDataBlock( const ANDBlock *block ) const
 {
 	auto nb = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
 	ASSERT( nb );
@@ -1203,7 +1203,7 @@ TreePtr<Node> VNLangActions::OnLookup( TreePtr<Node> object, TreePtr<Node> membe
 }
 
 
-TreePtr<Node> VNLangActions::OnIdByName( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc )
+TreePtr<Node> VNLangActions::OnIdByName( const ANDBlock *block, any id_disc_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
 	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
@@ -1223,7 +1223,7 @@ TreePtr<Node> VNLangActions::OnIdByName( const AvailableNodeData::Block *block, 
 }
 
 
-TreePtr<Node> VNLangActions::OnBuildId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources )
+TreePtr<Node> VNLangActions::OnBuildId( const ANDBlock *block, any id_disc_loc, wstring wformat, any name_loc, Item sources )
 {
 	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?
 	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);

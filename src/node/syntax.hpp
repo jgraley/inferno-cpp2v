@@ -1,6 +1,8 @@
 #ifndef RENDERABLE_HPP
 #define RENDERABLE_HPP
 
+#include "vn/lang/vn_lang.ypp.hpp"
+#include "vn/lang/vn_lang.location.hpp"
 #include "common/common.hpp"
 #include "common/mismatch.hpp"
 

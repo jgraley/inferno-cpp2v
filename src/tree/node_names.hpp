@@ -23,21 +23,22 @@ enum class IdentifierEnum
 #undef NODE
 };
 
+struct ANDBlock : Traceable // Ugly: done so we can forward-declare
+{
+	virtual string What() const = 0;
+};
+
 
 class AvailableNodeData
 {
-public:	
-	struct Block : Traceable
-	{
-		virtual string What() const = 0;
-	};
-	
+public:		
+	typedef ANDBlock Block;
 	struct NamespaceBlock : Block
 	{
 		string What() const final { return "node name scope"; }
 		string GetTrace() const { return Trace(sub_blocks); }
 
-		map<string, unique_ptr<AvailableNodeData::Block>> sub_blocks;
+		map<string, unique_ptr<ANDBlock>> sub_blocks;
 	};
 
 	struct NodeBlock : Block

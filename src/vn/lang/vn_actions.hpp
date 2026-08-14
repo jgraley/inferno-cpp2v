@@ -33,7 +33,7 @@ public:
 	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
 	TreePtr<Node> FinishExplicitNode( TreePtr<Node> dest, any node_name_loc, Itemisation itemisation );
 	TreePtr<Node> OnEmbeddedCommands( list<shared_ptr<Command>> commands );
-	TreePtr<Node> OnRestrict( const AvailableNodeData::Block *block, any node_name_loc, TreePtr<Node> target, any target_loc );
+	TreePtr<Node> OnRestrict( const ANDBlock *block, any node_name_loc, TreePtr<Node> target, any target_loc );
 	
 	TreePtr<Node> OnTypeSpecifierSeq( multiset<string> specifiers, any loc );
 	
@@ -70,7 +70,7 @@ public:
 	
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
-	TreePtr<Node> NodeFromANDataBlock( const AvailableNodeData::Block *block ) const;
+	TreePtr<Node> NodeFromANDataBlock( const ANDBlock *block ) const;
 	NodeAndGnomon MakeScopeGnomonForNode( TreePtr<Node> node ) const;
 	TreePtr<Node> OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, any type_loc, TreePtr<Node> declarator, any decl_loc );
 	TreePtr<Node> OnTypedef( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc );	
@@ -98,8 +98,8 @@ public:
 	TreePtr<Node> OnSeqArgsConsInit( TreePtr<Node> constructor_id, list<TreePtr<Node>> arguments );
 	TreePtr<Node> OnLookup( TreePtr<Node> object, TreePtr<Node> member, any member_loc );
 
-	TreePtr<Node> OnIdByName( const AvailableNodeData::Block *block, any id_disc_loc, wstring wname, any name_loc );
-	TreePtr<Node> OnBuildId( const AvailableNodeData::Block *block, any id_disc_loc, wstring wformat, any name_loc, Item sources );
+	TreePtr<Node> OnIdByName( const ANDBlock *block, any id_disc_loc, wstring wname, any name_loc );
+	TreePtr<Node> OnBuildId( const ANDBlock *block, any id_disc_loc, wstring wformat, any name_loc, Item sources );
 	TreePtr<Node> OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc );
 	TreePtr<Node> OnNegation( TreePtr<Node> operand );
 	TreePtr<Node> OnConjunction( TreePtr<Node> left, TreePtr<Node> right );

@@ -106,19 +106,19 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInNodeNameScope(wstring
 	// See if we want to supply a block
 	if( namespace_block && namespace_block->sub_blocks.count(ToASCII(text)) > 0 )
 	{
-		const AvailableNodeData::Block *sub_block = namespace_block->sub_blocks.at(ToASCII(text)).get();
+		const ANDBlock *sub_block = namespace_block->sub_blocks.at(ToASCII(text)).get();
 		return CreateBlockToken( sub_block, loc, metadata );
 	}
 		
 	if( default_namespace )
 	{
 		// Try the default namespace
-		const AvailableNodeData::Block *default_block = namespace_block->sub_blocks.at(DEFAULT_NODE_NAMESPACE).get();
+		const ANDBlock *default_block = namespace_block->sub_blocks.at(DEFAULT_NODE_NAMESPACE).get();
 		namespace_block = dynamic_cast<const AvailableNodeData::NamespaceBlock *>(default_block);
 		ASSERT( namespace_block ); // Internal error: default block is not a namespace block
 		if( namespace_block && namespace_block->sub_blocks.count(ToASCII(text)) > 0 )
 		{
-			const AvailableNodeData::Block *sub_block = namespace_block->sub_blocks.at(ToASCII(text)).get();
+			const ANDBlock *sub_block = namespace_block->sub_blocks.at(ToASCII(text)).get();
 			return CreateBlockToken( sub_block, loc, metadata );
 		}
 	}
@@ -129,7 +129,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInNodeNameScope(wstring
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::CreateBlockToken(const AvailableNodeData::Block *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+YY::VNLangParser::symbol_type VNLangRecogniser::CreateBlockToken(const ANDBlock *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
 {
 	metadata.as_andata_block = block; // return it to the parser whatever it is
 	if( auto lb = dynamic_cast<const AvailableNodeData::NodeBlock *>(block) )

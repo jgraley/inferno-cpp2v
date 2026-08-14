@@ -23,8 +23,9 @@
   
   #include <string>
   #include "vn/lang/vn_types.hpp"     
-  #include "tree/node_names.hpp"  
   #include "node/tree_ptr.hpp"
+
+  struct ANDBlock;
 
   namespace YY {
     class VNLangScanner;  
@@ -33,7 +34,7 @@
 		TreePtr<Node> as_designated;
 		string as_ascii;
 		wstring as_unicode;
-		const AvailableNodeData::Block *as_andata_block;
+		const ANDBlock *as_andata_block;
 	};     	
   };
   
@@ -216,9 +217,9 @@ stmt_high
 %type <list<TreePtr<Node>>>			bases memb_inits
 %type <VN::QualifierData> 			qualifier qualifier_nw
 %type <list<VN::QualifierData>>		qualifiers 
-%type <const AvailableNodeData::Block *> prerestrict_op_named id_by_name_op_named build_id_named 
-%type <const AvailableNodeData::Block *> type_prerestrict_op_named type_id_by_name_op_named type_build_id_op_named
-%type <const AvailableNodeData::Block *> mi_prerestrict_op_named mi_id_by_name_op_named mi_build_id_op_named
+%type <const ANDBlock *> prerestrict_op_named id_by_name_op_named build_id_named 
+%type <const ANDBlock *> type_prerestrict_op_named type_id_by_name_op_named type_build_id_op_named
+%type <const ANDBlock *> mi_prerestrict_op_named mi_id_by_name_op_named mi_build_id_op_named
 %type <multiset<string>>			type_specifier_seq
 
 // Solve the dangling-else amiguity by giving the "else" token a higher priority than the "if" token

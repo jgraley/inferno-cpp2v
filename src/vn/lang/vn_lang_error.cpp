@@ -2,6 +2,7 @@
 #include "vn/lang/vn_lang.location.hpp"
 #include "vn/lang/vn_lang.lpp.hpp"
 #include "vn/lang/vn_lang.ypp.hpp"
+#include "node/node.hpp"
 
 void YY::VNLangParser::error( const location& loc, const string& msg )
 {

@@ -2,13 +2,14 @@
 #define VN_TYPES_HPP
 
 // Watch the deps here: parser header file includes this
-#include "tree/node_names.hpp"  
 #include "node/tree_ptr.hpp"
 
 #include <any> // to dep-break the generated headers
 
+struct ANDBlock;
+
 namespace VN 
-{		
+{			
 struct Limit
 {
 	string cond;
@@ -103,13 +104,13 @@ public:
 class PrerestrictScopeGnomon : public ScopeGnomon
 {
 public:	
-	PrerestrictScopeGnomon( const AvailableNodeData::Block *block_ ) :
+	PrerestrictScopeGnomon( const ANDBlock *block_ ) :
 		block(block_) {}
 	string GetMessageText() const final
 	{
 		return "prerestrict scope";
 	}
-	const AvailableNodeData::Block * const block;
+	const ANDBlock * const block;
 };
 
 
@@ -170,7 +171,7 @@ struct QualifierData : Traceable
 
 struct BlockAndGnomon
 {
-	const AvailableNodeData::Block *block;
+	const ANDBlock *block;
 	shared_ptr<Gnomon> gnomon;
 };
 
