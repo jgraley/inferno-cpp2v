@@ -1,6 +1,7 @@
 #ifndef VN_TYPES_HPP
 #define VN_TYPES_HPP
 
+// Watch the deps here: parser header file includes this
 #include "tree/node_names.hpp"  
 #include "node/tree_ptr.hpp"
 
