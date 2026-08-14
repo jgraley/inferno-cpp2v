@@ -11,7 +11,9 @@
 #include "common/common.hpp"
 #include "common/magic.hpp"
 #include "itemise.hpp"
-#include "node.hpp"
+#include "common/serial.hpp"
+
+class Node;
 
 
 //#define TREE_POINTER_REF_COUNTS

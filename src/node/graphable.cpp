@@ -3,6 +3,7 @@
 #include "common/common.hpp"
 #include "common/trace.hpp"
 #include "tree_ptr.hpp"
+#include "node.hpp"
 
 #include <string>
 #include <list>

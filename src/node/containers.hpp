@@ -11,6 +11,7 @@
 #include "common/common.hpp"
 #include "itemise.hpp"
 #include "tree_ptr.hpp"
+#include "node.hpp"
 
 #include <list>
 #include <set>
