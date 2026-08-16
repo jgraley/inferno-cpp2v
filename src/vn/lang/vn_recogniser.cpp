@@ -185,26 +185,18 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 
 	if( ascii_text=="this" )
 		return YY::VNLangParser::make_KEYWORD_PRIMARY_OP(metadata, loc);
-	else if( ascii_text=="break" ||
-			 ascii_text=="continue" ) 
-		return YY::VNLangParser::make_KEYWORD_SIMPLE_STMT(metadata, loc);
 	else if( ascii_text=="return" ||
 	         ascii_text=="goto" ) 
 		return YY::VNLangParser::make_KEYWORD_SPACE_SEP_STMT(metadata, loc);
-	else if( ascii_text=="switch" ||
-	         ascii_text=="for" ) 
-		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_STMT(metadata, loc);
 	else if( ascii_text=="if" )
 		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_CHAIN_STMT(metadata, loc);
 	else if( ascii_text=="else" )
 		return YY::VNLangParser::make_CHAINING_KEYWORD(metadata, loc);
 	else if( ascii_text=="while" )
 		return YY::VNLangParser::make_WHILE_KEYWORD(metadata, loc);
-	else if( ascii_text=="do" )
-		return YY::VNLangParser::make_DO_KEYWORD(metadata, loc);
 	else if( ascii_text=="case" ) // There are 2 nodes: Case and RangeCase
 		return YY::VNLangParser::make_CASE_KEYWORD(metadata, loc);
-	else if( ascii_text=="typename" )
+	else if( ascii_text=="typename" ) // No node
 		return YY::VNLangParser::make_TYPENAME(ascii_text, loc);
 	else if( ascii_text=="char" ||
 	         ascii_text=="bool" ||
@@ -217,7 +209,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 	         ascii_text=="double" ||
 	         ascii_text=="void" )
 		return YY::VNLangParser::make_TYPE_SPECIFIER(ascii_text, loc);
-	else if( ascii_text=="static" )
+	else if( ascii_text=="static" ) // no node
 		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);
 
 	TreePtr<Node> node = AvailableNodeData().TryGetByKeyword( ascii_text );

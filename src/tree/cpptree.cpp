@@ -2299,6 +2299,12 @@ string Do::GetKeyword( Policy ) const
 	return "do";
 }
 
+
+YY::VNLangParser::token::token_kind_type Do::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_DO_KEYWORD;
+}
+
 //////////////////////////// For ///////////////////////////////
 
 Syntax::Production For::GetMyProductionTerminal() const
@@ -2326,6 +2332,12 @@ string For::GetKeyword( Policy ) const
 	return "for";
 }
 
+
+YY::VNLangParser::token::token_kind_type For::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_STMT;
+}
+
 //////////////////////////// Switch ///////////////////////////////
 
 Syntax::Production Switch::GetMyProductionTerminal() const
@@ -2347,6 +2359,12 @@ string Switch::GetRender( VN::RendererInterface *renderer, Production, Policy po
 string Switch::GetKeyword( Policy ) const 
 {
 	return "switch";
+}
+
+
+YY::VNLangParser::token::token_kind_type Switch::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_STMT;
 }
 
 //////////////////////////// SwitchTarget ///////////////////////////////
@@ -2440,6 +2458,12 @@ string Continue::GetKeyword( Policy ) const
 	return "continue";
 }
 
+
+YY::VNLangParser::token::token_kind_type Continue::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+}
+
 //////////////////////////// Break ///////////////////////////////
 
 Syntax::Production Break::GetMyProductionTerminal() const
@@ -2457,6 +2481,12 @@ string Break::GetRender( VN::RendererInterface *renderer, Production, Policy pol
 string Break::GetKeyword( Policy ) const 
 {
 	return "break";
+}
+
+
+YY::VNLangParser::token::token_kind_type Break::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }
 
 //////////////////////////// Nop ///////////////////////////////

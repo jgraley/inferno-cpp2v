@@ -1465,6 +1465,7 @@ struct Do : Loop, Uncombable // a do..while() construct
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// C-style for loop. 
@@ -1481,6 +1482,7 @@ struct For : Loop
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// Switch statement. 
@@ -1496,6 +1498,7 @@ struct Switch : Breakable
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// Intermediate for labels in a switch statement.
@@ -1548,6 +1551,7 @@ struct Continue : Statement, Uncombable
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// Break (from innermost Breakable)
@@ -1558,6 +1562,7 @@ struct Break : Statement
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// Do nothing; these get optimised out where possible
