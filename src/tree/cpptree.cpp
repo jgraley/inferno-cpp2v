@@ -2173,6 +2173,12 @@ string Return::GetKeyword( Policy ) const
 	return "return";
 }
 
+
+YY::VNLangParser::token::token_kind_type Return::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SPACE_SEP_STMT;
+}
+
 //////////////////////////// Goto ///////////////////////////////
 
 Syntax::Production Goto::GetMyProductionTerminal() const
@@ -2213,6 +2219,12 @@ string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 string Goto::GetKeyword( Policy ) const 
 {
 	return "goto";
+}
+
+
+YY::VNLangParser::token::token_kind_type Goto::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SPACE_SEP_STMT;
 }
 
 //////////////////////////// If ///////////////////////////////

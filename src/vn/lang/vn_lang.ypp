@@ -150,7 +150,7 @@
 <YY::TokenMetadata> KEYWORD_SIMPLE_STMT     _("keyword simple statement") // eg break;
 <YY::TokenMetadata> KEYWORD_SPACE_SEP_STMT 	_("keyword space-separated statement") // eg return 12;
 <YY::TokenMetadata> KEYWORD_ARGS_BODY_STMT 	_("keyword args-and-body statement") // eg switch(args) body
-<YY::TokenMetadata> KEYWORD_ARGS_BODY_CHAIN_STMT 	_("keyword args-body-chain statement") // eg if(args) body else chain_body	
+<YY::TokenMetadata> KEYWORD_ARGS_BODY_WITH_ELSE 	_("keyword args-body-chain statement") // eg if(args) body else chain_body	
 <YY::TokenMetadata> CHAINING_KEYWORD 		_("C chaining keyword") // eg else
 <YY::TokenMetadata> DO_KEYWORD				_("C do keyword")
 <YY::TokenMetadata> WHILE_KEYWORD			_("C while keyword")
@@ -226,7 +226,7 @@ stmt_high
 // In the rule, we must set the no-else rule to the "if" priority using %prec. Then, the TOKEN
 // for "else" will be compared with the RULE for no-else case and highest precidence will win.
 // It's all rather brittle.
-%precedence KEYWORD_ARGS_BODY_CHAIN_STMT // basically "then"
+%precedence KEYWORD_ARGS_BODY_WITH_ELSE // basically "then"
 %precedence CHAINING_KEYWORD  			     // basically "else"
 
 %%
@@ -641,9 +641,9 @@ statement_nl: bare_statement ';'												{ $$ = $1; }
 // #899		| explicit_norm_node '(' semicolon_args ')' stmt_comp				{ $$ = vn->OnArgsBodyStmt($1, @1, $3, @3, $5, @5); }
 			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp			{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
 			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 						{ $$ = vn->OnWhile($3, @3, $5, @5); }
-			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_comp	
-			  %prec KEYWORD_ARGS_BODY_CHAIN_STMT								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
-			| KEYWORD_ARGS_BODY_CHAIN_STMT '(' semicolon_args ')' stmt_comp
+			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp	
+			  %prec KEYWORD_ARGS_BODY_WITH_ELSE								{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, "", @1, nullptr, @1); }
+			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp
 			  CHAINING_KEYWORD stmt_comp										{ $$ = vn->OnArgsBodyChainStmt($1.as_ascii, @1, $3, @3, $5, @5, $6.as_ascii, @6, $7, @7); }
 
 bare_statement	: KEYWORD_SIMPLE_STMT											{ $$ = vn->OnSimpleStmt($1.as_ascii, @1); }

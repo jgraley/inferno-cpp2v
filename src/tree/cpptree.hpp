@@ -1393,6 +1393,7 @@ struct Return : Statement
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 
@@ -1411,6 +1412,7 @@ struct Goto : Statement, Uncombable
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// If statement

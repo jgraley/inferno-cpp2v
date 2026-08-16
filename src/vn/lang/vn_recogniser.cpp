@@ -185,16 +185,13 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 
 	if( ascii_text=="this" )
 		return YY::VNLangParser::make_KEYWORD_PRIMARY_OP(metadata, loc);
-	else if( ascii_text=="return" ||
-	         ascii_text=="goto" ) 
-		return YY::VNLangParser::make_KEYWORD_SPACE_SEP_STMT(metadata, loc);
 	else if( ascii_text=="if" )
-		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_CHAIN_STMT(metadata, loc);
-	else if( ascii_text=="else" )
+		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_WITH_ELSE(metadata, loc);
+	else if( ascii_text=="else" ) // No node
 		return YY::VNLangParser::make_CHAINING_KEYWORD(metadata, loc);
-	else if( ascii_text=="while" )
+	else if( ascii_text=="while" ) // TODO a While node can be created and then consumed during parse of Do
 		return YY::VNLangParser::make_WHILE_KEYWORD(metadata, loc);
-	else if( ascii_text=="case" ) // There are 2 nodes: Case and RangeCase
+	else if( ascii_text=="case" ) // There are 2 nodes: Case and RangeCase. TODO Case becomes RangeCase on signt of .. syntax
 		return YY::VNLangParser::make_CASE_KEYWORD(metadata, loc);
 	else if( ascii_text=="typename" ) // No node
 		return YY::VNLangParser::make_TYPENAME(ascii_text, loc);
