@@ -1311,26 +1311,29 @@ struct ConstructInitialiser : Initialiser
 
 /// Operator that operates on data types as parameters. 
 /** Where either is allowed we use the type one, since it's more concise. */
-struct TemplateExpression : Expression
+struct FuncOnType : Expression
 {
     NODE_FUNCTIONS
+
     TreePtr<Type> argument; ///< This Type is an input operand 
+
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
+	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// sizeof() a type
-struct SizeOf : TemplateExpression 
+struct SizeOf : FuncOnType 
 { 
 	NODE_FUNCTIONS_FINAL 
-	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
+    string GetKeyword( Policy ) const override;	
 }; 
 
 /// alignof() a type
-struct AlignOf : TemplateExpression 
+struct AlignOf : FuncOnType 
 { 
 	NODE_FUNCTIONS_FINAL
-	Production GetMyProductionTerminal() const override;	
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
+    string GetKeyword( Policy ) const override;	
 };
 
 //////////////////////////// Statements ////////////////////////////

@@ -126,7 +126,7 @@ NODE(CPPTree, Cast)
 NODE(CPPTree, GoSub)
 NODE(CPPTree, Call)
 NODE(CPPTree, ConstructInitialiser)
-NODE(CPPTree, TemplateExpression)
+NODE(CPPTree, FuncOnType)
 NODE(CPPTree, SizeOf)
 NODE(CPPTree, AlignOf)
 // Statements

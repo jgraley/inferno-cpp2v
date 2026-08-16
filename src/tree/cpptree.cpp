@@ -2045,30 +2045,37 @@ string ConstructInitialiser::GetRender( VN::RendererInterface *renderer, Product
 	return arg->DirectRenderArgumentation(renderer, policy);	
 }
 
-//////////////////////////// SizeOf ///////////////////////////////
+//////////////////////////// FuncOnType ///////////////////////////////
 
-Syntax::Production SizeOf::GetMyProductionTerminal() const
+Syntax::Production FuncOnType::GetMyProductionTerminal() const
 { 
 	return Production::PREFIX; 	
 }
 
 
-string SizeOf::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string FuncOnType::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return "sizeof(" + renderer->DoRender(&argument, Production::BOOT_TYPE, policy ) + ")";
+	return GetKeyword(policy) + "(" + renderer->DoRender(&argument, Production::BOOT_TYPE, policy ) + ")";
+}
+
+
+YY::VNLangParser::token::token_kind_type FuncOnType::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_FUNC_ON_TYPE;
+}
+
+//////////////////////////// SizeOf ///////////////////////////////
+
+string SizeOf::GetKeyword( Policy ) const
+{
+	return "sizeof";
 }
 
 //////////////////////////// AlignOf ///////////////////////////////
 
-Syntax::Production AlignOf::GetMyProductionTerminal() const
-{ 
-	return Production::PREFIX; 
-}
-
-
-string AlignOf::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string AlignOf::GetKeyword( Policy ) const
 {
-	return "alignof(" + renderer->DoRender(&argument, Production::BOOT_TYPE, policy ) + ")";
+	return "alignof";
 }
 
 //////////////////////////// Compound ///////////////////////////////

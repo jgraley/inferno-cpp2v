@@ -522,7 +522,7 @@ TreePtr<Node> VNLangActions::OnNop( any loc )
 
 TreePtr<Node> VNLangActions::OnFuncOnType( string keyword, any keyword_loc, TreePtr<Node> type_arg, any type_arg_loc )
 {
-	TreePtr<CPPTree::TemplateExpression> node;
+	TreePtr<CPPTree::FuncOnType> node;
 	if( keyword=="sizeof" )
 		node = MakeTreeNode<StandardAgentWrapper<CPPTree::SizeOf>>();
 	else if( keyword=="alignof" )

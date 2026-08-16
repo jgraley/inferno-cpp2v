@@ -222,9 +222,6 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 	         ascii_text=="double" ||
 	         ascii_text=="void" )
 		return YY::VNLangParser::make_TYPE_SPECIFIER(ascii_text, loc);
-	else if( ascii_text=="sizeof" ||
-	         ascii_text=="alignof" ) 
-		return YY::VNLangParser::make_FUNC_ON_TYPE(metadata, loc);
 	else if( ascii_text=="static" )
 		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);
 

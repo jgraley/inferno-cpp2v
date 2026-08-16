@@ -1920,7 +1920,7 @@ private:
     ActOnSizeOfAlignOfExpr( clang::SourceLocation, bool isSizeof, bool isType,
             void *TyOrEx, const clang::SourceRange &)
     {
-        TreePtr<TemplateExpression> p;
+        TreePtr<FuncOnType> p;
         if( isSizeof )
             p = MakeTreeNode<SizeOf>();
         else
