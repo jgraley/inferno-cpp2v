@@ -1943,6 +1943,12 @@ string This::GetRenderTerminal( Production ) const
 	return "this";
 }
 
+
+YY::VNLangParser::token::token_kind_type This::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_PRIMARY_OP;
+}
+
 //////////////////////////// New ///////////////////////////////
 
 Syntax::Production New::GetMyProductionTerminal() const
@@ -2257,6 +2263,12 @@ string If::GetRender( VN::RendererInterface *renderer, Production, Policy policy
 string If::GetKeyword( Policy ) const 
 {
 	return "if";
+}
+
+
+YY::VNLangParser::token::token_kind_type If::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_WITH_ELSE;
 }
 
 //////////////////////////// Breakable ///////////////////////////////

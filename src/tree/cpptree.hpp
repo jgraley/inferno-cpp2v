@@ -1211,6 +1211,7 @@ struct This : Operator
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRenderTerminal( Production ) const final;
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// Property indicating whether a New/Delete is global 
@@ -1426,6 +1427,7 @@ struct If : Statement
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// Designate a statement that may be broken out of

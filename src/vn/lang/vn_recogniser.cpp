@@ -183,19 +183,15 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 
 	string ascii_text = ToASCII(text);
 
-	if( ascii_text=="this" )
-		return YY::VNLangParser::make_KEYWORD_PRIMARY_OP(metadata, loc);
-	else if( ascii_text=="if" )
-		return YY::VNLangParser::make_KEYWORD_ARGS_BODY_WITH_ELSE(metadata, loc);
-	else if( ascii_text=="else" ) // No node
+	if( ascii_text=="else" ) // No node. TODO move to lexer
 		return YY::VNLangParser::make_CHAINING_KEYWORD(metadata, loc);
 	else if( ascii_text=="while" ) // TODO a While node can be created and then consumed during parse of Do
 		return YY::VNLangParser::make_WHILE_KEYWORD(metadata, loc);
 	else if( ascii_text=="case" ) // There are 2 nodes: Case and RangeCase. TODO Case becomes RangeCase on signt of .. syntax
 		return YY::VNLangParser::make_CASE_KEYWORD(metadata, loc);
-	else if( ascii_text=="typename" ) // No node
+	else if( ascii_text=="typename" ) // No node. TODO move to lexer
 		return YY::VNLangParser::make_TYPENAME(ascii_text, loc);
-	else if( ascii_text=="char" ||
+	else if( ascii_text=="char" || // TODO divide into core types and modifiers
 	         ascii_text=="bool" ||
 	         ascii_text=="short" ||
 	         ascii_text=="int" ||
@@ -206,7 +202,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 	         ascii_text=="double" ||
 	         ascii_text=="void" )
 		return YY::VNLangParser::make_TYPE_SPECIFIER(ascii_text, loc);
-	else if( ascii_text=="static" ) // no node
+	else if( ascii_text=="static" ) // no node. TODO move to lexer
 		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);
 
 	TreePtr<Node> node = AvailableNodeData().TryGetByKeyword( ascii_text );
