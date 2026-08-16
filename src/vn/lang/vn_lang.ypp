@@ -157,7 +157,7 @@
 <YY::TokenMetadata> CASE_KEYWORD			_("C case keyword")
 <YY::TokenMetadata> DEFAULT_KEYWORD			_("C default keyword")
 <YY::TokenMetadata> FUNC_ON_TYPE			_("function acting on a type")
-<YY::TokenMetadata> CLASS_KEYWORD			_("C class keyword")
+<YY::TokenMetadata> IRECORD_KEYWORD			_("C class/struct/union keyword")
 <YY::TokenMetadata> ENUM_KEYWORD			_("C enumeration keyword")
 <YY::TokenMetadata> QUAL_NODE_KEYWORD		_("C qualifier")
 <YY::TokenMetadata> STATIC_KEYWORD			_("C static keyword")
@@ -188,7 +188,7 @@ stmt_high
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
-%type <TreePtr<Node>> 				class_node class base_spec access_spec access_clause qualifier_node
+%type <TreePtr<Node>> 				irecord_node inheritance_record base_spec access_spec access_clause qualifier_node
 %type <TreePtr<Node>> 				enum_node enum
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					vn_name
@@ -208,7 +208,7 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		code_unit_scope compound_scope params_scope 
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
 %type <VN::NodeAndGnomon>			norm_full_explicit_start type_full_explicit_start decl_full_explicit_start qual_full_explicit_start mi_full_explicit_start
-%type <VN::NodeAndGnomon>			class_scope enum_scope
+%type <VN::NodeAndGnomon>			irecord_scope enum_scope
 %type <TreePtr<Node>> 				acc_memb_boot member comp_member bare_member bare_member_nvn 
 %type <TreePtr<Node>> 				acc_memb_prefix acc_memb_postfix acc_memb_paren acc_memb_primary
 %type <list<TreePtr<Node>>>			stmt_decls members enumerators
@@ -359,7 +359,7 @@ bare_decl_nvn	: prototype
 				| prototype bare_initialiser							{ $$ = vn->ApplyInitialiser($1, @1, $2, @2); } 
 				| prototype ':' memb_inits bare_initialiser				{ $$ = vn->ApplyMemberInits($1, @1, $3, @3); 
 																		  $$ = vn->ApplyInitialiser($$, @1, $4, @4); } 
-				| class
+				| inheritance_record
 				| enum				
 			
 bare_initialiser: C_ASSIGN assign_init									{ $$ = $2; } 
@@ -489,16 +489,16 @@ parameter   : decl_entry
                          
 //////////////////////////////// CLASSES ////////////////////////////////////                                  
                          
-class			: class_scope '{' members '}'			 					{ $$ = vn->FinishRecord( @$, $1.node, {}, $3 ); }
-				| class_scope ':' bases '{' members '}'						{ $$ = vn->FinishRecord( @$, $1.node, $3, $5 ); }
-				| class_scope '{' '}'			 							{ $$ = vn->FinishRecord( @$, $1.node, {}, {} ); }
-				| class_scope ':' bases '{' '}'								{ $$ = vn->FinishRecord( @$, $1.node, $3, {} ); }
+inheritance_record	: irecord_scope '{' members '}'			 				{ $$ = vn->FinishRecord( @$, $1.node, {}, $3 ); }
+					| irecord_scope ':' bases '{' members '}'				{ $$ = vn->FinishRecord( @$, $1.node, $3, $5 ); }
+					| irecord_scope '{' '}'			 						{ $$ = vn->FinishRecord( @$, $1.node, {}, {} ); }
+					| irecord_scope ':' bases '{' '}'						{ $$ = vn->FinishRecord( @$, $1.node, $3, {} ); }
              
-class_scope     : class_node type_specified        							{ $$ = { vn->ApplyIdentifier($1, @2, $2), 
+irecord_scope   : irecord_node type_specified        						{ $$ = { vn->ApplyIdentifier($1, @2, $2), 
 																		             vn->MakeRecordScopeGnomon($1, $2) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
-class_node		: CLASS_KEYWORD												{ $$ = vn->StartRecord(@$, $1.as_ascii); }
+irecord_node	: IRECORD_KEYWORD											{ $$ = vn->StartRecord(@$, $1.as_ascii); }
 		 		| explicit_decl_node										{ $$ = $1; } 
                                                   
 bases			: base_spec                                                 { $$.push_back($1); } 

@@ -1710,6 +1710,13 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 
 //////////////////////////// Union ///////////////////////////////
 
+YY::VNLangParser::token::token_kind_type InheritanceRecord::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_IRECORD_KEYWORD;
+}
+
+//////////////////////////// Union ///////////////////////////////
+
 TreePtr<AccessSpec> Union::GetInitialAccess() const
 {
 	return MakeTreeNode<Public>();
@@ -1743,6 +1750,12 @@ string Enumeration::RenderBody( VN::RendererInterface *renderer, Policy policy )
 		ls.push_back( renderer->DoRender( &d, Syntax::Production::COMMA_SEP, policy ) );       
     
     return Join( ls, ",\n", "{\n", "\n}" );
+}
+
+
+YY::VNLangParser::token::token_kind_type Enumeration::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_ENUM_KEYWORD;
 }
 
 //////////////////////////// InheritanceRecord ///////////////////////////////

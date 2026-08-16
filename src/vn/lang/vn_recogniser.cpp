@@ -225,12 +225,6 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 	else if( ascii_text=="sizeof" ||
 	         ascii_text=="alignof" ) 
 		return YY::VNLangParser::make_FUNC_ON_TYPE(metadata, loc);
-	else if( ascii_text=="class" ||
-	         ascii_text=="struct" ||
-	         ascii_text=="union" )
-		return YY::VNLangParser::make_CLASS_KEYWORD(metadata, loc);
-	else if( ascii_text=="enum" ) 
-		return YY::VNLangParser::make_ENUM_KEYWORD(metadata, loc);
 	else if( ascii_text=="static" )
 		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);
 

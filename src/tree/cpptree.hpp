@@ -1063,6 +1063,7 @@ struct Enumeration : Record
 	void InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const override;
     string GetKeyword( Policy ) const override;
 	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	
+	YY::VNLangParser::token::token_kind_type GetToken() const override;	
 };
 
 /// A record that can inherit from other records and be inherited from. 
@@ -1074,6 +1075,7 @@ struct InheritanceRecord : Record
     Collection<Base> bases; ///< contains the InheritanceRecords from which we inherit   
 
     string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy) override;
+	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// Struct as per InheritanceRecord
