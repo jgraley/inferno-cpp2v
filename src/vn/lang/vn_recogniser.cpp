@@ -231,13 +231,6 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 		return YY::VNLangParser::make_CLASS_KEYWORD(metadata, loc);
 	else if( ascii_text=="enum" ) 
 		return YY::VNLangParser::make_ENUM_KEYWORD(metadata, loc);
-	else if( ascii_text=="public" ||
-	         ascii_text=="private" ||
-	         ascii_text=="protected" ||
-	         ascii_text=="const" ||
-	         ascii_text=="mutable" ||
-	         ascii_text=="virtual" )
-		return YY::VNLangParser::make_QUAL_NODE_KEYWORD(metadata, loc);
 	else if( ascii_text=="static" )
 		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);
 
