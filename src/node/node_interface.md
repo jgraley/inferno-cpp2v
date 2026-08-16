@@ -209,7 +209,7 @@ Here, `Integer` is the intermediate node for the property like `Constancy` in th
 
 By overloading `IsLocalMatch()`, we have restricted the set of nodes that will match `SpecificInteger` from all other `SpecificInteger`s to just `SpecificInteger`s with the same value, which is a subset of the set of all `SpecificIdentifier`s. Hence the word "Specific" in the node name. 
  
-As an aside, `Integer` *could* be built topologically as a sequence of `Bool` literals, to be interpreted in binary. Then e.g. constant expression optimisations would need to implement their own binary arithmetic - doing this in S&R would be an interesting exercise.
+As an aside, `Integer` *could* be built topologically as a sequence of `BoolLiteral` literals, to be interpreted in binary. Then e.g. constant expression optimisations would need to implement their own binary arithmetic - doing this in S&R would be an interesting exercise.
 
 ### 5.5 Representing identifiers
 

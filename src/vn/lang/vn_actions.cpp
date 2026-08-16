@@ -416,9 +416,9 @@ TreePtr<Node> VNLangActions::OnStringLiteral( wstring wvalue )
 }
 
 
-TreePtr<Node> VNLangActions::OnBoolLiteral( bool value )
+TreePtr<Node> VNLangActions::OnBoolLiteral( string value )
 {
-	if( value )
+	if( value=="true" )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::True>>();
 	else
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::False>>();

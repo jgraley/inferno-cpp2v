@@ -42,7 +42,7 @@ NODE(CPPTree, Integer)
 NODE(CPPTree, SpecificInteger)
 NODE(CPPTree, Float)
 NODE(CPPTree, SpecificFloat)
-NODE(CPPTree, Bool)
+NODE(CPPTree, BoolLiteral)
 NODE(CPPTree, True)
 NODE(CPPTree, False)
 // Declarations

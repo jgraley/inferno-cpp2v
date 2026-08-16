@@ -543,7 +543,7 @@ AddYieldFlag::AddYieldFlag()
     ms_not->negand = msx_comp;
     msx_comp->members = msx_decls;
     msx_comp->statements = (msx_pre, msx_assign, msx_post);
-    msx_assign->operands = (r_flag_id, MakePatternNode<Bool>());
+    msx_assign->operands = (r_flag_id, MakePatternNode<BoolLiteral>());
 
     mr_comp->members = (m_decls);
     mr_comp->statements = (m_pre, m_wait, mr_assign, m_post);

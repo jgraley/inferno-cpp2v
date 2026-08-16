@@ -42,7 +42,7 @@ public:
 	TreePtr<Node> OnPostfixOperator( string tok, TreePtr<Node> operand );
 	TreePtr<Node> OnIntegralLiteral( string text, any loc ); 
 	TreePtr<Node> OnStringLiteral( wstring value );
-	TreePtr<Node> OnBoolLiteral( bool value );
+	TreePtr<Node> OnBoolLiteral( string value );
 	TreePtr<Node> OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> target, any target_loc );	
 	TreePtr<Node> OnConditionalOperator( TreePtr<Node> condition, TreePtr<Node> expr_then, TreePtr<Node> expr_else );	
 	TreePtr<Node> OnSubscript( TreePtr<Node> destination, TreePtr<Node> index );	

@@ -410,8 +410,10 @@ private:
     llvm::APSInt value;    
 };
 
+
 /// Intermediate property node that represents a floating point number of any value. 
 struct Float : Number { NODE_FUNCTIONS };
+
 
 /// Property node for a specific floating point value.
 /** We use LLVM's class for this, 
@@ -429,25 +431,32 @@ struct SpecificFloat : Float, llvm::APFloat
     Production GetMyProductionTerminal() const override;
 };
 
-/// Intermediate property node that represents either boolean value.
-/** Note: Bool here is considered a noun, and in general Property/Literal
- intermediates are named using nouns. C.f. the Type node Boolean */
-struct Bool : Literal { NODE_FUNCTIONS };
 
-/// Property node for boolean value true 
-struct True : Bool
-{
-    NODE_FUNCTIONS_FINAL
-    virtual string GetRenderTerminal( Production ) const { return "true"; } 
+/// Intermediate property node that represents either boolean value.
+/** Note: BoolLiteral here is considered a noun, and in general Property/Literal
+ intermediates are named using nouns. C.f. the Type node Boolean */
+struct BoolLiteral : Literal 
+{ 
+	NODE_FUNCTIONS 
+	string GetRender( VN::RendererInterface *, Production, Policy ) override;
 	Production GetMyProductionTerminal() const override;
+	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
-/// Property node for boolean value false 
-struct False : Bool
+
+/// Property node for boolean value true 
+struct True : BoolLiteral
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetRenderTerminal( Production ) const { return "false"; } 
-	Production GetMyProductionTerminal() const override;
+    string GetKeyword( Policy ) const override;
+};
+
+
+/// Property node for boolean value false 
+struct False : BoolLiteral
+{
+    NODE_FUNCTIONS_FINAL
+    string GetKeyword( Policy ) const override;
 };
 
 //////////////////////////// Declarations //////////////////////////// 
@@ -913,7 +922,7 @@ struct Void : Type
 /** We support bool separately from 1-bit ints, at least for now.
  (note that (bool)2==true but (int:1)2==0)
  Note: Boolean here is considered an adjective, and in general Type
- nodes are named using adjectives. C.f. the Property/Literal intermediate Bool */
+ nodes are named using adjectives. C.f. the Property/Literal intermediate BoolLiteral */
 struct Boolean : Type 
 { 
 	NODE_FUNCTIONS_FINAL 

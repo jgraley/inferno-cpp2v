@@ -804,18 +804,37 @@ Syntax::Production SpecificFloat::GetMyProductionTerminal() const
 	return Production::PRIMARY_EXPR; 
 }
 
-//////////////////////////// True ///////////////////////////////
+//////////////////////////// BoolLiteral ///////////////////////////////
 
-Syntax::Production True::GetMyProductionTerminal() const
+string BoolLiteral::GetRender( VN::RendererInterface *, Production, Policy policy )
+{ 
+	return GetKeyword( policy ); 
+} 
+
+
+Syntax::Production BoolLiteral::GetMyProductionTerminal() const
 { 
 	return Production::PRIMARY_EXPR; 
 }
 
+
+YY::VNLangParser::token::token_kind_type BoolLiteral::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_BOOL_LITERAL;
+}
+
+//////////////////////////// True ///////////////////////////////
+
+string True::GetKeyword( Policy ) const
+{
+	return "true";
+}
+
 //////////////////////////// False ///////////////////////////////
 
-Syntax::Production False::GetMyProductionTerminal() const
-{ 
-	return Production::PRIMARY_EXPR; 
+string False::GetKeyword( Policy ) const
+{
+	return "false";
 }
 
 //////////////////////////// MemberInitialiser ///////////////////////////////

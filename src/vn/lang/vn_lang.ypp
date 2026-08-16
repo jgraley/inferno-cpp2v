@@ -127,10 +127,10 @@
 <string>    C_PRE_OR_POSTFIX_OP 			_("C prefix/postfix operator")
 <wstring> 	STRING_LITERAL 					_("C string literal")
 <string> 	INTEGRAL_LITERAL				_("C integer literal")
-<bool>		BOOL_LITERAL					_("C boolean literal")
 <string>	ASCII_FORMAT 					_("C format string")
 <string>	TYPENAME						_("C typename operator")
 <string>	TYPE_SPECIFIER					_("C simple type specifier")
+<YY::TokenMetadata>	BOOL_LITERAL			_("C boolean literal")
 <YY::TokenMetadata> TRANSFORM_NAME_TYPE		_("type transform name")
 <YY::TokenMetadata> TRANSFORM_NAME_NORMAL	_("open_statement transform name")
 <YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
@@ -736,7 +736,7 @@ expr_primary: id_primary
 			| '(' stmt_boot ')'                          		{ $$ = $2; }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
-			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1); }
+			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1.as_ascii); }
 			| KEYWORD_PRIMARY_OP								{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); } 
 			| FUNC_ON_TYPE '(' type_boot ')'       				{ $$ = vn->OnFuncOnType($1.as_ascii, @1, $3, @3); }			
 			| DESIGNATED_COMPOUND      				  			{ $$ = $1.as_designated; }   // TODO move up into the statement rules once we don't need to support eg int main() = my_compound
@@ -830,8 +830,8 @@ type_transform_op_named 	: transform_op_scope TRANSFORM_NAME_TYPE 			{ $$ = $2.a
 
 // eg "long unsigned int". VN represents this as a single node. We don't want nodes for its constituent parts.
 // So, this is the level at which we mix in the VN syntax.
-type_specifier_seq	: TYPE_SPECIFIER												{ $$.insert($1); }
-					| TYPE_SPECIFIER type_specifier_seq								{ $$ = $2; $$.insert($1); }
+type_specifier_seq	: TYPE_SPECIFIER											{ $$.insert($1); }
+					| TYPE_SPECIFIER type_specifier_seq							{ $$ = $2; $$.insert($1); }
 
 //////////////////////////////// QUALIFIERS ////////////////////////////////////         
 

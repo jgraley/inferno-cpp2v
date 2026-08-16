@@ -206,9 +206,6 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 		return YY::VNLangParser::make_CASE_KEYWORD(metadata, loc);
 	else if( ascii_text=="default" )
 		return YY::VNLangParser::make_DEFAULT_KEYWORD(metadata, loc);
-	else if( ascii_text=="true" ||
-			 ascii_text=="false" )
-		return YY::VNLangParser::make_BOOL_LITERAL(ascii_text=="true", loc);
 	else if( ascii_text=="typename" )
 		return YY::VNLangParser::make_TYPENAME(ascii_text, loc);
 	else if( ascii_text=="char" ||

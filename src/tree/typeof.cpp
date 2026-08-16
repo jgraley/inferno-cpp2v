@@ -382,7 +382,7 @@ AugTreePtr<CPPTree::Type> TypeOf::GetLiteral( const TransKit &kit, AugTreePtr<Li
         SET_CHILD(ft, semantics, kit.utils->MakeAugTreeNode<SpecificFloatSemantics>( &sf->getSemantics() ));
         return ft;
     }
-    else if( AugTreePtr<Bool>::DynamicCast(l) )
+    else if( AugTreePtr<BoolLiteral>::DynamicCast(l) )
     {
         return kit.utils->MakeAugTreeNode<Boolean>();
     }
