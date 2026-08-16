@@ -2375,6 +2375,12 @@ string RangeCase::GetKeyword( Policy ) const
 	return "case";
 }
 
+
+YY::VNLangParser::token::token_kind_type RangeCase::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_CASE_KEYWORD;
+}
+
 //////////////////////////// Case //////////////////////////////
 
 string Case::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
@@ -2389,6 +2395,12 @@ string Case::GetKeyword( Policy ) const
 	return "case";
 }
 
+
+YY::VNLangParser::token::token_kind_type Case::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_CASE_KEYWORD;
+}
+
 //////////////////////////// Default //////////////////////////////
 
 string Default::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
@@ -2401,6 +2413,12 @@ string Default::GetRender( VN::RendererInterface *renderer, Production, Policy p
 string Default::GetKeyword( Policy ) const 
 {
 	return "default";
+}
+
+
+YY::VNLangParser::token::token_kind_type Default::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_DEFAULT_KEYWORD;
 }
 
 //////////////////////////// Continue ///////////////////////////////

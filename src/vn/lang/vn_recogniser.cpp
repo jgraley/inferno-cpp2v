@@ -202,10 +202,8 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 		return YY::VNLangParser::make_WHILE_KEYWORD(metadata, loc);
 	else if( ascii_text=="do" )
 		return YY::VNLangParser::make_DO_KEYWORD(metadata, loc);
-	else if( ascii_text=="case" )
+	else if( ascii_text=="case" ) // There are 2 nodes: Case and RangeCase
 		return YY::VNLangParser::make_CASE_KEYWORD(metadata, loc);
-	else if( ascii_text=="default" )
-		return YY::VNLangParser::make_DEFAULT_KEYWORD(metadata, loc);
 	else if( ascii_text=="typename" )
 		return YY::VNLangParser::make_TYPENAME(ascii_text, loc);
 	else if( ascii_text=="char" ||

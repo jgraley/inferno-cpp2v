@@ -1516,6 +1516,7 @@ struct RangeCase : SwitchTarget
 
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 }; 
 
 /// Case label
@@ -1526,6 +1527,7 @@ struct Case : SwitchTarget
 
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// Default label in a switch statement
@@ -1535,6 +1537,7 @@ struct Default : SwitchTarget
 	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// Continue (to innermost Loop)
