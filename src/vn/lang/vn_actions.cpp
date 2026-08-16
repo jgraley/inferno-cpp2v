@@ -28,7 +28,7 @@
 using namespace VN;
 using namespace reflex;
 
-static NodeEnum GetNodeEnum( list<string> typ, any loc );
+static NodeTag GetNodeEnum( list<string> typ, any loc );
 
 
 VNLangActions::VNLangActions() :
@@ -117,12 +117,12 @@ TreePtr<Node> VNLangActions::OnEmbeddedCommands( list<shared_ptr<Command>> comma
 }
 
 
-static TreePtr<Node> MakeStandardAgent(NodeEnum ne)
+static TreePtr<Node> MakeStandardAgent(NodeTag ne)
 {
 	switch(ne)
 	{
 #define NODE(NS, NAME) \
-	case NodeEnum::NS##_##NAME: \
+	case NodeTag::NS##_##NAME: \
 		return MakeTreeNode<StandardAgentWrapper<NS::NAME>>(); 
 #include "tree/node_names.inc"			
 #define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
@@ -253,7 +253,7 @@ TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, any node_na
 TreePtr<Node> VNLangActions::OnRestrict( const ANDBlock *block, any node_name_loc, TreePtr<Node> target, any target_loc )
 {
 	auto node_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	NodeEnum ne = node_block->node_enum.value();
+	NodeTag ne = node_block->tag.value();
 	Agent *agent = Agent::TryAsAgent(target);
 	ASSERT( agent )("We are parsing a pattern so everything should be agents");
 		
@@ -678,8 +678,8 @@ TreePtr<Node> VNLangActions::NodeFromANDataBlock( const ANDBlock *block ) const
 {
 	auto nb = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
 	ASSERT( nb );
-	ASSERT( nb->node_enum );
-	NodeEnum ne = nb->node_enum.value();
+	ASSERT( nb->tag );
+	NodeTag ne = nb->tag.value();
 	TreePtr<Node> node = MakeStandardAgent(ne);
 	ASSERT( node );
 	return node;
@@ -796,8 +796,8 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	{
 		auto nb = dynamic_cast<const AvailableNodeData::NodeBlock *>(psg->block);
 		ASSERT( nb );
-		ASSERT( nb->node_enum );
-		NodeEnum ne = nb->node_enum.value();
+		ASSERT( nb->tag );
+		NodeTag ne = nb->tag.value();
 		TreePtr<Node> node = MakeStandardAgent(ne);
 		ASSERT( node );
 		instance = TreePtr<CPPTree::Instance>::DynamicCast(node);
@@ -1207,15 +1207,15 @@ TreePtr<Node> VNLangActions::OnIdByName( const ANDBlock *block, any id_disc_loc,
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
 	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	NodeEnum ne = leaf_block->node_enum.value();
+	NodeTag ne = leaf_block->tag.value();
 
 	string name = Unquote(ToASCII(wname));
 
-	auto m = AvailableNodeData().GetEnumToNameMap();
+	auto m = AvailableNodeData().GetTagToNameMap();
 	auto l = m.at(ne);
 	string idt_ns = l.front();
 	string idt_name = l.back();	
-	ASSERT( !idt_name.empty() ); // internal error because we get a NodeEnum from the recogniser
+	ASSERT( !idt_name.empty() ); // internal error because we get a NodeTag from the recogniser
 	
 	TreePtr<Node> ibn_node = IdentifierByNameAgent::TryMakeFromDestignatedType( idt_ns, idt_name, name );
 	ASSERT( ibn_node )("%s::%s could not make id by name agent", idt_ns, idt_name);
@@ -1227,16 +1227,16 @@ TreePtr<Node> VNLangActions::OnBuildId( const ANDBlock *block, any id_disc_loc, 
 {
 	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?
 	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	NodeEnum ne = leaf_block->node_enum.value();
+	NodeTag ne = leaf_block->tag.value();
 
 	// Format is "" if omitted otherwise a quoted string with the quotes still on
 	string format = wformat.empty() ? "" : Unquote(ToASCII(wformat));
 		
-	auto m = AvailableNodeData().GetEnumToNameMap();
+	auto m = AvailableNodeData().GetTagToNameMap();
 	auto l = m.at(ne);
 	string idt_ns = l.front();
 	string idt_name = l.back();	
-	ASSERT( !idt_name.empty() ); // internal error because we get a NodeEnum from the recogniser
+	ASSERT( !idt_name.empty() ); // internal error because we get a NodeTag from the recogniser
 	
 	TreePtr<Node> bia_node = BuildIdentifierAgent::TryMakeFromDestignatedType( idt_ns, idt_name, format ); 
 	ASSERT( bia_node );
@@ -1361,16 +1361,16 @@ void VNLangActions::AddGnomon( shared_ptr<Gnomon> gnomon )
 }
 
 
-static NodeEnum GetNodeEnum( list<string> typ, any loc )
+static NodeTag GetNodeEnum( list<string> typ, any loc )
 {
-	if( !AvailableNodeData().GetNameToEnumMap().count(typ) )
+	if( !AvailableNodeData().GetNameToTagMap().count(typ) )
 	{
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(loc),
 			"Built-in type " + DiagQuote(Join(typ, "::")) + " unknown.");
 	}
 	
-	return AvailableNodeData().GetNameToEnumMap().at(typ);	
+	return AvailableNodeData().GetNameToTagMap().at(typ);	
 }
 
 //////////////////////////// Virtuality ////////////////////////////// TODO don't put these here, use MakeStandardAgentFromTypeID

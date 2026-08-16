@@ -8,21 +8,21 @@
 #include <list>
 #include <string>
 
-const AvailableNodeData::NameToNodeMapType &AvailableNodeData::GetNameToEnumMap()
+const AvailableNodeData::NameToTagMapType &AvailableNodeData::GetNameToTagMap()
 {
-	if( name_to_node_map.empty() )
+	if( name_to_tag_map.empty() )
 		InitialiseMap();
 	
-	return name_to_node_map;
+	return name_to_tag_map;
 }
 
 
-const AvailableNodeData::NodeToNameMapType &AvailableNodeData::GetEnumToNameMap()
+const AvailableNodeData::TagToNameMapType &AvailableNodeData::GetTagToNameMap()
 {
-	if( node_to_name_map.empty() )
+	if( tag_to_name_map.empty() )
 		InitialiseMap();
 	
-	return node_to_name_map;
+	return tag_to_name_map;
 }
 
 
@@ -35,12 +35,12 @@ const AvailableNodeData::NamespaceBlock *AvailableNodeData::GetNodeNamesRoot()
 }
 
 
-shared_ptr<Node> AvailableNodeData::MakeNode(NodeEnum ne) const 
+shared_ptr<Node> AvailableNodeData::MakeNode(NodeTag t) const 
 {
-	switch(ne)
+	switch(t)
 	{
 #define NODE(NS, NAME) \
-	case NodeEnum::NS##_##NAME: \
+	case NodeTag::NS##_##NAME: \
 		return shared_ptr<Node>( new NS::NAME ); 
 #include "node_names.inc"			
 #define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
@@ -55,12 +55,12 @@ shared_ptr<Node> AvailableNodeData::MakeNode(NodeEnum ne) const
 }
 
 
-shared_ptr<TreePtrInterface> AvailableNodeData::MakeTreePtr(NodeEnum ne) const
+shared_ptr<TreePtrInterface> AvailableNodeData::MakeTreePtr(NodeTag t) const
 {
-	switch(ne)
+	switch(t)
 	{
 #define NODE(NS, NAME) \
-	case NodeEnum::NS##_##NAME: \
+	case NodeTag::NS##_##NAME: \
 		return make_shared<TreePtr<NS::NAME>>(); 
 #include "node_names.inc"			
 #define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
@@ -77,16 +77,16 @@ shared_ptr<TreePtrInterface> AvailableNodeData::MakeTreePtr(NodeEnum ne) const
 
 bool AvailableNodeData::IsQualifier(const NodeBlock *block) const
 {
-	ASSERT( block->node_enum );
-	shared_ptr<Node> spn = MakeNode(block->node_enum.value());
+	ASSERT( block->tag );
+	shared_ptr<Node> spn = MakeNode(block->tag.value());
 	return !!dynamic_cast<const CPPTree::Qualifier *>(spn.get());
 }
 
 
 bool AvailableNodeData::IsMemberInit(const NodeBlock *block) const
 {
-	ASSERT( block->node_enum );
-	shared_ptr<Node> spn = MakeNode(block->node_enum.value());
+	ASSERT( block->tag );
+	shared_ptr<Node> spn = MakeNode(block->tag.value());
 	return !!dynamic_cast<const CPPTree::MemberInitialiser *>(spn.get());
 }
 
@@ -94,8 +94,8 @@ bool AvailableNodeData::IsMemberInit(const NodeBlock *block) const
 #define EXCLUDE_LABEL_FROM_DECLARATION
 bool AvailableNodeData::IsDeclaration(const NodeBlock *block) const
 {
-	ASSERT( block->node_enum );
-	shared_ptr<Node> spn = MakeNode(block->node_enum.value());
+	ASSERT( block->tag );
+	shared_ptr<Node> spn = MakeNode(block->tag.value());
 #ifdef EXCLUDE_LABEL_FROM_DECLARATION	
 	return dynamic_cast<const CPPTree::Declaration *>(spn.get()) && !dynamic_cast<const CPPTree::LabelDeclaration *>(spn.get());
 #else	
@@ -106,17 +106,17 @@ bool AvailableNodeData::IsDeclaration(const NodeBlock *block) const
 
 bool AvailableNodeData::IsType(const NodeBlock *block) const
 {
-	ASSERT( block->node_enum );
-	shared_ptr<Node> spn = MakeNode(block->node_enum.value());
+	ASSERT( block->tag );
+	shared_ptr<Node> spn = MakeNode(block->tag.value());
 	return !!dynamic_cast<const CPPTree::Type *>(spn.get());		
 }
 
 
 void AvailableNodeData::InitialiseMap()
 {
-	name_to_node_map =
+	name_to_tag_map =
 	{
-#define NODE(NS, NAME) { {#NS, #NAME}, NodeEnum::NS##_##NAME },
+#define NODE(NS, NAME) { {#NS, #NAME}, NodeTag::NS##_##NAME },
 #include "node_names.inc"	
 #define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
 #define POSTFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
@@ -124,14 +124,14 @@ void AvailableNodeData::InitialiseMap()
 #include "operator_data.inc"
 #undef NODE
 	};
-	ASSERT( !name_to_node_map.empty() );
+	ASSERT( !name_to_tag_map.empty() );
 		
-	for( auto p : name_to_node_map )
+	for( auto p : name_to_tag_map )
 	{
-		node_to_name_map[p.second] = p.first;
+		tag_to_name_map[p.second] = p.first;
 		
 		list<string> flat_list = p.first;
-		NodeEnum node_enum = p.second;
+		NodeTag tag = p.second;
 		
 		if( node_names_root.sub_blocks.count(flat_list.front())==0 )
 		{
@@ -148,11 +148,11 @@ void AvailableNodeData::InitialiseMap()
 
 		NodeBlock *node_block = dynamic_cast<NodeBlock *>(namespace_block->sub_blocks.at(flat_list.back()).get());
 		ASSERT( node_block );
-		node_block->node_enum = node_enum;		
+		node_block->tag = tag;		
 	}
 }
 
 
-AvailableNodeData::NameToNodeMapType AvailableNodeData::name_to_node_map;
-AvailableNodeData::NodeToNameMapType AvailableNodeData::node_to_name_map;
+AvailableNodeData::NameToTagMapType AvailableNodeData::name_to_tag_map;
+AvailableNodeData::TagToNameMapType AvailableNodeData::tag_to_name_map;
 AvailableNodeData::NamespaceBlock AvailableNodeData::node_names_root;

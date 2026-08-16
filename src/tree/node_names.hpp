@@ -5,7 +5,7 @@
 #include "node/node.hpp"
 #include <optional>
 
-enum class NodeEnum
+enum class NodeTag
 {
 #define NODE(NS, NAME) NS##_##NAME,
 #include "node_names.inc"	
@@ -45,27 +45,27 @@ public:
 	{
 		string What() const final 
 		{ 
-			if( !node_enum )
+			if( !tag )
 				return "no-node";
-			auto m = AvailableNodeData().GetEnumToNameMap();
-			return Join(m.at(node_enum.value()), "::");			
+			auto m = AvailableNodeData().GetTagToNameMap();
+			return Join(m.at(tag.value()), "::");			
 		}
 		string GetTrace() const 
 		{ 
-			string s = node_enum ? "#"+Trace((int)(node_enum.value())) : ""; 
+			string s = tag ? "#"+Trace((int)(tag.value())) : ""; 
 			return s + ":" + What();
 		}
 
-		optional<NodeEnum> node_enum;
+		optional<NodeTag> tag;
 	};
 
-	typedef map<list<string>, NodeEnum> NameToNodeMapType;	
-	typedef map<NodeEnum, list<string>> NodeToNameMapType;	
-	const NameToNodeMapType &GetNameToEnumMap();
-	const NodeToNameMapType &GetEnumToNameMap();
+	typedef map<list<string>, NodeTag> NameToTagMapType;	
+	typedef map<NodeTag, list<string>> TagToNameMapType;	
+	const NameToTagMapType &GetNameToTagMap();
+	const TagToNameMapType &GetTagToNameMap();
 	const AvailableNodeData::NamespaceBlock *GetNodeNamesRoot();
-	shared_ptr<Node> MakeNode(NodeEnum ne) const;
-	shared_ptr<TreePtrInterface> MakeTreePtr(NodeEnum ne) const;
+	shared_ptr<Node> MakeNode(NodeTag t) const;
+	shared_ptr<TreePtrInterface> MakeTreePtr(NodeTag t) const;
 	bool IsMemberInit(const NodeBlock *block) const;
 	bool IsQualifier(const NodeBlock *block) const;
 	bool IsDeclaration(const NodeBlock *block) const;
@@ -73,8 +73,8 @@ public:
 	
 private:
 	static void InitialiseMap();
-	static NameToNodeMapType name_to_node_map;
-	static NodeToNameMapType node_to_name_map;
+	static NameToTagMapType name_to_tag_map;
+	static TagToNameMapType tag_to_name_map;
 	static AvailableNodeData::NamespaceBlock node_names_root;
 };
 
