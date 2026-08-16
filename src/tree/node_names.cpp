@@ -112,6 +112,21 @@ bool AvailableNodeData::IsType(const NodeBlock *block) const
 }
 
 
+TreePtr<Node> AvailableNodeData::TryGetByKeyword( string keyword ) const
+{
+	if( keyword_to_node_map.empty() )
+		InitialiseMap();
+
+	if( !keyword_to_node_map.contains(keyword) )
+		return nullptr;
+	
+    shared_ptr<Cloner> dup_dest = keyword_to_node_map.at(keyword)->Clone();
+    TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
+            
+    return dest;
+}
+
+
 void AvailableNodeData::InitialiseMap()
 {
 	name_to_tag_map =
@@ -125,7 +140,7 @@ void AvailableNodeData::InitialiseMap()
 #undef NODE
 	};
 	ASSERT( !name_to_tag_map.empty() );
-		
+	
 	for( auto p : name_to_tag_map )
 	{
 		tag_to_name_map[p.second] = p.first;
@@ -150,9 +165,27 @@ void AvailableNodeData::InitialiseMap()
 		ASSERT( node_block );
 		node_block->tag = tag;		
 	}
+
+#define NODE(NS, NAME) tag_to_node_map[NodeTag::NS##_##NAME] = MakeTreeNode<NS::NAME>();
+#include "node_names.inc"	
+#define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
+#define POSTFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
+#define INFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
+#include "operator_data.inc"
+#undef NODE
+
+	for( pair p : tag_to_node_map )
+	{		
+		try {		
+			keyword_to_node_map[p.second->GetKeyword(Syntax::Policy())] = p.second;
+		} catch( Syntax::UnimplementedKeyword & ) {}			
+	}
 }
 
 
 AvailableNodeData::NameToTagMapType AvailableNodeData::name_to_tag_map;
 AvailableNodeData::TagToNameMapType AvailableNodeData::tag_to_name_map;
 AvailableNodeData::NamespaceBlock AvailableNodeData::node_names_root;
+
+AvailableNodeData::TagToNodeMapType AvailableNodeData::tag_to_node_map;
+AvailableNodeData::KeywordToNodeMapType AvailableNodeData::keyword_to_node_map;

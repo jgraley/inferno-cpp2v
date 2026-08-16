@@ -38,6 +38,8 @@ struct Qualifier : Property
 	// So if this is optional in the syntax, which final aka concrete node type is intended
 	// when nothing is given in the syntax (note: intermediates are always wildcards)
 	virtual TreePtr<Node> GetDefaultNode(TreePtr<Node>) const { ASSERTFAIL(); }
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
+	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 
@@ -493,8 +495,7 @@ struct Virtuality : Qualifier
 struct Virtual : Virtuality
 {
     NODE_FUNCTIONS_FINAL
-
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
+    string GetKeyword( Policy ) const override;
 };
 
 
@@ -529,7 +530,7 @@ struct Public : AccessSpec
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;    	
+    string GetKeyword( Policy ) const override;
 };
 
 /// Property for private access
@@ -537,7 +538,7 @@ struct Private : AccessSpec
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;    	
+    string GetKeyword( Policy ) const override;
 };
 
 /// Property for protected access
@@ -545,7 +546,7 @@ struct Protected : AccessSpec
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;    	
+    string GetKeyword( Policy ) const override;
 };
 
 /// Property that indicates whether some Instance is constant.
@@ -562,7 +563,7 @@ struct Const : Constancy
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;    		
+    string GetKeyword( Policy ) const override;
 };
 
 /// Property indicating the Instance is not constant
@@ -1023,6 +1024,7 @@ struct Typedef : TypeDeclaration
 
 	Production GetMyProductionTerminal() const override;	    
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
+	YY::VNLangParser::token::token_kind_type GetToken() const override;
 }; 
 
 /// Intermediate for declaration of a struct, class, union or enum. 

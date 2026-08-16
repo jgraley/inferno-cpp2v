@@ -160,6 +160,7 @@ public:
 	struct Refusal : Exception {};
 	struct Unimplemented : Refusal {};
     struct UnimplementedKeyword : Unimplemented {};
+    struct UnimplementedToken : Unimplemented {}; // Isn't this the same as UnimplementedKeyword?
 	struct RefusedByPolicy : Refusal {};
 	struct RefuseDueLocal : Refusal {};
 	struct RefuseDifficultSyntax : Refusal {}; // Eg, might cause conflicts
@@ -186,6 +187,7 @@ public:
     static string::size_type GetLineBreakThreshold();
     virtual string GetKeyword( Policy policy ) const;    
 	string RenderNodeTypeName() const; 
+	virtual YY::VNLangParser::token::token_kind_type GetToken() const;
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"

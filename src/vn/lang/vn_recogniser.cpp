@@ -240,10 +240,11 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 		return YY::VNLangParser::make_QUAL_NODE_KEYWORD(metadata, loc);
 	else if( ascii_text=="static" )
 		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);
-	else if( ascii_text=="typedef" )
-		return YY::VNLangParser::make_TYPEDEF_KEYWORD(metadata, loc);
-	else 
+
+	TreePtr<Node> node = AvailableNodeData().TryGetByKeyword( ascii_text );
+	if( !node )
 		throw Unrecognised();
+	return YY::VNLangParser::symbol_type( node->GetToken(), std::move(metadata), std::move(loc) );
 }
 
 

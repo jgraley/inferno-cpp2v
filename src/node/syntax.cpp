@@ -105,3 +105,7 @@ string Syntax::RenderNodeTypeName() const
     return Join( parts, "::" );    
 }
 
+YY::VNLangParser::token::token_kind_type Syntax::GetToken() const
+{
+	throw UnimplementedToken();
+}

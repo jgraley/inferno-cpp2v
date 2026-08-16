@@ -71,11 +71,20 @@ public:
 	bool IsDeclaration(const NodeBlock *block) const;
 	bool IsType(const NodeBlock *block) const;
 	
+	typedef map<NodeTag, TreePtr<Node>> TagToNodeMapType;
+	typedef map<string, TreePtr<Node>> KeywordToNodeMapType;
+	TreePtr<Node> TryGetByKeyword( string keyword ) const;
+		
+	
 private:
 	static void InitialiseMap();
+	
 	static NameToTagMapType name_to_tag_map;
 	static TagToNameMapType tag_to_name_map;
 	static AvailableNodeData::NamespaceBlock node_names_root;
+	
+	static TagToNodeMapType tag_to_node_map;
+	static KeywordToNodeMapType keyword_to_node_map;
 };
 
 #endif

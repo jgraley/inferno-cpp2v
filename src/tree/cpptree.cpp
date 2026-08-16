@@ -37,6 +37,19 @@ string Property::RenderScopeResolvingPrefix( VN::RendererInterface *renderer, Sy
         return scope->GetTrace()+"::"; // unknown scope
 }
 
+//////////////////////////// Qualifier ///////////////////////////////
+
+YY::VNLangParser::token::token_kind_type Qualifier::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_QUAL_NODE_KEYWORD;
+}
+
+
+string Qualifier::GetRender( VN::RendererInterface *, Production, Policy policy )
+{
+	return GetKeyword(policy);
+}
+
 //////////////////////////// Uninitialised ///////////////////////////////
 
 Syntax::Production Uninitialised::GetMyProductionTerminal() const
@@ -857,7 +870,7 @@ Syntax::Production Virtuality::GetMyProductionTerminal() const
 
 //////////////////////////// Virtual //////////////////////////////
 
-string Virtual::GetRender( VN::RendererInterface *, Production , Policy  )
+string Virtual::GetKeyword( Policy ) const
 {
 	return "virtual";
 }
@@ -878,21 +891,21 @@ Syntax::Production AccessSpec::GetMyProductionTerminal() const
 
 //////////////////////////// Public //////////////////////////////
 
-string Public::GetRender( VN::RendererInterface *, Production , Policy )
+string Public::GetKeyword( Policy ) const
 {
 	return "public";
 }
 
 //////////////////////////// Private //////////////////////////////
 
-string Private::GetRender( VN::RendererInterface *, Production , Policy )
+string Private::GetKeyword( Policy ) const
 {
 	return "private";
 }
 
 //////////////////////////// Protected //////////////////////////////
 
-string Protected::GetRender( VN::RendererInterface *, Production , Policy )
+string Protected::GetKeyword( Policy ) const
 {
 	return "protected";
 }
@@ -906,7 +919,7 @@ Syntax::Production Constancy::GetMyProductionTerminal() const
 
 //////////////////////////// Const //////////////////////////////
 
-string Const::GetRender( VN::RendererInterface *, Production, Policy )
+string Const::GetKeyword( Policy ) const
 {
 	return "const";
 }
@@ -1617,6 +1630,12 @@ string Typedef::GetRender( VN::RendererInterface *renderer, Production, Policy p
     ls.push_back( renderer->DoRenderTypeAndDeclarator( &type, id, starting_declarator_prod, Syntax::Production::TYPE_IN_DECLARATION, policy, MakeTreeNode<NonConst>() ) );
     return Join(ls);    
 }
+
+YY::VNLangParser::token::token_kind_type Typedef::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_TYPEDEF_KEYWORD;
+}
+
 
 //////////////////////////// Record ///////////////////////////////
 
