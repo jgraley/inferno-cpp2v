@@ -6,7 +6,6 @@
 
 #include <map>
 #include <list>
-#include <string>
 
 const AvailableNodeData::NameToTagMapType &AvailableNodeData::GetNameToTagMap()
 {
@@ -112,15 +111,30 @@ bool AvailableNodeData::IsType(const NodeBlock *block) const
 }
 
 
-TreePtr<Node> AvailableNodeData::TryGetByKeyword( string keyword ) const
+TreePtr<Node> AvailableNodeData::TryGetByKeywordIfToken( string keyword ) const
 {
 	if( keyword_to_node_map.empty() )
 		InitialiseMap();
 
-	if( !keyword_to_node_map.contains(keyword) )
+    auto [it_begin, it_end] = keyword_to_node_map.equal_range(keyword);
+    set<TreePtr<Node>> found;
+    for( auto it = it_begin; it != it_end; ++it ) try 
+    {
+		TreePtr<Node> node = it->second;
+		(void)node->GetToken();
+		found.insert( node );
+	} catch( Syntax::UnimplementedToken & ) {}
+				
+	if( found.empty() )
 		return nullptr;
-	
-    shared_ptr<Cloner> dup_dest = keyword_to_node_map.at(keyword)->Clone();
+	else	
+		return SoloElementOf( found );
+}
+
+
+TreePtr<Node> AvailableNodeData::Clone( TreePtr<Node> archetype ) const
+{
+    shared_ptr<Cloner> dup_dest = archetype->Clone();
     TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
             
     return dest;

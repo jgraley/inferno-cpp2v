@@ -915,7 +915,8 @@ struct Void : Type
 	NODE_FUNCTIONS_FINAL 
 
 	Production GetMyProductionTerminal() const override;
-	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
+    string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// Boolean type. 
@@ -928,7 +929,8 @@ struct Boolean : Type
 	NODE_FUNCTIONS_FINAL 
 	
 	Production GetMyProductionTerminal() const override;	
-	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
+    string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// Intermediate for any type that represents a number that you can eg add and subtract. 
@@ -1458,6 +1460,7 @@ struct While : Loop, Uncombable
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
 /// Do loop (first iteration always runs)
@@ -1523,7 +1526,8 @@ struct RangeCase : SwitchTarget
 
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+    // We don't have a token but Case does. TryGetByKeywordIfToken() 
+    // will find Case because it requires a GetToken() that succeeds.
 }; 
 
 /// Case label

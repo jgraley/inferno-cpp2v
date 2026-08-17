@@ -56,9 +56,9 @@ private:
 class DesignationGnomon : public Gnomon
 {
 public:	
-	DesignationGnomon( std::wstring name_, TreePtr<Node> pattern_ ) : 
+	DesignationGnomon( std::wstring name_, TreePtr<Node> node_ ) : 
 		name( name_ ),
-		pattern( pattern_ )	
+		node( node_ )	
 	{
 		ASSERT( !name.empty() );
 		// Pattern can be NULL for eg singular wildcard
@@ -66,13 +66,13 @@ public:
 
 	string GetTrace() const
 	{
-		return ToASCII(name) + "⪮" + Trace(pattern);
+		return ToASCII(name) + "⪮" + Trace(node);
 	}
 	
 private:
 	friend class VNLangRecogniser;
 	std::wstring name;
-	TreePtr<Node> pattern;
+	TreePtr<Node> node;
 };
 		
 		
@@ -147,7 +147,7 @@ private:
 	YY::VNLangParser::symbol_type CreateBlockToken(const ANDBlock *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
 	YY::VNLangParser::symbol_type CreateNodeToken(const AvailableNodeData::NodeBlock *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
 	YY::VNLangParser::symbol_type RecogniseInTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
-    YY::VNLangParser::symbol_type RecogniseKeyword(wstring text, bool ascii, const YY::TokenMetadata &metadata, YY::VNLangParser::location_type loc) const;
+    YY::VNLangParser::symbol_type RecogniseKeyword(wstring text, bool ascii, YY::TokenMetadata metadata, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type RecogniseDesignation(wstring text, YY::TokenMetadata metadata, YY::VNLangParser::location_type loc) const;
 
 	class Unrecognised : Exception {};

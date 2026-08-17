@@ -73,7 +73,8 @@ public:
 	
 	typedef map<NodeTag, TreePtr<Node>> TagToNodeMapType;
 	typedef map<string, TreePtr<Node>> KeywordToNodeMapType;
-	TreePtr<Node> TryGetByKeyword( string keyword ) const;
+	TreePtr<Node> TryGetByKeywordIfToken( string keyword ) const;
+	TreePtr<Node> Clone( TreePtr<Node> archetype ) const;
 		
 	
 private:

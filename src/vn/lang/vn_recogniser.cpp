@@ -62,7 +62,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool asc
 	metadata.as_unicode = text;
 	metadata.as_ascii = ToASCII(text);
 	metadata.as_andata_block = nullptr;
-	metadata.as_designated = nullptr;
+	metadata.node = nullptr;
 	
 	const ScopeGnomon *scope = nullptr;
 	shared_ptr<const ScopeGnomon> spg = scope_gnomons.TryLockTop();
@@ -176,7 +176,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInTransformNameScope(ws
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, bool ascii, const YY::TokenMetadata &metadata, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, bool ascii, YY::TokenMetadata metadata, YY::VNLangParser::location_type loc) const
 {
 	if( !ascii ) // Keywords are only ASCII
 		throw Unrecognised();
@@ -185,30 +185,25 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 
 	if( ascii_text=="else" ) // No node. TODO move to lexer
 		return YY::VNLangParser::make_CHAINING_KEYWORD(metadata, loc);
-	else if( ascii_text=="while" ) // TODO a While node can be created and then consumed during parse of Do
-		return YY::VNLangParser::make_WHILE_KEYWORD(metadata, loc);
-	else if( ascii_text=="case" ) // There are 2 nodes: Case and RangeCase. TODO Case becomes RangeCase on signt of .. syntax
-		return YY::VNLangParser::make_CASE_KEYWORD(metadata, loc);
 	else if( ascii_text=="typename" ) // No node. TODO move to lexer
 		return YY::VNLangParser::make_TYPENAME(ascii_text, loc);
 	else if( ascii_text=="char" || // TODO divide into core types and modifiers
-	         ascii_text=="bool" ||
 	         ascii_text=="short" ||
 	         ascii_text=="int" ||
 	         ascii_text=="long" ||
 	         ascii_text=="signed" ||
 	         ascii_text=="unsigned" ||
 	         ascii_text=="float" ||
-	         ascii_text=="double" ||
-	         ascii_text=="void" )
-		return YY::VNLangParser::make_TYPE_SPECIFIER(ascii_text, loc);
+	         ascii_text=="double" )
+		return YY::VNLangParser::make_TYPE_SPECIFIER(metadata, loc);
 	else if( ascii_text=="static" ) // no node. TODO move to lexer
 		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);
 
-	TreePtr<Node> node = AvailableNodeData().TryGetByKeyword( ascii_text );
-	if( !node )
+	TreePtr<Node> archetype = AvailableNodeData().TryGetByKeywordIfToken( ascii_text );
+	if( !archetype )
 		throw Unrecognised();
-	return YY::VNLangParser::symbol_type( node->GetToken(), std::move(metadata), std::move(loc) );
+	metadata.node = AvailableNodeData().Clone(archetype);
+	return YY::VNLangParser::symbol_type( metadata.node->GetToken(), std::move(metadata), std::move(loc) );
 }
 
 
@@ -220,7 +215,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring tex
 	else
 		throw Unrecognised();
 	
-	metadata.as_designated = designation_gnomon->pattern;
+	metadata.node = designation_gnomon->node;
 	
 	if( dynamic_cast<const NormalDesignationGnomon *>(designation_gnomon.get()) )
 		return YY::VNLangParser::make_DESIGNATED_NORMAL(metadata, loc);

@@ -112,10 +112,13 @@ string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string
 }                                           
 
 
-string Type::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy  )
+string Type::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 {
 	// This would be a type-specifier-seq in https://alx71hub.github.io/hcb/ 
-	throw Unimplemented();
+	// Try GetKeyword() for simple keyword types eg bool, void. Otherwise 
+	// this method should be overloaded, otherwise Type::GetRender() will do
+	// domething ugly with ⍑⍑
+	return GetKeyword(policy);
 }
 
 //////////////////////////// Declaration ///////////////////////////////
@@ -1437,9 +1440,15 @@ Syntax::Production Void::GetMyProductionTerminal() const
 }
 
 
-string Void::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
+string Void::GetKeyword( Policy ) const
 {
 	return "void";
+}
+
+
+YY::VNLangParser::token::token_kind_type Void::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_TYPE_SPECIFIER;
 }
 
 //////////////////////////// Boolean ///////////////////////////////
@@ -1449,9 +1458,16 @@ Syntax::Production Boolean::GetMyProductionTerminal() const
 	return Production::PRIMARY_TYPE; // eg auto a = new bool;
 }
 
-string Boolean::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
+
+string Boolean::GetKeyword( Policy ) const
 {
 	return "bool";
+}
+
+
+YY::VNLangParser::token::token_kind_type Boolean::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_TYPE_SPECIFIER;
 }
 
 //////////////////////////// Numeric ///////////////////////////////
@@ -1650,11 +1666,11 @@ string Typedef::GetRender( VN::RendererInterface *renderer, Production, Policy p
     return Join(ls);    
 }
 
+
 YY::VNLangParser::token::token_kind_type Typedef::GetToken() const
 {
 	return YY::VNLangParser::token::TOK_TYPEDEF_KEYWORD;
 }
-
 
 //////////////////////////// Record ///////////////////////////////
 
@@ -2295,9 +2311,16 @@ string While::GetRender( VN::RendererInterface *renderer, Production, Policy pol
 		   renderer->DoRender( &body, Production::STMT_DECL, policy );
 }
 
+
 string While::GetKeyword( Policy ) const 
 {
 	return "while";
+}
+
+
+YY::VNLangParser::token::token_kind_type While::GetToken() const
+{
+	return YY::VNLangParser::token::TOK_WHILE_KEYWORD;
 }
 
 //////////////////////////// Do ///////////////////////////////
@@ -2415,12 +2438,6 @@ string RangeCase::GetRender( VN::RendererInterface *renderer, Production, Policy
 string RangeCase::GetKeyword( Policy ) const 
 {
 	return "case";
-}
-
-
-YY::VNLangParser::token::token_kind_type RangeCase::GetToken() const
-{
-	return YY::VNLangParser::token::TOK_CASE_KEYWORD;
 }
 
 //////////////////////////// Case //////////////////////////////
