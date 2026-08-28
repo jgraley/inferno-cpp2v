@@ -42,7 +42,6 @@ public:
 	TreePtr<Node> OnPostfixOperator( string tok, TreePtr<Node> operand );
 	TreePtr<Node> OnIntegralLiteral( string text, any loc ); 
 	TreePtr<Node> OnStringLiteral( wstring value );
-	TreePtr<Node> OnBoolLiteral( string value );
 	TreePtr<Node> OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> target, any target_loc );	
 	TreePtr<Node> OnConditionalOperator( TreePtr<Node> condition, TreePtr<Node> expr_then, TreePtr<Node> expr_else );	
 	TreePtr<Node> OnSubscript( TreePtr<Node> destination, TreePtr<Node> index );	
@@ -56,7 +55,6 @@ public:
 	TreePtr<Node> OnNop( any loc );	
 	TreePtr<Node> OnFuncOnType( string keyword, any keyword_loc, TreePtr<Node> type_arg, any type_arg_loc );
 	
-	TreePtr<Node> OnNormalTerminalKeyword( string keyword, any keyword_loc );
 	TreePtr<Node> OnSimpleStmt( string keyword, any keyword_loc);
 	TreePtr<Node> OnSpaceSepStmt( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc );
 	TreePtr<Node> OnArgsBodyStmt( string keyword, any keyword_loc, list<TreePtr<Node>> args, any args_loc, TreePtr<Node> body, any body_loc );
@@ -88,7 +86,6 @@ public:
 	TreePtr<Node> FinishRecord( any loc, TreePtr<Node> node, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	
 	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type, any loc );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified
-	TreePtr<Node> OnQualifierNodeKeyword( string keyword );
 	Declarators::CVQuals OnCVQuals( const list<QualifierData> &quals, bool nice=false );
 	
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );

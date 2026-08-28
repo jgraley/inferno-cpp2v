@@ -391,15 +391,6 @@ TreePtr<Node> VNLangActions::OnStringLiteral( wstring wvalue )
 }
 
 
-TreePtr<Node> VNLangActions::OnBoolLiteral( string value )
-{
-	if( value=="true" )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::True>>();
-	else
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::False>>();
-}
-
-
 TreePtr<Node> VNLangActions::OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> operand, any operand_loc )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Cast>>();
@@ -510,14 +501,6 @@ TreePtr<Node> VNLangActions::OnFuncOnType( string keyword, any keyword_loc, Tree
 	return node;
 }
 
-
-TreePtr<Node> VNLangActions::OnNormalTerminalKeyword( string keyword, any keyword_loc )
-{
-	if( keyword=="this" )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::This>>();
-	
-	ASSERTFAIL();
-}
 
 TreePtr<Node> VNLangActions::OnSimpleStmt( string keyword, any keyword_loc)
 {
@@ -1052,23 +1035,6 @@ TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> type )
 	node->access = arch->GetDefaultNode(type);
 	node->record = type;
 	return node;
-}
-
-
-TreePtr<Node> VNLangActions::OnQualifierNodeKeyword( string keyword )
-{
-	if( keyword=="const" ) // todo Mutable node
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Const>>();
-	else if( keyword=="public" )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Public>>();
-	else if( keyword=="private" )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Private>>();
-	else if( keyword=="protected" )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Protected>>();
-	else if( keyword=="virtual" )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Virtual>>();
-	else 
-		ASSERTFAIL();
 }
 
 

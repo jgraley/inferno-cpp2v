@@ -637,19 +637,19 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); }
 			| DEFAULT_KEYWORD ':'											{ $$ = vn->OnDefault(@$); } 
 			| expr_prefix ':' 			 									{ $$ = vn->OnLabel($1, @1); } 
 
-statement_nl: bare_statement ';'												{ $$ = $1; }      
-			| expr_entry ';'													{ $$ = $1; } // TODO Should come in under bare_statement but conflicts
-// #899		| explicit_norm_node '(' semicolon_args ')' stmt_comp				{ $$ = vn->OnArgsBodyStmt($1, @1, $3, @3, $5, @5); }
-			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp			{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
-			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 						{ $$ = vn->OnWhile($3, @3, $5, @5); }
+statement_nl: bare_statement ';'											{ $$ = $1; }      
+			| expr_entry ';'												{ $$ = $1; } // TODO Should come in under bare_statement but conflicts
+// #899		| explicit_norm_node '(' semicolon_args ')' stmt_comp			{ $$ = vn->OnArgsBodyStmt($1, @1, $3, @3, $5, @5); }
+			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp		{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
+			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 					{ $$ = vn->OnWhile($3, @3, $5, @5); }
 			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp	
 			  %prec KEYWORD_ARGS_BODY_WITH_ELSE								{ $$ = vn->OnArgsBodyWithElseStmt($1.as_ascii, @1, $3, @3, $5, @5, @1, nullptr, @1); }
 			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp
 			  ELSE_KEYWORD stmt_comp										{ $$ = vn->OnArgsBodyWithElseStmt($1.as_ascii, @1, $3, @3, $5, @5, @6, $7, @7); }
 
-bare_statement	: KEYWORD_SIMPLE_STMT											{ $$ = vn->OnSimpleStmt($1.as_ascii, @1); }
-				| KEYWORD_SPACE_SEP_STMT expr_entry								{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
-				| DO_KEYWORD stmt_comp WHILE_KEYWORD '(' stmt_boot ')' 			{ $$ = vn->OnDo($2, @2, $5, @5); } // TODO a While node is gobbled up here
+bare_statement	: KEYWORD_SIMPLE_STMT										{ $$ = vn->OnSimpleStmt($1.as_ascii, @1); }
+				| KEYWORD_SPACE_SEP_STMT expr_entry							{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
+				| DO_KEYWORD stmt_comp WHILE_KEYWORD '(' stmt_boot ')' 		{ $$ = vn->OnDo($2, @2, $5, @5); } // TODO a While node is gobbled up here
 
 semicolon_args	: expr_entry										{ $$.push_back($1); }
 				| semicolon_args ';' expr_entry						{ $$ = $1; $$.push_back($3); }
@@ -737,8 +737,8 @@ expr_primary: id_primary
 			| '(' stmt_boot ')'                          		{ $$ = $2; }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
-			| BOOL_LITERAL										{ $$ = vn->OnBoolLiteral($1.as_ascii); }
-			| KEYWORD_PRIMARY_OP								{ $$ = vn->OnNormalTerminalKeyword($1.as_ascii, @1); } 
+			| BOOL_LITERAL										{ $$ = $1.node; }
+			| KEYWORD_PRIMARY_OP								{ $$ = $1.node; } 
 			| FUNC_ON_TYPE '(' type_boot ')'       				{ $$ = vn->OnFuncOnType($1.as_ascii, @1, $3, @3); }			
 			| DESIGNATED_COMPOUND      				  			{ $$ = $1.node; }   // TODO move up into the statement rules once we don't need to support eg int main() = my_compound
 
