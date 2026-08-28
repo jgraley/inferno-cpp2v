@@ -1448,7 +1448,7 @@ string Void::GetKeyword( Policy ) const
 
 YY::VNLangParser::token::token_kind_type Void::GetToken() const
 {
-	return YY::VNLangParser::token::TOK_TYPE_SPECIFIER;
+	return YY::VNLangParser::token::TOK_TYPE_KEYWORD;
 }
 
 //////////////////////////// Boolean ///////////////////////////////
@@ -1467,7 +1467,7 @@ string Boolean::GetKeyword( Policy ) const
 
 YY::VNLangParser::token::token_kind_type Boolean::GetToken() const
 {
-	return YY::VNLangParser::token::TOK_TYPE_SPECIFIER;
+	return YY::VNLangParser::token::TOK_TYPE_KEYWORD;
 }
 
 //////////////////////////// Numeric ///////////////////////////////

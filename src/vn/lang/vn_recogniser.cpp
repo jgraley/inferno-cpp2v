@@ -183,22 +183,6 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 
 	string ascii_text = ToASCII(text);
 
-	if( ascii_text=="else" ) // No node. TODO move to lexer
-		return YY::VNLangParser::make_CHAINING_KEYWORD(metadata, loc);
-	else if( ascii_text=="typename" ) // No node. TODO move to lexer
-		return YY::VNLangParser::make_TYPENAME(ascii_text, loc);
-	else if( ascii_text=="char" || // TODO divide into core types and modifiers
-	         ascii_text=="short" ||
-	         ascii_text=="int" ||
-	         ascii_text=="long" ||
-	         ascii_text=="signed" ||
-	         ascii_text=="unsigned" ||
-	         ascii_text=="float" ||
-	         ascii_text=="double" )
-		return YY::VNLangParser::make_TYPE_SPECIFIER(metadata, loc);
-	else if( ascii_text=="static" ) // no node. TODO move to lexer
-		return YY::VNLangParser::make_STATIC_KEYWORD(metadata, loc);
-
 	TreePtr<Node> archetype = AvailableNodeData().TryGetByKeywordIfToken( ascii_text );
 	if( !archetype )
 		throw Unrecognised();

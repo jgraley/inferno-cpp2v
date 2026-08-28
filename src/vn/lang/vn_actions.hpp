@@ -60,11 +60,11 @@ public:
 	TreePtr<Node> OnSimpleStmt( string keyword, any keyword_loc);
 	TreePtr<Node> OnSpaceSepStmt( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc );
 	TreePtr<Node> OnArgsBodyStmt( string keyword, any keyword_loc, list<TreePtr<Node>> args, any args_loc, TreePtr<Node> body, any body_loc );
-	TreePtr<Node> OnArgsBodyChainStmt( string keyword, any keyword_loc, 
+	TreePtr<Node> OnArgsBodyWithElseStmt( string keyword, any keyword_loc, 
 	                                   list<TreePtr<Node>> args, any args_loc, 
 	                                   TreePtr<Node> body, any body_loc,
-	                                   string chain_keyword, any chain_keyword_loc, 
-	                                   TreePtr<Node> chain_body, any chain_body_loc );
+	                                   any else_loc, 
+	                                   TreePtr<Node> body_else, any else_body_loc );
 	TreePtr<Node> OnWhile( TreePtr<Node> arg, any arg_loc, TreePtr<Node> body, any body_loc );
 	TreePtr<Node> OnDo( TreePtr<Node> body, any body_loc, TreePtr<Node> arg, any arg_loc );
 	

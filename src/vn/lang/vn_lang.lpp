@@ -90,7 +90,6 @@ comp_assign				\|=|\^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 ⍑ 				{ return YY::VNLangParser::make_TYPE_INDICATOR(location()); };
 ∞ 				{ return YY::VNLangParser::make_CODE_UNIT(location()); };
 
-// Multi-character before single-character
 ==|!=			{ return YY::VNLangParser::make_C_EQUALITY_OP(str(), location()); }
 <|<=|>|>=		{ return YY::VNLangParser::make_C_RELATIONAL_OP(str(), location()); }
 {comp_assign} 	{ return YY::VNLangParser::make_C_COMPOUND_ASSIGN(str(), location()); }
@@ -109,6 +108,12 @@ comp_assign				\|=|\^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 \.\. 			{ return YY::VNLangParser::make_RANGE_OP(location()); };
 
 [()\{\};?:\[\]\.,&\*]	{ return YY::VNLangParser::symbol_type(chr(), location()); }
+
+static			{ return YY::VNLangParser::make_STATIC_KEYWORD(location()); }
+typename		{ return YY::VNLangParser::make_TYPENAME_KEYWORD(location()); }
+else            { return YY::VNLangParser::make_ELSE_KEYWORD(location()); }
+char|short|int|long|signed|unsigned|float|double { return YY::VNLangParser::make_TYPE_SPECIFIER(str(), location()); }
+
 
 \"[^"]*\"   	{ return YY::VNLangParser::make_STRING_LITERAL(wstr(), location()); }
 {integral_num}	{ return YY::VNLangParser::make_INTEGRAL_LITERAL(str(), location()); }
