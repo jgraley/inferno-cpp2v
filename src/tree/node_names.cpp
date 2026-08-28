@@ -111,33 +111,26 @@ bool AvailableNodeData::IsType(const NodeBlock *block) const
 }
 
 
-TreePtr<Node> AvailableNodeData::TryGetByKeywordIfToken( string keyword ) const
+optional<NodeTag> AvailableNodeData::TryGetByKeywordIfToken( string keyword ) const
 {
-	if( keyword_to_node_map.empty() )
+	if( keyword_to_tag_map.empty() )
 		InitialiseMap();
 
-    auto [it_begin, it_end] = keyword_to_node_map.equal_range(keyword);
-    set<TreePtr<Node>> found;
+    auto [it_begin, it_end] = keyword_to_tag_map.equal_range(keyword);
+    set<NodeTag> found;
     for( auto it = it_begin; it != it_end; ++it ) try 
     {
-		TreePtr<Node> node = it->second;
-		(void)node->GetToken();
-		found.insert( node );
+		NodeTag tag = it->second;
+		(void)tag_to_node_map.at(tag)->GetToken(); // throws if no token
+		found.insert( tag );
 	} catch( Syntax::UnimplementedToken & ) {}
 				
+	ASSERT(found.size() <= 1 ); // Ambiguous: there's more than one note with a token and matching keyword
+				
 	if( found.empty() )
-		return nullptr;
+		return {};
 	else	
-		return SoloElementOf( found );
-}
-
-
-TreePtr<Node> AvailableNodeData::Clone( TreePtr<Node> archetype ) const
-{
-    shared_ptr<Cloner> dup_dest = archetype->Clone();
-    TreePtr<Node> dest( dynamic_pointer_cast<Node>( dup_dest ) );
-            
-    return dest;
+		return *(found.begin());
 }
 
 
@@ -191,7 +184,7 @@ void AvailableNodeData::InitialiseMap()
 	for( pair p : tag_to_node_map )
 	{		
 		try {		
-			keyword_to_node_map[p.second->GetKeyword(Syntax::Policy())] = p.second;
+			keyword_to_tag_map[p.second->GetKeyword(Syntax::Policy())] = p.first;
 		} catch( Syntax::UnimplementedKeyword & ) {}			
 	}
 }
@@ -202,4 +195,4 @@ AvailableNodeData::TagToNameMapType AvailableNodeData::tag_to_name_map;
 AvailableNodeData::NamespaceBlock AvailableNodeData::node_names_root;
 
 AvailableNodeData::TagToNodeMapType AvailableNodeData::tag_to_node_map;
-AvailableNodeData::KeywordToNodeMapType AvailableNodeData::keyword_to_node_map;
+AvailableNodeData::KeywordToTagMapType AvailableNodeData::keyword_to_tag_map;

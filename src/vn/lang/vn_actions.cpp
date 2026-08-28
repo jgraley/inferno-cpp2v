@@ -117,27 +117,6 @@ TreePtr<Node> VNLangActions::OnEmbeddedCommands( list<shared_ptr<Command>> comma
 }
 
 
-static TreePtr<Node> MakeStandardAgent(NodeTag ne)
-{
-	switch(ne)
-	{
-#define NODE(NS, NAME) \
-	case NodeTag::NS##_##NAME: \
-		return MakeTreeNode<StandardAgentWrapper<NS::NAME>>(); 
-#include "tree/node_names.inc"			
-#define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
-#define POSTFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
-#define INFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
-#include "tree/operator_data.inc"
-#undef NODE
-	}
-	
-	// By design we should have a case for every value of the node enum
-	ASSERT(false)("Invalid value for node enum value %d", ne); 
-	ASSERTFAIL();
-}
-
-
 static TreePtr<Node> MakeStandardAgentFromTypeID(const type_info &ti)
 {
 #define NODE(NS, NAME) \
@@ -275,11 +254,7 @@ TreePtr<Node> VNLangActions::OnTypeSpecifierSeq( multiset<string> specifiers, an
 	TreePtr<CPPTree::SpecificFloatSemantics> float_sem;
 	int width_bits = 0;
 	bool is_signed = true;
-	if( specifiers.extract("void") )
-		type = MakeTreeNode<StandardAgentWrapper<CPPTree::Void>>();
-	else if( specifiers.extract("bool") )
-		type = MakeTreeNode<StandardAgentWrapper<CPPTree::Boolean>>();
-	else if( specifiers.extract("float") )
+	if( specifiers.extract("float") )
 		float_sem = MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificFloatSemantics>>(TypeDb::float_semantics);
 	else if( specifiers.extract("double") )
 	{

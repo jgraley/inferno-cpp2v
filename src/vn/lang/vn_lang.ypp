@@ -849,7 +849,7 @@ qualifier_nw	: qualifier_node											{ $$ = VN::QualifierData($$, VN::QualCat
 				| TYPEDEF_KEYWORD											{ $$ = VN::QualifierData($$, VN::QualCat::TYPEDEF); }
 
 qualifier_node	: qual_full_explicit_start itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
-				| QUAL_NODE_KEYWORD											{ $$ = vn->OnQualifierNodeKeyword($1.as_ascii); }
+				| QUAL_NODE_KEYWORD											{ $$ = $1.node; }
 				| DESIGNATED_QUAL       				  					{ $$ = $1.node; } 
 
 qual_full_explicit_start : explicit_qual_node								{ $$ = vn->MakeScopeGnomonForNode($1); 

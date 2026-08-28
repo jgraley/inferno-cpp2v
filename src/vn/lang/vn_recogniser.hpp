@@ -33,6 +33,9 @@ class AvailableNodeData;
 namespace VN 
 {
 class VNLangActions;	
+
+TreePtr<Node> MakeStandardAgent(NodeTag ne);
+
 class ResolverGnomon : public Gnomon
 {
 public:	
