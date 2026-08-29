@@ -647,7 +647,7 @@ statement_nl: bare_statement ';'											{ $$ = $1; }
 			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp
 			  ELSE_KEYWORD stmt_comp										{ $$ = vn->OnArgsBodyWithElseStmt($1.as_ascii, @1, $3, @3, $5, @5, @6, $7, @7); }
 
-bare_statement	: KEYWORD_SIMPLE_STMT										{ $$ = vn->OnSimpleStmt($1.as_ascii, @1); }
+bare_statement	: KEYWORD_SIMPLE_STMT										{ $$ = $1.node; }
 				| KEYWORD_SPACE_SEP_STMT expr_entry							{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
 				| DO_KEYWORD stmt_comp WHILE_KEYWORD '(' stmt_boot ')' 		{ $$ = vn->OnDo($2, @2, $5, @5); } // TODO a While node is gobbled up here
 

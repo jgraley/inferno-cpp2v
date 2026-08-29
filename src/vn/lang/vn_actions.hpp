@@ -55,7 +55,6 @@ public:
 	TreePtr<Node> OnNop( any loc );	
 	TreePtr<Node> OnFuncOnType( string keyword, any keyword_loc, TreePtr<Node> type_arg, any type_arg_loc );
 	
-	TreePtr<Node> OnSimpleStmt( string keyword, any keyword_loc);
 	TreePtr<Node> OnSpaceSepStmt( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc );
 	TreePtr<Node> OnArgsBodyStmt( string keyword, any keyword_loc, list<TreePtr<Node>> args, any args_loc, TreePtr<Node> body, any body_loc );
 	TreePtr<Node> OnArgsBodyWithElseStmt( string keyword, any keyword_loc, 

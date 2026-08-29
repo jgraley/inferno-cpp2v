@@ -124,13 +124,11 @@ optional<NodeTag> AvailableNodeData::TryGetByKeywordIfToken( string keyword ) co
 		(void)tag_to_node_map.at(tag)->GetToken(); // throws if no token
 		found.insert( tag );
 	} catch( Syntax::UnimplementedToken & ) {}
-				
-	ASSERT(found.size() <= 1 ); // Ambiguous: there's more than one note with a token and matching keyword
-				
+								
 	if( found.empty() )
 		return {};
 	else	
-		return *(found.begin());
+		return SoloElementOf(found); // Ambiguous if more than one node with a token shares the same keyword
 }
 
 
@@ -184,10 +182,18 @@ void AvailableNodeData::InitialiseMap()
 	for( pair p : tag_to_node_map )
 	{		
 		try {		
-			keyword_to_tag_map[p.second->GetKeyword(Syntax::Policy())] = p.first;
+			string keyword = p.second->GetKeyword(Syntax::Policy());
+			keyword_to_tag_map.insert( pair(keyword, p.first) );
 		} catch( Syntax::UnimplementedKeyword & ) {}			
 	}
 }
+
+string Trace(const NodeTag &tag)
+{
+	list<string> parts = AvailableNodeData().GetTagToNameMap().at(tag);
+	return Join(parts, "::");			
+}
+
 
 
 AvailableNodeData::NameToTagMapType AvailableNodeData::name_to_tag_map;

@@ -55,6 +55,9 @@ string Trace(const void *p);
 string Trace(const Progress &progress); 
 string Trace(const std::type_info &ti);
 
+enum class NodeTag : unsigned int; // Forward-declare the enum - this works if we provide a type
+string Trace(const NodeTag&);
+
 template<typename T>
 string Trace(const T *p) 
 {

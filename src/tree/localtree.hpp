@@ -12,7 +12,12 @@
 		if( policy.refuse_local_nodes_without_overridden_syntax ) \
 			throw RefuseDueLocal(); /* Produce full explicit node */ \
 		return BASE::GetRender(renderer, surround_prod, policy); \
+	} \
+	YY::VNLangParser::token::token_kind_type GetToken() const override \
+	{ \
+		throw UnimplementedToken(); \
 	}
+		
 
 // See #899 about using this macro
 #define KEYWORD_AS_BASE_IN_CPP_ONLY(BASE) \
@@ -21,6 +26,10 @@
 		if( policy.refuse_local_nodes_without_overridden_syntax ) \
 			throw UnimplementedKeyword(); /* Produce short-form explicit node */ \
 		return BASE::GetKeyword(policy); \
+	} \
+	YY::VNLangParser::token::token_kind_type GetToken() const override \
+	{ \
+		throw UnimplementedToken(); \
 	}
 
 // Nodes that are only used locally to a transformaiton or sequence of transformtions. All

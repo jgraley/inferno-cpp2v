@@ -5,7 +5,7 @@
 #include "node/node.hpp"
 #include <optional>
 
-enum class NodeTag
+enum class NodeTag : unsigned int
 {
 #define NODE(NS, NAME) NS##_##NAME,
 #include "node_names.inc"	
@@ -72,7 +72,7 @@ public:
 	bool IsType(const NodeBlock *block) const;
 	
 	typedef map<NodeTag, TreePtr<Node>> TagToNodeMapType;
-	typedef map<string, NodeTag> KeywordToTagMapType;
+	typedef multimap<string, NodeTag> KeywordToTagMapType;
 	optional<NodeTag> TryGetByKeywordIfToken( string keyword ) const;		
 	
 private:

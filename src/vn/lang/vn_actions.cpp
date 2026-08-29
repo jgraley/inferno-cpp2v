@@ -502,17 +502,6 @@ TreePtr<Node> VNLangActions::OnFuncOnType( string keyword, any keyword_loc, Tree
 }
 
 
-TreePtr<Node> VNLangActions::OnSimpleStmt( string keyword, any keyword_loc)
-{
-	if( keyword=="break" )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Break>>();
-	else if( keyword=="continue" )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Continue>>();
-	
-	ASSERTFAIL(); // internal error: parser should not call this unless recogniser produced PRIMITIVE_STMT_KEYWORD		
-}
-
-
 TreePtr<Node> VNLangActions::OnSpaceSepStmt( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc )
 {
 	if( keyword=="return" )
@@ -530,6 +519,7 @@ TreePtr<Node> VNLangActions::OnSpaceSepStmt( string keyword, any keyword_loc, Tr
 	
 	ASSERTFAIL(); // internal error: parser should not call this unless recogniser produced SPACE_SEP_STMT_KEYWORD		
 }
+
 
 TreePtr<Node> VNLangActions::OnArgsBodyStmt( string keyword, any keyword_loc, list<TreePtr<Node>> args, any args_loc, TreePtr<Node> body, any body_loc )
 {
