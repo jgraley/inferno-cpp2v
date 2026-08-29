@@ -165,17 +165,8 @@ YY::VNLangParser::symbol_type VNLangRecogniser::CreateNodeToken(const AvailableN
 {
 	ASSERT(block->tag)("NodeBlock ")(*block)(" has no tag, so cannot create a node from it");
 	metadata.node = MakeStandardAgent(block->tag.value());
-
-	if( AvailableNodeData().IsQualifier(block) )		
-		return YY::VNLangParser::make_RESOLVED_QUAL(metadata, loc);
-	if( AvailableNodeData().IsMemberInit(block) )			
-		return YY::VNLangParser::make_RESOLVED_MEMB_INIT(metadata, loc);
-	else if( AvailableNodeData().IsDeclaration(block) )			
-		return YY::VNLangParser::make_RESOLVED_DECL(metadata, loc);
-	else if( AvailableNodeData().IsType(block) )			
-		return YY::VNLangParser::make_RESOLVED_TYPE(metadata, loc);
-	else
-		return YY::VNLangParser::make_RESOLVED_NORMAL(metadata, loc);
+	YY::VNLangParser::token::token_kind_type token_kind = metadata.node->GetResolvedToken();		
+	return YY::VNLangParser::symbol_type( token_kind, std::move(metadata), std::move(loc) );		
 }
 
 
@@ -223,19 +214,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring tex
 		throw Unrecognised();
 	
 	metadata.node = designation_gnomon->node;
-	
-	if( dynamic_cast<const NormalDesignationGnomon *>(designation_gnomon.get()) )
-		return YY::VNLangParser::make_DESIGNATED_NORMAL(metadata, loc);
-	else if( dynamic_cast<const TypeDesignationGnomon *>(designation_gnomon.get()) )
-		return YY::VNLangParser::make_DESIGNATED_TYPE(metadata, loc);
-	else if( dynamic_cast<const DeclarationDesignationGnomon *>(designation_gnomon.get()) )
-		return YY::VNLangParser::make_DESIGNATED_DECL(metadata, loc);
-	else if( dynamic_cast<const QualifierDesignationGnomon *>(designation_gnomon.get()) )
-		return YY::VNLangParser::make_DESIGNATED_QUAL(metadata, loc);
-	else if( dynamic_cast<const CompoundDesignationGnomon *>(designation_gnomon.get()) )
-		return YY::VNLangParser::make_DESIGNATED_COMPOUND(metadata, loc);
-	else 
-		ASSERTFAIL();
+	return YY::VNLangParser::symbol_type( designation_gnomon->token, std::move(metadata), std::move(loc) );
 }
 
 

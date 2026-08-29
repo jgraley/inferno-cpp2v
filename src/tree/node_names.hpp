@@ -66,10 +66,7 @@ public:
 	const AvailableNodeData::NamespaceBlock *GetNodeNamesRoot();
 	shared_ptr<Node> MakeNode(NodeTag t) const;
 	shared_ptr<TreePtrInterface> MakeTreePtr(NodeTag t) const;
-	bool IsMemberInit(const NodeBlock *block) const;
-	bool IsQualifier(const NodeBlock *block) const;
-	bool IsDeclaration(const NodeBlock *block) const;
-	bool IsType(const NodeBlock *block) const;
+
 	
 	typedef map<NodeTag, TreePtr<Node>> TagToNodeMapType;
 	typedef multimap<string, NodeTag> KeywordToTagMapType;

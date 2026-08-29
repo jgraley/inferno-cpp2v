@@ -59,9 +59,10 @@ private:
 class DesignationGnomon : public Gnomon
 {
 public:	
-	DesignationGnomon( std::wstring name_, TreePtr<Node> node_ ) : 
+	DesignationGnomon( std::wstring name_, TreePtr<Node> node_, YY::VNLangParser::token::token_kind_type token_ ) : 
 		name( name_ ),
-		node( node_ )	
+		node( node_ ),
+		token( token_ )
 	{
 		ASSERT( !name.empty() );
 		// Pattern can be NULL for eg singular wildcard
@@ -69,48 +70,14 @@ public:
 
 	string GetTrace() const
 	{
-		return ToASCII(name) + "⪮" + Trace(node);
+		return ToASCII(name) + "⪮" + Trace(node) + "(" + Trace((unsigned)token) + ")";
 	}
 	
 private:
 	friend class VNLangRecogniser;
 	std::wstring name;
 	TreePtr<Node> node;
-};
-		
-		
-class NormalDesignationGnomon : public DesignationGnomon
-{
-public:	
-	using DesignationGnomon::DesignationGnomon;
-};
-		
-		
-class TypeDesignationGnomon : public DesignationGnomon
-{
-public:	
-	using DesignationGnomon::DesignationGnomon;
-};
-		
-
-class DeclarationDesignationGnomon : public DesignationGnomon
-{
-public:	
-	using DesignationGnomon::DesignationGnomon;
-};		
-
-
-class QualifierDesignationGnomon : public DesignationGnomon
-{
-public:	
-	using DesignationGnomon::DesignationGnomon;
-};		
-
-
-class CompoundDesignationGnomon : public DesignationGnomon
-{
-public:	
-	using DesignationGnomon::DesignationGnomon;
+	YY::VNLangParser::token::token_kind_type token;
 };
 
 

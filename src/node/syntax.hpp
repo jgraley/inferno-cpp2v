@@ -188,6 +188,7 @@ public:
     virtual string GetKeyword( Policy policy ) const;    
 	string RenderNodeTypeName() const; 
 	virtual YY::VNLangParser::token::token_kind_type GetToken() const;
+	virtual YY::VNLangParser::token::token_kind_type GetResolvedToken() const;
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"

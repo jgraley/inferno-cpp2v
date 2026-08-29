@@ -74,43 +74,6 @@ shared_ptr<TreePtrInterface> AvailableNodeData::MakeTreePtr(NodeTag t) const
 }
 
 
-bool AvailableNodeData::IsQualifier(const NodeBlock *block) const
-{
-	ASSERT( block->tag );
-	shared_ptr<Node> spn = MakeNode(block->tag.value());
-	return !!dynamic_cast<const CPPTree::Qualifier *>(spn.get());
-}
-
-
-bool AvailableNodeData::IsMemberInit(const NodeBlock *block) const
-{
-	ASSERT( block->tag );
-	shared_ptr<Node> spn = MakeNode(block->tag.value());
-	return !!dynamic_cast<const CPPTree::MemberInitialiser *>(spn.get());
-}
-
-
-#define EXCLUDE_LABEL_FROM_DECLARATION
-bool AvailableNodeData::IsDeclaration(const NodeBlock *block) const
-{
-	ASSERT( block->tag );
-	shared_ptr<Node> spn = MakeNode(block->tag.value());
-#ifdef EXCLUDE_LABEL_FROM_DECLARATION	
-	return dynamic_cast<const CPPTree::Declaration *>(spn.get()) && !dynamic_cast<const CPPTree::LabelDeclaration *>(spn.get());
-#else	
-	return !!dynamic_cast<const CPPTree::Declaration *>(spn.get());
-#endif	
-}
-
-
-bool AvailableNodeData::IsType(const NodeBlock *block) const
-{
-	ASSERT( block->tag );
-	shared_ptr<Node> spn = MakeNode(block->tag.value());
-	return !!dynamic_cast<const CPPTree::Type *>(spn.get());		
-}
-
-
 optional<NodeTag> AvailableNodeData::TryGetByKeywordIfToken( string keyword ) const
 {
 	if( keyword_to_tag_map.empty() )

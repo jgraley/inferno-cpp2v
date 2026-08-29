@@ -39,15 +39,21 @@ string Property::RenderScopeResolvingPrefix( VN::RendererInterface *renderer, Sy
 
 //////////////////////////// Qualifier ///////////////////////////////
 
+string Qualifier::GetRender( VN::RendererInterface *, Production, Policy policy )
+{
+	return GetKeyword(policy);
+}
+
+
 YY::VNLangParser::token::token_kind_type Qualifier::GetToken() const
 {
 	return YY::VNLangParser::token::TOK_QUAL_NODE_KEYWORD;
 }
 
 
-string Qualifier::GetRender( VN::RendererInterface *, Production, Policy policy )
+YY::VNLangParser::token::token_kind_type Qualifier::GetResolvedToken() const
 {
-	return GetKeyword(policy);
+	return YY::VNLangParser::token::TOK_RESOLVED_QUAL;
 }
 
 //////////////////////////// Uninitialised ///////////////////////////////
@@ -121,6 +127,12 @@ string Type::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 	return GetKeyword(policy);
 }
 
+
+YY::VNLangParser::token::token_kind_type Type::GetResolvedToken() const
+{
+	return YY::VNLangParser::token::TOK_RESOLVED_TYPE;
+}
+
 //////////////////////////// Declaration ///////////////////////////////
 
 bool Declaration::ShouldSplitInstance( Policy ) const 
@@ -155,6 +167,12 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 	}
 
 	return ls;
+}
+
+
+YY::VNLangParser::token::token_kind_type Declaration::GetResolvedToken() const
+{
+	return YY::VNLangParser::token::TOK_RESOLVED_DECL;
 }
 
 //////////////////////////// DeclScope ///////////////////////////////
@@ -863,6 +881,12 @@ string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production
 		   ")";
 }
 
+
+YY::VNLangParser::token::token_kind_type MemberInitialiser::GetResolvedToken() const
+{
+	return YY::VNLangParser::token::TOK_RESOLVED_MEMB_INIT;
+}
+
 //////////////////////////// MembInitSeq ///////////////////////////////
 
 list<string> MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Policy policy )
@@ -1241,6 +1265,13 @@ string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production,
 	//    change the access in a delta pattern. The ; gets around this by making the 
 	//    label a complete statement.
 	return renderer->DoRender( &identifier, Production::PURE_IDENTIFIER, id_policy) + ":" + ";";
+}
+
+
+YY::VNLangParser::token::token_kind_type LabelDeclaration::GetResolvedToken() const
+{
+	// LabelDeclaration parses more like a statemant etc so override Declaration::GetResolvedToken()
+	return YY::VNLangParser::token::TOK_RESOLVED_NORMAL;
 }
 
 //////////////////////////// Callable //////////////////////////////
