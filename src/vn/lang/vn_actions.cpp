@@ -620,18 +620,6 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 }
 
 
-TreePtr<Node> VNLangActions::NodeFromANDataBlock( const ANDBlock *block ) const
-{
-	auto nb = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	ASSERT( nb );
-	ASSERT( nb->tag );
-	NodeTag ne = nb->tag.value();
-	TreePtr<Node> node = MakeStandardAgent(ne);
-	ASSERT( node );
-	return node;
-}
-
-
 NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 {	
 	shared_ptr<Gnomon> gnomon;

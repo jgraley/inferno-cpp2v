@@ -163,7 +163,10 @@ YY::VNLangParser::symbol_type VNLangRecogniser::CreateBlockToken(const ANDBlock 
 
 YY::VNLangParser::symbol_type VNLangRecogniser::CreateNodeToken(const AvailableNodeData::NodeBlock *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
 {
-	if( AvailableNodeData().IsQualifier(block) )			
+	ASSERT(block->tag)("NodeBlock ")(*block)(" has no tag, so cannot create a node from it");
+	metadata.node = MakeStandardAgent(block->tag.value());
+
+	if( AvailableNodeData().IsQualifier(block) )		
 		return YY::VNLangParser::make_RESOLVED_QUAL(metadata, loc);
 	if( AvailableNodeData().IsMemberInit(block) )			
 		return YY::VNLangParser::make_RESOLVED_MEMB_INIT(metadata, loc);

@@ -869,35 +869,35 @@ vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 
 explicit_norm_node	: explicit_op_scope resolved_norm_node	{ $$ = $2; }
 
-resolved_norm_node	: resolved_norm_name					{ $$ = vn->NodeFromANDataBlock($1.as_andata_block); }
+resolved_norm_node	: resolved_norm_name					{ $$ = $1.node; }
 
 resolved_norm_name	: part_resolve RESOLVED_NORMAL			{ $$ = $2; }
 					| RESOLVED_NORMAL						{ $$ = $1; }
 
 explicit_type_node	: explicit_op_scope resolved_type_node	{ $$ = $2; }
 
-resolved_type_node	: resolved_type_name					{ $$ = vn->NodeFromANDataBlock($1.as_andata_block); }
+resolved_type_node	: resolved_type_name					{ $$ = $1.node; }
 
 resolved_type_name	: part_resolve RESOLVED_TYPE			{ $$ = $2; }
 					| RESOLVED_TYPE							{ $$ = $1; }
 	
 explicit_decl_node	: explicit_op_scope resolved_decl_node	{ $$ = $2; }
 
-resolved_decl_node	: resolved_decl_name					{ $$ = vn->NodeFromANDataBlock($1.as_andata_block); }
+resolved_decl_node	: resolved_decl_name					{ $$ = $1.node; }
 
 resolved_decl_name	: part_resolve RESOLVED_DECL 			{ $$ = $2; }
 					| RESOLVED_DECL							{ $$ = $1; }
 
 explicit_qual_node	: explicit_op_scope resolved_qual_node	{ $$ = $2; }
 
-resolved_qual_node	: resolved_qual_name					{ $$ = vn->NodeFromANDataBlock($1.as_andata_block); }
+resolved_qual_node	: resolved_qual_name					{ $$ = $1.node; }
 
 resolved_qual_name	: part_resolve RESOLVED_QUAL		{ $$ = $2; }
 					| RESOLVED_QUAL						{ $$ = $1; }
 
 explicit_mi_node	: explicit_op_scope resolved_mi_node	{ $$ = $2; }
 
-resolved_mi_node	: resolved_mi_name					{ $$ = vn->NodeFromANDataBlock($1.as_andata_block); }
+resolved_mi_node	: resolved_mi_name					{ $$ = $1.node; }
 
 resolved_mi_name	: part_resolve RESOLVED_MEMB_INIT	{ $$ = $2; }
 					| RESOLVED_MEMB_INIT				{ $$ = $1; }

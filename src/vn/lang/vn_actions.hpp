@@ -67,7 +67,6 @@ public:
 	
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
-	TreePtr<Node> NodeFromANDataBlock( const ANDBlock *block ) const;
 	NodeAndGnomon MakeScopeGnomonForNode( TreePtr<Node> node ) const;
 	TreePtr<Node> OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, any type_loc, TreePtr<Node> declarator, any decl_loc );
 	TreePtr<Node> OnTypedef( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc );	
