@@ -127,7 +127,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInNodeNameScope(wstring
 	if( namespace_block && namespace_block->sub_blocks.count(ToASCII(text)) > 0 )
 	{
 		const ANDBlock *sub_block = namespace_block->sub_blocks.at(ToASCII(text)).get();
-		return CreateBlockToken( sub_block, loc, metadata );
+		return CreateBlockToken( sub_block, loc );
 	}
 		
 	if( default_namespace )
@@ -139,7 +139,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInNodeNameScope(wstring
 		if( namespace_block && namespace_block->sub_blocks.count(ToASCII(text)) > 0 )
 		{
 			const ANDBlock *sub_block = namespace_block->sub_blocks.at(ToASCII(text)).get();
-			return CreateBlockToken( sub_block, loc, metadata );
+			return CreateBlockToken( sub_block, loc );
 		}
 	}
 			
@@ -149,13 +149,12 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInNodeNameScope(wstring
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::CreateBlockToken(const ANDBlock *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+YY::VNLangParser::symbol_type VNLangRecogniser::CreateBlockToken(const ANDBlock *block, YY::VNLangParser::location_type loc) const
 {
-	metadata.as_andata_block = block; // return it to the parser whatever it is
 	if( auto lb = dynamic_cast<const AvailableNodeData::NodeBlock *>(block) )
 		return CreateNodeToken(lb, loc);
 	else if( dynamic_cast<const AvailableNodeData::NamespaceBlock *>(block) )
-		return YY::VNLangParser::make_NODE_NAMESPACE(metadata, loc);				
+		return YY::VNLangParser::make_NODE_NAMESPACE(block, loc);				
 	else
 		ASSERTFAIL("bad andata block");
 }

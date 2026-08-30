@@ -136,6 +136,7 @@
 <YY::TokenMetadata> TRANSFORM_NAME_NORMAL	_("open_statement transform name")
 <YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
 <YY::TokenMetadata> UNICODE_NAME 			_("Unicode name")
+<const ANDBlock *>	NODE_NAMESPACE			_("scope resolving name")
 <TreePtr<Node>>	DESIGNATED_NORMAL		_("designated statement/expression name")
 <TreePtr<Node>>	DESIGNATED_TYPE			_("designated type name")
 <TreePtr<Node>>	DESIGNATED_DECL			_("designated declaration name")
@@ -146,7 +147,6 @@
 <TreePtr<Node>>	RESOLVED_DECL			_("resolved declaration node name")
 <TreePtr<Node>>	RESOLVED_QUAL			_("resolved qualifier node name")
 <TreePtr<Node>>	RESOLVED_MEMB_INIT		_("resolved member initialiser node name")
-<YY::TokenMetadata>	NODE_NAMESPACE			_("scope resolving name")
 <TreePtr<Node>>	BOOL_LITERAL			_("C boolean literal")
 <TreePtr<Node>> KEYWORD_PRIMARY_OP		_("open_statement keyword operator")
 <TreePtr<Node>> KEYWORD_SIMPLE_STMT     _("keyword simple statement") // eg break;
@@ -194,7 +194,7 @@ stmt_high
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named mi_transform_op_named
-%type <YY::TokenMetadata> 			node_namespace
+%type <const ANDBlock *> 			node_namespace
 %type <TreePtr<Node>>	 			resolved_norm_node resolved_type_node resolved_decl_node resolved_qual_node resolved_mi_node
 %type <TreePtr<Node>>	 			explicit_norm_node explicit_type_node explicit_decl_node explicit_qual_node explicit_mi_node
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands decl_commands
@@ -894,7 +894,7 @@ resolved_mi_node	: part_resolve RESOLVED_MEMB_INIT	{ $$ = $2; }
 // On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 
 // expire when the production is complete or an error forces unwind. The naming layer
 // keeps weak_ptrs to these and will send us RESOLVED_NORMAL if one exists.
-part_resolve	: node_namespace RESOLUTION_OP			{ $$ = make_shared<VN::ResolverGnomon>($1.as_andata_block);
+part_resolve	: node_namespace RESOLUTION_OP			{ $$ = make_shared<VN::ResolverGnomon>($1);
                                                           recogniser->AddGnomon($$); }
     
 node_namespace 	: part_resolve NODE_NAMESPACE			{ $$ = $2; }
