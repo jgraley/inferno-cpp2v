@@ -96,7 +96,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool asc
 	} catch( Unrecognised& ) {}	
 		
 	try	{
-		return RecogniseDesignation( text, metadata, loc );
+		return RecogniseDesignation( text, loc );
 	} catch( Unrecognised& ) {}
 		
 	if( ascii )
@@ -205,7 +205,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring text, YY::TokenMetadata metadata, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring text, YY::VNLangParser::location_type loc) const
 {
 	shared_ptr<const DesignationGnomon> designation_gnomon;
 	if( designation_gnomons.count(text) > 0 )	
@@ -213,8 +213,10 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring tex
 	else
 		throw Unrecognised();
 	
-	metadata.node = designation_gnomon->node;
-	return YY::VNLangParser::symbol_type( designation_gnomon->token, std::move(metadata), std::move(loc) );
+	TreePtr<Node> node = designation_gnomon->node;
+	// The designation_gnomon->token is based on syntax in particurar and there's no expectation
+	// that the node should know what it should be. It's a parser -> parser message in effect.
+	return YY::VNLangParser::symbol_type( designation_gnomon->token, std::move(node), std::move(loc) );
 }
 
 

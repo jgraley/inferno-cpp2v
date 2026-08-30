@@ -66,7 +66,7 @@ public:
 	const AvailableNodeData::NamespaceBlock *GetNodeNamesRoot();
 	shared_ptr<Node> MakeNode(NodeTag t) const;
 	shared_ptr<TreePtrInterface> MakeTreePtr(NodeTag t) const;
-
+	NodeTag GetTagOfNode(TreePtr<Node> node) const; // Discards StandardAgentWrapper if present
 	
 	typedef map<NodeTag, TreePtr<Node>> TagToNodeMapType;
 	typedef multimap<string, NodeTag> KeywordToTagMapType;

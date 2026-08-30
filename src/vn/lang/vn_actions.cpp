@@ -232,15 +232,17 @@ TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, any node_na
 TreePtr<Node> VNLangActions::OnRestrict( const ANDBlock *block, any node_name_loc, TreePtr<Node> target, any target_loc )
 {
 	auto node_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	NodeTag ne = node_block->tag.value();
+	TreePtr<Node> node = MakeStandardAgent(node_block->tag.value());
+	
+	NodeTag tag = node_names->GetTagOfNode(node);	
 	Agent *agent = Agent::TryAsAgent(target);
 	ASSERT( agent )("We are parsing a pattern so everything should be agents");
 		
 	auto pspecial = dynamic_cast<SpecialBase *>(agent);
 	if( pspecial )
 	{
-		pspecial->pre_restriction_archetype_node = node_names->MakeNode(ne);
-		pspecial->pre_restriction_archetype_ptr = node_names->MakeTreePtr(ne);
+		pspecial->pre_restriction_archetype_node = node_names->MakeNode(tag);
+		pspecial->pre_restriction_archetype_ptr = node_names->MakeTreePtr(tag);
 	}
 
 	return target;
@@ -1123,13 +1125,15 @@ TreePtr<Node> VNLangActions::OnLookup( TreePtr<Node> object, TreePtr<Node> membe
 TreePtr<Node> VNLangActions::OnIdByName( const ANDBlock *block, any id_disc_loc, wstring wname, any name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
-	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	NodeTag ne = leaf_block->tag.value();
+	auto node_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
+	TreePtr<Node> node = MakeStandardAgent(node_block->tag.value());
+	
+	NodeTag tag = node_names->GetTagOfNode(node);	
 
 	string name = Unquote(ToASCII(wname));
 
 	auto m = AvailableNodeData().GetTagToNameMap();
-	auto l = m.at(ne);
+	auto l = m.at(tag);
 	string idt_ns = l.front();
 	string idt_name = l.back();	
 	ASSERT( !idt_name.empty() ); // internal error because we get a NodeTag from the recogniser
@@ -1143,14 +1147,16 @@ TreePtr<Node> VNLangActions::OnIdByName( const ANDBlock *block, any id_disc_loc,
 TreePtr<Node> VNLangActions::OnBuildId( const ANDBlock *block, any id_disc_loc, wstring wformat, any name_loc, Item sources )
 {
 	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?
-	auto leaf_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	NodeTag ne = leaf_block->tag.value();
+	auto node_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
+	TreePtr<Node> node = MakeStandardAgent(node_block->tag.value());
+	
+	NodeTag tag = node_names->GetTagOfNode(node);	
 
 	// Format is "" if omitted otherwise a quoted string with the quotes still on
 	string format = wformat.empty() ? "" : Unquote(ToASCII(wformat));
 		
 	auto m = AvailableNodeData().GetTagToNameMap();
-	auto l = m.at(ne);
+	auto l = m.at(tag);
 	string idt_ns = l.front();
 	string idt_name = l.back();	
 	ASSERT( !idt_name.empty() ); // internal error because we get a NodeTag from the recogniser

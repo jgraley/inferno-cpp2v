@@ -74,6 +74,16 @@ shared_ptr<TreePtrInterface> AvailableNodeData::MakeTreePtr(NodeTag t) const
 }
 
 
+NodeTag AvailableNodeData::GetTagOfNode(TreePtr<Node> node) const
+{	
+	// Jumping through hoops to avoid having to add a virtual to all the nodes
+	string name = GetInnermostTemplateParam(Traceable::TypeIdName(*node));
+	list<string> name_parts = Split( name, "::" );
+	FTRACE(name_parts)("\n");
+	return name_to_tag_map.at(name_parts);
+}
+
+
 optional<NodeTag> AvailableNodeData::TryGetByKeywordIfToken( string keyword ) const
 {
 	if( keyword_to_tag_map.empty() )
