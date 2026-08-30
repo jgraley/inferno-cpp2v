@@ -141,11 +141,11 @@
 <TreePtr<Node>>	DESIGNATED_DECL			_("designated declaration name")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier name")
 <TreePtr<Node>>	DESIGNATED_COMPOUND		_("designated compound name")
-<YY::TokenMetadata>	RESOLVED_NORMAL			_("resolved open_statement node name")
-<YY::TokenMetadata>	RESOLVED_TYPE			_("resolved type node name")
-<YY::TokenMetadata>	RESOLVED_DECL			_("resolved declaration node name")
-<YY::TokenMetadata>	RESOLVED_QUAL			_("resolved qualifier node name")
-<YY::TokenMetadata>	RESOLVED_MEMB_INIT		_("resolved member initialiser node name")
+<TreePtr<Node>>	RESOLVED_NORMAL			_("resolved open_statement node name")
+<TreePtr<Node>>	RESOLVED_TYPE			_("resolved type node name")
+<TreePtr<Node>>	RESOLVED_DECL			_("resolved declaration node name")
+<TreePtr<Node>>	RESOLVED_QUAL			_("resolved qualifier node name")
+<TreePtr<Node>>	RESOLVED_MEMB_INIT		_("resolved member initialiser node name")
 <YY::TokenMetadata>	NODE_NAMESPACE			_("scope resolving name")
 <TreePtr<Node>>	BOOL_LITERAL			_("C boolean literal")
 <TreePtr<Node>> KEYWORD_PRIMARY_OP		_("open_statement keyword operator")
@@ -195,7 +195,6 @@ stmt_high
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named mi_transform_op_named
 %type <YY::TokenMetadata> 			node_namespace
-%type <YY::TokenMetadata> 			resolved_norm_name resolved_type_name resolved_decl_name resolved_qual_name resolved_mi_name
 %type <TreePtr<Node>>	 			resolved_norm_node resolved_type_node resolved_decl_node resolved_qual_node resolved_mi_node
 %type <TreePtr<Node>>	 			explicit_norm_node explicit_type_node explicit_decl_node explicit_qual_node explicit_mi_node
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands decl_commands
@@ -869,37 +868,27 @@ vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
 
 explicit_norm_node	: explicit_op_scope resolved_norm_node	{ $$ = $2; }
 
-resolved_norm_node	: resolved_norm_name					{ $$ = $1.node; }
-
-resolved_norm_name	: part_resolve RESOLVED_NORMAL			{ $$ = $2; }
+resolved_norm_node	: part_resolve RESOLVED_NORMAL			{ $$ = $2; }
 					| RESOLVED_NORMAL					
 
 explicit_type_node	: explicit_op_scope resolved_type_node	{ $$ = $2; }
 
-resolved_type_node	: resolved_type_name					{ $$ = $1.node; }
-
-resolved_type_name	: part_resolve RESOLVED_TYPE			{ $$ = $2; }
+resolved_type_node	: part_resolve RESOLVED_TYPE			{ $$ = $2; }
 					| RESOLVED_TYPE						
 	
 explicit_decl_node	: explicit_op_scope resolved_decl_node	{ $$ = $2; }
 
-resolved_decl_node	: resolved_decl_name					{ $$ = $1.node; }
-
-resolved_decl_name	: part_resolve RESOLVED_DECL 			{ $$ = $2; }
+resolved_decl_node	: part_resolve RESOLVED_DECL 			{ $$ = $2; }
 					| RESOLVED_DECL							
 
 explicit_qual_node	: explicit_op_scope resolved_qual_node	{ $$ = $2; }
 
-resolved_qual_node	: resolved_qual_name					{ $$ = $1.node; }
-
-resolved_qual_name	: part_resolve RESOLVED_QUAL		{ $$ = $2; }
+resolved_qual_node	: part_resolve RESOLVED_QUAL		{ $$ = $2; }
 					| RESOLVED_QUAL						
 
 explicit_mi_node	: explicit_op_scope resolved_mi_node	{ $$ = $2; }
 
-resolved_mi_node	: resolved_mi_name					{ $$ = $1.node; }
-
-resolved_mi_name	: part_resolve RESOLVED_MEMB_INIT	{ $$ = $2; }
+resolved_mi_node	: part_resolve RESOLVED_MEMB_INIT	{ $$ = $2; }
 					| RESOLVED_MEMB_INIT				
 
 // On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 

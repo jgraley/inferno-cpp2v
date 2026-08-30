@@ -153,7 +153,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::CreateBlockToken(const ANDBlock 
 {
 	metadata.as_andata_block = block; // return it to the parser whatever it is
 	if( auto lb = dynamic_cast<const AvailableNodeData::NodeBlock *>(block) )
-		return CreateNodeToken(lb, loc, metadata);
+		return CreateNodeToken(lb, loc);
 	else if( dynamic_cast<const AvailableNodeData::NamespaceBlock *>(block) )
 		return YY::VNLangParser::make_NODE_NAMESPACE(metadata, loc);				
 	else
@@ -161,12 +161,12 @@ YY::VNLangParser::symbol_type VNLangRecogniser::CreateBlockToken(const ANDBlock 
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::CreateNodeToken(const AvailableNodeData::NodeBlock *block, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+YY::VNLangParser::symbol_type VNLangRecogniser::CreateNodeToken(const AvailableNodeData::NodeBlock *block, YY::VNLangParser::location_type loc) const
 {
 	ASSERT(block->tag)("NodeBlock ")(*block)(" has no tag, so cannot create a node from it");
-	metadata.node = MakeStandardAgent(block->tag.value());
-	YY::VNLangParser::token::token_kind_type token_kind = metadata.node->GetResolvedToken();		
-	return YY::VNLangParser::symbol_type( token_kind, std::move(metadata), std::move(loc) );		
+	TreePtr<Node> node = MakeStandardAgent(block->tag.value());
+	YY::VNLangParser::token::token_kind_type token_kind = node->GetResolvedToken();		
+	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
 }
 
 
