@@ -218,9 +218,9 @@ stmt_high
 %type <list<TreePtr<Node>>>			bases memb_inits
 %type <VN::QualifierData> 			qualifier qualifier_nw
 %type <list<VN::QualifierData>>		qualifiers 
-%type <const ANDBlock *> prerestrict_op_named id_by_name_op_named build_id_named 
-%type <const ANDBlock *> type_prerestrict_op_named type_id_by_name_op_named type_build_id_op_named
-%type <const ANDBlock *> mi_prerestrict_op_named mi_id_by_name_op_named mi_build_id_op_named
+%type <TreePtr<Node>> prerestrict_op_named id_by_name_op_named build_id_named 
+%type <TreePtr<Node>> type_prerestrict_op_named type_id_by_name_op_named type_build_id_op_named
+%type <TreePtr<Node>> mi_prerestrict_op_named mi_id_by_name_op_named mi_build_id_op_named
 %type <multiset<string>>			type_specifier_seq
 
 // Solve the dangling-else amiguity by giving the "else" token a higher priority than the "if" token
@@ -306,7 +306,7 @@ compound_prefix : compound_primary
 				|  								   stuff_op_scope compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				|    stuff_op_scope OPEN_VN unified_entry CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|     stuff_op_scope OPEN_VN stuff_depth CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
-				|                      prerestrict_op_named compound_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $2, @2); }
+				|                      prerestrict_op_named compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 
 compound_primary	: compound_scope '{' VN_SEP '}'                			{ $$ = vn->OnCompound({}, @3, {}, @3); } 
 					| compound_scope '{' stmt_decls VN_SEP '}'     			{ $$ = vn->OnCompound($3, @3, {}, @5); }
@@ -398,7 +398,7 @@ decl_vn_prim: decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicit
 decl_full_explicit_start 		: explicit_decl_node					{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                       vn->AddGnomon($$.gnomon); }
                                                                                   
-decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_name	{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2.node); 
+decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_node	{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2); 
                                                                           vn->AddGnomon($$); }
                                                                           
 memb_inits	: memb_inits ',' memb_init_boot								{ $$ = $1; $$.push_back($3); }
@@ -411,7 +411,7 @@ memb_init_entry	: memb_init_prefix
 memb_init_prefix: memb_init_postfix
 				| 						        GREEN_GRASS_OP memb_init_prefix	{ $$ = vn->OnGrass($2); }
 				| 					               NEGATION_OP memb_init_prefix	{ $$ = vn->OnNegation($2); }
-				|                      mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $2, @2); }
+				|                      mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 				|  						        stuff_op_scope memb_init_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				|    stuff_op_scope OPEN_VN memb_init_boot CLOSE_VN memb_init_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN memb_init_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
@@ -423,10 +423,10 @@ memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2
 					| DELTA_COMPARE_OP memb_init_boot DELTA_REPLACE_OP memb_init_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
 					| mi_full_explicit_start itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 					| DESIGNATED_NORMAL       				  			
-					| mi_id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN	{ $$ = vn->OnIdByName(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $3, @3); } // ASCII_NAME could be format
-					| mi_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN	{ $$ = vn->OnBuildId(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $3, @3, VN::Item{}); }
-					| mi_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $3, @3, $5); }
-					| mi_build_id_op_named OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, wstring(), @3, $4); }
+					| mi_id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN	{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+					| mi_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
+					| mi_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
+					| mi_build_id_op_named OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 					| mi_transform_op_named OPEN_VN unified_prefix CLOSE_VN		{ $$ = vn->OnTransform($1, @1, $3, @3); }
 					| STAR_OP												{ $$ = vn->OnStar(nullptr); }
 					| STAR_OP OPEN_VN memb_init_boot CLOSE_VN					{ $$ = vn->OnStar($3); }
@@ -434,9 +434,9 @@ memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2
                       
 mi_full_explicit_start 	: explicit_mi_node							{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
-mi_prerestrict_op_named	: prerestrict_op_scope resolved_mi_name		{ $$ = $2.as_andata_block; (void)$1; }                      
-mi_id_by_name_op_named 	: id_by_name_op_scope resolved_mi_name		{ $$ = $2.as_andata_block; (void)$1; }
-mi_build_id_op_named	: builder_id_op_scope resolved_mi_name		{ $$ = $2.as_andata_block; (void)$1; }
+mi_prerestrict_op_named	: prerestrict_op_scope resolved_mi_name		{ $$ = $2.node; (void)$1; }                      
+mi_id_by_name_op_named 	: id_by_name_op_scope resolved_mi_name		{ $$ = $2.node; (void)$1; }
+mi_build_id_op_named	: builder_id_op_scope resolved_mi_name		{ $$ = $2.node; (void)$1; }
 mi_transform_op_named  	: transform_op_scope TRANSFORM_NAME_NORMAL	{ $$ = $2.as_ascii; (void)$1; }
 
 //////////////////////////////// CONCRETE DECLARATORS /////////////////////////////////////         
@@ -713,8 +713,8 @@ expr_prefix : expr_postfix
 			| 						     GREEN_GRASS_OP expr_prefix	{ $$ = vn->OnGrass($2); }
 			| 						      POINTER_IS_OP expr_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
-			|                      prerestrict_op_named expr_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $2, @2); }
-			|              mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $2, @2); }
+			|                      prerestrict_op_named expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|              mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 			| stuff_op_scope OPEN_VN unified_entry CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
@@ -746,10 +746,10 @@ id_primary  : id_wildcard
 			| DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP stmt_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 			| norm_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DESIGNATED_NORMAL       				  			
-			| id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN	{ $$ = vn->OnIdByName(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $3, @3); } // ASCII_NAME could be format
-			| build_id_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN { $$ = vn->OnBuildId(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $3, @3, VN::Item{}); }
-			| build_id_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $3, @3, $5); }
-			| build_id_named OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, wstring(), @3, $4); }
+			| id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN	{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+			| build_id_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
+			| build_id_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
+			| build_id_named OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			| transform_op_named OPEN_VN unified_prefix CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 
 id_wildcard : STAR_OP												{ $$ = vn->OnStar(nullptr); }
@@ -762,9 +762,9 @@ comma_sep_expr_decl	: expr_no_comma_op								{ $$.push_back($1); }
 norm_full_explicit_start : explicit_norm_node						{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
 																
-prerestrict_op_named: prerestrict_op_scope resolved_norm_name	{ $$ = $2.as_andata_block; (void)$1; }
-id_by_name_op_named : id_by_name_op_scope resolved_norm_name		{ $$ = $2.as_andata_block; (void)$1; }
-build_id_named 		: builder_id_op_scope resolved_norm_name		{ $$ = $2.as_andata_block; (void)$1; }
+prerestrict_op_named: prerestrict_op_scope resolved_norm_name	{ $$ = $2.node; (void)$1; }
+id_by_name_op_named : id_by_name_op_scope resolved_norm_name		{ $$ = $2.node; (void)$1; }
+build_id_named 		: builder_id_op_scope resolved_norm_name		{ $$ = $2.node; (void)$1; }
 transform_op_named  : transform_op_scope TRANSFORM_NAME_NORMAL { $$ = $2.as_ascii; (void)$1; }
 
 //////////////////////////////// TYPE-ID ////////////////////////////////////         
@@ -798,7 +798,7 @@ type_prefix : type_postfix
 			| 						         GREEN_GRASS_OP type_prefix	{ $$ = vn->OnGrass($2); }
 			| 							      POINTER_IS_OP type_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP type_prefix	{ $$ = vn->OnNegation($2); }
-			|                     type_prerestrict_op_named type_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $2, @2); }
+			|                     type_prerestrict_op_named type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|								 TYPE_INDICATOR expr_prefix { $$ = $2; }
 
 type_postfix: type_primary		   
@@ -815,19 +815,19 @@ type_primary: type_vn_prim
 type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DELTA_COMPARE_OP type_boot DELTA_REPLACE_OP type_boot DELTA_END_OP { $$ = vn->OnDelta($2, $4); }
 			| DESIGNATED_TYPE     									  			
-			| type_id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN			 { $$ = vn->OnIdByName(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $3, @3); } // ASCII_NAME could be format
-			| type_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 	 { $$ = vn->OnBuildId(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $3, @3, VN::Item{}); }
-			| type_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN { $$ = vn->OnBuildId(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $3, @3, $5); }
-			| type_build_id_op_named OPEN_VN VN_SEP item CLOSE_VN 				 { $$ = vn->OnBuildId(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, wstring(), @3, $4); }
+			| type_id_by_name_op_named OPEN_VN STRING_LITERAL CLOSE_VN			 { $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+			| type_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 	 { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
+			| type_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN { $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
+			| type_build_id_op_named OPEN_VN VN_SEP item CLOSE_VN 				 { $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			| type_transform_op_named OPEN_VN unified_prefix CLOSE_VN 			 { $$ = vn->OnTransform($1, @1, $3, @3); }
 			| TYPE_INDICATOR STAR_OP OPEN_VN type_boot CLOSE_VN					 { $$ = vn->OnStar($4); }
 			| STAR_OP OPEN_VN type_boot CLOSE_VN								 { $$ = vn->OnStar($3); }
 		 	
 type_full_explicit_start 	: explicit_type_node								{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                                   vn->AddGnomon($$.gnomon); }
-type_prerestrict_op_named 	: prerestrict_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
-type_id_by_name_op_named 	: id_by_name_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
-type_build_id_op_named 		: builder_id_op_scope resolved_type_name			{ $$ = $2.as_andata_block; (void)$1; }
+type_prerestrict_op_named 	: prerestrict_op_scope resolved_type_name			{ $$ = $2.node; (void)$1; }
+type_id_by_name_op_named 	: id_by_name_op_scope resolved_type_name			{ $$ = $2.node; (void)$1; }
+type_build_id_op_named 		: builder_id_op_scope resolved_type_name			{ $$ = $2.node; (void)$1; }
 type_transform_op_named 	: transform_op_scope TRANSFORM_NAME_TYPE 			{ $$ = $2.as_ascii; (void)$1; }
 
 // eg "long unsigned int". VN represents this as a single node. We don't want nodes for its constituent parts.
