@@ -727,13 +727,15 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 			"Cannot disambiguate declaration under " + usg->reason + "." + note );
 	else if( auto psg = dynamic_cast<const PrerestrictScopeGnomon *>(spg.get()) ) 
 	{
-		auto nb = dynamic_cast<const AvailableNodeData::NodeBlock *>(psg->block);
 		ASSERT( psg->node );
 		instance = TreePtr<CPPTree::Instance>::DynamicCast(psg->node);
 		if( !instance )
 			throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(middle_loc),
-						"nearest prerestrict " + nb->What() + " cannot disambiguate an instance declaration" + note); // TODO it could if the pre-restriction was to eg a Record etc			
+						"nearest prerestrict " + 
+						DiagQuote(Traceable::TypeIdName( *(psg->node) )) + 
+						" cannot disambiguate an instance declaration" + 
+						note); // TODO it could if the pre-restriction was to eg a Record etc			
 	}
 	else if( dynamic_cast<const ParameterisationScopeGnomon *>(spg.get()) )
 		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
