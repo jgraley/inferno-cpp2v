@@ -132,7 +132,6 @@
 <string> 	INTEGRAL_LITERAL				_("C integer literal")
 <string>	ASCII_FORMAT 					_("C format string")
 <string>	TYPE_SPECIFIER					_("C simple type specifier")
-<YY::TokenMetadata>	BOOL_LITERAL			_("C boolean literal")
 <YY::TokenMetadata> TRANSFORM_NAME_TYPE		_("type transform name")
 <YY::TokenMetadata> TRANSFORM_NAME_NORMAL	_("open_statement transform name")
 <YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
@@ -148,21 +147,22 @@
 <YY::TokenMetadata>	RESOLVED_QUAL			_("resolved qualifier node name")
 <YY::TokenMetadata>	RESOLVED_MEMB_INIT		_("resolved member initialiser node name")
 <YY::TokenMetadata>	NODE_NAMESPACE			_("scope resolving name")
-<YY::TokenMetadata> KEYWORD_PRIMARY_OP		_("open_statement keyword operator")
-<YY::TokenMetadata> KEYWORD_SIMPLE_STMT     _("keyword simple statement") // eg break;
-<YY::TokenMetadata> KEYWORD_SPACE_SEP_STMT 	_("keyword space-separated statement") // eg return 12;
-<YY::TokenMetadata> KEYWORD_ARGS_BODY_STMT 	_("keyword args-and-body statement") // eg switch(args) body
-<YY::TokenMetadata> KEYWORD_ARGS_BODY_WITH_ELSE 	_("keyword args-body-chain statement") // eg if(args) body else body_else	
-<YY::TokenMetadata> DO_KEYWORD				_("C do keyword")
-<YY::TokenMetadata> WHILE_KEYWORD			_("C while keyword")
-<YY::TokenMetadata> CASE_KEYWORD			_("C case keyword")
-<YY::TokenMetadata> DEFAULT_KEYWORD			_("C default keyword")
-<YY::TokenMetadata> FUNC_ON_TYPE			_("function acting on a type")
-<YY::TokenMetadata> IRECORD_KEYWORD			_("C class/struct/union keyword")
-<YY::TokenMetadata> ENUM_KEYWORD			_("C enumeration keyword")
-<YY::TokenMetadata> QUAL_NODE_KEYWORD		_("C qualifier")
-<YY::TokenMetadata> TYPEDEF_KEYWORD			_("C typedef keyword")
-<YY::TokenMetadata> TYPE_KEYWORD			_("C type keyword")
+<TreePtr<Node>>	BOOL_LITERAL			_("C boolean literal")
+<TreePtr<Node>> KEYWORD_PRIMARY_OP		_("open_statement keyword operator")
+<TreePtr<Node>> KEYWORD_SIMPLE_STMT     _("keyword simple statement") // eg break;
+<TreePtr<Node>> KEYWORD_SPACE_SEP_STMT 	_("keyword space-separated statement") // eg return 12;
+<TreePtr<Node>> KEYWORD_ARGS_BODY_STMT 	_("keyword args-and-body statement") // eg switch(args) body
+<TreePtr<Node>> KEYWORD_ARGS_BODY_WITH_ELSE 	_("keyword args-body-chain statement") // eg if(args) body else body_else	
+<TreePtr<Node>> DO_KEYWORD				_("C do keyword")
+<TreePtr<Node>> WHILE_KEYWORD			_("C while keyword")
+<TreePtr<Node>> CASE_KEYWORD			_("C case keyword")
+<TreePtr<Node>> DEFAULT_KEYWORD			_("C default keyword")
+<TreePtr<Node>> FUNC_ON_TYPE			_("function acting on a type")
+<TreePtr<Node>> IRECORD_KEYWORD			_("C class/struct/union keyword")
+<TreePtr<Node>> ENUM_KEYWORD			_("C enumeration keyword")
+<TreePtr<Node>> QUAL_NODE_KEYWORD		_("C qualifier")
+<TreePtr<Node>> TYPEDEF_KEYWORD			_("C typedef keyword")
+<TreePtr<Node>> TYPE_KEYWORD			_("C type keyword")
 stmt_low 
 stmt_high
 	
@@ -499,7 +499,7 @@ irecord_scope   : irecord_node type_specified        						{ $$ = { vn->ApplyIde
 																		             vn->MakeRecordScopeGnomon($1, $2) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
-irecord_node	: IRECORD_KEYWORD											{ $$ = vn->StartRecord(@$, $1.as_ascii); }
+irecord_node	: IRECORD_KEYWORD											{ $$ = vn->StartRecord(@$, $1->GetKeyword(Syntax::Policy())); }
 		 		| explicit_decl_node										{ $$ = $1; } 
                                                   
 bases			: base_spec                                                 { $$.push_back($1); } 
@@ -576,7 +576,7 @@ enum_scope      : enum_node type_specified       							{ $$ = { vn->ApplyIdenti
 																		             vn->MakeRecordScopeGnomon($1, $2) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
-enum_node		: ENUM_KEYWORD												{ $$ = vn->StartRecord(@$, $1.as_ascii); }
+enum_node		: ENUM_KEYWORD												{ $$ = vn->StartRecord(@$, $1->GetKeyword(Syntax::Policy())); }
 //		 		| explicit_decl_node										{ $$ = $1; } // TODO bring back explicit support but differentiate
                                                                                                                                                        
 enumerators		: enumerator												{ $$.push_back($1); }
@@ -640,15 +640,15 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); }
 statement_nl: bare_statement ';'											{ $$ = $1; }      
 			| expr_entry ';'												{ $$ = $1; } // TODO Should come in under bare_statement but conflicts
 // #899		| explicit_norm_node '(' semicolon_args ')' stmt_comp			{ $$ = vn->OnArgsBodyStmt($1, @1, $3, @3, $5, @5); }
-			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp		{ $$ = vn->OnArgsBodyStmt($1.as_ascii, @1, $3, @3, $5, @5); }
+			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp		{ $$ = vn->OnArgsBodyStmt($1->GetKeyword(Syntax::Policy()), @1, $3, @3, $5, @5); }
 			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 					{ $$ = vn->OnWhile($3, @3, $5, @5); }
 			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp	
-			  %prec KEYWORD_ARGS_BODY_WITH_ELSE								{ $$ = vn->OnArgsBodyWithElseStmt($1.as_ascii, @1, $3, @3, $5, @5, @1, nullptr, @1); }
+			  %prec KEYWORD_ARGS_BODY_WITH_ELSE								{ $$ = vn->OnArgsBodyWithElseStmt($1->GetKeyword(Syntax::Policy()), @1, $3, @3, $5, @5, @1, nullptr, @1); }
 			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp
-			  ELSE_KEYWORD stmt_comp										{ $$ = vn->OnArgsBodyWithElseStmt($1.as_ascii, @1, $3, @3, $5, @5, @6, $7, @7); }
+			  ELSE_KEYWORD stmt_comp										{ $$ = vn->OnArgsBodyWithElseStmt($1->GetKeyword(Syntax::Policy()), @1, $3, @3, $5, @5, @6, $7, @7); }
 
-bare_statement	: KEYWORD_SIMPLE_STMT										{ $$ = $1.node; }
-				| KEYWORD_SPACE_SEP_STMT expr_entry							{ $$ = vn->OnSpaceSepStmt($1.as_ascii, @1, $2, @2); }
+bare_statement	: KEYWORD_SIMPLE_STMT										{ $$ = $1; }
+				| KEYWORD_SPACE_SEP_STMT expr_entry							{ $$ = vn->OnSpaceSepStmt($1->GetKeyword(Syntax::Policy()), @1, $2, @2); }
 				| DO_KEYWORD stmt_comp WHILE_KEYWORD '(' stmt_boot ')' 		{ $$ = vn->OnDo($2, @2, $5, @5); } // TODO a While node is gobbled up here
 
 semicolon_args	: expr_entry										{ $$.push_back($1); }
@@ -737,9 +737,9 @@ expr_primary: id_primary
 			| '(' stmt_boot ')'                          		{ $$ = $2; }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
-			| BOOL_LITERAL										{ $$ = $1.node; }
-			| KEYWORD_PRIMARY_OP								{ $$ = $1.node; } 
-			| FUNC_ON_TYPE '(' type_boot ')'       				{ $$ = vn->OnFuncOnType($1.as_ascii, @1, $3, @3); }			
+			| BOOL_LITERAL									
+			| KEYWORD_PRIMARY_OP							
+			| FUNC_ON_TYPE '(' type_boot ')'       				{ $$ = vn->OnFuncOnType($1->GetKeyword(Syntax::Policy()), @1, $3, @3); }			
 			| DESIGNATED_COMPOUND      				  			{ $$ = $1.node; }   // TODO move up into the statement rules once we don't need to support eg int main() = my_compound
 
 id_primary  : id_wildcard
@@ -808,7 +808,7 @@ type_for_declarator : type_primary
 			                                       
 type_primary: type_vn_prim
 			| '(' type_boot ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
-            | TYPE_KEYWORD														{ $$ = $1.node; }
+            | TYPE_KEYWORD														
 			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }				
 			| TYPE_INDICATOR TYPE_INDICATOR '(' type_id ')'						{ $$ = $4; } // See #888
 			
@@ -834,7 +834,7 @@ type_transform_op_named 	: transform_op_scope TRANSFORM_NAME_TYPE 			{ $$ = $2.a
 // So, this is the level at which we mix in the VN syntax.
 type_specifier_seq	: TYPE_SPECIFIER											{ $$.insert($1); }
 					| TYPE_SPECIFIER type_specifier_seq							{ $$ = $2; $$.insert($1); }
-                    | TYPE_KEYWORD type_specifier_seq							{ $$ = $2; $$.insert($1.as_ascii); }
+                    | TYPE_KEYWORD type_specifier_seq							{ $$ = $2; $$.insert($1->GetKeyword(Syntax::Policy())); }
                     
 //////////////////////////////// QUALIFIERS ////////////////////////////////////         
 
@@ -849,7 +849,7 @@ qualifier_nw	: qualifier_node											{ $$ = VN::QualifierData($$, VN::QualCat
 				| TYPEDEF_KEYWORD											{ $$ = VN::QualifierData($$, VN::QualCat::TYPEDEF); }
 
 qualifier_node	: qual_full_explicit_start itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
-				| QUAL_NODE_KEYWORD											{ $$ = $1.node; }
+				| QUAL_NODE_KEYWORD								
 				| DESIGNATED_QUAL       				  					{ $$ = $1.node; } 
 
 qual_full_explicit_start : explicit_qual_node								{ $$ = vn->MakeScopeGnomonForNode($1); 

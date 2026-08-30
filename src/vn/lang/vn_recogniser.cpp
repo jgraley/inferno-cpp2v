@@ -92,7 +92,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool asc
 		return RecogniseInTransformNameScope(text, ascii, loc, metadata);				
 		
 	try	{
-		return RecogniseKeyword( text, ascii, metadata, loc );
+		return RecogniseKeyword( text, ascii, loc );
 	} catch( Unrecognised& ) {}	
 		
 	try	{
@@ -190,7 +190,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInTransformNameScope(ws
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, bool ascii, YY::TokenMetadata metadata, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
 {
 	if( !ascii ) // Keywords are only ASCII
 		throw Unrecognised();
@@ -200,8 +200,8 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 	optional<NodeTag> tag = AvailableNodeData().TryGetByKeywordIfToken( ascii_text );
 	if( !tag )
 		throw Unrecognised();
-	metadata.node = MakeStandardAgent(tag.value());
-	return YY::VNLangParser::symbol_type( metadata.node->GetToken(), std::move(metadata), std::move(loc) );
+	TreePtr<Node> node = MakeStandardAgent(tag.value());
+	return YY::VNLangParser::symbol_type( node->GetToken(), std::move(node), std::move(loc) );
 }
 
 
