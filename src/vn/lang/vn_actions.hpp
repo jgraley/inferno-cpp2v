@@ -33,7 +33,7 @@ public:
 	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
 	TreePtr<Node> FinishExplicitNode( TreePtr<Node> dest, any node_name_loc, Itemisation itemisation );
 	TreePtr<Node> OnEmbeddedCommands( list<shared_ptr<Command>> commands );
-	TreePtr<Node> OnRestrict( const ANDBlock *block, any node_name_loc, TreePtr<Node> target, any target_loc );
+	TreePtr<Node> OnRestrict( TreePtr<Node> node, any node_name_loc, TreePtr<Node> target, any target_loc );
 	
 	TreePtr<Node> OnTypeSpecifierSeq( multiset<string> specifiers, any loc );
 	

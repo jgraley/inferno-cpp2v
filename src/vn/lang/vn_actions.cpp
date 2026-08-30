@@ -229,11 +229,8 @@ TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, any node_na
 }
 
 
-TreePtr<Node> VNLangActions::OnRestrict( const ANDBlock *block, any node_name_loc, TreePtr<Node> target, any target_loc )
+TreePtr<Node> VNLangActions::OnRestrict( TreePtr<Node> node, any node_name_loc, TreePtr<Node> target, any target_loc )
 {
-	auto node_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	TreePtr<Node> node = MakeStandardAgent(node_block->tag.value());
-	
 	NodeTag tag = node_names->GetTagOfNode(node);	
 	Agent *agent = Agent::TryAsAgent(target);
 	ASSERT( agent )("We are parsing a pattern so everything should be agents");

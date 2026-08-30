@@ -306,7 +306,7 @@ compound_prefix : compound_primary
 				|  								   stuff_op_scope compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				|    stuff_op_scope OPEN_VN unified_entry CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|     stuff_op_scope OPEN_VN stuff_depth CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
-				|                      prerestrict_op_named compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+				|                      prerestrict_op_named compound_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $2, @2); }
 
 compound_primary	: compound_scope '{' VN_SEP '}'                			{ $$ = vn->OnCompound({}, @3, {}, @3); } 
 					| compound_scope '{' stmt_decls VN_SEP '}'     			{ $$ = vn->OnCompound($3, @3, {}, @5); }
@@ -383,7 +383,7 @@ decl_prefix : decl_postfix
 			| 							      POINTER_IS_OP decl_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP decl_prefix	{ $$ = vn->OnNegation($2); }			
 			// Allows ‽Member to actually get us into access/member column so can have access spec
-			|            decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict($1->block, @1, $2, @2); }
+			|            decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1->block)->tag.value()), @1, $2, @2); }
 			   			 
 decl_postfix: decl_primary		   
 	                                       
@@ -411,7 +411,7 @@ memb_init_entry	: memb_init_prefix
 memb_init_prefix: memb_init_postfix
 				| 						        GREEN_GRASS_OP memb_init_prefix	{ $$ = vn->OnGrass($2); }
 				| 					               NEGATION_OP memb_init_prefix	{ $$ = vn->OnNegation($2); }
-				|                      mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+				|                      mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $2, @2); }
 				|  						        stuff_op_scope memb_init_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				|    stuff_op_scope OPEN_VN memb_init_boot CLOSE_VN memb_init_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN memb_init_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
@@ -543,7 +543,7 @@ acc_memb_prefix	: acc_memb_postfix
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
 				| 						      POINTER_IS_OP acc_memb_prefix	{ $$ = vn->OnPointerIs($2); }
 				| 					         	NEGATION_OP	acc_memb_prefix	{ $$ = vn->OnNegation($2); }
-				|         	      decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict($1->block, @1, $2, @2); }
+				|         	      decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1->block)->tag.value()), @1, $2, @2); }
 				|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				| stuff_op_scope OPEN_VN unified_entry CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
@@ -713,8 +713,8 @@ expr_prefix : expr_postfix
 			| 						     GREEN_GRASS_OP expr_prefix	{ $$ = vn->OnGrass($2); }
 			| 						      POINTER_IS_OP expr_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
-			|                      prerestrict_op_named expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|              mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|                      prerestrict_op_named expr_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $2, @2); }
+			|              mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $2, @2); }
 			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 			| stuff_op_scope OPEN_VN unified_entry CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
@@ -798,7 +798,7 @@ type_prefix : type_postfix
 			| 						         GREEN_GRASS_OP type_prefix	{ $$ = vn->OnGrass($2); }
 			| 							      POINTER_IS_OP type_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP type_prefix	{ $$ = vn->OnNegation($2); }
-			|                     type_prerestrict_op_named type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|                     type_prerestrict_op_named type_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1)->tag.value()), @1, $2, @2); }
 			|								 TYPE_INDICATOR expr_prefix { $$ = $2; }
 
 type_postfix: type_primary		   
