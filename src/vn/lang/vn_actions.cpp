@@ -728,12 +728,8 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	else if( auto psg = dynamic_cast<const PrerestrictScopeGnomon *>(spg.get()) ) 
 	{
 		auto nb = dynamic_cast<const AvailableNodeData::NodeBlock *>(psg->block);
-		ASSERT( nb );
-		ASSERT( nb->tag );
-		NodeTag ne = nb->tag.value();
-		TreePtr<Node> node = MakeStandardAgent(ne);
-		ASSERT( node );
-		instance = TreePtr<CPPTree::Instance>::DynamicCast(node);
+		ASSERT( psg->node );
+		instance = TreePtr<CPPTree::Instance>::DynamicCast(psg->node);
 		if( !instance )
 			throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(middle_loc),

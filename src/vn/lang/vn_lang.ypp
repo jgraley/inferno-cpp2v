@@ -383,7 +383,7 @@ decl_prefix : decl_postfix
 			| 							      POINTER_IS_OP decl_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP decl_prefix	{ $$ = vn->OnNegation($2); }			
 			// Allows ‽Member to actually get us into access/member column so can have access spec
-			|            decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1->block)->tag.value()), @1, $2, @2); }
+			|            decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
 			   			 
 decl_postfix: decl_primary		   
 	                                       
@@ -398,7 +398,7 @@ decl_vn_prim: decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicit
 decl_full_explicit_start 		: explicit_decl_node					{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                       vn->AddGnomon($$.gnomon); }
                                                                                   
-decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_name	{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2.as_andata_block); 
+decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_name	{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2.node); 
                                                                           vn->AddGnomon($$); }
                                                                           
 memb_inits	: memb_inits ',' memb_init_boot								{ $$ = $1; $$.push_back($3); }
@@ -543,7 +543,7 @@ acc_memb_prefix	: acc_memb_postfix
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
 				| 						      POINTER_IS_OP acc_memb_prefix	{ $$ = vn->OnPointerIs($2); }
 				| 					         	NEGATION_OP	acc_memb_prefix	{ $$ = vn->OnNegation($2); }
-				|         	      decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict(VN::MakeStandardAgent(dynamic_cast<const AvailableNodeData::NodeBlock *>($1->block)->tag.value()), @1, $2, @2); }
+				|         	      decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
 				|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				| stuff_op_scope OPEN_VN unified_entry CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }

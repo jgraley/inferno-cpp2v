@@ -104,13 +104,13 @@ public:
 class PrerestrictScopeGnomon : public ScopeGnomon
 {
 public:	
-	PrerestrictScopeGnomon( const ANDBlock *block_ ) :
-		block(block_) {}
+	PrerestrictScopeGnomon( TreePtr<Node> node_ ) :
+		node(node_) {}
 	string GetMessageText() const final
 	{
 		return "prerestrict scope";
 	}
-	const ANDBlock * const block;
+	TreePtr<Node> node;
 };
 
 
