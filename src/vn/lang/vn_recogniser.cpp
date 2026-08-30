@@ -181,7 +181,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInTransformNameScope(ws
 
 	// Transformations that act on unified scopes (instances or types, in this case)
 	if( ascii && ToASCII(text)=="TypeDeclarationOf" )
-		return YY::VNLangParser::make_TRANSFORM_NAME_TYPE(metadata, loc);
+		return YY::VNLangParser::make_TRANSFORM_NAME_TYPE(metadata.as_ascii, loc);
 
 	// In these scopes, there are no designations so we must succeed and can raise an error here if we don#t
 	throw YY::VNLangParser::syntax_error( loc,

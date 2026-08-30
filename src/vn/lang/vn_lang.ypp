@@ -132,7 +132,7 @@
 <string> 	INTEGRAL_LITERAL				_("C integer literal")
 <string>	ASCII_FORMAT 					_("C format string")
 <string>	TYPE_SPECIFIER					_("C simple type specifier")
-<YY::TokenMetadata> TRANSFORM_NAME_TYPE		_("type transform name")
+<string>    TRANSFORM_NAME_TYPE				_("type transform name")
 <YY::TokenMetadata> TRANSFORM_NAME_NORMAL	_("open_statement transform name")
 <YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
 <YY::TokenMetadata> UNICODE_NAME 			_("Unicode name")
@@ -827,7 +827,7 @@ type_full_explicit_start 	: explicit_type_node								{ $$ = vn->MakeScopeGnomon
 type_prerestrict_op_named 	: prerestrict_op_scope resolved_type_node			{ $$ = $2; (void)$1; }
 type_id_by_name_op_named 	: id_by_name_op_scope resolved_type_node			{ $$ = $2; (void)$1; }
 type_build_id_op_named 		: builder_id_op_scope resolved_type_node			{ $$ = $2; (void)$1; }
-type_transform_op_named 	: transform_op_scope TRANSFORM_NAME_TYPE 			{ $$ = $2.as_ascii; (void)$1; }
+type_transform_op_named 	: transform_op_scope TRANSFORM_NAME_TYPE 			{ $$ = $2; (void)$1; }
 
 // eg "long unsigned int". VN represents this as a single node. We don't want nodes for its constituent parts.
 // So, this is the level at which we mix in the VN syntax.
