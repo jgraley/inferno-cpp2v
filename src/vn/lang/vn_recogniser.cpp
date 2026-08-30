@@ -87,7 +87,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool asc
 	const ScopeGnomon *scope = nullptr;
 	shared_ptr<const ScopeGnomon> spg = scope_gnomons.TryLockTop();
 	if( spg && dynamic_cast<const NodeNameScopeGnomon *>(spg.get()) )
-		return RecogniseInNodeNameScope(text, ascii, loc, metadata);
+		return RecogniseInNodeNameScope(text, ascii, loc);
 	else if( spg && dynamic_cast<const TransformNameScopeGnomon *>(spg.get()) )
 		return RecogniseInTransformNameScope(text, ascii, loc, metadata);				
 		
@@ -100,13 +100,13 @@ YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool asc
 	} catch( Unrecognised& ) {}
 		
 	if( ascii )
-         return YY::VNLangParser::make_ASCII_NAME(metadata, loc);
+         return YY::VNLangParser::make_ASCII_NAME(ToASCII(text), loc);
     else
-         return YY::VNLangParser::make_UNICODE_NAME(metadata, loc);
+         return YY::VNLangParser::make_UNICODE_NAME(text, loc);
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
 {
 	if( !ascii )	
 		throw YY::VNLangParser::syntax_error( loc,

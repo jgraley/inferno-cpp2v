@@ -134,8 +134,8 @@
 <string>	TYPE_SPECIFIER					_("C simple type specifier")
 <string>    TRANSFORM_NAME_TYPE				_("type transform name")
 <string>    TRANSFORM_NAME_NORMAL			_("open_statement transform name")
-<YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
-<YY::TokenMetadata> UNICODE_NAME 			_("Unicode name")
+<string>    ASCII_NAME 						_("ASCII name")
+<wstring>   UNICODE_NAME 					_("Unicode name")
 <const ANDBlock *>	NODE_NAMESPACE			_("scope resolving name")
 <TreePtr<Node>>	DESIGNATED_NORMAL		_("designated statement/expression name")
 <TreePtr<Node>>	DESIGNATED_TYPE			_("designated type name")
@@ -859,8 +859,8 @@ qual_full_explicit_start : explicit_qual_node								{ $$ = vn->MakeScopeGnomonF
 // - Recogniser can only supply one token, but we can "or" them together using rules.
 // - We create Gnomons and give them to the recogniser - their lifetime indicates scopes.
 
-vn_name		: UNICODE_NAME    							{ $$ = $1.as_unicode; }
-			| ASCII_NAME								{ $$ = $1.as_unicode; }     
+vn_name		: UNICODE_NAME    						
+			| ASCII_NAME								{ $$ = ToUnicode($1); }     
           
 // RESOLVED_X is strong i.e. there was definitely a ::. resolved_x is weak and
 // doesn't require this. See comment by part_resolve for why we don't need a value from 
