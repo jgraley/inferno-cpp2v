@@ -133,7 +133,7 @@
 <string>	ASCII_FORMAT 					_("C format string")
 <string>	TYPE_SPECIFIER					_("C simple type specifier")
 <string>    TRANSFORM_NAME_TYPE				_("type transform name")
-<YY::TokenMetadata> TRANSFORM_NAME_NORMAL	_("open_statement transform name")
+<string>    TRANSFORM_NAME_NORMAL			_("open_statement transform name")
 <YY::TokenMetadata> ASCII_NAME 				_("ASCII name")
 <YY::TokenMetadata> UNICODE_NAME 			_("Unicode name")
 <const ANDBlock *>	NODE_NAMESPACE			_("scope resolving name")
@@ -436,7 +436,7 @@ mi_full_explicit_start 	: explicit_mi_node							{ $$ = vn->MakeScopeGnomonForNo
 mi_prerestrict_op_named	: prerestrict_op_scope resolved_mi_node		{ $$ = $2; (void)$1; }                      
 mi_id_by_name_op_named 	: id_by_name_op_scope resolved_mi_node		{ $$ = $2; (void)$1; }
 mi_build_id_op_named	: builder_id_op_scope resolved_mi_node		{ $$ = $2; (void)$1; }
-mi_transform_op_named  	: transform_op_scope TRANSFORM_NAME_NORMAL	{ $$ = $2.as_ascii; (void)$1; }
+mi_transform_op_named  	: transform_op_scope TRANSFORM_NAME_NORMAL	{ $$ = $2; (void)$1; }
 
 //////////////////////////////// CONCRETE DECLARATORS /////////////////////////////////////         
                           		
@@ -764,7 +764,7 @@ norm_full_explicit_start : explicit_norm_node						{ $$ = vn->MakeScopeGnomonFor
 prerestrict_op_named: prerestrict_op_scope resolved_norm_node		{ $$ = $2; (void)$1; }
 id_by_name_op_named : id_by_name_op_scope resolved_norm_node		{ $$ = $2; (void)$1; }
 build_id_named 		: builder_id_op_scope resolved_norm_node		{ $$ = $2; (void)$1; }
-transform_op_named  : transform_op_scope TRANSFORM_NAME_NORMAL { $$ = $2.as_ascii; (void)$1; }
+transform_op_named  : transform_op_scope TRANSFORM_NAME_NORMAL 		{ $$ = $2; (void)$1; }
 
 //////////////////////////////// TYPE-ID ////////////////////////////////////         
 // type-id as seen in https://alx71hub.github.io/hcb/#type-id can be troublesome grammatically. Care advised.

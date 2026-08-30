@@ -173,11 +173,11 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInTransformNameScope(ws
 {
 	// Transformations that act on normal scopes (instances, in this case)
 	if( ascii && ToASCII(text)=="TypeOf" )
-		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(metadata, loc);					
+		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(metadata.as_ascii, loc);					
 
 	// Transformations that act on unified scopes (instances or types, in this case)
 	if( ascii && ToASCII(text)=="DeclarationOf" )
-		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(metadata, loc);
+		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(metadata.as_ascii, loc);
 
 	// Transformations that act on unified scopes (instances or types, in this case)
 	if( ascii && ToASCII(text)=="TypeDeclarationOf" )
