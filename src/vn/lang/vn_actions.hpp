@@ -93,8 +93,8 @@ public:
 	TreePtr<Node> OnSeqArgsConsInit( TreePtr<Node> constructor_id, list<TreePtr<Node>> arguments );
 	TreePtr<Node> OnLookup( TreePtr<Node> object, TreePtr<Node> member, any member_loc );
 
-	TreePtr<Node> OnIdByName( const ANDBlock *block, any id_disc_loc, wstring wname, any name_loc );
-	TreePtr<Node> OnBuildId( const ANDBlock *block, any id_disc_loc, wstring wformat, any name_loc, Item sources );
+	TreePtr<Node> OnIdByName( TreePtr<Node> node, any id_disc_loc, wstring wname, any name_loc );
+	TreePtr<Node> OnBuildId( TreePtr<Node> node, any id_disc_loc, wstring wformat, any name_loc, Item sources );
 	TreePtr<Node> OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc );
 	TreePtr<Node> OnNegation( TreePtr<Node> operand );
 	TreePtr<Node> OnConjunction( TreePtr<Node> left, TreePtr<Node> right );

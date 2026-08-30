@@ -1119,12 +1119,9 @@ TreePtr<Node> VNLangActions::OnLookup( TreePtr<Node> object, TreePtr<Node> membe
 }
 
 
-TreePtr<Node> VNLangActions::OnIdByName( const ANDBlock *block, any id_disc_loc, wstring wname, any name_loc )
+TreePtr<Node> VNLangActions::OnIdByName( TreePtr<Node> node, any id_disc_loc, wstring wname, any name_loc )
 {
-	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?
-	auto node_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	TreePtr<Node> node = MakeStandardAgent(node_block->tag.value());
-	
+	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?	
 	NodeTag tag = node_names->GetTagOfNode(node);	
 
 	string name = Unquote(ToASCII(wname));
@@ -1141,12 +1138,9 @@ TreePtr<Node> VNLangActions::OnIdByName( const ANDBlock *block, any id_disc_loc,
 }
 
 
-TreePtr<Node> VNLangActions::OnBuildId( const ANDBlock *block, any id_disc_loc, wstring wformat, any name_loc, Item sources )
+TreePtr<Node> VNLangActions::OnBuildId( TreePtr<Node> node, any id_disc_loc, wstring wformat, any name_loc, Item sources )
 {
-	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?
-	auto node_block = dynamic_cast<const AvailableNodeData::NodeBlock *>(block);
-	TreePtr<Node> node = MakeStandardAgent(node_block->tag.value());
-	
+	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?	
 	NodeTag tag = node_names->GetTagOfNode(node);	
 
 	// Format is "" if omitted otherwise a quoted string with the quotes still on
