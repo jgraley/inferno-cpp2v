@@ -1482,6 +1482,7 @@ struct While : Loop, Uncombable
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
+	TreePtr<Node> OnBody( YY::VNLangParser::location_type loc, TreePtr<Node> body ) override;
 };
 
 
@@ -1495,6 +1496,7 @@ struct Do : Loop, Uncombable // a do..while() construct
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
+	TreePtr<Node> OnBody( YY::VNLangParser::location_type loc, TreePtr<Node> body ) override;
 };
 
 

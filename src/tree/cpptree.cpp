@@ -5,6 +5,7 @@
 #include "vn/lang/render.hpp"
 #include "vn/lang/vn_lang.ypp.hpp"
 #include "vn/lang/vn_lang.location.hpp"
+#include "vn/agents/standard_agent.hpp"
 #include "typeof.hpp"
 
 #define EXPLICIT_BASE 0
@@ -2325,6 +2326,7 @@ YY::VNLangParser::token::token_kind_type If::GetKeywordToken() const
 TreePtr<Node> If::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
 {
 	body = body_;	
+	body_else = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Nop>>();
 	return (TreePtr<Node>)shared_from_this();
 } 
 
@@ -2371,6 +2373,13 @@ YY::VNLangParser::token::token_kind_type While::GetKeywordToken() const
 	return YY::VNLangParser::token::TOK_WHILE_KEYWORD;
 }
 
+
+TreePtr<Node> While::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
+{
+	body = body_;	
+	return (TreePtr<Node>)shared_from_this();
+} 
+
 //////////////////////////// Do ///////////////////////////////
 
 Syntax::Production Do::GetMyProductionTerminal() const
@@ -2399,6 +2408,13 @@ YY::VNLangParser::token::token_kind_type Do::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_DO_KEYWORD;
 }
+
+
+TreePtr<Node> Do::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
+{
+	body = body_;	
+	return (TreePtr<Node>)shared_from_this();
+} 
 
 //////////////////////////// For ///////////////////////////////
 
