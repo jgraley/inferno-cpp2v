@@ -739,7 +739,7 @@ expr_primary: id_primary
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL									
 			| KEYWORD_PRIMARY_OP							
-			| FUNC_ON_TYPE '(' type_boot ')'       				{ $$ = $1->OnArgsList( {$3}, @3 ); }			
+			| FUNC_ON_TYPE '(' type_boot ')'       				{ $$ = $1->OnType($3, @3); }			
 			| DESIGNATED_COMPOUND      				  			// TODO move up into the statement rules once we don't need to support eg int main() = my_compound
 
 id_primary  : id_wildcard

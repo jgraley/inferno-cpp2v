@@ -193,6 +193,7 @@ public:
 	virtual TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnBases( list<TreePtr<Node>> bases, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnMembers( list<TreePtr<Node>> members, YY::VNLangParser::location_type loc );
+	virtual TreePtr<Node> OnType( TreePtr<Node> type, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );

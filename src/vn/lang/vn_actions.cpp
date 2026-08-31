@@ -575,7 +575,7 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( const list<QualifierData> &quals,
 	{
 		TreePtr<Node> td = q_typedef->node;
 		td = td->OnIdentifier(declarator_result.leaf, any_cast<YY::VNLangParser::location_type>(decl_loc));
-		td = td->OnArgsList({declarator_result.type_view}, any_cast<YY::VNLangParser::location_type>(middle_loc));
+		td = td->OnType(declarator_result.type_view, any_cast<YY::VNLangParser::location_type>(middle_loc));
 		return td;
 	}
 	else

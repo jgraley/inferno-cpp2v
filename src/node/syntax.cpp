@@ -149,6 +149,13 @@ TreePtr<Node> Syntax::OnMembers( list<TreePtr<Node>>, YY::VNLangParser::location
 }
 
 
+TreePtr<Node> Syntax::OnType( TreePtr<Node>, YY::VNLangParser::location_type loc )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " does not expect a type.");	
+}
+
+
 TreePtr<Node> Syntax::OnArgsList( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
