@@ -571,17 +571,15 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( const list<QualifierData> &quals,
 		if( q.cat == QualCat::TYPEDEF )
 			q_typedef = &q;
 
+	TreePtr<Node> node;
 	if( q_typedef )
-	{
-		TreePtr<Node> td = q_typedef->node;
-		td = td->OnIdentifier(declarator_result.leaf, any_cast<YY::VNLangParser::location_type>(decl_loc));
-		td = td->OnType(declarator_result.type_view, any_cast<YY::VNLangParser::location_type>(middle_loc));
-		return td;
-	}
-	else
-	{
-		return OnInstance(quals, declarator_result, middle_loc);
-	}
+		node = q_typedef->node;
+	else	
+		node = OnInstance(quals, declarator_result, middle_loc);
+
+	node = node->OnIdentifier(declarator_result.leaf, any_cast<YY::VNLangParser::location_type>(decl_loc));
+	node = node->OnType(declarator_result.type_view, any_cast<YY::VNLangParser::location_type>(middle_loc));
+	return node;
 }
 
 
@@ -658,9 +656,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	else 
 		ASSERT(false)("Unknown gnomon: ")(spg);
 
-	instance->type = declarator_result.type_view;
 	instance->constancy = declarator_result.cv_quals_view.constancy; 
-	instance->identifier = declarator_result.leaf;		
 		
 	// If indeed there is an initialiser, call ApplyInitialiser() to over-ride this
 	instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
@@ -757,37 +753,14 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 }
 
 
-TreePtr<Node> VNLangActions::ApplyAccessSpec( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> access )
+void VNLangActions::ApplyAccessSpec( TreePtr<Node> access )
 {
-	// OnInstance() will still try to program the current access. But this fn will override it with the parsed 
-	// access, and then try to update the current access
-	
-	// Overwrite the access spec of the member with the specified access spec
-	if( auto member = TreePtr<CPPTree::Member>::DynamicCast(declaration) )
-		member->access = access; // Don't duplicate the subtree - we want coupling behaviour
-	else
-		throw YY::VNLangParser::syntax_error(
-						any_cast<YY::VNLangParser::location_type>(instance_loc),
-						"access specs not yet supported for "+DiagQuote(Traceable::TypeIdName(*declaration)) );		
+	// OnInstance() will still try to program the current access. But this fn will try to update it.
 
 	// If we're in a record scope, update the stored access spec for future fields to use
 	if( shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop() )	
 		if( auto fspg = dynamic_cast<RecordScopeGnomon *>(spg.get()) ) 	
 			fspg->current_access = access; // Don't duplicate the subtree - we want coupling behaviour
-			
-	return declaration;
-}
-
-
-TreePtr<Node> VNLangActions::ApplyInitialiser( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> init, any init_loc )
-{
-	auto o = TreePtr<CPPTree::Instance>::DynamicCast(declaration);
-	ASSERT(o); // Parser should enforce
-	
-	o->initialiser = init;
-	//FTRACE(init)("\n");
-	
-	return o; 
 }
 
 
@@ -799,21 +772,6 @@ TreePtr<Node> VNLangActions::OnMemberInitialiser( TreePtr<Node> member_id, any m
 	memb_init->initialiser = initialiser;
 	
 	return memb_init;
-}
-
-
-TreePtr<Node> VNLangActions::ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc )
-{
-	auto member = TreePtr<CPPTree::Member>::DynamicCast(instance);
-	if( !member )
-		throw YY::VNLangParser::syntax_error(
-	  		  any_cast<YY::VNLangParser::location_type>(memb_inits_loc),
-			  "Member initialisers given for non-member: "+DiagQuote(Traceable::TypeIdName( *instance )) );		
-	
-	for( TreePtr<Node> memb_init : memb_inits )
-		member->memb_inits.push_back( memb_init );
-
-	return instance;
 }
 
 
@@ -833,20 +791,6 @@ TreePtr<Node> VNLangActions::OnAbDeclType( any loc, const list<QualifierData> &q
 				  any_cast<YY::VNLangParser::location_type>(loc),
 				  "Saw concrete declarator when expecting abstract." );		
 	}
-}
-
-
-TreePtr<Node> VNLangActions::ApplyIdentifier( TreePtr<Node> record, any loc, TreePtr<Node> id )
-{
-	auto r = TreePtr<CPPTree::Record>::DynamicCast(record);
-	ASSERT(r);
-	
-	if( id ) // can be null, ie due to ☆
-		// ASSERT( TreePtr<CPPTree::Identifier>::DynamicCast(id) ); TODO failing, which means we're putting a non-Identifier here sometimes
-	
-	r->identifier = id;
-	
-	return r;
 }
 	
 	

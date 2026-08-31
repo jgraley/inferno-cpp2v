@@ -128,6 +128,13 @@ catch( Unimplemented & )
 }
 
 
+TreePtr<Node> Syntax::OnAccess( TreePtr<Node>, YY::VNLangParser::location_type loc )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " does not expect an access specifier.");	
+}
+
+
 TreePtr<Node> Syntax::OnIdentifier( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
@@ -153,6 +160,20 @@ TreePtr<Node> Syntax::OnType( TreePtr<Node>, YY::VNLangParser::location_type loc
 {
 	throw YY::VNLangParser::syntax_error( loc,
 		MyBestErrName() + " does not expect a type.");	
+}
+
+
+TreePtr<Node> Syntax::OnMemberInits( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " does not expect member initialisers.");	
+}
+
+
+TreePtr<Node> Syntax::OnInitialiser( TreePtr<Node>, YY::VNLangParser::location_type loc )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " does not expect an initialiser.");	
 }
 
 

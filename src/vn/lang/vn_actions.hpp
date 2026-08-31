@@ -63,12 +63,9 @@ public:
 	TreePtr<Node> OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc );	
 	TreePtr<Node> OnEnumerator( any loc, TreePtr<Node> id );
 	TreePtr<Node> OnConstructorDecl( any loc, const list<QualifierData> &quals, TreePtr<Node> id, list<TreePtr<Node>> params );	
-	TreePtr<Node> ApplyAccessSpec( TreePtr<Node> declaration, any loc, TreePtr<Node> access );	
-	TreePtr<Node> ApplyInitialiser( TreePtr<Node> declaration, any instance_loc, TreePtr<Node> init, any init_loc );	
+	void ApplyAccessSpec( TreePtr<Node> access );	
 	TreePtr<Node> OnMemberInitialiser( TreePtr<Node> member_id, any member_loc, TreePtr<Node> initialiser, any initialiser_loc );
-	TreePtr<Node> ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc );	
 	TreePtr<Node> OnAbDeclType( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	
-	TreePtr<Node> ApplyIdentifier( TreePtr<Node> record, any loc, TreePtr<Node> id );
 	shared_ptr<Gnomon> MakeRecordScopeGnomon( TreePtr<Node> record, TreePtr<Node> type );
 	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type, any loc );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified

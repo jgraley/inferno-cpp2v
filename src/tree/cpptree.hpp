@@ -500,6 +500,7 @@ struct MembInitSeq : virtual Node
 	Sequence<MemberInitialiser> memb_inits;
 	
 	list<string> RenderMemberInits( VN::RendererInterface *renderer, Policy policy );	
+	TreePtr<Node> OnMemberInits( list<TreePtr<Node>> memb_inits, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -648,6 +649,10 @@ struct Instance : Declaration,
 	virtual list<string> RenderDeclSpecPost( VN::RendererInterface *renderer, Policy policy );
 	// Extras like member inits come before the initialiser
 	virtual list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy );
+
+	TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnType( TreePtr<Node> type, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnInitialiser( TreePtr<Node> init, YY::VNLangParser::location_type loc ) override;
 };
 
 /// A variable or function with one instance across the entire program. 
@@ -668,7 +673,7 @@ struct Global : Instance
  Constancy differs from that in Global, so we do not try to introduce a common intermediate.
  Note that static members are Global, not Member */
 struct Member : Instance,
-               MembInitSeq
+                MembInitSeq
 {
     NODE_FUNCTIONS_FINAL
     
@@ -678,6 +683,8 @@ struct Member : Instance,
 	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
    	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 	list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy ) override;
+
+	TreePtr<Node> OnAccess( TreePtr<Node> access, YY::VNLangParser::location_type loc ) override;
 };
 
 /// A local variable with automatic allocation

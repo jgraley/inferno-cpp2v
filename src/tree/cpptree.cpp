@@ -918,6 +918,15 @@ list<string> MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Po
     return ls;		    
 }
 
+
+TreePtr<Node> MembInitSeq::OnMemberInits( list<TreePtr<Node>> memb_inits_, YY::VNLangParser::location_type )
+{
+	for( TreePtr<Node> memb_init : memb_inits_ )
+		memb_inits.push_back( memb_init );
+
+	return (TreePtr<Node>)shared_from_this();	
+}
+
 //////////////////////////// Virtuality //////////////////////////////
 
 Syntax::Production Virtuality::GetMyProductionTerminal() const
@@ -1128,6 +1137,28 @@ list<string> Instance::RenderInitPre( VN::RendererInterface *, Policy )
 	return {};
 }
 
+
+TreePtr<Node> Instance::OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type )
+{
+	identifier = id;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+TreePtr<Node> Instance::OnType( TreePtr<Node> type_, YY::VNLangParser::location_type )
+{
+	type = type_;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+TreePtr<Node> Instance::OnInitialiser( TreePtr<Node> init, YY::VNLangParser::location_type )
+{
+	initialiser = init;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
 //////////////////////////// Global //////////////////////////////
 
 list<string> Global::RenderDeclSpecPre( VN::RendererInterface *, Policy policy ) const 
@@ -1184,6 +1215,13 @@ list<string> Member::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy 
 list<string> Member::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
 {
 	return RenderMemberInits(renderer, policy);
+}
+
+
+TreePtr<Node> Member::OnAccess( TreePtr<Node> access_, YY::VNLangParser::location_type )
+{
+	access = access_;
+	return (TreePtr<Node>)shared_from_this();	
 }
 
 //////////////////////////// Enumerator //////////////////////////////
