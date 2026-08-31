@@ -128,21 +128,21 @@ catch( Unimplemented & )
 }
 
 
-TreePtr<Node> Syntax::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> )
+TreePtr<Node> Syntax::OnStmtArgs( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
 		MyBestErrName() + " does not expect arguments.");	
 }
 
 
-TreePtr<Node> Syntax::OnBody( YY::VNLangParser::location_type loc, TreePtr<Node> )
+TreePtr<Node> Syntax::OnBody( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
 		MyBestErrName() + " does not expect a body.");		
 } 
 
 
-TreePtr<Node> Syntax::OnElseBody( YY::VNLangParser::location_type loc, TreePtr<Node> )
+TreePtr<Node> Syntax::OnElseBody( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
 		MyBestErrName() + " cannot be used with an `else' clause.");		

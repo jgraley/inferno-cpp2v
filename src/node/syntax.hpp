@@ -190,9 +190,9 @@ public:
 	virtual YY::VNLangParser::token::token_kind_type GetKeywordToken() const;
 	virtual YY::VNLangParser::token::token_kind_type GetCompleteToken() const;
 	string MyBestErrName() const;
-	virtual TreePtr<Node> OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> );
-	virtual TreePtr<Node> OnBody( YY::VNLangParser::location_type loc, TreePtr<Node> body );
-	virtual TreePtr<Node> OnElseBody( YY::VNLangParser::location_type loc, TreePtr<Node> body );
+	virtual TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc );
+	virtual TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
+	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"

@@ -2323,7 +2323,7 @@ YY::VNLangParser::token::token_kind_type If::GetKeywordToken() const
 }
 
 
-TreePtr<Node> If::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> args ) 
+TreePtr<Node> If::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
@@ -2334,7 +2334,7 @@ TreePtr<Node> If::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<
 }
 
 
-TreePtr<Node> If::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
+TreePtr<Node> If::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type )
 {
 	body = body_;	
 	body_else = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Nop>>();
@@ -2342,7 +2342,7 @@ TreePtr<Node> If::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
 } 
 
 
-TreePtr<Node> If::OnElseBody( YY::VNLangParser::location_type, TreePtr<Node> body )
+TreePtr<Node> If::OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type )
 {
 	body_else = body;	
 	return (TreePtr<Node>)shared_from_this();
@@ -2385,7 +2385,7 @@ YY::VNLangParser::token::token_kind_type While::GetKeywordToken() const
 }
 
 
-TreePtr<Node> While::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> args )
+TreePtr<Node> While::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc )
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
@@ -2396,7 +2396,7 @@ TreePtr<Node> While::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreeP
 }
 
 
-TreePtr<Node> While::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ ) // TODO move up into Breakable, which has a body
+TreePtr<Node> While::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type ) // TODO move up into Breakable, which has a body
 {
 	body = body_;	
 	return (TreePtr<Node>)shared_from_this();
@@ -2432,14 +2432,14 @@ YY::VNLangParser::token::token_kind_type Do::GetKeywordToken() const
 }
 
 
-TreePtr<Node> Do::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
+TreePtr<Node> Do::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type )
 {
 	body = body_;	
 	return (TreePtr<Node>)shared_from_this();
 } 
 
 
-TreePtr<Node> Do::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> args ) 
+TreePtr<Node> Do::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
@@ -2483,7 +2483,7 @@ YY::VNLangParser::token::token_kind_type For::GetKeywordToken() const
 }
 
 
-TreePtr<Node> For::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> args ) 
+TreePtr<Node> For::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
 {
 	if( args.size() != 3 )
 		throw YY::VNLangParser::syntax_error(
@@ -2497,7 +2497,7 @@ TreePtr<Node> For::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr
 }
 
 
-TreePtr<Node> For::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
+TreePtr<Node> For::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type )
 {
 	body = body_;	
 	return (TreePtr<Node>)shared_from_this();
@@ -2533,14 +2533,14 @@ YY::VNLangParser::token::token_kind_type Switch::GetKeywordToken() const
 }
 
 
-TreePtr<Node> Switch::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
+TreePtr<Node> Switch::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type )
 {
 	body = body_;	
 	return (TreePtr<Node>)shared_from_this();
 } 
 
 
-TreePtr<Node> Switch::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> args ) 
+TreePtr<Node> Switch::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
