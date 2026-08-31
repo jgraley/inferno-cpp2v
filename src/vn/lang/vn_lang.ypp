@@ -28,14 +28,7 @@
   struct ANDBlock;
 
   namespace YY {
-    class VNLangScanner;  
-  	struct TokenMetadata
-	{
-		TreePtr<Node> node;
-		string as_ascii;
-		wstring as_unicode;
-		const ANDBlock *as_andata_block;
-	};     	
+    class VNLangScanner;      	
   };
   
   namespace VN { 

@@ -77,19 +77,12 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(wstring text, Y
 
 YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
 {
-	// Where unicode is allowed, ascii is allowed too, so positive checks only
-	YY::TokenMetadata metadata;
-	metadata.as_unicode = text;
-	metadata.as_ascii = ToASCII(text);
-	metadata.as_andata_block = nullptr;
-	metadata.node = nullptr;
-	
 	const ScopeGnomon *scope = nullptr;
 	shared_ptr<const ScopeGnomon> spg = scope_gnomons.TryLockTop();
 	if( spg && dynamic_cast<const NodeNameScopeGnomon *>(spg.get()) )
 		return RecogniseInNodeNameScope(text, ascii, loc);
 	else if( spg && dynamic_cast<const TransformNameScopeGnomon *>(spg.get()) )
-		return RecogniseInTransformNameScope(text, ascii, loc, metadata);				
+		return RecogniseInTransformNameScope(text, ascii, loc);				
 		
 	try	{
 		return RecogniseKeyword( text, ascii, loc );
@@ -169,19 +162,19 @@ YY::VNLangParser::symbol_type VNLangRecogniser::CreateNodeToken(const AvailableN
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const
+YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
 {
 	// Transformations that act on normal scopes (instances, in this case)
 	if( ascii && ToASCII(text)=="TypeOf" )
-		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(metadata.as_ascii, loc);					
+		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(ToASCII(text), loc);					
 
 	// Transformations that act on unified scopes (instances or types, in this case)
 	if( ascii && ToASCII(text)=="DeclarationOf" )
-		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(metadata.as_ascii, loc);
+		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(ToASCII(text), loc);
 
 	// Transformations that act on unified scopes (instances or types, in this case)
 	if( ascii && ToASCII(text)=="TypeDeclarationOf" )
-		return YY::VNLangParser::make_TRANSFORM_NAME_TYPE(metadata.as_ascii, loc);
+		return YY::VNLangParser::make_TRANSFORM_NAME_TYPE(ToASCII(text), loc);
 
 	// In these scopes, there are no designations so we must succeed and can raise an error here if we don#t
 	throw YY::VNLangParser::syntax_error( loc,

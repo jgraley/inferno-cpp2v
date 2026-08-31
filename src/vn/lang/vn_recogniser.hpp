@@ -116,7 +116,7 @@ private:
 	YY::VNLangParser::symbol_type RecogniseInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type CreateBlockToken(const ANDBlock *block, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type CreateNodeToken(const AvailableNodeData::NodeBlock *block, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type RecogniseInTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc, YY::TokenMetadata metadata) const;
+	YY::VNLangParser::symbol_type RecogniseInTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
     YY::VNLangParser::symbol_type RecogniseKeyword(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type RecogniseDesignation(wstring text, YY::VNLangParser::location_type loc) const;
 
