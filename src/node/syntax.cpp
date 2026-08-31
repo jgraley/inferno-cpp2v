@@ -128,10 +128,17 @@ catch( Unimplemented & )
 }
 
 
+TreePtr<Node> Syntax::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " does not expect arguments.");	
+}
+
+
 TreePtr<Node> Syntax::OnBody( YY::VNLangParser::location_type loc, TreePtr<Node> )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " cannot be used with a body.");		
+		MyBestErrName() + " does not expect a body.");		
 } 
 
 

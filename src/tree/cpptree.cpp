@@ -2323,6 +2323,17 @@ YY::VNLangParser::token::token_kind_type If::GetKeywordToken() const
 }
 
 
+TreePtr<Node> If::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> args ) 
+{
+	if( args.size() != 1 )
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " requires 1 argument inside ().");
+	condition = SoloElementOf(args);
+	return (TreePtr<Node>)shared_from_this();
+}
+
+
 TreePtr<Node> If::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
 {
 	body = body_;	
@@ -2374,7 +2385,18 @@ YY::VNLangParser::token::token_kind_type While::GetKeywordToken() const
 }
 
 
-TreePtr<Node> While::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
+TreePtr<Node> While::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> args )
+{
+	if( args.size() != 1 )
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " requires 1 argument inside ().");
+	condition = SoloElementOf(args);
+	return (TreePtr<Node>)shared_from_this();
+}
+
+
+TreePtr<Node> While::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ ) // TODO move up into Breakable, which has a body
 {
 	body = body_;	
 	return (TreePtr<Node>)shared_from_this();
@@ -2416,6 +2438,17 @@ TreePtr<Node> Do::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
 	return (TreePtr<Node>)shared_from_this();
 } 
 
+
+TreePtr<Node> Do::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> args ) 
+{
+	if( args.size() != 1 )
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " requires 1 argument inside ().");
+	condition = SoloElementOf(args);
+	return (TreePtr<Node>)shared_from_this();
+}
+
 //////////////////////////// For ///////////////////////////////
 
 Syntax::Production For::GetMyProductionTerminal() const
@@ -2447,6 +2480,20 @@ string For::GetKeyword( Policy ) const
 YY::VNLangParser::token::token_kind_type For::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_STMT;
+}
+
+
+TreePtr<Node> For::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> args ) 
+{
+	if( args.size() != 3 )
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " requires 3 arguments inside ().");
+	auto it = args.begin();
+	initialisation = *it++;
+	condition = *it++;
+	increment = *it++;
+	return (TreePtr<Node>)shared_from_this();
 }
 
 
@@ -2491,6 +2538,17 @@ TreePtr<Node> Switch::OnBody( YY::VNLangParser::location_type, TreePtr<Node> bod
 	body = body_;	
 	return (TreePtr<Node>)shared_from_this();
 } 
+
+
+TreePtr<Node> Switch::OnStmtArgs( YY::VNLangParser::location_type loc, list<TreePtr<Node>> args ) 
+{
+	if( args.size() != 1 )
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " requires 1 argument inside ().");
+	condition = SoloElementOf(args);
+	return (TreePtr<Node>)shared_from_this();
+}
 
 //////////////////////////// SwitchTarget ///////////////////////////////
 
