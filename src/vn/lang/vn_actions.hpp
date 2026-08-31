@@ -54,9 +54,7 @@ public:
 	TreePtr<Node> OnDefault( any loc );	
 	TreePtr<Node> OnNop( any loc );	
 	TreePtr<Node> OnFuncOnType( string keyword, any keyword_loc, TreePtr<Node> type_arg, any type_arg_loc );
-	
-	TreePtr<Node> OnSpaceSepStmt( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc );
-		
+			
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
 	NodeAndGnomon MakeScopeGnomonForNode( TreePtr<Node> node ) const;

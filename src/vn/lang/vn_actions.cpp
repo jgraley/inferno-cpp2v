@@ -501,25 +501,6 @@ TreePtr<Node> VNLangActions::OnFuncOnType( string keyword, any keyword_loc, Tree
 }
 
 
-TreePtr<Node> VNLangActions::OnSpaceSepStmt( string keyword, any keyword_loc, TreePtr<Node> operand, any operand_loc )
-{
-	if( keyword=="return" )
-	{
-		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Return>>();
-		ret->return_value = operand;
-		return ret;
-	}
-	else if( keyword=="goto" )
-	{
-		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Goto>>();
-		ret->destination = operand;		
-		return ret;
-	}
-	
-	ASSERTFAIL(); // internal error: parser should not call this unless recogniser produced SPACE_SEP_STMT_KEYWORD		
-}
-
-
 TreePtr<Node> VNLangActions::OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params )
 {
 	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Function>>();

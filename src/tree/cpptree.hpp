@@ -1412,6 +1412,7 @@ struct Return : Statement
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
+	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -1431,6 +1432,7 @@ struct Goto : Statement, Uncombable
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
+	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };
 
 

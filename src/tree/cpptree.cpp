@@ -2236,6 +2236,17 @@ YY::VNLangParser::token::token_kind_type Return::GetKeywordToken() const
 	return YY::VNLangParser::token::TOK_KEYWORD_SPACE_SEP_STMT;
 }
 
+
+TreePtr<Node> Return::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+{
+	if( args.size() != 1 )
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " requires 1 argument inside ().");
+	return_value = SoloElementOf(args);
+	return (TreePtr<Node>)shared_from_this();
+}
+
 //////////////////////////// Goto ///////////////////////////////
 
 Syntax::Production Goto::GetMyProductionTerminal() const
@@ -2282,6 +2293,17 @@ string Goto::GetKeyword( Policy ) const
 YY::VNLangParser::token::token_kind_type Goto::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_SPACE_SEP_STMT;
+}
+
+
+TreePtr<Node> Goto::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+{
+	if( args.size() != 1 )
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " requires 1 argument inside ().");
+	destination = SoloElementOf(args);
+	return (TreePtr<Node>)shared_from_this();
 }
 
 //////////////////////////// If ///////////////////////////////

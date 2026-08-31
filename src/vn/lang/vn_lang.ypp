@@ -629,8 +629,8 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); }
 			| DEFAULT_KEYWORD ':'											{ $$ = vn->OnDefault(@$); } 
 			| expr_prefix ':' 			 									{ $$ = vn->OnLabel($1, @1); } 
 
-statement_nl: bare_statement ';'											{ $$ = $1; }      
-			| expr_entry ';'												{ $$ = $1; } // TODO Should come in under bare_statement but conflicts
+statement_nl: bare_statement ';'										
+			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts
 // #899		| explicit_norm_node '(' semicolon_args ')' stmt_comp			{ $$ = $1->OnStmtArgs($3, @3); 
 //                                                                            $$ = $$->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp		{ $$ = $1->OnStmtArgs($3, @3); 
@@ -645,8 +645,8 @@ statement_nl: bare_statement ';'											{ $$ = $1; }
 			                                                                  $$ = $$->OnBody($5, @5); 
 			                                                                  $$ = $$->OnElseBody($7, @6); }
 
-bare_statement	: KEYWORD_SIMPLE_STMT										{ $$ = $1; }
-				| KEYWORD_SPACE_SEP_STMT expr_entry							{ $$ = vn->OnSpaceSepStmt($1->GetKeyword(Syntax::Policy()), @1, $2, @2); }
+bare_statement	: KEYWORD_SIMPLE_STMT										
+				| KEYWORD_SPACE_SEP_STMT expr_entry							{ $$ = $1->OnStmtArgs({$2}, @2); }
 				| DO_KEYWORD stmt_comp WHILE_KEYWORD '(' stmt_boot ')' 		{ $$ = $1->OnBody($2, @2); 
                                                                               $$ = $$->OnStmtArgs({$5}, @5); } // TODO a While node is gobbled up here
 
