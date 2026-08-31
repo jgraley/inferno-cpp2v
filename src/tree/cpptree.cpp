@@ -2322,9 +2322,16 @@ YY::VNLangParser::token::token_kind_type If::GetKeywordToken() const
 }
 
 
-TreePtr<Node> If::OnElseClause( YY::VNLangParser::location_type, TreePtr<Node> body_else_ )
+TreePtr<Node> If::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
 {
-	body_else = body_else_;	
+	body = body_;	
+	return (TreePtr<Node>)shared_from_this();
+} 
+
+
+TreePtr<Node> If::OnElseBody( YY::VNLangParser::location_type, TreePtr<Node> body )
+{
+	body_else = body;	
 	return (TreePtr<Node>)shared_from_this();
 } 
 
@@ -2426,6 +2433,13 @@ YY::VNLangParser::token::token_kind_type For::GetKeywordToken() const
 	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_STMT;
 }
 
+
+TreePtr<Node> For::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
+{
+	body = body_;	
+	return (TreePtr<Node>)shared_from_this();
+} 
+
 //////////////////////////// Switch ///////////////////////////////
 
 Syntax::Production Switch::GetMyProductionTerminal() const
@@ -2454,6 +2468,13 @@ YY::VNLangParser::token::token_kind_type Switch::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_STMT;
 }
+
+
+TreePtr<Node> Switch::OnBody( YY::VNLangParser::location_type, TreePtr<Node> body_ )
+{
+	body = body_;	
+	return (TreePtr<Node>)shared_from_this();
+} 
 
 //////////////////////////// SwitchTarget ///////////////////////////////
 

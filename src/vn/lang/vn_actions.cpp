@@ -531,7 +531,7 @@ TreePtr<Node> VNLangActions::OnArgsBodyStmt( string keyword, any keyword_loc, li
 				
 		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Switch>>();
 		ret->condition = args.front();
-		ret->body = body;
+		ret->body = MakeTreeNode<StandardAgentWrapper<CPPTree::Nop>>();;
 		return ret;
 	}
 	else if( keyword=="for" )
@@ -546,7 +546,7 @@ TreePtr<Node> VNLangActions::OnArgsBodyStmt( string keyword, any keyword_loc, li
 		ret->initialisation = *it++;
 		ret->condition = *it++;
 		ret->increment = *it++;
-		ret->body = body;
+		ret->body = MakeTreeNode<StandardAgentWrapper<CPPTree::Nop>>();;
 		return ret;
 	}
 	
@@ -569,8 +569,8 @@ TreePtr<Node> VNLangActions::OnArgsBodyWithElseStmt( string keyword, any keyword
 				
 		auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::If>>();
 		ret->condition = args.front();
-		ret->body = body;		
-		ret->body_else = MakeTreeNode<StandardAgentWrapper<CPPTree::Nop>>();;
+		ret->body = MakeTreeNode<StandardAgentWrapper<CPPTree::Nop>>();
+		ret->body_else = MakeTreeNode<StandardAgentWrapper<CPPTree::Nop>>();
 				
 		return ret;
 	}

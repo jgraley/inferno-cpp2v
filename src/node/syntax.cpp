@@ -128,7 +128,14 @@ catch( Unimplemented & )
 }
 
 
-TreePtr<Node> Syntax::OnElseClause( YY::VNLangParser::location_type loc, TreePtr<Node> )
+TreePtr<Node> Syntax::OnBody( YY::VNLangParser::location_type loc, TreePtr<Node> )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " cannot be used with a body.");		
+} 
+
+
+TreePtr<Node> Syntax::OnElseBody( YY::VNLangParser::location_type loc, TreePtr<Node> )
 {
 	throw YY::VNLangParser::syntax_error( loc,
 		MyBestErrName() + " cannot be used with an `else' clause.");		
