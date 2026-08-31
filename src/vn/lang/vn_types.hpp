@@ -33,9 +33,7 @@ struct Itemisation
 class Gnomon : public Traceable
 {
 public:
-	virtual ~Gnomon()
-	{ 
-	}
+	virtual ~Gnomon();
 };
 
 
@@ -46,70 +44,67 @@ public:
 };
 
 
-class ParameterisationScopeGnomon : public ScopeGnomon
+class DeclScopeGnomon : public ScopeGnomon
 {
 public:	
-	string GetMessageText() const final
-	{
-		return "parameters scope";
-	}
+	virtual TreePtr<Node> GetDeclarationNode(any loc) const = 0;
 };
 
-class RecordScopeGnomon : public ScopeGnomon
+
+class ParameterisationScopeGnomon : public DeclScopeGnomon
 {
 public:	
-	RecordScopeGnomon( TreePtr<Node> initial_access, TreePtr<Node> record_type_ ) :
-		current_access( initial_access ),
-		record_type( record_type_ ) {}
-	string GetMessageText() const final
-	{
-		return "record scope";
-	}
+	string GetMessageText() const final;
+	TreePtr<Node> GetDeclarationNode(any loc) const override;
+};
+
+
+class RecordScopeGnomon : public DeclScopeGnomon
+{
+public:	
+	RecordScopeGnomon( TreePtr<Node> initial_access, TreePtr<Node> record_type_ );
+	string GetMessageText() const final;
+	TreePtr<Node> GetDeclarationNode(any loc) const override;
+
 	TreePtr<Node> current_access; // changes as we parse the scope
 	TreePtr<Node> record_type;
 };
 
 
-class CodeUnitScopeGnomon : public ScopeGnomon
+class CodeUnitScopeGnomon : public DeclScopeGnomon
 {
 public:	
-	string GetMessageText() const final
-	{
-		return "global scope";
-	}
+	string GetMessageText() const final;
+	TreePtr<Node> GetDeclarationNode(any loc) const override;
 };
 
 
-class CompoundScopeGnomon : public ScopeGnomon
+class CompoundScopeGnomon : public DeclScopeGnomon
 {
 public:	
-	string GetMessageText() const final
-	{
-		return "local scope";
-	}
+	string GetMessageText() const final;
+	TreePtr<Node> GetDeclarationNode(any loc) const override;	
 };
 
-class UnknownScopeGnomon : public ScopeGnomon
+
+class UnknownScopeGnomon : public DeclScopeGnomon
 {
 public:	
-	UnknownScopeGnomon(string reason_) :
-		reason( reason_ ) {}
-	string GetMessageText() const final
-	{
-		return "local scope";
-	}
+	UnknownScopeGnomon(string reason_);
+	string GetMessageText() const final;
+	TreePtr<Node> GetDeclarationNode(any loc) const override;
+
 	const string reason;
 };
 
-class PrerestrictScopeGnomon : public ScopeGnomon
+
+class PrerestrictScopeGnomon : public DeclScopeGnomon
 {
 public:	
-	PrerestrictScopeGnomon( TreePtr<Node> node_ ) :
-		node(node_) {}
-	string GetMessageText() const final
-	{
-		return "prerestrict scope";
-	}
+	PrerestrictScopeGnomon( TreePtr<Node> node_ );
+	string GetMessageText() const final;
+	TreePtr<Node> GetDeclarationNode(any loc) const override;
+
 	TreePtr<Node> node;
 };
 
