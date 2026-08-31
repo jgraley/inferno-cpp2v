@@ -93,7 +93,7 @@ optional<NodeTag> AvailableNodeData::TryGetByKeywordIfToken( string keyword ) co
     for( auto it = it_begin; it != it_end; ++it ) try 
     {
 		NodeTag tag = it->second;
-		(void)tag_to_node_map.at(tag)->GetToken(); // throws if no token
+		(void)tag_to_node_map.at(tag)->GetKeywordToken(); // throws if no token
 		found.insert( tag );
 	} catch( Syntax::UnimplementedToken & ) {}
 								

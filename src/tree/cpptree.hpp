@@ -39,8 +39,8 @@ struct Qualifier : Property
 	// when nothing is given in the syntax (note: intermediates are always wildcards)
 	virtual TreePtr<Node> GetDefaultNode(TreePtr<Node>) const { ASSERTFAIL(); }
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
-	YY::VNLangParser::token::token_kind_type GetToken() const override;
-	YY::VNLangParser::token::token_kind_type GetResolvedToken() const override;
+	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
+	YY::VNLangParser::token::token_kind_type GetCompleteToken() const override;
 };
 
 
@@ -105,7 +105,7 @@ struct Type : virtual Node
 
     // Render a simple type only, no declarators
 	virtual string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy );    
-	virtual YY::VNLangParser::token::token_kind_type GetResolvedToken() const;
+	virtual YY::VNLangParser::token::token_kind_type GetCompleteToken() const;
 };
 
 
@@ -119,7 +119,7 @@ struct Declaration : virtual Node
     virtual string GetColour() const { return "/set28/1"; }
 	virtual bool ShouldSplitInstance( Policy policy ) const;
 	virtual list<string> ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bool force, VN::RendererInterface *renderer, Policy policy ) const;
-	virtual YY::VNLangParser::token::token_kind_type GetResolvedToken() const;
+	virtual YY::VNLangParser::token::token_kind_type GetCompleteToken() const;
 };
 
 
@@ -451,7 +451,7 @@ struct BoolLiteral : Literal
 	NODE_FUNCTIONS 
 	string GetRender( VN::RendererInterface *, Production, Policy ) override;
 	Production GetMyProductionTerminal() const override;
-	YY::VNLangParser::token::token_kind_type GetToken() const override;
+	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 
@@ -487,7 +487,7 @@ struct MemberInitialiser : Statement // TODO not a Statement, just virtual Node 
 
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
-	YY::VNLangParser::token::token_kind_type GetResolvedToken() const override;
+	YY::VNLangParser::token::token_kind_type GetCompleteToken() const override;
 };
 
 
@@ -777,7 +777,7 @@ struct LabelDeclaration : Declaration, //TODO commonize with Case and Default
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
-	virtual YY::VNLangParser::token::token_kind_type GetResolvedToken() const;
+	virtual YY::VNLangParser::token::token_kind_type GetCompleteToken() const;
 };
 
 //////////////////////////// Built-in Types ////////////////////////////
@@ -929,7 +929,7 @@ struct Void : Type
 
 	Production GetMyProductionTerminal() const override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 /// Boolean type. 
@@ -943,7 +943,7 @@ struct Boolean : Type
 	
 	Production GetMyProductionTerminal() const override;	
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 /// Intermediate for any type that represents a number that you can eg add and subtract. 
@@ -1048,7 +1048,7 @@ struct Typedef : TypeDeclaration
 
 	Production GetMyProductionTerminal() const override;	    
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
-	YY::VNLangParser::token::token_kind_type GetToken() const override;
+	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 }; 
 
 /// Intermediate for declaration of a struct, class, union or enum. 
@@ -1087,7 +1087,7 @@ struct Enumeration : Record
 	void InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const override;
     string GetKeyword( Policy ) const override;
 	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	
-	YY::VNLangParser::token::token_kind_type GetToken() const override;	
+	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;	
 };
 
 /// A record that can inherit from other records and be inherited from. 
@@ -1099,7 +1099,7 @@ struct InheritanceRecord : Record
     Collection<Base> bases; ///< contains the InheritanceRecords from which we inherit   
 
     string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy) override;
-	YY::VNLangParser::token::token_kind_type GetToken() const override;
+	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 /// Struct as per InheritanceRecord
@@ -1226,7 +1226,7 @@ struct This : Operator
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRenderTerminal( Production ) const final;
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 /// Property indicating whether a New/Delete is global 
@@ -1344,7 +1344,7 @@ struct FuncOnType : Expression
 
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
-	YY::VNLangParser::token::token_kind_type GetToken() const override;
+	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 /// sizeof() a type
@@ -1411,7 +1411,7 @@ struct Return : Statement
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 
@@ -1430,7 +1430,7 @@ struct Goto : Statement, Uncombable
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 
@@ -1445,8 +1445,8 @@ struct If : Statement
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
-	TreePtr<Node> OnElseClause( any else_loc, TreePtr<Node> body_else ) override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
+	TreePtr<Node> OnElseClause( YY::VNLangParser::location_type loc, TreePtr<Node> body_else ) override;
 };
 
 
@@ -1480,7 +1480,7 @@ struct While : Loop, Uncombable
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 
@@ -1493,7 +1493,7 @@ struct Do : Loop, Uncombable // a do..while() construct
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 
@@ -1511,7 +1511,7 @@ struct For : Loop
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 
@@ -1528,7 +1528,7 @@ struct Switch : Breakable
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 
@@ -1552,7 +1552,7 @@ struct RangeCase : SwitchTarget
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
     // We don't have a token but Case does. TryGetByKeywordIfToken() 
-    // will find Case because it requires a GetToken() that succeeds.
+    // will find Case because it requires a GetKeywordToken() that succeeds.
 }; 
 
 
@@ -1564,7 +1564,7 @@ struct Case : SwitchTarget
 
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 
@@ -1575,7 +1575,7 @@ struct Default : SwitchTarget
 	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 
@@ -1587,7 +1587,7 @@ struct Continue : Statement, Uncombable
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 
@@ -1599,7 +1599,7 @@ struct Break : Statement
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetToken() const override;
+   	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 };
 
 

@@ -106,13 +106,13 @@ string Syntax::RenderNodeTypeName() const
 }
 
 
-YY::VNLangParser::token::token_kind_type Syntax::GetToken() const
+YY::VNLangParser::token::token_kind_type Syntax::GetKeywordToken() const
 {
 	throw UnimplementedToken();
 }
 
 
-YY::VNLangParser::token::token_kind_type Syntax::GetResolvedToken() const
+YY::VNLangParser::token::token_kind_type Syntax::GetCompleteToken() const
 {
 	return YY::VNLangParser::token::TOK_RESOLVED_NORMAL;
 }
@@ -128,9 +128,8 @@ catch( Unimplemented & )
 }
 
 
-TreePtr<Node> Syntax::OnElseClause( any else_loc, TreePtr<Node> )
+TreePtr<Node> Syntax::OnElseClause( YY::VNLangParser::location_type loc, TreePtr<Node> )
 {
-	throw YY::VNLangParser::syntax_error(
-		any_cast<YY::VNLangParser::location_type>(else_loc),
+	throw YY::VNLangParser::syntax_error( loc,
 		MyBestErrName() + " cannot be used with an `else' clause.");		
 } 

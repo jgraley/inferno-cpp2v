@@ -45,13 +45,13 @@ string Qualifier::GetRender( VN::RendererInterface *, Production, Policy policy 
 }
 
 
-YY::VNLangParser::token::token_kind_type Qualifier::GetToken() const
+YY::VNLangParser::token::token_kind_type Qualifier::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_QUAL_NODE_KEYWORD;
 }
 
 
-YY::VNLangParser::token::token_kind_type Qualifier::GetResolvedToken() const
+YY::VNLangParser::token::token_kind_type Qualifier::GetCompleteToken() const
 {
 	return YY::VNLangParser::token::TOK_RESOLVED_QUAL;
 }
@@ -131,7 +131,7 @@ string Type::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 }
 
 
-YY::VNLangParser::token::token_kind_type Type::GetResolvedToken() const
+YY::VNLangParser::token::token_kind_type Type::GetCompleteToken() const
 {
 	return YY::VNLangParser::token::TOK_RESOLVED_TYPE;
 }
@@ -173,7 +173,7 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 }
 
 
-YY::VNLangParser::token::token_kind_type Declaration::GetResolvedToken() const
+YY::VNLangParser::token::token_kind_type Declaration::GetCompleteToken() const
 {
 	return YY::VNLangParser::token::TOK_RESOLVED_DECL;
 }
@@ -842,7 +842,7 @@ Syntax::Production BoolLiteral::GetMyProductionTerminal() const
 }
 
 
-YY::VNLangParser::token::token_kind_type BoolLiteral::GetToken() const
+YY::VNLangParser::token::token_kind_type BoolLiteral::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_BOOL_LITERAL;
 }
@@ -885,7 +885,7 @@ string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production
 }
 
 
-YY::VNLangParser::token::token_kind_type MemberInitialiser::GetResolvedToken() const
+YY::VNLangParser::token::token_kind_type MemberInitialiser::GetCompleteToken() const
 {
 	return YY::VNLangParser::token::TOK_RESOLVED_MEMB_INIT;
 }
@@ -1271,9 +1271,9 @@ string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production,
 }
 
 
-YY::VNLangParser::token::token_kind_type LabelDeclaration::GetResolvedToken() const
+YY::VNLangParser::token::token_kind_type LabelDeclaration::GetCompleteToken() const
 {
-	// LabelDeclaration parses more like a statemant etc so override Declaration::GetResolvedToken()
+	// LabelDeclaration parses more like a statemant etc so override Declaration::GetCompleteToken()
 	return YY::VNLangParser::token::TOK_RESOLVED_NORMAL;
 }
 
@@ -1480,7 +1480,7 @@ string Void::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type Void::GetToken() const
+YY::VNLangParser::token::token_kind_type Void::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_TYPE_KEYWORD;
 }
@@ -1499,7 +1499,7 @@ string Boolean::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type Boolean::GetToken() const
+YY::VNLangParser::token::token_kind_type Boolean::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_TYPE_KEYWORD;
 }
@@ -1701,7 +1701,7 @@ string Typedef::GetRender( VN::RendererInterface *renderer, Production, Policy p
 }
 
 
-YY::VNLangParser::token::token_kind_type Typedef::GetToken() const
+YY::VNLangParser::token::token_kind_type Typedef::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_TYPEDEF_KEYWORD;
 }
@@ -1779,7 +1779,7 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 
 //////////////////////////// Union ///////////////////////////////
 
-YY::VNLangParser::token::token_kind_type InheritanceRecord::GetToken() const
+YY::VNLangParser::token::token_kind_type InheritanceRecord::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_IRECORD_KEYWORD;
 }
@@ -1822,7 +1822,7 @@ string Enumeration::RenderBody( VN::RendererInterface *renderer, Policy policy )
 }
 
 
-YY::VNLangParser::token::token_kind_type Enumeration::GetToken() const
+YY::VNLangParser::token::token_kind_type Enumeration::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_ENUM_KEYWORD;
 }
@@ -1994,7 +1994,7 @@ string This::GetRenderTerminal( Production ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type This::GetToken() const
+YY::VNLangParser::token::token_kind_type This::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_PRIMARY_OP;
 }
@@ -2134,7 +2134,7 @@ string FuncOnType::GetRender( VN::RendererInterface *renderer, Production, Polic
 }
 
 
-YY::VNLangParser::token::token_kind_type FuncOnType::GetToken() const
+YY::VNLangParser::token::token_kind_type FuncOnType::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_FUNC_ON_TYPE;
 }
@@ -2230,7 +2230,7 @@ string Return::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type Return::GetToken() const
+YY::VNLangParser::token::token_kind_type Return::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_SPACE_SEP_STMT;
 }
@@ -2278,7 +2278,7 @@ string Goto::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type Goto::GetToken() const
+YY::VNLangParser::token::token_kind_type Goto::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_SPACE_SEP_STMT;
 }
@@ -2316,13 +2316,13 @@ string If::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type If::GetToken() const
+YY::VNLangParser::token::token_kind_type If::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_WITH_ELSE;
 }
 
 
-TreePtr<Node> If::OnElseClause( any, TreePtr<Node> body_else_ )
+TreePtr<Node> If::OnElseClause( YY::VNLangParser::location_type, TreePtr<Node> body_else_ )
 {
 	body_else = body_else_;	
 	return (TreePtr<Node>)shared_from_this();
@@ -2359,7 +2359,7 @@ string While::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type While::GetToken() const
+YY::VNLangParser::token::token_kind_type While::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_WHILE_KEYWORD;
 }
@@ -2388,7 +2388,7 @@ string Do::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type Do::GetToken() const
+YY::VNLangParser::token::token_kind_type Do::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_DO_KEYWORD;
 }
@@ -2421,7 +2421,7 @@ string For::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type For::GetToken() const
+YY::VNLangParser::token::token_kind_type For::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_STMT;
 }
@@ -2450,7 +2450,7 @@ string Switch::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type Switch::GetToken() const
+YY::VNLangParser::token::token_kind_type Switch::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_STMT;
 }
@@ -2496,7 +2496,7 @@ string Case::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type Case::GetToken() const
+YY::VNLangParser::token::token_kind_type Case::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_CASE_KEYWORD;
 }
@@ -2516,7 +2516,7 @@ string Default::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type Default::GetToken() const
+YY::VNLangParser::token::token_kind_type Default::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_DEFAULT_KEYWORD;
 }
@@ -2541,7 +2541,7 @@ string Continue::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type Continue::GetToken() const
+YY::VNLangParser::token::token_kind_type Continue::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }
@@ -2566,7 +2566,7 @@ string Break::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type Break::GetToken() const
+YY::VNLangParser::token::token_kind_type Break::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }

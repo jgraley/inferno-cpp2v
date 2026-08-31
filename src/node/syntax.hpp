@@ -187,10 +187,10 @@ public:
     static string::size_type GetLineBreakThreshold();
     virtual string GetKeyword( Policy policy ) const;    
 	string RenderNodeTypeName() const; 
-	virtual YY::VNLangParser::token::token_kind_type GetToken() const;
-	virtual YY::VNLangParser::token::token_kind_type GetResolvedToken() const;
+	virtual YY::VNLangParser::token::token_kind_type GetKeywordToken() const;
+	virtual YY::VNLangParser::token::token_kind_type GetCompleteToken() const;
 	string MyBestErrName() const;
-	virtual TreePtr<Node> OnElseClause( any else_loc, TreePtr<Node> body_else );
+	virtual TreePtr<Node> OnElseClause( YY::VNLangParser::location_type loc, TreePtr<Node> body_else );
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"

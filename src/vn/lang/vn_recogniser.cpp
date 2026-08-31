@@ -157,7 +157,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::CreateNodeToken(const AvailableN
 {
 	ASSERT(block->tag)("NodeBlock ")(*block)(" has no tag, so cannot create a node from it");
 	TreePtr<Node> node = MakeStandardAgent(block->tag.value());
-	YY::VNLangParser::token::token_kind_type token_kind = node->GetResolvedToken();		
+	YY::VNLangParser::token::token_kind_type token_kind = node->GetCompleteToken();		
 	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
 }
 
@@ -193,7 +193,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 	if( !tag )
 		throw Unrecognised();
 	TreePtr<Node> node = MakeStandardAgent(tag.value());
-	return YY::VNLangParser::symbol_type( node->GetToken(), std::move(node), std::move(loc) );
+	return YY::VNLangParser::symbol_type( node->GetKeywordToken(), std::move(node), std::move(loc) );
 }
 
 
