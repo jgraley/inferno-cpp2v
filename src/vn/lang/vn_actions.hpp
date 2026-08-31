@@ -68,10 +68,8 @@ public:
 	TreePtr<Node> OnMemberInitialiser( TreePtr<Node> member_id, any member_loc, TreePtr<Node> initialiser, any initialiser_loc );
 	TreePtr<Node> ApplyMemberInits( TreePtr<Node> instance, any instance_loc, list<TreePtr<Node>> memb_inits, any memb_inits_loc );	
 	TreePtr<Node> OnAbDeclType( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	
-	TreePtr<Node> StartRecord( any loc, string keyword );
 	TreePtr<Node> ApplyIdentifier( TreePtr<Node> record, any loc, TreePtr<Node> id );
 	shared_ptr<Gnomon> MakeRecordScopeGnomon( TreePtr<Node> record, TreePtr<Node> type );
-	TreePtr<Node> FinishRecord( any loc, TreePtr<Node> node, list<TreePtr<Node>> bases, list<TreePtr<Node>> members );	
 	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type, any loc );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified
 	Declarators::CVQuals OnCVQuals( const list<QualifierData> &quals, bool nice=false );

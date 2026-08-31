@@ -190,6 +190,9 @@ public:
 	virtual YY::VNLangParser::token::token_kind_type GetKeywordToken() const;
 	virtual YY::VNLangParser::token::token_kind_type GetCompleteToken() const;
 	string MyBestErrName() const;
+	virtual TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type loc );
+	virtual TreePtr<Node> OnBases( list<TreePtr<Node>> bases, YY::VNLangParser::location_type loc );
+	virtual TreePtr<Node> OnMembers( list<TreePtr<Node>> members, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );

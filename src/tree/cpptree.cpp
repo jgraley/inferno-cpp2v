@@ -181,6 +181,13 @@ YY::VNLangParser::token::token_kind_type Declaration::GetCompleteToken() const
 
 //////////////////////////// DeclScope ///////////////////////////////
 
+TreePtr<Node> DeclScope::OnMembers( list<TreePtr<Node>> members_, YY::VNLangParser::location_type ) 
+{
+	for( TreePtr<Node> member : members_ )
+		members.insert( member );				
+	return (TreePtr<Node>)shared_from_this();	
+}
+
 //////////////////////////// CodeUnit ///////////////////////////////
 
 Syntax::Production CodeUnit::GetMyProductionTerminal() const
@@ -1677,6 +1684,14 @@ string Labeley::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 	return "void *"; 
 }
 
+//////////////////////////// TypeDeclaration ///////////////////////////////
+
+TreePtr<Node> TypeDeclaration::OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type )
+{
+	identifier = id;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
 //////////////////////////// Typedef ///////////////////////////////
 
 Syntax::Production Typedef::GetMyProductionTerminal() const
@@ -1840,6 +1855,14 @@ string InheritanceRecord::RenderExtras(VN::RendererInterface *renderer, Producti
 		return "";
 	else
 		return " : " + Join( ls, ", ", "", "" );
+}
+
+
+TreePtr<Node> InheritanceRecord::OnBases( list<TreePtr<Node>> bases_, YY::VNLangParser::location_type ) 
+{
+	for( TreePtr<Node> base : bases_ )
+		bases.insert( base );				
+	return (TreePtr<Node>)shared_from_this();	
 }
 
 //////////////////////////// Struct ///////////////////////////////

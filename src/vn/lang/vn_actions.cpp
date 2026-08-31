@@ -827,24 +827,6 @@ TreePtr<Node> VNLangActions::OnAbDeclType( any loc, const list<QualifierData> &q
 }
 
 
-TreePtr<Node> VNLangActions::StartRecord( any loc, string keyword )
-{
-	TreePtr<CPPTree::InheritanceRecord> node;
-	if( keyword=="class" )
-		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Class>>();
-	else if( keyword=="struct" )
-		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Struct>>();
-	else if( keyword=="union" )
-		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Union>>();
-	else if( keyword=="enum" )
-		node = MakeTreeNode<StandardAgentWrapper<CPPTree::Enumeration>>();
-	else
-		ASSERTFAIL()
-	
-	return node;
-}
-
-
 TreePtr<Node> VNLangActions::ApplyIdentifier( TreePtr<Node> record, any loc, TreePtr<Node> id )
 {
 	auto r = TreePtr<CPPTree::Record>::DynamicCast(record);
@@ -865,22 +847,6 @@ shared_ptr<Gnomon> VNLangActions::MakeRecordScopeGnomon( TreePtr<Node> record, T
 	ASSERT(r);
 	
 	return make_shared<RecordScopeGnomon>(r->GetInitialAccess(), type);
-}
-
-
-TreePtr<Node> VNLangActions::FinishRecord( any loc, TreePtr<Node> node, list<TreePtr<Node>> bases, list<TreePtr<Node>> members )
-{
-	auto r = TreePtr<CPPTree::Record>::DynamicCast(node);
-	ASSERT(r);
-	
-	if( auto ir = TreePtr<CPPTree::InheritanceRecord>::DynamicCast(r) )
-		for( TreePtr<Node> base : bases )
-			ir->bases.insert( base );				
-	
-	for( TreePtr<Node> member : members )
-		r->members.insert( member );		
-	
-	return r;
 }
 
 

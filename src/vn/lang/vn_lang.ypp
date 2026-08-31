@@ -482,17 +482,18 @@ parameter   : decl_entry
                          
 //////////////////////////////// CLASSES ////////////////////////////////////                                  
                          
-inheritance_record	: irecord_scope '{' members '}'			 				{ $$ = vn->FinishRecord( @$, $1.node, {}, $3 ); }
-					| irecord_scope ':' bases '{' members '}'				{ $$ = vn->FinishRecord( @$, $1.node, $3, $5 ); }
-					| irecord_scope '{' '}'			 						{ $$ = vn->FinishRecord( @$, $1.node, {}, {} ); }
-					| irecord_scope ':' bases '{' '}'						{ $$ = vn->FinishRecord( @$, $1.node, $3, {} ); }
+inheritance_record	: irecord_scope '{' members '}'			 				{ $$ = $1.node->OnMembers($3, @3); }
+					| irecord_scope ':' bases '{' members '}'				{ $$ = $1.node->OnBases($3, @3); 
+					                                                          $$ = $$->OnMembers($5, @5); }
+					| irecord_scope '{' '}'			 						{ $$ = $1.node; }
+					| irecord_scope ':' bases '{' '}'						{ $$ = $1.node->OnBases($3, @3); }
              
-irecord_scope   : irecord_node type_specified        						{ $$ = { vn->ApplyIdentifier($1, @2, $2), 
+irecord_scope   : irecord_node type_specified        						{ $$ = { $1->OnIdentifier($2, @2),  
 																		             vn->MakeRecordScopeGnomon($1, $2) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
-irecord_node	: IRECORD_KEYWORD											{ $$ = vn->StartRecord(@$, $1->GetKeyword(Syntax::Policy())); }
-		 		| explicit_decl_node										{ $$ = $1; } 
+irecord_node	: IRECORD_KEYWORD											
+		 		| explicit_decl_node										
                                                   
 bases			: base_spec                                                 { $$.push_back($1); } 
 				| bases ',' base_spec										{ $$ = $1; $$.push_back($3); } 
@@ -561,15 +562,15 @@ acc_memb_primary: qualifier_node // Gets us the access specs
 
 //////////////////////////////// ENUMERATIONS ////////////////////////////////////                                  
                          
-enum			: enum_scope '{' enumerators '}'		 					{ $$ = vn->FinishRecord( @$, $1.node, {}, $3 ); }
-				| enum_scope '{' '}'		 								{ $$ = vn->FinishRecord( @$, $1.node, {}, {} ); }
+enum			: enum_scope '{' enumerators '}'		 					{ $$ = $1.node->OnMembers( $3, @3 ); }
+				| enum_scope '{' '}'		 								{ $$ = $1.node; }
              
-enum_scope      : enum_node type_specified       							{ $$ = { vn->ApplyIdentifier($1, @2, $2), 
+enum_scope      : enum_node type_specified       							{ $$ = { $1->OnIdentifier($2, @2), 
 																		             vn->MakeRecordScopeGnomon($1, $2) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
-enum_node		: ENUM_KEYWORD												{ $$ = vn->StartRecord(@$, $1->GetKeyword(Syntax::Policy())); }
-//		 		| explicit_decl_node										{ $$ = $1; } // TODO bring back explicit support but differentiate
+enum_node		: ENUM_KEYWORD												
+//		 		| explicit_decl_node										// TODO bring back explicit support but differentiate
                                                                                                                                                        
 enumerators		: enumerator												{ $$.push_back($1); }
 				| enumerators ',' enumerator 								{ $$ = $1; $$.push_back($3); }

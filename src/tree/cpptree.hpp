@@ -138,6 +138,7 @@ struct DeclScope : virtual Scope
 {
     NODE_FUNCTIONS
     Collection<Declaration> members; /// The declarations in this scope    
+	TreePtr<Node> OnMembers( list<TreePtr<Node>> members, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -1036,6 +1037,7 @@ struct TypeDeclaration : Declaration
     NODE_FUNCTIONS
     TreePtr<TypeIdentifier> identifier; ///< The handle to the type that has been declared
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
+	TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type loc ) override;
 };
 
 /// Represents a typedef. 
@@ -1100,6 +1102,7 @@ struct InheritanceRecord : Record
 
     string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy) override;
 	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
+	TreePtr<Node> OnBases( list<TreePtr<Node>> bases, YY::VNLangParser::location_type loc ) override;
 };
 
 /// Struct as per InheritanceRecord

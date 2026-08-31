@@ -128,6 +128,27 @@ catch( Unimplemented & )
 }
 
 
+TreePtr<Node> Syntax::OnIdentifier( TreePtr<Node>, YY::VNLangParser::location_type loc )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " does not expect an identifier.");	
+}
+
+
+TreePtr<Node> Syntax::OnBases( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " does not expect base classes.");	
+}
+
+
+TreePtr<Node> Syntax::OnMembers( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " does not expect members.");	
+}
+
+
 TreePtr<Node> Syntax::OnStmtArgs( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
