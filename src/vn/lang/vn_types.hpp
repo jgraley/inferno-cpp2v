@@ -41,69 +41,74 @@ class ScopeGnomon : public Gnomon
 {
 public:	
 	virtual string GetMessageText() const = 0;	
+	virtual TreePtr<Node> GetDeclarationNode(any loc, bool static_) const;
 };
 
 
-class DeclScopeGnomon : public ScopeGnomon
+class RegularScopeGnomon : public ScopeGnomon
 {
 public:	
-	virtual TreePtr<Node> GetDeclarationNode(any loc) const = 0;
+	RegularScopeGnomon( TreePtr<Node> node_ );
+	string GetMessageText() const final;
+	TreePtr<Node> GetDeclarationNode(any loc, bool static_) const override;
+
+	TreePtr<Node> node;
 };
 
 
-class ParameterisationScopeGnomon : public DeclScopeGnomon
+class ParameterisationScopeGnomon : public ScopeGnomon
 {
 public:	
 	string GetMessageText() const final;
-	TreePtr<Node> GetDeclarationNode(any loc) const override;
+	TreePtr<Node> GetDeclarationNode(any loc, bool static_) const override;
 };
 
 
-class RecordScopeGnomon : public DeclScopeGnomon
+class RecordScopeGnomon : public ScopeGnomon
 {
 public:	
 	RecordScopeGnomon( TreePtr<Node> initial_access, TreePtr<Node> record_type_ );
 	string GetMessageText() const final;
-	TreePtr<Node> GetDeclarationNode(any loc) const override;
+	TreePtr<Node> GetDeclarationNode(any loc, bool static_) const override;
 
 	TreePtr<Node> current_access; // changes as we parse the scope
 	TreePtr<Node> record_type;
 };
 
 
-class CodeUnitScopeGnomon : public DeclScopeGnomon
+class CodeUnitScopeGnomon : public ScopeGnomon
 {
 public:	
 	string GetMessageText() const final;
-	TreePtr<Node> GetDeclarationNode(any loc) const override;
+	TreePtr<Node> GetDeclarationNode(any loc, bool static_) const override;
 };
 
 
-class CompoundScopeGnomon : public DeclScopeGnomon
+class CompoundScopeGnomon : public ScopeGnomon
 {
 public:	
 	string GetMessageText() const final;
-	TreePtr<Node> GetDeclarationNode(any loc) const override;	
+	TreePtr<Node> GetDeclarationNode(any loc, bool static_) const override;	
 };
 
 
-class UnknownScopeGnomon : public DeclScopeGnomon
+class UnknownScopeGnomon : public ScopeGnomon
 {
 public:	
 	UnknownScopeGnomon(string reason_);
 	string GetMessageText() const final;
-	TreePtr<Node> GetDeclarationNode(any loc) const override;
+	TreePtr<Node> GetDeclarationNode(any loc, bool static_) const override;
 
 	const string reason;
 };
 
 
-class PrerestrictScopeGnomon : public DeclScopeGnomon
+class PrerestrictScopeGnomon : public ScopeGnomon
 {
 public:	
 	PrerestrictScopeGnomon( TreePtr<Node> node_ );
 	string GetMessageText() const final;
-	TreePtr<Node> GetDeclarationNode(any loc) const override;
+	TreePtr<Node> GetDeclarationNode(any loc, bool static_) const override;
 
 	TreePtr<Node> node;
 };

@@ -200,6 +200,7 @@ public:
 	virtual TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
+	virtual TreePtr<Node> GetDeclNode(YY::VNLangParser::location_type loc) const; 
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"

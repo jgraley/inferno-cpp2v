@@ -610,51 +610,14 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
 	TreePtr<CPPTree::Instance> instance;
-	if( q_static )
-	{
-		if( dynamic_cast<const ParameterisationScopeGnomon *>(spg.get()) )
-			throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(q_static->loc),
-				"static is not allowed for parameters.");
-		if( dynamic_cast<const CodeUnitScopeGnomon *>(spg.get()) )
-			throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(q_static->loc),
-				"static is not supported at code unit level (TODO).");
-		// Remaining scopes are member and local. VN is a resolved form of C/C++
-		// so we don't need to constrain scope. We can just call these global 
-		// if static was specified.
-		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
-	}	
-	else if( !spg ) 
+	if( !spg ) 
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(middle_loc),
 			"Cannot disambiguate declaration because no surrounding scope." + note );
-	else if( auto usg = dynamic_cast<const UnknownScopeGnomon *>(spg.get()) ) 
-		throw YY::VNLangParser::syntax_error(
-			any_cast<YY::VNLangParser::location_type>(middle_loc),
-			"Cannot disambiguate declaration under " + usg->reason + "." + note );
-	else if( auto psg = dynamic_cast<const PrerestrictScopeGnomon *>(spg.get()) ) 
-	{
-		ASSERT( psg->node );
-		instance = TreePtr<CPPTree::Instance>::DynamicCast(psg->node);
-		if( !instance )
-			throw YY::VNLangParser::syntax_error(
-						any_cast<YY::VNLangParser::location_type>(middle_loc),
-						"nearest prerestrict " + 
-						DiagQuote(Traceable::TypeIdName( *(psg->node) )) + 
-						" cannot disambiguate an instance declaration" + 
-						note); // TODO it could if the pre-restriction was to eg a Record etc			
-	}
-	else if( dynamic_cast<const ParameterisationScopeGnomon *>(spg.get()) )
-		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
-	else if( dynamic_cast<const RecordScopeGnomon *>(spg.get()) )
-		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Member>>();
-	else if( dynamic_cast<const CodeUnitScopeGnomon *>(spg.get()) ) 
-		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
-	else if( dynamic_cast<const CompoundScopeGnomon *>(spg.get()) ) 
-		instance = MakeTreeNode<StandardAgentWrapper<CPPTree::Local>>(); 
-	else 
-		ASSERT(false)("Unknown gnomon: ")(spg);
+	
+	// Get whichever kind of declaration is allowed in the current scope. This can throw
+	// for a range of reasons!
+	instance = spg->GetDeclarationNode(middle_loc, !!q_static); 
 
 	instance->constancy = declarator_result.cv_quals_view.constancy; 
 		

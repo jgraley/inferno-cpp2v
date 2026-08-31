@@ -196,3 +196,10 @@ TreePtr<Node> Syntax::OnElseBody( TreePtr<Node>, YY::VNLangParser::location_type
 	throw YY::VNLangParser::syntax_error( loc,
 		MyBestErrName() + " cannot be used with an `else' clause.");		
 } 
+
+
+TreePtr<Node> Syntax::GetDeclNode(YY::VNLangParser::location_type loc) const
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " cannot act as a scope for declarations.");		
+}

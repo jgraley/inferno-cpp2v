@@ -286,6 +286,13 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
     return s; 
 }
 
+
+TreePtr<Node> CodeUnit::GetDeclNode(YY::VNLangParser::location_type) const
+{
+	return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
+}
+
+
 //////////////////////////// SpecificIdentifier ///////////////////////////////
 
 SpecificIdentifier::SpecificIdentifier() :
@@ -1369,6 +1376,12 @@ string Callable::GetRenderParameterisation(VN::RendererInterface *, Policy )
 
 //////////////////////////// CallableParams //////////////////////////////
 
+TreePtr<Node> CallableParams::GetDeclNode(YY::VNLangParser::location_type) const
+{
+	return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Parameter>>();
+}
+
+
 string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy)
 {
 	INDENT("P");
@@ -1838,6 +1851,13 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 	return Join( ls, "\n", "{\n", "\n}" );
 }
 
+
+TreePtr<Node> Record::GetDeclNode(YY::VNLangParser::location_type) const
+{
+	return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Member>>();
+}
+
+
 //////////////////////////// Union ///////////////////////////////
 
 YY::VNLangParser::token::token_kind_type InheritanceRecord::GetKeywordToken() const
@@ -2227,6 +2247,13 @@ string SizeOf::GetKeyword( Policy ) const
 string AlignOf::GetKeyword( Policy ) const
 {
 	return "alignof";
+}
+
+//////////////////////////// SequentialScope ///////////////////////////////
+
+TreePtr<Node> SequentialScope::GetDeclNode(YY::VNLangParser::location_type) const
+{
+	return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Local>>(); 	
 }
 
 //////////////////////////// Compound ///////////////////////////////
