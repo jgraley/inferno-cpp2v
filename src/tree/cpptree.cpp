@@ -2377,6 +2377,13 @@ Syntax::Production Breakable::GetMyProductionTerminal() const
 	return Production::STMT_DECL_HIGH; 
 }
 
+
+TreePtr<Node> Breakable::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type ) 
+{
+	body = body_;	
+	return (TreePtr<Node>)shared_from_this();
+} 
+
 //////////////////////////// While ///////////////////////////////
 
 Syntax::Production While::GetMyProductionTerminal() const
@@ -2417,13 +2424,6 @@ TreePtr<Node> While::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::loc
 	return (TreePtr<Node>)shared_from_this();
 }
 
-
-TreePtr<Node> While::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type ) // TODO move up into Breakable, which has a body
-{
-	body = body_;	
-	return (TreePtr<Node>)shared_from_this();
-} 
-
 //////////////////////////// Do ///////////////////////////////
 
 Syntax::Production Do::GetMyProductionTerminal() const
@@ -2452,13 +2452,6 @@ YY::VNLangParser::token::token_kind_type Do::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_DO_KEYWORD;
 }
-
-
-TreePtr<Node> Do::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type )
-{
-	body = body_;	
-	return (TreePtr<Node>)shared_from_this();
-} 
 
 
 TreePtr<Node> Do::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
@@ -2518,13 +2511,6 @@ TreePtr<Node> For::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::locat
 	return (TreePtr<Node>)shared_from_this();
 }
 
-
-TreePtr<Node> For::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type )
-{
-	body = body_;	
-	return (TreePtr<Node>)shared_from_this();
-} 
-
 //////////////////////////// Switch ///////////////////////////////
 
 Syntax::Production Switch::GetMyProductionTerminal() const
@@ -2553,13 +2539,6 @@ YY::VNLangParser::token::token_kind_type Switch::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_STMT;
 }
-
-
-TreePtr<Node> Switch::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type )
-{
-	body = body_;	
-	return (TreePtr<Node>)shared_from_this();
-} 
 
 
 TreePtr<Node> Switch::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 

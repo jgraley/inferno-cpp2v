@@ -1465,6 +1465,7 @@ struct Breakable : Statement
     TreePtr<Statement> body; ///< a break in here jumps to the end of here
 
 	Production GetMyProductionTerminal() const override;	
+	TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -1486,7 +1487,6 @@ struct While : Loop, Uncombable
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -1500,7 +1500,6 @@ struct Do : Loop, Uncombable // a do..while() construct
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
-	TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc ) override;
 	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };
 
@@ -1521,7 +1520,6 @@ struct For : Loop
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -1540,7 +1538,6 @@ struct Switch : Breakable
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc ) override;
 };
 
 
