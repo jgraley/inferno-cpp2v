@@ -54,6 +54,7 @@ struct Initialiser : virtual Node
     NODE_FUNCTIONS 
 };
 
+
 /// an uninitialised Instance.
 struct Uninitialised : Initialiser 
 { 
@@ -62,6 +63,7 @@ struct Uninitialised : Initialiser
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *, Production, Policy ) override;
 }; 
+
 
 /// Represents a statement as found inside a function body. 
 /** Basically anything 
@@ -73,6 +75,7 @@ struct Statement : virtual Node
     virtual string GetColour() const { return "/set28/2"; }    
 };
 
+
 /// An expression that computes a result value. 
 /** Can be used anywhere a statement can, per C syntax rules. */
 struct Expression : virtual Statement,
@@ -81,6 +84,7 @@ struct Expression : virtual Statement,
     NODE_FUNCTIONS 
     virtual string GetColour() const { return "/set28/6"; }    
 };
+
 
 /// Any abstract data type
 /** Any abstract data type including fundamentals, structs, function prototypes
@@ -103,6 +107,7 @@ struct Type : virtual Node
 	virtual string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy );    
 	virtual YY::VNLangParser::token::token_kind_type GetResolvedToken() const;
 };
+
 
 /// A declaration specifies the creation of a TypeDeclaration or an Instance. 
 /** Declaration can appear where statements can and also inside structs etc
@@ -127,12 +132,14 @@ struct Scope : virtual Node
     virtual string GetColour() const { return "/set28/4"; }
 };
 
+
 /// A scope in which we provide a collection of declarations.
 struct DeclScope : virtual Scope
 {
     NODE_FUNCTIONS
     Collection<Declaration> members; /// The declarations in this scope    
 };
+
 
 /// One unit of code
 /** Like a compilation unit but for VN. Does not have to be entire program.
@@ -144,6 +151,7 @@ struct CodeUnit : DeclScope
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
+
 
 /// Indicates that the node cannot be combinationalised
 struct Uncombable : virtual Node { NODE_FUNCTIONS };
@@ -1367,6 +1375,7 @@ struct SequentialScope : DeclScope,
     virtual string GetColour() const { return Statement::GetColour(); } // Statement wins    
 };
 
+
 /// Declarations and Statements inside {} or begin/end. 
 struct Compound : SequentialScope,  ///< Local declarations go in here (preferably)
                   Initialiser       ///< Can "initialise" a function (with the body) 
@@ -1375,6 +1384,7 @@ struct Compound : SequentialScope,  ///< Local declarations go in here (preferab
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };                   
+
 
 /// GCC extension for compound statements that return a value
 /** The returned value is that returned by the last statement if it
@@ -1423,6 +1433,7 @@ struct Goto : Statement, Uncombable
    	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
+
 /// If statement
 struct If : Statement
 {
@@ -1435,7 +1446,9 @@ struct If : Statement
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetToken() const override;
+	TreePtr<Node> OnElseClause( any else_loc, TreePtr<Node> body_else ) override;
 };
+
 
 /// Designate a statement that may be broken out of
 /** A "break" statement jumps out of the innermost one of these
@@ -1450,11 +1463,13 @@ struct Breakable : Statement
 	Production GetMyProductionTerminal() const override;	
 };
 
+
 /// Any loop.
 /** A "continue" statement jumps out of the innermost one of 
     these and goes to the bottom of the body. So this is effectively
     "Continuable". Our body is inherited from Breakable. */
 struct Loop : Breakable { NODE_FUNCTIONS };
+
 
 /// While loop
 struct While : Loop, Uncombable
@@ -1468,6 +1483,7 @@ struct While : Loop, Uncombable
    	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
+
 /// Do loop (first iteration always runs)
 struct Do : Loop, Uncombable // a do..while() construct 
 {
@@ -1479,6 +1495,7 @@ struct Do : Loop, Uncombable // a do..while() construct
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
+
 
 /// C-style for loop. 
 struct For : Loop
@@ -1497,6 +1514,7 @@ struct For : Loop
    	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
+
 /// Switch statement. 
 /** Body (From Breakable) is just a statement scope - case labels
  and breaks are dropped into the sequence at the corresponding 
@@ -1513,6 +1531,7 @@ struct Switch : Breakable
    	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
+
 /// Intermediate for labels in a switch statement.
 struct SwitchTarget : Statement 
 { 
@@ -1520,6 +1539,7 @@ struct SwitchTarget : Statement
 
 	Production GetMyProductionTerminal() const override;
 };
+
 
 /// Case label, supporting range extension in case useful for optimisation
 struct RangeCase : SwitchTarget
@@ -1535,6 +1555,7 @@ struct RangeCase : SwitchTarget
     // will find Case because it requires a GetToken() that succeeds.
 }; 
 
+
 /// Case label
 struct Case : SwitchTarget
 {
@@ -1546,6 +1567,7 @@ struct Case : SwitchTarget
    	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
+
 /// Default label in a switch statement
 struct Default : SwitchTarget 
 { 
@@ -1555,6 +1577,7 @@ struct Default : SwitchTarget
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
+
 
 /// Continue (to innermost Loop)
 struct Continue : Statement, Uncombable 
@@ -1567,6 +1590,7 @@ struct Continue : Statement, Uncombable
    	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
 
+
 /// Break (from innermost Breakable)
 struct Break : Statement 
 { 
@@ -1577,6 +1601,7 @@ struct Break : Statement
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetToken() const override;
 };
+
 
 /// Do nothing; these get optimised out where possible
 struct Nop : Statement 

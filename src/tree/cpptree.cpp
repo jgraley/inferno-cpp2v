@@ -71,6 +71,9 @@ string Uninitialised::GetRender( VN::RendererInterface *, Production, Policy pol
 	return "";
 }
 
+//////////////////////////// Statement ///////////////////////////////
+
+
 //////////////////////////// Type ///////////////////////////////
 
 Syntax::Production Type::GetMyProductionTerminal() const
@@ -2317,6 +2320,13 @@ YY::VNLangParser::token::token_kind_type If::GetToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_WITH_ELSE;
 }
+
+
+TreePtr<Node> If::OnElseClause( any, TreePtr<Node> body_else_ )
+{
+	body_else = body_else_;	
+	return (TreePtr<Node>)shared_from_this();
+} 
 
 //////////////////////////// Breakable ///////////////////////////////
 

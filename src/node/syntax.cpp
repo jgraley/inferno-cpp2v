@@ -116,3 +116,21 @@ YY::VNLangParser::token::token_kind_type Syntax::GetResolvedToken() const
 {
 	return YY::VNLangParser::token::TOK_RESOLVED_NORMAL;
 }
+
+
+string Syntax::MyBestErrName() const try
+{
+	return DiagQuote( GetKeyword(Policy()) );
+}		
+catch( Unimplemented & )
+{
+	return DiagQuote(Traceable::TypeIdName( *this ));	
+}
+
+
+TreePtr<Node> Syntax::OnElseClause( any else_loc, TreePtr<Node> )
+{
+	throw YY::VNLangParser::syntax_error(
+		any_cast<YY::VNLangParser::location_type>(else_loc),
+		MyBestErrName() + " cannot be used with an `else' clause.");		
+} 

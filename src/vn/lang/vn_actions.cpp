@@ -571,11 +571,7 @@ TreePtr<Node> VNLangActions::OnArgsBodyWithElseStmt( string keyword, any keyword
 		ret->condition = args.front();
 		ret->body = body;		
 		ret->body_else = MakeTreeNode<StandardAgentWrapper<CPPTree::Nop>>();;
-		
-		// Add the else body
-		if( body_else )
-			ret->body_else = body_else;
-			
+				
 		return ret;
 	}
 	ASSERTFAIL(); // internal error: parser should not call this unless recogniser produced ARGS_BODY_STMT_KEYWORD		

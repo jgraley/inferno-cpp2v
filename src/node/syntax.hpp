@@ -189,6 +189,8 @@ public:
 	string RenderNodeTypeName() const; 
 	virtual YY::VNLangParser::token::token_kind_type GetToken() const;
 	virtual YY::VNLangParser::token::token_kind_type GetResolvedToken() const;
+	string MyBestErrName() const;
+	virtual TreePtr<Node> OnElseClause( any else_loc, TreePtr<Node> body_else );
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"
