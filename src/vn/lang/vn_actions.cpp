@@ -548,12 +548,7 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( const list<QualifierData> &quals,
 {
 	YY::VNLangParser::location_type middle_loc = any_cast<YY::VNLangParser::location_type>(type_loc) +
 												 any_cast<YY::VNLangParser::location_type>(decl_loc);
-	
-	const QualifierData *q_typedef = nullptr;
-	for( const QualifierData &q : quals )
-		if( q.cat == QualCat::TYPEDEF )
-			q_typedef = &q;
-			
+				
 	// Get the CV-qualifiers for declarator reduction
 	Declarators::CVQuals cv_quals = OnCVQuals(quals, true);
 	
@@ -563,15 +558,29 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( const list<QualifierData> &quals,
 	{
 		case Declarators::Result::CONCRETE:
 		case Declarators::Result::WILDCARD:
-			if( q_typedef )
-				return OnTypedef(quals, declarator_result, middle_loc);
-			else
-				return OnInstance(quals, declarator_result, middle_loc);
+			break; // good, will continue
 
 		default:
 			throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(middle_loc),
-				"Expected concrete declaration but got abstract.");
+				"Expected concrete declarator but got abstract.");
+	}
+	
+	const QualifierData *q_typedef = nullptr;
+	for( const QualifierData &q : quals )
+		if( q.cat == QualCat::TYPEDEF )
+			q_typedef = &q;
+
+	if( q_typedef )
+	{
+		TreePtr<Node> td = q_typedef->node;
+		td = td->OnIdentifier(declarator_result.leaf, any_cast<YY::VNLangParser::location_type>(decl_loc));
+		td = td->OnArgsList({declarator_result.type_view}, any_cast<YY::VNLangParser::location_type>(middle_loc));
+		return td;
+	}
+	else
+	{
+		return OnInstance(quals, declarator_result, middle_loc);
 	}
 }
 

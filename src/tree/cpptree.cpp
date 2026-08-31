@@ -1722,6 +1722,17 @@ YY::VNLangParser::token::token_kind_type Typedef::GetKeywordToken() const
 	return YY::VNLangParser::token::TOK_TYPEDEF_KEYWORD;
 }
 
+
+TreePtr<Node> Typedef::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc )
+{
+	if( args.size() != 1 )
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " requires one argument.");
+	type = SoloElementOf(args);
+	return (TreePtr<Node>)shared_from_this();
+}
+
 //////////////////////////// Record ///////////////////////////////
 
 TreePtr<AccessSpec> Record::GetInitialAccess() const
@@ -2163,6 +2174,17 @@ YY::VNLangParser::token::token_kind_type FuncOnType::GetKeywordToken() const
 	return YY::VNLangParser::token::TOK_FUNC_ON_TYPE;
 }
 
+
+TreePtr<Node> FuncOnType::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+{
+	if( args.size() != 1 )
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " requires one argument.");
+	argument = SoloElementOf(args);
+	return (TreePtr<Node>)shared_from_this();
+}
+
 //////////////////////////// SizeOf ///////////////////////////////
 
 string SizeOf::GetKeyword( Policy ) const
@@ -2260,12 +2282,12 @@ YY::VNLangParser::token::token_kind_type Return::GetKeywordToken() const
 }
 
 
-TreePtr<Node> Return::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+TreePtr<Node> Return::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
-			MyBestErrName() + " requires 1 argument inside ().");
+			MyBestErrName() + " requires one argument.");
 	return_value = SoloElementOf(args);
 	return (TreePtr<Node>)shared_from_this();
 }
@@ -2319,12 +2341,12 @@ YY::VNLangParser::token::token_kind_type Goto::GetKeywordToken() const
 }
 
 
-TreePtr<Node> Goto::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+TreePtr<Node> Goto::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
-			MyBestErrName() + " requires 1 argument inside ().");
+			MyBestErrName() + " requires one argument.");
 	destination = SoloElementOf(args);
 	return (TreePtr<Node>)shared_from_this();
 }
@@ -2368,12 +2390,12 @@ YY::VNLangParser::token::token_kind_type If::GetKeywordToken() const
 }
 
 
-TreePtr<Node> If::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+TreePtr<Node> If::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
-			MyBestErrName() + " requires 1 argument inside ().");
+			MyBestErrName() + " requires one argument.");
 	condition = SoloElementOf(args);
 	return (TreePtr<Node>)shared_from_this();
 }
@@ -2437,12 +2459,12 @@ YY::VNLangParser::token::token_kind_type While::GetKeywordToken() const
 }
 
 
-TreePtr<Node> While::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc )
+TreePtr<Node> While::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc )
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
-			MyBestErrName() + " requires 1 argument inside ().");
+			MyBestErrName() + " requires one argument.");
 	condition = SoloElementOf(args);
 	return (TreePtr<Node>)shared_from_this();
 }
@@ -2477,12 +2499,12 @@ YY::VNLangParser::token::token_kind_type Do::GetKeywordToken() const
 }
 
 
-TreePtr<Node> Do::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+TreePtr<Node> Do::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
-			MyBestErrName() + " requires 1 argument inside ().");
+			MyBestErrName() + " requires one argument.");
 	condition = SoloElementOf(args);
 	return (TreePtr<Node>)shared_from_this();
 }
@@ -2521,7 +2543,7 @@ YY::VNLangParser::token::token_kind_type For::GetKeywordToken() const
 }
 
 
-TreePtr<Node> For::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+TreePtr<Node> For::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
 {
 	if( args.size() != 3 )
 		throw YY::VNLangParser::syntax_error(
@@ -2564,12 +2586,12 @@ YY::VNLangParser::token::token_kind_type Switch::GetKeywordToken() const
 }
 
 
-TreePtr<Node> Switch::OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+TreePtr<Node> Switch::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
-			MyBestErrName() + " requires 1 argument inside ().");
+			MyBestErrName() + " requires one argument.");
 	condition = SoloElementOf(args);
 	return (TreePtr<Node>)shared_from_this();
 }

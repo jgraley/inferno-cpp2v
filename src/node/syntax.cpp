@@ -149,7 +149,7 @@ TreePtr<Node> Syntax::OnMembers( list<TreePtr<Node>>, YY::VNLangParser::location
 }
 
 
-TreePtr<Node> Syntax::OnStmtArgs( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
+TreePtr<Node> Syntax::OnArgsList( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
 		MyBestErrName() + " does not expect arguments.");	

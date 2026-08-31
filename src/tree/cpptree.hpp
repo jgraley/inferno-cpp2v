@@ -1051,6 +1051,7 @@ struct Typedef : TypeDeclaration
 	Production GetMyProductionTerminal() const override;	    
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
 	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 }; 
 
 /// Intermediate for declaration of a struct, class, union or enum. 
@@ -1348,6 +1349,7 @@ struct FuncOnType : Expression
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
 	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };
 
 /// sizeof() a type
@@ -1415,7 +1417,7 @@ struct Return : Statement
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
-	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -1435,7 +1437,7 @@ struct Goto : Statement, Uncombable
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
-	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -1451,7 +1453,7 @@ struct If : Statement
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
-	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 	TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc ) override;
 	TreePtr<Node> OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type loc ) override;
 };
@@ -1489,7 +1491,7 @@ struct While : Loop, Uncombable
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
-	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -1503,7 +1505,7 @@ struct Do : Loop, Uncombable // a do..while() construct
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
-	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -1522,7 +1524,7 @@ struct For : Loop
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
-	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -1540,7 +1542,7 @@ struct Switch : Breakable
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
-	TreePtr<Node> OnStmtArgs( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };
 
 
