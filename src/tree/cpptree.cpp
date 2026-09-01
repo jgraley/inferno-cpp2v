@@ -287,11 +287,14 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 }
 
 
-TreePtr<Node> CodeUnit::GetDeclNode(YY::VNLangParser::location_type) const
+TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const
 {
+	if( static_keyword_specified )
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			"static is not supported at code unit level (TODO).");
 	return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
 }
-
 
 //////////////////////////// SpecificIdentifier ///////////////////////////////
 
@@ -1376,8 +1379,12 @@ string Callable::GetRenderParameterisation(VN::RendererInterface *, Policy )
 
 //////////////////////////// CallableParams //////////////////////////////
 
-TreePtr<Node> CallableParams::GetDeclNode(YY::VNLangParser::location_type) const
+TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const
 {
+	if( static_keyword_specified )
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"static is not allowed for parameters.");
 	return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Parameter>>();
 }
 
@@ -1852,9 +1859,12 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 }
 
 
-TreePtr<Node> Record::GetDeclNode(YY::VNLangParser::location_type) const
+TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type) const
 {
-	return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Member>>();
+	if( static_keyword_specified )
+		return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
+	else
+		return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Member>>();
 }
 
 
@@ -2251,9 +2261,20 @@ string AlignOf::GetKeyword( Policy ) const
 
 //////////////////////////// SequentialScope ///////////////////////////////
 
-TreePtr<Node> SequentialScope::GetDeclNode(YY::VNLangParser::location_type) const
+TreePtr<Node> SequentialScope::OnStatements( list<TreePtr<Node>> statements_, YY::VNLangParser::location_type )
 {
-	return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Local>>(); 	
+	for( TreePtr<Node> statement : statements_ )
+		statements.insert( statement );				
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type) const
+{
+	if( static_keyword_specified )
+		return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
+	else
+		return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Local>>(); 	
 }
 
 //////////////////////////// Compound ///////////////////////////////

@@ -523,11 +523,7 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 {	
 	shared_ptr<Gnomon> gnomon;
-	if( dynamic_pointer_cast<CPPTree::CodeUnit>(node) )
-		gnomon = make_shared<CodeUnitScopeGnomon>();
-	else if( dynamic_pointer_cast<CPPTree::SequentialScope>(node) )
-		gnomon = make_shared<CompoundScopeGnomon>();
-	else if( auto record = dynamic_pointer_cast<CPPTree::Record>(node) )
+	if( auto record = dynamic_pointer_cast<CPPTree::Record>(node) )
 	{
 		TreePtr<Node> init_access = record->GetInitialAccess();
 		ASSERT( init_access ); // Records must always specify an initial access
@@ -536,7 +532,7 @@ NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 	else if( dynamic_pointer_cast<CPPTree::CallableParams>(node) )
 		gnomon = make_shared<ParameterisationScopeGnomon>();
 	else
-		gnomon = make_shared<UnknownScopeGnomon>("non-scope explicit node " + Trace(node));	
+		gnomon = make_shared<RegularScopeGnomon>(node);
 		
 	// DeclScope and Scope are too broad, as they apply to more than one of the above categories	
 		

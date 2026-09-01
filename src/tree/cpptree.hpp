@@ -151,7 +151,7 @@ struct CodeUnit : DeclScope
 	NODE_FUNCTIONS_FINAL
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-	TreePtr<Node> GetDeclNode(YY::VNLangParser::location_type loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const override; 
 };
 
 
@@ -817,7 +817,7 @@ struct CallableParams : Callable, Scope
     NODE_FUNCTIONS
     Collection<Declaration> params; // TODO be Parameter #803
     virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
-	TreePtr<Node> GetDeclNode(YY::VNLangParser::location_type loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const override; 
 
 protected:    
     string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy) override;
@@ -1079,7 +1079,7 @@ struct Record : TypeDeclaration,
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
     virtual string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
 	virtual string RenderBody( VN::RendererInterface *renderer, Policy policy );
-	TreePtr<Node> GetDeclNode(YY::VNLangParser::location_type loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const override; 
 };
 
 /// A union, as per Record.
@@ -1388,7 +1388,8 @@ struct SequentialScope : DeclScope,
     NODE_FUNCTIONS
     Sequence<Statement> statements; ///< Can contain local declarations and code
     virtual string GetColour() const { return Statement::GetColour(); } // Statement wins    
-	TreePtr<Node> GetDeclNode(YY::VNLangParser::location_type loc) const override; 
+	TreePtr<Node> OnStatements( list<TreePtr<Node>> statements, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const override; 
 };
 
 

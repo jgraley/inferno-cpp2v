@@ -21,7 +21,7 @@ Gnomon::~Gnomon()
 }
 
 
-TreePtr<Node> ScopeGnomon::GetDeclarationNode(any loc, bool static_) const 
+TreePtr<Node> ScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
 {
 	throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
@@ -42,9 +42,9 @@ string RegularScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> RegularScopeGnomon::GetDeclarationNode(any loc, bool static_) const 
+TreePtr<Node> RegularScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
 {
-	return node->GetDeclNode( any_cast<YY::VNLangParser::location_type>(loc) );
+	return node->CreateDeclNode( static_keyword_specified, any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 
@@ -54,9 +54,9 @@ string ParameterisationScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(any loc, bool static_) const 
+TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
 {
-	if( static_ )
+	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(loc),
 				"static is not allowed for parameters.");
@@ -78,9 +78,9 @@ string RecordScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> RecordScopeGnomon::GetDeclarationNode(any loc, bool static_) const 
+TreePtr<Node> RecordScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
 {
-	if( static_ )
+	if( static_keyword_specified )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
 	return MakeTreeNode<StandardAgentWrapper<CPPTree::Member>>();
 }
@@ -92,9 +92,9 @@ string CodeUnitScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> CodeUnitScopeGnomon::GetDeclarationNode(any loc, bool static_) const 
+TreePtr<Node> CodeUnitScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
 {
-	if( static_ )
+	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
 			"static is not supported at code unit level (TODO).");
@@ -108,9 +108,9 @@ string CompoundScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> CompoundScopeGnomon::GetDeclarationNode(any loc, bool static_) const 
+TreePtr<Node> CompoundScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
 {
-	if( static_ )
+	if( static_keyword_specified )
 		return MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
 	return MakeTreeNode<StandardAgentWrapper<CPPTree::Local>>(); 
 }
@@ -128,7 +128,7 @@ string UnknownScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> UnknownScopeGnomon::GetDeclarationNode(any loc, bool static_) const 
+TreePtr<Node> UnknownScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
 {
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
@@ -151,7 +151,7 @@ string PrerestrictScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> PrerestrictScopeGnomon::GetDeclarationNode(any loc, bool static_) const 
+TreePtr<Node> PrerestrictScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
 {
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"

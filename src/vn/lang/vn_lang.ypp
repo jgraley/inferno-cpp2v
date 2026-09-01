@@ -49,6 +49,7 @@
   #include "vn_actions.hpp"     
   #include "declarators.hpp" 
   #include "tree/node_names.hpp"  
+  #include "vn/agents/standard_agent.hpp"  
   #include "vn_recogniser.hpp"
   #include <iostream>
   #include <fstream>  
@@ -198,7 +199,8 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		part_resolve designation_command 
 %type <shared_ptr<VN::Gnomon>>		transform_op_scope
 %type <shared_ptr<VN::Gnomon>>		explicit_op_scope prerestrict_op_scope id_by_name_op_scope builder_id_op_scope stuff_op_scope
-%type <shared_ptr<VN::Gnomon>>		code_unit_scope compound_scope params_scope 
+%type <shared_ptr<VN::Gnomon>>		 params_scope 
+%type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
 %type <VN::NodeAndGnomon>			norm_full_explicit_start type_full_explicit_start decl_full_explicit_start qual_full_explicit_start mi_full_explicit_start
 %type <VN::NodeAndGnomon>			irecord_scope enum_scope
@@ -300,16 +302,17 @@ compound_prefix : compound_primary
 				|     stuff_op_scope OPEN_VN stuff_depth CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
 				|                      prerestrict_op_named compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 
-compound_primary	: compound_scope '{' VN_SEP '}'                			{ $$ = vn->OnCompound({}, @3, {}, @3); } 
-					| compound_scope '{' stmt_decls VN_SEP '}'     			{ $$ = vn->OnCompound($3, @3, {}, @5); }
-					| compound_scope '{' VN_SEP stmt_decls '}'     			{ $$ = vn->OnCompound({}, @3, $4, @4); }
-					| compound_scope '{' stmt_decls VN_SEP stmt_decls '}'	{ $$ = vn->OnCompound($3, @3, $5, @5); }
-					| CODE_UNIT code_unit_scope '{' stmt_decls '}' 			{ $$ = vn->OnCodeUnit($4, @4); }
+compound_primary	: compound_scope '{' VN_SEP '}'                			{ $$ = $1->node; } 
+					| compound_scope '{' stmt_decls VN_SEP '}'     			{ $$ = $1->node->OnMembers($3, @3); }
+					| compound_scope '{' VN_SEP stmt_decls '}'     			{ $$ = $1->node->OnStatements($4, @4); }
+					| compound_scope '{' stmt_decls VN_SEP stmt_decls '}'	{ $$ = $1->node->OnMembers($3, @3);
+					                                                          $$ = $$->OnStatements($5, @5); }
+					| CODE_UNIT code_unit_scope '{' stmt_decls '}' 			{ $$ = $2->node->OnMembers($4, @4); }
 
-compound_scope	: %empty													{ $$ = make_shared<VN::CompoundScopeGnomon>(); 
+compound_scope	: %empty													{ $$ = make_shared<VN::RegularScopeGnomon>(MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Compound>>()); 
 																			  vn->AddGnomon($$); }
 
-code_unit_scope	: %empty													{ $$ = make_shared<VN::CodeUnitScopeGnomon>(); 
+code_unit_scope	: %empty													{ $$ = make_shared<VN::RegularScopeGnomon>(MakeTreeNode<VN::StandardAgentWrapper<CPPTree::CodeUnit>>()); 
 																			  vn->AddGnomon($$); }
 
 stmt_decls	: stmt_decl_l													{ $$ = $1; }

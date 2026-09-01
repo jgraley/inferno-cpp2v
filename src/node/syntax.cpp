@@ -156,6 +156,13 @@ TreePtr<Node> Syntax::OnMembers( list<TreePtr<Node>>, YY::VNLangParser::location
 }
 
 
+TreePtr<Node> Syntax::OnStatements( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " does not expect statements.");	
+}
+
+
 TreePtr<Node> Syntax::OnType( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
@@ -198,7 +205,7 @@ TreePtr<Node> Syntax::OnElseBody( TreePtr<Node>, YY::VNLangParser::location_type
 } 
 
 
-TreePtr<Node> Syntax::GetDeclNode(YY::VNLangParser::location_type loc) const
+TreePtr<Node> Syntax::CreateDeclNode(bool, YY::VNLangParser::location_type loc) const
 {
 	throw YY::VNLangParser::syntax_error( loc,
 		MyBestErrName() + " cannot act as a scope for declarations.");		
