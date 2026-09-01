@@ -85,36 +85,6 @@ TreePtr<Node> RecordScopeGnomon::GetDeclarationNode(any loc, bool static_keyword
 	return MakeTreeNode<StandardAgentWrapper<CPPTree::Member>>();
 }
 
-	
-string CodeUnitScopeGnomon::GetMessageText() const 
-{
-	return "global scope";
-}
-
-
-TreePtr<Node> CodeUnitScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
-{
-	if( static_keyword_specified )
-		throw YY::VNLangParser::syntax_error(
-			any_cast<YY::VNLangParser::location_type>(loc),
-			"static is not supported at code unit level (TODO).");
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
-}
-
-
-string CompoundScopeGnomon::GetMessageText() const 
-{
-	return "local scope";
-}
-
-
-TreePtr<Node> CompoundScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
-{
-	if( static_keyword_specified )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::Local>>(); 
-}
-
 
 UnknownScopeGnomon::UnknownScopeGnomon(string reason_) :
 	reason( reason_ )

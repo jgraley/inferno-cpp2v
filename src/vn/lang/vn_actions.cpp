@@ -418,26 +418,6 @@ TreePtr<Node> VNLangActions::OnSubscript( TreePtr<Node> destination, TreePtr<Nod
 }
 	
 
-TreePtr<Node> VNLangActions::OnCompound( list<TreePtr<Node>> members, any memb_loc, list<TreePtr<Node>> statements, any stmt_loc )
-{
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Compound>>();
-	for( TreePtr<Node> member : members )
-		node->members.insert(member);
-	for( TreePtr<Node> statement : statements )
-		node->statements.insert(statement);
-	return node;
-}
-
-
-TreePtr<Node> VNLangActions::OnCodeUnit( list<TreePtr<Node>> members, any memb_loc )
-{
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::CodeUnit>>();
-	for( TreePtr<Node> member : members )
-		node->members.insert(member);
-	return node;
-}
-
-
 TreePtr<Node> VNLangActions::OnArrayInitialiser( list<TreePtr<Node>> elements )
 {
 	// Fill out the array literal

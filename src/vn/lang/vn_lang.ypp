@@ -305,8 +305,7 @@ compound_prefix : compound_primary
 compound_primary	: compound_scope '{' VN_SEP '}'                			{ $$ = $1->node; } 
 					| compound_scope '{' stmt_decls VN_SEP '}'     			{ $$ = $1->node->OnMembers($3, @3); }
 					| compound_scope '{' VN_SEP stmt_decls '}'     			{ $$ = $1->node->OnStatements($4, @4); }
-					| compound_scope '{' stmt_decls VN_SEP stmt_decls '}'	{ $$ = $1->node->OnMembers($3, @3);
-					                                                          $$ = $$->OnStatements($5, @5); }
+					| compound_scope '{' stmt_decls VN_SEP stmt_decls '}'	{ $$ = $1->node->OnMembers($3, @3)->OnStatements($5, @5); }
 					| CODE_UNIT code_unit_scope '{' stmt_decls '}' 			{ $$ = $2->node->OnMembers($4, @4); }
 
 compound_scope	: %empty													{ $$ = make_shared<VN::RegularScopeGnomon>(MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Compound>>()); 

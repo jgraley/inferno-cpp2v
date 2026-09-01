@@ -76,22 +76,6 @@ public:
 };
 
 
-class CodeUnitScopeGnomon : public ScopeGnomon
-{
-public:	
-	string GetMessageText() const final;
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const override;
-};
-
-
-class CompoundScopeGnomon : public ScopeGnomon
-{
-public:	
-	string GetMessageText() const final;
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const override;	
-};
-
-
 class UnknownScopeGnomon : public ScopeGnomon
 {
 public:	
