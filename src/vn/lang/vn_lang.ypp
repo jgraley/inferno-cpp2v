@@ -302,16 +302,16 @@ compound_prefix : compound_primary
 				|     stuff_op_scope OPEN_VN stuff_depth CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
 				|                      prerestrict_op_named compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 
-compound_primary	: compound_scope '{' VN_SEP '}'                			{ $$ = $1->node; } 
-					| compound_scope '{' stmt_decls VN_SEP '}'     			{ $$ = $1->node->OnMembers($3, @3); }
-					| compound_scope '{' VN_SEP stmt_decls '}'     			{ $$ = $1->node->OnStatements($4, @4); }
-					| compound_scope '{' stmt_decls VN_SEP stmt_decls '}'	{ $$ = $1->node->OnMembers($3, @3)->OnStatements($5, @5); }
-					| CODE_UNIT code_unit_scope '{' stmt_decls '}' 			{ $$ = $2->node->OnMembers($4, @4); }
+compound_primary	: compound_scope VN_SEP '}'                				{ $$ = $1->node; } 
+					| compound_scope stmt_decls VN_SEP '}'     				{ $$ = $1->node->OnMembers($2, @2); }
+					| compound_scope VN_SEP stmt_decls '}'     				{ $$ = $1->node->OnStatements($3, @3); }
+					| compound_scope stmt_decls VN_SEP stmt_decls '}'		{ $$ = $1->node->OnMembers($2, @2)->OnStatements($4, @4); }
+					| code_unit_scope stmt_decls '}' 						{ $$ = $1->node->OnMembers($2, @2); }
 
-compound_scope	: %empty													{ $$ = make_shared<VN::RegularScopeGnomon>(MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Compound>>()); 
+compound_scope	: '{'														{ $$ = make_shared<VN::RegularScopeGnomon>(MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Compound>>()); 
 																			  vn->AddGnomon($$); }
 
-code_unit_scope	: %empty													{ $$ = make_shared<VN::RegularScopeGnomon>(MakeTreeNode<VN::StandardAgentWrapper<CPPTree::CodeUnit>>()); 
+code_unit_scope	: CODE_UNIT '{'												{ $$ = make_shared<VN::RegularScopeGnomon>(MakeTreeNode<VN::StandardAgentWrapper<CPPTree::CodeUnit>>()); 
 																			  vn->AddGnomon($$); }
 
 stmt_decls	: stmt_decl_l													{ $$ = $1; }
@@ -636,24 +636,17 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); }
 
 statement_nl: bare_statement ';'										
 			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts
-// #899		| explicit_norm_node '(' semicolon_args ')' stmt_comp			{ $$ = $1->OnArgsList($3, @3); 
-//                                                                            $$ = $$->OnBody($5, @5); }
-			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp		{ $$ = $1->OnArgsList($3, @3); 
-			                                                                  $$ = $$->OnBody($5, @5); }
-			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 					{ $$ = $1->OnArgsList({$3}, @3); 
-			                                                                  $$ = $$->OnBody($5, @5); }
+// #899		| explicit_norm_node '(' semicolon_args ')' stmt_comp			{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
+			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp		{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
+			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 					{ $$ = $1->OnArgsList({$3}, @3)->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp	
-			  %prec KEYWORD_ARGS_BODY_WITH_ELSE								{ $$ = $1->OnArgsList($3, @3); 
-			                                                                  $$ = $$->OnBody($5, @5); }
+			  %prec KEYWORD_ARGS_BODY_WITH_ELSE								{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp
-			  ELSE_KEYWORD stmt_comp										{ $$ = $1->OnArgsList($3, @3); 
-			                                                                  $$ = $$->OnBody($5, @5); 
-			                                                                  $$ = $$->OnElseBody($7, @6); }
+			  ELSE_KEYWORD stmt_comp										{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5)->OnElseBody($7, @6); }
 
 bare_statement	: KEYWORD_SIMPLE_STMT										
 				| KEYWORD_SPACE_SEP_STMT expr_entry							{ $$ = $1->OnArgsList({$2}, @2); }
-				| DO_KEYWORD stmt_comp WHILE_KEYWORD '(' stmt_boot ')' 		{ $$ = $1->OnBody($2, @2); 
-                                                                              $$ = $$->OnArgsList({$5}, @5); } // TODO a While node is gobbled up here
+				| DO_KEYWORD stmt_comp WHILE_KEYWORD '(' stmt_boot ')' 		{ $$ = $1->OnBody($2, @2)->OnArgsList({$5}, @5); } // TODO a While node is gobbled up here
 
 semicolon_args	: expr_entry										{ $$.push_back($1); }
 				| semicolon_args ';' expr_entry						{ $$ = $1; $$.push_back($3); }
