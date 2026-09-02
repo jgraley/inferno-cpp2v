@@ -49,7 +49,7 @@ class RegularScopeGnomon : public ScopeGnomon
 {
 public:	
 	RegularScopeGnomon( TreePtr<Node> node_ );
-	string GetMessageText() const final;
+	string GetMessageText() const override;
 	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const override;
 
 	TreePtr<Node> node;
@@ -59,17 +59,15 @@ public:
 class ParameterisationScopeGnomon : public ScopeGnomon
 {
 public:	
-	string GetMessageText() const final;
+	string GetMessageText() const override;
 	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const override;
 };
 
 
-class RecordScopeGnomon : public ScopeGnomon
+class RecordScopeGnomon : public RegularScopeGnomon
 {
 public:	
-	RecordScopeGnomon( TreePtr<Node> initial_access, TreePtr<Node> record_type_ );
-	string GetMessageText() const final;
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const override;
+	RecordScopeGnomon( TreePtr<Node> node_, TreePtr<Node> initial_access, TreePtr<Node> record_type_ );
 
 	TreePtr<Node> current_access; // changes as we parse the scope
 	TreePtr<Node> record_type;
@@ -80,7 +78,7 @@ class UnknownScopeGnomon : public ScopeGnomon
 {
 public:	
 	UnknownScopeGnomon(string reason_);
-	string GetMessageText() const final;
+	string GetMessageText() const override;
 	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const override;
 
 	const string reason;
@@ -91,7 +89,7 @@ class PrerestrictScopeGnomon : public ScopeGnomon
 {
 public:	
 	PrerestrictScopeGnomon( TreePtr<Node> node_ );
-	string GetMessageText() const final;
+	string GetMessageText() const override;
 	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const override;
 
 	TreePtr<Node> node;

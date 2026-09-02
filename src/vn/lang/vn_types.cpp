@@ -65,24 +65,11 @@ TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(any loc, bool stat
 }
 
 
-RecordScopeGnomon::RecordScopeGnomon( TreePtr<Node> initial_access, TreePtr<Node> record_type_ ) :
+RecordScopeGnomon::RecordScopeGnomon( TreePtr<Node> node_, TreePtr<Node> initial_access, TreePtr<Node> record_type_ ) :
+	RegularScopeGnomon(node_),
 	current_access( initial_access ),
 	record_type( record_type_ ) 
 {
-}
-
-
-string RecordScopeGnomon::GetMessageText() const 
-{
-	return "record scope";
-}
-
-
-TreePtr<Node> RecordScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
-{
-	if( static_keyword_specified )
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::Global>>(); 
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::Member>>();
 }
 
 

@@ -507,7 +507,7 @@ NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 	{
 		TreePtr<Node> init_access = record->GetInitialAccess();
 		ASSERT( init_access ); // Records must always specify an initial access
-		gnomon = make_shared<RecordScopeGnomon>( MakeStandardAgentFromTypeID( typeid(*init_access) ), record->identifier );
+		gnomon = make_shared<RecordScopeGnomon>( node, MakeStandardAgentFromTypeID( typeid(*init_access) ), record->identifier );
 	}
 	else if( dynamic_pointer_cast<CPPTree::CallableParams>(node) )
 		gnomon = make_shared<ParameterisationScopeGnomon>();
@@ -738,7 +738,7 @@ shared_ptr<Gnomon> VNLangActions::MakeRecordScopeGnomon( TreePtr<Node> record, T
 	auto r = TreePtr<CPPTree::Record>::DynamicCast(record);
 	ASSERT(r);
 	
-	return make_shared<RecordScopeGnomon>(r->GetInitialAccess(), type);
+	return make_shared<RecordScopeGnomon>(record, r->GetInitialAccess(), type);
 }
 
 
