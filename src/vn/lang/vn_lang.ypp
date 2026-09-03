@@ -491,7 +491,7 @@ inheritance_record	: irecord_scope '{' members '}'			 				{ $$ = $1.node->OnMemb
 					| irecord_scope ':' bases '{' '}'						{ $$ = $1.node->OnBases($3, @3); }
              
 irecord_scope   : irecord_node type_specified        						{ $$ = { $1->OnIdentifier($2, @2),  
-																		             vn->MakeRecordScopeGnomon($1, $2) }; 
+																		             vn->MakeRecordScopeGnomon($1) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 irecord_node	: IRECORD_KEYWORD											
@@ -519,14 +519,14 @@ member			: bare_member ';'											{ $$ = $1; }
 // access_clause: OnInstance() will still try to program the current access. But the new fn will override it with the parsed acess, and then try to update the current access
 comp_member		: comp_decl_nvn		
 				| access_clause comp_decl_nvn								{ $$ = $2->OnAccess($1, @1);
-				                                                              vn->ApplyAccessSpec($1); }	
+				                                                              vn->UpdateCurrentAccess($1); }	
 				
 bare_member		: bare_member_nvn
 				| acc_memb_prefix  
 
 bare_member_nvn : bare_decl_nvn
 				| access_clause bare_decl_nvn								{ $$ = $2->OnAccess($1, @1);
-				                                                              vn->ApplyAccessSpec($1); }	
+				                                                              vn->UpdateCurrentAccess($1); }	
 				                                                              
 access_clause	: acc_memb_prefix ':'									
 
@@ -570,7 +570,7 @@ enum			: enum_scope '{' enumerators '}'		 					{ $$ = $1.node->OnMembers( $3, @3
 				| enum_scope '{' '}'		 								{ $$ = $1.node; }
              
 enum_scope      : enum_node type_specified       							{ $$ = { $1->OnIdentifier($2, @2), 
-																		             vn->MakeRecordScopeGnomon($1, $2) }; 
+																		             vn->MakeRecordScopeGnomon($1) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 enum_node		: ENUM_KEYWORD												

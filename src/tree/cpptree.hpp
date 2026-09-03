@@ -151,7 +151,7 @@ struct CodeUnit : DeclScope
 	NODE_FUNCTIONS_FINAL
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *access, YY::VNLangParser::location_type loc) const override; 
 };
 
 
@@ -817,7 +817,7 @@ struct CallableParams : Callable, Scope
     NODE_FUNCTIONS
     Collection<Declaration> params; // TODO be Parameter #803
     virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *access, YY::VNLangParser::location_type loc) const override; 
 
 protected:    
     string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy) override;
@@ -1049,6 +1049,7 @@ struct TypeDeclaration : Declaration
 	TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type loc ) override;
 };
 
+
 /// Represents a typedef. 
 /** Typedef is to the specified type. We do not expand these at parse, but try to retain
     them for as long as possible */
@@ -1062,6 +1063,7 @@ struct Typedef : TypeDeclaration
 	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 	TreePtr<Node> OnType( TreePtr<Node> type, YY::VNLangParser::location_type loc ) override;
 }; 
+
 
 /// Intermediate for declaration of a struct, class, union or enum. 
 /** The set of member Declaration (which will be Member
@@ -1079,8 +1081,9 @@ struct Record : TypeDeclaration,
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
     virtual string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
 	virtual string RenderBody( VN::RendererInterface *renderer, Policy policy );
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *access, YY::VNLangParser::location_type loc) const override; 
 };
+
 
 /// A union, as per Record.
 struct Union : Record 
@@ -1090,6 +1093,7 @@ struct Union : Record
 	TreePtr<AccessSpec> GetInitialAccess() const override;    
     string GetKeyword( Policy ) const override;	
 };
+
 
 /// An Enumeration, as per record. 
 /** We regard enumerations as static const variables, initialised as per 
@@ -1101,7 +1105,9 @@ struct Enumeration : Record
     string GetKeyword( Policy ) const override;
 	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	
 	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;	
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *access, YY::VNLangParser::location_type loc) const override; 
 };
+
 
 /// A record that can inherit from other records and be inherited from. 
 /** We add in a list of base class declarations. */
@@ -1116,6 +1122,7 @@ struct InheritanceRecord : Record
 	TreePtr<Node> OnBases( list<TreePtr<Node>> bases, YY::VNLangParser::location_type loc ) override;
 };
 
+
 /// Struct as per InheritanceRecord
 struct Struct : InheritanceRecord 
 { 
@@ -1124,6 +1131,7 @@ struct Struct : InheritanceRecord
 	TreePtr<AccessSpec> GetInitialAccess() const override;    
     string GetKeyword( Policy ) const override;
 };
+
 
 /// Class as per InheritanceRecord
 struct Class : InheritanceRecord 
@@ -1389,7 +1397,7 @@ struct SequentialScope : DeclScope,
     Sequence<Statement> statements; ///< Can contain local declarations and code
     virtual string GetColour() const { return Statement::GetColour(); } // Statement wins    
 	TreePtr<Node> OnStatements( list<TreePtr<Node>> statements, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *access, YY::VNLangParser::location_type loc) const override; 
 };
 
 

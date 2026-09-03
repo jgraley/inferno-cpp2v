@@ -44,7 +44,13 @@ string RegularScopeGnomon::GetMessageText() const
 
 TreePtr<Node> RegularScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
 {
-	return node->CreateDeclNode( static_keyword_specified, any_cast<YY::VNLangParser::location_type>(loc) );
+	return node->CreateDeclNode( static_keyword_specified, nullptr, any_cast<YY::VNLangParser::location_type>(loc) );
+}
+
+
+TreePtr<Node> RegularScopeGnomon::GetNode() const
+{
+	return node;
 }
 
 
@@ -65,11 +71,16 @@ TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(any loc, bool stat
 }
 
 
-RecordScopeGnomon::RecordScopeGnomon( TreePtr<Node> node_, TreePtr<Node> initial_access, TreePtr<Node> record_type_ ) :
+AccessScopeGnomon::AccessScopeGnomon( TreePtr<Node> node_, TreePtr<Node> initial_access ) :
 	RegularScopeGnomon(node_),
-	current_access( initial_access ),
-	record_type( record_type_ ) 
+	current_access( initial_access )
 {
+}
+
+
+TreePtr<Node> AccessScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
+{
+	return node->CreateDeclNode( static_keyword_specified, &current_access, any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 

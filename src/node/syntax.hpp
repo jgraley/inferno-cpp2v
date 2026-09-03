@@ -12,6 +12,7 @@
 namespace VN
 {
 	class RendererInterface;
+	class ScopeGnomon;
 };
 
 /// Interface for being able to reutnr a string for rendering (as opposed to debug)
@@ -201,7 +202,7 @@ public:
 	virtual TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const; 
+	virtual TreePtr<Node> CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *access, YY::VNLangParser::location_type loc) const; 
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"

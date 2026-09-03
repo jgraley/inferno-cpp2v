@@ -287,7 +287,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 }
 
 
-TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const
+TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *, YY::VNLangParser::location_type loc) const
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -1379,7 +1379,7 @@ string Callable::GetRenderParameterisation(VN::RendererInterface *, Policy )
 
 //////////////////////////// CallableParams //////////////////////////////
 
-TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type loc) const
+TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *, YY::VNLangParser::location_type loc) const
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -1859,12 +1859,20 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 }
 
 
-TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type) const
-{
+TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *access, YY::VNLangParser::location_type) const
+{	
 	if( static_keyword_specified )
+	{
 		return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
+	}
 	else
-		return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Member>>();
+	{
+		auto memb = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Member>>();
+		// Use the currently stored access spec
+		// Note: the access spec set here can be overridden by UpdateCurrentAccess()
+		memb->access = *access; // Don't duplicate the subtree - we want coupling behaviour		
+		return memb;
+	}
 }
 
 
@@ -1916,6 +1924,23 @@ string Enumeration::RenderBody( VN::RendererInterface *renderer, Policy policy )
 YY::VNLangParser::token::token_kind_type Enumeration::GetKeywordToken() const
 {
 	return YY::VNLangParser::token::TOK_ENUM_KEYWORD;
+}
+
+
+
+TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *, YY::VNLangParser::location_type loc) const
+{
+	if( static_keyword_specified )
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"static is not allowed for enumerators.");
+	auto en = MakeTreeNode<VN::StandardAgentWrapper<Enumerator>>(); 
+	
+	// Whatever we're called, that's the type of our enumerations. Would still be true if we're given
+	// explicit underlying type.
+	en->type = identifier;
+	
+	return en;
 }
 
 //////////////////////////// InheritanceRecord ///////////////////////////////
@@ -2269,7 +2294,7 @@ TreePtr<Node> SequentialScope::OnStatements( list<TreePtr<Node>> statements_, YY
 }
 
 
-TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, YY::VNLangParser::location_type) const
+TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *, YY::VNLangParser::location_type) const
 {
 	if( static_keyword_specified )
 		return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
