@@ -684,7 +684,7 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 
 	if( shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop() )
 		if( auto fspg = dynamic_cast<AccessScopeGnomon *>(spg.get()) )
-			member->access = fspg->current_access; // Don't duplicate the subtree - we want coupling behaviour			
+			member->access = any_cast<TreePtr<Node>>(fspg->context); // Don't duplicate the subtree - we want coupling behaviour			
 	
 	return member;
 }
@@ -697,7 +697,7 @@ void VNLangActions::UpdateCurrentAccess( TreePtr<Node> access )
 	// If we're in a record scope, update the stored access spec for future fields to use
 	if( shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop() )	
 		if( auto fspg = dynamic_cast<AccessScopeGnomon *>(spg.get()) ) 	
-			fspg->current_access = access; // Don't duplicate the subtree - we want coupling behaviour
+			fspg->context = access; // Don't duplicate the subtree - we want coupling behaviour
 }
 
 

@@ -205,7 +205,7 @@ TreePtr<Node> Syntax::OnElseBody( TreePtr<Node>, YY::VNLangParser::location_type
 } 
 
 
-TreePtr<Node> Syntax::CreateDeclNode(bool, const TreePtr<Node> *, YY::VNLangParser::location_type loc) const
+TreePtr<Node> Syntax::CreateDeclNode(bool, any &, YY::VNLangParser::location_type loc) const
 {
 	throw YY::VNLangParser::syntax_error( loc,
 		MyBestErrName() + " cannot act as a scope for declarations.");		

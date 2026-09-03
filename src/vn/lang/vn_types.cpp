@@ -21,7 +21,7 @@ Gnomon::~Gnomon()
 }
 
 
-TreePtr<Node> ScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
+TreePtr<Node> ScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
 {
 	throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
@@ -42,9 +42,10 @@ string RegularScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> RegularScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
-{
-	return node->CreateDeclNode( static_keyword_specified, nullptr, any_cast<YY::VNLangParser::location_type>(loc) );
+TreePtr<Node> RegularScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
+{	
+	any context( nullptr ); // TODO hold in class
+	return node->CreateDeclNode( static_keyword_specified, context, any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 
@@ -60,7 +61,7 @@ string ParameterisationScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
+TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -73,14 +74,14 @@ TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(any loc, bool stat
 
 AccessScopeGnomon::AccessScopeGnomon( TreePtr<Node> node_, TreePtr<Node> initial_access ) :
 	RegularScopeGnomon(node_),
-	current_access( initial_access )
+	context( initial_access )
 {
 }
 
 
-TreePtr<Node> AccessScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
+TreePtr<Node> AccessScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
 {
-	return node->CreateDeclNode( static_keyword_specified, &current_access, any_cast<YY::VNLangParser::location_type>(loc) );
+	return node->CreateDeclNode( static_keyword_specified, context, any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 
@@ -96,7 +97,7 @@ string UnknownScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> UnknownScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
+TreePtr<Node> UnknownScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
 {
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
@@ -119,7 +120,7 @@ string PrerestrictScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> PrerestrictScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) const 
+TreePtr<Node> PrerestrictScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
 {
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"

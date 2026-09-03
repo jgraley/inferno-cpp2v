@@ -287,7 +287,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 }
 
 
-TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *, YY::VNLangParser::location_type loc) const
+TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, any &, YY::VNLangParser::location_type loc) const
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -1379,7 +1379,7 @@ string Callable::GetRenderParameterisation(VN::RendererInterface *, Policy )
 
 //////////////////////////// CallableParams //////////////////////////////
 
-TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *, YY::VNLangParser::location_type loc) const
+TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, any &, YY::VNLangParser::location_type loc) const
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -1859,7 +1859,7 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 }
 
 
-TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *access, YY::VNLangParser::location_type) const
+TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type) const
 {	
 	if( static_keyword_specified )
 	{
@@ -1870,7 +1870,7 @@ TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, const TreePt
 		auto memb = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Member>>();
 		// Use the currently stored access spec
 		// Note: the access spec set here can be overridden by UpdateCurrentAccess()
-		memb->access = *access; // Don't duplicate the subtree - we want coupling behaviour		
+		memb->access = any_cast<TreePtr<Node>>(context); // Don't duplicate the subtree - we want coupling behaviour		
 		return memb;
 	}
 }
@@ -1928,7 +1928,7 @@ YY::VNLangParser::token::token_kind_type Enumeration::GetKeywordToken() const
 
 
 
-TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *, YY::VNLangParser::location_type loc) const
+TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, any &, YY::VNLangParser::location_type loc) const
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -2294,7 +2294,7 @@ TreePtr<Node> SequentialScope::OnStatements( list<TreePtr<Node>> statements_, YY
 }
 
 
-TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, const TreePtr<Node> *, YY::VNLangParser::location_type) const
+TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, any &, YY::VNLangParser::location_type) const
 {
 	if( static_keyword_specified )
 		return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 

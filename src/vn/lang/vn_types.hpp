@@ -41,7 +41,7 @@ class ScopeGnomon : public Gnomon
 {
 public:	
 	virtual string GetMessageText() const = 0;	
-	virtual TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const;
+	virtual TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified);
 };
 
 
@@ -50,7 +50,7 @@ class RegularScopeGnomon : public ScopeGnomon
 public:	
 	RegularScopeGnomon( TreePtr<Node> node_ );
 	string GetMessageText() const override;
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const override;
+	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
 	TreePtr<Node> GetNode() const;
 
 	TreePtr<Node> node;
@@ -61,7 +61,7 @@ class ParameterisationScopeGnomon : public ScopeGnomon
 {
 public:	
 	string GetMessageText() const override;
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const override;
+	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
 };
 
 
@@ -69,8 +69,8 @@ class AccessScopeGnomon : public RegularScopeGnomon
 {
 public:	
 	AccessScopeGnomon( TreePtr<Node> node_, TreePtr<Node> initial_access );
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const override;
-	TreePtr<Node> current_access; // changes as we parse the scope
+	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
+	any context; // changes as we parse the scope
 };
 
 
@@ -79,7 +79,7 @@ class UnknownScopeGnomon : public ScopeGnomon
 public:	
 	UnknownScopeGnomon(string reason_);
 	string GetMessageText() const override;
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const override;
+	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
 
 	const string reason;
 };
@@ -90,7 +90,7 @@ class PrerestrictScopeGnomon : public ScopeGnomon
 public:	
 	PrerestrictScopeGnomon( TreePtr<Node> node_ );
 	string GetMessageText() const override;
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) const override;
+	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
 
 	TreePtr<Node> node;
 };
