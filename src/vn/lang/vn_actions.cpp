@@ -1062,7 +1062,7 @@ TreePtr<Node> CPPTree::AccessSpec::GetDefaultNode(TreePtr<Node> type) const
 	ASSERT(record); // Type is not a record (maybe could provide Public)
 	any ic = record->GetInitialContext();
 	if( ic.has_value() )
-		return any_cast<TreePtr<Node>>(ic);
+		return any_cast<TreePtr<AccessSpec>>(ic);
 	else
 		return nullptr;
 }

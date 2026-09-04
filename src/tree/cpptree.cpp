@@ -159,7 +159,8 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 	if( policy.context.has_value() )
 	{
 		//ls.push_back( "/* "+Trace(*policy.context)+" -> "+Trace(new_access)+" */" );
-		if( new_access.get() != any_cast<TreePtr<Node>>(policy.context).get() )			
+		FTRACE(CPPFilt(policy.context.type().name()))("\n");
+		if( new_access.get() != any_cast<TreePtr<AccessSpec>>(policy.context).get() )			
 			ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );	
 		policy.context = new_access;
 	}
@@ -1791,7 +1792,7 @@ TreePtr<Node> Typedef::OnType( TreePtr<Node> type_, YY::VNLangParser::location_t
 
 any Record::GetInitialContext() const
 {
-	return (TreePtr<Node>)(MakeTreeNode<Public>());
+	return (TreePtr<AccessSpec>)(MakeTreeNode<Public>());
 }
 
 
@@ -1857,7 +1858,7 @@ void Record::UpdateContext( TreePtr<Node> node, any &context, YY::VNLangParser::
 		throw YY::VNLangParser::syntax_error( loc,
 			MyBestErrName() + " context can only be updated by an AccessSpec (was " + node->MyBestErrName() + ")");		
 
-	any_cast<TreePtr<Node> &>(context) = node;
+	context = TreePtr<AccessSpec>::DynamicCast(node);
 }	
 	
 	
@@ -1872,7 +1873,7 @@ TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context
 		auto memb = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Member>>();
 		// Use the currently stored access spec
 		// Note: the access spec set here can be overridden by UpdateCurrentAccess()
-		memb->access = any_cast<TreePtr<Node>>(context); // Don't duplicate the subtree - we want coupling behaviour		
+		memb->access = any_cast<TreePtr<AccessSpec>>(context); // Don't duplicate the subtree - we want coupling behaviour		
 		return memb;
 	}
 }
@@ -1889,7 +1890,7 @@ YY::VNLangParser::token::token_kind_type InheritanceRecord::GetKeywordToken() co
 
 any Union::GetInitialContext() const
 {
-	return (TreePtr<Node>)(MakeTreeNode<Public>());
+	return (TreePtr<AccessSpec>)(MakeTreeNode<Public>());
 }
 
 
@@ -1970,7 +1971,7 @@ TreePtr<Node> InheritanceRecord::OnBases( list<TreePtr<Node>> bases_, YY::VNLang
 
 any Struct::GetInitialContext() const
 {
-	return (TreePtr<Node>)(MakeTreeNode<Public>());
+	return (TreePtr<AccessSpec>)(MakeTreeNode<Public>());
 }
 
 
@@ -1983,7 +1984,7 @@ string Struct::GetKeyword( Policy ) const
 
 any Class::GetInitialContext() const
 {
-	return (TreePtr<Node>)(MakeTreeNode<Private>());
+	return (TreePtr<AccessSpec>)(MakeTreeNode<Private>());
 }
 
 

@@ -140,7 +140,7 @@ string PrerestrictScopeGnomon::GetMessageText() const
 }
 
 
-void PrerestrictScopeGnomon::UpdateContext(any, TreePtr<Node> )
+void PrerestrictScopeGnomon::UpdateContext(any, TreePtr<Node>)
 {
 	// There is no context so discard the update
 }
