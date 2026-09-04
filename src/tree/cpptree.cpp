@@ -1789,16 +1789,10 @@ TreePtr<Node> Typedef::OnType( TreePtr<Node> type_, YY::VNLangParser::location_t
 
 //////////////////////////// Record ///////////////////////////////
 
-any Record::GetInitalContext() const
+any Record::GetInitialContext() const
 {
 	return (TreePtr<Node>)(MakeTreeNode<Public>());
 }
-
-
-void Record::InitialiseAccess( Policy &policy ) const
-{
-	policy.context = GetInitalContext();
-}  
 
 
 Syntax::Production Record::GetMyProductionTerminal() const
@@ -1816,9 +1810,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Production, Policy po
 		Append( ls, ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, renderer, policy ) );// see #877
 
 	// For our members
-	any ic = GetInitalContext();
-	FTRACE(ic.type().name())("\n");
-	InitialiseAccess( policy );
+	policy.context = GetInitialContext();
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
@@ -1895,7 +1887,7 @@ YY::VNLangParser::token::token_kind_type InheritanceRecord::GetKeywordToken() co
 
 //////////////////////////// Union ///////////////////////////////
 
-any Union::GetInitalContext() const
+any Union::GetInitialContext() const
 {
 	return (TreePtr<Node>)(MakeTreeNode<Public>());
 }
@@ -1908,16 +1900,10 @@ string Union::GetKeyword( Policy ) const
 
 //////////////////////////// Enumeration ///////////////////////////////
 
-any Enumeration::GetInitalContext() const
+any Enumeration::GetInitialContext() const
 {
 	return any();
 }
-
-
-void Enumeration::InitialiseAccess( Policy &policy ) const
-{
-	policy.context = GetInitalContext();
-} 
 
 
 string Enumeration::GetKeyword( Policy ) const
@@ -1982,7 +1968,7 @@ TreePtr<Node> InheritanceRecord::OnBases( list<TreePtr<Node>> bases_, YY::VNLang
 
 //////////////////////////// Struct ///////////////////////////////
 
-any Struct::GetInitalContext() const
+any Struct::GetInitialContext() const
 {
 	return (TreePtr<Node>)(MakeTreeNode<Public>());
 }
@@ -1995,7 +1981,7 @@ string Struct::GetKeyword( Policy ) const
 
 //////////////////////////// Class ///////////////////////////////
 
-any Class::GetInitalContext() const
+any Class::GetInitialContext() const
 {
 	return (TreePtr<Node>)(MakeTreeNode<Private>());
 }

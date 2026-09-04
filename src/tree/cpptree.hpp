@@ -1075,8 +1075,7 @@ struct Record : TypeDeclaration,
     NODE_FUNCTIONS
        
     virtual string GetColour() const { return TypeDeclaration::GetColour(); } // TypeDeclaration wins
-	any GetInitalContext() const override;    
-	virtual void InitialiseAccess( Policy &policy ) const;    
+	any GetInitialContext() const override;    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
     virtual string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
@@ -1092,7 +1091,7 @@ struct Union : Record
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	any GetInitalContext() const override;    
+	any GetInitialContext() const override;    
     string GetKeyword( Policy ) const override;	
 };
 
@@ -1103,8 +1102,7 @@ struct Union : Record
 struct Enumeration : Record 
 { 
 	NODE_FUNCTIONS_FINAL 
-	void InitialiseAccess( Policy &policy ) const override;
-	any GetInitalContext() const override;    
+	any GetInitialContext() const override;    
     string GetKeyword( Policy ) const override;
 	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	
 	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;	
@@ -1131,7 +1129,7 @@ struct Struct : InheritanceRecord
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	any GetInitalContext() const override;    
+	any GetInitialContext() const override;    
     string GetKeyword( Policy ) const override;
 };
 
@@ -1141,7 +1139,7 @@ struct Class : InheritanceRecord
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	any GetInitalContext() const override;    
+	any GetInitialContext() const override;    
     string GetKeyword( Policy ) const override;
 };
 

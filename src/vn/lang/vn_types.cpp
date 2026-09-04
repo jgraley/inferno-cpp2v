@@ -89,7 +89,7 @@ AccessScopeGnomon::AccessScopeGnomon( TreePtr<Node> scope_node_ ) :
 	auto record = dynamic_pointer_cast<CPPTree::Record>(scope_node);
 	ASSERT( record );
 	// Get the type exactly right for std::any
-	context = record->GetInitalContext();
+	context = record->GetInitialContext();
 }
 
 
