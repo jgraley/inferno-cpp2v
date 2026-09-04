@@ -84,12 +84,9 @@ TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(any loc, bool stat
 
 
 AccessScopeGnomon::AccessScopeGnomon( TreePtr<Node> scope_node_ ) :
-	RegularScopeGnomon(scope_node_)
+	RegularScopeGnomon(scope_node_),
+	context( scope_node->GetInitialContext() )
 {
-	auto record = dynamic_pointer_cast<CPPTree::Record>(scope_node);
-	ASSERT( record );
-	// Get the type exactly right for std::any
-	context = record->GetInitialContext();
 }
 
 
