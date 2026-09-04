@@ -30,28 +30,39 @@ TreePtr<Node> ScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_speci
 }
 
 
-RegularScopeGnomon::RegularScopeGnomon( TreePtr<Node> node_ ) :
-	node(node_) 
+void ScopeGnomon::UpdateContext(any loc, TreePtr<Node> update_node)
 {
+	throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			"Context update not allowed inside " +
+			GetMessageText() + 
+			" (update node is " + update_node->MyBestErrName() + ")");
+}
+
+
+RegularScopeGnomon::RegularScopeGnomon( TreePtr<Node> scope_node_ ) :
+	scope_node(scope_node_) 
+{
+	ASSERT(scope_node);
 }
 
 
 string RegularScopeGnomon::GetMessageText() const 
 {
-	return node->MyBestErrName() + " scope";
+	return scope_node->MyBestErrName() + " regular scope";
 }
 
 
 TreePtr<Node> RegularScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
 {	
 	any context( nullptr ); // TODO hold in class
-	return node->CreateDeclNode( static_keyword_specified, context, any_cast<YY::VNLangParser::location_type>(loc) );
+	return scope_node->CreateDeclNode( static_keyword_specified, context, any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 
 TreePtr<Node> RegularScopeGnomon::GetNode() const
 {
-	return node;
+	return scope_node;
 }
 
 
@@ -72,16 +83,25 @@ TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(any loc, bool stat
 }
 
 
-AccessScopeGnomon::AccessScopeGnomon( TreePtr<Node> node_, TreePtr<Node> initial_access ) :
-	RegularScopeGnomon(node_),
-	context( initial_access )
+AccessScopeGnomon::AccessScopeGnomon( TreePtr<Node> scope_node_ ) :
+	RegularScopeGnomon(scope_node_)
 {
+	auto record = dynamic_pointer_cast<CPPTree::Record>(scope_node);
+	ASSERT( record );
+	// Get the type exactly right for std::any
+	context = any_cast<TreePtr<Node>>(record->GetInitalContext());
 }
 
 
 TreePtr<Node> AccessScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
 {
-	return node->CreateDeclNode( static_keyword_specified, context, any_cast<YY::VNLangParser::location_type>(loc) );
+	return scope_node->CreateDeclNode( static_keyword_specified, context, any_cast<YY::VNLangParser::location_type>(loc) );
+}
+
+
+void AccessScopeGnomon::UpdateContext(any loc, TreePtr<Node> update_node)
+{
+	scope_node->UpdateContext( update_node, context, any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 
@@ -117,6 +137,12 @@ PrerestrictScopeGnomon::PrerestrictScopeGnomon( TreePtr<Node> node_ ) :
 string PrerestrictScopeGnomon::GetMessageText() const 
 {
 	return "prerestrict scope";
+}
+
+
+void PrerestrictScopeGnomon::UpdateContext(any, TreePtr<Node> )
+{
+	// There is no context so discard the update
 }
 
 

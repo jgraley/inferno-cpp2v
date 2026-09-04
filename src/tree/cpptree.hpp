@@ -1075,12 +1075,14 @@ struct Record : TypeDeclaration,
     NODE_FUNCTIONS
        
     virtual string GetColour() const { return TypeDeclaration::GetColour(); } // TypeDeclaration wins
-	virtual TreePtr<AccessSpec> GetInitialAccess() const;    
+	any GetInitalContext() const override;    
 	virtual void InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const;    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
     virtual string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
 	virtual string RenderBody( VN::RendererInterface *renderer, Policy policy );
+
+	virtual void UpdateContext( TreePtr<Node> node, any &context, YY::VNLangParser::location_type loc );	
 	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type loc) const override; 
 };
 
@@ -1090,7 +1092,7 @@ struct Union : Record
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	TreePtr<AccessSpec> GetInitialAccess() const override;    
+	any GetInitalContext() const override;    
     string GetKeyword( Policy ) const override;	
 };
 
@@ -1128,7 +1130,7 @@ struct Struct : InheritanceRecord
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	TreePtr<AccessSpec> GetInitialAccess() const override;    
+	any GetInitalContext() const override;    
     string GetKeyword( Policy ) const override;
 };
 
@@ -1138,7 +1140,7 @@ struct Class : InheritanceRecord
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	TreePtr<AccessSpec> GetInitialAccess() const override;    
+	any GetInitalContext() const override;    
     string GetKeyword( Policy ) const override;
 };
 

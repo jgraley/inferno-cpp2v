@@ -205,8 +205,21 @@ TreePtr<Node> Syntax::OnElseBody( TreePtr<Node>, YY::VNLangParser::location_type
 } 
 
 
+any Syntax::GetInitalContext() const
+{
+	return any();	// std::any is nullable
+}
+
+
+void Syntax::UpdateContext( TreePtr<Node>, any &context, YY::VNLangParser::location_type )
+{
+	ASSERT( !context.has_value() ); //	GetInitalContext() wasimplemented therefore so should this be
+	// No action otherwise because no context
+}	
+
+
 TreePtr<Node> Syntax::CreateDeclNode(bool, any &, YY::VNLangParser::location_type loc) const
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " cannot act as a scope for declarations.");		
+		MyBestErrName() + " cannot act as a scope for declarations.");	
 }

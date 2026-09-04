@@ -162,6 +162,7 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 		if( new_access.get() != policy.cur_access->get() )			
 			ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );	
 		*policy.cur_access = new_access;
+		policy.context = new_access;
 	}
 	else if( force )
 	{
@@ -202,6 +203,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 	(void)surround_prod;
  	policy.permit_static_keyword = false; // No support for code-unit statics
 	policy.cur_access = nullptr; // No access specs here
+	policy.context = any(); // No access specs here
 
 	if( !policy.full_render_code_unit )
 	{
@@ -1393,6 +1395,7 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 {
 	INDENT("P");
 	policy.cur_access = nullptr; // No access spec here
+	policy.context = any(); // No access spec here
 		
     list<string> strings;
     for( auto &d : params )	
@@ -1789,15 +1792,16 @@ TreePtr<Node> Typedef::OnType( TreePtr<Node> type_, YY::VNLangParser::location_t
 
 //////////////////////////// Record ///////////////////////////////
 
-TreePtr<AccessSpec> Record::GetInitialAccess() const
+any Record::GetInitalContext() const
 {
-	return MakeTreeNode<Public>();
+	return (TreePtr<Node>)(MakeTreeNode<Public>());
 }
 
 
 void Record::InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const
 {
-	*local_access = GetInitialAccess();
+	policy.context = GetInitalContext();
+	*local_access = any_cast<TreePtr<Node>>(policy.context);
 	policy.cur_access = local_access;
 }  
 
@@ -1817,7 +1821,9 @@ string Record::GetRender( VN::RendererInterface *renderer, Production, Policy po
 		Append( ls, ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, renderer, policy ) );// see #877
 
 	// For our members
-	shared_ptr<Syntax> local_access = GetInitialAccess();
+	any ic = GetInitalContext();
+	FTRACE(ic.type().name())("\n");
+	shared_ptr<Syntax> local_access = any_cast<TreePtr<Node>>(ic); // TODO no need to initialise
 	InitialiseAccess( &local_access, policy );
 
 	Policy id_policy = policy;
@@ -1859,6 +1865,16 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 }
 
 
+void Record::UpdateContext( TreePtr<Node> node, any &context, YY::VNLangParser::location_type loc )
+{
+	if( node && !TreePtr<AccessSpec>::DynamicCast(node) ) // node can be NULL, which we'll allow as wildcard
+		throw YY::VNLangParser::syntax_error( loc,
+			MyBestErrName() + " context can only be updated by an AccessSpec (was " + node->MyBestErrName() + ")");		
+
+	any_cast<TreePtr<Node> &>(context) = node;
+}	
+	
+	
 TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type) const
 {	
 	if( static_keyword_specified )
@@ -1885,9 +1901,9 @@ YY::VNLangParser::token::token_kind_type InheritanceRecord::GetKeywordToken() co
 
 //////////////////////////// Union ///////////////////////////////
 
-TreePtr<AccessSpec> Union::GetInitialAccess() const
+any Union::GetInitalContext() const
 {
-	return MakeTreeNode<Public>();
+	return (TreePtr<Node>)(MakeTreeNode<Public>());
 }
 
 
@@ -1902,6 +1918,7 @@ void Enumeration::InitialiseAccess( shared_ptr<Syntax> *, Policy &policy ) const
 {
 	// Don't use the local access pointer, just disable the mechanism in this scope
 	policy.cur_access = nullptr;
+	policy.context = any(); // No access spec here
 } 
 
 
@@ -1967,9 +1984,9 @@ TreePtr<Node> InheritanceRecord::OnBases( list<TreePtr<Node>> bases_, YY::VNLang
 
 //////////////////////////// Struct ///////////////////////////////
 
-TreePtr<AccessSpec> Struct::GetInitialAccess() const
+any Struct::GetInitalContext() const
 {
-	return MakeTreeNode<Public>();
+	return (TreePtr<Node>)(MakeTreeNode<Public>());
 }
 
 
@@ -1980,9 +1997,9 @@ string Struct::GetKeyword( Policy ) const
 
 //////////////////////////// Class ///////////////////////////////
 
-TreePtr<AccessSpec> Class::GetInitialAccess() const
+any Class::GetInitalContext() const
 {
-	return MakeTreeNode<Private>();
+	return (TreePtr<Node>)(MakeTreeNode<Private>());
 }
 
 
@@ -2316,7 +2333,8 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
     string s = "{\n";
  	policy.permit_static_keyword = true; // In a compound, static means global
 	policy.cur_access = nullptr; // No access specs here
-	
+	policy.context = any(); // No access spec here
+
     for( auto &m : members )    
         s += renderer->DoRender( &m, Production::STMT_DECL, policy );    
     if( policy.compound_uses_vn_separator )
@@ -2345,6 +2363,7 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 		// gets the updated policy. 
 		policy.permit_static_keyword = true; // In a compound, static means global
 		policy.cur_access = nullptr; // No access specs here
+		policy.context = any(); // No access spec here
 		return renderer->RenderNodeExplicit(shared_from_this(), production, policy);
 	}
 	    

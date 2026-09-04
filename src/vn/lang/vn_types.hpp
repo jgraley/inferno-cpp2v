@@ -42,18 +42,20 @@ class ScopeGnomon : public Gnomon
 public:	
 	virtual string GetMessageText() const = 0;	
 	virtual TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified);
+	virtual void UpdateContext(any loc, TreePtr<Node> node);
 };
 
 
 class RegularScopeGnomon : public ScopeGnomon
 {
 public:	
-	RegularScopeGnomon( TreePtr<Node> node_ );
+	RegularScopeGnomon( TreePtr<Node> scope_node_ );
 	string GetMessageText() const override;
 	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
+	//void UpdateContext(any loc, TreePtr<Node> update_node) override;
 	TreePtr<Node> GetNode() const;
 
-	TreePtr<Node> node;
+	TreePtr<Node> scope_node;
 };
 
 
@@ -68,8 +70,10 @@ public:
 class AccessScopeGnomon : public RegularScopeGnomon
 {
 public:	
-	AccessScopeGnomon( TreePtr<Node> node_, TreePtr<Node> initial_access );
+	AccessScopeGnomon( TreePtr<Node> node_ );
 	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
+	void UpdateContext(any loc, TreePtr<Node> update_node) override;
+
 	any context; // changes as we parse the scope
 };
 
@@ -90,6 +94,7 @@ class PrerestrictScopeGnomon : public ScopeGnomon
 public:	
 	PrerestrictScopeGnomon( TreePtr<Node> node_ );
 	string GetMessageText() const override;
+	void UpdateContext(any loc, TreePtr<Node> update_node) override;
 	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
 
 	TreePtr<Node> node;

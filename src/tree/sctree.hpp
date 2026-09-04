@@ -48,7 +48,7 @@ struct Module : SCRecord
     NODE_FUNCTIONS_FINAL
     
     virtual string GetLoweredIdName() const { return "sc_module"; }
-  	TreePtr<CPPTree::AccessSpec> GetInitialAccess() const override { return MakeTreeNode<CPPTree::Private>(); }   
+  	any GetInitalContext() const override { return (TreePtr<Node>)MakeTreeNode<CPPTree::Private>(); }   
 };
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 
@@ -58,7 +58,7 @@ struct Interface : SCRecord
     NODE_FUNCTIONS_FINAL
     
     virtual string GetLoweredIdName() const { return "sc_interface"; }
-  	TreePtr<CPPTree::AccessSpec> GetInitialAccess() const override { return MakeTreeNode<CPPTree::Private>(); } 
+  	any GetInitalContext() const override { return (TreePtr<Node>)MakeTreeNode<CPPTree::Private>(); } 
 };
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 

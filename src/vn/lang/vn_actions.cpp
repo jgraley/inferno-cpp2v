@@ -505,9 +505,7 @@ NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 	shared_ptr<Gnomon> gnomon;
 	if( auto record = dynamic_pointer_cast<CPPTree::Record>(node) )
 	{
-		TreePtr<Node> init_access = record->GetInitialAccess();
-		ASSERT( init_access ); // Records must always specify an initial access
-		gnomon = make_shared<AccessScopeGnomon>( node, MakeStandardAgentFromTypeID( typeid(*init_access) ) );
+		gnomon = make_shared<AccessScopeGnomon>( node );
 	}
 	else if( dynamic_pointer_cast<CPPTree::CallableParams>(node) )
 		gnomon = make_shared<ParameterisationScopeGnomon>();
@@ -585,7 +583,6 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
-	TreePtr<CPPTree::Instance> instance;
 	if( !spg ) 
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(middle_loc),
@@ -593,7 +590,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	
 	// Get whichever kind of declaration is allowed in the current scope. This can throw
 	// for a range of reasons!
-	instance = spg->GetDeclarationNode(middle_loc, !!q_static); 
+	TreePtr<CPPTree::Instance> instance = spg->GetDeclarationNode(middle_loc, !!q_static); 
 
 	instance->constancy = declarator_result.cv_quals_view.constancy; 
 		
@@ -651,12 +648,29 @@ TreePtr<Node> VNLangActions::OnEnumerator( any loc, TreePtr<Node> id )
 
 TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierData> &quals, TreePtr<Node> id, list<TreePtr<Node>> params )
 {
+	// TODO process the qualifiers in one loop at the top, with lots of checking. Check for:
+	// - wrong qualifier eg an access spec
+	// - duplication/conflict of qualifiers (<=1 in each category)
+	const QualifierData *q_static = nullptr;
+	for( const QualifierData &q : quals )
+		if( q.cat == QualCat::STATIC )
+			q_static = &q;
+
+	//auto member = MakeTreeNode<StandardAgentWrapper<CPPTree::Member>>();
+	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
+	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	if( !spg ) 
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			"Cannot disambiguate declaration because no surrounding scope." );
+	TreePtr<CPPTree::Member> member = spg->GetDeclarationNode(loc, !!q_static); 
+
+	member->identifier = id;
+	
 	auto cons_type = MakeTreeNode<StandardAgentWrapper<CPPTree::Constructor>>();
 	for( auto param : params )
-		cons_type->params.push_back(param);
+		cons_type->params.push_back(param);	
 	
-	auto member = MakeTreeNode<StandardAgentWrapper<CPPTree::Member>>();
-	member->identifier = id;
 	member->type = cons_type;
 	member->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
 	member->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();
@@ -676,28 +690,21 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 						any_cast<YY::VNLangParser::location_type>(loc),
 						"Constructor does not support virtuality: " + DiagQuote(q.GetDiagnostic()) );
 		case QualCat::STATIC:
-				throw YY::VNLangParser::syntax_error(
-						any_cast<YY::VNLangParser::location_type>(loc),
-						"Xstructor cannot be static" );		
+				break;
 		}
 	}
-
-	if( shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop() )
-		if( auto fspg = dynamic_cast<AccessScopeGnomon *>(spg.get()) )
-			member->access = any_cast<TreePtr<Node>>(fspg->context); // Don't duplicate the subtree - we want coupling behaviour			
 	
 	return member;
 }
 
 
-void VNLangActions::UpdateCurrentAccess( TreePtr<Node> access )
+void VNLangActions::UpdateCurrentAccess( any loc, TreePtr<Node> access )
 {
 	// OnInstance() will still try to program the current access. But this fn will try to update it.
 
 	// If we're in a record scope, update the stored access spec for future fields to use
 	if( shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop() )	
-		if( auto fspg = dynamic_cast<AccessScopeGnomon *>(spg.get()) ) 	
-			fspg->context = access; // Don't duplicate the subtree - we want coupling behaviour
+		spg->UpdateContext(loc, access);
 }
 
 
@@ -733,10 +740,7 @@ TreePtr<Node> VNLangActions::OnAbDeclType( any loc, const list<QualifierData> &q
 	
 shared_ptr<Gnomon> VNLangActions::MakeRecordScopeGnomon( TreePtr<Node> record )
 {
-	auto r = TreePtr<CPPTree::Record>::DynamicCast(record);
-	ASSERT(r);
-	
-	return make_shared<AccessScopeGnomon>(record, r->GetInitialAccess());
+	return make_shared<AccessScopeGnomon>(record);
 }
 
 
@@ -1042,7 +1046,7 @@ static NodeTag GetNodeEnum( list<string> typ, any loc )
 	return AvailableNodeData().GetNameToTagMap().at(typ);	
 }
 
-//////////////////////////// Virtuality ////////////////////////////// TODO don't put these here, use MakeStandardAgentFromTypeID
+//////////////////////////// Virtuality ////////////////////////////// 
 
 TreePtr<Node> CPPTree::Virtuality::GetDefaultNode(TreePtr<Node>) const
 {
@@ -1056,7 +1060,7 @@ TreePtr<Node> CPPTree::AccessSpec::GetDefaultNode(TreePtr<Node> type) const
 	ASSERT(type); // if this is firing, it's probably due to explicit node parsing. Confirm we have an Instance and then pass in its type.
 	auto record = TreePtr<Record>::DynamicCast(type);
 	ASSERT(record); // Type is not a record (maybe could provide Public)
-	return record->GetInitialAccess();
+	return any_cast<TreePtr<Node>>(record->GetInitalContext());
 }
 
 //////////////////////////// Constancy //////////////////////////////
