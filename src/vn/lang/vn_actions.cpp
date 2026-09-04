@@ -625,23 +625,7 @@ TreePtr<Node> VNLangActions::OnEnumerator( any loc )
 {
 	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
 	ASSERT( spg );
-	auto dnode = spg->GetDeclarationNode(loc, false);
-	auto er = TreePtr<CPPTree::Enumerator>::DynamicCast(dnode);
-	ASSERT( er )(dnode); // Probably a parse error if got enumerator not inside enumeration
-
-	auto rsg = dynamic_pointer_cast<AccessScopeGnomon>(spg);
-	if( !rsg )
-		throw YY::VNLangParser::syntax_error(
-						any_cast<YY::VNLangParser::location_type>(loc),
-						"Enumerator not inside a record" );
-	
-	//auto er = MakeTreeNode<StandardAgentWrapper<CPPTree::Enumerator>>(); 
-	er->OnConstancy( MakeTreeNode<StandardAgentWrapper<CPPTree::Const>>(), any_cast<YY::VNLangParser::location_type>(loc) ); // per parse.hpp
-
-	// If indeed there is an initialiser, call ApplyInitialiser() to over-ride this
-	er->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
-	
-	return er;
+	return spg->GetDeclarationNode(loc, false);
 }
 
 

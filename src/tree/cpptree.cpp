@@ -1958,13 +1958,19 @@ TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, any &, 
 		throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(loc),
 				"static is not allowed for enumerators.");
-	auto en = MakeTreeNode<VN::StandardAgentWrapper<Enumerator>>(); 
+	auto er = MakeTreeNode<VN::StandardAgentWrapper<Enumerator>>(); 
 	
 	// Whatever we're called, that's the type of our enumerations. Would still be true if we're given
 	// explicit underlying type.
-	en->type = identifier;
+	er->type = identifier;
 	
-	return en;
+	// Enumerators always const
+	er->constancy = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Const>>(); 
+
+	// Begin uninitialised, hopefully an initialiser will be set during parse
+	er->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
+	
+	return er;
 }
 
 //////////////////////////// InheritanceRecord ///////////////////////////////
