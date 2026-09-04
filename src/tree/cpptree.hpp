@@ -1076,7 +1076,7 @@ struct Record : TypeDeclaration,
        
     virtual string GetColour() const { return TypeDeclaration::GetColour(); } // TypeDeclaration wins
 	any GetInitalContext() const override;    
-	virtual void InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const;    
+	virtual void InitialiseAccess( Policy &policy ) const;    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
     virtual string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
@@ -1103,7 +1103,8 @@ struct Union : Record
 struct Enumeration : Record 
 { 
 	NODE_FUNCTIONS_FINAL 
-	void InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const override;
+	void InitialiseAccess( Policy &policy ) const override;
+	any GetInitalContext() const override;    
     string GetKeyword( Policy ) const override;
 	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	
 	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;	

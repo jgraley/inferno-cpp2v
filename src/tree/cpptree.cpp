@@ -156,12 +156,11 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 	// for example a delta pattern can be used to change the access spec of a member.
 	
 	list<string> ls;	
-	if( policy.cur_access )
+	if( policy.context.has_value() )
 	{
-		//ls.push_back( "/* "+Trace(*policy.cur_access)+" -> "+Trace(new_access)+" */" );
-		if( new_access.get() != policy.cur_access->get() )			
+		//ls.push_back( "/* "+Trace(*policy.context)+" -> "+Trace(new_access)+" */" );
+		if( new_access.get() != any_cast<TreePtr<Node>>(policy.context).get() )			
 			ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );	
-		*policy.cur_access = new_access;
 		policy.context = new_access;
 	}
 	else if( force )
@@ -202,7 +201,6 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
     string s;
 	(void)surround_prod;
  	policy.permit_static_keyword = false; // No support for code-unit statics
-	policy.cur_access = nullptr; // No access specs here
 	policy.context = any(); // No access specs here
 
 	if( !policy.full_render_code_unit )
@@ -1110,7 +1108,7 @@ bool Instance::ShouldSplitInstance( Policy ) const
 
 list<string> Instance::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
 {
-	if( policy.cur_access ) // are we in a record scope that maintains access spec, and yet are not a member
+	if( policy.context.has_value() ) // are we in a record scope that maintains access spec, and yet are not a member
 		throw NoAccessInstanceInAccessRecord(); 
 		
 	// Patterns managed to get an Instance that isn't a Member into a Record body.
@@ -1394,7 +1392,6 @@ TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, any 
 string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy)
 {
 	INDENT("P");
-	policy.cur_access = nullptr; // No access spec here
 	policy.context = any(); // No access spec here
 		
     list<string> strings;
@@ -1798,11 +1795,9 @@ any Record::GetInitalContext() const
 }
 
 
-void Record::InitialiseAccess( shared_ptr<Syntax> *local_access, Policy &policy ) const
+void Record::InitialiseAccess( Policy &policy ) const
 {
 	policy.context = GetInitalContext();
-	*local_access = any_cast<TreePtr<Node>>(policy.context);
-	policy.cur_access = local_access;
 }  
 
 
@@ -1823,8 +1818,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Production, Policy po
 	// For our members
 	any ic = GetInitalContext();
 	FTRACE(ic.type().name())("\n");
-	shared_ptr<Syntax> local_access = any_cast<TreePtr<Node>>(ic); // TODO no need to initialise
-	InitialiseAccess( &local_access, policy );
+	InitialiseAccess( policy );
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
@@ -1914,11 +1908,15 @@ string Union::GetKeyword( Policy ) const
 
 //////////////////////////// Enumeration ///////////////////////////////
 
-void Enumeration::InitialiseAccess( shared_ptr<Syntax> *, Policy &policy ) const
+any Enumeration::GetInitalContext() const
 {
-	// Don't use the local access pointer, just disable the mechanism in this scope
-	policy.cur_access = nullptr;
-	policy.context = any(); // No access spec here
+	return any();
+}
+
+
+void Enumeration::InitialiseAccess( Policy &policy ) const
+{
+	policy.context = GetInitalContext();
 } 
 
 
@@ -2332,7 +2330,6 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
 	INDENT("C");
     string s = "{\n";
  	policy.permit_static_keyword = true; // In a compound, static means global
-	policy.cur_access = nullptr; // No access specs here
 	policy.context = any(); // No access spec here
 
     for( auto &m : members )    
@@ -2362,13 +2359,12 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 		// If we can't render syntactially, call RenderNodeExplicit() directly so it
 		// gets the updated policy. 
 		policy.permit_static_keyword = true; // In a compound, static means global
-		policy.cur_access = nullptr; // No access specs here
 		policy.context = any(); // No access spec here
 		return renderer->RenderNodeExplicit(shared_from_this(), production, policy);
 	}
 	    
  	policy.permit_static_keyword = true; // In a compound, static means global
-	policy.cur_access = nullptr; // No access specs here
+    policy.context = any();
       
     string s = "({ ";
 	for( TreePtr<Declaration> m : members )    

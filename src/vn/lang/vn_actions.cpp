@@ -1060,7 +1060,11 @@ TreePtr<Node> CPPTree::AccessSpec::GetDefaultNode(TreePtr<Node> type) const
 	ASSERT(type); // if this is firing, it's probably due to explicit node parsing. Confirm we have an Instance and then pass in its type.
 	auto record = TreePtr<Record>::DynamicCast(type);
 	ASSERT(record); // Type is not a record (maybe could provide Public)
-	return any_cast<TreePtr<Node>>(record->GetInitalContext());
+	any ic = record->GetInitalContext();
+	if( ic.has_value() )
+		return any_cast<TreePtr<Node>>(ic);
+	else
+		return nullptr;
 }
 
 //////////////////////////// Constancy //////////////////////////////

@@ -173,7 +173,6 @@ string StuffAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Prod
 	(void)surround_prod;
 	
 	// Refuse to treat restriction or terminus as being in a record, even if the Stuff node is	
-	policy.cur_access = nullptr; 
 	policy.context = any(); // No access spec here
 
 	string s;

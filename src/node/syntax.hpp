@@ -121,7 +121,6 @@ public:
 			missing_access_to_public(true),
 			refuse_preprocessor(false),
 			refuse_identifiers(false),
-			cur_access(nullptr),
 			context() {}
 		bool rendering_definitions;
 		bool force_incomplete_records;
@@ -147,7 +146,6 @@ public:
 		bool refuse_preprocessor;
 		bool refuse_identifiers;
 		shared_ptr<Syntax> pointer_archetype;
-		shared_ptr<Syntax> *cur_access;
 		any context;
 	};
 	
