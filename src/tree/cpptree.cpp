@@ -159,7 +159,6 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 	if( policy.context.has_value() )
 	{
 		//ls.push_back( "/* "+Trace(*policy.context)+" -> "+Trace(new_access)+" */" );
-		FTRACE(CPPFilt(policy.context.type().name()))("\n");
 		if( new_access.get() != any_cast<TreePtr<AccessSpec>>(policy.context).get() )			
 			ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );	
 		policy.context = new_access;

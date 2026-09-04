@@ -503,11 +503,7 @@ TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 {	
 	shared_ptr<Gnomon> gnomon;
-	if( auto record = dynamic_pointer_cast<CPPTree::Record>(node) )
-	{
-		gnomon = make_shared<AccessScopeGnomon>( node );
-	}
-	else if( dynamic_pointer_cast<CPPTree::CallableParams>(node) )
+	if( dynamic_pointer_cast<CPPTree::CallableParams>(node) )
 		gnomon = make_shared<ParameterisationScopeGnomon>();
 	else
 		gnomon = make_shared<RegularScopeGnomon>(node);
@@ -721,7 +717,7 @@ TreePtr<Node> VNLangActions::OnAbDeclType( any loc, const list<QualifierData> &q
 	
 shared_ptr<Gnomon> VNLangActions::MakeRecordScopeGnomon( TreePtr<Node> record )
 {
-	return make_shared<AccessScopeGnomon>(record);
+	return make_shared<RegularScopeGnomon>(record);
 }
 
 

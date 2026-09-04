@@ -52,10 +52,11 @@ public:
 	RegularScopeGnomon( TreePtr<Node> scope_node_ );
 	string GetMessageText() const override;
 	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
-	//void UpdateContext(any loc, TreePtr<Node> update_node) override;
+	void UpdateContext(any loc, TreePtr<Node> update_node) override;
 	TreePtr<Node> GetNode() const;
 
 	TreePtr<Node> scope_node;
+	any context; // changes as we parse the scope
 };
 
 
@@ -64,17 +65,6 @@ class ParameterisationScopeGnomon : public ScopeGnomon
 public:	
 	string GetMessageText() const override;
 	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
-};
-
-
-class AccessScopeGnomon : public RegularScopeGnomon
-{
-public:	
-	AccessScopeGnomon( TreePtr<Node> node_ );
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
-	void UpdateContext(any loc, TreePtr<Node> update_node) override;
-
-	any context; // changes as we parse the scope
 };
 
 

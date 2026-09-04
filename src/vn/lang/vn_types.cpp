@@ -41,7 +41,8 @@ void ScopeGnomon::UpdateContext(any loc, TreePtr<Node> update_node)
 
 
 RegularScopeGnomon::RegularScopeGnomon( TreePtr<Node> scope_node_ ) :
-	scope_node(scope_node_) 
+	scope_node( scope_node_ ),
+	context( scope_node->GetInitialContext() )
 {
 	ASSERT(scope_node);
 }
@@ -55,8 +56,13 @@ string RegularScopeGnomon::GetMessageText() const
 
 TreePtr<Node> RegularScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
 {	
-	any context( nullptr ); // TODO hold in class
 	return scope_node->CreateDeclNode( static_keyword_specified, context, any_cast<YY::VNLangParser::location_type>(loc) );
+}
+
+
+void RegularScopeGnomon::UpdateContext(any loc, TreePtr<Node> update_node)
+{
+	scope_node->UpdateContext( update_node, context, any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 
@@ -80,25 +86,6 @@ TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(any loc, bool stat
 				"static is not allowed for parameters.");
 
 	return MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
-}
-
-
-AccessScopeGnomon::AccessScopeGnomon( TreePtr<Node> scope_node_ ) :
-	RegularScopeGnomon(scope_node_),
-	context( scope_node->GetInitialContext() )
-{
-}
-
-
-TreePtr<Node> AccessScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
-{
-	return scope_node->CreateDeclNode( static_keyword_specified, context, any_cast<YY::VNLangParser::location_type>(loc) );
-}
-
-
-void AccessScopeGnomon::UpdateContext(any loc, TreePtr<Node> update_node)
-{
-	scope_node->UpdateContext( update_node, context, any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 
