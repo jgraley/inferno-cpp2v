@@ -549,6 +549,7 @@ struct AccessSpec : Qualifier
 	TreePtr<Node> GetDefaultNode(TreePtr<Node> type) const final;     
 };
 
+
 /// Property for public access
 struct Public : AccessSpec 
 { 
@@ -556,6 +557,7 @@ struct Public : AccessSpec
 	
     string GetKeyword( Policy ) const override;
 };
+
 
 /// Property for private access
 struct Private : AccessSpec  
@@ -565,6 +567,7 @@ struct Private : AccessSpec
     string GetKeyword( Policy ) const override;
 };
 
+
 /// Property for protected access
 struct Protected : AccessSpec  
 { 
@@ -572,6 +575,7 @@ struct Protected : AccessSpec
 	
     string GetKeyword( Policy ) const override;
 };
+
 
 /// Property that indicates whether some Instance is constant.
 struct Constancy : Qualifier 
@@ -582,6 +586,7 @@ struct Constancy : Qualifier
 	TreePtr<Node> GetDefaultNode(TreePtr<Node> type) const final;     
 };
 
+
 /// Property indicating the Instance is constant
 struct Const : Constancy 
 { 
@@ -589,6 +594,7 @@ struct Const : Constancy
 	
     string GetKeyword( Policy ) const override;
 };
+
 
 /// Property indicating the Instance is not constant
 struct NonConst : Constancy 
@@ -598,6 +604,7 @@ struct NonConst : Constancy
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final;    	
 };
 
+
 // TODO #853 put this in Instance, Indirection and New
 // The idea is that we specify const not in the types, but in the nodes
 // that permit an object to be reached for assignment or mutation.
@@ -606,7 +613,10 @@ struct View : virtual Node
 	NODE_FUNCTIONS
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
     TreePtr<Constancy> constancy; ///< Is the field constant (ie only written by constructor)
+
+	TreePtr<Node> OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type loc ) override;
 };
+
 
 /// Declaration of a variable, object or function
 /** Instance represents a variable/object or a function. In case of function, type is a
@@ -652,9 +662,11 @@ struct Instance : Declaration,
 	virtual list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy );
 
 	TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type loc ) override;
 	TreePtr<Node> OnType( TreePtr<Node> type, YY::VNLangParser::location_type loc ) override;
 	TreePtr<Node> OnInitialiser( TreePtr<Node> init, YY::VNLangParser::location_type loc ) override;
 };
+
 
 /// A variable or function with one instance across the entire program. 
 /** This includes extern and static scope for globals. If a Global variable is Const, then it may be
@@ -666,6 +678,7 @@ struct Global : Instance
 	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 	bool ShouldSplitInstance( Policy policy ) const override;
 };
+
 
 /// A non-static member Instance (function or variable)
 /** A variable or function with one instance for each object of the containing class, ie
@@ -688,6 +701,7 @@ struct Member : Instance,
 	TreePtr<Node> OnAccess( TreePtr<Node> access, YY::VNLangParser::location_type loc ) override;
 };
 
+
 /// A local variable with automatic allocation
 /** A variable with one instance for each *invocation* of a function, ie
     non-static locals. Safe across recursion. */
@@ -695,6 +709,7 @@ struct Local : Instance
 {
     NODE_FUNCTIONS_FINAL
 };
+
 
 /// A function parameter
 /** Function parameters. Allocation is probably the same as automatic, unless 
@@ -727,6 +742,7 @@ struct Temporary : Instance
 	string GetRenderTerminal( Production ) const { throw Unimplemented(); }    
 	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;	
 };
+
 
 /// Node for a base class within a class declaration, specifies another class from which to inherit
 struct Base : virtual Node
@@ -907,6 +923,7 @@ struct Indirection : Type
 
 	Production GetMyProductionTerminal() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
+	TreePtr<Node> OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type loc ) override;
 };
 
 

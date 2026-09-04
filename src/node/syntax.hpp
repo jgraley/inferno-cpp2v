@@ -193,6 +193,7 @@ public:
 	string MyBestErrName() const;
 	virtual TreePtr<Node> OnAccess( TreePtr<Node> access, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type loc );
+	virtual TreePtr<Node> OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnBases( list<TreePtr<Node>> bases, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnMembers( list<TreePtr<Node>> members, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnStatements( list<TreePtr<Node>> statements, YY::VNLangParser::location_type loc );

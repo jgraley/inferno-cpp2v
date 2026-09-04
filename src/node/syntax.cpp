@@ -142,6 +142,13 @@ TreePtr<Node> Syntax::OnIdentifier( TreePtr<Node>, YY::VNLangParser::location_ty
 }
 
 
+TreePtr<Node> Syntax::OnConstancy( TreePtr<Node>, YY::VNLangParser::location_type loc )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " does not expect const/mutable.");	
+}
+
+
 TreePtr<Node> Syntax::OnBases( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,

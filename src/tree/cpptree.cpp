@@ -1010,6 +1010,14 @@ string NonConst::GetRender( VN::RendererInterface *, Production surround_prod, P
 	return "";
 }
 
+//////////////////////////// View //////////////////////////////
+
+TreePtr<Node> View::OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type )
+{
+	constancy = c;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
 //////////////////////////// Instance //////////////////////////////
 
 Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Policy policy) const
@@ -1152,6 +1160,13 @@ list<string> Instance::RenderInitPre( VN::RendererInterface *, Policy )
 TreePtr<Node> Instance::OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type )
 {
 	identifier = id;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+TreePtr<Node> Instance::OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type )
+{
+	constancy = c;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
@@ -1493,6 +1508,13 @@ Syntax::Production Indirection::GetOperandInDeclaratorProduction() const
 {
 	// Rendering a non-abstract declarator.
 	return Production::PREFIX; // eg int *a;
+}
+
+
+TreePtr<Node> Indirection::OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type )
+{
+	constancy = c;
+	return (TreePtr<Node>)shared_from_this();	
 }
 
 //////////////////////////// Pointer //////////////////////////////

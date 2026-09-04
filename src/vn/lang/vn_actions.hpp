@@ -61,8 +61,8 @@ public:
 	TreePtr<Node> OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, any type_loc, TreePtr<Node> declarator, any decl_loc );
 	TreePtr<Node> OnTypedef( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc );	
 	TreePtr<Node> OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc );	
-	TreePtr<Node> OnEnumerator( any loc, TreePtr<Node> id );
-	TreePtr<Node> OnConstructorDecl( any loc, const list<QualifierData> &quals, TreePtr<Node> id, list<TreePtr<Node>> params );	
+	TreePtr<Node> OnEnumerator( any loc );
+	TreePtr<Node> OnConstructorDecl( any loc, const list<QualifierData> &quals, list<TreePtr<Node>> params );	
 	void UpdateCurrentAccess( any loc, TreePtr<Node> access );	
 	TreePtr<Node> OnMemberInitialiser( TreePtr<Node> member_id, any member_loc, TreePtr<Node> initialiser, any initialiser_loc );
 	TreePtr<Node> OnAbDeclType( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	

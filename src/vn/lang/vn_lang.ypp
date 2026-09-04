@@ -365,8 +365,8 @@ prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({},
 				| qualifiers type_for_declarator declarator				{ $$ = vn->OnDeclaratorDecl($1, $2, @2, $3, @3); } // eg const int a	
 				| type_for_declarator qualifiers declarator				{ $$ = vn->OnDeclaratorDecl($2, $1, @1, $3, @3); } // eg int const a 	
 				| qualifiers type_for_declarator qualifiers declarator	{ $$ = vn->OnDeclaratorDecl($1+$3, $2, @2, $4, @4); } 
-				| XSTRUCTOR id_primary parameterisation					{ $$ = vn->OnConstructorDecl(@$, {}, $2, $3); }	
-				| qualifiers XSTRUCTOR id_primary parameterisation		{ $$ = vn->OnConstructorDecl(@$, $1, $3, $4); }	// for virtual destructor but needs ~
+				| XSTRUCTOR id_primary parameterisation					{ $$ = vn->OnConstructorDecl(@$, {}, $3)->OnIdentifier($2, @2); }
+				| qualifiers XSTRUCTOR id_primary parameterisation		{ $$ = vn->OnConstructorDecl(@$, $1, $4)->OnIdentifier($3, @3); } // for virtual destructor but needs ~
 
 assign_init		: expr_entry
 				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser({}); } 
@@ -584,7 +584,7 @@ enumerator		: prototype_enumerator
 				| prototype_enumerator C_ASSIGN assign_init					{ $$ = $1->OnInitialiser($3, @3); } 
 				| DESIGNATED_DECL			 							
 
-prototype_enumerator 		: id_primary 									{ $$ = vn->OnEnumerator(@1, $1); }
+prototype_enumerator 		: id_primary 									{ $$ = vn->OnEnumerator(@1)->OnIdentifier( $1, @1 ); }
 
 //////////////////////////////// STATEMENTS ////////////////////////////////////                 
 

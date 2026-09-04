@@ -592,7 +592,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	// for a range of reasons!
 	TreePtr<CPPTree::Instance> instance = spg->GetDeclarationNode(middle_loc, !!q_static); 
 
-	instance->constancy = declarator_result.cv_quals_view.constancy; 
+	instance->OnConstancy( declarator_result.cv_quals_view.constancy, any_cast<YY::VNLangParser::location_type>(middle_loc) ); 
 		
 	// If indeed there is an initialiser, call ApplyInitialiser() to over-ride this
 	instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
@@ -621,7 +621,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 }
 
 
-TreePtr<Node> VNLangActions::OnEnumerator( any loc, TreePtr<Node> id )
+TreePtr<Node> VNLangActions::OnEnumerator( any loc )
 {
 	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
 	ASSERT( spg );
@@ -636,8 +636,7 @@ TreePtr<Node> VNLangActions::OnEnumerator( any loc, TreePtr<Node> id )
 						"Enumerator not inside a record" );
 	
 	//auto er = MakeTreeNode<StandardAgentWrapper<CPPTree::Enumerator>>(); 
-	er->identifier = id;		
-	er->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::Const>>(); // per parse.hpp
+	er->OnConstancy( MakeTreeNode<StandardAgentWrapper<CPPTree::Const>>(), any_cast<YY::VNLangParser::location_type>(loc) ); // per parse.hpp
 
 	// If indeed there is an initialiser, call ApplyInitialiser() to over-ride this
 	er->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
@@ -646,7 +645,7 @@ TreePtr<Node> VNLangActions::OnEnumerator( any loc, TreePtr<Node> id )
 }
 
 
-TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierData> &quals, TreePtr<Node> id, list<TreePtr<Node>> params )
+TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierData> &quals, list<TreePtr<Node>> params )
 {
 	// TODO process the qualifiers in one loop at the top, with lots of checking. Check for:
 	// - wrong qualifier eg an access spec
@@ -663,16 +662,14 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
 			"Cannot disambiguate declaration because no surrounding scope." );
-	TreePtr<CPPTree::Member> member = spg->GetDeclarationNode(loc, !!q_static); 
+	TreePtr<CPPTree::Member> member = spg->GetDeclarationNode(any_cast<YY::VNLangParser::location_type>(loc), !!q_static); 
 
-	member->identifier = id;
-	
 	auto cons_type = MakeTreeNode<StandardAgentWrapper<CPPTree::Constructor>>();
 	for( auto param : params )
 		cons_type->params.push_back(param);	
 	
-	member->type = cons_type;
-	member->constancy = MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>();
+	member->OnType(cons_type, any_cast<YY::VNLangParser::location_type>(loc));
+	member->OnConstancy( MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>(), any_cast<YY::VNLangParser::location_type>(loc) );
 	member->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();
 
 	// Now fill in fields derived from the qualifiers	
