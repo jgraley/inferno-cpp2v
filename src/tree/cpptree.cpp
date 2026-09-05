@@ -293,7 +293,9 @@ TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, any &, YY:
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
 			"static is not supported at code unit level (TODO).");
-	return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
+	auto instance = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
+	instance->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
+	return instance;
 }
 
 //////////////////////////// SpecificIdentifier ///////////////////////////////
@@ -1400,7 +1402,9 @@ TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, any 
 		throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(loc),
 				"static is not allowed for parameters.");
-	return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Parameter>>();
+	auto instance = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Parameter>>();
+	instance->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
+	return instance;
 }
 
 
@@ -1885,9 +1889,10 @@ void Record::UpdateContext( TreePtr<Node> node, any &context, YY::VNLangParser::
 	
 TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type) const
 {	
+	TreePtr<Instance> instance;
 	if( static_keyword_specified )
 	{
-		return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
+		instance = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
 	}
 	else
 	{
@@ -1895,8 +1900,10 @@ TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context
 		// Use the currently stored access spec
 		// Note: the access spec set here can be overridden by UpdateCurrentAccess()
 		memb->access = any_cast<TreePtr<AccessSpec>>(context); // Don't duplicate the subtree - we want coupling behaviour		
-		return memb;
+		instance = memb;
 	}
+	instance->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
+	return instance;
 }
 
 
@@ -1963,10 +1970,9 @@ TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, any &, 
 	// explicit underlying type.
 	er->type = identifier;
 	
-	// Enumerators always const
+	// Enumerators are always const
 	er->constancy = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Const>>(); 
 
-	// Begin uninitialised, hopefully an initialiser will be set during parse
 	er->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
 	
 	return er;
@@ -2325,10 +2331,14 @@ TreePtr<Node> SequentialScope::OnStatements( list<TreePtr<Node>> statements_, YY
 
 TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, any &, YY::VNLangParser::location_type) const
 {
+	TreePtr<Instance> instance;
 	if( static_keyword_specified )
-		return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
+		instance = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
 	else
-		return MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Local>>(); 	
+		instance = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Local>>(); 	
+
+	instance->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
+	return instance;
 }
 
 //////////////////////////// Compound ///////////////////////////////

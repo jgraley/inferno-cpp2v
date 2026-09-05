@@ -587,11 +587,10 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	// Get whichever kind of declaration is allowed in the current scope. This can throw
 	// for a range of reasons!
 	TreePtr<CPPTree::Instance> instance = spg->GetDeclarationNode(middle_loc, !!q_static); 
+	//instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
 
 	instance->OnConstancy( declarator_result.cv_quals_view.constancy, any_cast<YY::VNLangParser::location_type>(middle_loc) ); 
 		
-	// If indeed there is an initialiser, call ApplyInitialiser() to over-ride this
-	instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
 
 	// Now fill in any subclass-specific fields
 	if( auto member = TreePtr<CPPTree::Member>::DynamicCast(instance) )
