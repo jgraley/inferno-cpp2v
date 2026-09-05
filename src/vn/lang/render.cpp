@@ -593,7 +593,7 @@ string Render::AccomodateBootTypeAndDeclarator( TreePtr<Node> type, string decla
 
 string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                           Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                          TreePtr<CPPTree::Constancy> constant )
+                                          TreePtr<CPPTree::Permission> constant )
 {
 	try
 	{
@@ -613,7 +613,7 @@ string Render::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator,
 	catch( Syntax::Refusal & ) {}
 	
 	auto type_as_type = TreePtr<CPPTree::Type>::DynamicCast(type);
-	auto dc = TreePtr<Constancy>::DynamicCast(constant);	
+	auto dc = TreePtr<Permission>::DynamicCast(constant);	
 	if( !type_as_type )
 	{
 		return //"/*Non-type*/" +	

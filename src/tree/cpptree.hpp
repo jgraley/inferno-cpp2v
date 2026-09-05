@@ -506,7 +506,7 @@ struct MembInitSeq : virtual Node
 
 
 /// Property for a member function that may or may not be virtual.
-struct Virtuality : Qualifier 
+struct Dispatch : Qualifier 
 { 
 	NODE_FUNCTIONS 
 
@@ -516,7 +516,7 @@ struct Virtuality : Qualifier
 
 
 /// Property for a virtual member funciton
-struct Virtual : Virtuality
+struct Virtual : Dispatch
 {
     NODE_FUNCTIONS_FINAL
     string GetKeyword( Policy ) const override;
@@ -524,7 +524,7 @@ struct Virtual : Virtuality
 
 
 /// Property for a non-virtual member funciton
-struct NonVirtual : Virtuality 
+struct NonVirtual : Dispatch 
 { 
 	NODE_FUNCTIONS_FINAL 
 
@@ -578,7 +578,7 @@ struct Protected : AccessSpec
 
 
 /// Property that indicates whether some Instance is constant.
-struct Constancy : Qualifier 
+struct Permission : Qualifier 
 { 
 	NODE_FUNCTIONS 
 
@@ -588,7 +588,7 @@ struct Constancy : Qualifier
 
 
 /// Property indicating the Instance is constant
-struct Const : Constancy 
+struct Const : Permission 
 { 
 	NODE_FUNCTIONS_FINAL 
 	
@@ -597,7 +597,7 @@ struct Const : Constancy
 
 
 /// Property indicating the Instance is not constant
-struct NonConst : Constancy 
+struct NonConst : Permission 
 { 
 	NODE_FUNCTIONS_FINAL 
 
@@ -612,9 +612,9 @@ struct View : virtual Node
 {
 	NODE_FUNCTIONS
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
-    TreePtr<Constancy> constancy; ///< Is the field constant (ie only written by constructor)
+    TreePtr<Permission> permission; ///< Is the field constant (ie only written by constructor)
 
-	TreePtr<Node> OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -641,7 +641,7 @@ struct Instance : Declaration,
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
     TreePtr<InstanceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
     TreePtr<Initialiser> initialiser; ///< init value for data, body for Callable type
-    TreePtr<Constancy> constancy; ///< is the instance constant (ie compile time value)?
+    TreePtr<Permission> permission; ///< is the instance constant (ie compile time value)?
     
     virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
@@ -662,7 +662,7 @@ struct Instance : Declaration,
 	virtual list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy );
 
 	TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type loc ) override;
 	TreePtr<Node> OnType( TreePtr<Node> type, YY::VNLangParser::location_type loc ) override;
 	TreePtr<Node> OnInitialiser( TreePtr<Node> init, YY::VNLangParser::location_type loc ) override;
 };
@@ -682,22 +682,23 @@ struct Global : Instance
 
 /// A non-static member Instance (function or variable)
 /** A variable or function with one instance for each object of the containing class, ie
- non-static members. Functions have a "this" pointer. Note that access and constancy
+ non-static members. Functions have a "this" pointer. Note that access and permission
  are intended to control the generation of read/write lines for modules. This usage of
- Constancy differs from that in Global, so we do not try to introduce a common intermediate.
+ Permission differs from that in Global, so we do not try to introduce a common intermediate.
  Note that static members are Global, not Member */
 struct Member : Instance,
                 MembInitSeq
 {
     NODE_FUNCTIONS_FINAL
     
-    TreePtr<Virtuality> virt; ///< Is the member virtual?
+    TreePtr<Dispatch> dispatch; ///< Is the member virtual?
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
     
 	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
    	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 	list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy ) override;
 
+	TreePtr<Node> OnDispatch( TreePtr<Node> d, YY::VNLangParser::location_type loc ) override;
 	TreePtr<Node> OnAccess( TreePtr<Node> access, YY::VNLangParser::location_type loc ) override;
 };
 
@@ -919,11 +920,11 @@ struct Indirection : Type
 {
     NODE_FUNCTIONS
     TreePtr<Type> destination; ///< reaching an object of this type, indirectly
-	TreePtr<Constancy> constancy;  ///< is the destination const?
+	TreePtr<Permission> permission;  ///< is the destination const?
 
 	Production GetMyProductionTerminal() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
-	TreePtr<Node> OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type loc ) override;
 };
 
 

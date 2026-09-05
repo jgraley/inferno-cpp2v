@@ -15,7 +15,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     auto sc = MakePatternNode<Compound>();
     auto si = MakePatternNode<Local>();
     auto delta = MakePatternNode<DeltaAgent, Local>();
-    si->constancy = MakePatternNode<NonConst>();  // Cannot split const
+    si->permission = MakePatternNode<NonConst>();  // Cannot split const
     si->identifier = MakePatternNode<InstanceIdentifier>();  // Only acting on initialised Instances
     si->initialiser = MakePatternNode<Expression>();  // Only acting on initialised Instances
     auto decls = MakePatternNode<StarAgent, Declaration>();
@@ -28,7 +28,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     auto ri = MakePatternNode<Local>();
     delta->through = si;
     delta->overlay = ri;
-    ri->constancy = MakePatternNode<NonConst>();  
+    ri->permission = MakePatternNode<NonConst>();  
     ri->initialiser = MakePatternNode<Uninitialised>();
     rc->members = ( delta, decls );
     auto ra = MakePatternNode<Assign>();

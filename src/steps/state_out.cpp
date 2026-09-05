@@ -224,7 +224,7 @@ EnsureBootstrap::EnsureBootstrap()
     auto stop = MakePatternNode<NegationAgent, Statement>();
     auto sx_goto = MakePatternNode<Goto>();
         
-    fn->constancy = MakePatternNode<NonConst>();    
+    fn->permission = MakePatternNode<NonConst>();    
     fn->type = thread;
     fn->initialiser = delta;
     delta->through = s_all;
@@ -286,7 +286,7 @@ AddStateLabelVar::AddStateLabelVar()
     state_var->identifier = state_var_id;
     state_var->type = MakePatternNode<Labeley>();    
     state_var->initialiser = MakePatternNode<Uninitialised>();
-    state_var->constancy = MakePatternNode<NonConst>();
+    state_var->permission = MakePatternNode<NonConst>();
 
     Configure( SEARCH_REPLACE, s_comp, r_embedded );
 }
@@ -311,7 +311,7 @@ EnsureSuperLoop::EnsureSuperLoop()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto r_loop = MakePatternNode<Do>();
         
-    fn->constancy = MakePatternNode<NonConst>();    
+    fn->permission = MakePatternNode<NonConst>();    
     fn->type = thread;
     fn->initialiser = delta;
     delta->through = s_all;
@@ -525,7 +525,7 @@ AddYieldFlag::AddYieldFlag()
     r_flag_decl->identifier = r_flag_id;
     r_flag_decl->type = MakePatternNode<Boolean>();
     r_flag_decl->initialiser = MakePatternNode<Uninitialised>();
-    r_flag_decl->constancy = MakePatternNode<NonConst>();        
+    r_flag_decl->permission = MakePatternNode<NonConst>();        
     delta->overlay = embedded;
     r_comp->members = (decls, r_flag_decl);
     r_comp->statements = (r_flag_init, stmts);
@@ -578,7 +578,7 @@ AddInferredYield::AddInferredYield()
     auto sx_not = MakePatternNode< LogicalNot >();
     auto assign = MakePatternNode< Assign >();
           
-    fn->constancy = MakePatternNode<NonConst>();    
+    fn->permission = MakePatternNode<NonConst>();    
     fn->type = thread;
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  
@@ -630,7 +630,7 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto first_init = MakePatternNode<Statement>();
                     
-    fn->constancy = MakePatternNode<NonConst>();    
+    fn->permission = MakePatternNode<NonConst>();    
     fn->type = thread;
     fn->initialiser = func_over;
     fn->identifier = fn_id;  
@@ -723,7 +723,7 @@ LoopRotation::LoopRotation()
     auto s_notmatch = MakePatternNode<NegationAgent, Compound>();
     auto inner_state = MakePatternNode<DisjunctionAgent, If>();
     
-    fn->constancy = MakePatternNode<NonConst>();    
+    fn->permission = MakePatternNode<NonConst>();    
     fn->type = thread;
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  

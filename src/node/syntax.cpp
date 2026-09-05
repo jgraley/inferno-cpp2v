@@ -142,10 +142,17 @@ TreePtr<Node> Syntax::OnIdentifier( TreePtr<Node>, YY::VNLangParser::location_ty
 }
 
 
-TreePtr<Node> Syntax::OnConstancy( TreePtr<Node>, YY::VNLangParser::location_type loc )
+TreePtr<Node> Syntax::OnPermission( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
 		MyBestErrName() + " does not expect const/mutable.");	
+}
+
+
+TreePtr<Node> Syntax::OnDispatch( TreePtr<Node>, YY::VNLangParser::location_type loc )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " does not expect virtual.");
 }
 
 

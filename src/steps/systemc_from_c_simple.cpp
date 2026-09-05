@@ -37,7 +37,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 	auto er_scope = MakePatternNode< CodeUnit >();
 	auto er_member = MakePatternNode<Member>();
 	auto es_id = MakePatternNode<InstanceIdentifier>();
-	auto es_constancy = MakePatternNode<Constancy>();
+	auto es_constancy = MakePatternNode<Permission>();
 #ifdef ALSO_MOVE_VARS
 	auto es_id_all = MakePatternNode<ConjunctionAgent, InstanceIdentifier>();
 	auto es_id_not = MakePatternNode<NegationAgent, InstanceIdentifier>();
@@ -56,12 +56,12 @@ GlobalScopeToModule::GlobalScopeToModule()
 	r_gmodule_inst->type = r_gmodule_tid;
 	r_gmodule_inst->identifier = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("globals");
 	r_gmodule_inst->initialiser = MakePatternNode<Uninitialised>();
-	r_gmodule_inst->constancy = MakePatternNode<NonConst>();
+	r_gmodule_inst->permission = MakePatternNode<NonConst>();
 	
 	es_scope->members = ( es_gmodule, es_instance, es_decls );
 	// Act on all Instance types, which includes functions, variable and 
 	// constants but excludes user types (incl classes) and labels
-	es_instance->constancy = es_constancy;
+	es_instance->permission = es_constancy;
 #ifdef ALSO_MOVE_VARS
 	es_instance->type = MakePatternNode<Type>(); 
 #else
@@ -80,11 +80,11 @@ GlobalScopeToModule::GlobalScopeToModule()
 	er_scope->members = ( er_gmodule, es_decls );
 	er_gmodule->identifier = es_gmodule_name;
 	er_gmodule->members = ( es_gmodule_decls, er_member );
-	er_member->constancy = es_constancy;
+	er_member->permission = es_constancy;
 	er_member->type = es_instance->type;
 	er_member->identifier = es_id;
 	er_member->initialiser = es_instance->initialiser;
-	er_member->virt = MakePatternNode<NonVirtual>();
+	er_member->dispatch = MakePatternNode<NonVirtual>();
 	er_member->access = MakePatternNode<Public>();
 	
 	// Through, search, replace
@@ -118,7 +118,7 @@ MainToThread::MainToThread()
 	gmodule->bases = ( MakePatternNode<StarAgent, Base>() );
 	gmodule->members = ( delta, MakePatternNode<StarAgent, Declaration>() );	
 	delta->through = s_member;
-	s_member->constancy = MakePatternNode<NonConst>();
+	s_member->permission = MakePatternNode<NonConst>();
 	s_member->identifier = s_identifier;
 	s_member->type = s_func;
 	s_member->initialiser = body;
@@ -127,12 +127,12 @@ MainToThread::MainToThread()
 	//s_func->members = ()        require no parameters
 	s_func->return_type = MakePatternNode<Integral>();
 	delta->overlay = r_member;
-	r_member->constancy = MakePatternNode<NonConst>();
+	r_member->permission = MakePatternNode<NonConst>();
 	r_member->identifier = s_identifier;
 	r_member->type = MakePatternNode<Thread>();
-	r_member->virt = MakePatternNode<NonVirtual>();
+	r_member->dispatch = MakePatternNode<NonVirtual>();
 	r_member->access = MakePatternNode<Public>();
-	r_member->constancy = MakePatternNode<NonConst>();
+	r_member->permission = MakePatternNode<NonConst>();
 	auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( body, e_stuff );
 	r_member->initialiser = r_embedded;
 

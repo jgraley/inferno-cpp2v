@@ -182,12 +182,12 @@ There are now separate final nodes for signed and unsigned cases. However, algor
 ### 5.3 A topological property
 
 ```
-struct Constancy : Property { NODE_FUNCTIONS };
-struct Const : Constancy { NODE_FUNCTIONS_FINAL };
-struct NonConst : Constancy { NODE_FUNCTIONS_FINAL };
+struct Permission : Property { NODE_FUNCTIONS };
+struct Const : Permission { NODE_FUNCTIONS_FINAL };
+struct NonConst : Permission { NODE_FUNCTIONS_FINAL };
 ```
 
-`Property` derives from `Node`. If we need to indicate whether or not a variable is `const`, instead of adding a `bool` member to the node, we will add a `TreePtr<Constancy>`. In program trees, `Constancy` is not allowed because it is intermediate. So we must have one of `Const` or `NonConst`.
+`Property` derives from `Node`. If we need to indicate whether or not a variable is `const`, instead of adding a `bool` member to the node, we will add a `TreePtr<Permission>`. In program trees, `Permission` is not allowed because it is intermediate. So we must have one of `Const` or `NonConst`.
 
 ### 5.4 A non-topological property (simplified for the example)
 
@@ -205,7 +205,7 @@ struct SpecificInteger : Integer
 };
 ```
 
-Here, `Integer` is the intermediate node for the property like `Constancy` in the above example. However, we prefer not to define 2^32 final classes for the values of an integer. We want to use a simple `int` variable, so we add it as a member. We consider different values of `value` to be different properties that should compare unequal. So we overload `IsLocalMatch()` to achieve this behaviour. First we must dynamically upcast to `SpecificInteger` (if this fails, return false since the node is of a different type and doesn't match). Second, we compare the values.
+Here, `Integer` is the intermediate node for the property like `Permission` in the above example. However, we prefer not to define 2^32 final classes for the values of an integer. We want to use a simple `int` variable, so we add it as a member. We consider different values of `value` to be different properties that should compare unequal. So we overload `IsLocalMatch()` to achieve this behaviour. First we must dynamically upcast to `SpecificInteger` (if this fails, return false since the node is of a different type and doesn't match). Second, we compare the values.
 
 By overloading `IsLocalMatch()`, we have restricted the set of nodes that will match `SpecificInteger` from all other `SpecificInteger`s to just `SpecificInteger`s with the same value, which is a subset of the set of all `SpecificIdentifier`s. Hence the word "Specific" in the node name. 
  

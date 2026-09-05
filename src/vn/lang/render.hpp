@@ -61,7 +61,7 @@ public:
                                             TreePtr<Node> constant );
 	virtual string DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                               Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                              TreePtr<CPPTree::Constancy> constant );	
+                                              TreePtr<CPPTree::Permission> constant );	
 
 	virtual Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const;						 
 	TreePtr<Node> TryGetScope( TreePtr<Node> node ) const override;

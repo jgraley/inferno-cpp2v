@@ -437,7 +437,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     r_decl->identifier = id;
     r_decl->type = cond_type;
     r_decl->initialiser = s_cond;
-    r_decl->constancy = MakePatternNode<NonConst>();
+    r_decl->permission = MakePatternNode<NonConst>();
     r_comp->statements = (r_decl, r_embedded_3);
     
     Configure( SEARCH_REPLACE, MakeCheckUncombable(s_switch), r_comp );
@@ -547,7 +547,7 @@ LogicalAndToIf::LogicalAndToIf()
     r_temp->identifier = r_temp_id;
     r_temp->type= r_boolean;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
-    r_temp->constancy = MakePatternNode<NonConst>();    
+    r_temp->permission = MakePatternNode<NonConst>();    
     r_comp->statements = (r_assign1, r_if, r_temp_id);
     r_assign1->operands = (r_temp_id, op1);
     r_if->condition = r_temp_id;
@@ -578,7 +578,7 @@ LogicalOrToIf::LogicalOrToIf()
     r_temp->identifier = r_temp_id;
     r_temp->type= r_boolean;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
-    r_temp->constancy = MakePatternNode<NonConst>();    
+    r_temp->permission = MakePatternNode<NonConst>();    
     r_comp->statements = (r_assign1, r_if, r_temp_id);
     r_assign1->operands = (r_temp_id, op1);
     r_if->condition = r_temp_id;
@@ -613,7 +613,7 @@ ConditionalOperatorToIf::ConditionalOperatorToIf()
     r_temp->identifier = r_temp_id;
     r_temp->type= type;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
-    r_temp->constancy = MakePatternNode<NonConst>();    
+    r_temp->permission = MakePatternNode<NonConst>();    
     r_comp->statements = (r_if, r_temp_id);
     r_if->condition = op1;
     r_if->body = r_assignt;
@@ -675,7 +675,7 @@ ExtractCallParams::ExtractCallParams()
     r_temp_id->sources = (id);
     r_temp->initialiser = MakePatternNode<Uninitialised>();
     r_temp->type = type;
-    r_temp->constancy = MakePatternNode<NonConst>();    
+    r_temp->permission = MakePatternNode<NonConst>();    
     r_ce->statements = (r_assign, r_call);
     r_assign->operands = (r_temp_id, value);
     r_call->argumentation = r_args;

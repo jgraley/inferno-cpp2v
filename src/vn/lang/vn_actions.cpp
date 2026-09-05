@@ -587,11 +587,8 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	// Get whichever kind of declaration is allowed in the current scope. This can throw
 	// for a range of reasons!
 	TreePtr<CPPTree::Instance> instance = spg->GetDeclarationNode(middle_loc, !!q_static); 
-	//instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
-
-	instance->OnConstancy( declarator_result.cv_quals_view.constancy, any_cast<YY::VNLangParser::location_type>(middle_loc) ); 
+	instance->OnPermission( declarator_result.cv_quals_view.permission, any_cast<YY::VNLangParser::location_type>(middle_loc) ); 
 		
-
 	// Now fill in any subclass-specific fields
 	if( auto member = TreePtr<CPPTree::Member>::DynamicCast(instance) )
 	{
@@ -599,17 +596,15 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 		{
 			if( q.cat == QualCat::NODE )
 			{
-				if( auto vq = TreePtr<CPPTree::Virtuality>::DynamicCast(q.node) )
-					member->virt = vq;
+				if( auto vq = TreePtr<CPPTree::Dispatch>::DynamicCast(q.node) )
+					member->OnDispatch(vq, any_cast<YY::VNLangParser::location_type>(middle_loc));
 					
 				if( auto aq = TreePtr<CPPTree::AccessSpec>::DynamicCast(q.node) )
 					throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(q.loc),
 						"Java-like access spec detected: " + DiagQuote(Traceable::TypeIdName( *aq )) );
 			}
-		}
-		if( !member->virt ) // absence of a vituality means non-virtual, for wild use ⯁Virtuality⦅⦆
-			member->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();					
+		}							
 	}
 
 	return instance;
@@ -648,8 +643,7 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 		cons_type->params.push_back(param);	
 	
 	member->OnType(cons_type, any_cast<YY::VNLangParser::location_type>(loc));
-	member->OnConstancy( MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>(), any_cast<YY::VNLangParser::location_type>(loc) );
-	member->virt = MakeTreeNode<StandardAgentWrapper<CPPTree::NonVirtual>>();
+	member->OnPermission( MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>(), any_cast<YY::VNLangParser::location_type>(loc) );
 
 	// Now fill in fields derived from the qualifiers	
 	for( const QualifierData &q : quals )
@@ -657,11 +651,11 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 		switch( q.cat )
 		{
 		case QualCat::NODE:
-			if( TreePtr<CPPTree::Constancy>::DynamicCast(q.node) )				
+			if( TreePtr<CPPTree::Permission>::DynamicCast(q.node) )				
 				throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(loc),
-						"Xstructor does not support constancy: " + DiagQuote(q.GetDiagnostic()) );
-			if( TreePtr<CPPTree::Virtuality>::DynamicCast(q.node) ) // TODO allow virtuality for destructors
+						"Xstructor does not support permission: " + DiagQuote(q.GetDiagnostic()) );
+			if( TreePtr<CPPTree::Dispatch>::DynamicCast(q.node) ) // TODO allow virtuality for destructors
 				throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(loc),
 						"Constructor does not support virtuality: " + DiagQuote(q.GetDiagnostic()) );
@@ -763,13 +757,13 @@ Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals,
 		switch( q.cat )
 		{
 		case QualCat::NODE:
-			if( TreePtr<CPPTree::Constancy>::DynamicCast(q.node) )	// Add volatile here
+			if( TreePtr<CPPTree::Permission>::DynamicCast(q.node) )	// Add volatile here
 			{
 				if( got_const )
 					throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(q.loc),
 						"Excess " + DiagQuote(q.GetDiagnostic()) );
-				cv_quals.constancy = q.node;
+				cv_quals.permission = q.node;
 				got_const = true;
 				continue;
 			}
@@ -1022,9 +1016,9 @@ static NodeTag GetNodeEnum( list<string> typ, any loc )
 	return AvailableNodeData().GetNameToTagMap().at(typ);	
 }
 
-//////////////////////////// Virtuality ////////////////////////////// 
+//////////////////////////// Dispatch ////////////////////////////// 
 
-TreePtr<Node> CPPTree::Virtuality::GetDefaultNode(TreePtr<Node>) const
+TreePtr<Node> CPPTree::Dispatch::GetDefaultNode(TreePtr<Node>) const
 {
 	return MakeTreeNode<StandardAgentWrapper<NonVirtual>>();
 }
@@ -1043,9 +1037,9 @@ TreePtr<Node> CPPTree::AccessSpec::GetDefaultNode(TreePtr<Node> type) const
 		return nullptr;
 }
 
-//////////////////////////// Constancy //////////////////////////////
+//////////////////////////// Permission //////////////////////////////
 
-TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
+TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 {
 	return MakeTreeNode<StandardAgentWrapper<NonConst>>();
 }
@@ -1086,7 +1080,7 @@ TreePtr<Node> CPPTree::Constancy::GetDefaultNode(TreePtr<Node>) const
 // entirely in search or entirely in replace context. Maybe designations could qualify themselves to be search-side or replace 
 // side by borrowing ▲ and ⯈ symbols. A pain to render though.
  
-// Review the virt-specifiers and const on the node methods for rendering
+// Review the dispatch-specifiers and const on the node methods for rendering
 
 // MAYBE Move conj and disj back to original precidences. The lowered precs require two syntaxes, statement and expression. So we can
 // get confused by eg { return x; ∧ goto y; } (=new form) versus { (return x;) ∧ (goto y;); } - or maybe we use the former and it's not confusing...

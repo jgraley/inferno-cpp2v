@@ -58,10 +58,10 @@ AutosToModule::AutosToModule()
     r_var->type = type;
     r_var->identifier = var_id;
     r_var->initialiser = var_init;
-    r_var->virt = MakePatternNode<NonVirtual>();
+    r_var->dispatch = MakePatternNode<NonVirtual>();
     r_var->access = MakePatternNode<Private>();
     // If the local automatic var had been const, it could still change value from call to call
-    r_var->constancy = MakePatternNode<NonConst>(); 
+    r_var->permission = MakePatternNode<NonConst>(); 
     
     Configure( SEARCH_REPLACE, s_rec, r_rec );
 }
@@ -93,7 +93,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
 
     s_rec->members = (decls, fn);
     r_rec->members = (decls, fn, r_var);
-    fn->constancy = MakePatternNode<NonConst>();    
+    fn->permission = MakePatternNode<NonConst>();    
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
@@ -112,8 +112,8 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     s_staticvar->identifier = var_identifier;
     s_staticvar->initialiser = var_initialiser;
     r_var->access = MakePatternNode<Private>();
-    r_var->virt = MakePatternNode<NonVirtual>();
-    r_var->constancy = MakePatternNode<NonConst>();
+    r_var->dispatch = MakePatternNode<NonVirtual>();
+    r_var->permission = MakePatternNode<NonConst>();
     r_var->type = var_type;
     r_var->identifier = var_identifier;
     r_var->initialiser = var_initialiser;
@@ -144,7 +144,7 @@ DeclsToModule::DeclsToModule()
     
     s_rec->members = (decls, fn);
     r_rec->members = (decls, fn, ut);
-    fn->constancy = MakePatternNode<NonConst>();    
+    fn->permission = MakePatternNode<NonConst>();    
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
@@ -192,7 +192,7 @@ ThreadToMethod::ThreadToMethod()
     auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_n, ms_wait_static, mr_nt_static);
     auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_m, ls_wait_dynamic, lr_nt_dynamic);
 
-    s_thread->constancy = MakePatternNode<NonConst>();    
+    s_thread->permission = MakePatternNode<NonConst>();    
     s_thread->type = s_thread_type;
     s_thread->initialiser = s_comp;
     s_thread->identifier = id;
@@ -202,7 +202,7 @@ ThreadToMethod::ThreadToMethod()
     s_loop->body = loop_comp;
     loop_comp->members = (loop_decls);
     loop_comp->statements = (loop_stmts);
-    r_method->constancy = MakePatternNode<NonConst>();        
+    r_method->permission = MakePatternNode<NonConst>();        
     r_method->type = r_method_type;
     r_method->initialiser = embedded_l;
     r_method->identifier = id;
@@ -280,7 +280,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     r_flag->type = r_boolean;
     r_flag->identifier = r_flag_id;
     r_flag->initialiser = r_true;
-    r_flag->constancy = MakePatternNode<NonConst>();        
+    r_flag->permission = MakePatternNode<NonConst>();        
 
     Configure( SEARCH_REPLACE, s_all, inst );
 }

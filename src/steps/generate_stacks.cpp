@@ -87,7 +87,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     auto r_sub_comp= MakeTreeNode<Compound>();
     auto r_newvar = MakeTreeNode< Temporary >();
     r_newvar->type = type;
-    r_newvar->constancy = MakePatternNode<NonConst>();    
+    r_newvar->permission = MakePatternNode<NonConst>();    
     auto id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("temp_retval");
     r_newvar->identifier = id;
     r_newvar->initialiser = MakePatternNode<Uninitialised>();
@@ -176,8 +176,8 @@ ReturnViaTemp::ReturnViaTemp()
     r_retval->initialiser = MakePatternNode<Uninitialised>();
     r_retval->type = return_type;
     r_retval->identifier = r_temp_id;
-    r_retval->constancy = MakePatternNode<NonConst>();    
-    r_retval->virt = MakePatternNode<NonVirtual>();    
+    r_retval->permission = MakePatternNode<NonConst>();    
+    r_retval->dispatch = MakePatternNode<NonVirtual>();    
     r_retval->access = func_access;    
     r_temp_id->sources = (func_id);
     
@@ -277,11 +277,11 @@ AddLinkAddress::AddLinkAddress()
     lr_retaddr->identifier = lr_retaddr_id;
     lr_retaddr->type = MakePatternNode<Labeley>();
     lr_retaddr->initialiser = MakePatternNode<Uninitialised>();
-    lr_retaddr->constancy = MakePatternNode<NonConst>();
+    lr_retaddr->permission = MakePatternNode<NonConst>();
     lr_temp_retaddr->identifier = lr_temp_retaddr_id;
     lr_temp_retaddr->type = MakePatternNode<Labeley>();
     lr_temp_retaddr->initialiser = MakePatternNode<Uninitialised>();
-    lr_temp_retaddr->constancy = MakePatternNode<NonConst>();
+    lr_temp_retaddr->permission = MakePatternNode<NonConst>();
     lr_comp->statements = (l_stmts);
     
     s_module->members = (gg, decls);
@@ -290,9 +290,9 @@ AddLinkAddress::AddLinkAddress()
     r_retaddr->identifier = r_retaddr_id;
     r_retaddr->type = MakePatternNode<Labeley>();
     r_retaddr->initialiser = MakePatternNode<Uninitialised>();
-    r_retaddr->virt = MakePatternNode<NonVirtual>();
+    r_retaddr->dispatch = MakePatternNode<NonVirtual>();
     r_retaddr->access = func_access;
-    r_retaddr->constancy = MakePatternNode<NonConst>();
+    r_retaddr->permission = MakePatternNode<NonConst>();
     r_retaddr_id->sources = (l_inst_id);
     Configure( SEARCH_REPLACE, s_module, embedded_m );  
 }
@@ -366,19 +366,19 @@ ParamsViaTemps::ParamsViaTemps()
     s_cp->return_type = return_type;
     s_param->identifier = param_id;
     s_param->type = param_type;
-    s_param->constancy = MakePatternNode<NonConst>();
+    s_param->permission = MakePatternNode<NonConst>();
     r_param->type = param_type;
     r_param->initialiser = r_temp_id;
     r_param->identifier = param_id;
-    r_param->constancy = MakePatternNode<NonConst>();
+    r_param->permission = MakePatternNode<NonConst>();
     r_cp->params = (params);
     r_cp->return_type = return_type;
     r_param_hold->type = param_type;
     r_param_hold->initialiser = MakePatternNode<Uninitialised>();
     r_param_hold->identifier = r_temp_id;
-    r_param_hold->constancy = MakePatternNode<NonConst>();    
+    r_param_hold->permission = MakePatternNode<NonConst>();    
     r_param_hold->access = func_access;    
-    r_param_hold->virt = MakePatternNode<NonVirtual>();    
+    r_param_hold->dispatch = MakePatternNode<NonVirtual>();    
     r_temp_id->sources = (func_id, param_id);
     
     Configure( SEARCH_REPLACE, s_module, embedded_m );  
@@ -465,7 +465,7 @@ GenerateStacks::GenerateStacks()
     s_instance->type = MakePatternNode<Type>();
 
     // EmbeddedSearchReplace replace to insert as a static array (TODO be a member of enclosing class)
-    r_instance->constancy = MakePatternNode<NonConst>();
+    r_instance->permission = MakePatternNode<NonConst>();
     r_instance->initialiser = MakePatternNode<Uninitialised>();
     overlay->overlay = r_embedded;
     r_vcomp->members = (vdecls);
@@ -473,7 +473,7 @@ GenerateStacks::GenerateStacks()
     r_identifier->sources = (s_identifier);
     r_instance->identifier = r_identifier;
     r_instance->type = r_array;
-    r_instance->virt = MakePatternNode<NonVirtual>();
+    r_instance->dispatch = MakePatternNode<NonVirtual>();
     r_instance->access = MakePatternNode<Private>();
     r_array->element = s_instance->type;
     r_array->size = MakePatternNode<SpecificInteger>(10);
@@ -490,7 +490,7 @@ GenerateStacks::GenerateStacks()
     lr_module->members = (l_members, l_fi, r_instance);
     l_fi->initialiser = stuff;
     l_fi->identifier = fi_id;
-    l_fi->virt = MakePatternNode<NonVirtual>(); // TODO can we generalise?
+    l_fi->dispatch = MakePatternNode<NonVirtual>(); // TODO can we generalise?
     l_fi->access = MakePatternNode<Public>(); // TODO can we generalise?
     
     auto r_mid = MakePatternNode<EmbeddedCompareReplaceAgent, Scope>( r_module, ls_module, lr_module ); // stuff, stuff
@@ -505,14 +505,14 @@ GenerateStacks::GenerateStacks()
     delta->overlay = r_fi;    
     s_fi->identifier = r_fi->identifier = fi_id;
     s_fi->type = r_fi->type = s_not;
-    s_fi->virt = MakePatternNode<NonVirtual>();
+    s_fi->dispatch = MakePatternNode<NonVirtual>();
     s_fi->access = MakePatternNode<Public>();
 
     s_not->negand = sx_any;
     sx_any->disjuncts = (sx_thread, sx_method); // Do not provide stacks for these because they do not recurse
     s_fi->initialiser = s_and;   
     r_fi->initialiser = temp;   
-    r_fi->virt = MakePatternNode<NonVirtual>();
+    r_fi->dispatch = MakePatternNode<NonVirtual>();
     r_fi->access = MakePatternNode<Public>();
 
     s_top_comp->members = ( top_decls );
@@ -529,11 +529,11 @@ GenerateStacks::GenerateStacks()
     r_index_type->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
     r_index_identifier->sources = (fi_id);
     r_index->identifier = r_index_identifier;
-    r_index->constancy = MakePatternNode<NonConst>();
+    r_index->permission = MakePatternNode<NonConst>();
     r_index->initialiser = MakePatternNode<SpecificInteger>(0);
     //r_index->initialiser = MakePatternNode<SpecificInteger>(0);
     r_index_init->operands = (r_index_identifier, MakePatternNode<SpecificInteger>(0));
-    r_index->virt = MakePatternNode<NonVirtual>();
+    r_index->dispatch = MakePatternNode<NonVirtual>();
     r_index->access = MakePatternNode<Private>();
 
     // top-level statements
@@ -588,7 +588,7 @@ MergeFunctions::MergeFunctions()
     
     s_module->members = (members, thread, s_func);
     r_module->members = (members, thread);
-    thread->constancy = MakePatternNode<NonConst>();    
+    thread->permission = MakePatternNode<NonConst>();    
     thread->type = thread_type;
     thread->initialiser = thread_over;
     thread_over->through = s_all;

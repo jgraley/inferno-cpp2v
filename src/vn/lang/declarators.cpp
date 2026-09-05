@@ -44,7 +44,7 @@ Result Pointer::DeclaratorReduce( TreePtr<Node> type_view, CVQuals cv_quals_view
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Pointer>>();
 	node->destination = type_view;
-	node->constancy = cv_quals_view.constancy; 
+	node->permission = cv_quals_view.permission; 
 	return DoReduce(child, node, cv_quals_decl);
 }
 
@@ -53,7 +53,7 @@ Result Reference::DeclaratorReduce( TreePtr<Node> type_view, CVQuals cv_quals_vi
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Reference>>();
 	node->destination = type_view;
-	node->constancy = cv_quals_view.constancy; 
+	node->permission = cv_quals_view.permission; 
 	return DoReduce(child, node, cv_quals_view); // Copy the constness => alias behaviour, not pointer behaviour.
 }
 

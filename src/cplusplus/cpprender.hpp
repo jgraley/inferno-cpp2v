@@ -21,7 +21,7 @@ private:
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const final;
     string DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                       Syntax::Production object_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                      TreePtr<CPPTree::Constancy> constant ) final;
+                                      TreePtr<CPPTree::Permission> constant ) final;
 
 	UniquifyNames::NodeToNameMap unique_identifier_names;
 	int nodes_not_rendered_to_c;

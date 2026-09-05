@@ -115,7 +115,7 @@ string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string
                                          Production, Production, Policy policy,
                                          TreePtr<Node> constant)
 {
-	auto dc = TreePtr<Constancy>::DynamicCast(constant);	
+	auto dc = TreePtr<Permission>::DynamicCast(constant);	
 	return GetRenderTypeSpecSeq( renderer, policy ) + 
 		   renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
 	       (declarator != "" ? " "+declarator : "");
@@ -939,9 +939,9 @@ TreePtr<Node> MembInitSeq::OnMemberInits( list<TreePtr<Node>> memb_inits_, YY::V
 	return (TreePtr<Node>)shared_from_this();	
 }
 
-//////////////////////////// Virtuality //////////////////////////////
+//////////////////////////// Dispatch //////////////////////////////
 
-Syntax::Production Virtuality::GetMyProductionTerminal() const
+Syntax::Production Dispatch::GetMyProductionTerminal() const
 {
 	return Production::KEYWORD;
 }
@@ -988,9 +988,9 @@ string Protected::GetKeyword( Policy ) const
 	return "protected";
 }
 
-//////////////////////////// Constancy //////////////////////////////
+//////////////////////////// Permission //////////////////////////////
 
-Syntax::Production Constancy::GetMyProductionTerminal() const
+Syntax::Production Permission::GetMyProductionTerminal() const
 { 
 	return Production::KEYWORD; 
 }
@@ -1013,9 +1013,9 @@ string NonConst::GetRender( VN::RendererInterface *, Production surround_prod, P
 
 //////////////////////////// View //////////////////////////////
 
-TreePtr<Node> View::OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type )
+TreePtr<Node> View::OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type )
 {
-	constancy = c;
+	permission = c;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
@@ -1142,7 +1142,7 @@ list<string> Instance::RenderMiddlePart( VN::RendererInterface *renderer, Policy
                                                       Production::PRIMARY_EXPR, 
                                                       Production::BARE_STMT_DECL, 
                                                       policy, 
-                                                      constancy) };	
+                                                      permission) };	
 }
 
 
@@ -1165,9 +1165,9 @@ TreePtr<Node> Instance::OnIdentifier( TreePtr<Node> id, YY::VNLangParser::locati
 }
 
 
-TreePtr<Node> Instance::OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type )
+TreePtr<Node> Instance::OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type )
 {
-	constancy = c;
+	permission = c;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
@@ -1201,7 +1201,7 @@ bool Global::ShouldSplitInstance( Policy policy ) const
 {
 	if( policy.split_bulky_statics )
 	{
-		if( DynamicTreePtrCast<Const>(constancy) && DynamicTreePtrCast<Numeric>( type ) )
+		if( DynamicTreePtrCast<Const>(permission) && DynamicTreePtrCast<Numeric>( type ) )
 			return false;
 
 		return true;                
@@ -1225,23 +1225,30 @@ list<string> Member::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy 
 	if( TreePtr<Constructor>::DynamicCast(type) )
 	{
 		ASSERT( !identifier || TreePtr<ConstructorIdentifier>::DynamicCast(identifier) )(identifier);
-		ASSERT( TreePtr<NonConst>::DynamicCast(constancy) )(constancy);
-		ASSERT( TreePtr<NonVirtual>::DynamicCast(virt) )(virt);
+		ASSERT( TreePtr<NonConst>::DynamicCast(permission) )(permission);
+		ASSERT( TreePtr<NonVirtual>::DynamicCast(dispatch) )(dispatch);
 	}
 	if( TreePtr<Destructor>::DynamicCast(type) )
 	{
-		ASSERT( TreePtr<NonConst>::DynamicCast(constancy) )(constancy);
+		ASSERT( TreePtr<NonConst>::DynamicCast(permission) )(permission);
 		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);	
 		// Virtual is allowed for destructors
 	}
 
-	return { renderer->DoRender(&virt, Production::SPACE_SEP_STMT_DECL, policy) };
+	return { renderer->DoRender(&dispatch, Production::SPACE_SEP_STMT_DECL, policy) };
 }
 
 
 list<string> Member::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
 {
 	return RenderMemberInits(renderer, policy);
+}
+
+
+TreePtr<Node> Member::OnDispatch( TreePtr<Node> d, YY::VNLangParser::location_type ) 
+{
+	dispatch = d;
+	return (TreePtr<Node>)shared_from_this();	
 }
 
 
@@ -1382,7 +1389,7 @@ string Callable::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
 string Callable::UpdateDeclarator( VN::RendererInterface *renderer, string declarator, Policy policy,
                                    TreePtr<Node> constant ) 
 {
-	auto dc = TreePtr<Constancy>::DynamicCast(constant);	
+	auto dc = TreePtr<Permission>::DynamicCast(constant);	
 	return declarator + 
 	       GetRenderParameterisation(renderer, policy) +	             
 	       renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy);
@@ -1514,9 +1521,9 @@ Syntax::Production Indirection::GetOperandInDeclaratorProduction() const
 }
 
 
-TreePtr<Node> Indirection::OnConstancy( TreePtr<Node> c, YY::VNLangParser::location_type )
+TreePtr<Node> Indirection::OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type )
 {
-	constancy = c;
+	permission = c;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
@@ -1526,7 +1533,7 @@ string Pointer::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, str
 											Production, Production surround_prod, Policy policy,
 											TreePtr<Node> constant )
 {
-	auto dc = TreePtr<Constancy>::DynamicCast(constant);	
+	auto dc = TreePtr<Permission>::DynamicCast(constant);	
 	string d2 = "*" + 
 	            renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
 	            " " + 
@@ -1536,7 +1543,7 @@ string Pointer::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, str
 											    Production::PREFIX, 
 											    surround_prod, 
 											    policy, 
-											    constancy ); 
+											    permission ); 
 }                                       
 
 //////////////////////////// Reference //////////////////////////////
@@ -1545,7 +1552,7 @@ string Reference::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, s
 											Production, Production surround_prod, Policy policy,
 											TreePtr<Node> constant )
 {
-	auto dc = TreePtr<Constancy>::DynamicCast(constant);
+	auto dc = TreePtr<Permission>::DynamicCast(constant);
 	string d2 = "&" + 
 	            renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
 	            " " + 
@@ -1555,7 +1562,7 @@ string Reference::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, s
 											    Production::PREFIX, 
 											    surround_prod, 
 											    policy, 
-											    constancy ); 
+											    permission ); 
 }                                       
 
 //////////////////////////// Void ///////////////////////////////
@@ -1900,12 +1907,12 @@ TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context
 		// Use the currently stored access spec
 		// Note: the access spec set here can be overridden by UpdateCurrentAccess()
 		memb->access = any_cast<TreePtr<AccessSpec>>(context); // Don't duplicate the subtree - we want coupling behaviour		
+		memb->dispatch = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::NonVirtual>>();	
 		instance = memb;
 	}
 	instance->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
 	return instance;
 }
-
 
 //////////////////////////// Union ///////////////////////////////
 
@@ -1971,7 +1978,7 @@ TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, any &, 
 	er->type = identifier;
 	
 	// Enumerators are always const
-	er->constancy = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Const>>(); 
+	er->permission = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Const>>(); 
 
 	er->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
 	

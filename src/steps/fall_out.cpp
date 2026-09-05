@@ -126,13 +126,13 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     l_delta_enum->through = ls_enum;
     l_delta_enum->overlay = lr_enum;
     l_module->members = (l_module_decls, l_delta_enum, l_func);
-    lr_state_decl->constancy = MakePatternNode<Const>();
+    lr_state_decl->permission = MakePatternNode<Const>();
     lr_state_decl->identifier = lr_state_id;
     lr_state_decl->type = r_enum_id;
     lr_state_decl->initialiser = lr_count;
     lr_count->container = l_enum_vals;
     lr_state_id->sources = (func_id, ls_label->identifier);
-    //l_lmap->constancy = MakePatternNode<Const>(); // TODO if I skip this, I should get ⯁Constancy⦅⦆ but I actually get nothing, which is wrong (means non-const)
+    //l_lmap->permission = MakePatternNode<Const>(); // TODO if I skip this, I should get ⯁Permission⦅⦆ but I actually get nothing, which is wrong (means non-const)
     l_lmap->identifier = r_lmap_id;
     l_lmap->initialiser = l_mover;
     l_mover->through = ls_make;
@@ -152,7 +152,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     
     //s_module->bases = (bases);
     //s_module->identifier = module_id;
-    func->constancy = MakePatternNode<NonConst>();
+    func->permission = MakePatternNode<NonConst>();
     func->type = gg;
     gg->through = thread;
     func->identifier = func_id;
@@ -172,8 +172,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     r_lmap->type = r_array;
     r_lmap->identifier = r_lmap_id;
     r_lmap->initialiser = r_make;    
-    r_lmap->constancy = MakePatternNode<Const>();        
-//    r_lmap->virt = MakePatternNode<NonVirtual>();
+    r_lmap->permission = MakePatternNode<Const>();        
+//    r_lmap->dispatch = MakePatternNode<NonVirtual>();
   //  r_lmap->access = MakePatternNode<Private>();    
     r_array->element = MakePatternNode<Labeley>();
     r_array->size = MakePatternNode<Uninitialised>();
@@ -248,7 +248,7 @@ LabelTypeToEnum::LabelTypeToEnum()
     stuff_lmap->terminus = lmap;
     lmap->identifier = lmap_id;
     lmap->type = lmap_type;
-    lmap->constancy = lmap_const;
+    lmap->permission = lmap_const;
     lmap_type->element = MakePatternNode<Labeley>();
     stuff_labeley->terminus = labeley;
     stuff_labeley->recurse_restriction = apnot;
@@ -636,7 +636,7 @@ InsertInferredYield::InsertInferredYield()
     auto sx_not = MakePatternNode< LogicalNot >();
     auto assign = MakePatternNode< Assign >();
           
-    fn->constancy = MakePatternNode<NonConst>();
+    fn->permission = MakePatternNode<NonConst>();
     fn->type = thread;
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  

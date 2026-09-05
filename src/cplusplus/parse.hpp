@@ -288,19 +288,19 @@ private:
             }
         }
 
-        TreePtr<Type> CreateTypeNode(clang::Declarator &D, unsigned depth = 0, TreePtr<Constancy> *constancy = nullptr)
+        TreePtr<Type> CreateTypeNode(clang::Declarator &D, unsigned depth = 0, TreePtr<Permission> *permission = nullptr)
         {
             ASSERT( depth<=D.getNumTypeObjects() );
 
             if (depth == D.getNumTypeObjects())
             {
                 const clang::DeclSpec &DS = D.getDeclSpec();
-				if( constancy )
+				if( permission )
 				{
 					if( DS.getTypeQualifiers() & clang::DeclSpec::TQ_const )
-						*constancy = MakeTreeNode<Const>();
+						*permission = MakeTreeNode<Const>();
 					else
-						*constancy = MakeTreeNode<NonConst>();
+						*permission = MakeTreeNode<NonConst>();
 				}
                 clang::DeclSpec::TST t = DS.getTypeSpecType();
                 ASSERT( DS.getTypeSpecComplex() == clang::DeclSpec::TSC_unspecified )(
@@ -369,8 +369,8 @@ private:
                 case clang::DeclaratorChunk::Function:
                 {
                     const clang::DeclaratorChunk::FunctionTypeInfo &fchunk = chunk.Fun;
-					if( constancy )				
-						*constancy = MakeTreeNode<NonConst>();					     
+					if( permission )				
+						*permission = MakeTreeNode<NonConst>();					     
                     switch (D.getKind())
                     {
                     case clang::Declarator::DK_Normal:
@@ -402,16 +402,16 @@ private:
                     // TODO attributes
                     TRACE("pointer to...\n");
                     const clang::DeclaratorChunk::PointerTypeInfo &pchunk = chunk.Ptr;
-					if( constancy )
+					if( permission )
 					{						
 						if( pchunk.TypeQuals & clang::DeclSpec::TQ_const )
-							*constancy = MakeTreeNode<Const>();
+							*permission = MakeTreeNode<Const>();
 						else
-							*constancy = MakeTreeNode<NonConst>();
+							*permission = MakeTreeNode<NonConst>();
 					}                    
                     auto p = MakeTreeNode<Pointer>();                    
-                    p->destination = CreateTypeNode(D, depth + 1, &p->constancy);
-                    ASSERT( p->constancy );
+                    p->destination = CreateTypeNode(D, depth + 1, &p->permission);
+                    ASSERT( p->permission );
 					return p;
                 }
 
@@ -420,13 +420,13 @@ private:
                     // TODO attributes
                     TRACE("reference to...\n");
 					//const clang::DeclaratorChunk::ReferenceTypeInfo &rchunk = chunk.Ref;                    
- 					if( constancy )
-						*constancy = MakeTreeNode<NonConst>();
+ 					if( permission )
+						*permission = MakeTreeNode<NonConst>();
                     FTRACE("Warning: references not supported by transformations");
                     auto r = MakeTreeNode<Reference>();
                     ASSERT(r);
-                    r->destination = CreateTypeNode(D, depth + 1, &r->constancy);
-                    ASSERT( r->constancy );
+                    r->destination = CreateTypeNode(D, depth + 1, &r->permission);
+                    ASSERT( r->permission );
                     return r;
                 }
 
@@ -435,12 +435,12 @@ private:
                     // TODO attributes
                     const clang::DeclaratorChunk::ArrayTypeInfo &achunk = chunk.Arr;
                     TRACE("array [%d] of...\n", achunk.NumElts);
-					if( constancy )
+					if( permission )
 					{						
 						if( achunk.TypeQuals & clang::DeclSpec::TQ_const )
-							*constancy = MakeTreeNode<Const>();
+							*permission = MakeTreeNode<Const>();
 						else
-							*constancy = MakeTreeNode<NonConst>();
+							*permission = MakeTreeNode<NonConst>();
 					}                    
                     auto a = MakeTreeNode<Array>();
                     ASSERT(a);
@@ -496,14 +496,14 @@ private:
             if (!access)
                 access = MakeTreeNode<Private>(); // Most scopes are private unless specified otherwise
 
-            TreePtr<Constancy> constancy;
+            TreePtr<Permission> permission;
 /*            if (DS.getTypeQualifiers() & clang::DeclSpec::TQ_const)
-                constancy = MakeTreeNode<Const>();
+                permission = MakeTreeNode<Const>();
             else
-                constancy = MakeTreeNode<NonConst>();
+                permission = MakeTreeNode<NonConst>();
 */
-			TreePtr<Type> type = CreateTypeNode(D, 0, &constancy);			
-            ASSERT( constancy );
+			TreePtr<Type> type = CreateTypeNode(D, 0, &permission);			
+            ASSERT( permission );
             TreePtr<Instance> o;
 
             TRACE("scope flags 0x%x\n", S->getFlags());
@@ -513,11 +513,11 @@ private:
 				o = no;
 				if (DS.isVirtualSpecified())
 				{
-					no->virt = MakeTreeNode<Virtual> ();
+					no->dispatch = MakeTreeNode<Virtual> ();
 				}
 				else
 				{
-					no->virt = MakeTreeNode<NonVirtual> ();
+					no->dispatch = MakeTreeNode<NonVirtual> ();
 				}
 				no->access = access;
 			}
@@ -569,7 +569,7 @@ private:
             }
             o->type = type;
             o->initialiser = MakeTreeNode<Uninitialised> ();
-            o->constancy = constancy;
+            o->permission = permission;
 
             return o;
         }
@@ -577,14 +577,14 @@ private:
         TreePtr<Parameter> CreateParameterNode(clang::Scope *S, clang::Declarator &D)
         {
             TRACE();
-            TreePtr<Constancy> constancy;
+            TreePtr<Permission> permission;
             /*const clang::DeclSpec &DS = D.getDeclSpec();
             if (DS.getTypeQualifiers() & clang::DeclSpec::TQ_const)
-                constancy = MakeTreeNode<Const>();
+                permission = MakeTreeNode<Const>();
             else
-                constancy = MakeTreeNode<NonConst>();*/
-   			TreePtr<Type> type = CreateTypeNode(D, 0, &constancy);
-            ASSERT( constancy );
+                permission = MakeTreeNode<NonConst>();*/
+   			TreePtr<Type> type = CreateTypeNode(D, 0, &permission);
+            ASSERT( permission );
 
             auto param = MakeTreeNode<Parameter>();
 
@@ -602,7 +602,7 @@ private:
             }
             param->type = type;
             param->initialiser = MakeTreeNode<Uninitialised> ();
-            param->constancy = constancy;
+            param->permission = permission;
 
             return param;
         }
@@ -1852,7 +1852,7 @@ private:
 		auto er = MakeTreeNode<Enumerator>();
         all_decls->members.insert(er);
         er->identifier = CreateInstanceIdentifier(Id);
-        er->constancy = MakeTreeNode<Const>(); // static const member need not consume storage!!
+        er->permission = MakeTreeNode<Const>(); // static const member need not consume storage!!
         er->type = en->identifier;//CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
         if( Val )
         {
@@ -1958,7 +1958,7 @@ private:
          base->storage = MakeTreeNode<Virtual>();
          else
          base->storage = MakeTreeNode<NonStatic>();
-         base->constancy = MakeTreeNode<NonConst>(); */
+         base->permission = MakeTreeNode<NonConst>(); */
         base->access = ConvertAccess( AccessSpec, r );
         return hold_base.ToRaw( base );
     }

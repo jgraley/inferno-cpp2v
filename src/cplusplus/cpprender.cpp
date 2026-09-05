@@ -120,7 +120,7 @@ string CppRender::GetUniqueIdentifierName( TreePtr<Node> id ) const
 
 string CppRender::DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
                                              Syntax::Production declarator_prod, Syntax::Production surround_prod, Syntax::Policy policy,
-                                             TreePtr<CPPTree::Constancy> constant )
+                                             TreePtr<CPPTree::Permission> constant )
 { 		
 	auto type_as_type = TreePtr<CPPTree::Type>::DynamicCast(type);
 	ASSERT( type_as_type )(type)(" needs to be a Type"); // Must supply a type
