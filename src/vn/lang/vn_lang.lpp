@@ -49,6 +49,7 @@ float_exp_suffix		[Ee] [-+]? \d+
 float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 integral_num			\d*[lLuU]*
 comp_assign				\|=|\^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
+node_name               ({ascii_name}|::)*
 
 %%
 
@@ -120,6 +121,6 @@ char|short|int|long|signed|unsigned|float|double { return YY::VNLangParser::make
 {ascii_name}	{ return recogniser->OnUnquotedLexeme(str(), location()); }
 {unicode_name}	{ return recogniser->OnUnquotedLexeme(wstr(), location()); }
 
-⯁({ascii_name}|::)* 	{ return recogniser->OnExplicitLexeme(wstr(), location()); }
+⯁{node_name} 	{ return recogniser->OnExplicitLexeme(wstr(), location()); }
 
 %%

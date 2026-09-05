@@ -113,6 +113,7 @@ public:
 	YY::VNLangParser::symbol_type OnExplicitLexeme(wstring text, YY::VNLangParser::location_type loc) const;
 
 private:
+	TreePtr<Node> CreateNode(string text, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type Recognise(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type RecogniseInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type CreateBlockToken(const ANDBlock *block, YY::VNLangParser::location_type loc) const;

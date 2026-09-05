@@ -189,8 +189,7 @@ stmt_high
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named mi_transform_op_named
 %type <const ANDBlock *> 			node_namespace
-%type <TreePtr<Node>>	 			resolved_norm_node resolved_type_node resolved_decl_node resolved_qual_node resolved_mi_node
-%type <TreePtr<Node>>	 			explicit_norm_node explicit_type_node explicit_decl_node explicit_qual_node explicit_mi_node
+%type <TreePtr<Node>>	 			resolved_norm_node resolved_type_node resolved_decl_node resolved_mi_node
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands decl_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
@@ -384,19 +383,19 @@ decl_postfix: decl_primary
 decl_primary: decl_vn_prim
 			| '(' decl_boot ')'														{ $$ = $2; } 
 						
-decl_vn_prim: decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
+decl_vn_prim: decl_full_explicit_start itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DELTA_COMPARE_OP decl_boot DELTA_REPLACE_OP decl_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 			| DESIGNATED_DECL     						  			
-			| STAR_OP OPEN_VN decl_entry CLOSE_VN					{ $$ = vn->OnStar($3); }
+			| STAR_OP OPEN_VN decl_entry CLOSE_VN						{ $$ = vn->OnStar($3); }
 			
-decl_full_explicit_start 		: explicit_decl_node					{ $$ = vn->MakeScopeGnomonForNode($1); 
+decl_full_explicit_start 	: RESOLVED_DECL								{ $$ = vn->MakeScopeGnomonForNode($1); 
 																		  vn->AddGnomon($$.gnomon); }
                                                                                   
 decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_node	{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2); 
                                                                           vn->AddGnomon($$); }
                                                                           
 memb_inits	: memb_inits ',' memb_init_boot								{ $$ = $1; $$.push_back($3); }
-			| memb_init_boot												{ $$ = {$1}; }
+			| memb_init_boot											{ $$ = {$1}; }
 
 memb_init_boot	: memb_init_entry
 
@@ -426,7 +425,7 @@ memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2
 					| STAR_OP OPEN_VN memb_init_boot CLOSE_VN					{ $$ = vn->OnStar($3); }
 					| ANY_NODE_OP											{ $$ = nullptr; }
                       
-mi_full_explicit_start 	: explicit_mi_node							{ $$ = vn->MakeScopeGnomonForNode($1); 
+mi_full_explicit_start 	: RESOLVED_MEMB_INIT						{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
 mi_prerestrict_op_named	: prerestrict_op_scope resolved_mi_node		{ $$ = $2; (void)$1; }                      
 mi_id_by_name_op_named 	: id_by_name_op_scope resolved_mi_node		{ $$ = $2; (void)$1; }
@@ -495,7 +494,7 @@ irecord_scope   : irecord_node type_specified        						{ $$ = { $1->OnIdenti
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 irecord_node	: IRECORD_KEYWORD											
-		 		| explicit_decl_node										
+		 		| RESOLVED_DECL										
                                                   
 bases			: base_spec                                                 { $$.push_back($1); } 
 				| bases ',' base_spec										{ $$ = $1; $$.push_back($3); } 
@@ -574,7 +573,7 @@ enum_scope      : enum_node type_specified       							{ $$ = { $1->OnIdentifie
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 enum_node		: ENUM_KEYWORD												
-//		 		| explicit_decl_node										// TODO bring back explicit support but differentiate
+//		 		| RESOLVED_DECL										// TODO bring back explicit support but differentiate
                                                                                                                                                        
 enumerators		: enumerator												{ $$.push_back($1); }
 				| enumerators ',' enumerator 								{ $$ = $1; $$.push_back($3); }
@@ -636,7 +635,7 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); }
 
 statement_nl: bare_statement ';'										
 			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts
-     		| explicit_norm_node '(' semicolon_args ')' stmt_comp			{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
+     		| RESOLVED_NORMAL '(' semicolon_args ')' stmt_comp				{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp		{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 					{ $$ = $1->OnArgsList({$3}, @3)->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp	
@@ -756,7 +755,7 @@ id_wildcard : STAR_OP												{ $$ = vn->OnStar(nullptr); }
 comma_sep_expr_decl	: expr_no_comma_op								{ $$.push_back($1); }
 					| comma_sep_expr_decl ',' expr_no_comma_op		{ $$ = $1; $$.push_back($3); }			
 
-norm_full_explicit_start : explicit_norm_node						{ $$ = vn->MakeScopeGnomonForNode($1); 
+norm_full_explicit_start : RESOLVED_NORMAL							{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
 																
 prerestrict_op_named: prerestrict_op_scope resolved_norm_node		{ $$ = $2; (void)$1; }
@@ -820,7 +819,7 @@ type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExpl
 			| TYPE_INDICATOR STAR_OP OPEN_VN type_boot CLOSE_VN					 { $$ = vn->OnStar($4); }
 			| STAR_OP OPEN_VN type_boot CLOSE_VN								 { $$ = vn->OnStar($3); }
 		 	
-type_full_explicit_start 	: explicit_type_node								{ $$ = vn->MakeScopeGnomonForNode($1); 
+type_full_explicit_start 	: RESOLVED_TYPE										{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                                   vn->AddGnomon($$.gnomon); }
 type_prerestrict_op_named 	: prerestrict_op_scope resolved_type_node			{ $$ = $2; (void)$1; }
 type_id_by_name_op_named 	: id_by_name_op_scope resolved_type_node			{ $$ = $2; (void)$1; }
@@ -848,7 +847,7 @@ qualifier_node	: qual_full_explicit_start itemisation						{ $$ = vn->FinishExpl
 				| QUAL_NODE_KEYWORD								
 				| DESIGNATED_QUAL       				  			
 
-qual_full_explicit_start : explicit_qual_node								{ $$ = vn->MakeScopeGnomonForNode($1); 
+qual_full_explicit_start : RESOLVED_QUAL									{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                               vn->AddGnomon($$.gnomon); }
 
 //////////////////////////////////////// RECOGNISER GLUE /////////////////////////////////////////////
@@ -863,28 +862,15 @@ vn_name		: UNICODE_NAME
 // doesn't require this. See comment by part_resolve for why we don't need a value from 
 // part_resolve. The Gnomon is still around because we *could* use $1 here, so it must be valid.
 
-explicit_norm_node	: resolved_norm_node	
-
 resolved_norm_node	: part_resolve RESOLVED_NORMAL			{ $$ = $2; }
 					| RESOLVED_NORMAL					
-
-explicit_type_node	: resolved_type_node	
 
 resolved_type_node	: part_resolve RESOLVED_TYPE			{ $$ = $2; }
 					| RESOLVED_TYPE						
 	
-explicit_decl_node	: resolved_decl_node	
-
 resolved_decl_node	: part_resolve RESOLVED_DECL 			{ $$ = $2; }
 					| RESOLVED_DECL							
-
-explicit_qual_node	: resolved_qual_node	
-
-resolved_qual_node	: part_resolve RESOLVED_QUAL		{ $$ = $2; }
-					| RESOLVED_QUAL						
-
-explicit_mi_node	: resolved_mi_node	
-
+					
 resolved_mi_node	: part_resolve RESOLVED_MEMB_INIT	{ $$ = $2; }
 					| RESOLVED_MEMB_INIT				
 

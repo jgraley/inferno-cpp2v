@@ -77,9 +77,15 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(wstring text, Y
 
 YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, YY::VNLangParser::location_type loc) const
 {
-	string ascii = ToASCII(text.substr(1));
-	list<string> parts = Split(ascii, "::");
-	FTRACE(parts)("\n");
+	TreePtr<Node> node = CreateNode( ToASCII(text.substr(1)), loc );
+	YY::VNLangParser::token::token_kind_type token_kind = node->GetCompleteToken();		
+	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
+}
+
+
+TreePtr<Node> VNLangRecogniser::CreateNode(string text, YY::VNLangParser::location_type loc) const
+{
+	list<string> parts = Split(text, "::");
 	const AvailableNodeData::NamespaceBlock *namespace_block = AvailableNodeData().GetNodeNamesRoot();
 	ASSERT( namespace_block ); // Internal error: no root block
 
@@ -101,7 +107,10 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, Y
 
 		const ANDBlock *sub_block = namespace_block->sub_blocks.at(part).get();
 		if( auto lb = dynamic_cast<const AvailableNodeData::NodeBlock *>(sub_block) )
-			return CreateNodeToken(lb, loc);
+		{
+			ASSERT(lb->tag)("NodeBlock ")(*lb)(" has no tag, so cannot create a node from it");
+			return MakeStandardAgent(lb->tag.value());
+		}
 		else if( auto nsb = dynamic_cast<const AvailableNodeData::NamespaceBlock *>(sub_block) )
 			namespace_block = nsb;				
 		else
