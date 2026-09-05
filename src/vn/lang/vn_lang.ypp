@@ -136,7 +136,7 @@
 <TreePtr<Node>>	DESIGNATED_DECL			_("designated declaration name")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier name")
 <TreePtr<Node>>	DESIGNATED_COMPOUND		_("designated compound name")
-<TreePtr<Node>>	RESOLVED_NORMAL			_("resolved open_statement node name")
+<TreePtr<Node>>	RESOLVED_NORMAL			_("resolved statement/expression node name")
 <TreePtr<Node>>	RESOLVED_TYPE			_("resolved type node name")
 <TreePtr<Node>>	RESOLVED_DECL			_("resolved declaration node name")
 <TreePtr<Node>>	RESOLVED_QUAL			_("resolved qualifier node name")
@@ -390,7 +390,7 @@ decl_vn_prim: decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicit
 			| STAR_OP OPEN_VN decl_entry CLOSE_VN					{ $$ = vn->OnStar($3); }
 			
 decl_full_explicit_start 		: explicit_decl_node					{ $$ = vn->MakeScopeGnomonForNode($1); 
-                                                                      vn->AddGnomon($$.gnomon); }
+																		  vn->AddGnomon($$.gnomon); }
                                                                                   
 decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_node	{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2); 
                                                                           vn->AddGnomon($$); }
@@ -636,7 +636,7 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); }
 
 statement_nl: bare_statement ';'										
 			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts
-// #899		| explicit_norm_node '(' semicolon_args ')' stmt_comp			{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
+     		| explicit_norm_node '(' semicolon_args ')' stmt_comp			{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp		{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 					{ $$ = $1->OnArgsList({$3}, @3)->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp	
@@ -898,7 +898,7 @@ node_namespace 	: part_resolve NODE_NAMESPACE			{ $$ = $2; }
 				| NODE_NAMESPACE						{ $$ = $1; }				      
 
 
-explicit_op_scope		: EXPLICIT_OP 		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
+explicit_op_scope		: %empty 		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 										      recogniser->AddGnomon($$); }
 										      
 prerestrict_op_scope	: PRERESTRICT_OP	{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 

@@ -75,6 +75,44 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(wstring text, Y
 }
 
 
+YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, YY::VNLangParser::location_type loc) const
+{
+	string ascii = ToASCII(text.substr(1));
+	list<string> parts = Split(ascii, "::");
+	FTRACE(parts)("\n");
+	const AvailableNodeData::NamespaceBlock *namespace_block = AvailableNodeData().GetNodeNamesRoot();
+	ASSERT( namespace_block ); // Internal error: no root block
+
+	// If the first part won't match, try the default namespace
+	if( namespace_block->sub_blocks.count(parts.front()) == 0 ) 
+	{
+		const ANDBlock *default_block = namespace_block->sub_blocks.at(DEFAULT_NODE_NAMESPACE).get();
+		if( auto nsb = dynamic_cast<const AvailableNodeData::NamespaceBlock *>(default_block) )
+			namespace_block = nsb;				
+		else
+			ASSERTFAIL("bad default andata block");		
+	}
+
+	for( string part : parts )
+	{
+		if( namespace_block->sub_blocks.count(part) == 0 )
+			throw YY::VNLangParser::syntax_error( loc,
+				SSPrintf("Unrecognised %s in explicit name", DiagQuote(part).c_str() ) ); 
+
+		const ANDBlock *sub_block = namespace_block->sub_blocks.at(part).get();
+		if( auto lb = dynamic_cast<const AvailableNodeData::NodeBlock *>(sub_block) )
+			return CreateNodeToken(lb, loc);
+		else if( auto nsb = dynamic_cast<const AvailableNodeData::NamespaceBlock *>(sub_block) )
+			namespace_block = nsb;				
+		else
+			ASSERT(false)("bad andata block ")(part)(" in ")(text);
+	}
+	throw YY::VNLangParser::syntax_error( loc,
+	    SSPrintf("Explicit %s only specifies a node namespace, not an actual node", DiagQuote(text).c_str() ) ); 
+	
+}
+
+
 YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
 {
 	const ScopeGnomon *scope = nullptr;
