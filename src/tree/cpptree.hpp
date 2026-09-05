@@ -40,7 +40,8 @@ struct Qualifier : Property
 	virtual TreePtr<Node> GetDefaultNode(TreePtr<Node>) const { ASSERTFAIL(); }
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
 	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
-	YY::VNLangParser::token::token_kind_type GetCompleteToken() const override;
+	YY::VNLangParser::token::token_kind_type GetExplicitToken() const override;
+	YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const override;
 };
 
 
@@ -105,7 +106,8 @@ struct Type : virtual Node
 
     // Render a simple type only, no declarators
 	virtual string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy );    
-	virtual YY::VNLangParser::token::token_kind_type GetCompleteToken() const;
+	YY::VNLangParser::token::token_kind_type GetExplicitToken() const override;
+	YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const override;
 };
 
 
@@ -119,7 +121,8 @@ struct Declaration : virtual Node
     virtual string GetColour() const { return "/set28/1"; }
 	virtual bool ShouldSplitInstance( Policy policy ) const;
 	virtual list<string> ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bool force, VN::RendererInterface *renderer, Policy policy ) const;
-	virtual YY::VNLangParser::token::token_kind_type GetCompleteToken() const;
+	virtual YY::VNLangParser::token::token_kind_type GetExplicitToken() const;
+	YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const override;
 };
 
 
@@ -489,7 +492,8 @@ struct MemberInitialiser : Statement // TODO not a Statement, just virtual Node 
 
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
-	YY::VNLangParser::token::token_kind_type GetCompleteToken() const override;
+	YY::VNLangParser::token::token_kind_type GetExplicitToken() const override;
+	YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const override;
 };
 
 
@@ -803,7 +807,8 @@ struct LabelDeclaration : Declaration, //TODO commonize with Case and Default
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
-	virtual YY::VNLangParser::token::token_kind_type GetCompleteToken() const;
+	YY::VNLangParser::token::token_kind_type GetExplicitToken() const override;
+	YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const override;
 };
 
 //////////////////////////// Built-in Types ////////////////////////////

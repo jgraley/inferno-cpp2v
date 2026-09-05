@@ -73,7 +73,6 @@ node_name               ({ascii_name}|::)*
 ▲				{ return YY::VNLangParser::make_DELTA_COMPARE_OP(location()); };
 ⯈				{ return YY::VNLangParser::make_DELTA_REPLACE_OP(location()); };
 ⯇				{ return YY::VNLangParser::make_DELTA_END_OP(location()); };
-//⯁				{ return YY::VNLangParser::make_EXPLICIT_OP(location()); };
 ☆				{ return YY::VNLangParser::make_ANY_NODE_OP(location()); };
 ★				{ return YY::VNLangParser::make_STAR_OP(location()); };
 ⊛				{ return YY::VNLangParser::make_ID_BY_NAME_OP(location()); };
@@ -86,7 +85,7 @@ node_name               ({ascii_name}|::)*
 ⮎				{ return YY::VNLangParser::make_POINTER_IS_OP(location()); };
 🄽				{ return YY::VNLangParser::make_BUILD_SIZE_OP(location()); };
 §				{ return YY::VNLangParser::make_STRINGIZE_OP(location()); };
-‽ 				{ return YY::VNLangParser::make_PRERESTRICT_OP(location()); };
+//‽ 				{ return YY::VNLangParser::make_PRERESTRICT_OP(location()); };
 ⨤				{ return YY::VNLangParser::make_XSTRUCTOR(location()); };
 ⍑ 				{ return YY::VNLangParser::make_TYPE_INDICATOR(location()); };
 ∞ 				{ return YY::VNLangParser::make_CODE_UNIT(location()); };
@@ -105,7 +104,6 @@ node_name               ({ascii_name}|::)*
 \|				{ return YY::VNLangParser::make_C_BITWISE_OR_OP(str(), location()); }
 \^				{ return YY::VNLangParser::make_C_BITWISE_XOR_OP(str(), location()); }
 
-//::				{ return YY::VNLangParser::make_RESOLUTION_OP(location()); };
 \.\. 			{ return YY::VNLangParser::make_RANGE_OP(location()); };
 
 [()\{\};?:\[\]\.,&\*]	{ return YY::VNLangParser::symbol_type(chr(), location()); }
@@ -122,5 +120,5 @@ char|short|int|long|signed|unsigned|float|double { return YY::VNLangParser::make
 {unicode_name}	{ return recogniser->OnUnquotedLexeme(wstr(), location()); }
 
 ⯁{node_name} 	{ return recogniser->OnExplicitLexeme(wstr(), location()); }
-
+‽{node_name} 	{ return recogniser->OnPrerestrictLexeme(wstr(), location()); }
 %%

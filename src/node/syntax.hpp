@@ -188,8 +188,11 @@ public:
     static string::size_type GetLineBreakThreshold();
     virtual string GetKeyword( Policy policy ) const;    
 	string RenderNodeTypeName() const; 
+	
 	virtual YY::VNLangParser::token::token_kind_type GetKeywordToken() const;
-	virtual YY::VNLangParser::token::token_kind_type GetCompleteToken() const;
+	virtual YY::VNLangParser::token::token_kind_type GetExplicitToken() const;
+	virtual YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const;
+
 	string MyBestErrName() const;
 	virtual TreePtr<Node> OnAccess( TreePtr<Node> access, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type loc );
@@ -204,6 +207,7 @@ public:
 	virtual TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
+	
 	virtual any GetInitialContext() const;    
 	virtual void UpdateContext( TreePtr<Node> node, any &context, YY::VNLangParser::location_type loc );	
 	virtual TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type loc) const; 

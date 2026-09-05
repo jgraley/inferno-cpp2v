@@ -141,6 +141,11 @@
 <TreePtr<Node>>	RESOLVED_DECL			_("resolved declaration node name")
 <TreePtr<Node>>	RESOLVED_QUAL			_("resolved qualifier node name")
 <TreePtr<Node>>	RESOLVED_MEMB_INIT		_("resolved member initialiser node name")
+<TreePtr<Node>>	PRERESTRICT_NORMAL		_("statement/expression pre-restriction")
+<TreePtr<Node>>	PRERESTRICT_TYPE		_("type pre-restriction")
+<TreePtr<Node>>	PRERESTRICT_DECL		_("declaration pre-restriction")
+<TreePtr<Node>>	PRERESTRICT_QUAL		_("qualifier pre-restriction")
+<TreePtr<Node>>	PRERESTRICT_MEMB_INIT	_("member initialiser pre-restriction")
 <TreePtr<Node>>	BOOL_LITERAL			_("C boolean literal")
 <TreePtr<Node>> KEYWORD_PRIMARY_OP		_("open_statement keyword operator")
 <TreePtr<Node>> KEYWORD_SIMPLE_STMT     _("keyword simple statement") // eg break;
@@ -189,7 +194,7 @@ stmt_high
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named mi_transform_op_named
 %type <const ANDBlock *> 			node_namespace
-%type <TreePtr<Node>>	 			resolved_norm_node resolved_type_node resolved_decl_node resolved_mi_node
+%type <TreePtr<Node>>	 			resolved_norm_node resolved_type_node resolved_mi_node
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands decl_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
@@ -197,10 +202,9 @@ stmt_high
 %type <VN::Item>					item
 %type <shared_ptr<VN::Gnomon>>		part_resolve designation_command 
 %type <shared_ptr<VN::Gnomon>>		transform_op_scope
-%type <shared_ptr<VN::Gnomon>>		prerestrict_op_scope id_by_name_op_scope builder_id_op_scope stuff_op_scope
-%type <shared_ptr<VN::Gnomon>>		 params_scope 
+%type <shared_ptr<VN::Gnomon>>		id_by_name_op_scope builder_id_op_scope stuff_op_scope
+%type <shared_ptr<VN::Gnomon>>		params_scope 
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
-%type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
 %type <VN::NodeAndGnomon>			norm_full_explicit_start type_full_explicit_start decl_full_explicit_start qual_full_explicit_start mi_full_explicit_start
 %type <VN::NodeAndGnomon>			irecord_scope enum_scope
 %type <TreePtr<Node>> 				acc_memb_boot member comp_member bare_member bare_member_nvn 
@@ -211,10 +215,11 @@ stmt_high
 %type <list<TreePtr<Node>>>			bases memb_inits
 %type <VN::QualifierData> 			qualifier qualifier_nw
 %type <list<VN::QualifierData>>		qualifiers 
-%type <TreePtr<Node>> prerestrict_op_named id_by_name_op_named build_id_named 
-%type <TreePtr<Node>> type_prerestrict_op_named type_id_by_name_op_named type_build_id_op_named
-%type <TreePtr<Node>> mi_prerestrict_op_named mi_id_by_name_op_named mi_build_id_op_named
+%type <TreePtr<Node>> id_by_name_op_named build_id_named 
+%type <TreePtr<Node>> type_id_by_name_op_named type_build_id_op_named
+%type <TreePtr<Node>> mi_id_by_name_op_named mi_build_id_op_named
 %type <multiset<string>>			type_specifier_seq
+%type <shared_ptr<VN::PrerestrictScopeGnomon>>         prerestrict_decl_start
 
 // Solve the dangling-else amiguity by giving the "else" token a higher priority than the "if" token
 // In the rule, we must set the no-else rule to the "if" priority using %prec. Then, the TOKEN
@@ -299,7 +304,7 @@ compound_prefix : compound_primary
 				|  								   stuff_op_scope compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				|    stuff_op_scope OPEN_VN unified_entry CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|     stuff_op_scope OPEN_VN stuff_depth CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
-				|                      prerestrict_op_named compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+				|                              PRERESTRICT_NORMAL compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 
 compound_primary	: compound_scope VN_SEP '}'                				{ $$ = $1->scope_node; } 
 					| compound_scope stmt_decls VN_SEP '}'     				{ $$ = $1->scope_node->OnMembers($2, @2); }
@@ -376,7 +381,7 @@ decl_prefix : decl_postfix
 			| 							      POINTER_IS_OP decl_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP decl_prefix	{ $$ = vn->OnNegation($2); }			
 			// Allows ‽Member to actually get us into access/member column so can have access spec
-			|            decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
+			|        			 prerestrict_decl_start acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
 			   			 
 decl_postfix: decl_primary		   
 	                                       
@@ -389,9 +394,9 @@ decl_vn_prim: decl_full_explicit_start itemisation						{ $$ = vn->FinishExplici
 			| STAR_OP OPEN_VN decl_entry CLOSE_VN						{ $$ = vn->OnStar($3); }
 			
 decl_full_explicit_start 	: RESOLVED_DECL								{ $$ = vn->MakeScopeGnomonForNode($1); 
-																		  vn->AddGnomon($$.gnomon); }
-                                                                                  
-decl_prerestrict_op_named 	: prerestrict_op_scope resolved_decl_node	{ $$ = make_shared<VN::PrerestrictScopeGnomon>($2); 
+																		  vn->AddGnomon($$.gnomon); }                                                                                  
+                                         
+prerestrict_decl_start : PRERESTRICT_DECL     						    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
                                                                           vn->AddGnomon($$); }
                                                                           
 memb_inits	: memb_inits ',' memb_init_boot								{ $$ = $1; $$.push_back($3); }
@@ -404,7 +409,7 @@ memb_init_entry	: memb_init_prefix
 memb_init_prefix: memb_init_postfix
 				| 						        GREEN_GRASS_OP memb_init_prefix	{ $$ = vn->OnGrass($2); }
 				| 					               NEGATION_OP memb_init_prefix	{ $$ = vn->OnNegation($2); }
-				|                      mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+				|                        PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 				|  						        stuff_op_scope memb_init_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				|    stuff_op_scope OPEN_VN memb_init_boot CLOSE_VN memb_init_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN memb_init_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
@@ -427,7 +432,6 @@ memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2
                       
 mi_full_explicit_start 	: RESOLVED_MEMB_INIT						{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
-mi_prerestrict_op_named	: prerestrict_op_scope resolved_mi_node		{ $$ = $2; (void)$1; }                      
 mi_id_by_name_op_named 	: id_by_name_op_scope resolved_mi_node		{ $$ = $2; (void)$1; }
 mi_build_id_op_named	: builder_id_op_scope resolved_mi_node		{ $$ = $2; (void)$1; }
 mi_transform_op_named  	: transform_op_scope TRANSFORM_NAME_NORMAL	{ $$ = $2; (void)$1; }
@@ -539,7 +543,7 @@ acc_memb_prefix	: acc_memb_postfix
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
 				| 						      POINTER_IS_OP acc_memb_prefix	{ $$ = vn->OnPointerIs($2); }
 				| 					         	NEGATION_OP	acc_memb_prefix	{ $$ = vn->OnNegation($2); }
-				|         	      decl_prerestrict_op_named acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
+				|         	      	 prerestrict_decl_start acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
 				|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				| stuff_op_scope OPEN_VN unified_entry CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
@@ -709,8 +713,8 @@ expr_prefix : expr_postfix
 			| 						     GREEN_GRASS_OP expr_prefix	{ $$ = vn->OnGrass($2); }
 			| 						      POINTER_IS_OP expr_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
-			|                      prerestrict_op_named expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|              mi_prerestrict_op_named memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|                        PRERESTRICT_NORMAL expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 			| stuff_op_scope OPEN_VN unified_entry CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
@@ -758,7 +762,6 @@ comma_sep_expr_decl	: expr_no_comma_op								{ $$.push_back($1); }
 norm_full_explicit_start : RESOLVED_NORMAL							{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
 																
-prerestrict_op_named: prerestrict_op_scope resolved_norm_node		{ $$ = $2; (void)$1; }
 id_by_name_op_named : id_by_name_op_scope resolved_norm_node		{ $$ = $2; (void)$1; }
 build_id_named 		: builder_id_op_scope resolved_norm_node		{ $$ = $2; (void)$1; }
 transform_op_named  : transform_op_scope TRANSFORM_NAME_NORMAL 		{ $$ = $2; (void)$1; }
@@ -794,7 +797,7 @@ type_prefix : type_postfix
 			| 						         GREEN_GRASS_OP type_prefix	{ $$ = vn->OnGrass($2); }
 			| 							      POINTER_IS_OP type_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP type_prefix	{ $$ = vn->OnNegation($2); }
-			|                     type_prerestrict_op_named type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|                     		   PRERESTRICT_TYPE type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|								 TYPE_INDICATOR expr_prefix { $$ = $2; }
 
 type_postfix: type_primary		   
@@ -821,7 +824,6 @@ type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExpl
 		 	
 type_full_explicit_start 	: RESOLVED_TYPE										{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                                   vn->AddGnomon($$.gnomon); }
-type_prerestrict_op_named 	: prerestrict_op_scope resolved_type_node			{ $$ = $2; (void)$1; }
 type_id_by_name_op_named 	: id_by_name_op_scope resolved_type_node			{ $$ = $2; (void)$1; }
 type_build_id_op_named 		: builder_id_op_scope resolved_type_node			{ $$ = $2; (void)$1; }
 type_transform_op_named 	: transform_op_scope TRANSFORM_NAME_TYPE 			{ $$ = $2; (void)$1; }
@@ -866,12 +868,9 @@ resolved_norm_node	: part_resolve RESOLVED_NORMAL			{ $$ = $2; }
 					| RESOLVED_NORMAL					
 
 resolved_type_node	: part_resolve RESOLVED_TYPE			{ $$ = $2; }
-					| RESOLVED_TYPE						
-	
-resolved_decl_node	: part_resolve RESOLVED_DECL 			{ $$ = $2; }
-					| RESOLVED_DECL							
+					| RESOLVED_TYPE												
 					
-resolved_mi_node	: part_resolve RESOLVED_MEMB_INIT	{ $$ = $2; }
+resolved_mi_node	: part_resolve RESOLVED_MEMB_INIT		{ $$ = $2; }
 					| RESOLVED_MEMB_INIT				
 
 // On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 
@@ -882,10 +881,7 @@ part_resolve	: node_namespace RESOLUTION_OP			{ $$ = make_shared<VN::ResolverGno
     
 node_namespace 	: part_resolve NODE_NAMESPACE			{ $$ = $2; }
 				| NODE_NAMESPACE						{ $$ = $1; }				      
-
 										      
-prerestrict_op_scope	: PRERESTRICT_OP	{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
-										      recogniser->AddGnomon($$); }
 
 id_by_name_op_scope		: ID_BY_NAME_OP 	{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 											  recogniser->AddGnomon($$); }

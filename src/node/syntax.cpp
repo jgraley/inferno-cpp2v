@@ -112,9 +112,15 @@ YY::VNLangParser::token::token_kind_type Syntax::GetKeywordToken() const
 }
 
 
-YY::VNLangParser::token::token_kind_type Syntax::GetCompleteToken() const
+YY::VNLangParser::token::token_kind_type Syntax::GetExplicitToken() const
 {
 	return YY::VNLangParser::token::TOK_RESOLVED_NORMAL;
+}
+
+
+YY::VNLangParser::token::token_kind_type Syntax::GetPrerestrictToken() const
+{
+	return YY::VNLangParser::token::TOK_PRERESTRICT_NORMAL;	
 }
 
 

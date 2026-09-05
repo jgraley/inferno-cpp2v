@@ -52,9 +52,15 @@ YY::VNLangParser::token::token_kind_type Qualifier::GetKeywordToken() const
 }
 
 
-YY::VNLangParser::token::token_kind_type Qualifier::GetCompleteToken() const
+YY::VNLangParser::token::token_kind_type Qualifier::GetExplicitToken() const
 {
 	return YY::VNLangParser::token::TOK_RESOLVED_QUAL;
+}
+
+
+YY::VNLangParser::token::token_kind_type Qualifier::GetPrerestrictToken() const
+{
+	return YY::VNLangParser::token::TOK_PRERESTRICT_QUAL;
 }
 
 //////////////////////////// Uninitialised ///////////////////////////////
@@ -132,9 +138,15 @@ string Type::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 }
 
 
-YY::VNLangParser::token::token_kind_type Type::GetCompleteToken() const
+YY::VNLangParser::token::token_kind_type Type::GetExplicitToken() const
 {
 	return YY::VNLangParser::token::TOK_RESOLVED_TYPE;
+}
+
+
+YY::VNLangParser::token::token_kind_type Type::GetPrerestrictToken() const
+{
+	return YY::VNLangParser::token::TOK_PRERESTRICT_TYPE;
 }
 
 //////////////////////////// Declaration ///////////////////////////////
@@ -174,9 +186,15 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 }
 
 
-YY::VNLangParser::token::token_kind_type Declaration::GetCompleteToken() const
+YY::VNLangParser::token::token_kind_type Declaration::GetExplicitToken() const
 {
 	return YY::VNLangParser::token::TOK_RESOLVED_DECL;
+}
+
+
+YY::VNLangParser::token::token_kind_type Declaration::GetPrerestrictToken() const
+{
+	return YY::VNLangParser::token::TOK_PRERESTRICT_DECL;
 }
 
 //////////////////////////// DeclScope ///////////////////////////////
@@ -905,9 +923,15 @@ string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production
 }
 
 
-YY::VNLangParser::token::token_kind_type MemberInitialiser::GetCompleteToken() const
+YY::VNLangParser::token::token_kind_type MemberInitialiser::GetExplicitToken() const
 {
 	return YY::VNLangParser::token::TOK_RESOLVED_MEMB_INIT;
+}
+
+
+YY::VNLangParser::token::token_kind_type MemberInitialiser::GetPrerestrictToken() const
+{
+	return YY::VNLangParser::token::TOK_PRERESTRICT_MEMB_INIT;
 }
 
 //////////////////////////// MembInitSeq ///////////////////////////////
@@ -1351,10 +1375,17 @@ string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production,
 }
 
 
-YY::VNLangParser::token::token_kind_type LabelDeclaration::GetCompleteToken() const
+YY::VNLangParser::token::token_kind_type LabelDeclaration::GetExplicitToken() const
 {
-	// LabelDeclaration parses more like a statemant etc so override Declaration::GetCompleteToken()
+	// LabelDeclaration parses more like a statemant etc so override Declaration::GetExplicitToken()
 	return YY::VNLangParser::token::TOK_RESOLVED_NORMAL;
+}
+
+
+YY::VNLangParser::token::token_kind_type LabelDeclaration::GetPrerestrictToken() const
+{
+	// LabelDeclaration parses more like a statemant etc so override Declaration::GetExplicitToken()
+	return YY::VNLangParser::token::TOK_PRERESTRICT_NORMAL;
 }
 
 //////////////////////////// Callable //////////////////////////////

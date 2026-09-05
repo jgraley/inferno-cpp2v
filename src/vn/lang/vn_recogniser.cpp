@@ -78,7 +78,15 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(wstring text, Y
 YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, YY::VNLangParser::location_type loc) const
 {
 	TreePtr<Node> node = CreateNode( ToASCII(text.substr(1)), loc );
-	YY::VNLangParser::token::token_kind_type token_kind = node->GetCompleteToken();		
+	YY::VNLangParser::token::token_kind_type token_kind = node->GetExplicitToken();		
+	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
+}
+
+
+YY::VNLangParser::symbol_type VNLangRecogniser::OnPrerestrictLexeme(wstring text, YY::VNLangParser::location_type loc) const
+{
+	TreePtr<Node> node = CreateNode( ToASCII(text.substr(1)), loc );
+	YY::VNLangParser::token::token_kind_type token_kind = node->GetPrerestrictToken();		
 	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
 }
 
@@ -204,7 +212,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::CreateNodeToken(const AvailableN
 {
 	ASSERT(block->tag)("NodeBlock ")(*block)(" has no tag, so cannot create a node from it");
 	TreePtr<Node> node = MakeStandardAgent(block->tag.value());
-	YY::VNLangParser::token::token_kind_type token_kind = node->GetCompleteToken();		
+	YY::VNLangParser::token::token_kind_type token_kind = node->GetExplicitToken();		
 	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
 }
 
