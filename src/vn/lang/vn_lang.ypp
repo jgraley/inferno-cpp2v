@@ -198,7 +198,7 @@ stmt_high
 %type <VN::Item>					item
 %type <shared_ptr<VN::Gnomon>>		part_resolve designation_command 
 %type <shared_ptr<VN::Gnomon>>		transform_op_scope
-%type <shared_ptr<VN::Gnomon>>		explicit_op_scope prerestrict_op_scope id_by_name_op_scope builder_id_op_scope stuff_op_scope
+%type <shared_ptr<VN::Gnomon>>		prerestrict_op_scope id_by_name_op_scope builder_id_op_scope stuff_op_scope
 %type <shared_ptr<VN::Gnomon>>		 params_scope 
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>		decl_prerestrict_op_named
@@ -863,27 +863,27 @@ vn_name		: UNICODE_NAME
 // doesn't require this. See comment by part_resolve for why we don't need a value from 
 // part_resolve. The Gnomon is still around because we *could* use $1 here, so it must be valid.
 
-explicit_norm_node	: explicit_op_scope resolved_norm_node	{ $$ = $2; }
+explicit_norm_node	: resolved_norm_node	
 
 resolved_norm_node	: part_resolve RESOLVED_NORMAL			{ $$ = $2; }
 					| RESOLVED_NORMAL					
 
-explicit_type_node	: explicit_op_scope resolved_type_node	{ $$ = $2; }
+explicit_type_node	: resolved_type_node	
 
 resolved_type_node	: part_resolve RESOLVED_TYPE			{ $$ = $2; }
 					| RESOLVED_TYPE						
 	
-explicit_decl_node	: explicit_op_scope resolved_decl_node	{ $$ = $2; }
+explicit_decl_node	: resolved_decl_node	
 
 resolved_decl_node	: part_resolve RESOLVED_DECL 			{ $$ = $2; }
 					| RESOLVED_DECL							
 
-explicit_qual_node	: explicit_op_scope resolved_qual_node	{ $$ = $2; }
+explicit_qual_node	: resolved_qual_node	
 
 resolved_qual_node	: part_resolve RESOLVED_QUAL		{ $$ = $2; }
 					| RESOLVED_QUAL						
 
-explicit_mi_node	: explicit_op_scope resolved_mi_node	{ $$ = $2; }
+explicit_mi_node	: resolved_mi_node	
 
 resolved_mi_node	: part_resolve RESOLVED_MEMB_INIT	{ $$ = $2; }
 					| RESOLVED_MEMB_INIT				
@@ -897,9 +897,6 @@ part_resolve	: node_namespace RESOLUTION_OP			{ $$ = make_shared<VN::ResolverGno
 node_namespace 	: part_resolve NODE_NAMESPACE			{ $$ = $2; }
 				| NODE_NAMESPACE						{ $$ = $1; }				      
 
-
-explicit_op_scope		: %empty 		{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
-										      recogniser->AddGnomon($$); }
 										      
 prerestrict_op_scope	: PRERESTRICT_OP	{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
 										      recogniser->AddGnomon($$); }
