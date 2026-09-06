@@ -124,6 +124,12 @@ YY::VNLangParser::token::token_kind_type Syntax::GetPrerestrictToken() const
 }
 
 
+YY::VNLangParser::token::token_kind_type Syntax::GetIdByNameToken() const
+{
+	return YY::VNLangParser::token::TOK_ID_BY_NAME_NORMAL;	
+}
+
+
 string Syntax::MyBestErrName() const try
 {
 	return DiagQuote( GetKeyword(Policy()) );

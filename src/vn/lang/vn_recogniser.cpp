@@ -91,6 +91,14 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnPrerestrictLexeme(wstring text
 }
 
 
+YY::VNLangParser::symbol_type VNLangRecogniser::OnIdByNameLexeme(wstring text, YY::VNLangParser::location_type loc) const
+{
+	TreePtr<Node> node = CreateNode( ToASCII(text.substr(1)), loc );
+	YY::VNLangParser::token::token_kind_type token_kind = node->GetIdByNameToken();		
+	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
+}
+
+
 TreePtr<Node> VNLangRecogniser::CreateNode(string text, YY::VNLangParser::location_type loc) const
 {
 	list<string> parts = Split(text, "::");

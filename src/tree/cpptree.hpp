@@ -108,6 +108,7 @@ struct Type : virtual Node
 	virtual string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy );    
 	YY::VNLangParser::token::token_kind_type GetExplicitToken() const override;
 	YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const override;
+	YY::VNLangParser::token::token_kind_type GetIdByNameToken() const override;
 };
 
 
@@ -121,7 +122,7 @@ struct Declaration : virtual Node
     virtual string GetColour() const { return "/set28/1"; }
 	virtual bool ShouldSplitInstance( Policy policy ) const;
 	virtual list<string> ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bool force, VN::RendererInterface *renderer, Policy policy ) const;
-	virtual YY::VNLangParser::token::token_kind_type GetExplicitToken() const;
+	YY::VNLangParser::token::token_kind_type GetExplicitToken() const;
 	YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const override;
 };
 

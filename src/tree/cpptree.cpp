@@ -149,6 +149,12 @@ YY::VNLangParser::token::token_kind_type Type::GetPrerestrictToken() const
 	return YY::VNLangParser::token::TOK_PRERESTRICT_TYPE;
 }
 
+
+YY::VNLangParser::token::token_kind_type Type::GetIdByNameToken() const
+{
+	return YY::VNLangParser::token::TOK_ID_BY_NAME_TYPE;	
+}
+
 //////////////////////////// Declaration ///////////////////////////////
 
 bool Declaration::ShouldSplitInstance( Policy ) const 
