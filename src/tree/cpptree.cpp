@@ -155,6 +155,12 @@ YY::VNLangParser::token::token_kind_type Type::GetIdByNameToken() const
 	return YY::VNLangParser::token::TOK_ID_BY_NAME_TYPE;	
 }
 
+
+YY::VNLangParser::token::token_kind_type Type::GetIdBuilderToken() const
+{
+	return YY::VNLangParser::token::TOK_ID_BUILDER_TYPE;	
+}
+
 //////////////////////////// Declaration ///////////////////////////////
 
 bool Declaration::ShouldSplitInstance( Policy ) const 

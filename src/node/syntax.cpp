@@ -130,6 +130,12 @@ YY::VNLangParser::token::token_kind_type Syntax::GetIdByNameToken() const
 }
 
 
+YY::VNLangParser::token::token_kind_type Syntax::GetIdBuilderToken() const
+{
+	return YY::VNLangParser::token::TOK_ID_BUILDER_NORMAL;	
+}
+
+
 string Syntax::MyBestErrName() const try
 {
 	return DiagQuote( GetKeyword(Policy()) );

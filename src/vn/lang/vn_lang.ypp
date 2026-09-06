@@ -87,8 +87,6 @@
 	DELTA_END_OP 					 	        _("delta-end operator ⯇")
 	ANY_NODE_OP 						        _("any node operator ☆")
 	STAR_OP 							        _("star operator ★")
-	ID_BY_NAME_OP						        _("identifier-by-name operator ⊛")
-	BUILDER_ID_OP						        _("node-builder operator ⧇")
 	TRANSFORM_OP						        _("transform operator ⤨")
 	NEGATION_OP							        _("negation operator ¬")
 	CONJUNCTION_OP						        _("conjunction operator ∧")
@@ -147,6 +145,8 @@
 <TreePtr<Node>>	PRERESTRICT_MEMB_INIT	_("member initialiser pre-restriction")
 <TreePtr<Node>>	ID_BY_NAME_NORMAL		_("instance identifier by name")
 <TreePtr<Node>>	ID_BY_NAME_TYPE			_("type identifier by name")
+<TreePtr<Node>>	ID_BUILDER_NORMAL		_("instance identifier builder")
+<TreePtr<Node>>	ID_BUILDER_TYPE			_("type identifier builder")
 <TreePtr<Node>>	BOOL_LITERAL			_("C boolean literal")
 <TreePtr<Node>> KEYWORD_PRIMARY_OP		_("open_statement keyword operator")
 <TreePtr<Node>> KEYWORD_SIMPLE_STMT     _("keyword simple statement") // eg break;
@@ -194,16 +194,14 @@ stmt_high
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					vn_name
 %type <string>						transform_op_named type_transform_op_named mi_transform_op_named
-%type <const ANDBlock *> 			node_namespace
-%type <TreePtr<Node>>	 			resolved_norm_node resolved_type_node resolved_mi_node
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands decl_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
 %type <VN::Itemisation>				itemisation items_bare items_sep
 %type <VN::Item>					item
-%type <shared_ptr<VN::Gnomon>>		part_resolve designation_command 
+%type <shared_ptr<VN::Gnomon>>		designation_command 
 %type <shared_ptr<VN::Gnomon>>		transform_op_scope
-%type <shared_ptr<VN::Gnomon>>		builder_id_op_scope stuff_op_scope
+%type <shared_ptr<VN::Gnomon>>		stuff_op_scope
 %type <shared_ptr<VN::Gnomon>>		params_scope 
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
 %type <VN::NodeAndGnomon>			norm_full_explicit_start type_full_explicit_start decl_full_explicit_start qual_full_explicit_start mi_full_explicit_start
@@ -216,9 +214,6 @@ stmt_high
 %type <list<TreePtr<Node>>>			bases memb_inits
 %type <VN::QualifierData> 			qualifier qualifier_nw
 %type <list<VN::QualifierData>>		qualifiers 
-%type <TreePtr<Node>> build_id_named 
-%type <TreePtr<Node>> type_build_id_op_named
-%type <TreePtr<Node>> mi_build_id_op_named
 %type <multiset<string>>			type_specifier_seq
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>         prerestrict_decl_start
 
@@ -422,10 +417,10 @@ memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2
 					| DELTA_COMPARE_OP memb_init_boot DELTA_REPLACE_OP memb_init_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
 					| mi_full_explicit_start itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 					| DESIGNATED_NORMAL       				  			
-//					| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN	{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
-					| mi_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
-					| mi_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
-					| mi_build_id_op_named OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
+					| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN	{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+					| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
+					| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
+					| ID_BUILDER_NORMAL OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 					| mi_transform_op_named OPEN_VN unified_prefix CLOSE_VN		{ $$ = vn->OnTransform($1, @1, $3, @3); }
 					| STAR_OP												{ $$ = vn->OnStar(nullptr); }
 					| STAR_OP OPEN_VN memb_init_boot CLOSE_VN					{ $$ = vn->OnStar($3); }
@@ -433,7 +428,6 @@ memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2
                       
 mi_full_explicit_start 	: RESOLVED_MEMB_INIT						{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
-mi_build_id_op_named	: builder_id_op_scope resolved_mi_node		{ $$ = $2; (void)$1; }
 mi_transform_op_named  	: transform_op_scope TRANSFORM_NAME_NORMAL	{ $$ = $2; (void)$1; }
 
 //////////////////////////////// CONCRETE DECLARATORS /////////////////////////////////////         
@@ -747,9 +741,9 @@ id_primary  : id_wildcard
 			| norm_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DESIGNATED_NORMAL       				  			
 			| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN		{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
-			| build_id_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
-			| build_id_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
-			| build_id_named OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
+			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
+			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
+			| ID_BUILDER_NORMAL OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			| transform_op_named OPEN_VN unified_prefix CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 
 id_wildcard : STAR_OP												{ $$ = vn->OnStar(nullptr); }
@@ -762,7 +756,6 @@ comma_sep_expr_decl	: expr_no_comma_op								{ $$.push_back($1); }
 norm_full_explicit_start : RESOLVED_NORMAL							{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
 																
-build_id_named 		: builder_id_op_scope resolved_norm_node		{ $$ = $2; (void)$1; }
 transform_op_named  : transform_op_scope TRANSFORM_NAME_NORMAL 		{ $$ = $2; (void)$1; }
 
 //////////////////////////////// TYPE-ID ////////////////////////////////////         
@@ -813,17 +806,16 @@ type_primary: type_vn_prim
 type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DELTA_COMPARE_OP type_boot DELTA_REPLACE_OP type_boot DELTA_END_OP { $$ = vn->OnDelta($2, $4); }
 			| DESIGNATED_TYPE     									  			
-			| ID_BY_NAME_TYPE OPEN_VN STRING_LITERAL CLOSE_VN			 { $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
-			| type_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 	 { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
-			| type_build_id_op_named OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN { $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
-			| type_build_id_op_named OPEN_VN VN_SEP item CLOSE_VN 				 { $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
+			| ID_BY_NAME_TYPE OPEN_VN STRING_LITERAL CLOSE_VN					 { $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 			 { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
+			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN 		 { $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
+			| ID_BUILDER_TYPE OPEN_VN VN_SEP item CLOSE_VN 						 { $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			| type_transform_op_named OPEN_VN unified_prefix CLOSE_VN 			 { $$ = vn->OnTransform($1, @1, $3, @3); }
 			| TYPE_INDICATOR STAR_OP OPEN_VN type_boot CLOSE_VN					 { $$ = vn->OnStar($4); }
 			| STAR_OP OPEN_VN type_boot CLOSE_VN								 { $$ = vn->OnStar($3); }
 		 	
 type_full_explicit_start 	: RESOLVED_TYPE										{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                                   vn->AddGnomon($$.gnomon); }
-type_build_id_op_named 		: builder_id_op_scope resolved_type_node			{ $$ = $2; (void)$1; }
 type_transform_op_named 	: transform_op_scope TRANSFORM_NAME_TYPE 			{ $$ = $2; (void)$1; }
 
 // eg "long unsigned int". VN represents this as a single node. We don't want nodes for its constituent parts.
@@ -856,33 +848,7 @@ qual_full_explicit_start : RESOLVED_QUAL									{ $$ = vn->MakeScopeGnomonForNo
 // - We create Gnomons and give them to the recogniser - their lifetime indicates scopes.
 
 vn_name		: UNICODE_NAME    						
-			| ASCII_NAME								{ $$ = ToUnicode($1); }     
-          
-// RESOLVED_X is strong i.e. there was definitely a ::. resolved_x is weak and
-// doesn't require this. See comment by part_resolve for why we don't need a value from 
-// part_resolve. The Gnomon is still around because we *could* use $1 here, so it must be valid.
-
-resolved_norm_node	: part_resolve RESOLVED_NORMAL			{ $$ = $2; }
-					| RESOLVED_NORMAL					
-
-resolved_type_node	: part_resolve RESOLVED_TYPE			{ $$ = $2; }
-					| RESOLVED_TYPE												
-					
-resolved_mi_node	: part_resolve RESOLVED_MEMB_INIT		{ $$ = $2; }
-					| RESOLVED_MEMB_INIT				
-
-// On sight of ::, we inform the recognition layer, which returns a shared_ptr which will 
-// expire when the production is complete or an error forces unwind. The naming layer
-// keeps weak_ptrs to these and will send us RESOLVED_NORMAL if one exists.
-part_resolve	: node_namespace RESOLUTION_OP			{ $$ = make_shared<VN::ResolverGnomon>($1);
-                                                          recogniser->AddGnomon($$); }
-    
-node_namespace 	: part_resolve NODE_NAMESPACE			{ $$ = $2; }
-				| NODE_NAMESPACE						{ $$ = $1; }				      
-										      
-
-builder_id_op_scope		: BUILDER_ID_OP 	{ $$ = make_shared<VN::NodeNameScopeGnomon>(); 
-											  recogniser->AddGnomon($$); }
+			| ASCII_NAME								{ $$ = ToUnicode($1); }     										      
 
 transform_op_scope		: TRANSFORM_OP		{ $$ = make_shared<VN::TransformNameScopeGnomon>(); 
 											  recogniser->AddGnomon($$); }

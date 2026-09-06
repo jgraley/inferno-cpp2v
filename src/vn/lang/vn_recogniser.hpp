@@ -81,16 +81,6 @@ private:
 };
 
 
-class NodeNameScopeGnomon : public ScopeGnomon
-{
-public:	
-	string GetMessageText() const final
-	{
-		return "node name scope";
-	}
-};
-		
-
 class TransformNameScopeGnomon : public ScopeGnomon
 {
 public:	
@@ -113,6 +103,7 @@ public:
 	YY::VNLangParser::symbol_type OnExplicitLexeme(wstring text, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type OnPrerestrictLexeme(wstring text, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type OnIdByNameLexeme(wstring text, YY::VNLangParser::location_type loc) const;
+	YY::VNLangParser::symbol_type OnIdBuilderLexeme(wstring text, YY::VNLangParser::location_type loc) const;
 	
 private:
 	TreePtr<Node> CreateNode(string text, YY::VNLangParser::location_type loc) const;

@@ -109,6 +109,7 @@ struct Type : virtual Node
 	YY::VNLangParser::token::token_kind_type GetExplicitToken() const override;
 	YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const override;
 	YY::VNLangParser::token::token_kind_type GetIdByNameToken() const override;
+	YY::VNLangParser::token::token_kind_type GetIdBuilderToken() const override;
 };
 
 
