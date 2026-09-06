@@ -104,6 +104,7 @@ public:
 	YY::VNLangParser::symbol_type OnPrerestrictLexeme(wstring text, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type OnIdByNameLexeme(wstring text, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type OnIdBuilderLexeme(wstring text, YY::VNLangParser::location_type loc) const;
+	YY::VNLangParser::symbol_type OnTransformLexeme(wstring text, YY::VNLangParser::location_type loc) const;
 	
 private:
 	TreePtr<Node> CreateNode(string text, YY::VNLangParser::location_type loc) const;
@@ -111,7 +112,6 @@ private:
 	YY::VNLangParser::symbol_type RecogniseInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type CreateBlockToken(const ANDBlock *block, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type CreateNodeToken(const AvailableNodeData::NodeBlock *block, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type RecogniseInTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
     YY::VNLangParser::symbol_type RecogniseKeyword(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type RecogniseDesignation(wstring text, YY::VNLangParser::location_type loc) const;
 

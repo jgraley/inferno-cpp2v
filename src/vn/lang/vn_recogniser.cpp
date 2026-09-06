@@ -107,6 +107,28 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnIdBuilderLexeme(wstring text, 
 }
 
 
+YY::VNLangParser::symbol_type VNLangRecogniser::OnTransformLexeme(wstring text, YY::VNLangParser::location_type loc) const
+{
+	string ascii_text = ToASCII(text.substr(1));
+	
+	// Transformations that act on normal scopes (instances, in this case)
+	if( ascii_text=="TypeOf" )
+		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(ascii_text, loc);					
+
+	// Transformations that act on unified scopes (instances or types, in this case)
+	if( ascii_text=="DeclarationOf" )
+		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(ascii_text, loc);
+
+	// Transformations that act on unified scopes (instances or types, in this case)
+	if( ascii_text=="TypeDeclarationOf" )
+		return YY::VNLangParser::make_TRANSFORM_NAME_TYPE(ascii_text, loc);
+
+	// In these scopes, there are no designations so we must succeed and can raise an error here if we don#t
+	throw YY::VNLangParser::syntax_error( loc,
+	    SSPrintf("Unrecognised transform: %s %s", DiagQuote(text).c_str(), GetContextText().c_str()) ); 
+}
+
+
 TreePtr<Node> VNLangRecogniser::CreateNode(string text, YY::VNLangParser::location_type loc) const
 {
 	list<string> parts = Split(text, "::");
@@ -150,8 +172,6 @@ YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool asc
 {
 	const ScopeGnomon *scope = nullptr;
 	shared_ptr<const ScopeGnomon> spg = scope_gnomons.TryLockTop();
-	if( spg && dynamic_cast<const TransformNameScopeGnomon *>(spg.get()) )
-		return RecogniseInTransformNameScope(text, ascii, loc);				
 		
 	try	{
 		return RecogniseKeyword( text, ascii, loc );
@@ -165,26 +185,6 @@ YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool asc
          return YY::VNLangParser::make_ASCII_NAME(ToASCII(text), loc);
     else
          return YY::VNLangParser::make_UNICODE_NAME(text, loc);
-}
-
-
-YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseInTransformNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
-{
-	// Transformations that act on normal scopes (instances, in this case)
-	if( ascii && ToASCII(text)=="TypeOf" )
-		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(ToASCII(text), loc);					
-
-	// Transformations that act on unified scopes (instances or types, in this case)
-	if( ascii && ToASCII(text)=="DeclarationOf" )
-		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(ToASCII(text), loc);
-
-	// Transformations that act on unified scopes (instances or types, in this case)
-	if( ascii && ToASCII(text)=="TypeDeclarationOf" )
-		return YY::VNLangParser::make_TRANSFORM_NAME_TYPE(ToASCII(text), loc);
-
-	// In these scopes, there are no designations so we must succeed and can raise an error here if we don#t
-	throw YY::VNLangParser::syntax_error( loc,
-	    SSPrintf("Unrecognised: %s %s", DiagQuote(text).c_str(), GetContextText().c_str()) ); 
 }
 
 

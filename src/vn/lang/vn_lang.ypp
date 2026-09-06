@@ -133,7 +133,7 @@
 <TreePtr<Node>>	DESIGNATED_DECL			_("designated declaration name")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier name")
 <TreePtr<Node>>	DESIGNATED_COMPOUND		_("designated compound name")
-<TreePtr<Node>>	RESOLVED_NORMAL			_("resolved statement/expression node name")
+<TreePtr<Node>>	prerestrict_decl_start			_("resolved statement/expression node name")
 <TreePtr<Node>>	RESOLVED_TYPE			_("resolved type node name")
 <TreePtr<Node>>	RESOLVED_DECL			_("resolved declaration node name")
 <TreePtr<Node>>	RESOLVED_QUAL			_("resolved qualifier node name")
@@ -193,14 +193,12 @@ stmt_high
 %type <TreePtr<Node>> 				enum_node enum
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					vn_name
-%type <string>						transform_op_named type_transform_op_named mi_transform_op_named
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands decl_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
 %type <VN::Itemisation>				itemisation items_bare items_sep
 %type <VN::Item>					item
 %type <shared_ptr<VN::Gnomon>>		designation_command 
-%type <shared_ptr<VN::Gnomon>>		transform_op_scope
 %type <shared_ptr<VN::Gnomon>>		stuff_op_scope
 %type <shared_ptr<VN::Gnomon>>		params_scope 
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
@@ -296,7 +294,7 @@ compound_entry	: compound_prefix
 
 compound_prefix : compound_primary 
 				| 								NEGATION_OP compound_prefix	{ $$ = vn->OnNegation($2); }
-				|       				 transform_op_named compound_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
+				|       				 TRANSFORM_NAME_NORMAL compound_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
 				|  								   stuff_op_scope compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				|    stuff_op_scope OPEN_VN unified_entry CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|     stuff_op_scope OPEN_VN stuff_depth CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
@@ -421,14 +419,13 @@ memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2
 					| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 					| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 					| ID_BUILDER_NORMAL OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
-					| mi_transform_op_named OPEN_VN unified_prefix CLOSE_VN		{ $$ = vn->OnTransform($1, @1, $3, @3); }
+					| TRANSFORM_NAME_NORMAL OPEN_VN unified_prefix CLOSE_VN		{ $$ = vn->OnTransform($1, @1, $3, @3); }
 					| STAR_OP												{ $$ = vn->OnStar(nullptr); }
 					| STAR_OP OPEN_VN memb_init_boot CLOSE_VN					{ $$ = vn->OnStar($3); }
 					| ANY_NODE_OP											{ $$ = nullptr; }
                       
 mi_full_explicit_start 	: RESOLVED_MEMB_INIT						{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
-mi_transform_op_named  	: transform_op_scope TRANSFORM_NAME_NORMAL	{ $$ = $2; (void)$1; }
 
 //////////////////////////////// CONCRETE DECLARATORS /////////////////////////////////////         
                           		
@@ -556,7 +553,7 @@ acc_memb_primary: qualifier_node // Gets us the access specs
 				| DESIGNATED_DECL       				  				
 				| DESIGNATED_NORMAL       				  		
 				| DESIGNATED_COMPOUND      				  			    // TODO want declarations and access specs
-				| transform_op_named OPEN_VN unified_prefix CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
+				| TRANSFORM_NAME_NORMAL OPEN_VN unified_prefix CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 				| STAR_OP												{ $$ = vn->OnStar(nullptr); }
 				| STAR_OP OPEN_VN acc_memb_boot CLOSE_VN				{ $$ = vn->OnStar($3); }
 				| ANY_NODE_OP											{ $$ = nullptr; }
@@ -633,7 +630,7 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); }
 
 statement_nl: bare_statement ';'										
 			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts
-     		| RESOLVED_NORMAL '(' semicolon_args ')' stmt_comp				{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
+     		| prerestrict_decl_start '(' semicolon_args ')' stmt_comp				{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp		{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 					{ $$ = $1->OnArgsList({$3}, @3)->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp	
@@ -740,11 +737,11 @@ id_primary  : id_wildcard
 			| DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP stmt_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 			| norm_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DESIGNATED_NORMAL       				  			
-			| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN		{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+			| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| ID_BUILDER_NORMAL OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
-			| transform_op_named OPEN_VN unified_prefix CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
+			| TRANSFORM_NAME_NORMAL OPEN_VN unified_prefix CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 
 id_wildcard : STAR_OP												{ $$ = vn->OnStar(nullptr); }
 			| STAR_OP OPEN_VN stmt_entry CLOSE_VN					{ $$ = vn->OnStar($3); }
@@ -753,11 +750,9 @@ id_wildcard : STAR_OP												{ $$ = vn->OnStar(nullptr); }
 comma_sep_expr_decl	: expr_no_comma_op								{ $$.push_back($1); }
 					| comma_sep_expr_decl ',' expr_no_comma_op		{ $$ = $1; $$.push_back($3); }			
 
-norm_full_explicit_start : RESOLVED_NORMAL							{ $$ = vn->MakeScopeGnomonForNode($1); 
+norm_full_explicit_start : prerestrict_decl_start							{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
 																
-transform_op_named  : transform_op_scope TRANSFORM_NAME_NORMAL 		{ $$ = $2; (void)$1; }
-
 //////////////////////////////// TYPE-ID ////////////////////////////////////         
 // type-id as seen in https://alx71hub.github.io/hcb/#type-id can be troublesome grammatically. Care advised.
 
@@ -810,14 +805,13 @@ type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExpl
 			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 			 { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN 		 { $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| ID_BUILDER_TYPE OPEN_VN VN_SEP item CLOSE_VN 						 { $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
-			| type_transform_op_named OPEN_VN unified_prefix CLOSE_VN 			 { $$ = vn->OnTransform($1, @1, $3, @3); }
+			| TRANSFORM_NAME_TYPE OPEN_VN unified_prefix CLOSE_VN 			 { $$ = vn->OnTransform($1, @1, $3, @3); }
 			| TYPE_INDICATOR STAR_OP OPEN_VN type_boot CLOSE_VN					 { $$ = vn->OnStar($4); }
 			| STAR_OP OPEN_VN type_boot CLOSE_VN								 { $$ = vn->OnStar($3); }
 		 	
 type_full_explicit_start 	: RESOLVED_TYPE										{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                                   vn->AddGnomon($$.gnomon); }
-type_transform_op_named 	: transform_op_scope TRANSFORM_NAME_TYPE 			{ $$ = $2; (void)$1; }
-
+                                                                                  
 // eg "long unsigned int". VN represents this as a single node. We don't want nodes for its constituent parts.
 // So, this is the level at which we mix in the VN syntax.
 type_specifier_seq	: TYPE_SPECIFIER											{ $$.insert($1); }
@@ -843,15 +837,9 @@ qual_full_explicit_start : RESOLVED_QUAL									{ $$ = vn->MakeScopeGnomonForNo
                                                                               vn->AddGnomon($$.gnomon); }
 
 //////////////////////////////////////// RECOGNISER GLUE /////////////////////////////////////////////
-// 2 things going on here:
-// - Recogniser can only supply one token, but we can "or" them together using rules.
-// - We create Gnomons and give them to the recogniser - their lifetime indicates scopes.
 
 vn_name		: UNICODE_NAME    						
 			| ASCII_NAME								{ $$ = ToUnicode($1); }     										      
-
-transform_op_scope		: TRANSFORM_OP		{ $$ = make_shared<VN::TransformNameScopeGnomon>(); 
-											  recogniser->AddGnomon($$); }
 
 stuff_op_scope			: STUFF_OP			{ $$ = make_shared<VN::UnknownScopeGnomon>("stuff pattern"); 
 											  vn->AddGnomon($$); }
