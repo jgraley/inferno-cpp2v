@@ -809,6 +809,10 @@ struct LabelDeclaration : Declaration, //TODO commonize with Case and Default
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
+	string GetKeyword( Policy ) const override;
+
+	TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type ) override;
+
 	YY::VNLangParser::token::token_kind_type GetExplicitToken() const override;
 	YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const override;
 };
@@ -1625,6 +1629,7 @@ struct Case : SwitchTarget
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };
 
 

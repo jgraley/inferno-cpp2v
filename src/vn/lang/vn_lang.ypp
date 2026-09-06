@@ -133,11 +133,11 @@
 <TreePtr<Node>>	DESIGNATED_DECL			_("designated declaration name")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier name")
 <TreePtr<Node>>	DESIGNATED_COMPOUND		_("designated compound name")
-<TreePtr<Node>>	EXPLICIT_NORMAL			_("resolved statement/expression node name")
-<TreePtr<Node>>	EXPLICIT_TYPE			_("resolved type node name")
-<TreePtr<Node>>	EXPLICIT_DECL			_("resolved declaration node name")
-<TreePtr<Node>>	EXPLICIT_QUAL			_("resolved qualifier node name")
-<TreePtr<Node>>	EXPLICIT_MEMB_INIT		_("resolved member initialiser node name")
+<TreePtr<Node>>	EXPLICIT_NORMAL			_("explicit statement/expression node name")
+<TreePtr<Node>>	EXPLICIT_TYPE			_("explicit type node name")
+<TreePtr<Node>>	EXPLICIT_DECL			_("explicit declaration node name")
+<TreePtr<Node>>	EXPLICIT_QUAL			_("explicit qualifier node name")
+<TreePtr<Node>>	EXPLICIT_MEMB_INIT		_("explicit member initialiser node name")
 <TreePtr<Node>>	PRERESTRICT_NORMAL		_("statement/expression pre-restriction")
 <TreePtr<Node>>	PRERESTRICT_TYPE		_("type pre-restriction")
 <TreePtr<Node>>	PRERESTRICT_DECL		_("declaration pre-restriction")
@@ -177,8 +177,8 @@ stmt_high
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
 %type <TreePtr<Node>> 				unified_entry unified_prefix 
 %type <TreePtr<Node>> 				arrival
-%type <TreePtr<Node>> 				bare_statement statement_nl stmt_comp statement         
-%type <list<TreePtr<Node>>>			statement_l statement_e stmt_decl_l statement_nc
+%type <TreePtr<Node>> 				bare_statement statement_nl stmt_comp statement args_body_stmt_keyword       
+%type <list<TreePtr<Node>>>			statement_l statement_e stmt_decl_l statement_nc 
 %type <TreePtr<Node>> 				open_declaration decl_boot decl_entry decl_disjunction decl_conjunction declaration 
 %type <TreePtr<Node>> 				prototype bare_decl_nvn comp_decl_nvn bare_declaration bare_initialiser
 %type <TreePtr<Node>> 				assign_init
@@ -623,24 +623,31 @@ statement_nc: statement_nl													{ $$ = {$1}; }
 			| arrival statement_nl											{ $$ = {$1, $2}; } 
 			| arrival ';'		 											{ $$ = {$1}; } // Note no Nop
 
-arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); } 
-			| CASE_KEYWORD expr_entry RANGE_OP expr_entry ':' 				{ $$ = vn->OnRangeCase($2, @2, $4, @4); } // TODO we'll be given the Case node and must let it evolve into RangeCase
-			| DEFAULT_KEYWORD ':'											{ $$ = vn->OnDefault(@$); } 
-			| expr_prefix ':' 			 									{ $$ = vn->OnLabel($1, @1); } 
+arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = $1->OnArgsList({$2}, @2); } 
+			| CASE_KEYWORD expr_entry RANGE_OP expr_entry ':' 				{ $$ = $1->OnArgsList({$2, $4}, @2+@4); } // TODO we'll be given the Case node and must let it evolve into RangeCase
+			| DEFAULT_KEYWORD ':'										
+			| id_primary ':' 			 									{ $$ = vn->OnLabel($1, @1); } 
+			| EXPLICIT_NORMAL id_primary ':' 			 					{ $$ = $1->OnIdentifier($2, @2); } 
+//			| id_primary expr_entry ':' 			 						{ $$ = vn->OnLabel($1, @1)->OnCase($2, @2); } 
+//			| EXPLICIT_NORMAL id_primary expr_entry ':' 					{ $$ = $1->OnIdentifier($2, @2)->OnCase($3, @3); } 
 
 statement_nl: bare_statement ';'										
 			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts
-     		| EXPLICIT_NORMAL '(' semicolon_args ')' stmt_comp				{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
-			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp		{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
-			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 					{ $$ = $1->OnArgsList({$3}, @3)->OnBody($5, @5); }
-			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp	
+			| args_body_stmt_keyword '(' semicolon_args ')' stmt_comp	
 			  %prec KEYWORD_ARGS_BODY_WITH_ELSE								{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
-			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp
+			| args_body_stmt_keyword '(' semicolon_args ')' stmt_comp
 			  ELSE_KEYWORD stmt_comp										{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5)->OnElseBody($7, @6); }
 
 bare_statement	: KEYWORD_SIMPLE_STMT										
 				| KEYWORD_SPACE_SEP_STMT expr_entry							{ $$ = $1->OnArgsList({$2}, @2); }
 				| DO_KEYWORD stmt_comp WHILE_KEYWORD '(' stmt_boot ')' 		{ $$ = $1->OnBody($2, @2)->OnArgsList({$5}, @5); } // TODO a While node is gobbled up here
+				| EXPLICIT_NORMAL
+				
+args_body_stmt_keyword 	: KEYWORD_ARGS_BODY_STMT
+						| KEYWORD_ARGS_BODY_WITH_ELSE
+						| WHILE_KEYWORD
+						| EXPLICIT_NORMAL
+						
 
 semicolon_args	: expr_entry										{ $$.push_back($1); }
 				| semicolon_args ';' expr_entry						{ $$ = $1; $$.push_back($3); }
@@ -722,7 +729,7 @@ expr_postfix: expr_primary
 			| expr_postfix OPEN_MAP_CALL CLOSE_MAP_CALL				{ $$ = vn->OnMapArgsCall($1, list<TreePtr<Node>>()); }
 			| expr_postfix '(' comma_sep_expr_decl ')'				{ $$ = vn->OnSeqArgsCall($1, $3); }
 			| expr_postfix '(' ')'	 								{ $$ = vn->OnSeqArgsCall($1, list<TreePtr<Node>>()); }
-			| expr_postfix '.' expr_primary							{ $$ = vn->OnLookup($1, $3, @3); }
+			| expr_postfix '.' id_primary							{ $$ = vn->OnLookup($1, $3, @3); }
 		
 expr_primary: id_primary  
 			| '(' stmt_boot ')'                          		{ $$ = $2; }

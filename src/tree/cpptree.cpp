@@ -1383,7 +1383,24 @@ string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production,
 	//    and the latter are tightly bound to declarations so that we can for example
 	//    change the access in a delta pattern. The ; gets around this by making the 
 	//    label a complete statement.
-	return renderer->DoRender( &identifier, Production::PURE_IDENTIFIER, id_policy) + ":" + ";";
+	string s = renderer->GetKeyword(this, policy);
+	if( !s.empty() )
+		s += " ";
+	s += renderer->DoRender( &identifier, Production::PURE_IDENTIFIER, id_policy);
+	return  s + ":" + ";";	
+}
+
+
+string LabelDeclaration::GetKeyword( Policy ) const 
+{
+	return "";
+}
+
+
+TreePtr<Node> LabelDeclaration::OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type )
+{
+	identifier = id;
+	return (TreePtr<Node>)shared_from_this();	
 }
 
 
@@ -2826,6 +2843,30 @@ string Case::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 string Case::GetKeyword( Policy ) const 
 {
 	return "case";
+}
+
+
+TreePtr<Node> Case::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc )
+{
+	switch( args.size() )
+	{
+		case 1:
+			value = SoloElementOf(args);
+			return (TreePtr<Node>)shared_from_this();
+			
+		case 2:
+		{
+			auto rc = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::RangeCase>>();
+			rc->value_lo = args.front();
+			rc->value_hi = args.back();
+			return rc;
+		}
+		
+		default:
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				MyBestErrName() + " requires one or two arguments.");
+	}
 }
 
 

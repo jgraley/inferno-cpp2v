@@ -41,11 +41,11 @@ struct GlobalsModule : SCTree::Module { NODE_FUNCTIONS_FINAL };
 
 // From Lower Control Flow 
 // Local nodes let us designate switch and for nodes as uncombable
-struct UncombableSwitch : CPPTree::Switch, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL RENDER_AS_BASE_IN_CPP_ONLY(CPPTree::Switch) };
-struct UncombableFor : CPPTree::For, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL RENDER_AS_BASE_IN_CPP_ONLY(CPPTree::For) };
-struct CombableFor : CPPTree::For { NODE_FUNCTIONS_FINAL RENDER_AS_BASE_IN_CPP_ONLY(CPPTree::For) };
-struct UncombableBreak : CPPTree::Break, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL RENDER_AS_BASE_IN_CPP_ONLY(CPPTree::Break) };
-struct CombableBreak : CPPTree::Break { NODE_FUNCTIONS_FINAL RENDER_AS_BASE_IN_CPP_ONLY(CPPTree::Break) };
+struct UncombableSwitch : CPPTree::Switch, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Switch) };
+struct UncombableFor : CPPTree::For, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::For) };
+struct CombableFor : CPPTree::For { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::For) };
+struct UncombableBreak : CPPTree::Break, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Break) };
+struct CombableBreak : CPPTree::Break { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Break) };
 
 // From Generate stacks
 struct TempReturnAddress : CPPTree::Temporary { NODE_FUNCTIONS_FINAL RENDER_AS_BASE_IN_CPP_ONLY(CPPTree::Temporary) };
@@ -57,6 +57,16 @@ struct StateLabel : CPPTree::LabelDeclaration
     NODE_FUNCTIONS_FINAL 
     RENDER_AS_BASE_IN_CPP_ONLY(CPPTree::LabelDeclaration)
     TreePtr<CPPTree::InstanceIdentifier> state;
+    
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override
+	{
+		if( args.size() != 1 )
+			throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				MyBestErrName() + " requires one argument.");
+		state = SoloElementOf(args);
+		return (TreePtr<Node>)shared_from_this();
+	}
 };
 
 
