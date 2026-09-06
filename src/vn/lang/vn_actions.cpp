@@ -553,16 +553,6 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( const list<QualifierData> &quals,
 }
 
 
-TreePtr<Node> VNLangActions::OnTypedef( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc )
-{
-	auto typedef_ = MakeTreeNode<StandardAgentWrapper<CPPTree::Typedef>>(); 
-	typedef_->type = declarator_result.type_view;
-	typedef_->identifier = declarator_result.leaf;	
-	
-	return typedef_;
-}
-
-
 TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc )
 {		
 	string note = 
