@@ -114,7 +114,7 @@ YY::VNLangParser::token::token_kind_type Syntax::GetKeywordToken() const
 
 YY::VNLangParser::token::token_kind_type Syntax::GetExplicitToken() const
 {
-	return YY::VNLangParser::token::TOK_RESOLVED_NORMAL;
+	return YY::VNLangParser::token::TOK_EXPLICIT_NORMAL;
 }
 
 

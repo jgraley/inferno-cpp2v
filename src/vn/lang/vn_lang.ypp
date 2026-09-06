@@ -133,11 +133,11 @@
 <TreePtr<Node>>	DESIGNATED_DECL			_("designated declaration name")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier name")
 <TreePtr<Node>>	DESIGNATED_COMPOUND		_("designated compound name")
-<TreePtr<Node>>	RESOLVED_NORMAL			_("resolved statement/expression node name")
-<TreePtr<Node>>	RESOLVED_TYPE			_("resolved type node name")
-<TreePtr<Node>>	RESOLVED_DECL			_("resolved declaration node name")
-<TreePtr<Node>>	RESOLVED_QUAL			_("resolved qualifier node name")
-<TreePtr<Node>>	RESOLVED_MEMB_INIT		_("resolved member initialiser node name")
+<TreePtr<Node>>	EXPLICIT_NORMAL			_("resolved statement/expression node name")
+<TreePtr<Node>>	EXPLICIT_TYPE			_("resolved type node name")
+<TreePtr<Node>>	EXPLICIT_DECL			_("resolved declaration node name")
+<TreePtr<Node>>	EXPLICIT_QUAL			_("resolved qualifier node name")
+<TreePtr<Node>>	EXPLICIT_MEMB_INIT		_("resolved member initialiser node name")
 <TreePtr<Node>>	PRERESTRICT_NORMAL		_("statement/expression pre-restriction")
 <TreePtr<Node>>	PRERESTRICT_TYPE		_("type pre-restriction")
 <TreePtr<Node>>	PRERESTRICT_DECL		_("declaration pre-restriction")
@@ -387,7 +387,7 @@ decl_vn_prim: decl_full_explicit_start itemisation						{ $$ = vn->FinishExplici
 			| DESIGNATED_DECL     						  			
 			| STAR_OP OPEN_VN decl_entry CLOSE_VN						{ $$ = vn->OnStar($3); }
 			
-decl_full_explicit_start 	: RESOLVED_DECL								{ $$ = vn->MakeScopeGnomonForNode($1); 
+decl_full_explicit_start 	: EXPLICIT_DECL								{ $$ = vn->MakeScopeGnomonForNode($1); 
 																		  vn->AddGnomon($$.gnomon); }                                                                                  
                                          
 prerestrict_decl_start : PRERESTRICT_DECL     						    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
@@ -424,7 +424,7 @@ memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2
 					| STAR_OP OPEN_VN memb_init_boot CLOSE_VN					{ $$ = vn->OnStar($3); }
 					| ANY_NODE_OP											{ $$ = nullptr; }
                       
-mi_full_explicit_start 	: RESOLVED_MEMB_INIT						{ $$ = vn->MakeScopeGnomonForNode($1); 
+mi_full_explicit_start 	: EXPLICIT_MEMB_INIT						{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
 
 //////////////////////////////// CONCRETE DECLARATORS /////////////////////////////////////         
@@ -489,7 +489,7 @@ irecord_scope   : irecord_node type_specified        						{ $$ = { $1->OnIdenti
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 irecord_node	: IRECORD_KEYWORD											
-		 		| RESOLVED_DECL										
+		 		| EXPLICIT_DECL										
                                                   
 bases			: base_spec                                                 { $$.push_back($1); } 
 				| bases ',' base_spec										{ $$ = $1; $$.push_back($3); } 
@@ -568,7 +568,7 @@ enum_scope      : enum_node type_specified       							{ $$ = { $1->OnIdentifie
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 enum_node		: ENUM_KEYWORD												
-//		 		| RESOLVED_DECL										// TODO bring back explicit support but differentiate
+//		 		| EXPLICIT_DECL										// TODO bring back explicit support but differentiate
                                                                                                                                                        
 enumerators		: enumerator												{ $$.push_back($1); }
 				| enumerators ',' enumerator 								{ $$ = $1; $$.push_back($3); }
@@ -630,7 +630,7 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); }
 
 statement_nl: bare_statement ';'										
 			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts
-     		| RESOLVED_NORMAL '(' semicolon_args ')' stmt_comp				{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
+     		| EXPLICIT_NORMAL '(' semicolon_args ')' stmt_comp				{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp		{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 					{ $$ = $1->OnArgsList({$3}, @3)->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp	
@@ -750,7 +750,7 @@ id_wildcard : STAR_OP												{ $$ = vn->OnStar(nullptr); }
 comma_sep_expr_decl	: expr_no_comma_op								{ $$.push_back($1); }
 					| comma_sep_expr_decl ',' expr_no_comma_op		{ $$ = $1; $$.push_back($3); }			
 
-norm_full_explicit_start : RESOLVED_NORMAL							{ $$ = vn->MakeScopeGnomonForNode($1); 
+norm_full_explicit_start : EXPLICIT_NORMAL							{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
 																
 //////////////////////////////// TYPE-ID ////////////////////////////////////         
@@ -809,7 +809,7 @@ type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExpl
 			| TYPE_INDICATOR STAR_OP OPEN_VN type_boot CLOSE_VN					 { $$ = vn->OnStar($4); }
 			| STAR_OP OPEN_VN type_boot CLOSE_VN								 { $$ = vn->OnStar($3); }
 		 	
-type_full_explicit_start 	: RESOLVED_TYPE										{ $$ = vn->MakeScopeGnomonForNode($1); 
+type_full_explicit_start 	: EXPLICIT_TYPE										{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                                   vn->AddGnomon($$.gnomon); }
                                                                                   
 // eg "long unsigned int". VN represents this as a single node. We don't want nodes for its constituent parts.
@@ -833,7 +833,7 @@ qualifier_node	: qual_full_explicit_start itemisation						{ $$ = vn->FinishExpl
 				| QUAL_NODE_KEYWORD								
 				| DESIGNATED_QUAL       				  			
 
-qual_full_explicit_start : RESOLVED_QUAL									{ $$ = vn->MakeScopeGnomonForNode($1); 
+qual_full_explicit_start : EXPLICIT_QUAL									{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                               vn->AddGnomon($$.gnomon); }
 
 //////////////////////////////////////// RECOGNISER GLUE /////////////////////////////////////////////

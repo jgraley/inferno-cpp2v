@@ -54,7 +54,7 @@ YY::VNLangParser::token::token_kind_type Qualifier::GetKeywordToken() const
 
 YY::VNLangParser::token::token_kind_type Qualifier::GetExplicitToken() const
 {
-	return YY::VNLangParser::token::TOK_RESOLVED_QUAL;
+	return YY::VNLangParser::token::TOK_EXPLICIT_QUAL;
 }
 
 
@@ -140,7 +140,7 @@ string Type::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 
 YY::VNLangParser::token::token_kind_type Type::GetExplicitToken() const
 {
-	return YY::VNLangParser::token::TOK_RESOLVED_TYPE;
+	return YY::VNLangParser::token::TOK_EXPLICIT_TYPE;
 }
 
 
@@ -200,7 +200,7 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 
 YY::VNLangParser::token::token_kind_type Declaration::GetExplicitToken() const
 {
-	return YY::VNLangParser::token::TOK_RESOLVED_DECL;
+	return YY::VNLangParser::token::TOK_EXPLICIT_DECL;
 }
 
 
@@ -937,7 +937,7 @@ string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production
 
 YY::VNLangParser::token::token_kind_type MemberInitialiser::GetExplicitToken() const
 {
-	return YY::VNLangParser::token::TOK_RESOLVED_MEMB_INIT;
+	return YY::VNLangParser::token::TOK_EXPLICIT_MEMB_INIT;
 }
 
 
@@ -1390,7 +1390,7 @@ string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production,
 YY::VNLangParser::token::token_kind_type LabelDeclaration::GetExplicitToken() const
 {
 	// LabelDeclaration parses more like a statemant etc so override Declaration::GetExplicitToken()
-	return YY::VNLangParser::token::TOK_RESOLVED_NORMAL;
+	return YY::VNLangParser::token::TOK_EXPLICIT_NORMAL;
 }
 
 
