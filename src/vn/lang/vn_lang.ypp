@@ -133,7 +133,7 @@
 <TreePtr<Node>>	DESIGNATED_DECL			_("designated declaration name")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier name")
 <TreePtr<Node>>	DESIGNATED_COMPOUND		_("designated compound name")
-<TreePtr<Node>>	prerestrict_decl_start			_("resolved statement/expression node name")
+<TreePtr<Node>>	RESOLVED_NORMAL			_("resolved statement/expression node name")
 <TreePtr<Node>>	RESOLVED_TYPE			_("resolved type node name")
 <TreePtr<Node>>	RESOLVED_DECL			_("resolved declaration node name")
 <TreePtr<Node>>	RESOLVED_QUAL			_("resolved qualifier node name")
@@ -630,7 +630,7 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = vn->OnCase($2, @2); }
 
 statement_nl: bare_statement ';'										
 			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts
-     		| prerestrict_decl_start '(' semicolon_args ')' stmt_comp				{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
+     		| RESOLVED_NORMAL '(' semicolon_args ')' stmt_comp				{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_STMT '(' semicolon_args ')' stmt_comp		{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| WHILE_KEYWORD '(' stmt_boot ')' stmt_comp 					{ $$ = $1->OnArgsList({$3}, @3)->OnBody($5, @5); }
 			| KEYWORD_ARGS_BODY_WITH_ELSE '(' semicolon_args ')' stmt_comp	
@@ -750,7 +750,7 @@ id_wildcard : STAR_OP												{ $$ = vn->OnStar(nullptr); }
 comma_sep_expr_decl	: expr_no_comma_op								{ $$.push_back($1); }
 					| comma_sep_expr_decl ',' expr_no_comma_op		{ $$ = $1; $$.push_back($3); }			
 
-norm_full_explicit_start : prerestrict_decl_start							{ $$ = vn->MakeScopeGnomonForNode($1); 
+norm_full_explicit_start : RESOLVED_NORMAL							{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
 																
 //////////////////////////////// TYPE-ID ////////////////////////////////////         
