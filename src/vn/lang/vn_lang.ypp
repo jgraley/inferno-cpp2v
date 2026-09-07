@@ -149,10 +149,9 @@
 <TreePtr<Node>>	ID_BUILDER_TYPE			_("type identifier builder")
 <TreePtr<Node>>	BOOL_LITERAL			_("C boolean literal")
 <TreePtr<Node>> KEYWORD_PRIMARY_OP		_("open_statement keyword operator")
-<TreePtr<Node>> KEYWORD_SIMPLE_STMT     _("keyword simple statement") // eg break;
-<TreePtr<Node>> KEYWORD_SPACE_SEP_STMT 	_("keyword space-separated statement") // eg return 12;
-<TreePtr<Node>> KEYWORD_ARGS_BODY_STMT 	_("keyword args-and-body statement") // eg switch(args) body
-<TreePtr<Node>> KEYWORD_ARGS_BODY_WITH_ELSE 	_("keyword args-body-chain statement") // eg if(args) body else body_else	
+<TreePtr<Node>> KEYWORD_SIMPLE_STMT     _("keyword for simple statement") // eg break;
+<TreePtr<Node>> KEYWORD_SPACE_SEP_STMT 	_("keyword for space-separated statement") // eg return 12;
+<TreePtr<Node>> KEYWORD_ARGS_BODY_STMT 	_("keyword for args-and-body statement") // eg switch(args) body
 <TreePtr<Node>> DO_KEYWORD				_("C do keyword")
 <TreePtr<Node>> WHILE_KEYWORD			_("C while keyword")
 <TreePtr<Node>> CASE_KEYWORD			_("C case keyword")
@@ -219,8 +218,8 @@ stmt_high
 // In the rule, we must set the no-else rule to the "if" priority using %prec. Then, the TOKEN
 // for "else" will be compared with the RULE for no-else case and highest precidence will win.
 // It's all rather brittle.
-%precedence KEYWORD_ARGS_BODY_WITH_ELSE // basically "then"
-%precedence ELSE_KEYWORD  			     // basically "else"
+%precedence KEYWORD_ARGS_BODY_STMT // basically "then"
+%precedence ELSE_KEYWORD  		   // basically "else"
 
 %%
 
@@ -615,8 +614,9 @@ statement_nc: statement_nl													{ $$ = {$1}; }
 			| arrival statement_nl											{ $$ = {$1, $2}; } 
 			| arrival ';'		 											{ $$ = {$1}; } // Note no Nop
 
+// #903 generalise to comma separated args
 arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = $1->OnArgsList({$2}, @2); } 
-			| CASE_KEYWORD expr_entry RANGE_OP expr_entry ':' 				{ $$ = $1->OnArgsList({$2, $4}, @2+@4); } // TODO we'll be given the Case node and must let it evolve into RangeCase
+			| CASE_KEYWORD expr_entry RANGE_OP expr_entry ':' 				{ $$ = $1->OnArgsList({$2, $4}, @2+@4); }
 			| DEFAULT_KEYWORD ':'										
 			| id_primary ':' 			 									{ $$ = vn->OnLabel($1, @1); } 
 			| EXPLICIT_NORMAL id_primary ':' 			 					{ $$ = $1->OnIdentifier($2, @2); } 
@@ -624,7 +624,7 @@ arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = $1->OnArgsList({$2}, @2); 
 statement_nl: bare_statement ';'										
 			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts
 			| args_body_stmt_keyword '(' semicolon_args ')' stmt_comp	
-			  %prec KEYWORD_ARGS_BODY_WITH_ELSE								{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
+			  %prec KEYWORD_ARGS_BODY_STMT									{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| args_body_stmt_keyword '(' semicolon_args ')' stmt_comp
 			  ELSE_KEYWORD stmt_comp										{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5)->OnElseBody($7, @6); }
 
@@ -634,11 +634,9 @@ bare_statement	: KEYWORD_SIMPLE_STMT
 				| EXPLICIT_NORMAL
 				
 args_body_stmt_keyword 	: KEYWORD_ARGS_BODY_STMT
-						| KEYWORD_ARGS_BODY_WITH_ELSE
 						| WHILE_KEYWORD
 						| EXPLICIT_NORMAL
 						
-
 semicolon_args	: expr_entry										{ $$.push_back($1); }
 				| semicolon_args ';' expr_entry						{ $$ = $1; $$.push_back($3); }
 

@@ -2595,7 +2595,7 @@ string If::GetKeyword( Policy ) const
 
 YY::VNLangParser::token::token_kind_type If::GetKeywordToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_WITH_ELSE;
+	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_STMT;
 }
 
 

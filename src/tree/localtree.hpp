@@ -49,10 +49,12 @@ struct CombableBreak : CPPTree::Break { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_
 
 // From GenerateStacks
 // Requires long-form explicit because no keyword to override
+// TODO #902 switch to short-form explicit
 struct TempReturnAddress : CPPTree::Temporary { NODE_FUNCTIONS_FINAL RENDER_AS_BASE_IN_CPP_ONLY(CPPTree::Temporary) };
 
 // From Fall Out
 // Requires long-form explicit because no keyword to override and no syntax for specifying state
+// TODO #903 for short-form explicit
 struct StateLabel : CPPTree::LabelDeclaration
 {
     NODE_FUNCTIONS_FINAL 

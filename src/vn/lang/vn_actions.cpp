@@ -645,10 +645,10 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 				throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(loc),
 						"Xstructor does not support permission: " + DiagQuote(q.GetDiagnostic()) );
-			if( TreePtr<CPPTree::Dispatch>::DynamicCast(q.node) ) // TODO allow virtuality for destructors
+			if( TreePtr<CPPTree::Dispatch>::DynamicCast(q.node) ) // TODO allow dispatch for destructors
 				throw YY::VNLangParser::syntax_error(
 						any_cast<YY::VNLangParser::location_type>(loc),
-						"Constructor does not support virtuality: " + DiagQuote(q.GetDiagnostic()) );
+						"Constructor does not support dispatch: " + DiagQuote(q.GetDiagnostic()) );
 		case QualCat::STATIC:
 				break;
 		}
