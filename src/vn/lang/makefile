@@ -29,7 +29,7 @@ VNL_DEPS = $(VNL_DIR)/makefile
 -include $(VNL_LYPP_MODULES:%=build/%.lpp.d) 
 -include $(VNL_LYPP_MODULES:%=build/%.ypp.d)
 
-$(VNL_LYPP_MODULES:%=build/%.lpp.hpp) : build/%.lpp.hpp : build/%.lpp.cpp build/%.ypp.hpp
+$(VNL_LYPP_MODULES:%=build/%.lpp.hpp) : build/%.lpp.hpp : build/%.lpp.cpp build/%.ypp.hpp build/%.ypp.cpp
 $(VNL_LYPP_MODULES:%=build/%.lpp.cpp) : build/%.lpp.cpp : %.lpp build/%.ypp.hpp $(VNL_DEPS)
 	@mkdir -p $(dir $@)
 	@echo GENERATING LEXER

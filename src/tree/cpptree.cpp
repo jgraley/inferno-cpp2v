@@ -2872,7 +2872,7 @@ TreePtr<Node> Case::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::loca
 
 YY::VNLangParser::token::token_kind_type Case::GetKeywordToken() const
 {
-	return YY::VNLangParser::token::TOK_CASE_KEYWORD;
+	return YY::VNLangParser::token::TOK_ARRIVAL_KEYWORD;
 }
 
 //////////////////////////// Default //////////////////////////////
@@ -2892,7 +2892,7 @@ string Default::GetKeyword( Policy ) const
 
 YY::VNLangParser::token::token_kind_type Default::GetKeywordToken() const
 {
-	return YY::VNLangParser::token::TOK_DEFAULT_KEYWORD;
+	return YY::VNLangParser::token::TOK_ARRIVAL_KEYWORD;
 }
 
 //////////////////////////// Continue ///////////////////////////////

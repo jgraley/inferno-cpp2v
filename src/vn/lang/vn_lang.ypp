@@ -154,8 +154,7 @@
 <TreePtr<Node>> KEYWORD_ARGS_BODY_STMT 	_("keyword for args-and-body statement") // eg switch(args) body
 <TreePtr<Node>> DO_KEYWORD				_("C do keyword")
 <TreePtr<Node>> WHILE_KEYWORD			_("C while keyword")
-<TreePtr<Node>> CASE_KEYWORD			_("C case keyword")
-<TreePtr<Node>> DEFAULT_KEYWORD			_("C default keyword")
+<TreePtr<Node>> ARRIVAL_KEYWORD			_("C arrival keyword")
 <TreePtr<Node>> FUNC_ON_TYPE			_("function acting on a type")
 <TreePtr<Node>> IRECORD_KEYWORD			_("C class/struct/union keyword")
 <TreePtr<Node>> ENUM_KEYWORD			_("C enumeration keyword")
@@ -615,9 +614,9 @@ statement_nc: statement_nl													{ $$ = {$1}; }
 			| arrival ';'		 											{ $$ = {$1}; } // Note no Nop
 
 // #903 generalise to comma separated args
-arrival		: CASE_KEYWORD expr_entry ':'									{ $$ = $1->OnArgsList({$2}, @2); } 
-			| CASE_KEYWORD expr_entry RANGE_OP expr_entry ':' 				{ $$ = $1->OnArgsList({$2, $4}, @2+@4); }
-			| DEFAULT_KEYWORD ':'										
+arrival		: ARRIVAL_KEYWORD expr_entry ':'									{ $$ = $1->OnArgsList({$2}, @2); } 
+			| ARRIVAL_KEYWORD expr_entry RANGE_OP expr_entry ':' 				{ $$ = $1->OnArgsList({$2, $4}, @2+@4); }
+			| ARRIVAL_KEYWORD ':'										
 			| id_primary ':' 			 									{ $$ = vn->OnLabel($1, @1); } 
 			| EXPLICIT_NORMAL id_primary ':' 			 					{ $$ = $1->OnIdentifier($2, @2); } 
 
