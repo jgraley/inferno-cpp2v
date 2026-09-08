@@ -2487,7 +2487,7 @@ string Return::GetKeyword( Policy ) const
 
 YY::VNLangParser::token::token_kind_type Return::GetKeywordToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SPACE_SEP_STMT;
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }
 
 
@@ -2546,7 +2546,7 @@ string Goto::GetKeyword( Policy ) const
 
 YY::VNLangParser::token::token_kind_type Goto::GetKeywordToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SPACE_SEP_STMT;
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }
 
 
@@ -2595,7 +2595,7 @@ string If::GetKeyword( Policy ) const
 
 YY::VNLangParser::token::token_kind_type If::GetKeywordToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_STMT;
+	return YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT;
 }
 
 
@@ -2748,7 +2748,7 @@ string For::GetKeyword( Policy ) const
 
 YY::VNLangParser::token::token_kind_type For::GetKeywordToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_STMT;
+	return YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT;
 }
 
 
@@ -2791,7 +2791,7 @@ string Switch::GetKeyword( Policy ) const
 
 YY::VNLangParser::token::token_kind_type Switch::GetKeywordToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_ARGS_BODY_STMT;
+	return YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT;
 }
 
 
