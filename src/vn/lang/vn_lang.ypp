@@ -634,6 +634,7 @@ bare_statement	: KEYWORD_SIMPLE_STMT
 control_stmt_sign 	: KEYWORD_CONTROL_STMT
 					| WHILE_KEYWORD
 					| EXPLICIT_NORMAL
+					| KEYWORD_SIMPLE_STMT
 						
 semicolon_args	: expr_entry										{ $$.push_back($1); }
 				| semicolon_args ';' expr_entry						{ $$ = $1; $$.push_back($3); }
