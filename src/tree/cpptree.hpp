@@ -1109,6 +1109,7 @@ struct Record : TypeDeclaration,
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
     virtual string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
 	virtual string RenderBody( VN::RendererInterface *renderer, Policy policy );
+	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 
 	virtual void UpdateContext( TreePtr<Node> node, any &context, YY::VNLangParser::location_type loc );	
 	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type loc) const override; 
@@ -1148,7 +1149,6 @@ struct InheritanceRecord : Record
     Collection<Base> bases; ///< contains the InheritanceRecords from which we inherit   
 
     string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy) override;
-	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override;
 	TreePtr<Node> OnBases( list<TreePtr<Node>> bases, YY::VNLangParser::location_type loc ) override;
 };
 

@@ -154,7 +154,7 @@
 <TreePtr<Node>> WHILE_KEYWORD			_("C while keyword")
 <TreePtr<Node>> ARRIVAL_KEYWORD			_("C arrival keyword")
 <TreePtr<Node>> FUNC_ON_TYPE			_("function acting on a type")
-<TreePtr<Node>> IRECORD_KEYWORD			_("C class/struct/union keyword")
+<TreePtr<Node>> RECORD_KEYWORD			_("C class/struct/union keyword")
 <TreePtr<Node>> ENUM_KEYWORD			_("C enumeration keyword")
 <TreePtr<Node>> QUAL_NODE_KEYWORD		_("C qualifier")
 <TreePtr<Node>> TYPEDEF_KEYWORD			_("C typedef keyword")
@@ -185,7 +185,7 @@ stmt_high
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
-%type <TreePtr<Node>> 				irecord_node inheritance_record base_spec access_spec access_clause qualifier_node
+%type <TreePtr<Node>> 				record base_spec access_spec access_clause qualifier_node
 %type <TreePtr<Node>> 				enum_node enum
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					vn_name
@@ -199,7 +199,7 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		params_scope 
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
 %type <VN::NodeAndGnomon>			norm_full_explicit_start type_full_explicit_start decl_full_explicit_start qual_full_explicit_start mi_full_explicit_start
-%type <VN::NodeAndGnomon>			irecord_scope enum_scope
+%type <VN::NodeAndGnomon>			record_scope enum_scope
 %type <TreePtr<Node>> 				acc_memb_boot member comp_member bare_member bare_member_nvn 
 %type <TreePtr<Node>> 				acc_memb_prefix acc_memb_postfix acc_memb_paren acc_memb_primary
 %type <list<TreePtr<Node>>>			stmt_decls members enumerators
@@ -348,7 +348,7 @@ bare_decl_nvn	: prototype
 				| prototype bare_initialiser							{ $$ = $1->OnInitialiser($2, @2); } 
 				| prototype ':' memb_inits bare_initialiser				{ $$ = $1->OnMemberInits($3, @3); 
 																		  $$ = $1->OnInitialiser($4, @4); } 
-				| inheritance_record
+				| record
 				| enum				
 			
 bare_initialiser: C_ASSIGN assign_init									{ $$ = $2; } 
@@ -464,21 +464,17 @@ parameters	: parameter												{ $$.push_back($1); }
 				
 parameter   : decl_entry           									
                          
-//////////////////////////////// CLASSES ////////////////////////////////////                                  
+//////////////////////////////// RECORDS ////////////////////////////////////                                  
                          
-inheritance_record	: irecord_scope '{' members '}'			 				{ $$ = $1.node->OnMembers($3, @3); }
-					| irecord_scope ':' bases '{' members '}'				{ $$ = $1.node->OnBases($3, @3); 
-					                                                          $$ = $$->OnMembers($5, @5); }
-					| irecord_scope '{' '}'			 						{ $$ = $1.node; }
-					| irecord_scope ':' bases '{' '}'						{ $$ = $1.node->OnBases($3, @3); }
+record			: record_scope '{' members '}'			 				{ $$ = $1.node->OnMembers($3, @3); }
+				| record_scope ':' bases '{' members '}'				{ $$ = $1.node->OnBases($3, @3)->OnMembers($5, @5); }
+				| record_scope '{' '}'			 						{ $$ = $1.node; }
+				| record_scope ':' bases '{' '}'						{ $$ = $1.node->OnBases($3, @3); }
              
-irecord_scope   : irecord_node type_specified        						{ $$ = { $1->OnIdentifier($2, @2),  
+record_scope    : RECORD_KEYWORD type_specified        						{ $$ = { $1->OnIdentifier($2, @2),  
 																		             vn->MakeRecordScopeGnomon($1) }; 
 																			  vn->AddGnomon($$.gnomon); } 
-																			  
-irecord_node	: IRECORD_KEYWORD											
-		 		| EXPLICIT_DECL										
-                                                  
+																			                                                  
 bases			: base_spec                                                 { $$.push_back($1); } 
 				| bases ',' base_spec										{ $$ = $1; $$.push_back($3); } 
                                        
@@ -556,7 +552,6 @@ enum_scope      : enum_node type_specified       							{ $$ = { $1->OnIdentifie
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
 enum_node		: ENUM_KEYWORD												
-//		 		| EXPLICIT_DECL										// TODO bring back explicit support but differentiate
                                                                                                                                                        
 enumerators		: enumerator												{ $$.push_back($1); }
 				| enumerators ',' enumerator 								{ $$ = $1; $$.push_back($3); }
@@ -616,7 +611,6 @@ arrival		: ARRIVAL_KEYWORD ':'
 			| ARRIVAL_KEYWORD expr_entry ':'									{ $$ = $1->OnArgsList({$2}, @2); } 
 			| ARRIVAL_KEYWORD expr_entry RANGE_OP expr_entry ':' 				{ $$ = $1->OnArgsList({$2, $4}, @2+@4); }
 			| id_primary ':' 			 									{ $$ = vn->OnLabel($1, @1); } 
-			| EXPLICIT_NORMAL id_primary ':' 			 					{ $$ = $1->OnIdentifier($2, @2); } 
 
 statement_nl: bare_statement ';'										
 			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts #905
@@ -628,11 +622,9 @@ statement_nl: bare_statement ';'
 bare_statement	: KEYWORD_SIMPLE_STMT										
 				| KEYWORD_SIMPLE_STMT expr_entry							{ $$ = $1->OnArgsList({$2}, @2); }
 				| DO_KEYWORD stmt_comp WHILE_KEYWORD '(' stmt_boot ')' 		{ $$ = $1->OnBody($2, @2)->OnArgsList({$5}, @5); } // TODO a While node is gobbled up here
-				| EXPLICIT_NORMAL
 				
 control_stmt_sign 	: KEYWORD_CONTROL_STMT
 					| WHILE_KEYWORD
-					| EXPLICIT_NORMAL
 						
 semicolon_args	: expr_entry										{ $$.push_back($1); }
 				| semicolon_args ';' expr_entry						{ $$ = $1; $$.push_back($3); }

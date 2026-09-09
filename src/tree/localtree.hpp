@@ -29,7 +29,7 @@
 	} \
 	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override \
 	{ \
-		throw UnimplementedToken(); /* return TOKEN; */ \
+		return TOKEN; \
 	}
 
 // Nodes that are only used locally to a transformaiton or sequence of transformtions. All

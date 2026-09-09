@@ -1945,6 +1945,12 @@ string Record::RenderBody( VN::RendererInterface *renderer, Policy policy )
 }
 
 
+YY::VNLangParser::token::token_kind_type Record::GetKeywordToken() const
+{
+	return YY::VNLangParser::token::TOK_RECORD_KEYWORD;
+}
+
+
 void Record::UpdateContext( TreePtr<Node> node, any &context, YY::VNLangParser::location_type loc )
 {
 	if( node && !TreePtr<AccessSpec>::DynamicCast(node) ) // node can be NULL, which we'll allow as wildcard
@@ -1973,13 +1979,6 @@ TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context
 	}
 	instance->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
 	return instance;
-}
-
-//////////////////////////// Union ///////////////////////////////
-
-YY::VNLangParser::token::token_kind_type InheritanceRecord::GetKeywordToken() const
-{
-	return YY::VNLangParser::token::TOK_IRECORD_KEYWORD;
 }
 
 //////////////////////////// Union ///////////////////////////////
