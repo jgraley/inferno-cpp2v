@@ -110,7 +110,7 @@ public:
 			compound_uses_vn_separator(false),
 			is_vn_render_for_temp_disables(false),
 			goto_uses_ref_and_deref(true),
-			refuse_local_nodes_without_overridden_syntax(false),
+			permit_inherited_keyword(false),
 			full_render_code_unit(true),
 			definitions(nullptr),
 			can_split_instances(false),
@@ -134,7 +134,7 @@ public:
 		bool compound_uses_vn_separator;
 		bool is_vn_render_for_temp_disables;
 		bool goto_uses_ref_and_deref;
-		bool refuse_local_nodes_without_overridden_syntax;
+		bool permit_inherited_keyword;
 		bool full_render_code_unit;
 	    queue<shared_ptr<Syntax>> *definitions;
 		bool can_split_instances;

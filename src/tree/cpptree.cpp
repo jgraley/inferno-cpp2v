@@ -1314,10 +1314,10 @@ list<string> Enumerator::RenderMiddlePart( VN::RendererInterface *renderer, Poli
 
 list<string> Temporary::RenderDeclSpecPre( VN::RendererInterface *, Policy policy ) const 
 { 
-	if( policy.refuse_local_nodes_without_overridden_syntax )
-		throw RefuseDueLocal(); 
-		
-	return { "/*temp*/" };
+	if( policy.permit_inherited_keyword )
+		return { "/*temp*/" }; // Effecively inherited, we just add a hint in a comment
+	
+	throw RefuseDueLocal(); 			
 }
 
 //////////////////////////// Base //////////////////////////////
@@ -1824,15 +1824,16 @@ Syntax::Production Labeley::GetMyProductionTerminal() const
 
 string Labeley::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 {
-	if( policy.refuse_local_nodes_without_overridden_syntax ) 
-		throw RefuseDueLocal(); 
+	if( policy.permit_inherited_keyword ) 
+		return "void *"; // Effecively inherited, this is the underlying C type for a label
+
+	throw RefuseDueLocal(); 
 		
 	// Note: all instances must be const
 	// TODO Labely should be a local node, maybe raised and definitely lowered 
 	// back to const void *.
 	// Raising requires usage analysis but only needed if goto-a-variable is 
 	// accepted as input.
-	return "void *"; 
 }
 
 //////////////////////////// TypeDeclaration ///////////////////////////////

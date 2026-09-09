@@ -163,7 +163,7 @@ Syntax::Policy Render::GetDefaultPolicy()
 	// Rendering local node types that don't have their own syntax will just
 	// use the parent class's render which will be parsed back as the parent class,
 	// which is an error. Or, the render is ambiguous in vn files.
-	policy.refuse_local_nodes_without_overridden_syntax = true;
+	policy.permit_inherited_keyword = false;
 	
 	policy.full_render_code_unit = false;
 	
@@ -520,15 +520,25 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
     			
     s += node->RenderNodeTypeName(); 
    
-	if( ReadArgs::use.contains("c") )
-		s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";
-    
-    list<string> sitems = PopulateItemStrings( node, policy );    
-    if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
-		s += Join( sitems, "⚬\n", "⦅\n", "\n⦆" );   
-	else 
-		s += Join( sitems, " ⚬ ", "⦅", "⦆" );    
-
+	try
+	{
+		(void)node->GetKeywordToken();
+		// There's a keyword token, we can use the short-form syntax, because it will parse (recognise) as a keyword
+		// See VNLangRecogniser::OnExplicitLexeme()
+	}
+	catch( Syntax::UnimplementedToken & )
+	{
+		// There's no keyword token, so we need to provide a full explicit, which will parse as the complete production
+		if( ReadArgs::use.contains("c") )
+			s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";
+		
+		list<string> sitems = PopulateItemStrings( node, policy );    
+		if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
+			s += Join( sitems, "⚬\n", "⦅\n", "\n⦆" );   
+		else 
+			s += Join( sitems, " ⚬ ", "⦅", "⦆" );    
+	}
+		
 	return s;
 }
 

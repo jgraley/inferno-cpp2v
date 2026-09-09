@@ -34,27 +34,7 @@ namespace VN
 {
 class VNLangActions;	
 
-TreePtr<Node> MakeStandardAgent(NodeTag ne);
-
-class ResolverGnomon : public Gnomon
-{
-public:	
-	ResolverGnomon( const ANDBlock *andata_block ) : 
-		namespace_block(dynamic_cast<const AvailableNodeData::NamespaceBlock *>(andata_block))
-	{
-		ASSERT( namespace_block );
-	}
-
-	string GetTrace() const
-	{
-		return Trace(namespace_block);
-	}
-	
-private:
-	friend class VNLangRecogniser;
-	const AvailableNodeData::NamespaceBlock * const namespace_block;
-};
-		
+TreePtr<Node> MakeStandardAgent(NodeTag ne);	
 		
 class DesignationGnomon : public Gnomon
 {
@@ -107,7 +87,7 @@ public:
 	YY::VNLangParser::symbol_type OnTransformLexeme(wstring text, YY::VNLangParser::location_type loc) const;
 	
 private:
-	TreePtr<Node> CreateNode(string text, YY::VNLangParser::location_type loc) const;
+	TreePtr<Node> CreateNodeFromName(string text, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type Recognise(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type RecogniseInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
 	YY::VNLangParser::symbol_type CreateBlockToken(const ANDBlock *block, YY::VNLangParser::location_type loc) const;
@@ -121,9 +101,6 @@ private:
 
 	// store with weak_ptr => these will expire when the parser exists the scope
 	WeakStack<const ScopeGnomon> scope_gnomons;
-
-	// store with weak_ptr => these will expire when the parser exists the resolver production
-	WeakStack<const ResolverGnomon> resolver_gnomons;
 	
 	// Store with shared_ptr => these will stick around until we ditch them
 	map<wstring, shared_ptr<const DesignationGnomon>> designation_gnomons;

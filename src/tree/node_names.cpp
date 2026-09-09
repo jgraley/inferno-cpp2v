@@ -96,6 +96,9 @@ optional<NodeTag> AvailableNodeData::TryGetByKeywordIfToken( string keyword ) co
 		(void)tag_to_node_map.at(tag)->GetKeywordToken(); // throws if no token
 		found.insert( tag );
 	} catch( Syntax::UnimplementedToken & ) {}
+							
+	if( found.size()>1 )
+		FTRACE("Found multiple matches to keyword \"")(keyword)("\" with tokens\n"); // extra info for when SoloElementOf() fails
 								
 	if( found.empty() )
 		return {};

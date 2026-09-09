@@ -9,9 +9,9 @@
 #define RENDER_AS_BASE_IN_CPP_ONLY(BASE) \
     string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override \
     { \
-		if( policy.refuse_local_nodes_without_overridden_syntax ) \
-			throw RefuseDueLocal(); /* Produce full explicit node */ \
-		return BASE::GetRender(renderer, surround_prod, policy); \
+		if( policy.permit_inherited_keyword ) \
+			return BASE::GetRender(renderer, surround_prod, policy); \
+		throw RefuseDueLocal(); /* Produce full explicit node */ \
 	} \
 	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override \
 	{ \
@@ -20,16 +20,16 @@
 		
 
 // See #899 about using this macro
-#define KEYWORD_AS_BASE_IN_CPP_ONLY(BASE) \
+#define KEYWORD_AS_BASE_IN_CPP_ONLY(BASE, TOKEN) \
     string GetKeyword(Policy policy) const override \
     { \
-		if( policy.refuse_local_nodes_without_overridden_syntax ) \
-			throw UnimplementedKeyword(); /* Produce short-form explicit node */ \
-		return BASE::GetKeyword(policy); \
+		if( policy.permit_inherited_keyword ) \
+			return BASE::GetKeyword(policy); \
+		throw UnimplementedKeyword(); /* Produce short-form explicit node */ \
 	} \
 	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override \
 	{ \
-		throw UnimplementedToken(); \
+		throw UnimplementedToken(); /* return TOKEN; */ \
 	}
 
 // Nodes that are only used locally to a transformaiton or sequence of transformtions. All
@@ -41,11 +41,11 @@ struct GlobalsModule : SCTree::Module { NODE_FUNCTIONS_FINAL };
 
 // From LowerControlFlow 
 // These work with short-form explicits
-struct UncombableSwitch : CPPTree::Switch, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Switch) };
-struct UncombableFor : CPPTree::For, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::For) };
-struct CombableFor : CPPTree::For { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::For) };
-struct UncombableBreak : CPPTree::Break, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Break) };
-struct CombableBreak : CPPTree::Break { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Break) };
+struct UncombableSwitch : CPPTree::Switch, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Switch, YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT) };
+struct UncombableFor : CPPTree::For, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::For, YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT) };
+struct CombableFor : CPPTree::For { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::For, YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT) };
+struct UncombableBreak : CPPTree::Break, CPPTree::Uncombable { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Break, YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT) };
+struct CombableBreak : CPPTree::Break { NODE_FUNCTIONS_FINAL KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Break, YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT) };
 
 // From GenerateStacks
 // Requires long-form explicit because no keyword to override

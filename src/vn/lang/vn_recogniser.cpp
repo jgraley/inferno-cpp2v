@@ -54,8 +54,6 @@ void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 	
 	if( auto scope_gnomon = dynamic_pointer_cast<const ScopeGnomon>(gnomon) )
 		scope_gnomons.Push( scope_gnomon ); // front is top
-	else if( auto resolver_gnomon = dynamic_pointer_cast<const ResolverGnomon>(gnomon) )
-		resolver_gnomons.Push( resolver_gnomon ); // front is top
 	else if( auto designation_gnomon = dynamic_pointer_cast<const DesignationGnomon>(gnomon) )
 		designation_gnomons.insert( make_pair( designation_gnomon->name, designation_gnomon ) );
 	else 
@@ -77,15 +75,27 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(wstring text, Y
 
 YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, YY::VNLangParser::location_type loc) const
 {
-	TreePtr<Node> node = CreateNode( ToASCII(text.substr(1)), loc );
-	YY::VNLangParser::token::token_kind_type token_kind = node->GetExplicitToken();		
+	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
+	
+	YY::VNLangParser::token::token_kind_type token_kind;
+	try
+	{
+		token_kind = node->GetKeywordToken();		
+		// There's a keyword token for this node, so give it to the parser to parse as short-form
+		// See Render::RenderNodeExplicit()
+	}
+	catch( Syntax::UnimplementedToken & )
+	{
+		// There's no keyword token, so produce explicit token for long-form parsing
+		token_kind = node->GetExplicitToken();		
+	}
 	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
 }
 
 
 YY::VNLangParser::symbol_type VNLangRecogniser::OnPrerestrictLexeme(wstring text, YY::VNLangParser::location_type loc) const
 {
-	TreePtr<Node> node = CreateNode( ToASCII(text.substr(1)), loc );
+	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
 	YY::VNLangParser::token::token_kind_type token_kind = node->GetPrerestrictToken();		
 	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
 }
@@ -93,7 +103,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnPrerestrictLexeme(wstring text
 
 YY::VNLangParser::symbol_type VNLangRecogniser::OnIdByNameLexeme(wstring text, YY::VNLangParser::location_type loc) const
 {
-	TreePtr<Node> node = CreateNode( ToASCII(text.substr(1)), loc );
+	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
 	YY::VNLangParser::token::token_kind_type token_kind = node->GetIdByNameToken();		
 	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
 }
@@ -101,7 +111,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnIdByNameLexeme(wstring text, Y
 
 YY::VNLangParser::symbol_type VNLangRecogniser::OnIdBuilderLexeme(wstring text, YY::VNLangParser::location_type loc) const
 {
-	TreePtr<Node> node = CreateNode( ToASCII(text.substr(1)), loc );
+	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
 	YY::VNLangParser::token::token_kind_type token_kind = node->GetIdBuilderToken();		
 	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
 }
@@ -129,7 +139,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnTransformLexeme(wstring text, 
 }
 
 
-TreePtr<Node> VNLangRecogniser::CreateNode(string text, YY::VNLangParser::location_type loc) const
+TreePtr<Node> VNLangRecogniser::CreateNodeFromName(string text, YY::VNLangParser::location_type loc) const
 {
 	list<string> parts = Split(text, "::");
 	const AvailableNodeData::NamespaceBlock *namespace_block = AvailableNodeData().GetNodeNamesRoot();

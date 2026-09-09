@@ -81,6 +81,9 @@ Syntax::Policy CppRender::GetDefaultPolicy()
 	// Allow invisible things to be rendered as empty strings
 	policy.refuse_invisibles = false;
 
+	// We can't render ecxplicit node syntax, so try to render like the parent class
+	policy.permit_inherited_keyword = true;
+
 	return policy;
 }
 
