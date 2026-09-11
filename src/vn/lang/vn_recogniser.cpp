@@ -80,7 +80,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, Y
 	YY::VNLangParser::token::token_kind_type token_kind;
 	try
 	{
-		token_kind = node->GetKeywordToken();		
+		token_kind = node->GetSignifierToken();		
 		// There's a keyword token for this node, so give it to the parser to parse as short-form
 		// See Render::RenderNodeExplicit()
 	}
@@ -209,7 +209,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 	if( !tag )
 		throw Unrecognised();
 	TreePtr<Node> node = MakeStandardAgent(tag.value());
-	return YY::VNLangParser::symbol_type( node->GetKeywordToken(), std::move(node), std::move(loc) );
+	return YY::VNLangParser::symbol_type( node->GetSignifierToken(), std::move(node), std::move(loc) );
 }
 
 

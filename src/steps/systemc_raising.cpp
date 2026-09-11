@@ -17,7 +17,7 @@ RaiseSCClass::RaiseSCClass( TreePtr< Type > lr_sctype )
     auto r_program = MakePatternNode< CodeUnit >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto s_class = MakePatternNode< Class >();
-    auto s_token = MakePatternNode< SpecificTypeIdentifierByNameAgent >( lr_sctype->GetLoweredIdName() );                
+    auto s_token = MakePatternNode< SpecificTypeIdentifierByNameAgent >( lr_sctype->GetLoweredIdOrMacroName() );                
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( delta, s_token, lr_sctype );    
     auto s_decls = MakePatternNode<StarAgent, Declaration>();
     auto s_bases = MakePatternNode<StarAgent, Base>();
@@ -48,7 +48,7 @@ RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_sccla
     auto ls_class = MakePatternNode< Class >();
     auto ls_base = MakePatternNode< Base >();
     auto l_tid = MakePatternNode< TypeIdentifier >();
-    auto s_token = MakePatternNode< SpecificTypeIdentifierByNameAgent >( lr_scclass->GetLoweredIdName() ); 
+    auto s_token = MakePatternNode< SpecificTypeIdentifierByNameAgent >( lr_scclass->GetLoweredIdOrMacroName() ); 
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( delta, ls_class, lr_scclass );    
     auto s_decls = MakePatternNode<StarAgent, Declaration>();
     auto s_bases = MakePatternNode<StarAgent, Base>();
@@ -79,7 +79,7 @@ RaiseSCDynamic::RaiseSCDynamic( TreePtr<SCDynamicFunction> r_dynamic )
     auto s_call = MakePatternNode<Call>();
     auto s_args = MakePatternNode<MapArgumentation>();
     auto s_arg = MakePatternNode< IdValuePair >();
-    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_dynamic->GetLoweredIdName() ); 
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_dynamic->GetLoweredIdOrMacroName() ); 
     auto s_param_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "p1" ); 
     auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
                     
@@ -99,7 +99,7 @@ RaiseSCStatic::RaiseSCStatic( TreePtr<SCFunction> r_static )
 {
     auto s_call = MakePatternNode<Call>();
     auto s_args = MakePatternNode<MapArgumentation>();
-    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_static->GetLoweredIdName() ); 
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_static->GetLoweredIdOrMacroName() ); 
                       
     s_call->callee = s_token;   
     s_call->argumentation = s_args;       
@@ -114,7 +114,7 @@ RaiseSCDelta::RaiseSCDelta( TreePtr<SCFunction> r_delta )
     auto s_call = MakePatternNode<Call>();
     auto s_args = MakePatternNode<MapArgumentation>();
     auto s_arg = MakePatternNode< IdValuePair >();
-    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_delta->GetLoweredIdName() ); 
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_delta->GetLoweredIdOrMacroName() ); 
     auto s_param_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "p1" ); 
     auto s_arg_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "SC_ZERO_TIME" ); 
                     
@@ -124,7 +124,7 @@ RaiseSCDelta::RaiseSCDelta( TreePtr<SCFunction> r_delta )
     s_arg->key = s_param_id;
     s_arg->value = s_arg_id;
       
-    // TODO This is the last trans to remove calls to r_delta->GetLoweredIdName(), so   
+    // TODO This is the last trans to remove calls to r_delta->GetLoweredIdOrMacroName(), so   
     // clear the declaration away.
       
     Configure( SEARCH_REPLACE, s_call, r_delta );
@@ -137,7 +137,7 @@ RaiseTerminationFunction::RaiseTerminationFunction( TreePtr<TerminationFunction>
     auto s_call = MakePatternNode<Call>();
     auto s_args = MakePatternNode<MapArgumentation>();
     auto s_arg = MakePatternNode< IdValuePair >();
-    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_tf->GetLoweredIdName() ); 
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_tf->GetLoweredIdOrMacroName() ); 
     auto s_param_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "exit_code" ); 
             
     s_call->callee = s_token;       
@@ -179,7 +179,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto l_bases = MakePatternNode<StarAgent, Base>();
     auto l_ctype = MakePatternNode<Constructor>();
     auto l_ident = MakePatternNode<ConstructorIdentifier>();
-    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( lr_scprocess->GetLoweredIdName() ); 
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( lr_scprocess->GetLoweredIdOrMacroName() ); 
     auto s_arg_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "func" );
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( delta, l_module, l_module );            
     auto l_ctype_param = MakePatternNode<Parameter>();
@@ -236,7 +236,7 @@ RaiseSCDeltaCount::RaiseSCDeltaCount()
 
     auto s_call = MakePatternNode<Call>();
     auto s_args = MakePatternNode<MapArgumentation>();
-    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_delta_count->GetLoweredIdName() );                
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_delta_count->GetLoweredIdOrMacroName() );                
                 
     s_call->callee = s_token;
     s_call->argumentation = s_args;
@@ -253,7 +253,7 @@ RaiseSCNotifyImmediate::RaiseSCNotifyImmediate()
     auto s_lookup = MakePatternNode<Lookup>();
     auto s_event = MakePatternNode<Event>();
     auto r_notify = MakePatternNode<NotifyImmediate>();
-    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_notify->GetLoweredIdName() );                
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_notify->GetLoweredIdOrMacroName() );                
     auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
     //MakePatternNode< Expression > eexpr; 
             
@@ -280,7 +280,7 @@ RaiseSCNotifyDelta::RaiseSCNotifyDelta()
     auto s_arg = MakePatternNode<IdValuePair>();
     auto s_zero_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "SC_ZERO_TIME" );                
     auto s_arg_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "p1" ); 
-    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_notify->GetLoweredIdName() );                
+    auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( r_notify->GetLoweredIdOrMacroName() );                
     auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
     //MakePatternNode< Expression > eexpr; 
             

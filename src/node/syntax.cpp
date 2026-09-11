@@ -3,7 +3,7 @@
 
 #include "tree/cpptree.hpp"
 
-string Syntax::GetLoweredIdName() const
+string Syntax::GetLoweredIdOrMacroName() const
 {
 	throw Unimplemented();
 }
@@ -17,7 +17,7 @@ string Syntax::GetIdentifierName() const
 
 string Syntax::GetDesignationNameHint() const
 {
-	try { return GetLoweredIdName(); }
+	try { return GetLoweredIdOrMacroName(); }
 	catch( Refusal & ) {}
 	
 	// If no token, just use the type
@@ -106,7 +106,7 @@ string Syntax::RenderNodeTypeName() const
 }
 
 
-YY::VNLangParser::token::token_kind_type Syntax::GetKeywordToken() const
+YY::VNLangParser::token::token_kind_type Syntax::GetSignifierToken() const
 {
 	throw UnimplementedToken();
 }
@@ -237,7 +237,7 @@ TreePtr<Node> Syntax::OnElseBody( TreePtr<Node>, YY::VNLangParser::location_type
 } 
 
 
-any Syntax::GetInitialContext() const
+any Syntax::GetInitialScopeContext() const
 {
 	return any();	// std::any is nullable
 }
@@ -245,7 +245,7 @@ any Syntax::GetInitialContext() const
 
 void Syntax::UpdateContext( TreePtr<Node>, any &context, YY::VNLangParser::location_type )
 {
-	ASSERT( !context.has_value() ); //	GetInitialContext() wasimplemented therefore so should this be
+	ASSERT( !context.has_value() ); //	GetInitialScopeContext() wasimplemented therefore so should this be
 	// No action otherwise because no context
 }	
 

@@ -747,7 +747,7 @@ Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals,
 		switch( q.cat )
 		{
 		case QualCat::NODE:
-			if( TreePtr<CPPTree::Permission>::DynamicCast(q.node) )	// Add volatile here
+			if( TreePtr<CPPTree::Permission>::DynamicCast(q.node) )	// Add dispatch here
 			{
 				if( got_const )
 					throw YY::VNLangParser::syntax_error(
@@ -1020,7 +1020,7 @@ TreePtr<Node> CPPTree::AccessSpec::GetDefaultNode(TreePtr<Node> type) const
 	ASSERT(type); // if this is firing, it's probably due to explicit node parsing. Confirm we have an Instance and then pass in its type.
 	auto record = TreePtr<Record>::DynamicCast(type);
 	ASSERT(record); // Type is not a record (maybe could provide Public)
-	any ic = record->GetInitialContext();
+	any ic = record->GetInitialScopeContext();
 	if( ic.has_value() )
 		return any_cast<TreePtr<AccessSpec>>(ic);
 	else
@@ -1166,4 +1166,5 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // But the user can also use a designation to capture the (compound initialiser⨟ other commands...) and then apply the designation without =
 // This is now rule #896 (sort of)
 
-
+// NOTE A "signifier" can be a keyword or a short-form explicit. It generalises keywords to things we shouldn't call
+// keywords, but which are grammatically equivalent.

@@ -522,7 +522,7 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
    
 	try
 	{
-		(void)node->GetKeywordToken();
+		(void)node->GetSignifierToken();
 		// There's a keyword token, we can use the short-form syntax, because it will parse (recognise) as a keyword
 		// See VNLangRecogniser::OnExplicitLexeme()
 	}

@@ -170,7 +170,7 @@ public:
 	struct TypeOfFailSyntax : Refusal {}; // Eg, might cause conflicts
 		
 	/// Produce the source-code-name of the corresponding SystemC construct
-    virtual string GetLoweredIdName() const;
+    virtual string GetLoweredIdOrMacroName() const;
     virtual string GetIdentifierName() const;
     virtual string GetDesignationNameHint() const;
     virtual bool IsDesignationNamedIdentifier() const;
@@ -189,7 +189,7 @@ public:
     virtual string GetKeyword( Policy policy ) const;    
 	string RenderNodeTypeName() const; 
 	
-	virtual YY::VNLangParser::token::token_kind_type GetKeywordToken() const;
+	virtual YY::VNLangParser::token::token_kind_type GetSignifierToken() const;
 	virtual YY::VNLangParser::token::token_kind_type GetExplicitToken() const;
 	virtual YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const;
 	virtual YY::VNLangParser::token::token_kind_type GetIdByNameToken() const;
@@ -210,7 +210,7 @@ public:
 	virtual TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
 	
-	virtual any GetInitialContext() const;    
+	virtual any GetInitialScopeContext() const;    
 	virtual void UpdateContext( TreePtr<Node> node, any &context, YY::VNLangParser::location_type loc );	
 	virtual TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type loc) const; 
 };

@@ -13,7 +13,7 @@
 			return BASE::GetRender(renderer, surround_prod, policy); \
 		throw RefuseDueLocal(); /* Produce full explicit node */ \
 	} \
-	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override \
+	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override \
 	{ \
 		throw UnimplementedToken(); \
 	}
@@ -27,7 +27,7 @@
 			return BASE::GetKeyword(policy); \
 		throw UnimplementedKeyword(); /* Produce short-form explicit node */ \
 	} \
-	YY::VNLangParser::token::token_kind_type GetKeywordToken() const override \
+	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override \
 	{ \
 		return TOKEN; \
 	}

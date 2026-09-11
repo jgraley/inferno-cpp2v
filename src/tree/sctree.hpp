@@ -2,7 +2,7 @@
 #define SCTREE_HPP
 
 #include "node/specialise_oostd.hpp"
-#include "clang/Parse/DeclSpec.h"
+//#include "clang/Parse/DeclSpec.h"
 #include "tree/type_data.hpp"
 #include "tree/cpptree.hpp"
 #include <string>
@@ -23,10 +23,7 @@ struct SCRecord : virtual SCNode,
 /// Anything derived from this renders like a function
 struct SCFunction : virtual SCNode 
 {
-	Production GetMyProductionTerminal() const
-	{
-		return Production::POSTFIX; 	
-	}
+	Production GetMyProductionTerminal() const override;
 };
 
 /** SystemC event type, no members need to be set up. Event instances
@@ -34,7 +31,7 @@ struct SCFunction : virtual SCNode
 struct Event : CPPTree::Type
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetLoweredIdName() const { return "sc_event"; }
+    string GetLoweredIdOrMacroName() const override;
 };
 
 /** SystemC module type. The processes, registers, submodules and everything
@@ -47,8 +44,8 @@ struct Module : SCRecord
 {
     NODE_FUNCTIONS_FINAL
     
-    virtual string GetLoweredIdName() const { return "sc_module"; }
-  	any GetInitialContext() const override { return (TreePtr<CPPTree::AccessSpec>)MakeTreeNode<CPPTree::Private>(); }   
+    string GetLoweredIdOrMacroName() const override;
+  	any GetInitialScopeContext() const override;   
 };
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 
@@ -57,8 +54,8 @@ struct Interface : SCRecord
 {
     NODE_FUNCTIONS_FINAL
     
-    virtual string GetLoweredIdName() const { return "sc_interface"; }
-  	any GetInitialContext() const override { return (TreePtr<CPPTree::AccessSpec>)MakeTreeNode<CPPTree::Private>(); } 
+    string GetLoweredIdOrMacroName() const override;
+  	any GetInitialScopeContext() const override; 
 };
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 
@@ -79,7 +76,7 @@ struct Wait : CPPTree::Statement,
               CPPTree::Uncombable
 {
     NODE_FUNCTIONS
-    virtual string GetLoweredIdName() const { return "wait"; }
+    string GetLoweredIdOrMacroName() const override;
 };
 
 /** Waiting for a SystemC event - blocks until the event indicated by the expression is 
@@ -114,7 +111,7 @@ struct NextTrigger : CPPTree::Statement,
                      virtual SCFunction
 {
     NODE_FUNCTIONS
-    virtual string GetLoweredIdName() const { return "next_trigger"; }
+    string GetLoweredIdOrMacroName() const override;
 };
 
 /** Causes the method to be triggered again when the event indicated by the expression is 
@@ -148,7 +145,7 @@ struct Notify : CPPTree::Statement,
                 virtual SCFunction
 {
     NODE_FUNCTIONS
-    virtual string GetLoweredIdName() const { return "notify"; }
+    string GetLoweredIdOrMacroName() const override;
     TreePtr<CPPTree::Expression> event; ///< event to notify 
 };
 
@@ -195,7 +192,7 @@ struct EventProcess : Process
 struct Method : EventProcess
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetLoweredIdName() const { return "SC_METHOD"; }
+    string GetLoweredIdOrMacroName() const override;
 };
 
 /** SystemC thread process. Local context, so this can run forever (stopping only to indicate completion
@@ -205,7 +202,7 @@ struct Thread : EventProcess // TODO if SystemC really can't pre-empt, then this
                              // TODO and I should create a real thread support extension because user's threads will run busy sometimes
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetLoweredIdName() const { return "SC_THREAD"; }
+    string GetLoweredIdOrMacroName() const override;
 };
 
 /** SystemC clocked thread process. A local context as with Thread, but can only
@@ -214,7 +211,7 @@ struct Thread : EventProcess // TODO if SystemC really can't pre-empt, then this
 struct ClockedThread : Process
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetLoweredIdName() const { return "SC_CTHREAD"; }
+    string GetLoweredIdOrMacroName() const override;
     //TODO TreePtr<Sensitivity> clock;
 };
 
@@ -224,7 +221,7 @@ struct DeltaCount : CPPTree::Operator,
                     virtual SCFunction // TODO rename as InferredReset() since that will transform more easily to a real reset system
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetLoweredIdName() const { return "sc_delta_count"; }    
+    string GetLoweredIdOrMacroName() const override;
 	Production GetMyProductionTerminal() const override { return Production::POSTFIX; };	// renders like a function call
 };
 
@@ -240,10 +237,11 @@ struct TerminationFunction : CPPTree::Statement,
 };
 
 /// The exit() system call; cease() below is preferred.
+// TODO not actually SystemC
 struct Exit : TerminationFunction
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetLoweredIdName() const { return "exit"; }
+    string GetLoweredIdOrMacroName() const override;
 };
 
 
@@ -260,7 +258,7 @@ struct SCExtension : virtual Node
 struct Cease : TerminationFunction, SCExtension
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetLoweredIdName() const { return "cease"; }
+    string GetLoweredIdOrMacroName() const override;
 };
 
 };

@@ -12,7 +12,7 @@ using namespace Steps;
 
 LowerSCType::LowerSCType( TreePtr< Type > s_sctype )
 {
-    auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_sctype->GetLoweredIdName() );                
+    auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_sctype->GetLoweredIdOrMacroName() );                
 
     Configure( SEARCH_REPLACE, s_sctype, r_token );
 }
@@ -30,7 +30,7 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
 	auto r_scclass = MakePatternNode< SCRecord >();
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
-    auto r_token = MakePatternNode< SpecificTypeIdentifier >( ""/*s_scclass->GetLoweredIdName() TODO SCRecord is intermediate and has no lowered id name */ ); 
+    auto r_token = MakePatternNode< SpecificTypeIdentifier >( ""/*s_scclass->GetLoweredIdOrMacroName() TODO SCRecord is intermediate and has no lowered id name */ ); 
     auto r_cons_macro = MakePatternNode< MacroField >(); 
     auto r_comp = MakePatternNode< Compound >();
     auto ctor_macro_name = MakePatternNode< SpecificPreprocessorIdentifier >( "SC_CTOR" ); // #819 style
@@ -78,7 +78,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto r_class = MakePatternNode< Class >();
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
-    auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetLoweredIdName() ); 
+    auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetLoweredIdOrMacroName() ); 
     
     auto l1_class = MakePatternNode< InheritanceRecord >();
     auto l1_members = MakePatternNode<StarAgent, Declaration>();
@@ -220,7 +220,7 @@ LowerTerminationFunction::LowerTerminationFunction( TreePtr<SCTree::TerminationF
 {
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
-    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_tf->GetLoweredIdName() ); 
+    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_tf->GetLoweredIdOrMacroName() ); 
     // TODO IdValuePair args can't render without a function decl. Maybe add OperandSequence as an alternative? 
     auto exit_expr = MakePatternNode< Expression >(); 
                     
@@ -253,7 +253,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto id = MakePatternNode< InstanceIdentifier >(); 
     auto bases = MakePatternNode<StarAgent, Base>();
     auto ident = MakePatternNode<PreprocessorIdentifier>();
-    auto token = MakePatternNode< SpecificPreprocessorIdentifier >( s_scprocess->GetLoweredIdName() ); // #819 style
+    auto token = MakePatternNode< SpecificPreprocessorIdentifier >( s_scprocess->GetLoweredIdOrMacroName() ); // #819 style
     auto r_func = MakePatternNode<Function>();
                 
     module->members = (overcons, process, decls);
@@ -296,7 +296,7 @@ LowerSCNotifyImmediate::LowerSCNotifyImmediate()
     auto r_args = MakePatternNode<SeqArgumentation>();
     auto r_lookup = MakePatternNode<Lookup>();
     auto r_event = MakePatternNode<Event>();
-    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetLoweredIdName() );                
+    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetLoweredIdOrMacroName() );                
     auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
     //MakePatternNode< Expression > eexpr; 
             
@@ -322,7 +322,7 @@ LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::InstanceIdentifier> zero
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
     auto r_lookup = MakePatternNode<Lookup>();
-    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetLoweredIdName() );                
+    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_notify->GetLoweredIdOrMacroName() );                
     //MakePatternNode< Expression > eexpr; 
             
     s_notify->event = eexpr;
@@ -344,7 +344,7 @@ LowerSCDeltaCount::LowerSCDeltaCount()
  
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
-    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_delta_count->GetLoweredIdName() );                
+    auto r_token = MakePatternNode< SpecificInstanceIdentifier >( s_delta_count->GetLoweredIdOrMacroName() );                
     //MakePatternNode< Expression > eexpr; 
             
     r_call->callee = r_token;

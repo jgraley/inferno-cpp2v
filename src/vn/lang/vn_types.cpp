@@ -42,7 +42,7 @@ void ScopeGnomon::UpdateContext(any loc, TreePtr<Node> update_node)
 
 RegularScopeGnomon::RegularScopeGnomon( TreePtr<Node> scope_node_ ) :
 	scope_node( scope_node_ ),
-	context( scope_node->GetInitialContext() )
+	context( scope_node->GetInitialScopeContext() )
 {
 	ASSERT(scope_node);
 }
