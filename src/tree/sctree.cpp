@@ -49,12 +49,63 @@ any Interface::GetStartingScopeContext() const
 } 
 
 //////////////////////////// Wait ///////////////////////////////
+/*
+Syntax::Production Wait::GetMyProductionTerminal() const
+{ 
+	return Production::BARE_STMT_DECL; 
+}
+*/
 
 string Wait::GetLoweredIdOrMacroName() const 
 { 
 	return "wait"; 
 }
 
+/*
+YY::VNLangParser::token::token_kind_type Wait::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+}
+*/
+//////////////////////////// WaitDynamic ///////////////////////////////
+
+/*
+string WaitDynamic::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetKeyword(this, policy);
+}
+
+string WaitDynamic::GetKeyword( Policy ) const 
+{
+	return "wait_dynamic"; 
+}*/
+
+//////////////////////////// WaitStatic ///////////////////////////////
+/*
+string WaitStatic::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetKeyword(this, policy);
+}
+
+
+string WaitStatic::GetKeyword( Policy ) const 
+{
+	return "wait_static"; // TODO just be "wait" and evolve into WaitDynamic in OnArgsList()
+}
+*/
+//////////////////////////// WaitDelta ///////////////////////////////
+
+/*string WaitDelta::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetKeyword(this, policy);
+}
+
+
+string WaitDelta::GetKeyword( Policy ) const 
+{
+	return "wait_delta"; // Keep as wait_delta to differentiate from WaitStatic which is just wait with no args
+}
+*/
 //////////////////////////// NextTrigger ///////////////////////////////
 
 string NextTrigger::GetLoweredIdOrMacroName() const 

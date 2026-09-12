@@ -40,9 +40,9 @@ string Property::RenderScopeResolvingPrefix( VN::RendererInterface *renderer, Sy
 
 //////////////////////////// Qualifier ///////////////////////////////
 
-string Qualifier::GetRender( VN::RendererInterface *, Production, Policy policy )
+string Qualifier::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return GetKeyword(policy);
+	return renderer->GetKeyword(this, policy);
 }
 
 
@@ -1040,10 +1040,10 @@ string Const::GetKeyword( Policy ) const
 
 //////////////////////////// NonConst //////////////////////////////
 
-string NonConst::GetRender( VN::RendererInterface *, Production surround_prod, Policy )
+string NonConst::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {
 	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
-		throw RefuseInItemisation(); // Not defaulted in itemisations
+		return renderer->GetKeyword(this, policy); // Not defaulted in itemisations
 	return "";
 }
 

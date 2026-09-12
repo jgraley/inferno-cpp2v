@@ -263,8 +263,8 @@ string Render::OnRefusal( Syntax::Refusal &, TreePtr<Node> node, Syntax::Product
 {
 	// If render was unsuccessful, TRY AGAIN but this time with node_prod set to 
 	// EXPLICIT_NODE which means the render will be explicit (i.e. with ⯁) and
-	// won't throw.
-	return AccomodateInit(node, Syntax::Production::EXPLICIT_NODE, surround_prod, policy);
+	// won't throw.	
+	return string("/* render refused */") + AccomodateInit(node, Syntax::Production::EXPLICIT_NODE, surround_prod, policy);
 }
 
 
@@ -520,14 +520,14 @@ string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Producti
     			
     s += node->RenderNodeTypeName(); 
    
-	try
+/*	try
 	{
 		(void)node->GetSignifierToken();
 		// There's a keyword token, we can use the short-form syntax, because it will parse (recognise) as a keyword
 		// See VNLangRecogniser::OnExplicitLexeme()
 	}
 	catch( Syntax::UnimplementedToken & )
-	{
+*/	{
 		// There's no keyword token, so we need to provide a full explicit, which will parse as the complete production
 		if( ReadArgs::use.contains("c") )
 			s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";
