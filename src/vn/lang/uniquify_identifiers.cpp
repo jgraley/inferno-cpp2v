@@ -23,6 +23,9 @@ using namespace VN;
 UniqueNameGenerator::UniqueNameGenerator( string (Syntax::*name_getter_)() const ) :
     name_getter( name_getter_ )
 {	
+	// See #907
+	name_usages.insert( NameUsagesPair( "wait", {{0, nullptr}} ) );
+	name_usages.insert( NameUsagesPair( "next_trigger", {{0, nullptr}} ) );
 }
 
 

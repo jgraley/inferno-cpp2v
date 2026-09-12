@@ -88,9 +88,7 @@ struct WaitDynamic : Wait,
 {
     NODE_FUNCTIONS_FINAL
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    //string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
-	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
+    string GetKeyword( Policy ) const override;	
 };
 
 /** Waiting for a SystemC event - blocks until an event is triggered. I think the event
@@ -99,8 +97,9 @@ struct WaitStatic : Wait
 {
     NODE_FUNCTIONS_FINAL
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    //string GetKeyword( Policy ) const override;	
+    string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
 };
 
 /** Basically a yield. Blocks for a short period of time (a delta cycle) and then continues.
@@ -109,7 +108,7 @@ struct WaitDelta : Wait
 {
     NODE_FUNCTIONS_FINAL
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    //string GetKeyword( Policy ) const override;	
+    string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 };
 
@@ -122,6 +121,7 @@ struct NextTrigger : CPPTree::Statement,
                      virtual SCFunction
 {
     NODE_FUNCTIONS
+	Production GetMyProductionTerminal() const override;
     string GetLoweredIdOrMacroName() const override;
 };
 
@@ -132,6 +132,8 @@ struct NextTriggerDynamic : NextTrigger,
                             SCDynamicFunction
 {
     NODE_FUNCTIONS_FINAL
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+    string GetKeyword( Policy ) const override;	
 };
 
 /** Causes the method to be triggered again when an event is triggered. I think the event
@@ -139,6 +141,10 @@ struct NextTriggerDynamic : NextTrigger,
 struct NextTriggerStatic : NextTrigger
 {
     NODE_FUNCTIONS_FINAL
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+    string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
 };
 
 /** Causes the method to be triggered again very soon after it completes.
@@ -147,6 +153,9 @@ struct NextTriggerStatic : NextTrigger
 struct NextTriggerDelta : NextTrigger
 {
     NODE_FUNCTIONS_FINAL
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+    string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 };
 
 /** Triggers the event instance given in the expression. It must be an lvalue of

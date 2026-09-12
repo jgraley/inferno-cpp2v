@@ -1,8 +1,9 @@
 #include "sctree.hpp"
 #include "node/syntax.hpp"
 #include "node/specialise_oostd.hpp"
-//#include "clang/Parse/DeclSpec.h"
 #include "tree/type_data.hpp"
+#include "tree/type_data.hpp"
+#include "vn/agents/standard_agent.hpp"
 #include <string>
 
 /// SCTree namespace contains node definitions that represent elements of SystemC, as native language elements
@@ -67,22 +68,10 @@ string WaitDynamic::GetRender( VN::RendererInterface *renderer, Production, Poli
 {
 	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
 }
-/*
+
 string WaitDynamic::GetKeyword( Policy ) const 
 {
-	return "wait_dynamic"; 
-}*/
-
-YY::VNLangParser::token::token_kind_type WaitDynamic::GetSignifierToken() const
-{
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
-}
-
-
-TreePtr<Node> WaitDynamic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
-{
-	event = arg;
-	return (TreePtr<Node>)shared_from_this();
+	return "wait"; 
 }
 
 //////////////////////////// WaitStatic ///////////////////////////////
@@ -92,17 +81,25 @@ string WaitStatic::GetRender( VN::RendererInterface *renderer, Production, Polic
 	return renderer->GetKeyword(this, policy);
 }
 
-/*
 
 string WaitStatic::GetKeyword( Policy ) const 
 {
-	return "wait_static"; // TODO just be "wait" and evolve into WaitDynamic in OnArgsList()
+	return "wait"; 
 }
-*/
+
 
 YY::VNLangParser::token::token_kind_type WaitStatic::GetSignifierToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+}
+
+
+TreePtr<Node> WaitStatic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+{
+	// Seeing an argument makes this node evolve into WaitDynamic
+	auto wd = MakeTreeNode<VN::StandardAgentWrapper<WaitDynamic>>();
+	wd->event = arg;
+	return wd; 
 }
 
 //////////////////////////// WaitDelta ///////////////////////////////
@@ -112,13 +109,12 @@ string WaitDelta::GetRender( VN::RendererInterface *renderer, Production, Policy
 	return renderer->GetKeyword(this, policy);
 }
 
-/*
 
 string WaitDelta::GetKeyword( Policy ) const 
 {
-	return "wait_delta"; // Keep as wait_delta to differentiate from WaitStatic which is just wait with no args
+	// Keep as wait_delta to differentiate from WaitStatic which is just wait with no args
+	return "wait_delta"; 
 }
-*/
 
 
 YY::VNLangParser::token::token_kind_type WaitDelta::GetSignifierToken() const
@@ -128,9 +124,75 @@ YY::VNLangParser::token::token_kind_type WaitDelta::GetSignifierToken() const
 
 //////////////////////////// NextTrigger ///////////////////////////////
 
+Syntax::Production NextTrigger::GetMyProductionTerminal() const
+{ 
+	return Production::BARE_STMT_DECL; 
+}
+
+
 string NextTrigger::GetLoweredIdOrMacroName() const 
 { 
 	return "next_trigger"; 
+}
+
+//////////////////////////// NextTriggerDynamic ///////////////////////////////
+
+string NextTriggerDynamic::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
+}
+
+string NextTriggerDynamic::GetKeyword( Policy ) const 
+{
+	return "next_trigger"; 
+}
+
+//////////////////////////// NextTriggerStatic ///////////////////////////////
+
+string NextTriggerStatic::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetKeyword(this, policy);
+}
+
+
+string NextTriggerStatic::GetKeyword( Policy ) const 
+{
+	return "next_trigger"; 
+}
+
+
+YY::VNLangParser::token::token_kind_type NextTriggerStatic::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+}
+
+
+TreePtr<Node> NextTriggerStatic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+{
+	// Seeing an argument makes this node evolve into WaitDynamic
+	auto wd = MakeTreeNode<VN::StandardAgentWrapper<NextTriggerDynamic>>();
+	wd->event = arg;
+	return wd; 
+}
+
+//////////////////////////// NextTriggerDelta ///////////////////////////////
+
+string NextTriggerDelta::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetKeyword(this, policy);
+}
+
+
+string NextTriggerDelta::GetKeyword( Policy ) const 
+{
+	// Keep as next_trigger_delta to differentiate from NextTriggerStatic which is just next trigger with no args
+	return "next_trigger_delta"; 
+}
+
+
+YY::VNLangParser::token::token_kind_type NextTriggerDelta::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }
 
 //////////////////////////// Notify ///////////////////////////////
