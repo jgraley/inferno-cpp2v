@@ -2448,11 +2448,11 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 
     if( policy.refuse_statement_expression )
 	{
-		// If we can't render syntactially, call RenderNodeExplicit() directly so it
+		// If we can't render syntactially, call RenderLongFormExplicit() directly so it
 		// gets the updated policy. 
 		policy.permit_static_keyword = true; // In a compound, static means global
 		policy.context = any(); // No access spec here
-		return renderer->RenderNodeExplicit(shared_from_this(), production, policy);
+		return renderer->RenderLongFormExplicit(shared_from_this(), production, policy);
 	}
 	    
  	policy.permit_static_keyword = true; // In a compound, static means global

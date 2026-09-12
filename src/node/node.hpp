@@ -116,7 +116,7 @@ namespace VN
 												          TreePtr<Node> constant ) = 0;
 
 		virtual string GetUniqueIdentifierName( TreePtr<Node> id ) const = 0;
-		virtual string RenderNodeExplicit( shared_ptr<const Node> node, 
+		virtual string RenderLongFormExplicit( shared_ptr<const Node> node, 
 										   Syntax::Production surround_prod, 
 		                                   Syntax::Policy policy ) = 0;
 		virtual TreePtr<Node> TryGetScope( TreePtr<Node> node ) const = 0;

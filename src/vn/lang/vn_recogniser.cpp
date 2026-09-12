@@ -82,7 +82,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, Y
 	{
 		token_kind = node->GetSignifierToken();		
 		// There's a keyword token for this node, so give it to the parser to parse as short-form
-		// See Render::RenderNodeExplicit()
+		// See Render::GetKeyword()
 	}
 	catch( Syntax::UnimplementedToken & )
 	{

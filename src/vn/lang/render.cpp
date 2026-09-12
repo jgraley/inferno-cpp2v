@@ -264,7 +264,7 @@ string Render::OnRefusal( Syntax::Refusal &, TreePtr<Node> node, Syntax::Product
 	// If render was unsuccessful, TRY AGAIN but this time with node_prod set to 
 	// EXPLICIT_NODE which means the render will be explicit (i.e. with ⯁) and
 	// won't throw.	
-	return string("/* render refused */") + AccomodateInit(node, Syntax::Production::EXPLICIT_NODE, surround_prod, policy);
+	return AccomodateInit(node, Syntax::Production::EXPLICIT_NODE, surround_prod, policy);
 }
 
 
@@ -454,17 +454,23 @@ string Render::RenderNullPointer(Syntax::Production node_prod, Syntax::Productio
 string Render::Dispatch( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy )
 {	
 	if( node_prod==Syntax::Production::EXPLICIT_NODE )
-		return RenderNodeExplicit(node, surround_prod, policy);	
+		return RenderLongFormExplicit(node, surround_prod, policy);	
 	else if( const Agent *agent = Agent::TryAsAgentConst(node) )
 		return agent->GetAgentRender( this, surround_prod, policy );
 	string s = node->GetRender(this, surround_prod, policy); 
 	
-	// Don't put empty renders in itemisations. Try a short-form explicit instead.
+	// Don't put empty renders in itemisations. Try a short-form explicit instead. See #906
 	if( s.empty() && surround_prod == Syntax::Production::VN_SEP_ITEMS)
-		s = "⯁" + node->RenderNodeTypeName();	
+		s = RenderShortFormExplicit( node.get(), policy );	
 	
 	return s;
 }		
+
+
+string Render::RenderShortFormExplicit( const Node *node, Syntax::Policy )
+{
+	return "⯁" + node->RenderNodeTypeName(); 
+}
 
 
 list<string> Render::PopulateItemStrings( shared_ptr<const Node> node, Syntax::Policy policy )
@@ -519,30 +525,19 @@ list<string> Render::PopulateItemStrings( shared_ptr<const Node> node, Syntax::P
 }
 
 
-string Render::RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Production, Syntax::Policy policy )
+string Render::RenderLongFormExplicit( shared_ptr<const Node> node, Syntax::Production, Syntax::Policy policy )
 {
-    string s = "⯁";
-    			
-    s += node->RenderNodeTypeName(); 
-   
-/*	try
-	{
-		(void)node->GetSignifierToken();
-		// There's a keyword token, we can use the short-form syntax, because it will parse (recognise) as a keyword
-		// See VNLangRecogniser::OnExplicitLexeme()
-	}
-	catch( Syntax::UnimplementedToken & )
-*/	{
-		// There's no keyword token, so we need to provide a full explicit, which will parse as the complete production
-		if( ReadArgs::use.contains("c") )
-			s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";
+    string s = RenderShortFormExplicit( node.get(), policy );
+    			   
+	// There's no keyword token, so we need to provide a full explicit, which will parse as the complete production
+	if( ReadArgs::use.contains("c") )
+		s += policy.force_incomplete_records ? "/* force incomplete */" : "/* no force incomplete */";
 		
-		list<string> sitems = PopulateItemStrings( node, policy );    
-		if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
-			s += Join( sitems, "⚬\n", "⦅\n", "\n⦆" );   
-		else 
-			s += Join( sitems, " ⚬ ", "⦅", "⦆" );    
-	}
+	list<string> sitems = PopulateItemStrings( node, policy );    
+	if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
+		s += Join( sitems, "⚬\n", "⦅\n", "\n⦆" );   
+	else 
+		s += Join( sitems, " ⚬ ", "⦅", "⦆" );    
 		
 	return s;
 }
@@ -729,7 +724,7 @@ string Render::GetKeyword( const Node *node,
 	{
 		// Short form of explicit has no VN parens and only serves to inject a 
 		// node name into a syntax we already know how to render.
-		return "⯁" + node->RenderNodeTypeName();		
+		return RenderShortFormExplicit( node, policy );		
 	}
 }						   
 

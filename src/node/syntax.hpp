@@ -141,7 +141,7 @@ public:
 		bool resolve_identifier_scope;
 		bool use_vn_xstructor_symbol;
 		bool disambiguate_type_id;
-		bool refuse_invisibles;
+		bool refuse_invisibles; // To be dropped, see #906
 		bool missing_access_to_public; // See #877
 		bool refuse_preprocessor;
 		bool refuse_identifiers;

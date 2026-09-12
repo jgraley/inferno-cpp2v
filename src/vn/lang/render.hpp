@@ -46,8 +46,9 @@ public:
 
 	virtual string Dispatch( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );
 
+	string RenderShortFormExplicit( const Node *node, Syntax::Policy );
 	list<string> PopulateItemStrings( shared_ptr<const Node> node, Syntax::Policy policy );
-	string RenderNodeExplicit( shared_ptr<const Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) final;
+	string RenderLongFormExplicit( shared_ptr<const Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) final;
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const override;
 
     string DoRenderTypeAndDeclarator( const TreePtrInterface *tpi, string declarator, 
