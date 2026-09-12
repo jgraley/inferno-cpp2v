@@ -77,7 +77,9 @@ struct Wait : CPPTree::Statement,
 {
     NODE_FUNCTIONS
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetLoweredIdOrMacroName() const override;
+   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 };
 
 /** Waiting for a SystemC event - blocks until the event indicated by the expression is 
@@ -89,6 +91,8 @@ struct WaitDynamic : Wait,
     NODE_FUNCTIONS_FINAL
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
 };
 
 /** Waiting for a SystemC event - blocks until an event is triggered. I think the event
@@ -96,9 +100,7 @@ struct WaitDynamic : Wait,
 struct WaitStatic : Wait
 {
     NODE_FUNCTIONS_FINAL
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
 };
 
@@ -107,9 +109,7 @@ struct WaitStatic : Wait
 struct WaitDelta : Wait
 {
     NODE_FUNCTIONS_FINAL
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 };
 
 /** Intermediate node for SystemC next_trigger() primitive. next_trigger() can be used
@@ -135,6 +135,8 @@ struct NextTriggerDynamic : NextTrigger,
 {
     NODE_FUNCTIONS_FINAL
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+    string GetKeyword( Policy ) const override;	
+   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
 };
 

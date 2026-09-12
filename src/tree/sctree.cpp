@@ -57,9 +57,21 @@ Syntax::Production Wait::GetMyProductionTerminal() const
 }
 
 
+string Wait::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetKeyword(this, policy);
+}
+
+
 string Wait::GetLoweredIdOrMacroName() const 
 { 
 	return "wait"; 
+}
+
+
+YY::VNLangParser::token::token_kind_type Wait::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }
 
 //////////////////////////// WaitDynamic ///////////////////////////////
@@ -69,18 +81,26 @@ string WaitDynamic::GetRender( VN::RendererInterface *renderer, Production, Poli
 	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
 }
 
+
 string WaitDynamic::GetKeyword( Policy ) const 
 {
 	return "wait"; 
 }
 
-//////////////////////////// WaitStatic ///////////////////////////////
 
-string WaitStatic::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+YY::VNLangParser::token::token_kind_type WaitDynamic::GetSignifierToken() const
 {
-	return renderer->GetKeyword(this, policy);
+	return Syntax::GetSignifierToken(); // retract the token - we want to recognise WaitStatic instead
 }
 
+
+TreePtr<Node> WaitDynamic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+{
+	event = arg;
+	return TreePtr<Node>( shared_from_this() );	
+}
+
+//////////////////////////// WaitStatic ///////////////////////////////
 
 string WaitStatic::GetKeyword( Policy ) const 
 {
@@ -88,38 +108,18 @@ string WaitStatic::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type WaitStatic::GetSignifierToken() const
-{
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
-}
-
-
-TreePtr<Node> WaitStatic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+TreePtr<Node> WaitStatic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc )
 {
 	// Seeing an argument makes this node evolve into WaitDynamic
-	auto wd = MakeTreeNode<VN::StandardAgentWrapper<WaitDynamic>>();
-	wd->event = arg;
-	return wd; 
+	return MakeTreeNode<VN::StandardAgentWrapper<WaitDynamic>>()->OnSoloArg( arg, loc ); 
 }
 
 //////////////////////////// WaitDelta ///////////////////////////////
-
-string WaitDelta::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
-{
-	return renderer->GetKeyword(this, policy);
-}
-
 
 string WaitDelta::GetKeyword( Policy ) const 
 {
 	// Keep as wait_delta to differentiate from WaitStatic which is just wait with no args
 	return "wait_delta"; 
-}
-
-
-YY::VNLangParser::token::token_kind_type WaitDelta::GetSignifierToken() const
-{
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }
 
 //////////////////////////// NextTrigger ///////////////////////////////
@@ -152,6 +152,18 @@ YY::VNLangParser::token::token_kind_type NextTrigger::GetSignifierToken() const
 string NextTriggerDynamic::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
+}
+
+
+string NextTriggerDynamic::GetKeyword( Policy ) const 
+{
+	return "next_trigger"; 
+}
+
+
+YY::VNLangParser::token::token_kind_type NextTriggerDynamic::GetSignifierToken() const
+{
+	return Syntax::GetSignifierToken(); // retract the token - we want to recognise WaitStatic instead
 }
 
 
