@@ -153,7 +153,8 @@
 <TreePtr<Node>> DO_KEYWORD				_("C do keyword")
 <TreePtr<Node>> WHILE_KEYWORD			_("C while keyword")
 <TreePtr<Node>> ARRIVAL_KEYWORD			_("C arrival keyword")
-<TreePtr<Node>> LIBRARY_FUNC			_("library function") // Not necessarily C/C++
+<TreePtr<Node>> LIBRARY_FUNC			_("library function keyword") // Not necessarily C/C++
+<TreePtr<Node>> LIBRARY_METHOD			_("library method keyword") // Not necessarily C/C++
 <TreePtr<Node>> FUNC_ON_TYPE			_("function acting on a type")
 <TreePtr<Node>> RECORD_KEYWORD			_("C class/struct/union keyword")
 <TreePtr<Node>> ENUM_KEYWORD			_("C enumeration keyword")
@@ -701,14 +702,17 @@ expr_prefix : expr_postfix
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
 stuff_depth		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
 
+// Postfix operators are treated like method calls, operand is regarded as object
 expr_postfix: expr_primary     
-			| expr_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2)->OnSoloArg($1, @1); }
-			| expr_postfix '[' stmt_entry ']'	 					{ $$ = vn->OnSubscript()->OnArgsList({$1, $3}, @$); }
-			| expr_postfix argumentation							{ $$ = vn->OnCall($1, $2); }
-			| expr_postfix '.' id_primary							{ $$ = vn->OnLookup($1, $3, @3); }
-			| LIBRARY_FUNC '(' comma_sep_exprs ')'   				{ $$ = $1->OnArgsList($3, @3); }			
+			| expr_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2)->OnObject($1, @1); }
+			| expr_postfix '[' stmt_entry ']'	 					{ $$ = vn->OnSubscript()->OnObject($1, @1)->OnSoloArg($3, @3); }
+			| expr_postfix argumentation							{ $$ = vn->OnCall($1, $2); } // TODO OnObject() for $1
+			| expr_postfix '.' id_primary							{ $$ = vn->OnLookup()->OnObject($1, @1)->OnSoloArg($3, @3); }
+			| LIBRARY_FUNC '(' comma_sep_exprs ')'   				{ $$ = $1->OnArgsList($3, @3); } // TODO OnArgumentation			
 			| LIBRARY_FUNC '(' ')'   							
-			| FUNC_ON_TYPE '(' type_boot ')'       					{ $$ = $1->OnType($3, @3); }			
+			| expr_postfix '.' LIBRARY_METHOD '(' comma_sep_exprs ')' 	{ $$ = $3->OnObject($1, @1)->OnArgsList($5, @5); }			
+			| expr_postfix '.' LIBRARY_METHOD '(' ')'   				{ $$ = $3->OnObject($1, @1); }			
+			| FUNC_ON_TYPE '(' type_boot ')'       						{ $$ = $1->OnType($3, @3); }			
 		
 expr_primary: id_primary  
 			| '(' stmt_boot ')'                          		{ $$ = $2; }

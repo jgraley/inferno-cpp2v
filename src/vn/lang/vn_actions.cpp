@@ -784,13 +784,9 @@ TreePtr<Node> VNLangActions::OnCall( TreePtr<Node> callee, TreePtr<Node> argumen
 }	
 
 
-TreePtr<Node> VNLangActions::OnLookup( TreePtr<Node> object, TreePtr<Node> member, any member_loc )
+TreePtr<Node> VNLangActions::OnLookup()
 {
-	(void)member_loc;
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Lookup>>();
-	node->object = object;
-	node->member = member;
-	return node;
+	return MakeTreeNode<StandardAgentWrapper<CPPTree::Lookup>>();
 }
 
 

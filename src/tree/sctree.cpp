@@ -211,10 +211,10 @@ Syntax::Production Notify::GetMyProductionTerminal() const
 
 string Notify::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetKeyword(this, policy) + 
-	       "( " + 
-	       renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
-	       " )";
+	return renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
+		   "." +
+		   renderer->GetKeyword(this, policy) + 
+	       "()";
 }
 
 
@@ -226,13 +226,13 @@ string Notify::GetLoweredIdOrMacroName() const
 
 YY::VNLangParser::token::token_kind_type Notify::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_LIBRARY_FUNC;
+	return YY::VNLangParser::token::TOK_LIBRARY_METHOD;
 }
 
 
-TreePtr<Node> Notify::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+TreePtr<Node> Notify::OnObject( TreePtr<Node> object, YY::VNLangParser::location_type )
 {
-	event = arg;
+	event = object;
 	return TreePtr<Node>( shared_from_this() );	
 }
 
@@ -255,10 +255,10 @@ string NotifyDelta::GetKeyword( Policy ) const
 
 string NotifyTimed::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetKeyword(this, policy) + 
-	       "( " + 
-	       renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
-	       ", " + 
+	return renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
+	       "." + 
+	       renderer->GetKeyword(this, policy) + 
+	       "( " + // TODO factor out a render for the args
 	       renderer->DoRender(&time, Production::SPACE_SEP_STMT_DECL, policy) +
 	       " )";
 }
@@ -276,10 +276,9 @@ YY::VNLangParser::token::token_kind_type NotifyTimed::GetSignifierToken() const
 }
 
 
-TreePtr<Node> NotifyTimed::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type )
+TreePtr<Node> NotifyTimed::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
 {
-	event = args.front();
-	time = args.back();
+	time = arg;
 	return TreePtr<Node>( shared_from_this() );	
 }
 

@@ -237,6 +237,12 @@ TreePtr<Node> Syntax::OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type 
 }
 
 
+TreePtr<Node> Syntax::OnObject( TreePtr<Node>, YY::VNLangParser::location_type loc )
+{
+	throw YY::VNLangParser::syntax_error( loc,
+		MyBestErrName() + " does not expect to be used on an object (implement OnObject()).");	
+}
+
 TreePtr<Node> Syntax::OnBody( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,

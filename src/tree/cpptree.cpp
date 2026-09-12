@@ -2116,6 +2116,14 @@ TreePtr<Node> Unop::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_typ
 	return TreePtr<Node>( shared_from_this() );	
 }
 
+
+TreePtr<Node> Unop::OnObject( TreePtr<Node> object, YY::VNLangParser::location_type )
+{
+	ASSERT( operands.empty() );
+	operands.push_back(object); 
+	return TreePtr<Node>( shared_from_this() );	
+}
+
 //////////////////////////// Operators from operator_data.inc ///////////////////////////////
 
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
@@ -2209,12 +2217,18 @@ string Subscript::GetRender( VN::RendererInterface *renderer, Production, Policy
 		   "]";       
 }
 
-TreePtr<Node> Subscript::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type )
+
+TreePtr<Node> Subscript::OnObject( TreePtr<Node> object, YY::VNLangParser::location_type )
 {
-	ASSERT( args.size() == 2 );
-	destination = args.front();	
-	index = args.back();
-	return TreePtr<Node>( shared_from_this() );	
+	destination = object;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+TreePtr<Node> Subscript::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+{
+	index = arg;
+	return (TreePtr<Node>)shared_from_this();
 }
 
 //////////////////////////// ArrayInitialiser ///////////////////////////////
@@ -2310,6 +2324,20 @@ string Lookup::GetRender( VN::RendererInterface *renderer, Production, Policy po
 	return renderer->DoRender(&object, Production::POSTFIX, policy) +
 		   "." +
 		   renderer->DoRender(&member, Production::PRIMARY_EXPR, policy);
+}
+
+
+TreePtr<Node> Lookup::OnObject( TreePtr<Node> object_, YY::VNLangParser::location_type )
+{
+	object = object_;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+TreePtr<Node> Lookup::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+{
+	member = arg;
+	return (TreePtr<Node>)shared_from_this();
 }
 
 //////////////////////////// Cast ///////////////////////////////

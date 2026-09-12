@@ -1206,6 +1206,9 @@ struct Unop : NonCommutativeOperator
 { 
 	NODE_FUNCTIONS
 	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc ) override;
+	// Postfix operators are treated like method calls, operand is regarded as object
+	TreePtr<Node> OnObject( TreePtr<Node> object, YY::VNLangParser::location_type ) override;
+
 };
 
 /// An operator with two operands
@@ -1275,7 +1278,8 @@ struct Subscript : Operator
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
-	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type ) override;
+	TreePtr<Node> OnObject( TreePtr<Node> object, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc ) override;
 };
 
 /// An array formed directly from elements which should all be the same type
@@ -1358,6 +1362,8 @@ struct Lookup : Operator
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+	TreePtr<Node> OnObject( TreePtr<Node> object, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc ) override;
 };
 
 /// Node for a c-style cast. 

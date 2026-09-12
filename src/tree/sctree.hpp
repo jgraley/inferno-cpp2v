@@ -170,7 +170,7 @@ struct Notify : CPPTree::Statement,
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetLoweredIdOrMacroName() const override;    
-	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnObject( TreePtr<Node> object, YY::VNLangParser::location_type loc ) override;
    	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 };
 
@@ -197,7 +197,7 @@ struct NotifyTimed : Notify
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
-	TreePtr<Node> OnArgsList( list<TreePtr<Node>>, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc ) override;
 };
 
 /** Intermediate class for processes, which are the places in SystemC where we 

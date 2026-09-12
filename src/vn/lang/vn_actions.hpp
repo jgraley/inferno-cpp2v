@@ -74,7 +74,7 @@ public:
 	TreePtr<Node> OnMapArgs();
 	TreePtr<Node> OnSeqArgs();
 	TreePtr<Node> OnCall( TreePtr<Node> callee, TreePtr<Node> argumentation );
-	TreePtr<Node> OnLookup( TreePtr<Node> object, TreePtr<Node> member, any member_loc );
+	TreePtr<Node> OnLookup();
 
 	TreePtr<Node> OnIdByName( TreePtr<Node> node, any id_disc_loc, wstring wname, any name_loc );
 	TreePtr<Node> OnBuildId( TreePtr<Node> node, any id_disc_loc, wstring wformat, any name_loc, Item sources );
