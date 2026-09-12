@@ -1020,7 +1020,7 @@ TreePtr<Node> CPPTree::AccessSpec::GetDefaultNode(TreePtr<Node> type) const
 	ASSERT(type); // if this is firing, it's probably due to explicit node parsing. Confirm we have an Instance and then pass in its type.
 	auto record = TreePtr<Record>::DynamicCast(type);
 	ASSERT(record); // Type is not a record (maybe could provide Public)
-	any ic = record->GetInitialScopeContext();
+	any ic = record->GetStartingScopeContext();
 	if( ic.has_value() )
 		return any_cast<TreePtr<AccessSpec>>(ic);
 	else
@@ -1166,5 +1166,8 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // But the user can also use a designation to capture the (compound initialiser⨟ other commands...) and then apply the designation without =
 // This is now rule #896 (sort of)
 
-// NOTE A "signifier" can be a keyword or a short-form explicit. It generalises keywords to things we shouldn't call
+// NOTE A "signifier" can be a keyword or an operator name or a short-form explicit. It generalises keywords to things we shouldn't call
 // keywords, but which are grammatically equivalent.
+
+// NOTE we do not generate nodes for operators because the same operator text can generate different nodes eg
+// & could be BitwiseAnd or AddressOf. Only the parser can determine which node to create because it depends on syntax.

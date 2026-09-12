@@ -389,7 +389,7 @@ decl_full_explicit_start 	: EXPLICIT_DECL								{ $$ = vn->MakeScopeGnomonForNo
 prerestrict_decl_start : PRERESTRICT_DECL     						    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
                                                                           vn->AddGnomon($$); }
                                                                           
-memb_inits	: memb_inits ',' memb_init_entry								{ $$ = $1; $$.push_back($3); }
+memb_inits	: memb_inits ',' memb_init_entry							{ $$ = $1; $$.push_back($3); }
 			| memb_init_entry											{ $$ = {$1}; }
 
 memb_init_boot	: memb_init_entry

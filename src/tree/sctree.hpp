@@ -45,7 +45,7 @@ struct Module : SCRecord
     NODE_FUNCTIONS_FINAL
     
     string GetLoweredIdOrMacroName() const override;
-  	any GetInitialScopeContext() const override;   
+  	any GetStartingScopeContext() const override;   
 };
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 
@@ -55,7 +55,7 @@ struct Interface : SCRecord
     NODE_FUNCTIONS_FINAL
     
     string GetLoweredIdOrMacroName() const override;
-  	any GetInitialScopeContext() const override; 
+  	any GetStartingScopeContext() const override; 
 };
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 

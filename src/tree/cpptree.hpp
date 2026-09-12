@@ -1104,7 +1104,7 @@ struct Record : TypeDeclaration,
     NODE_FUNCTIONS
        
     virtual string GetColour() const { return TypeDeclaration::GetColour(); } // TypeDeclaration wins
-	any GetInitialScopeContext() const override;    
+	any GetStartingScopeContext() const override;    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
     virtual string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy); // class MyClass <here> { int a; ...
@@ -1121,7 +1121,7 @@ struct Union : Record
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	any GetInitialScopeContext() const override;    
+	any GetStartingScopeContext() const override;    
     string GetKeyword( Policy ) const override;	
 };
 
@@ -1132,7 +1132,7 @@ struct Union : Record
 struct Enumeration : Record 
 { 
 	NODE_FUNCTIONS_FINAL 
-	any GetInitialScopeContext() const override;    
+	any GetStartingScopeContext() const override;    
     string GetKeyword( Policy ) const override;
 	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	
 	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;	
@@ -1158,7 +1158,7 @@ struct Struct : InheritanceRecord
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	any GetInitialScopeContext() const override;    
+	any GetStartingScopeContext() const override;    
     string GetKeyword( Policy ) const override;
 };
 
@@ -1168,7 +1168,7 @@ struct Class : InheritanceRecord
 { 
 	NODE_FUNCTIONS_FINAL 
 	
-	any GetInitialScopeContext() const override;    
+	any GetStartingScopeContext() const override;    
     string GetKeyword( Policy ) const override;
 };
 
@@ -1217,24 +1217,24 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetMyProductionTerminal() const final; \
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final; \
+	Production GetMyProductionTerminal() const override; \
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override; \
 }; \
 
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
 struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetMyProductionTerminal() const final; \
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final; \
+	Production GetMyProductionTerminal() const override; \
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override; \
 }; \
 
 #define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
 struct NODE : BASE \
 { \
 	NODE_FUNCTIONS_FINAL \
-	Production GetMyProductionTerminal() const final; \
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) final; \
+	Production GetMyProductionTerminal() const override; \
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override; \
 }; \
 
 #include "operator_data.inc"

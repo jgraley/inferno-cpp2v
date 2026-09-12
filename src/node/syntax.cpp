@@ -237,7 +237,7 @@ TreePtr<Node> Syntax::OnElseBody( TreePtr<Node>, YY::VNLangParser::location_type
 } 
 
 
-any Syntax::GetInitialScopeContext() const
+any Syntax::GetStartingScopeContext() const
 {
 	return any();	// std::any is nullable
 }
@@ -245,7 +245,7 @@ any Syntax::GetInitialScopeContext() const
 
 void Syntax::UpdateContext( TreePtr<Node>, any &context, YY::VNLangParser::location_type )
 {
-	ASSERT( !context.has_value() ); //	GetInitialScopeContext() wasimplemented therefore so should this be
+	ASSERT( !context.has_value() ); //	GetStartingScopeContext() wasimplemented therefore so should this be
 	// No action otherwise because no context
 }	
 

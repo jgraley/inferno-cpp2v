@@ -1883,7 +1883,7 @@ TreePtr<Node> Typedef::OnType( TreePtr<Node> type_, YY::VNLangParser::location_t
 
 //////////////////////////// Record ///////////////////////////////
 
-any Record::GetInitialScopeContext() const
+any Record::GetStartingScopeContext() const
 {
 	return (TreePtr<AccessSpec>)(MakeTreeNode<Public>());
 }
@@ -1904,7 +1904,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Production, Policy po
 		Append( ls, ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, renderer, policy ) );// see #877
 
 	// For our members
-	policy.context = GetInitialScopeContext();
+	policy.context = GetStartingScopeContext();
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
@@ -1983,7 +1983,7 @@ TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context
 
 //////////////////////////// Union ///////////////////////////////
 
-any Union::GetInitialScopeContext() const
+any Union::GetStartingScopeContext() const
 {
 	return (TreePtr<AccessSpec>)(MakeTreeNode<Public>());
 }
@@ -1996,7 +1996,7 @@ string Union::GetKeyword( Policy ) const
 
 //////////////////////////// Enumeration ///////////////////////////////
 
-any Enumeration::GetInitialScopeContext() const
+any Enumeration::GetStartingScopeContext() const
 {
 	return any();
 }
@@ -2069,7 +2069,7 @@ TreePtr<Node> InheritanceRecord::OnBases( list<TreePtr<Node>> bases_, YY::VNLang
 
 //////////////////////////// Struct ///////////////////////////////
 
-any Struct::GetInitialScopeContext() const
+any Struct::GetStartingScopeContext() const
 {
 	return (TreePtr<AccessSpec>)(MakeTreeNode<Public>());
 }
@@ -2082,7 +2082,7 @@ string Struct::GetKeyword( Policy ) const
 
 //////////////////////////// Class ///////////////////////////////
 
-any Class::GetInitialScopeContext() const
+any Class::GetStartingScopeContext() const
 {
 	return (TreePtr<AccessSpec>)(MakeTreeNode<Private>());
 }
@@ -2103,14 +2103,16 @@ Syntax::Production NODE::GetMyProductionTerminal() const \
 string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy policy ) \
 { \
 	Sequence<Expression>::iterator operands_it = operands.begin(); \
-	string s = TEXT; \
 	bool paren = false; \
 	/* Prevent interpretation as a member function pointer literal: &scope::id becomes &(scope::id) */ \
 	if( dynamic_cast<AddressOf *>(shared_from_this().get()) ) \
 		if( auto scope = renderer->TryGetScope(*operands_it) ) \
 			paren = !!DynamicTreePtrCast<Record>( scope ); \
-	return s + (paren?"(":"") + renderer->DoRender( &*operands_it, Production::PROD, policy) + (paren?")":""); \
-} \
+	return string(TEXT) + \
+	       (paren?"(":"") + \
+	       renderer->DoRender( &*operands_it, Production::PROD, policy) + \
+	       (paren?")":""); \
+}
 
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
 Syntax::Production NODE::GetMyProductionTerminal() const \
@@ -2120,8 +2122,9 @@ Syntax::Production NODE::GetMyProductionTerminal() const \
 string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy policy ) \
 { \
 	Sequence<Expression>::iterator operands_it = operands.begin(); \
-	return renderer->DoRender( &*operands_it, Production::PROD, policy) + TEXT; \
-} \
+	return renderer->DoRender( &*operands_it, Production::PROD, policy) + \
+	       TEXT; \
+}
 
 #define INFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
 Syntax::Production NODE::GetMyProductionTerminal() const \
@@ -2143,7 +2146,7 @@ string NODE::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	++operands_it; \
 	s += renderer->DoRender( &*operands_it, prod_right, policy ); \
 	return s; \
-}
+} 
 
 #include "operator_data.inc"
 

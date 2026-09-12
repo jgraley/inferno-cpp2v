@@ -210,7 +210,7 @@ public:
 	virtual TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
 	
-	virtual any GetInitialScopeContext() const;    
+	virtual any GetStartingScopeContext() const;    
 	virtual void UpdateContext( TreePtr<Node> node, any &context, YY::VNLangParser::location_type loc );	
 	virtual TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type loc) const; 
 };
