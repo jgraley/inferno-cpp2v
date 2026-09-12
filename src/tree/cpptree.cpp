@@ -621,6 +621,14 @@ TreePtr<Argumentation> MapArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expr
 	return sa;
 }
 
+
+TreePtr<Node> MapArgumentation::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type )
+{
+	for( auto arg : args )
+		arguments.insert( arg );
+	return (TreePtr<Node>)shared_from_this();
+}
+
 //////////////////////////// SeqArgumentation ///////////////////////////////
 
 Syntax::Production SeqArgumentation::GetMyProductionTerminal() const
@@ -648,6 +656,14 @@ string SeqArgumentation::DirectRenderArgumentation(VN::RendererInterface *render
 TreePtr<Argumentation> SeqArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expression>, VN::RendererInterface *, Policy)
 {
 	return TreePtr<SeqArgumentation>( shared_from_this() );
+}
+
+
+TreePtr<Node> SeqArgumentation::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type )
+{
+	for( auto arg : args )
+		arguments.insert( arg );
+	return (TreePtr<Node>)shared_from_this();
 }
 
 //////////////////////////// Literal ///////////////////////////////
@@ -2089,6 +2105,15 @@ any Class::GetStartingScopeContext() const
 string Class::GetKeyword( Policy ) const
 {
 	return "class";
+}
+
+//////////////////////////// Unop ///////////////////////////////
+
+TreePtr<Node> Unop::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+{
+	ASSERT( operands.empty() );
+	operands.push_back(arg); 
+	return TreePtr<Node>( shared_from_this() );	
 }
 
 //////////////////////////// Operators from operator_data.inc ///////////////////////////////

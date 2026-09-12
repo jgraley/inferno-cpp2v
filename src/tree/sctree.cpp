@@ -59,7 +59,7 @@ Syntax::Production Wait::GetMyProductionTerminal() const
 
 string Wait::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetKeyword(this, policy);
+	return renderer->GetKeyword(this, policy) + "()";
 }
 
 
@@ -71,14 +71,17 @@ string Wait::GetLoweredIdOrMacroName() const
 
 YY::VNLangParser::token::token_kind_type Wait::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+	return YY::VNLangParser::token::TOK_LIBRARY_FUNC;
 }
 
 //////////////////////////// WaitDynamic ///////////////////////////////
 
 string WaitDynamic::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
+	return renderer->GetKeyword(this, policy) + 
+	       "( " + 
+	       renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
+	       " )";
 }
 
 
@@ -132,7 +135,7 @@ Syntax::Production NextTrigger::GetMyProductionTerminal() const
 
 string NextTrigger::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetKeyword(this, policy);
+	return renderer->GetKeyword(this, policy) + "()";
 }
 
 
@@ -144,14 +147,17 @@ string NextTrigger::GetLoweredIdOrMacroName() const
 
 YY::VNLangParser::token::token_kind_type NextTrigger::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+	return YY::VNLangParser::token::TOK_LIBRARY_FUNC;
 }
 
 //////////////////////////// NextTriggerDynamic ///////////////////////////////
 
 string NextTriggerDynamic::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
+	return renderer->GetKeyword(this, policy) + 
+	       "( " + 
+	       renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
+	       " )";
 }
 
 
@@ -205,7 +211,10 @@ Syntax::Production Notify::GetMyProductionTerminal() const
 
 string Notify::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
+	return renderer->GetKeyword(this, policy) + 
+	       "( " + 
+	       renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
+	       " )";
 }
 
 
@@ -217,7 +226,7 @@ string Notify::GetLoweredIdOrMacroName() const
 
 YY::VNLangParser::token::token_kind_type Notify::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+	return YY::VNLangParser::token::TOK_LIBRARY_FUNC;
 }
 
 
@@ -247,10 +256,11 @@ string NotifyDelta::GetKeyword( Policy ) const
 string NotifyTimed::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return renderer->GetKeyword(this, policy) + 
-	       " " + 
+	       "( " + 
 	       renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
 	       ", " + 
-	       renderer->DoRender(&time, Production::SPACE_SEP_STMT_DECL, policy);
+	       renderer->DoRender(&time, Production::SPACE_SEP_STMT_DECL, policy) +
+	       " )";
 }
 
 

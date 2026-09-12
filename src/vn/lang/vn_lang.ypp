@@ -153,6 +153,7 @@
 <TreePtr<Node>> DO_KEYWORD				_("C do keyword")
 <TreePtr<Node>> WHILE_KEYWORD			_("C while keyword")
 <TreePtr<Node>> ARRIVAL_KEYWORD			_("C arrival keyword")
+<TreePtr<Node>> LIBRARY_FUNC			_("library function") // Not necessarily C/C++
 <TreePtr<Node>> FUNC_ON_TYPE			_("function acting on a type")
 <TreePtr<Node>> RECORD_KEYWORD			_("C class/struct/union keyword")
 <TreePtr<Node>> ENUM_KEYWORD			_("C enumeration keyword")
@@ -169,6 +170,7 @@ stmt_high
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expr_entry expr_id_value stmt_boot
 %type <TreePtr<Node>> 				id_primary vn_primary
+%type <TreePtr<Node>> 				map_args seq_args
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_vn_prim 
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
 %type <TreePtr<Node>> 				unified_entry unified_prefix pure_wildcard
@@ -204,7 +206,7 @@ stmt_high
 %type <TreePtr<Node>> 				acc_memb_prefix acc_memb_postfix acc_memb_paren acc_memb_primary
 %type <list<TreePtr<Node>>>			stmt_decls members enumerators
 %type <TreePtr<Node>> 				enumerator prototype_enumerator
-%type <list<TreePtr<Node>>>			comma_sep_expr_decl semicolon_args parameters parameterisation
+%type <list<TreePtr<Node>>>			comma_sep_exprs semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases memb_inits
 %type <VN::QualifierData> 			qualifier qualifier_nw
 %type <list<VN::QualifierData>>		qualifiers 
@@ -364,7 +366,7 @@ prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({},
 
 assign_init		: expr_entry
 				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser({}); } 
-				| '{' comma_sep_expr_decl '}'      						{ $$ = vn->OnArrayInitialiser($2); }               
+				| '{' comma_sep_exprs '}'      						{ $$ = vn->OnArrayInitialiser($2); }               
 
 decl_prefix : decl_postfix
 			| 						         GREEN_GRASS_OP decl_prefix	{ $$ = vn->OnGrass($2); }
@@ -679,12 +681,12 @@ expr_mul_etc 		: expr_prefix
 					| expr_mul_etc '*' expr_prefix								{ $$ = vn->OnInfixOperator("*", $1, $3); }
 		
 expr_prefix : expr_postfix
-			| 					            C_PREFIX_OP	expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
-			| 					                    '&' expr_prefix	{ $$ = vn->OnPrefixOperator("&", $2); }
-			| 					                    '*' expr_prefix	{ $$ = vn->OnPrefixOperator("*", $2); }
-			| 					           C_ADD_SUB_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
-			| 					      C_PRE_OR_INFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
-			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1, $2); }
+			| 					            C_PREFIX_OP	expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnSoloArg($2, @2); }
+			| 					                    '&' expr_prefix	{ $$ = vn->OnPrefixOperator("&")->OnSoloArg($2, @2); }
+			| 					                    '*' expr_prefix	{ $$ = vn->OnPrefixOperator("*")->OnSoloArg($2, @2); }
+			| 					           C_ADD_SUB_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnSoloArg($2, @2); }
+			| 					      C_PRE_OR_INFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnSoloArg($2, @2); }
+			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnSoloArg($2, @2); }
 			| 						     GREEN_GRASS_OP expr_prefix	{ $$ = vn->OnGrass($2); }
 			| 						      POINTER_IS_OP expr_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
@@ -700,12 +702,10 @@ expr_prefix : expr_postfix
 stuff_depth		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
 
 expr_postfix: expr_primary     
-			| expr_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2, $1); }
+			| expr_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2)->OnSoloArg($1, @1); }
 			| expr_postfix '[' stmt_entry ']'	 					{ $$ = vn->OnSubscript($1, $3); }
-			| expr_postfix OPEN_MAP_CALL comma_sep_expr_decl CLOSE_MAP_CALL	{ $$ = vn->OnMapArgsCall($1, $3); }
-			| expr_postfix OPEN_MAP_CALL CLOSE_MAP_CALL				{ $$ = vn->OnMapArgsCall($1, list<TreePtr<Node>>()); }
-			| expr_postfix '(' comma_sep_expr_decl ')'				{ $$ = vn->OnSeqArgsCall($1, $3); }
-			| expr_postfix '(' ')'	 								{ $$ = vn->OnSeqArgsCall($1, list<TreePtr<Node>>()); }
+			| expr_postfix map_args									{ $$ = vn->OnCall($1, $2); }
+			| expr_postfix seq_args	 								{ $$ = vn->OnCall($1, $2); }
 			| expr_postfix '.' id_primary							{ $$ = vn->OnLookup($1, $3, @3); }
 		
 expr_primary: id_primary  
@@ -714,6 +714,8 @@ expr_primary: id_primary
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL									
 			| KEYWORD_PRIMARY_OP							
+			| LIBRARY_FUNC '(' comma_sep_exprs ')'   			{ $$ = $1->OnArgsList($3, @3); }			
+			| LIBRARY_FUNC '(' ')'   							
 			| FUNC_ON_TYPE '(' type_boot ')'       				{ $$ = $1->OnType($3, @3); }			
 			| DESIGNATED_COMPOUND      				  			// TODO move up into the statement rules once we don't need to support eg int main() = my_compound
 
@@ -733,8 +735,14 @@ vn_primary	: pure_wildcard
 pure_wildcard 	: STAR_OP													 { $$ = vn->OnStar(nullptr); }
 				| ANY_NODE_OP												 { $$ = nullptr; }
 
-comma_sep_expr_decl	: expr_no_comma_op								{ $$.push_back($1); }
-					| comma_sep_expr_decl ',' expr_no_comma_op		{ $$ = $1; $$.push_back($3); }			
+map_args 		: OPEN_MAP_CALL comma_sep_exprs CLOSE_MAP_CALL	{ $$ = vn->OnMapArgs()->OnArgsList($2, @2); }
+				| OPEN_MAP_CALL CLOSE_MAP_CALL					{ $$ = vn->OnMapArgs(); }
+
+seq_args		: '(' comma_sep_exprs ')'						{ $$ = vn->OnSeqArgs()->OnArgsList($2, @2); }
+				| '(' ')'	 									{ $$ = vn->OnSeqArgs(); }
+
+comma_sep_exprs	: expr_no_comma_op								{ $$.push_back($1); }
+				| comma_sep_exprs ',' expr_no_comma_op			{ $$ = $1; $$.push_back($3); }			
 
 norm_full_explicit_start : EXPLICIT_NORMAL							{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }

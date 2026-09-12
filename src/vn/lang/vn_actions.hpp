@@ -38,8 +38,8 @@ public:
 	TreePtr<Node> OnTypeSpecifierSeq( multiset<string> specifiers, any loc );
 	
 	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
-	TreePtr<Node> OnPrefixOperator( string tok, TreePtr<Node> operand );
-	TreePtr<Node> OnPostfixOperator( string tok, TreePtr<Node> operand );
+	TreePtr<Node> OnPrefixOperator( string tok );
+	TreePtr<Node> OnPostfixOperator( string tok );
 	TreePtr<Node> OnIntegralLiteral( string text, any loc ); 
 	TreePtr<Node> OnStringLiteral( wstring value );
 	TreePtr<Node> OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> target, any target_loc );	
@@ -71,10 +71,9 @@ public:
 	Declarators::CVQuals OnCVQuals( const list<QualifierData> &quals, bool nice=false );
 	
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );
-	TreePtr<Node> OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );
-	TreePtr<Node> OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments );
-	TreePtr<Node> OnMapArgsConsInit( TreePtr<Node> constructor_id, list<TreePtr<Node>> arguments );
-	TreePtr<Node> OnSeqArgsConsInit( TreePtr<Node> constructor_id, list<TreePtr<Node>> arguments );
+	TreePtr<Node> OnMapArgs();
+	TreePtr<Node> OnSeqArgs();
+	TreePtr<Node> OnCall( TreePtr<Node> callee, TreePtr<Node> argumentation );
 	TreePtr<Node> OnLookup( TreePtr<Node> object, TreePtr<Node> member, any member_loc );
 
 	TreePtr<Node> OnIdByName( TreePtr<Node> node, any id_disc_loc, wstring wname, any name_loc );

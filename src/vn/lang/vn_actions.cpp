@@ -321,35 +321,23 @@ TreePtr<Node> VNLangActions::OnTypeSpecifierSeq( multiset<string> specifiers, an
 }
 
 
-TreePtr<Node> VNLangActions::OnPrefixOperator( string tok, TreePtr<Node> operand )
+TreePtr<Node> VNLangActions::OnPrefixOperator( string tok )
 {
 #define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
     if( tok==TEXT ) \
-    { \
-		auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::NAME>>(); \
-		node->operands.push_back(operand); \
-        return node; \
-	}
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::NAME>>(); 
 #include "tree/operator_data.inc"
-	{
-		ASSERTFAIL("Operator parsed but not found in operator_data.inc"); 
-	}
+	ASSERTFAIL("Prefix operator parsed but not found in operator_data.inc"); 
 }
 
 
-TreePtr<Node> VNLangActions::OnPostfixOperator( string tok, TreePtr<Node> operand )
+TreePtr<Node> VNLangActions::OnPostfixOperator( string tok )
 {
 #define POSTFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
     if( tok==TEXT ) \
-    { \
-		auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::NAME>>(); \
-		node->operands.push_back(operand); \
-        return node; \
-	}
-#include "tree/operator_data.inc"
-	{
-		ASSERTFAIL("Operator parsed but not found in operator_data.inc"); 
-	}
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::NAME>>(); 
+#include "tree/operator_data.inc"	
+	ASSERTFAIL("Postfix operator parsed but not found in operator_data.inc"); 	
 }
 
 
@@ -363,10 +351,8 @@ TreePtr<Node> VNLangActions::OnInfixOperator( string tok, TreePtr<Node> left, Tr
 		node->operands.push_back(right); \
         return node; \
 	}
-#include "tree/operator_data.inc"
-	{
-		ASSERTFAIL("Operator parsed but not found in operator_data.inc"); 
-	}
+#include "tree/operator_data.inc"	
+	ASSERTFAIL("Infix operator parsed but not found in operator_data.inc"); 
 }
 
 
@@ -780,50 +766,23 @@ TreePtr<Node> VNLangActions::OnIdValuePair( TreePtr<Node> key, any id_loc, TreeP
 }	
 
 
-TreePtr<Node> VNLangActions::OnMapArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments )
+TreePtr<Node> VNLangActions::OnMapArgs()
+{
+	return MakeTreeNode<StandardAgentWrapper<CPPTree::MapArgumentation>>();
+}	
+
+
+TreePtr<Node> VNLangActions::OnSeqArgs()
+{
+	return MakeTreeNode<StandardAgentWrapper<CPPTree::SeqArgumentation>>();
+}	
+
+
+TreePtr<Node> VNLangActions::OnCall( TreePtr<Node> callee, TreePtr<Node> argumentation )
 {
 	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::Call>>();
-	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::MapArgumentation>>();
 	call->callee = callee;
-	call->argumentation = args;
-	for( auto argument : arguments )
-		args->arguments.insert( argument );
-	return call;
-}	
-
-
-TreePtr<Node> VNLangActions::OnSeqArgsCall( TreePtr<Node> callee, list<TreePtr<Node>> arguments )
-{
-	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::Call>>();
-	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::SeqArgumentation>>();
-	call->callee = callee;
-	call->argumentation = args;
-	for( auto argument : arguments )
-		args->arguments.insert( argument );
-	return call;
-}	
-
-
-TreePtr<Node> VNLangActions::OnMapArgsConsInit( TreePtr<Node> constructor_id, list<TreePtr<Node>> arguments )
-{
-	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::ConstructInitialiser>>();
-	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::MapArgumentation>>();
-	call->constructor_id = constructor_id;
-	call->argumentation = args;
-	for( auto argument : arguments )
-		args->arguments.insert( argument );
-	return call;
-}	
-
-
-TreePtr<Node> VNLangActions::OnSeqArgsConsInit( TreePtr<Node> constructor_id, list<TreePtr<Node>> arguments )
-{
-	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::ConstructInitialiser>>();
-	auto args = MakeTreeNode<StandardAgentWrapper<CPPTree::SeqArgumentation>>();
-	call->constructor_id = constructor_id;
-	call->argumentation = args;
-	for( auto argument : arguments )
-		args->arguments.insert( argument );
+	call->argumentation = argumentation;
 	return call;
 }	
 

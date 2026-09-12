@@ -337,6 +337,7 @@ struct MapArgumentation : Argumentation
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy) final;
     TreePtr<Argumentation> ConvertToSeqIfPolicyAllows(TreePtr<Expression> callee, VN::RendererInterface *, Policy) final;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };
 
 
@@ -351,6 +352,7 @@ struct SeqArgumentation : Argumentation
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy) final;
     TreePtr<Argumentation> ConvertToSeqIfPolicyAllows(TreePtr<Expression> callee, VN::RendererInterface *, Policy) final;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
 };  
 
 //////////////////////////// Literals ///////////////////////////////
@@ -1200,16 +1202,29 @@ struct CommutativeOperator : Operator
 // distinct from non-commutative.
 
 /// An operator with a single operand
-struct Unop : NonCommutativeOperator { NODE_FUNCTIONS };
+struct Unop : NonCommutativeOperator 
+{ 
+	NODE_FUNCTIONS
+	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc ) override;
+};
 
 /// An operator with two operands
-struct Binop : NonCommutativeOperator { NODE_FUNCTIONS };
+struct Binop : NonCommutativeOperator 
+{ 
+	NODE_FUNCTIONS 
+};
 
 /// An operator with two interchangable operands
-struct CommutativeBinop : CommutativeOperator { NODE_FUNCTIONS };
+struct CommutativeBinop : CommutativeOperator 
+{ 
+	NODE_FUNCTIONS 
+};
 
 /// An operator with two operands, that writes its result back to the first operand
-struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
+struct AssignmentOperator : NonCommutativeOperator 
+{ 
+	NODE_FUNCTIONS 
+};
 
 // Use an include file to generate nodes for all the actual operators based on
 // contents of operator_data.inc
