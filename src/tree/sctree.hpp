@@ -122,7 +122,9 @@ struct NextTrigger : CPPTree::Statement,
 {
     NODE_FUNCTIONS
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetLoweredIdOrMacroName() const override;
+   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 };
 
 /** Causes the method to be triggered again when the event indicated by the expression is 
@@ -133,7 +135,7 @@ struct NextTriggerDynamic : NextTrigger,
 {
     NODE_FUNCTIONS_FINAL
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-    string GetKeyword( Policy ) const override;	
+	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
 };
 
 /** Causes the method to be triggered again when an event is triggered. I think the event
@@ -141,9 +143,7 @@ struct NextTriggerDynamic : NextTrigger,
 struct NextTriggerStatic : NextTrigger
 {
     NODE_FUNCTIONS_FINAL
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
 };
 
@@ -153,9 +153,7 @@ struct NextTriggerStatic : NextTrigger
 struct NextTriggerDelta : NextTrigger
 {
     NODE_FUNCTIONS_FINAL
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 };
 
 /** Triggers the event instance given in the expression. It must be an lvalue of
@@ -168,8 +166,10 @@ struct Notify : CPPTree::Statement,
     TreePtr<CPPTree::Expression> event; ///< event to notify 
     
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetLoweredIdOrMacroName() const override;    
 	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
+   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 };
 
 /** Notify the event immediately. Not sure if this can force control to go 
@@ -177,16 +177,12 @@ struct Notify : CPPTree::Statement,
 struct NotifyImmediate : Notify
 {
     NODE_FUNCTIONS_FINAL
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 };
 
 /** Notify the event with a delta cycle delay (SC_ZERO_TIME). */
 struct NotifyDelta : Notify
 {
     NODE_FUNCTIONS_FINAL
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 };
 
 /** Notify the event with a specified time delay. */
@@ -248,7 +244,7 @@ struct ClockedThread : Process
 /** Evaluates to the total number of delta cycles thus far. Can be compared with zero 
     to produce an inferred reset signal for initialising state machines */
 struct DeltaCount : CPPTree::Operator,
-                    virtual SCFunction // TODO rename as InferredReset() since that will transform more easily to a real reset system
+                    virtual SCFunction 
 {
     NODE_FUNCTIONS_FINAL
     string GetLoweredIdOrMacroName() const override;

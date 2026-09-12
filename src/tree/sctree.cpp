@@ -130,9 +130,21 @@ Syntax::Production NextTrigger::GetMyProductionTerminal() const
 }
 
 
+string NextTrigger::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetKeyword(this, policy);
+}
+
+
 string NextTrigger::GetLoweredIdOrMacroName() const 
 { 
 	return "next_trigger"; 
+}
+
+
+YY::VNLangParser::token::token_kind_type NextTrigger::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }
 
 //////////////////////////// NextTriggerDynamic ///////////////////////////////
@@ -142,18 +154,14 @@ string NextTriggerDynamic::GetRender( VN::RendererInterface *renderer, Productio
 	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
 }
 
-string NextTriggerDynamic::GetKeyword( Policy ) const 
+
+TreePtr<Node> NextTriggerDynamic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
 {
-	return "next_trigger"; 
+	event = arg;
+	return TreePtr<Node>( shared_from_this() );	
 }
 
 //////////////////////////// NextTriggerStatic ///////////////////////////////
-
-string NextTriggerStatic::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
-{
-	return renderer->GetKeyword(this, policy);
-}
-
 
 string NextTriggerStatic::GetKeyword( Policy ) const 
 {
@@ -161,38 +169,18 @@ string NextTriggerStatic::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type NextTriggerStatic::GetSignifierToken() const
+TreePtr<Node> NextTriggerStatic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc )
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
-}
-
-
-TreePtr<Node> NextTriggerStatic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
-{
-	// Seeing an argument makes this node evolve into WaitDynamic
-	auto wd = MakeTreeNode<VN::StandardAgentWrapper<NextTriggerDynamic>>();
-	wd->event = arg;
-	return wd; 
+	// Evolve into NextTriggerDynamic and try again
+	return MakeTreeNode<VN::StandardAgentWrapper<NextTriggerDynamic>>()->OnSoloArg(arg, loc);
 }
 
 //////////////////////////// NextTriggerDelta ///////////////////////////////
-
-string NextTriggerDelta::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
-{
-	return renderer->GetKeyword(this, policy);
-}
-
 
 string NextTriggerDelta::GetKeyword( Policy ) const 
 {
 	// Keep as next_trigger_delta to differentiate from NextTriggerStatic which is just next trigger with no args
 	return "next_trigger_delta"; 
-}
-
-
-YY::VNLangParser::token::token_kind_type NextTriggerDelta::GetSignifierToken() const
-{
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }
 
 //////////////////////////// Notify ///////////////////////////////
@@ -203,9 +191,21 @@ Syntax::Production Notify::GetMyProductionTerminal() const
 }
 
 
+string Notify::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
+}
+
+
 string Notify::GetLoweredIdOrMacroName() const 
 { 
 	return "notify"; 
+}
+
+
+YY::VNLangParser::token::token_kind_type Notify::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }
 
 
@@ -217,29 +217,7 @@ TreePtr<Node> Notify::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_t
 
 //////////////////////////// NotifyImmediate ///////////////////////////////
 
-string NotifyImmediate::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
-{
-	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
-}
-
-
-YY::VNLangParser::token::token_kind_type NotifyImmediate::GetSignifierToken() const
-{
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
-}
-
 //////////////////////////// NotifyDelta ///////////////////////////////
-
-string NotifyDelta::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
-{
-	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
-}
-
-
-YY::VNLangParser::token::token_kind_type NotifyDelta::GetSignifierToken() const
-{
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
-}
 
 //////////////////////////// NotifyTimed ///////////////////////////////
 
