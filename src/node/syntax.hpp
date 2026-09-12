@@ -207,6 +207,7 @@ public:
 	virtual TreePtr<Node> OnMemberInits( list<TreePtr<Node>> memb_inits, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnInitialiser( TreePtr<Node> init, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc );
+	virtual TreePtr<Node> OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
 	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
 	

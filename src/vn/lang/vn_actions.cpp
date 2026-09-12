@@ -1169,5 +1169,10 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // NOTE A "signifier" can be a keyword or an operator name or a short-form explicit. It generalises keywords to things we shouldn't call
 // keywords, but which are grammatically equivalent.
 
-// NOTE we do not generate nodes for operators because the same operator text can generate different nodes eg
-// & could be BitwiseAnd or AddressOf. Only the parser can determine which node to create because it depends on syntax.
+// NOTE we cannot recognise nodes for operators because the same operator text can generate different nodes eg
+// & could be BitwiseAnd or AddressOf. Only the parser can determine which node to create because it depends on 
+// syntax.
+
+// NODE: implementing GetSignifierToken gives the node syntax in the parser, so for render to match, GetRender()
+// must be implemented. The impl should call renderer->GetKeyword() for the element that will parse with the 
+// signifier token.

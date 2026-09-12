@@ -261,6 +261,10 @@ string Render::RenderNoDesignation( TreePtr<Node> node,
 
 string Render::OnRefusalToRender( Syntax::Refusal &, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
+	// Nodes that provide tokens have special syntax and we shouldn't render a long-form explicit for them 
+	try { node->GetSignifierToken(); ASSERT(false)(node)(" has GetSignifierToken() but refuses to render - please implement GetRender()"); }
+	catch(Syntax::Refusal &ex) {} // Good - not generating a parser token
+	
 	// If render was unsuccessful, TRY AGAIN but this time with node_prod set to 
 	// EXPLICIT_NODE which means the render will be explicit (i.e. with ⯁) and
 	// won't throw.	

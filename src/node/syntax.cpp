@@ -149,91 +149,105 @@ catch( Unimplemented & )
 TreePtr<Node> Syntax::OnAccess( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " does not expect an access specifier.");	
+		MyBestErrName() + " does not expect an access specifier (implement OnAccess()).");	
 }
 
 
 TreePtr<Node> Syntax::OnIdentifier( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " does not expect an identifier.");	
+		MyBestErrName() + " does not expect an identifier (implement OnIdentifier()).");	
 }
 
 
 TreePtr<Node> Syntax::OnPermission( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " does not expect const/mutable.");	
+		MyBestErrName() + " does not expect const/mutable (implement OnPermission()).");	
 }
 
 
 TreePtr<Node> Syntax::OnDispatch( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " does not expect virtual.");
+		MyBestErrName() + " does not expect virtual (implement OnVirtual()).");
 }
 
 
 TreePtr<Node> Syntax::OnBases( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " does not expect base classes.");	
+		MyBestErrName() + " does not expect base classes (implement OnBases()).");	
 }
 
 
 TreePtr<Node> Syntax::OnMembers( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " does not expect members.");	
+		MyBestErrName() + " does not expect members (implement OnMembers()).");	
 }
 
 
 TreePtr<Node> Syntax::OnStatements( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " does not expect statements.");	
+		MyBestErrName() + " does not expect statements (implement OnStatements()).");	
 }
 
 
 TreePtr<Node> Syntax::OnType( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " does not expect a type.");	
+		MyBestErrName() + " does not expect a type (implement OnType()).");	
 }
 
 
 TreePtr<Node> Syntax::OnMemberInits( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " does not expect member initialisers.");	
+		MyBestErrName() + " does not expect member initialisers (implement OnMemberInits()).");	
 }
 
 
 TreePtr<Node> Syntax::OnInitialiser( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " does not expect an initialiser.");	
+		MyBestErrName() + " does not expect an initialiser (implement OnInitialiser()).");	
 }
 
 
-TreePtr<Node> Syntax::OnArgsList( list<TreePtr<Node>>, YY::VNLangParser::location_type loc )
+TreePtr<Node> Syntax::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc )
+{
+	switch( args.size() )
+	{
+		case 1:
+		return OnSoloArg( SoloElementOf(args), loc );
+		
+		default:
+		throw YY::VNLangParser::syntax_error( loc,
+			MyBestErrName() + " does not expect multiple arguments (implement OnArgsList()).");	
+	}
+}
+
+
+TreePtr<Node> Syntax::OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " does not expect arguments.");	
+		MyBestErrName() + " does not expect an argument (implement OnSoloArg()).");	
 }
 
 
 TreePtr<Node> Syntax::OnBody( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " does not expect a body.");		
+		MyBestErrName() + " does not expect a body (implement OnBody()).");		
 } 
 
 
 TreePtr<Node> Syntax::OnElseBody( TreePtr<Node>, YY::VNLangParser::location_type loc )
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " cannot be used with an `else' clause.");		
+		MyBestErrName() + " cannot be used with an `else' clause (implement OnElseBody()).");		
 } 
 
 
@@ -245,7 +259,7 @@ any Syntax::GetStartingScopeContext() const
 
 void Syntax::UpdateContext( TreePtr<Node>, any &context, YY::VNLangParser::location_type )
 {
-	ASSERT( !context.has_value() ); //	GetStartingScopeContext() wasimplemented therefore so should this be
+	ASSERT( !context.has_value() ); //	GetStartingScopeContext() was implemented therefore so should this be
 	// No action otherwise because no context
 }	
 
@@ -253,5 +267,5 @@ void Syntax::UpdateContext( TreePtr<Node>, any &context, YY::VNLangParser::locat
 TreePtr<Node> Syntax::CreateDeclNode(bool, any &, YY::VNLangParser::location_type loc) const
 {
 	throw YY::VNLangParser::syntax_error( loc,
-		MyBestErrName() + " cannot act as a scope for declarations.");	
+		MyBestErrName() + " cannot act as a scope for declarations (implement CreateDeclNode()).");	
 }
