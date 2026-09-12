@@ -26,6 +26,7 @@ UniqueNameGenerator::UniqueNameGenerator( string (Syntax::*name_getter_)() const
 	// See #907
 	name_usages.insert( NameUsagesPair( "wait", {{0, nullptr}} ) );
 	name_usages.insert( NameUsagesPair( "next_trigger", {{0, nullptr}} ) );
+	name_usages.insert( NameUsagesPair( "notify", {{0, nullptr}} ) );
 }
 
 

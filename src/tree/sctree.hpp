@@ -165,8 +165,11 @@ struct Notify : CPPTree::Statement,
                 virtual SCFunction
 {
     NODE_FUNCTIONS
-    string GetLoweredIdOrMacroName() const override;
     TreePtr<CPPTree::Expression> event; ///< event to notify 
+    
+	Production GetMyProductionTerminal() const override;
+    string GetLoweredIdOrMacroName() const override;    
+	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
 };
 
 /** Notify the event immediately. Not sure if this can force control to go 
@@ -174,12 +177,16 @@ struct Notify : CPPTree::Statement,
 struct NotifyImmediate : Notify
 {
     NODE_FUNCTIONS_FINAL
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 };
 
 /** Notify the event with a delta cycle delay (SC_ZERO_TIME). */
 struct NotifyDelta : Notify
 {
     NODE_FUNCTIONS_FINAL
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
 };
 
 /** Notify the event with a specified time delay. */
@@ -187,6 +194,9 @@ struct NotifyTimed : Notify
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<CPPTree::Expression> time; ///< how long to wait for before notifying
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>>, YY::VNLangParser::location_type loc ) override;
 };
 
 /** Intermediate class for processes, which are the places in SystemC where we 

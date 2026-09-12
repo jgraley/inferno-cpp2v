@@ -197,10 +197,75 @@ YY::VNLangParser::token::token_kind_type NextTriggerDelta::GetSignifierToken() c
 
 //////////////////////////// Notify ///////////////////////////////
 
+Syntax::Production Notify::GetMyProductionTerminal() const
+{ 
+	return Production::BARE_STMT_DECL; 
+}
+
+
 string Notify::GetLoweredIdOrMacroName() const 
 { 
 	return "notify"; 
 }
+
+
+TreePtr<Node> Notify::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+{
+	event = arg;
+	return TreePtr<Node>( shared_from_this() );	
+}
+
+//////////////////////////// NotifyImmediate ///////////////////////////////
+
+string NotifyImmediate::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
+}
+
+
+YY::VNLangParser::token::token_kind_type NotifyImmediate::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+}
+
+//////////////////////////// NotifyDelta ///////////////////////////////
+
+string NotifyDelta::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetKeyword(this, policy) + " " + renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy);
+}
+
+
+YY::VNLangParser::token::token_kind_type NotifyDelta::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+}
+
+//////////////////////////// NotifyTimed ///////////////////////////////
+
+string NotifyTimed::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetKeyword(this, policy) + 
+	       " " + 
+	       renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
+	       ", " + 
+	       renderer->DoRender(&time, Production::SPACE_SEP_STMT_DECL, policy);
+}
+
+
+YY::VNLangParser::token::token_kind_type NotifyTimed::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+}
+
+
+TreePtr<Node> NotifyTimed::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type )
+{
+	event = args.front();
+	time = args.back();
+	return TreePtr<Node>( shared_from_this() );	
+}
+
 
 //////////////////////////// Method ///////////////////////////////
 
