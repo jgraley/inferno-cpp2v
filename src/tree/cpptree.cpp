@@ -1040,10 +1040,8 @@ string Const::GetKeyword( Policy ) const
 
 //////////////////////////// NonConst //////////////////////////////
 
-string NonConst::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+string NonConst::GetRender( VN::RendererInterface *, Production, Policy  )
 {
-	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
-		return renderer->GetKeyword(this, policy); // Not defaulted in itemisations
 	return "";
 }
 

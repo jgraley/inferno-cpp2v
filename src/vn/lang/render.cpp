@@ -457,8 +457,13 @@ string Render::Dispatch( TreePtr<Node> node, Syntax::Production node_prod, Synta
 		return RenderNodeExplicit(node, surround_prod, policy);	
 	else if( const Agent *agent = Agent::TryAsAgentConst(node) )
 		return agent->GetAgentRender( this, surround_prod, policy );
-	else
-		return node->GetRender(this, surround_prod, policy); 
+	string s = node->GetRender(this, surround_prod, policy); 
+	
+	// Don't put empty renders in itemisations. Try a short-form explicit instead.
+	if( s.empty() && surround_prod == Syntax::Production::VN_SEP_ITEMS)
+		s = "⯁" + node->RenderNodeTypeName();	
+	
+	return s;
 }		
 
 
