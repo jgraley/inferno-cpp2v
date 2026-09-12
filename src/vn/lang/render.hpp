@@ -37,7 +37,7 @@ public:
 	string RenderNoDesignation( TreePtr<Node> node, 
 								Syntax::Production surround_prod, 
 								Syntax::Policy policy );
-	virtual string OnRefusal( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
+	virtual string OnRefusalToRender( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy );
 	string AccomodateInit( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );
 	string AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );
 	string AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy );

@@ -102,7 +102,7 @@ Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Pol
 }
 */
 
-string CppRender::OnRefusal( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string CppRender::OnRefusalToRender( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	// If render was unsuccessful, TRY AGAIN but this time with node_prod set to 
 	// EXPLICIT_NODE which means the render will be explicit (i.e. with ⯁) and

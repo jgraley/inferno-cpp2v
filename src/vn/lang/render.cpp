@@ -212,7 +212,7 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 		}
 		catch( Syntax::Refusal &ex ) 
 		{
-			node_prod = Syntax::Production::EXPLICIT_NODE; // Must have been designated as an explicit, see OnRefusal()
+			node_prod = Syntax::Production::EXPLICIT_NODE; // Must have been designated as an explicit, see OnRefusalToRender()
 		}
 
 		s += unique_coupling_names.at(node);
@@ -254,12 +254,12 @@ string Render::RenderNoDesignation( TreePtr<Node> node,
 	}
 	catch( Syntax::Refusal &ex ) 
 	{
-		return OnRefusal(ex, node, surround_prod, policy);
+		return OnRefusalToRender(ex, node, surround_prod, policy);
 	}	
 }   
                             
 
-string Render::OnRefusal( Syntax::Refusal &, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
+string Render::OnRefusalToRender( Syntax::Refusal &, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	// If render was unsuccessful, TRY AGAIN but this time with node_prod set to 
 	// EXPLICIT_NODE which means the render will be explicit (i.e. with ⯁) and

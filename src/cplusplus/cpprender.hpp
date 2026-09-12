@@ -16,7 +16,7 @@ private:
 	static Syntax::Policy GetDefaultPolicy();
 	//Syntax::Production GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const final;
 	
-	string OnRefusal( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) override;
+	string OnRefusalToRender( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy ) override;
 	
 	string GetUniqueIdentifierName( TreePtr<Node> id ) const final;
     string DispatchTypeAndDeclarator( TreePtr<Node> type, string declarator, 
