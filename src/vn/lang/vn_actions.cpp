@@ -395,12 +395,9 @@ TreePtr<Node> VNLangActions::OnConditionalOperator( TreePtr<Node> condition, Tre
 }
 	
 
-TreePtr<Node> VNLangActions::OnSubscript( TreePtr<Node> destination, TreePtr<Node> index )
+TreePtr<Node> VNLangActions::OnSubscript()
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Subscript>>();
-	node->destination = destination;	
-	node->index = index;
-	return node;
+	return MakeTreeNode<StandardAgentWrapper<CPPTree::Subscript>>();
 }
 	
 

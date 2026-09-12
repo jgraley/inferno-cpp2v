@@ -2209,6 +2209,14 @@ string Subscript::GetRender( VN::RendererInterface *renderer, Production, Policy
 		   "]";       
 }
 
+TreePtr<Node> Subscript::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type )
+{
+	ASSERT( args.size() == 2 );
+	destination = args.front();	
+	index = args.back();
+	return TreePtr<Node>( shared_from_this() );	
+}
+
 //////////////////////////// ArrayInitialiser ///////////////////////////////
 
 Syntax::Production ArrayInitialiser::GetMyProductionTerminal() const

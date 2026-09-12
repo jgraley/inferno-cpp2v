@@ -1275,6 +1275,7 @@ struct Subscript : Operator
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type ) override;
 };
 
 /// An array formed directly from elements which should all be the same type
