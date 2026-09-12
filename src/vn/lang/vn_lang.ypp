@@ -706,6 +706,9 @@ expr_postfix: expr_primary
 			| expr_postfix '[' stmt_entry ']'	 					{ $$ = vn->OnSubscript()->OnArgsList({$1, $3}, @$); }
 			| expr_postfix argumentation							{ $$ = vn->OnCall($1, $2); }
 			| expr_postfix '.' id_primary							{ $$ = vn->OnLookup($1, $3, @3); }
+			| LIBRARY_FUNC '(' comma_sep_exprs ')'   				{ $$ = $1->OnArgsList($3, @3); }			
+			| LIBRARY_FUNC '(' ')'   							
+			| FUNC_ON_TYPE '(' type_boot ')'       					{ $$ = $1->OnType($3, @3); }			
 		
 expr_primary: id_primary  
 			| '(' stmt_boot ')'                          		{ $$ = $2; }
@@ -713,9 +716,6 @@ expr_primary: id_primary
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL									
 			| KEYWORD_PRIMARY_OP							
-			| LIBRARY_FUNC '(' comma_sep_exprs ')'   			{ $$ = $1->OnArgsList($3, @3); }			
-			| LIBRARY_FUNC '(' ')'   							
-			| FUNC_ON_TYPE '(' type_boot ')'       				{ $$ = $1->OnType($3, @3); }			
 			| DESIGNATED_COMPOUND      				  			// TODO move up into the statement rules once we don't need to support eg int main() = my_compound
 
 id_primary  : vn_primary
