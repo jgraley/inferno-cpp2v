@@ -229,7 +229,18 @@ TreePtr<Node> Notify::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_t
 
 //////////////////////////// NotifyImmediate ///////////////////////////////
 
+string NotifyImmediate::GetKeyword( Policy ) const 
+{
+	return "notify"; 
+}
+
 //////////////////////////// NotifyDelta ///////////////////////////////
+
+string NotifyDelta::GetKeyword( Policy ) const 
+{
+	// Keep as notify_delta to differentiate from NotifyImmediate which is just notify with one arg
+	return "notify_delta"; 
+}
 
 //////////////////////////// NotifyTimed ///////////////////////////////
 
@@ -243,9 +254,15 @@ string NotifyTimed::GetRender( VN::RendererInterface *renderer, Production, Poli
 }
 
 
+string NotifyTimed::GetKeyword( Policy ) const 
+{
+	return "notify"; 
+}
+
+
 YY::VNLangParser::token::token_kind_type NotifyTimed::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+	return Syntax::GetSignifierToken(); // retract the token - we want to recognise WaitStatic instead
 }
 
 
