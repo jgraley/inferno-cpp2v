@@ -453,7 +453,7 @@ ab_declarator_postfix	: ab_declarator_postfix parameterisation qualifiers	{ $$ =
 						| ab_declarator_postfix '[' stmt_entry ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
 						| parameterisation									{ $$ = make_shared<Declarators::Function>(nullptr, $1, vn->OnCVQuals({})); }   
 						| parameterisation qualifiers						{ $$ = make_shared<Declarators::Function>(nullptr, $1, vn->OnCVQuals($2)); }   
-						| '[' stmt_entry ']'									{ $$ = make_shared<Declarators::Array>(nullptr, $2); }                 		
+						| '[' stmt_entry ']'								{ $$ = make_shared<Declarators::Array>(nullptr, $2); }                 		
 					                         
 //////////////////////////////////////// PARAMETERS /////////////////////////////////////////////
 
@@ -585,11 +585,11 @@ open_statement    	: open_statement_nc
 stmt_entry_nc		: stmt_disjunction_nc
 
 stmt_disjunction_nc	: stmt_conjunction_nc
-					| stmt_disjunction_nc DISJUNCTION_OP stmt_conjunction_nc		{ $$ = vn->OnDisjunction($1, $3); }
+					| stmt_disjunction_nc DISJUNCTION_OP stmt_conjunction_nc	{ $$ = vn->OnDisjunction($1, $3); }
 					| stmt_disjunction_nc DISJUNCTION_OP decl_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
 
 stmt_conjunction_nc : open_statement_nc       
-					| stmt_conjunction_nc CONJUNCTION_OP open_statement_nc   		{ $$ = vn->OnConjunction($1, $3); }
+					| stmt_conjunction_nc CONJUNCTION_OP open_statement_nc  	{ $$ = vn->OnConjunction($1, $3); }
 					| stmt_conjunction_nc CONJUNCTION_OP open_declaration 		{ $$ = vn->OnConjunction($1, $3); }
 		
 open_statement_nc 	: expr_entry
@@ -612,8 +612,8 @@ statement_nc: statement_nl													{ $$ = {$1}; }
 
 // #903 generalise to comma separated args
 arrival		: ARRIVAL_KEYWORD ':'										
-			| ARRIVAL_KEYWORD expr_entry ':'									{ $$ = $1->OnArgsList({$2}, @2); } 
-			| ARRIVAL_KEYWORD expr_entry RANGE_OP expr_entry ':' 				{ $$ = $1->OnArgsList({$2, $4}, @2+@4); }
+			| ARRIVAL_KEYWORD expr_entry ':'								{ $$ = $1->OnArgsList({$2}, @2); } 
+			| ARRIVAL_KEYWORD expr_entry RANGE_OP expr_entry ':' 			{ $$ = $1->OnArgsList({$2, $4}, @2+@4); }
 			| id_primary ':' 			 									{ $$ = vn->OnLabel($1, @1); } 
 
 statement_nl: bare_statement ';'										
@@ -701,7 +701,7 @@ expr_prefix : expr_postfix
 			|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
-stuff_depth		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
+stuff_depth		: C_ASSIGN INTEGRAL_LITERAL							{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
 
 // Postfix operators are treated like method calls, operand is regarded as object
 expr_postfix: expr_primary     
@@ -756,9 +756,9 @@ norm_full_explicit_start : EXPLICIT_NORMAL							{ $$ = vn->MakeScopeGnomonForNo
 type_id 			: ab_type
                       
 ab_type				: type_for_declarator ab_declarator 				 		{ $$ = vn->OnAbDeclType(@$, {}, $1, $2); }
-ab_type				: qualifiers type_for_declarator ab_declarator 		 		{ $$ = vn->OnAbDeclType(@$, $1, $2, $3); }  
-ab_type				: type_for_declarator qualifiers ab_declarator 		 		{ $$ = vn->OnAbDeclType(@$, $2, $1, $3); } 
-ab_type				: qualifiers type_for_declarator qualifiers ab_declarator	{ $$ = vn->OnAbDeclType(@$, $1+$3, $2, $4); } 
+					| qualifiers type_for_declarator ab_declarator 		 		{ $$ = vn->OnAbDeclType(@$, $1, $2, $3); }  
+					| type_for_declarator qualifiers ab_declarator 		 		{ $$ = vn->OnAbDeclType(@$, $2, $1, $3); } 
+					| qualifiers type_for_declarator qualifiers ab_declarator	{ $$ = vn->OnAbDeclType(@$, $1+$3, $2, $4); } 
 					| type_for_declarator 				 						// abstract declarators can be "invisible"
 					| XSTRUCTOR parameterisation 								{ $$ = vn->OnConstructorType($2); } 				                     
 
@@ -793,7 +793,7 @@ type_primary: type_vn_prim
 			| '(' type_boot ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
             | TYPE_KEYWORD														
 			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }				
-			| TYPE_INDICATOR TYPE_INDICATOR '(' type_id ')'						{ $$ = $4; } // See #888
+			| TYPE_INDICATOR '(' type_id ')'									{ $$ = $3; } // See #909
 			
 type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DELTA_COMPARE_OP type_boot DELTA_REPLACE_OP type_boot DELTA_END_OP { $$ = vn->OnDelta($2, $4); }
@@ -803,7 +803,6 @@ type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExpl
 			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN 		 { $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| ID_BUILDER_TYPE OPEN_VN VN_SEP item CLOSE_VN 						 { $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			| TRANSFORM_NAME_TYPE OPEN_VN unified_entry CLOSE_VN 				 { $$ = vn->OnTransform($1, @1, $3, @3); }
-			| TYPE_INDICATOR STAR_OP OPEN_VN type_boot CLOSE_VN					 { $$ = vn->OnStar($4); }
 			| STAR_OP OPEN_VN type_boot CLOSE_VN								 { $$ = vn->OnStar($3); }
 		 	
 type_full_explicit_start 	: EXPLICIT_TYPE										{ $$ = vn->MakeScopeGnomonForNode($1); 

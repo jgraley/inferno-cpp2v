@@ -25,11 +25,29 @@ string Event::GetLoweredIdOrMacroName() const
 	return "sc_event";
 }
 
+
+string Event::GetKeyword( Policy ) const
+{
+	return "event";
+}
+
+
+Syntax::Token Event::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_TYPE_KEYWORD;
+}
+
 //////////////////////////// Module ///////////////////////////////
 
 string Module::GetLoweredIdOrMacroName() const 
 { 
 	return "sc_module"; 
+}
+
+
+string Module::GetKeyword( Policy ) const
+{
+	return "module";
 }
 
 
@@ -43,6 +61,12 @@ any Module::GetStartingScopeContext() const
 string Interface::GetLoweredIdOrMacroName() const 
 { 
 	return "sc_interface"; 
+}
+
+
+string Interface::GetKeyword( Policy ) const
+{
+	return "interface";
 }
 
 

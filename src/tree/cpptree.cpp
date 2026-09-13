@@ -112,7 +112,7 @@ catch( Unimplemented & )
 		surround_prod = Production::BOOT_TYPE;
 	string s = GetRenderTypeAndDeclarator( renderer, "", Production::ANONYMOUS, surround_prod, policy, MakeTreeNode<NonConst>() );
 	if( policy.disambiguate_type_id )
-		s = "⍑⍑(" + s + ")"; 
+		s = "⍑(" + s + ")"; 
 	return s;
 }
 
@@ -133,7 +133,7 @@ string Type::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 	// This would be a type-specifier-seq in https://alx71hub.github.io/hcb/ 
 	// Try GetKeyword() for simple keyword types eg bool, void. Otherwise 
 	// this method should be overloaded, otherwise Type::GetRender() will do
-	// domething ugly with ⍑⍑
+	// something ugly with ⍑
 	return GetKeyword(policy);
 }
 

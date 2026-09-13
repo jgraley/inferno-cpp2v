@@ -6,3 +6,10 @@
 #include "vn/lang/vn_lang.ypp.hpp"
 #include "vn/lang/vn_lang.location.hpp"
 using namespace LocalTree;
+
+//////////////////////////// GlobalsModule ///////////////////////////////
+
+string GlobalsModule::GetKeyword( Policy ) const
+{
+	return "globals_module";
+}

@@ -45,6 +45,7 @@ namespace LocalTree {
 struct GlobalsModule : SCTree::Module 
 { 
 	NODE_FUNCTIONS_FINAL 
+    string GetKeyword( Policy ) const override;		
 };
 
 
