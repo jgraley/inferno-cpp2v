@@ -1212,25 +1212,28 @@ struct Unop : NonCommutativeOperator
 	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, Location loc ) override;
 	// Postfix operators are treated like method calls, operand is regarded as object
 	TreePtr<Node> OnObject( TreePtr<Node> object, Location ) override;
-
 };
 
 /// An operator with two operands
 struct Binop : NonCommutativeOperator 
 { 
 	NODE_FUNCTIONS 
+	TreePtr<Node> OnTwoArgs( TreePtr<Node> arg_l, TreePtr<Node> arg_r, Location loc ) override;
 };
 
 /// An operator with two interchangable operands
 struct CommutativeBinop : CommutativeOperator 
 { 
 	NODE_FUNCTIONS 
+	TreePtr<Node> OnTwoArgs( TreePtr<Node> arg_l, TreePtr<Node> arg_r, Location loc ) override;
 };
 
 /// An operator with two operands, that writes its result back to the first operand
 struct AssignmentOperator : NonCommutativeOperator 
 { 
 	NODE_FUNCTIONS 
+	TreePtr<Node> OnObject( TreePtr<Node> object, Location ) override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, Location loc ) override;
 };
 
 // Use an include file to generate nodes for all the actual operators based on
@@ -1355,6 +1358,7 @@ struct Delete : Operator
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
 
+
 /// Node for accessing an element in a record as in base.member
 /** Note that the parser breaks down a->b into (*a).b which may
  be detected using a search pattern if desired. */
@@ -1369,6 +1373,7 @@ struct Lookup : Operator
 	TreePtr<Node> OnObject( TreePtr<Node> object, Location loc ) override;
 	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, Location loc ) override;
 };
+
 
 /// Node for a c-style cast. 
 // TODO C++ casts are not in here yet and C casts will be harmonised into whatever scheme I use for that.
@@ -1386,6 +1391,8 @@ struct Cast : Operator
 struct GoSub : virtual Node, Uncombable
 {
     NODE_FUNCTIONS
+	TreePtr<Node> OnObject( TreePtr<Node> object, Location loc ) override;    
+    
     TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call	
 };
 
@@ -1397,6 +1404,7 @@ struct Call : GoSub, Expression
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+	TreePtr<Node> OnArgumentation( TreePtr<Node> argumentation_, Location loc ) override;
 };  
 
 
@@ -1410,7 +1418,9 @@ struct ConstructInitialiser : Initialiser
 
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+	TreePtr<Node> OnArgumentation( TreePtr<Node> argumentation_, Location loc ) override;
 };
+
 
 /// Operator that operates on data types as parameters. 
 /** Where either is allowed we use the type one, since it's more concise. */
@@ -1426,12 +1436,14 @@ struct FuncOnType : Expression
 	TreePtr<Node> OnType( TreePtr<Node> type, Location loc ) override;
 };
 
+
 /// sizeof() a type
 struct SizeOf : FuncOnType 
 { 
 	NODE_FUNCTIONS_FINAL 
     string GetKeyword( Policy ) const override;	
 }; 
+
 
 /// alignof() a type
 struct AlignOf : FuncOnType 

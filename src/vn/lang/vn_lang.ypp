@@ -630,8 +630,8 @@ bare_statement	: KEYWORD_SIMPLE_STMT
 control_stmt_sign 	: KEYWORD_CONTROL_STMT
 					| WHILE_KEYWORD
 						
-semicolon_args	: expr_entry										{ $$.push_back($1); }
-				| semicolon_args ';' expr_entry						{ $$ = $1; $$.push_back($3); }
+semicolon_args	: expr_entry												{ $$.push_back($1); }
+				| semicolon_args ';' expr_entry								{ $$ = $1; $$.push_back($3); }
 
 //////////////////////////////// EXPRESSIONS ////////////////////////////////////         
 
@@ -707,9 +707,9 @@ stuff_depth		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 };
 expr_postfix: expr_primary     
 			| expr_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2)->OnObject($1, @1); }
 			| expr_postfix '[' stmt_entry ']'	 					{ $$ = vn->OnSubscript()->OnObject($1, @1)->OnSoloArg($3, @3); }
-			| expr_postfix argumentation							{ $$ = vn->OnCall($1, $2); } // TODO OnObject() for $1
+			| expr_postfix argumentation							{ $$ = vn->OnCall()->OnObject($1, @1)->OnArgumentation($2, @2); } 
 			| expr_postfix '.' id_primary							{ $$ = vn->OnLookup()->OnObject($1, @1)->OnSoloArg($3, @3); }
-			| LIBRARY_FUNC '(' comma_sep_exprs ')'   				{ $$ = $1->OnArgsList($3, @3); } // TODO OnArgumentatio			
+			| LIBRARY_FUNC '(' comma_sep_exprs ')'   				{ $$ = $1->OnArgsList($3, @3); }	
 			| LIBRARY_FUNC '(' ')'   							
 			| expr_postfix '.' LIBRARY_METHOD '(' comma_sep_exprs ')' 	{ $$ = $3->OnObject($1, @1)->OnArgsList($5, @5); }			
 			| expr_postfix '.' LIBRARY_METHOD '(' ')'   				{ $$ = $3->OnObject($1, @1); }			
@@ -725,19 +725,19 @@ expr_primary: id_primary
 
 id_primary  : vn_primary
 			| DELTA_COMPARE_OP stmt_boot DELTA_REPLACE_OP stmt_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
-			| norm_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
+			| norm_full_explicit_start itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 
 vn_primary	: pure_wildcard
 			| DESIGNATED_NORMAL       				  			
-			| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN			{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
-			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
+			| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
-			| ID_BUILDER_NORMAL OPEN_VN VN_SEP item CLOSE_VN 			{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
-			| TRANSFORM_NAME_NORMAL OPEN_VN unified_entry CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
-			| STAR_OP OPEN_VN stmt_entry CLOSE_VN					{ $$ = vn->OnStar($3); }
+			| ID_BUILDER_NORMAL OPEN_VN VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
+			| TRANSFORM_NAME_NORMAL OPEN_VN unified_entry CLOSE_VN			{ $$ = vn->OnTransform($1, @1, $3, @3); }
+			| STAR_OP OPEN_VN stmt_entry CLOSE_VN							{ $$ = vn->OnStar($3); }
 
-pure_wildcard 	: STAR_OP													 { $$ = vn->OnStar(nullptr); }
-				| ANY_NODE_OP												 { $$ = nullptr; }
+pure_wildcard 	: STAR_OP													{ $$ = vn->OnStar(nullptr); }
+				| ANY_NODE_OP												{ $$ = nullptr; }
 
 argumentation	: OPEN_MAP_CALL comma_sep_exprs CLOSE_MAP_CALL	{ $$ = vn->OnMapArgs()->OnArgsList($2, @2); }
 				| OPEN_MAP_CALL CLOSE_MAP_CALL					{ $$ = vn->OnMapArgs(); }

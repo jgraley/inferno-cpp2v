@@ -213,7 +213,9 @@ public:
 	virtual TreePtr<Node> OnMemberInits( list<TreePtr<Node>> memb_inits, Location loc );
 	virtual TreePtr<Node> OnInitialiser( TreePtr<Node> init, Location loc );
 	virtual TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location loc );
+	virtual TreePtr<Node> OnArgumentation( TreePtr<Node> argumentation, Location loc );
 	virtual TreePtr<Node> OnSoloArg( TreePtr<Node> arg, Location loc );
+	virtual TreePtr<Node> OnTwoArgs( TreePtr<Node> arg_l, TreePtr<Node> arg_r, Location loc );
 	virtual TreePtr<Node> OnObject( TreePtr<Node> object, Location loc );
 	virtual TreePtr<Node> OnBody( TreePtr<Node> body, Location loc );
 	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, Location loc );

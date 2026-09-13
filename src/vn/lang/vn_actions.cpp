@@ -775,12 +775,9 @@ TreePtr<Node> VNLangActions::OnSeqArgs()
 }	
 
 
-TreePtr<Node> VNLangActions::OnCall( TreePtr<Node> callee, TreePtr<Node> argumentation )
+TreePtr<Node> VNLangActions::OnCall()
 {
-	auto call = MakeTreeNode<StandardAgentWrapper<CPPTree::Call>>();
-	call->callee = callee;
-	call->argumentation = argumentation;
-	return call;
+	return MakeTreeNode<StandardAgentWrapper<CPPTree::Call>>();
 }	
 
 

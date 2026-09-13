@@ -73,7 +73,7 @@ public:
 	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, Syntax::Location id_loc, TreePtr<Node> value );
 	TreePtr<Node> OnMapArgs();
 	TreePtr<Node> OnSeqArgs();
-	TreePtr<Node> OnCall( TreePtr<Node> callee, TreePtr<Node> argumentation );
+	TreePtr<Node> OnCall();
 	TreePtr<Node> OnLookup();
 
 	TreePtr<Node> OnIdByName( TreePtr<Node> node, Syntax::Location id_disc_loc, wstring wname, Syntax::Location name_loc );

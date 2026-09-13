@@ -2136,6 +2136,41 @@ TreePtr<Node> Unop::OnObject( TreePtr<Node> object, Location )
 	return TreePtr<Node>( shared_from_this() );	
 }
 
+//////////////////////////// Binop ///////////////////////////////
+
+TreePtr<Node> Binop::OnTwoArgs( TreePtr<Node> arg_l, TreePtr<Node> arg_r, Location )
+{
+	ASSERT( operands.empty() );
+	operands.push_back(arg_l); 
+	operands.push_back(arg_r); 
+	return TreePtr<Node>( shared_from_this() );	
+}
+
+//////////////////////////// CommutativeBinop ///////////////////////////////
+
+TreePtr<Node> CommutativeBinop::OnTwoArgs( TreePtr<Node> arg_l, TreePtr<Node> arg_r, Location )
+{
+	ASSERT( operands.empty() );
+	operands.push_back(arg_l); 
+	operands.push_back(arg_r); 
+	return TreePtr<Node>( shared_from_this() );	
+}
+
+//////////////////////////// AssignmentOperator ///////////////////////////////
+
+TreePtr<Node> AssignmentOperator::OnObject( TreePtr<Node> object, Location )
+{
+	operands.push_front(object); 
+	return TreePtr<Node>( shared_from_this() );	
+}
+
+
+TreePtr<Node> AssignmentOperator::OnSoloArg( TreePtr<Node> arg, Location )
+{
+	operands.push_back(arg); 
+	return TreePtr<Node>( shared_from_this() );	
+}
+
 //////////////////////////// Operators from operator_data.inc ///////////////////////////////
 
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT, PROD, ASSOC) \
@@ -2368,6 +2403,14 @@ string Cast::GetRender( VN::RendererInterface *renderer, Production, Policy poli
                  renderer->DoRender( &operand, Production::PREFIX, policy );
 }
 
+//////////////////////////// GoSub ///////////////////////////////
+
+TreePtr<Node> GoSub::OnObject( TreePtr<Node> object_, Location )
+{
+	callee = object_;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
 //////////////////////////// Call ///////////////////////////////
 
 Syntax::Production Call::GetMyProductionTerminal() const
@@ -2387,6 +2430,13 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	// Let the SeqArgumentation node do the actual render
 	s += arg->DirectRenderArgumentation(renderer, policy);    
 	return s;
+}
+
+
+TreePtr<Node> Call::OnArgumentation( TreePtr<Node> argumentation_, Location )
+{
+	argumentation = argumentation_;
+	return (TreePtr<Node>)shared_from_this();
 }
 
 //////////////////////////// ConstructInitialiser ///////////////////////////////
@@ -2418,6 +2468,13 @@ string ConstructInitialiser::GetRender( VN::RendererInterface *renderer, Product
 	// We never render the identifier for constructors - they are "invisible" and represent
 	// the choice of which overload we are bound to.		
 	return arg->DirectRenderArgumentation(renderer, policy);	
+}
+
+
+TreePtr<Node> ConstructInitialiser::OnArgumentation( TreePtr<Node> argumentation_, Location )
+{
+	argumentation = argumentation_;
+	return (TreePtr<Node>)shared_from_this();
 }
 
 //////////////////////////// FuncOnType ///////////////////////////////

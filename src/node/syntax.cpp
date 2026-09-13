@@ -236,6 +236,9 @@ TreePtr<Node> Syntax::OnArgsList( list<TreePtr<Node>> args, Location loc )
 		case 1:
 		return OnSoloArg( SoloElementOf(args), loc );
 		
+		case 2:
+		return OnTwoArgs( args.front(), args.back(), loc );
+		
 		default:
 		throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
 			MyBestErrName() + " does not expect multiple arguments (implement OnArgsList()).");	
@@ -247,6 +250,20 @@ TreePtr<Node> Syntax::OnSoloArg( TreePtr<Node>, Location loc )
 {
 	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
 		MyBestErrName() + " does not expect an argument (implement OnSoloArg()).");	
+}
+
+
+TreePtr<Node> Syntax::OnTwoArgs( TreePtr<Node>, TreePtr<Node>, Location loc )
+{
+	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
+		MyBestErrName() + " does not expect a pair of arguments (implement OnTwoArgs()).");	
+}
+
+
+TreePtr<Node> Syntax::OnArgumentation( TreePtr<Node>, Location loc )
+{
+	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
+		MyBestErrName() + " does not expect an argumentation (implement OnArgumentation()).");		
 }
 
 
