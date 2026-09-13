@@ -1128,3 +1128,8 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // NODE: implementing GetSignifierToken gives the node syntax in the parser, so for render to match, GetRender()
 // must be implemented. The impl should call renderer->GetKeyword() for the element that will parse with the 
 // signifier token.
+
+// NOTE on sub-hierarchies of add-on nodes:
+// GetSignifierToken() is generally implemented in intermediate so intermediate can be used grammatically
+// whereas GetKeyword() is usually only implemented in leaf classes so only they get keywords 
+// GetRender() is usually implemented in intermediate to gove consistent syntax

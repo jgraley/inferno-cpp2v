@@ -206,6 +206,8 @@ struct Process : CPPTree::Subroutine,
                  virtual SCNode 
 {
     NODE_FUNCTIONS
+	Syntax::Production GetMyProductionTerminal() const override;
+   	Token GetSignifierToken() const override; 
 };
 
 /** Any process that begins or resumes execution in response to events (presumably
@@ -223,16 +225,17 @@ struct Method : EventProcess
 {
     NODE_FUNCTIONS_FINAL
     string GetLoweredIdOrMacroName() const override;
+    string GetKeyword( Policy ) const override;	
 };
 
 /** SystemC thread process. Local context, so this can run forever (stopping only to indicate completion
     of a test run) and may block in wait or run busy for a while. Actually I dont think 
     the SystemC kernel can pre-empt, so it should not run busy all the time. */
-struct Thread : EventProcess // TODO if SystemC really can't pre-empt, then this should be renamed to Context
-                             // TODO and I should create a real thread support extension because user's threads will run busy sometimes
+struct Thread : EventProcess 
 {
     NODE_FUNCTIONS_FINAL
     string GetLoweredIdOrMacroName() const override;
+    string GetKeyword( Policy ) const override;	
 };
 
 /** SystemC clocked thread process. A local context as with Thread, but can only
@@ -242,6 +245,8 @@ struct ClockedThread : Process
 {
     NODE_FUNCTIONS_FINAL
     string GetLoweredIdOrMacroName() const override;
+    string GetKeyword( Policy ) const override;	
+
     //TODO TreePtr<Sensitivity> clock;
 };
 
@@ -252,8 +257,12 @@ struct DeltaCount : CPPTree::Operator,
 {
     NODE_FUNCTIONS_FINAL
     string GetLoweredIdOrMacroName() const override;
-	Production GetMyProductionTerminal() const override { return Production::POSTFIX; };	// renders like a function call
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+    string GetKeyword( Policy ) const override;	
+   	Token GetSignifierToken() const override;
 };
+
 
 /// Termination functions
 /** These are used to stop the program and produce an exit code because 
@@ -264,7 +273,12 @@ struct TerminationFunction : CPPTree::Statement,
 {
     NODE_FUNCTIONS
     TreePtr<CPPTree::Expression> code; ///< exit code for program, 0 to 255 
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+	Production GetMyProductionTerminal() const override;
+   	Token GetSignifierToken() const override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, Location loc ) override;
 };
+
 
 /// The exit() system call; cease() below is preferred.
 // TODO not actually SystemC
@@ -272,6 +286,7 @@ struct Exit : TerminationFunction
 {
     NODE_FUNCTIONS_FINAL
     string GetLoweredIdOrMacroName() const override;
+    string GetKeyword( Policy ) const override;	
 };
 
 
@@ -289,6 +304,7 @@ struct Cease : TerminationFunction, SCExtension
 {
     NODE_FUNCTIONS_FINAL
     string GetLoweredIdOrMacroName() const override;
+    string GetKeyword( Policy ) const override;	
 };
 
 };

@@ -25,6 +25,9 @@ UniqueNameGenerator::UniqueNameGenerator( string (Syntax::*name_getter_)() const
 	name_usages.insert( NameUsagesPair( "wait", {{0, nullptr}} ) );
 	name_usages.insert( NameUsagesPair( "next_trigger", {{0, nullptr}} ) );
 	name_usages.insert( NameUsagesPair( "notify", {{0, nullptr}} ) );
+	name_usages.insert( NameUsagesPair( "delta_count", {{0, nullptr}} ) );
+	name_usages.insert( NameUsagesPair( "exit", {{0, nullptr}} ) );
+	name_usages.insert( NameUsagesPair( "cease", {{0, nullptr}} ) );
 }
 
 

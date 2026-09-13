@@ -82,7 +82,7 @@ string WaitDynamic::GetRender( VN::RendererInterface *renderer, Production, Poli
 {
 	return renderer->GetKeyword(this, policy) + 
 	       "( " + 
-	       renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
+	       renderer->DoRender(&event, Production::COMMA_SEP, policy) +
 	       " )";
 }
 
@@ -158,7 +158,7 @@ string NextTriggerDynamic::GetRender( VN::RendererInterface *renderer, Productio
 {
 	return renderer->GetKeyword(this, policy) + 
 	       "( " + 
-	       renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
+	       renderer->DoRender(&event, Production::COMMA_SEP, policy) +
 	       " )";
 }
 
@@ -213,7 +213,7 @@ Syntax::Production Notify::GetMyProductionTerminal() const
 
 string Notify::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
+	return renderer->DoRender(&event, Production::POSTFIX, policy) +
 		   "." +
 		   renderer->GetKeyword(this, policy) + 
 	       "()";
@@ -257,11 +257,11 @@ string NotifyDelta::GetKeyword( Policy ) const
 
 string NotifyTimed::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->DoRender(&event, Production::SPACE_SEP_STMT_DECL, policy) +
+	return renderer->DoRender(&event, Production::POSTFIX, policy) +
 	       "." + 
 	       renderer->GetKeyword(this, policy) + 
 	       "( " + // TODO factor out a render for the args
-	       renderer->DoRender(&time, Production::SPACE_SEP_STMT_DECL, policy) +
+	       renderer->DoRender(&time, Production::COMMA_SEP, policy) +
 	       " )";
 }
 
@@ -284,12 +284,30 @@ TreePtr<Node> NotifyTimed::OnSoloArg( TreePtr<Node> arg, Location )
 	return TreePtr<Node>( shared_from_this() );	
 }
 
+//////////////////////////// Process //////////////////////////// 
+
+Syntax::Production Process::GetMyProductionTerminal() const
+{ 
+	return Production::PRIMARY_TYPE; 
+}
+
+
+Syntax::Token Process::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_TYPE_KEYWORD;
+}
 
 //////////////////////////// Method ///////////////////////////////
 
 string Method::GetLoweredIdOrMacroName() const 
 { 
 	return "SC_METHOD"; 
+}
+
+
+string Method::GetKeyword( Policy ) const 
+{
+	return "method"; 
 }
 
 //////////////////////////// Thread ///////////////////////////////
@@ -299,11 +317,22 @@ string Thread::GetLoweredIdOrMacroName() const
 	return "SC_THREAD"; 
 }
 
+
+string Thread::GetKeyword( Policy ) const 
+{
+	return "thread"; 
+}
+
 //////////////////////////// ClockedThread ///////////////////////////////
 
 string ClockedThread::GetLoweredIdOrMacroName() const 
 { 
 	return "SC_CTHREAD"; 
+}
+
+string ClockedThread::GetKeyword( Policy ) const 
+{
+	return "cthread"; 
 }
 
 //////////////////////////// DeltaCount ///////////////////////////////
@@ -313,6 +342,59 @@ string DeltaCount::GetLoweredIdOrMacroName() const
 	return "sc_delta_count"; 
 }    
 
+
+Syntax::Production DeltaCount::GetMyProductionTerminal() const
+{
+	return Production::POSTFIX; 	// renders like a function call
+}
+
+
+string DeltaCount::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{				
+	return renderer->GetKeyword(this, policy) + "()";
+}
+
+
+string DeltaCount::GetKeyword( Policy ) const 
+{
+	return "delta_count"; 
+}
+
+
+Syntax::Token DeltaCount::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_LIBRARY_FUNC;
+}
+
+//////////////////////////// TerminationFunction ///////////////////////////////
+
+Syntax::Production TerminationFunction::GetMyProductionTerminal() const
+{
+	return Production::POSTFIX; 	
+}
+
+
+string TerminationFunction::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{				
+	return renderer->GetKeyword(this, policy) + 
+	       "( " +
+	       renderer->DoRender(&code, Production::COMMA_SEP, policy) +
+	       " )";
+}
+
+
+Syntax::Token TerminationFunction::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_LIBRARY_FUNC;
+}
+
+
+TreePtr<Node> TerminationFunction::OnSoloArg( TreePtr<Node> arg, Location )
+{
+	code = arg;
+	return TreePtr<Node>( shared_from_this() );	
+}
+
 //////////////////////////// Exit ///////////////////////////////
 
 string Exit::GetLoweredIdOrMacroName() const 
@@ -320,10 +402,22 @@ string Exit::GetLoweredIdOrMacroName() const
 	return "exit"; 
 }
 
+
+string Exit::GetKeyword( Policy ) const
+{
+	return "exit";
+}	
+
 //////////////////////////// Cease ///////////////////////////////
 
 string Cease::GetLoweredIdOrMacroName() const 
 { 
 	return "cease"; 
+}
+
+
+string Cease::GetKeyword( Policy ) const
+{
+	return "cease";
 }
 
