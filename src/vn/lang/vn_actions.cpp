@@ -371,22 +371,9 @@ TreePtr<Node> VNLangActions::OnStringLiteral( wstring wvalue )
 }
 
 
-TreePtr<Node> VNLangActions::OnCast( TreePtr<Node> type, Syntax::Location type_loc, TreePtr<Node> operand, Syntax::Location operand_loc )
+TreePtr<Node> VNLangActions::OnConditionalOperator()
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Cast>>();
-	node->operand = operand;	
-	node->type = type;
-	return node;
-}
-
-
-TreePtr<Node> VNLangActions::OnConditionalOperator( TreePtr<Node> condition, TreePtr<Node> expr_then, TreePtr<Node> expr_else )
-{
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::ConditionalOperator>>();
-	node->condition = condition;	
-	node->expr_then = expr_then;
-	node->expr_else = expr_else;
-	return node;
+	return MakeTreeNode<StandardAgentWrapper<CPPTree::ConditionalOperator>>();
 }
 	
 
@@ -396,13 +383,9 @@ TreePtr<Node> VNLangActions::OnSubscript()
 }
 	
 
-TreePtr<Node> VNLangActions::OnArrayInitialiser( list<TreePtr<Node>> elements )
+TreePtr<Node> VNLangActions::OnArrayInitialiser()
 {
-	// Fill out the array literal
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::ArrayInitialiser>>();
-	for( TreePtr<Node> value : elements )
-		node->elements.insert( value );
-	return node;
+	return MakeTreeNode<StandardAgentWrapper<CPPTree::ArrayInitialiser>>();
 }
 
 
@@ -414,58 +397,9 @@ TreePtr<Node> VNLangActions::OnLabel( TreePtr<Node> identifier, Syntax::Location
 }
 
 
-TreePtr<Node> VNLangActions::OnCase( TreePtr<Node> value, Syntax::Location loc )
-{
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Case>>();
-	node->value = value;
-	return node;
-}
-
-
-TreePtr<Node> VNLangActions::OnRangeCase( TreePtr<Node> value_lo, Syntax::Location lo_loc, TreePtr<Node> value_hi, Syntax::Location hi_loc )
-{
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::RangeCase>>();
-	node->value_lo = value_lo;
-	node->value_hi = value_hi;
-	return node;
-}
-
-
-TreePtr<Node> VNLangActions::OnDefault( Syntax::Location loc )
-{
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::Default>>();
-}
-
-
 TreePtr<Node> VNLangActions::OnNop( Syntax::Location loc )
 {
 	return MakeTreeNode<StandardAgentWrapper<CPPTree::Nop>>();
-}
-
-
-TreePtr<Node> VNLangActions::OnFuncOnType( string keyword, Syntax::Location keyword_loc, TreePtr<Node> type_arg, Syntax::Location type_arg_loc )
-{
-	TreePtr<CPPTree::FuncOnType> node;
-	if( keyword=="sizeof" )
-		node = MakeTreeNode<StandardAgentWrapper<CPPTree::SizeOf>>();
-	else if( keyword=="alignof" )
-		node = MakeTreeNode<StandardAgentWrapper<CPPTree::AlignOf>>();
-	else
-		ASSERTFAIL();
-		
-	node->argument = type_arg;
-	
-	return node;
-}
-
-
-TreePtr<Node> VNLangActions::OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params )
-{
-	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Function>>();
-	for( auto p : params )
-		ret->params.insert(p);
-	ret->return_type = return_type;
-	return ret;
 }
 
 
@@ -748,13 +682,9 @@ Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals,
 }
 
 
-TreePtr<Node> VNLangActions::OnIdValuePair( TreePtr<Node> key, Syntax::Location id_loc, TreePtr<Node> value )
+TreePtr<Node> VNLangActions::OnIdValuePair()
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::IdValuePair>>();
-	
-	node->key = key;
-	node->value = value;
-	return node;
+	return MakeTreeNode<StandardAgentWrapper<CPPTree::IdValuePair>>();
 }	
 
 

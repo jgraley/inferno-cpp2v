@@ -568,6 +568,13 @@ Sequence<Expression> IdValuePair::SortMapById( Collection<IdValuePair> &id_value
 }
 
 
+TreePtr<Node> IdValuePair::OnTwoArgs( TreePtr<Node> arg_l, TreePtr<Node> arg_r, Location )
+{
+	key = arg_l;
+	value = arg_r; 
+	return TreePtr<Node>( shared_from_this() );	
+}
+
 //////////////////////////// MapArgumentation ///////////////////////////////
 
 Syntax::Production MapArgumentation::GetMyProductionTerminal() const
@@ -2249,6 +2256,18 @@ string ConditionalOperator::GetRender( VN::RendererInterface *renderer, Producti
 }
 
 
+TreePtr<Node> ConditionalOperator::OnArgsList( list<TreePtr<Node>> args, Location )
+{
+	condition = args.front();
+	args.pop_front();
+	expr_then = args.front();
+	args.pop_front();
+	expr_else = args.front();
+	args.pop_front();
+	return TreePtr<Node>( shared_from_this() );	
+}
+
+
 //////////////////////////// Subscript ///////////////////////////////
 
 Syntax::Production Subscript::GetMyProductionTerminal() const
@@ -2300,6 +2319,15 @@ string ArrayInitialiser::GetRender( VN::RendererInterface *renderer, Production 
 
     return Join(ls, ", ", "{", "}\n"); 
 }
+
+
+TreePtr<Node> ArrayInitialiser::OnArgsList( list<TreePtr<Node>> args, Location )
+{
+	for( TreePtr<Node> value : args )
+		elements.insert( value );
+	return (TreePtr<Node>)shared_from_this();
+}
+
 
 //////////////////////////// This ///////////////////////////////
 

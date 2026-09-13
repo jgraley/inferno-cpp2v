@@ -42,12 +42,11 @@ public:
 	TreePtr<Node> OnPostfixOperator( string tok );
 	TreePtr<Node> OnIntegralLiteral( string text, Syntax::Location loc ); 
 	TreePtr<Node> OnStringLiteral( wstring value );
-	TreePtr<Node> OnCast( TreePtr<Node> type, Syntax::Location type_loc, TreePtr<Node> target, Syntax::Location target_loc );	
-	TreePtr<Node> OnConditionalOperator( TreePtr<Node> condition, TreePtr<Node> expr_then, TreePtr<Node> expr_else );	
+	TreePtr<Node> OnConditionalOperator();	
 	TreePtr<Node> OnSubscript();	
 	TreePtr<Node> OnCompound( list<TreePtr<Node>> members, Syntax::Location memb_loc, list<TreePtr<Node>> statements, Syntax::Location stmt_loc );	
 	TreePtr<Node> OnCodeUnit( list<TreePtr<Node>> members, Syntax::Location memb_loc );	
-	TreePtr<Node> OnArrayInitialiser( list<TreePtr<Node>> elements );	
+	TreePtr<Node> OnArrayInitialiser();	
 	TreePtr<Node> OnLabel( TreePtr<Node> identifier, Syntax::Location loc );	
 	TreePtr<Node> OnCase( TreePtr<Node> value, Syntax::Location loc );	
 	TreePtr<Node> OnRangeCase( TreePtr<Node> value_lo, Syntax::Location lo_loc, TreePtr<Node> value_hi, Syntax::Location hi_loc );	
@@ -70,7 +69,7 @@ public:
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified
 	Declarators::CVQuals OnCVQuals( const list<QualifierData> &quals, bool nice=false );
 	
-	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, Syntax::Location id_loc, TreePtr<Node> value );
+	TreePtr<Node> OnIdValuePair();
 	TreePtr<Node> OnMapArgs();
 	TreePtr<Node> OnSeqArgs();
 	TreePtr<Node> OnCall();

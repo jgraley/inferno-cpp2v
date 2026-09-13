@@ -312,6 +312,7 @@ struct IdValuePair : virtual Node
 	// Sort-of a method on Collection<IdValuePair>
 	static Sequence<Expression> SortMapById( Collection<IdValuePair> &id_value_map,
 								     	     Sequence<Declaration> key_sequence );
+	TreePtr<Node> OnTwoArgs( TreePtr<Node> arg_l, TreePtr<Node> arg_r, Location ) override;
 };
 
 
@@ -1264,6 +1265,7 @@ struct NODE : BASE \
 
 #include "operator_data.inc"
 
+
 /// The termary ?: operator
 struct ConditionalOperator : Operator
 {
@@ -1274,7 +1276,9 @@ struct ConditionalOperator : Operator
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location ) override;
 };
+
 
 /// Subscripting on objects
 struct Subscript : Operator
@@ -1289,6 +1293,7 @@ struct Subscript : Operator
 	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, Location loc ) override;
 };
 
+
 /// An array formed directly from elements which should all be the same type
 struct ArrayInitialiser : Initialiser
 {
@@ -1297,7 +1302,9 @@ struct ArrayInitialiser : Initialiser
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location ) override;
 };
+
 
 struct This : Operator
 {
@@ -1308,6 +1315,7 @@ struct This : Operator
    	Token GetSignifierToken() const override;
 };
 
+
 /// Property indicating whether a New/Delete is global 
 /** New/Delete is global if it has :: in
  front of it. This differentiates when placement args are given as follows:
@@ -1315,21 +1323,27 @@ struct This : Operator
  NonGlobal: all placement args go to a corresponding operator new which returns address to construct at */
 struct Globality : Property { NODE_FUNCTIONS };
 
+
 /// Property indicating ::new/::delete was used
 struct IsGlobal : Globality { NODE_FUNCTIONS_FINAL }; 
 
+
 /// Property indicating just new/delete, no :: was used
 struct NonGlobal : Globality { NODE_FUNCTIONS_FINAL }; 
+
 
 /// Property indicating whether a delete should delete an array.
 /** Apologies for the tenuous grammar. */
 struct DeleteArrayness : Property { NODE_FUNCTIONS };
 
+
 /// Property indicating delete[] was used
 struct DeleteArray : DeleteArrayness { NODE_FUNCTIONS_FINAL }; 
 
+
 /// Property indicating delete, no []
 struct DeleteNonArray : DeleteArrayness { NODE_FUNCTIONS_FINAL }; 
+
 
 /// Node for the C++ new operator
 /** gives all the syntactical elements required for allocation and initialisation */
@@ -1345,6 +1359,7 @@ struct New : Operator
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 };
+
 
 /// Node for C++ delete operator
 struct Delete : Operator 
