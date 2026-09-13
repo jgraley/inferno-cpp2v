@@ -194,11 +194,11 @@ public:
 	typedef any Token;
 	typedef any Location;
 
-	virtual YY::VNLangParser::token::token_kind_type GetSignifierToken() const;
-	virtual YY::VNLangParser::token::token_kind_type GetExplicitToken() const;
-	virtual YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const;
-	virtual YY::VNLangParser::token::token_kind_type GetIdByNameToken() const;
-	virtual YY::VNLangParser::token::token_kind_type GetIdBuilderToken() const;
+	virtual Token GetSignifierToken() const;
+	virtual Token GetExplicitToken() const;
+	virtual Token GetPrerestrictToken() const;
+	virtual Token GetIdByNameToken() const;
+	virtual Token GetIdBuilderToken() const;
 
 	string MyBestErrName() const;
 	virtual TreePtr<Node> OnAccess( TreePtr<Node> access, YY::VNLangParser::location_type loc );

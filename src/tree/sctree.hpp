@@ -78,7 +78,7 @@ struct Wait : CPPTree::Statement,
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetLoweredIdOrMacroName() const override;
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
+   	Token GetSignifierToken() const override;
 };
 
 /** Waiting for a SystemC event - blocks until the event indicated by the expression is 
@@ -90,7 +90,7 @@ struct WaitDynamic : Wait,
     NODE_FUNCTIONS_FINAL
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
+   	Token GetSignifierToken() const override;
 	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
 };
 
@@ -123,7 +123,7 @@ struct NextTrigger : CPPTree::Statement,
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetLoweredIdOrMacroName() const override;
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
+   	Token GetSignifierToken() const override;
 };
 
 /** Causes the method to be triggered again when the event indicated by the expression is 
@@ -135,7 +135,7 @@ struct NextTriggerDynamic : NextTrigger,
     NODE_FUNCTIONS_FINAL
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
+   	Token GetSignifierToken() const override;
 	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
 };
 
@@ -170,7 +170,7 @@ struct Notify : CPPTree::Statement,
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetLoweredIdOrMacroName() const override;    
 	TreePtr<Node> OnObject( TreePtr<Node> object, YY::VNLangParser::location_type loc ) override;
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
+   	Token GetSignifierToken() const override;
 };
 
 /** Notify the event immediately. Not sure if this can force control to go 
@@ -195,7 +195,7 @@ struct NotifyTimed : Notify
     TreePtr<CPPTree::Expression> time; ///< how long to wait for before notifying
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-   	YY::VNLangParser::token::token_kind_type GetSignifierToken() const override;
+   	Token GetSignifierToken() const override;
 	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc ) override;
 };
 

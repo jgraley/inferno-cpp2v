@@ -69,7 +69,7 @@ string Wait::GetLoweredIdOrMacroName() const
 }
 
 
-YY::VNLangParser::token::token_kind_type Wait::GetSignifierToken() const
+Syntax::Token Wait::GetSignifierToken() const
 {
 	return YY::VNLangParser::token::TOK_LIBRARY_FUNC;
 }
@@ -91,7 +91,7 @@ string WaitDynamic::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type WaitDynamic::GetSignifierToken() const
+Syntax::Token WaitDynamic::GetSignifierToken() const
 {
 	return Syntax::GetSignifierToken(); // retract the token - we want to recognise WaitStatic instead
 }
@@ -145,7 +145,7 @@ string NextTrigger::GetLoweredIdOrMacroName() const
 }
 
 
-YY::VNLangParser::token::token_kind_type NextTrigger::GetSignifierToken() const
+Syntax::Token NextTrigger::GetSignifierToken() const
 {
 	return YY::VNLangParser::token::TOK_LIBRARY_FUNC;
 }
@@ -167,7 +167,7 @@ string NextTriggerDynamic::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type NextTriggerDynamic::GetSignifierToken() const
+Syntax::Token NextTriggerDynamic::GetSignifierToken() const
 {
 	return Syntax::GetSignifierToken(); // retract the token - we want to recognise WaitStatic instead
 }
@@ -224,7 +224,7 @@ string Notify::GetLoweredIdOrMacroName() const
 }
 
 
-YY::VNLangParser::token::token_kind_type Notify::GetSignifierToken() const
+Syntax::Token Notify::GetSignifierToken() const
 {
 	return YY::VNLangParser::token::TOK_LIBRARY_METHOD;
 }
@@ -270,7 +270,7 @@ string NotifyTimed::GetKeyword( Policy ) const
 }
 
 
-YY::VNLangParser::token::token_kind_type NotifyTimed::GetSignifierToken() const
+Syntax::Token NotifyTimed::GetSignifierToken() const
 {
 	return Syntax::GetSignifierToken(); // retract the token - we want to recognise WaitStatic instead
 }

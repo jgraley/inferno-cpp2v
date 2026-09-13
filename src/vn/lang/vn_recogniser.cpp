@@ -77,7 +77,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, Y
 {
 	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
 	
-	YY::VNLangParser::token::token_kind_type token_kind;
+	Syntax::Token token_kind;
 	try
 	{
 		token_kind = node->GetSignifierToken();		
@@ -89,31 +89,31 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, Y
 		// There's no keyword token, so produce explicit token for long-form parsing
 		token_kind = node->GetExplicitToken();		
 	}
-	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
+	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), std::move(node), std::move(loc) );		
 }
 
 
 YY::VNLangParser::symbol_type VNLangRecogniser::OnPrerestrictLexeme(wstring text, YY::VNLangParser::location_type loc) const
 {
 	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
-	YY::VNLangParser::token::token_kind_type token_kind = node->GetPrerestrictToken();		
-	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
+	Syntax::Token token_kind = node->GetPrerestrictToken();		
+	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), std::move(node), std::move(loc) );		
 }
 
 
 YY::VNLangParser::symbol_type VNLangRecogniser::OnIdByNameLexeme(wstring text, YY::VNLangParser::location_type loc) const
 {
 	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
-	YY::VNLangParser::token::token_kind_type token_kind = node->GetIdByNameToken();		
-	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
+	Syntax::Token token_kind = node->GetIdByNameToken();		
+	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), std::move(node), std::move(loc) );		
 }
 
 
 YY::VNLangParser::symbol_type VNLangRecogniser::OnIdBuilderLexeme(wstring text, YY::VNLangParser::location_type loc) const
 {
 	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
-	YY::VNLangParser::token::token_kind_type token_kind = node->GetIdBuilderToken();		
-	return YY::VNLangParser::symbol_type( token_kind, std::move(node), std::move(loc) );		
+	Syntax::Token token_kind = node->GetIdBuilderToken();		
+	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), std::move(node), std::move(loc) );		
 }
 
 
@@ -209,7 +209,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 	if( !tag )
 		throw Unrecognised();
 	TreePtr<Node> node = MakeStandardAgent(tag.value());
-	return YY::VNLangParser::symbol_type( node->GetSignifierToken(), std::move(node), std::move(loc) );
+	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(node->GetSignifierToken()), std::move(node), std::move(loc) );
 }
 
 
@@ -224,7 +224,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring tex
 	TreePtr<Node> node = designation_gnomon->node;
 	// The designation_gnomon->token is based on syntax in particurar and there's no expectation
 	// that the node should know what it should be. It's a parser -> parser message in effect.
-	return YY::VNLangParser::symbol_type( designation_gnomon->token, std::move(node), std::move(loc) );
+	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(designation_gnomon->token), std::move(node), std::move(loc) );
 }
 
 

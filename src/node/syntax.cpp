@@ -119,31 +119,31 @@ bool Syntax::IsSpecificIdentifier() const
 }
 
 
-YY::VNLangParser::token::token_kind_type Syntax::GetSignifierToken() const
+Syntax::Token Syntax::GetSignifierToken() const
 {
 	throw UnimplementedToken();
 }
 
 
-YY::VNLangParser::token::token_kind_type Syntax::GetExplicitToken() const
+Syntax::Token Syntax::GetExplicitToken() const
 {
 	return YY::VNLangParser::token::TOK_EXPLICIT_NORMAL;
 }
 
 
-YY::VNLangParser::token::token_kind_type Syntax::GetPrerestrictToken() const
+Syntax::Token Syntax::GetPrerestrictToken() const
 {
 	return YY::VNLangParser::token::TOK_PRERESTRICT_NORMAL;	
 }
 
 
-YY::VNLangParser::token::token_kind_type Syntax::GetIdByNameToken() const
+Syntax::Token Syntax::GetIdByNameToken() const
 {
 	return YY::VNLangParser::token::TOK_ID_BY_NAME_NORMAL;	
 }
 
 
-YY::VNLangParser::token::token_kind_type Syntax::GetIdBuilderToken() const
+Syntax::Token Syntax::GetIdBuilderToken() const
 {
 	return YY::VNLangParser::token::TOK_ID_BUILDER_NORMAL;	
 }

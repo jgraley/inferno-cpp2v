@@ -37,7 +37,7 @@ TreePtr<Node> MakeStandardAgent(NodeTag ne);
 class DesignationGnomon : public Gnomon
 {
 public:	
-	DesignationGnomon( std::wstring name_, TreePtr<Node> node_, YY::VNLangParser::token::token_kind_type token_ ) : 
+	DesignationGnomon( std::wstring name_, TreePtr<Node> node_, Syntax::Token token_ ) : 
 		name( name_ ),
 		node( node_ ),
 		token( token_ )
@@ -48,14 +48,14 @@ public:
 
 	string GetTrace() const
 	{
-		return ToASCII(name) + "⪮" + Trace(node) + "(" + Trace((unsigned)token) + ")";
+		return ToASCII(name) + "⪮" + Trace(node) + "(" + Trace((unsigned)any_cast<YY::VNLangParser::token::token_kind_type>(token)) + ")";
 	}
 	
 private:
 	friend class VNLangRecogniser;
 	std::wstring name;
 	TreePtr<Node> node;
-	YY::VNLangParser::token::token_kind_type token;
+	Syntax::Token token;
 };
 
 

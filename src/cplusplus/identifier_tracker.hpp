@@ -12,8 +12,6 @@ struct FieldDeclarator;
 // Parse.
 class Selector;
 // Lex.
-class Token;
-
 
 class IdentifierTracker
 {
