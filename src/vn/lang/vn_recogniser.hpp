@@ -76,22 +76,22 @@ public:
 
 	void Designate( wstring name, TreePtr<Node> sub_pattern );
 	
-	YY::VNLangParser::symbol_type OnUnquotedLexeme(string text, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type OnUnquotedLexeme(wstring text, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type OnExplicitLexeme(wstring text, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type OnPrerestrictLexeme(wstring text, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type OnIdByNameLexeme(wstring text, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type OnIdBuilderLexeme(wstring text, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type OnTransformLexeme(wstring text, YY::VNLangParser::location_type loc) const;
+	YY::VNLangParser::symbol_type OnUnquotedLexeme(string text, Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type OnUnquotedLexeme(wstring text, Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type OnExplicitLexeme(wstring text, Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type OnPrerestrictLexeme(wstring text, Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type OnIdByNameLexeme(wstring text, Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type OnIdBuilderLexeme(wstring text, Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type OnTransformLexeme(wstring text, Syntax::Location loc) const;
 	
 private:
-	TreePtr<Node> CreateNodeFromName(string text, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type Recognise(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type RecogniseInNodeNameScope(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type CreateBlockToken(const ANDBlock *block, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type CreateNodeToken(const AvailableNodeData::NodeBlock *block, YY::VNLangParser::location_type loc) const;
-    YY::VNLangParser::symbol_type RecogniseKeyword(wstring text, bool ascii, YY::VNLangParser::location_type loc) const;
-	YY::VNLangParser::symbol_type RecogniseDesignation(wstring text, YY::VNLangParser::location_type loc) const;
+	TreePtr<Node> CreateNodeFromName(string text, Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type Recognise(wstring text, bool ascii, Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type RecogniseInNodeNameScope(wstring text, bool ascii, Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type CreateBlockToken(const ANDBlock *block, Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type CreateNodeToken(const AvailableNodeData::NodeBlock *block, Syntax::Location loc) const;
+    YY::VNLangParser::symbol_type RecogniseKeyword(wstring text, bool ascii, Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type RecogniseDesignation(wstring text, Syntax::Location loc) const;
 
 	class Unrecognised : Exception {};
 	

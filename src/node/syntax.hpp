@@ -201,25 +201,25 @@ public:
 	virtual Token GetIdBuilderToken() const;
 
 	string MyBestErrName() const;
-	virtual TreePtr<Node> OnAccess( TreePtr<Node> access, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnDispatch( TreePtr<Node> d, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnBases( list<TreePtr<Node>> bases, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnMembers( list<TreePtr<Node>> members, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnStatements( list<TreePtr<Node>> statements, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnType( TreePtr<Node> type, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnMemberInits( list<TreePtr<Node>> memb_inits, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnInitialiser( TreePtr<Node> init, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnObject( TreePtr<Node> object, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
-	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type loc );
+	virtual TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc );
+	virtual TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc );
+	virtual TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc );
+	virtual TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc );
+	virtual TreePtr<Node> OnBases( list<TreePtr<Node>> bases, Location loc );
+	virtual TreePtr<Node> OnMembers( list<TreePtr<Node>> members, Location loc );
+	virtual TreePtr<Node> OnStatements( list<TreePtr<Node>> statements, Location loc );
+	virtual TreePtr<Node> OnType( TreePtr<Node> type, Location loc );
+	virtual TreePtr<Node> OnMemberInits( list<TreePtr<Node>> memb_inits, Location loc );
+	virtual TreePtr<Node> OnInitialiser( TreePtr<Node> init, Location loc );
+	virtual TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location loc );
+	virtual TreePtr<Node> OnSoloArg( TreePtr<Node> arg, Location loc );
+	virtual TreePtr<Node> OnObject( TreePtr<Node> object, Location loc );
+	virtual TreePtr<Node> OnBody( TreePtr<Node> body, Location loc );
+	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, Location loc );
 	
 	virtual any GetStartingScopeContext() const;    
-	virtual void UpdateContext( TreePtr<Node> node, any &context, YY::VNLangParser::location_type loc );	
-	virtual TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type loc) const; 
+	virtual void UpdateContext( TreePtr<Node> node, any &context, Location loc );	
+	virtual TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const; 
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"

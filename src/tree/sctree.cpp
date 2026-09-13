@@ -97,7 +97,7 @@ Syntax::Token WaitDynamic::GetSignifierToken() const
 }
 
 
-TreePtr<Node> WaitDynamic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+TreePtr<Node> WaitDynamic::OnSoloArg( TreePtr<Node> arg, Location )
 {
 	event = arg;
 	return TreePtr<Node>( shared_from_this() );	
@@ -111,7 +111,7 @@ string WaitStatic::GetKeyword( Policy ) const
 }
 
 
-TreePtr<Node> WaitStatic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc )
+TreePtr<Node> WaitStatic::OnSoloArg( TreePtr<Node> arg, Location loc )
 {
 	// Seeing an argument makes this node evolve into WaitDynamic
 	return MakeTreeNode<VN::StandardAgentWrapper<WaitDynamic>>()->OnSoloArg( arg, loc ); 
@@ -173,7 +173,7 @@ Syntax::Token NextTriggerDynamic::GetSignifierToken() const
 }
 
 
-TreePtr<Node> NextTriggerDynamic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+TreePtr<Node> NextTriggerDynamic::OnSoloArg( TreePtr<Node> arg, Location )
 {
 	event = arg;
 	return TreePtr<Node>( shared_from_this() );	
@@ -187,7 +187,7 @@ string NextTriggerStatic::GetKeyword( Policy ) const
 }
 
 
-TreePtr<Node> NextTriggerStatic::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc )
+TreePtr<Node> NextTriggerStatic::OnSoloArg( TreePtr<Node> arg, Location loc )
 {
 	// Evolve into NextTriggerDynamic and try again
 	return MakeTreeNode<VN::StandardAgentWrapper<NextTriggerDynamic>>()->OnSoloArg(arg, loc);
@@ -230,7 +230,7 @@ Syntax::Token Notify::GetSignifierToken() const
 }
 
 
-TreePtr<Node> Notify::OnObject( TreePtr<Node> object, YY::VNLangParser::location_type )
+TreePtr<Node> Notify::OnObject( TreePtr<Node> object, Location )
 {
 	event = object;
 	return TreePtr<Node>( shared_from_this() );	
@@ -276,7 +276,7 @@ Syntax::Token NotifyTimed::GetSignifierToken() const
 }
 
 
-TreePtr<Node> NotifyTimed::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+TreePtr<Node> NotifyTimed::OnSoloArg( TreePtr<Node> arg, Location )
 {
 	time = arg;
 	return TreePtr<Node>( shared_from_this() );	

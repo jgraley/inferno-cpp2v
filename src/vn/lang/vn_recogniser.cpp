@@ -61,19 +61,19 @@ void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(string text, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(string text, Syntax::Location loc) const
 {
 	return Recognise( ToUnicode(text), true, loc );
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(wstring text, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::OnUnquotedLexeme(wstring text, Syntax::Location loc) const
 {
 	return Recognise( text, false, loc );
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, Syntax::Location loc) const
 {
 	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
 	
@@ -89,57 +89,65 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, Y
 		// There's no keyword token, so produce explicit token for long-form parsing
 		token_kind = node->GetExplicitToken();		
 	}
-	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), std::move(node), std::move(loc) );		
+	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), 
+	                                      std::move(node), 
+	                                      any_cast<YY::VNLangParser::location_type>(loc) );		
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::OnPrerestrictLexeme(wstring text, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::OnPrerestrictLexeme(wstring text, Syntax::Location loc) const
 {
 	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
 	Syntax::Token token_kind = node->GetPrerestrictToken();		
-	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), std::move(node), std::move(loc) );		
+	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), 
+	                                      std::move(node), 
+	                                      any_cast<YY::VNLangParser::location_type>(loc) );		
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::OnIdByNameLexeme(wstring text, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::OnIdByNameLexeme(wstring text, Syntax::Location loc) const
 {
 	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
 	Syntax::Token token_kind = node->GetIdByNameToken();		
-	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), std::move(node), std::move(loc) );		
+	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), 
+	                                      std::move(node), 
+	                                      any_cast<YY::VNLangParser::location_type>(loc) );		
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::OnIdBuilderLexeme(wstring text, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::OnIdBuilderLexeme(wstring text, Syntax::Location loc) const
 {
 	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
 	Syntax::Token token_kind = node->GetIdBuilderToken();		
-	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), std::move(node), std::move(loc) );		
+	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), 
+	                                      std::move(node), 
+	                                      any_cast<YY::VNLangParser::location_type>(loc) );		
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::OnTransformLexeme(wstring text, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::OnTransformLexeme(wstring text, Syntax::Location loc) const
 {
 	string ascii_text = ToASCII(text.substr(1));
 	
 	// Transformations that act on normal scopes (instances, in this case)
 	if( ascii_text=="TypeOf" )
-		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(ascii_text, loc);					
+		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(ascii_text, any_cast<YY::VNLangParser::location_type>(loc));					
 
 	// Transformations that act on unified scopes (instances or types, in this case)
 	if( ascii_text=="DeclarationOf" )
-		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(ascii_text, loc);
+		return YY::VNLangParser::make_TRANSFORM_NAME_NORMAL(ascii_text, any_cast<YY::VNLangParser::location_type>(loc));
 
 	// Transformations that act on unified scopes (instances or types, in this case)
 	if( ascii_text=="TypeDeclarationOf" )
-		return YY::VNLangParser::make_TRANSFORM_NAME_TYPE(ascii_text, loc);
+		return YY::VNLangParser::make_TRANSFORM_NAME_TYPE(ascii_text, any_cast<YY::VNLangParser::location_type>(loc));
 
 	// In these scopes, there are no designations so we must succeed and can raise an error here if we don#t
-	throw YY::VNLangParser::syntax_error( loc,
+	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
 	    SSPrintf("Unrecognised transform: %s %s", DiagQuote(text).c_str(), GetContextText().c_str()) ); 
 }
 
 
-TreePtr<Node> VNLangRecogniser::CreateNodeFromName(string text, YY::VNLangParser::location_type loc) const
+TreePtr<Node> VNLangRecogniser::CreateNodeFromName(string text, Syntax::Location loc) const
 {
 	list<string> parts = Split(text, "::");
 	const AvailableNodeData::NamespaceBlock *namespace_block = AvailableNodeData().GetNodeNamesRoot();
@@ -158,7 +166,7 @@ TreePtr<Node> VNLangRecogniser::CreateNodeFromName(string text, YY::VNLangParser
 	for( string part : parts )
 	{
 		if( namespace_block->sub_blocks.count(part) == 0 )
-			throw YY::VNLangParser::syntax_error( loc,
+			throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
 				SSPrintf("Unrecognised %s in explicit name", DiagQuote(part).c_str() ) ); 
 
 		const ANDBlock *sub_block = namespace_block->sub_blocks.at(part).get();
@@ -172,13 +180,13 @@ TreePtr<Node> VNLangRecogniser::CreateNodeFromName(string text, YY::VNLangParser
 		else
 			ASSERT(false)("bad andata block ")(part)(" in ")(text);
 	}
-	throw YY::VNLangParser::syntax_error( loc,
+	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
 	    SSPrintf("Explicit %s only specifies a node namespace, not an actual node", DiagQuote(text).c_str() ) ); 
 	
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool ascii, Syntax::Location loc) const
 {
 	const ScopeGnomon *scope = nullptr;
 	shared_ptr<const ScopeGnomon> spg = scope_gnomons.TryLockTop();
@@ -192,13 +200,13 @@ YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool asc
 	} catch( Unrecognised& ) {}
 		
 	if( ascii )
-         return YY::VNLangParser::make_ASCII_NAME(ToASCII(text), loc);
+         return YY::VNLangParser::make_ASCII_NAME(ToASCII(text), any_cast<YY::VNLangParser::location_type>(loc));
     else
-         return YY::VNLangParser::make_UNICODE_NAME(text, loc);
+         return YY::VNLangParser::make_UNICODE_NAME(text, any_cast<YY::VNLangParser::location_type>(loc));
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, bool ascii, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, bool ascii, Syntax::Location loc) const
 {
 	if( !ascii ) // Keywords are only ASCII
 		throw Unrecognised();
@@ -209,11 +217,13 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 	if( !tag )
 		throw Unrecognised();
 	TreePtr<Node> node = MakeStandardAgent(tag.value());
-	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(node->GetSignifierToken()), std::move(node), std::move(loc) );
+	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(node->GetSignifierToken()), 
+	                                      std::move(node), 
+	                                      any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring text, YY::VNLangParser::location_type loc) const
+YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring text, Syntax::Location loc) const
 {
 	shared_ptr<const DesignationGnomon> designation_gnomon;
 	if( designation_gnomons.count(text) > 0 )	
@@ -224,7 +234,9 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring tex
 	TreePtr<Node> node = designation_gnomon->node;
 	// The designation_gnomon->token is based on syntax in particurar and there's no expectation
 	// that the node should know what it should be. It's a parser -> parser message in effect.
-	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(designation_gnomon->token), std::move(node), std::move(loc) );
+	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(designation_gnomon->token), 
+	                                      std::move(node), 
+	                                      any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 

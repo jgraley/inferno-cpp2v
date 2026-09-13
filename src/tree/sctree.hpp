@@ -91,7 +91,7 @@ struct WaitDynamic : Wait,
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	Token GetSignifierToken() const override;
-	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node>, Location loc ) override;
 };
 
 /** Waiting for a SystemC event - blocks until an event is triggered. I think the event
@@ -100,7 +100,7 @@ struct WaitStatic : Wait
 {
     NODE_FUNCTIONS_FINAL
     string GetKeyword( Policy ) const override;	
-	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node>, Location loc ) override;
 };
 
 /** Basically a yield. Blocks for a short period of time (a delta cycle) and then continues.
@@ -136,7 +136,7 @@ struct NextTriggerDynamic : NextTrigger,
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	Token GetSignifierToken() const override;
-	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node>, Location loc ) override;
 };
 
 /** Causes the method to be triggered again when an event is triggered. I think the event
@@ -145,7 +145,7 @@ struct NextTriggerStatic : NextTrigger
 {
     NODE_FUNCTIONS_FINAL
     string GetKeyword( Policy ) const override;	
-	TreePtr<Node> OnSoloArg( TreePtr<Node>, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node>, Location loc ) override;
 };
 
 /** Causes the method to be triggered again very soon after it completes.
@@ -169,7 +169,7 @@ struct Notify : CPPTree::Statement,
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetLoweredIdOrMacroName() const override;    
-	TreePtr<Node> OnObject( TreePtr<Node> object, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnObject( TreePtr<Node> object, Location loc ) override;
    	Token GetSignifierToken() const override;
 };
 
@@ -196,7 +196,7 @@ struct NotifyTimed : Notify
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	Token GetSignifierToken() const override;
-	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, Location loc ) override;
 };
 
 /** Intermediate class for processes, which are the places in SystemC where we 

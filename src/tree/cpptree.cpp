@@ -216,7 +216,7 @@ Syntax::Token Declaration::GetPrerestrictToken() const
 
 //////////////////////////// DeclScope ///////////////////////////////
 
-TreePtr<Node> DeclScope::OnMembers( list<TreePtr<Node>> members_, YY::VNLangParser::location_type ) 
+TreePtr<Node> DeclScope::OnMembers( list<TreePtr<Node>> members_, Location ) 
 {
 	for( TreePtr<Node> member : members_ )
 		members.insert( member );				
@@ -322,7 +322,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 }
 
 
-TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, any &, YY::VNLangParser::location_type loc) const
+TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, any &, Location loc) const
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -634,7 +634,7 @@ TreePtr<Argumentation> MapArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expr
 }
 
 
-TreePtr<Node> MapArgumentation::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type )
+TreePtr<Node> MapArgumentation::OnArgsList( list<TreePtr<Node>> args, Location )
 {
 	for( auto arg : args )
 		arguments.insert( arg );
@@ -671,7 +671,7 @@ TreePtr<Argumentation> SeqArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expr
 }
 
 
-TreePtr<Node> SeqArgumentation::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type )
+TreePtr<Node> SeqArgumentation::OnArgsList( list<TreePtr<Node>> args, Location )
 {
 	for( auto arg : args )
 		arguments.insert( arg );
@@ -995,7 +995,7 @@ list<string> MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Po
 }
 
 
-TreePtr<Node> MembInitSeq::OnMemberInits( list<TreePtr<Node>> memb_inits_, YY::VNLangParser::location_type )
+TreePtr<Node> MembInitSeq::OnMemberInits( list<TreePtr<Node>> memb_inits_, Location )
 {
 	for( TreePtr<Node> memb_init : memb_inits_ )
 		memb_inits.push_back( memb_init );
@@ -1075,7 +1075,7 @@ string NonConst::GetRender( VN::RendererInterface *, Production, Policy  )
 
 //////////////////////////// View //////////////////////////////
 
-TreePtr<Node> View::OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type )
+TreePtr<Node> View::OnPermission( TreePtr<Node> c, Location )
 {
 	permission = c;
 	return (TreePtr<Node>)shared_from_this();	
@@ -1220,28 +1220,28 @@ list<string> Instance::RenderInitPre( VN::RendererInterface *, Policy )
 }
 
 
-TreePtr<Node> Instance::OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type )
+TreePtr<Node> Instance::OnIdentifier( TreePtr<Node> id, Location )
 {
 	identifier = id;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
 
-TreePtr<Node> Instance::OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type )
+TreePtr<Node> Instance::OnPermission( TreePtr<Node> c, Location )
 {
 	permission = c;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
 
-TreePtr<Node> Instance::OnType( TreePtr<Node> type_, YY::VNLangParser::location_type )
+TreePtr<Node> Instance::OnType( TreePtr<Node> type_, Location )
 {
 	type = type_;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
 
-TreePtr<Node> Instance::OnInitialiser( TreePtr<Node> init, YY::VNLangParser::location_type )
+TreePtr<Node> Instance::OnInitialiser( TreePtr<Node> init, Location )
 {
 	initialiser = init;
 	return (TreePtr<Node>)shared_from_this();	
@@ -1307,14 +1307,14 @@ list<string> Member::RenderInitPre( VN::RendererInterface *renderer, Policy poli
 }
 
 
-TreePtr<Node> Member::OnDispatch( TreePtr<Node> d, YY::VNLangParser::location_type ) 
+TreePtr<Node> Member::OnDispatch( TreePtr<Node> d, Location ) 
 {
 	dispatch = d;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
 
-TreePtr<Node> Member::OnAccess( TreePtr<Node> access_, YY::VNLangParser::location_type )
+TreePtr<Node> Member::OnAccess( TreePtr<Node> access_, Location )
 {
 	access = access_;
 	return (TreePtr<Node>)shared_from_this();	
@@ -1423,7 +1423,7 @@ string LabelDeclaration::GetKeyword( Policy ) const
 }
 
 
-TreePtr<Node> LabelDeclaration::OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type )
+TreePtr<Node> LabelDeclaration::OnIdentifier( TreePtr<Node> id, Location )
 {
 	identifier = id;
 	return (TreePtr<Node>)shared_from_this();	
@@ -1489,7 +1489,7 @@ string Callable::GetRenderParameterisation(VN::RendererInterface *, Policy )
 
 //////////////////////////// CallableParams //////////////////////////////
 
-TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, any &, YY::VNLangParser::location_type loc) const
+TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, any &, Location loc) const
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -1607,7 +1607,7 @@ Syntax::Production Indirection::GetOperandInDeclaratorProduction() const
 }
 
 
-TreePtr<Node> Indirection::OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type )
+TreePtr<Node> Indirection::OnPermission( TreePtr<Node> c, Location )
 {
 	permission = c;
 	return (TreePtr<Node>)shared_from_this();	
@@ -1864,7 +1864,7 @@ string Labeley::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 
 //////////////////////////// TypeDeclaration ///////////////////////////////
 
-TreePtr<Node> TypeDeclaration::OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type )
+TreePtr<Node> TypeDeclaration::OnIdentifier( TreePtr<Node> id, Location )
 {
 	identifier = id;
 	return (TreePtr<Node>)shared_from_this();	
@@ -1901,7 +1901,7 @@ Syntax::Token Typedef::GetSignifierToken() const
 }
 
 
-TreePtr<Node> Typedef::OnType( TreePtr<Node> type_, YY::VNLangParser::location_type )
+TreePtr<Node> Typedef::OnType( TreePtr<Node> type_, Location )
 {
 	type = type_;
 	return (TreePtr<Node>)shared_from_this();
@@ -1977,17 +1977,17 @@ Syntax::Token Record::GetSignifierToken() const
 }
 
 
-void Record::UpdateContext( TreePtr<Node> node, any &context, YY::VNLangParser::location_type loc )
+void Record::UpdateContext( TreePtr<Node> node, any &context, Location loc )
 {
 	if( node && !TreePtr<AccessSpec>::DynamicCast(node) ) // node can be NULL, which we'll allow as wildcard
-		throw YY::VNLangParser::syntax_error( loc,
+		throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
 			MyBestErrName() + " context can only be updated by an AccessSpec (was " + node->MyBestErrName() + ")");		
 
 	context = TreePtr<AccessSpec>::DynamicCast(node);
 }	
 	
 	
-TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type) const
+TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context, Location) const
 {	
 	TreePtr<Instance> instance;
 	if( static_keyword_specified )
@@ -2051,7 +2051,7 @@ Syntax::Token Enumeration::GetSignifierToken() const
 
 
 
-TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, any &, YY::VNLangParser::location_type loc) const
+TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, any &, Location loc) const
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -2086,7 +2086,7 @@ string InheritanceRecord::RenderExtras(VN::RendererInterface *renderer, Producti
 }
 
 
-TreePtr<Node> InheritanceRecord::OnBases( list<TreePtr<Node>> bases_, YY::VNLangParser::location_type ) 
+TreePtr<Node> InheritanceRecord::OnBases( list<TreePtr<Node>> bases_, Location ) 
 {
 	for( TreePtr<Node> base : bases_ )
 		bases.insert( base );				
@@ -2121,7 +2121,7 @@ string Class::GetKeyword( Policy ) const
 
 //////////////////////////// Unop ///////////////////////////////
 
-TreePtr<Node> Unop::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+TreePtr<Node> Unop::OnSoloArg( TreePtr<Node> arg, Location )
 {
 	ASSERT( operands.empty() );
 	operands.push_back(arg); 
@@ -2129,7 +2129,7 @@ TreePtr<Node> Unop::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_typ
 }
 
 
-TreePtr<Node> Unop::OnObject( TreePtr<Node> object, YY::VNLangParser::location_type )
+TreePtr<Node> Unop::OnObject( TreePtr<Node> object, Location )
 {
 	ASSERT( operands.empty() );
 	operands.push_back(object); 
@@ -2230,14 +2230,14 @@ string Subscript::GetRender( VN::RendererInterface *renderer, Production, Policy
 }
 
 
-TreePtr<Node> Subscript::OnObject( TreePtr<Node> object, YY::VNLangParser::location_type )
+TreePtr<Node> Subscript::OnObject( TreePtr<Node> object, Location )
 {
 	destination = object;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
 
-TreePtr<Node> Subscript::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+TreePtr<Node> Subscript::OnSoloArg( TreePtr<Node> arg, Location )
 {
 	index = arg;
 	return (TreePtr<Node>)shared_from_this();
@@ -2339,14 +2339,14 @@ string Lookup::GetRender( VN::RendererInterface *renderer, Production, Policy po
 }
 
 
-TreePtr<Node> Lookup::OnObject( TreePtr<Node> object_, YY::VNLangParser::location_type )
+TreePtr<Node> Lookup::OnObject( TreePtr<Node> object_, Location )
 {
 	object = object_;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
 
-TreePtr<Node> Lookup::OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type )
+TreePtr<Node> Lookup::OnSoloArg( TreePtr<Node> arg, Location )
 {
 	member = arg;
 	return (TreePtr<Node>)shared_from_this();
@@ -2440,7 +2440,7 @@ Syntax::Token FuncOnType::GetSignifierToken() const
 }
 
 
-TreePtr<Node> FuncOnType::OnType( TreePtr<Node> type_, YY::VNLangParser::location_type ) 
+TreePtr<Node> FuncOnType::OnType( TreePtr<Node> type_, Location ) 
 {
 	argument = type_;
 	return (TreePtr<Node>)shared_from_this();
@@ -2462,7 +2462,7 @@ string AlignOf::GetKeyword( Policy ) const
 
 //////////////////////////// SequentialScope ///////////////////////////////
 
-TreePtr<Node> SequentialScope::OnStatements( list<TreePtr<Node>> statements_, YY::VNLangParser::location_type )
+TreePtr<Node> SequentialScope::OnStatements( list<TreePtr<Node>> statements_, Location )
 {
 	for( TreePtr<Node> statement : statements_ )
 		statements.insert( statement );				
@@ -2470,7 +2470,7 @@ TreePtr<Node> SequentialScope::OnStatements( list<TreePtr<Node>> statements_, YY
 }
 
 
-TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, any &, YY::VNLangParser::location_type) const
+TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, any &, Location) const
 {
 	TreePtr<Instance> instance;
 	if( static_keyword_specified )
@@ -2565,7 +2565,7 @@ Syntax::Token Return::GetSignifierToken() const
 }
 
 
-TreePtr<Node> Return::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+TreePtr<Node> Return::OnArgsList( list<TreePtr<Node>> args, Location loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
@@ -2624,7 +2624,7 @@ Syntax::Token Goto::GetSignifierToken() const
 }
 
 
-TreePtr<Node> Goto::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+TreePtr<Node> Goto::OnArgsList( list<TreePtr<Node>> args, Location loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
@@ -2673,7 +2673,7 @@ Syntax::Token If::GetSignifierToken() const
 }
 
 
-TreePtr<Node> If::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+TreePtr<Node> If::OnArgsList( list<TreePtr<Node>> args, Location loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
@@ -2684,7 +2684,7 @@ TreePtr<Node> If::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::locati
 }
 
 
-TreePtr<Node> If::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type )
+TreePtr<Node> If::OnBody( TreePtr<Node> body_, Location )
 {
 	body = body_;	
 	body_else = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Nop>>();
@@ -2692,7 +2692,7 @@ TreePtr<Node> If::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type )
 } 
 
 
-TreePtr<Node> If::OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type )
+TreePtr<Node> If::OnElseBody( TreePtr<Node> body, Location )
 {
 	body_else = body;	
 	return (TreePtr<Node>)shared_from_this();
@@ -2706,7 +2706,7 @@ Syntax::Production Breakable::GetMyProductionTerminal() const
 }
 
 
-TreePtr<Node> Breakable::OnBody( TreePtr<Node> body_, YY::VNLangParser::location_type ) 
+TreePtr<Node> Breakable::OnBody( TreePtr<Node> body_, Location ) 
 {
 	body = body_;	
 	return (TreePtr<Node>)shared_from_this();
@@ -2742,7 +2742,7 @@ Syntax::Token While::GetSignifierToken() const
 }
 
 
-TreePtr<Node> While::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc )
+TreePtr<Node> While::OnArgsList( list<TreePtr<Node>> args, Location loc )
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
@@ -2782,7 +2782,7 @@ Syntax::Token Do::GetSignifierToken() const
 }
 
 
-TreePtr<Node> Do::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+TreePtr<Node> Do::OnArgsList( list<TreePtr<Node>> args, Location loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
@@ -2826,7 +2826,7 @@ Syntax::Token For::GetSignifierToken() const
 }
 
 
-TreePtr<Node> For::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+TreePtr<Node> For::OnArgsList( list<TreePtr<Node>> args, Location loc ) 
 {
 	if( args.size() != 3 )
 		throw YY::VNLangParser::syntax_error(
@@ -2869,7 +2869,7 @@ Syntax::Token Switch::GetSignifierToken() const
 }
 
 
-TreePtr<Node> Switch::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) 
+TreePtr<Node> Switch::OnArgsList( list<TreePtr<Node>> args, Location loc ) 
 {
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
@@ -2920,7 +2920,7 @@ string Case::GetKeyword( Policy ) const
 }
 
 
-TreePtr<Node> Case::OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc )
+TreePtr<Node> Case::OnArgsList( list<TreePtr<Node>> args, Location loc )
 {
 	switch( args.size() )
 	{

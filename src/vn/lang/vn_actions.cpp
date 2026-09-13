@@ -139,20 +139,20 @@ static TreePtr<Node> MakeStandardAgentFromTypeID(const type_info &ti)
 
 TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, any node_name_loc, Itemisation src_itemisation )
 {
-    YY::VNLangParser::location_type prev_loc = any_cast<YY::VNLangParser::location_type>(src_itemisation.loc);
+    Syntax::Location prev_loc = src_itemisation.loc;
 	
 	// Special case for specific identifiers
 	if( auto dest_sid = TreePtr<CPPTree::SpecificIdentifier>::DynamicCast( dest ) )
 	{
 		if( src_itemisation.items.size() != 1  )
 			throw YY::VNLangParser::syntax_error( 
-				prev_loc,
+				any_cast<YY::VNLangParser::location_type>(prev_loc),
 				SSPrintf("%s expects a string, but %d items given.",
 				         DiagQuote(Traceable::TypeIdName( *dest )).c_str(),
 				         src_itemisation.items.size()));
 		if( src_itemisation.items.front().nodes.size() != 1 )
 			throw YY::VNLangParser::syntax_error( 
-				prev_loc,
+				any_cast<YY::VNLangParser::location_type>(prev_loc),
 				SSPrintf("%s expects a string, but %d nodes given.",
 				         DiagQuote(Traceable::TypeIdName( *dest )).c_str(),
 				         src_itemisation.items.front().nodes.size()));
@@ -183,7 +183,7 @@ TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, any node_na
     {
 		if( src_it == src_itemisation.items.end() )
 			throw YY::VNLangParser::syntax_error( 
-				prev_loc, 
+				any_cast<YY::VNLangParser::location_type>(prev_loc), 
 				"In ⯁, insufficient items given. " + counts_msg );
 		const Item &src_item = *src_it;
         if( auto dest_con = dynamic_cast<ContainerInterface *>(dest_item) ) 
@@ -499,7 +499,7 @@ NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 
 TreePtr<Node> VNLangActions::OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, any type_loc, TreePtr<Node> declarator, any decl_loc )
 {
-	YY::VNLangParser::location_type middle_loc = any_cast<YY::VNLangParser::location_type>(type_loc) +
+	Syntax::Location middle_loc = any_cast<YY::VNLangParser::location_type>(type_loc) +
 												 any_cast<YY::VNLangParser::location_type>(decl_loc);
 				
 	// Get the CV-qualifiers for declarator reduction
@@ -1099,7 +1099,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // we like the prefix syntax without any braces at all, but braces are likely needed for unified argument
 // and 2. for completeness there should be a Stuff-As-Type symbol although this isn't manifesting atm.
  
-// NOTE to get a source location for TRACE etc 
+// NOTE to get a source Syntax::Location for TRACE etc 
 // 		stringstream ss;
 //		ss << any_cast<YY::VNLangParser::location_type>(loc);
 //      ... ss.str() ...

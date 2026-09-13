@@ -146,7 +146,7 @@ struct DeclScope : virtual Scope
 {
     NODE_FUNCTIONS
     Collection<Declaration> members; /// The declarations in this scope    
-	TreePtr<Node> OnMembers( list<TreePtr<Node>> members, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnMembers( list<TreePtr<Node>> members, Location loc ) override;
 };
 
 
@@ -159,7 +159,7 @@ struct CodeUnit : DeclScope
 	NODE_FUNCTIONS_FINAL
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
 };
 
 
@@ -342,7 +342,7 @@ struct MapArgumentation : Argumentation
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy) final;
     TreePtr<Argumentation> ConvertToSeqIfPolicyAllows(TreePtr<Expression> callee, VN::RendererInterface *, Policy) final;
-	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location loc ) override;
 };
 
 
@@ -357,7 +357,7 @@ struct SeqArgumentation : Argumentation
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string DirectRenderArgumentation(VN::RendererInterface *renderer, Policy policy) final;
     TreePtr<Argumentation> ConvertToSeqIfPolicyAllows(TreePtr<Expression> callee, VN::RendererInterface *, Policy) final;
-	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location loc ) override;
 };  
 
 //////////////////////////// Literals ///////////////////////////////
@@ -514,7 +514,7 @@ struct MembInitSeq : virtual Node
 	Sequence<MemberInitialiser> memb_inits;
 	
 	list<string> RenderMemberInits( VN::RendererInterface *renderer, Policy policy );	
-	TreePtr<Node> OnMemberInits( list<TreePtr<Node>> memb_inits, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnMemberInits( list<TreePtr<Node>> memb_inits, Location loc ) override;
 };
 
 
@@ -627,7 +627,7 @@ struct View : virtual Node
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
     TreePtr<Permission> permission; ///< Is the field constant (ie only written by constructor)
 
-	TreePtr<Node> OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc ) override;
 };
 
 
@@ -674,10 +674,10 @@ struct Instance : Declaration,
 	// Extras like member inits come before the initialiser
 	virtual list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy );
 
-	TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> OnType( TreePtr<Node> type, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> OnInitialiser( TreePtr<Node> init, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc ) override;
+	TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc ) override;
+	TreePtr<Node> OnType( TreePtr<Node> type, Location loc ) override;
+	TreePtr<Node> OnInitialiser( TreePtr<Node> init, Location loc ) override;
 };
 
 
@@ -711,8 +711,8 @@ struct Member : Instance,
    	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 	list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy ) override;
 
-	TreePtr<Node> OnDispatch( TreePtr<Node> d, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> OnAccess( TreePtr<Node> access, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc ) override;
+	TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc ) override;
 };
 
 
@@ -818,7 +818,7 @@ struct LabelDeclaration : Declaration, //TODO commonize with Case and Default
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
 	string GetKeyword( Policy ) const override;
 
-	TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type ) override;
+	TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location ) override;
 
 	Token GetExplicitToken() const override;
 	Token GetPrerestrictToken() const override;
@@ -852,7 +852,7 @@ struct CallableParams : Callable, Scope
     NODE_FUNCTIONS
     Collection<Declaration> params; // TODO be Parameter #803
     virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
 
 protected:    
     string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy) override;
@@ -942,7 +942,7 @@ struct Indirection : Type
 
 	Production GetMyProductionTerminal() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
-	TreePtr<Node> OnPermission( TreePtr<Node> c, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc ) override;
 };
 
 
@@ -1082,7 +1082,7 @@ struct TypeDeclaration : Declaration
     NODE_FUNCTIONS
     TreePtr<TypeIdentifier> identifier; ///< The handle to the type that has been declared
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
-	TreePtr<Node> OnIdentifier( TreePtr<Node> id, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc ) override;
 };
 
 
@@ -1097,7 +1097,7 @@ struct Typedef : TypeDeclaration
 	Production GetMyProductionTerminal() const override;	    
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;     
 	Token GetSignifierToken() const override;
-	TreePtr<Node> OnType( TreePtr<Node> type, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnType( TreePtr<Node> type, Location loc ) override;
 }; 
 
 
@@ -1118,8 +1118,8 @@ struct Record : TypeDeclaration,
 	virtual string RenderBody( VN::RendererInterface *renderer, Policy policy );
 	Token GetSignifierToken() const override;
 
-	virtual void UpdateContext( TreePtr<Node> node, any &context, YY::VNLangParser::location_type loc );	
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type loc) const override; 
+	virtual void UpdateContext( TreePtr<Node> node, any &context, Location loc );	
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
 };
 
 
@@ -1143,7 +1143,7 @@ struct Enumeration : Record
     string GetKeyword( Policy ) const override;
 	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	
 	Token GetSignifierToken() const override;	
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
 };
 
 
@@ -1156,7 +1156,7 @@ struct InheritanceRecord : Record
     Collection<Base> bases; ///< contains the InheritanceRecords from which we inherit   
 
     string RenderExtras(VN::RendererInterface *renderer, Production surround_prod, Policy policy) override;
-	TreePtr<Node> OnBases( list<TreePtr<Node>> bases, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnBases( list<TreePtr<Node>> bases, Location loc ) override;
 };
 
 
@@ -1210,9 +1210,9 @@ struct CommutativeOperator : Operator
 struct Unop : NonCommutativeOperator 
 { 
 	NODE_FUNCTIONS
-	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, Location loc ) override;
 	// Postfix operators are treated like method calls, operand is regarded as object
-	TreePtr<Node> OnObject( TreePtr<Node> object, YY::VNLangParser::location_type ) override;
+	TreePtr<Node> OnObject( TreePtr<Node> object, Location ) override;
 
 };
 
@@ -1283,8 +1283,8 @@ struct Subscript : Operator
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
-	TreePtr<Node> OnObject( TreePtr<Node> object, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnObject( TreePtr<Node> object, Location loc ) override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, Location loc ) override;
 };
 
 /// An array formed directly from elements which should all be the same type
@@ -1367,8 +1367,8 @@ struct Lookup : Operator
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-	TreePtr<Node> OnObject( TreePtr<Node> object, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnObject( TreePtr<Node> object, Location loc ) override;
+	TreePtr<Node> OnSoloArg( TreePtr<Node> arg, Location loc ) override;
 };
 
 /// Node for a c-style cast. 
@@ -1424,7 +1424,7 @@ struct FuncOnType : Expression
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
 	Token GetSignifierToken() const override;
-	TreePtr<Node> OnType( TreePtr<Node> type, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnType( TreePtr<Node> type, Location loc ) override;
 };
 
 /// sizeof() a type
@@ -1453,8 +1453,8 @@ struct SequentialScope : DeclScope,
     NODE_FUNCTIONS
     Sequence<Statement> statements; ///< Can contain local declarations and code
     virtual string GetColour() const { return Statement::GetColour(); } // Statement wins    
-	TreePtr<Node> OnStatements( list<TreePtr<Node>> statements, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, YY::VNLangParser::location_type loc) const override; 
+	TreePtr<Node> OnStatements( list<TreePtr<Node>> statements, Location loc ) override;
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
 };
 
 
@@ -1494,7 +1494,7 @@ struct Return : Statement
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	Token GetSignifierToken() const override;
-	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location loc ) override;
 };
 
 
@@ -1514,7 +1514,7 @@ struct Goto : Statement, Uncombable
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	Token GetSignifierToken() const override;
-	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location loc ) override;
 };
 
 
@@ -1530,9 +1530,9 @@ struct If : Statement
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	Token GetSignifierToken() const override;
-	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc ) override;
-	TreePtr<Node> OnElseBody( TreePtr<Node> body, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location loc ) override;
+	TreePtr<Node> OnBody( TreePtr<Node> body, Location loc ) override;
+	TreePtr<Node> OnElseBody( TreePtr<Node> body, Location loc ) override;
 };
 
 
@@ -1547,7 +1547,7 @@ struct Breakable : Statement
     TreePtr<Statement> body; ///< a break in here jumps to the end of here
 
 	Production GetMyProductionTerminal() const override;	
-	TreePtr<Node> OnBody( TreePtr<Node> body, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnBody( TreePtr<Node> body, Location loc ) override;
 };
 
 
@@ -1568,7 +1568,7 @@ struct While : Loop, Uncombable
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	Token GetSignifierToken() const override;
-	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location loc ) override;
 };
 
 
@@ -1582,7 +1582,7 @@ struct Do : Loop, Uncombable // a do..while() construct
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	Token GetSignifierToken() const override;
-	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location loc ) override;
 };
 
 
@@ -1601,7 +1601,7 @@ struct For : Loop
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	Token GetSignifierToken() const override;
-	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location loc ) override;
 };
 
 
@@ -1619,7 +1619,7 @@ struct Switch : Breakable
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	Token GetSignifierToken() const override;
-	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location loc ) override;
 };
 
 
@@ -1656,7 +1656,7 @@ struct Case : SwitchTarget
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	Token GetSignifierToken() const override;
-	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, YY::VNLangParser::location_type loc ) override;
+	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location loc ) override;
 };
 
 
