@@ -7,6 +7,7 @@
 #include "common/standard.hpp"
 #include "helpers/simple_compare.hpp"
 #include "helpers/transformation.hpp"
+#include "node/syntax.hpp"
 
 // Check names for duplication
 // Policy is to dedupe with a simple scheme like <name>_<unique number> or even without the underscore

@@ -1,12 +1,9 @@
 #include "uniquify_identifiers.hpp"
 #include "helpers/walk.hpp"
 #include "tree/misc.hpp"
-#include "node/syntax.hpp"
 #include "helpers/flatten.hpp"
 #include "agents/embedded_scr_agent.hpp"
-#include "tree/cpptree.hpp" 
 
-using namespace CPPTree;
 using namespace VN;
 
 #define UID_FORMAT_HINT "%s_%u"
@@ -361,7 +358,7 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 		{			
 			try
 			{		
-				if( TreePtr<SpecificIdentifier>::DynamicCast(node) )
+				if( node->IsSpecificIdentifier() )
 				    DeclarationOf().TryApplyTransformation( kit, node );
 			}
 			catch(DeclarationOf::DeclarationNotFound &)
@@ -429,9 +426,7 @@ Orderable::Diff UniquifyCompare::Compare3Way( TreePtr<Node> l, TreePtr<Node> r )
     // We're overriding the node entrypoint of SimpleCompare. If we're not
     // dealing with two SpecificIdentifiers, call back into that function
     // explicitly to get normal compare behaviour.
-    auto id_l = TreePtr<SpecificIdentifier>::DynamicCast(l);
-    auto id_r = TreePtr<SpecificIdentifier>::DynamicCast(r);
-    if( !(id_l && id_r) )
+    if( !(l->IsSpecificIdentifier() && r->IsSpecificIdentifier()) )
         return SimpleCompare::Compare3Way(l, r);
         
     // We have two SpecificIdentifiers, so get their unique names

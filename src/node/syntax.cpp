@@ -1,7 +1,8 @@
 #include "syntax.hpp"
+#include "vn/lang/vn_lang.ypp.hpp"
+#include "vn/lang/vn_lang.location.hpp"
+#include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
-
-#include "tree/cpptree.hpp"
 
 string Syntax::GetLoweredIdOrMacroName() const
 {

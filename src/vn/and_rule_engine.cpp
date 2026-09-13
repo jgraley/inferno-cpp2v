@@ -16,7 +16,6 @@
 #include "common/common.hpp"
 #include "agents/disjunction_agent.hpp"
 #include "link.hpp"
-#include "tree/cpptree.hpp"
 #include "vn/graph/graph.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/rewriters.hpp"

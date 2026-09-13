@@ -24,7 +24,7 @@
 #include <fstream>
 #include <cctype>
 
-using namespace CPPTree; // TODO should not need
+using namespace CPPTree; 
 using namespace VN;
 using namespace reflex;
 

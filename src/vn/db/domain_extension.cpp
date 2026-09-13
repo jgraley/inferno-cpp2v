@@ -281,7 +281,7 @@ void DomainExtensionChannel::CheckStimulusXLink( XLink stimulus_xlink )
 	//Validate();    
 	//FTRACE("induced_root_to_tree_ordinal_and_ref_count: ")(induced_root_to_tree_ordinal_and_ref_count)("\n");
 }
-#include "../tree/cpptree.hpp"
+
 
 void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
 {

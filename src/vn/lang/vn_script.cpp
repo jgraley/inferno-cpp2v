@@ -1,7 +1,6 @@
 #include "vn_script.hpp"
 
 #include "vn_commands.hpp"
-#include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
 #include "tree/typeof.hpp"
 #include "common/trace.hpp"
@@ -24,7 +23,6 @@
 
 #define ELIMINATE_STEP_NUMBER
 
-using namespace CPPTree; 
 using namespace VN;
 
 //////////////////////////// VNSoftStep ///////////////////////////////

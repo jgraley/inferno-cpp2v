@@ -190,6 +190,9 @@ public:
 	string RenderNodeTypeName() const; 
 	virtual	bool IsType() const; 
 	virtual	bool IsSpecificIdentifier() const; 
+	
+	typedef any Token;
+	typedef any Location;
 
 	virtual YY::VNLangParser::token::token_kind_type GetSignifierToken() const;
 	virtual YY::VNLangParser::token::token_kind_type GetExplicitToken() const;

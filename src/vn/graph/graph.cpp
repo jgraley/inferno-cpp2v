@@ -5,7 +5,6 @@
  *      Author: jgraley
  */
 
-#include "tree/cpptree.hpp"
 #include "vn/vn_step.hpp"
 #include "vn/search_replace.hpp"
 #include "vn/scr_engine.hpp"
@@ -20,7 +19,6 @@
 #include "vn/agents/standard_agent.hpp" 
 #include "vn/agents/special_agent.hpp" 
 
-using namespace CPPTree;
 using namespace VN;
 
 // Graph Documentation

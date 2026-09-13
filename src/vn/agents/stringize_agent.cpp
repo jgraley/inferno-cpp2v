@@ -1,6 +1,5 @@
 #include "stringize_agent.hpp"
 #include "tree/cpptree.hpp"
-#include "tree/sctree.hpp"
 #include "vn/agents/agent.hpp"
 #include "vn/agents/standard_agent.hpp"
 #include "vn/scr_engine.hpp"

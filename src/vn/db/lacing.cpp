@@ -3,8 +3,6 @@
 #include "../sym/expression.hpp"
 #include "../sym/predicate_operators.hpp"
 
-#include "../tree/cpptree.hpp"
-
 #include <limits>
 
 #define BF
@@ -59,13 +57,13 @@ void Lacing::FixupCategories(const CategorySet &raw_categories_)
             if( Node::IsEquivalentCategory(*x, *y) )
             {
                 unique = false;
-                if( TreePtr<CPPTree::SpecificIdentifier>::DynamicCast(y) )
+                if( y->IsSpecificIdentifier() )
 					FTRACE("Discard ")(y)(" as equaivalent to ")(x)("\n");
             }
             else
             {
                 // A handy place to check that node ordering is always at least
-                // as strict as catecory equivalence.
+                // as strict as category equivalence.
                 ASSERT( Node::OrderCompare3Way( *x, *y, Orderable::TOTAL ) );
                 ASSERT( Node::OrderCompare3Way( *x, *y, Orderable::REPEATABLE ) );
             }

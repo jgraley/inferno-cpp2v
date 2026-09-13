@@ -1,6 +1,5 @@
 #include "post_pass.hpp"
 #include "tree/misc.hpp"
-#include "node/syntax.hpp"
 #include "db/mutator.hpp"
 #include "agents/embedded_scr_agent.hpp"
 #include "agents/relocating_agent.hpp"

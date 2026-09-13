@@ -1,4 +1,3 @@
-#include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
 #include "vn/search_replace.hpp"
 #include "common/trace.hpp"
@@ -7,7 +6,6 @@
 #include "graph.hpp"
 #include <inttypes.h>
 
-using namespace CPPTree;
 using namespace VN;
 
 /// Output a graph of the subtree at node, to a dot file with basename

@@ -2,7 +2,6 @@
 #define SCTREE_HPP
 
 #include "node/specialise_oostd.hpp"
-//#include "clang/Parse/DeclSpec.h"
 #include "tree/type_data.hpp"
 #include "tree/cpptree.hpp"
 #include <string>
