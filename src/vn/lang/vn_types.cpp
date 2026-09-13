@@ -21,7 +21,7 @@ Gnomon::~Gnomon()
 }
 
 
-TreePtr<Node> ScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
+TreePtr<Node> ScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) 
 {
 	throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
@@ -30,7 +30,7 @@ TreePtr<Node> ScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_speci
 }
 
 
-void ScopeGnomon::UpdateContext(any loc, TreePtr<Node> update_node)
+void ScopeGnomon::UpdateContext(Syntax::Location loc, TreePtr<Node> update_node)
 {
 	throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
@@ -54,13 +54,13 @@ string RegularScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> RegularScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
+TreePtr<Node> RegularScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) 
 {	
 	return scope_node->CreateDeclNode( static_keyword_specified, context, any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 
-void RegularScopeGnomon::UpdateContext(any loc, TreePtr<Node> update_node)
+void RegularScopeGnomon::UpdateContext(Syntax::Location loc, TreePtr<Node> update_node)
 {
 	scope_node->UpdateContext( update_node, context, any_cast<YY::VNLangParser::location_type>(loc) );
 }
@@ -78,7 +78,7 @@ string ParameterisationScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
+TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) 
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -103,7 +103,7 @@ string UnknownScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> UnknownScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
+TreePtr<Node> UnknownScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) 
 {
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
@@ -132,7 +132,7 @@ void PrerestrictScopeGnomon::UpdateContext(any, TreePtr<Node>)
 }
 
 
-TreePtr<Node> PrerestrictScopeGnomon::GetDeclarationNode(any loc, bool static_keyword_specified) 
+TreePtr<Node> PrerestrictScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) 
 {
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"

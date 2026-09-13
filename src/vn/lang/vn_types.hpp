@@ -3,6 +3,7 @@
 
 // Watch the deps here: parser header file includes this
 #include "node/tree_ptr.hpp"
+#include "node/syntax.hpp"
 
 #include <any> // to dep-break the generated headers
 
@@ -21,13 +22,13 @@ struct Limit
 struct Item
 {
 	list<TreePtr<Node>> nodes;
-	any loc;
+	Syntax::Location loc;
 };
 
 struct Itemisation
 {
 	list<Item> items;
-	any loc;
+	Syntax::Location loc;
 };
 
 class Gnomon : public Traceable
@@ -41,8 +42,8 @@ class ScopeGnomon : public Gnomon
 {
 public:	
 	virtual string GetMessageText() const = 0;	
-	virtual TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified);
-	virtual void UpdateContext(any loc, TreePtr<Node> node);
+	virtual TreePtr<Node> GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified);
+	virtual void UpdateContext(Syntax::Location loc, TreePtr<Node> node);
 };
 
 
@@ -51,8 +52,8 @@ class RegularScopeGnomon : public ScopeGnomon
 public:	
 	RegularScopeGnomon( TreePtr<Node> scope_node_ );
 	string GetMessageText() const override;
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
-	void UpdateContext(any loc, TreePtr<Node> update_node) override;
+	TreePtr<Node> GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) override;
+	void UpdateContext(Syntax::Location loc, TreePtr<Node> update_node) override;
 	TreePtr<Node> GetNode() const;
 
 	TreePtr<Node> scope_node;
@@ -64,7 +65,7 @@ class ParameterisationScopeGnomon : public ScopeGnomon
 {
 public:	
 	string GetMessageText() const override;
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
+	TreePtr<Node> GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) override;
 };
 
 
@@ -73,7 +74,7 @@ class UnknownScopeGnomon : public ScopeGnomon
 public:	
 	UnknownScopeGnomon(string reason_);
 	string GetMessageText() const override;
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
+	TreePtr<Node> GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) override;
 
 	const string reason;
 };
@@ -84,8 +85,8 @@ class PrerestrictScopeGnomon : public ScopeGnomon
 public:	
 	PrerestrictScopeGnomon( TreePtr<Node> node_ );
 	string GetMessageText() const override;
-	void UpdateContext(any loc, TreePtr<Node> update_node) override;
-	TreePtr<Node> GetDeclarationNode(any loc, bool static_keyword_specified) override;
+	void UpdateContext(Syntax::Location loc, TreePtr<Node> update_node) override;
+	TreePtr<Node> GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) override;
 
 	TreePtr<Node> node;
 };
@@ -103,7 +104,7 @@ struct QualifierData : Traceable
 {
 	QualifierData(  ) : cat(QualCat::UNDEFINED), node(nullptr) {}
 
-	QualifierData( any loc_, QualCat cat_, TreePtr<Node> node_=nullptr ) :
+	QualifierData( Syntax::Location loc_, QualCat cat_, TreePtr<Node> node_=nullptr ) :
 		loc(loc_),
 		cat(cat_),
 		node(node_)
@@ -141,7 +142,7 @@ struct QualifierData : Traceable
 		ASSERTFAIL();
 	}
 	
-	any loc;	
+	Syntax::Location loc;	
 	QualCat cat;
 	TreePtr<Node> node;
 };

@@ -12,9 +12,6 @@
 #include "tree/misc.hpp"
 #include "tree/scope.hpp"
 #include "sort_decls.hpp"
-#include "vn/lang/vn_lang.ypp.hpp"
-#include "vn/lang/vn_lang.lpp.hpp"
-#include "vn/lang/vn_lang.location.hpp"
 #include "vn/agents/all.hpp"
 #include "tree/node_names.hpp"
 #include "vn_commands.hpp"
@@ -47,6 +44,30 @@ TreePtr<Node> VN::MakeStandardAgent(NodeTag ne)
 	ASSERT(false)("Invalid value for node enum value %d", ne); 
 	ASSERTFAIL();
 }
+
+
+DesignationGnomon::DesignationGnomon( std::wstring name_, TreePtr<Node> node_, Syntax::Token token_ ) : 
+	name( name_ ),
+	node( node_ ),
+	token( token_ )
+{
+	ASSERT( !name.empty() );
+	// Pattern can be NULL for eg singular wildcard
+}
+
+
+string DesignationGnomon::GetTrace() const
+{
+	return ToASCII(name) + "⪮" + Trace(node) + "(" + Trace((unsigned)any_cast<YY::VNLangParser::token::token_kind_type>(token)) + ")";
+}
+	
+
+string TransformNameScopeGnomon::GetMessageText() const
+{
+	return "transformation name scope";
+}
+
+///////////////////////////////// VNLangRecogniser //////////////////////////////////
 
 void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 {

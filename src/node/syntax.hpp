@@ -1,13 +1,13 @@
 #ifndef RENDERABLE_HPP
 #define RENDERABLE_HPP
 
-#include "vn/lang/vn_lang.ypp.hpp"
-#include "vn/lang/vn_lang.location.hpp"
 #include "common/common.hpp"
 #include "common/mismatch.hpp"
+#include "node/tree_ptr.hpp"
 
 #include <typeinfo>
 #include <typeindex>
+#include <any>
 
 namespace VN
 {
@@ -191,6 +191,7 @@ public:
 	virtual	bool IsType() const; 
 	virtual	bool IsSpecificIdentifier() const; 
 	
+	// Use std::any for dep breaking at the include level
 	typedef any Token;
 	typedef any Location;
 

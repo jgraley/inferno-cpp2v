@@ -1,5 +1,4 @@
 #include "tree/cpptree.hpp"
-#include "tree/localtree.hpp"
 #include "helpers/transformation.hpp"
 #include "tree/typeof.hpp"
 #include "common/trace.hpp"

@@ -28,7 +28,7 @@
 using namespace VN;
 using namespace reflex;
 
-static NodeTag GetNodeEnum( list<string> typ, any loc );
+static NodeTag GetNodeEnum( list<string> typ, Syntax::Location loc );
 
 
 VNLangActions::VNLangActions() :
@@ -137,7 +137,7 @@ static TreePtr<Node> MakeStandardAgentFromTypeID(const type_info &ti)
 }
 
 
-TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, any node_name_loc, Itemisation src_itemisation )
+TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, Syntax::Location node_name_loc, Itemisation src_itemisation )
 {
     Syntax::Location prev_loc = src_itemisation.loc;
 	
@@ -229,7 +229,7 @@ TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, any node_na
 }
 
 
-TreePtr<Node> VNLangActions::OnRestrict( TreePtr<Node> node, any node_name_loc, TreePtr<Node> target, any target_loc )
+TreePtr<Node> VNLangActions::OnRestrict( TreePtr<Node> node, Syntax::Location node_name_loc, TreePtr<Node> target, Syntax::Location target_loc )
 {
 	NodeTag tag = node_names->GetTagOfNode(node);	
 	Agent *agent = Agent::TryAsAgent(target);
@@ -246,7 +246,7 @@ TreePtr<Node> VNLangActions::OnRestrict( TreePtr<Node> node, any node_name_loc, 
 }
 
 
-TreePtr<Node> VNLangActions::OnTypeSpecifierSeq( multiset<string> specifiers, any loc )
+TreePtr<Node> VNLangActions::OnTypeSpecifierSeq( multiset<string> specifiers, Syntax::Location loc )
 {
 	ASSERT( specifiers.size() >= 1 ); // this would be a bug in the parser
 	TreePtr<CPPTree::Type> type;
@@ -356,7 +356,7 @@ TreePtr<Node> VNLangActions::OnInfixOperator( string tok, TreePtr<Node> left, Tr
 }
 
 
-TreePtr<Node> VNLangActions::OnIntegralLiteral( string text, any loc )
+TreePtr<Node> VNLangActions::OnIntegralLiteral( string text, Syntax::Location loc )
 {
 	// Normalise to upper case
     transform(text.begin(), text.end(), text.begin(), ::toupper);
@@ -376,7 +376,7 @@ TreePtr<Node> VNLangActions::OnStringLiteral( wstring wvalue )
 }
 
 
-TreePtr<Node> VNLangActions::OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> operand, any operand_loc )
+TreePtr<Node> VNLangActions::OnCast( TreePtr<Node> type, Syntax::Location type_loc, TreePtr<Node> operand, Syntax::Location operand_loc )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Cast>>();
 	node->operand = operand;	
@@ -411,7 +411,7 @@ TreePtr<Node> VNLangActions::OnArrayInitialiser( list<TreePtr<Node>> elements )
 }
 
 
-TreePtr<Node> VNLangActions::OnLabel( TreePtr<Node> identifier, any loc )
+TreePtr<Node> VNLangActions::OnLabel( TreePtr<Node> identifier, Syntax::Location loc )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::LabelDeclaration>>();
 	node->identifier = identifier;
@@ -419,7 +419,7 @@ TreePtr<Node> VNLangActions::OnLabel( TreePtr<Node> identifier, any loc )
 }
 
 
-TreePtr<Node> VNLangActions::OnCase( TreePtr<Node> value, any loc )
+TreePtr<Node> VNLangActions::OnCase( TreePtr<Node> value, Syntax::Location loc )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Case>>();
 	node->value = value;
@@ -427,7 +427,7 @@ TreePtr<Node> VNLangActions::OnCase( TreePtr<Node> value, any loc )
 }
 
 
-TreePtr<Node> VNLangActions::OnRangeCase( TreePtr<Node> value_lo, any lo_loc, TreePtr<Node> value_hi, any hi_loc )
+TreePtr<Node> VNLangActions::OnRangeCase( TreePtr<Node> value_lo, Syntax::Location lo_loc, TreePtr<Node> value_hi, Syntax::Location hi_loc )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::RangeCase>>();
 	node->value_lo = value_lo;
@@ -436,19 +436,19 @@ TreePtr<Node> VNLangActions::OnRangeCase( TreePtr<Node> value_lo, any lo_loc, Tr
 }
 
 
-TreePtr<Node> VNLangActions::OnDefault( any loc )
+TreePtr<Node> VNLangActions::OnDefault( Syntax::Location loc )
 {
 	return MakeTreeNode<StandardAgentWrapper<CPPTree::Default>>();
 }
 
 
-TreePtr<Node> VNLangActions::OnNop( any loc )
+TreePtr<Node> VNLangActions::OnNop( Syntax::Location loc )
 {
 	return MakeTreeNode<StandardAgentWrapper<CPPTree::Nop>>();
 }
 
 
-TreePtr<Node> VNLangActions::OnFuncOnType( string keyword, any keyword_loc, TreePtr<Node> type_arg, any type_arg_loc )
+TreePtr<Node> VNLangActions::OnFuncOnType( string keyword, Syntax::Location keyword_loc, TreePtr<Node> type_arg, Syntax::Location type_arg_loc )
 {
 	TreePtr<CPPTree::FuncOnType> node;
 	if( keyword=="sizeof" )
@@ -497,7 +497,7 @@ NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 }
 
 
-TreePtr<Node> VNLangActions::OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, any type_loc, TreePtr<Node> declarator, any decl_loc )
+TreePtr<Node> VNLangActions::OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, Syntax::Location type_loc, TreePtr<Node> declarator, Syntax::Location decl_loc )
 {
 	Syntax::Location middle_loc = any_cast<YY::VNLangParser::location_type>(type_loc) +
 												 any_cast<YY::VNLangParser::location_type>(decl_loc);
@@ -536,7 +536,7 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( const list<QualifierData> &quals,
 }
 
 
-TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc )
+TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, Syntax::Location middle_loc )
 {		
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
@@ -562,7 +562,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	TreePtr<CPPTree::Instance> instance = spg->GetDeclarationNode(middle_loc, !!q_static); 
 	instance->OnPermission( declarator_result.cv_quals_view.permission, any_cast<YY::VNLangParser::location_type>(middle_loc) ); 
 		
-	// Now fill in any subclass-specific fields
+	// Now fill in subclass-specific fields
 	if( auto member = TreePtr<CPPTree::Member>::DynamicCast(instance) )
 	{
 		for( const QualifierData &q : quals )
@@ -584,7 +584,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 }
 
 
-TreePtr<Node> VNLangActions::OnEnumerator( any loc )
+TreePtr<Node> VNLangActions::OnEnumerator( Syntax::Location loc )
 {
 	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
 	ASSERT( spg );
@@ -592,7 +592,7 @@ TreePtr<Node> VNLangActions::OnEnumerator( any loc )
 }
 
 
-TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierData> &quals, list<TreePtr<Node>> params )
+TreePtr<Node> VNLangActions::OnConstructorDecl( Syntax::Location loc, const list<QualifierData> &quals, list<TreePtr<Node>> params )
 {
 	// TODO process the qualifiers in one loop at the top, with lots of checking. Check for:
 	// - wrong qualifier eg an access spec
@@ -641,7 +641,7 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( any loc, const list<QualifierDat
 }
 
 
-void VNLangActions::UpdateCurrentAccess( any loc, TreePtr<Node> access )
+void VNLangActions::UpdateCurrentAccess( Syntax::Location loc, TreePtr<Node> access )
 {
 	// OnInstance() will still try to program the current access. But this fn will try to update it.
 
@@ -651,7 +651,7 @@ void VNLangActions::UpdateCurrentAccess( any loc, TreePtr<Node> access )
 }
 
 
-TreePtr<Node> VNLangActions::OnMemberInitialiser( TreePtr<Node> member_id, any member_loc, TreePtr<Node> initialiser, any initialiser_loc )
+TreePtr<Node> VNLangActions::OnMemberInitialiser( TreePtr<Node> member_id, Syntax::Location member_loc, TreePtr<Node> initialiser, Syntax::Location initialiser_loc )
 {
 	auto memb_init = MakeTreeNode<StandardAgentWrapper<CPPTree::MemberInitialiser>>();
 	
@@ -662,7 +662,7 @@ TreePtr<Node> VNLangActions::OnMemberInitialiser( TreePtr<Node> member_id, any m
 }
 
 
-TreePtr<Node> VNLangActions::OnAbDeclType( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator )
+TreePtr<Node> VNLangActions::OnAbDeclType( Syntax::Location loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator )
 {
 	Declarators::CVQuals cv_quals = OnCVQuals(quals, true); 
 	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type, cv_quals);
@@ -687,7 +687,7 @@ shared_ptr<Gnomon> VNLangActions::MakeRecordScopeGnomon( TreePtr<Node> record )
 }
 
 
-TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> access, TreePtr<Node> type, any loc )
+TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> access, TreePtr<Node> type, Syntax::Location loc )
 {
 	if( !TreePtr<CPPTree::AccessSpec>::DynamicCast(access) )
 		throw YY::VNLangParser::syntax_error(
@@ -753,7 +753,7 @@ Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals,
 }
 
 
-TreePtr<Node> VNLangActions::OnIdValuePair( TreePtr<Node> key, any id_loc, TreePtr<Node> value )
+TreePtr<Node> VNLangActions::OnIdValuePair( TreePtr<Node> key, Syntax::Location id_loc, TreePtr<Node> value )
 {
 	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::IdValuePair>>();
 	
@@ -790,7 +790,7 @@ TreePtr<Node> VNLangActions::OnLookup()
 }
 
 
-TreePtr<Node> VNLangActions::OnIdByName( TreePtr<Node> node, any id_disc_loc, wstring wname, any name_loc )
+TreePtr<Node> VNLangActions::OnIdByName( TreePtr<Node> node, Syntax::Location id_disc_loc, wstring wname, Syntax::Location name_loc )
 {
 	(void)name_loc; // TODO perhaps IdentifierByNameAgent can validate this?	
 	NodeTag tag = node_names->GetTagOfNode(node);	
@@ -809,7 +809,7 @@ TreePtr<Node> VNLangActions::OnIdByName( TreePtr<Node> node, any id_disc_loc, ws
 }
 
 
-TreePtr<Node> VNLangActions::OnBuildId( TreePtr<Node> node, any id_disc_loc, wstring wformat, any name_loc, Item sources )
+TreePtr<Node> VNLangActions::OnBuildId( TreePtr<Node> node, Syntax::Location id_disc_loc, wstring wformat, Syntax::Location name_loc, Item sources )
 {
 	(void)name_loc; // TODO perhaps BuildIdentifierAgent can validate this?	
 	NodeTag tag = node_names->GetTagOfNode(node);	
@@ -832,7 +832,7 @@ TreePtr<Node> VNLangActions::OnBuildId( TreePtr<Node> node, any id_disc_loc, wst
 }
 
 
-TreePtr<Node> VNLangActions::OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc )
+TreePtr<Node> VNLangActions::OnTransform( string kind, Syntax::Location kind_loc, TreePtr<Node> pattern, Syntax::Location pattern_loc )
 {
 	TreePtr<TransformOfAgent> to_agent;
 	if( kind == "TypeOf" )
@@ -904,7 +904,7 @@ TreePtr<Node> VNLangActions::OnStringize( TreePtr<Node> source )
 }
 
 
-TreePtr<Node> VNLangActions::OnNeedSoloStatement( list<TreePtr<Node>> source, any loc )
+TreePtr<Node> VNLangActions::OnNeedSoloStatement( list<TreePtr<Node>> source, Syntax::Location loc )
 {
 	ASSERT( !source.empty() );
 	if( source.size() > 1 )
@@ -915,7 +915,7 @@ TreePtr<Node> VNLangActions::OnNeedSoloStatement( list<TreePtr<Node>> source, an
 }
 
 
-TreePtr<Node> VNLangActions::CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc )
+TreePtr<Node> VNLangActions::CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, Syntax::Location loc )
 {
 	int bits;
 	if( lng )
@@ -946,7 +946,7 @@ void VNLangActions::AddGnomon( shared_ptr<Gnomon> gnomon )
 }
 
 
-static NodeTag GetNodeEnum( list<string> typ, any loc )
+static NodeTag GetNodeEnum( list<string> typ, Syntax::Location loc )
 {
 	if( !AvailableNodeData().GetNameToTagMap().count(typ) )
 	{
@@ -1048,7 +1048,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Keep the () on types for disambiguation unless you can prove away or just rely on designations TODO.
 
 // Semantics of optional keywords: if absent, this is taken to be the default (eg, private for a base of a class, non-const for 
-// a declaration etc). ☆ should be accepted to mean "any". Thus a fully wild base is ☆ ☆.
+// a declaration etc). ☆ should be accepted to mean "Syntax::Location". Thus a fully wild base is ☆ ☆.
 
 // Note: there are no explicit forms for agents. Thus, no ⯁Star⦅⦆ for example. This could have been handy for a greedy
 // alternative to ★. But see zipping syntax #883 for an alternative that uses a post-pass to move ★ toward root.
@@ -1077,11 +1077,11 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 
 // Putting arrivals on compound or expression causes conflicts, need to look at symmetry
  
-// According to https://alx71hub.github.io/hcb/#assignment-expression, the RHS of any assignment
+// According to https://alx71hub.github.io/hcb/#assignment-expression, the RHS of Syntax::Location assignment
 // operator including = is actual an initialiser. That might reduce pressure in the grammar
 // by making = more symmetrical.
 
-// NOTE: ; is NOT required for any VN operators working on statements or declarations. This is
+// NOTE: ; is NOT required for Syntax::Location VN operators working on statements or declarations. This is
 // consistent with statements and declarations that end in {...} not requiring one either. We DO
 // provide essentially optional semicolons for various surroundings. At present these are normal and decl_open 
 // TODO name more consistently
@@ -1096,7 +1096,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // fix is to split DeclarationOf and TypeDeclarationOf, then because TypeDeclarationOf converts from type
 // to normal we have to put VN brackets around its argument making it a promary. To make life easier in the
 // future, doing this to all the VN prefix ops that can switch between type and norm. Stuff is tricky, 1.
-// we like the prefix syntax without any braces at all, but braces are likely needed for unified argument
+// we like the prefix syntax without Syntax::Location braces at all, but braces are likely needed for unified argument
 // and 2. for completeness there should be a Stuff-As-Type symbol although this isn't manifesting atm.
  
 // NOTE to get a source Syntax::Location for TRACE etc 

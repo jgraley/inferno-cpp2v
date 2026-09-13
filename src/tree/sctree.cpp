@@ -4,6 +4,8 @@
 #include "tree/type_data.hpp"
 #include "tree/type_data.hpp"
 #include "vn/agents/standard_agent.hpp"
+#include "vn/lang/vn_lang.ypp.hpp"
+#include "vn/lang/vn_lang.location.hpp"
 #include <string>
 
 /// SCTree namespace contains node definitions that represent elements of SystemC, as native language elements

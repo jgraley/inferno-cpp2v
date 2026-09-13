@@ -4,8 +4,7 @@
 #include "include_clang_llvm.hpp"
 #include "node/specialise_oostd.hpp"
 #include "tree/type_data.hpp"
-#include "vn/lang/vn_lang.ypp.hpp"
-#include "vn/lang/vn_lang.location.hpp"
+
 #include <string>
 
 /// CPPTree namespace contains node definitions that represent elements of the C++ language

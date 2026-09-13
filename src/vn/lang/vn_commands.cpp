@@ -15,7 +15,6 @@
 #include "vn/lang/vn_lang.ypp.hpp"
 #include "vn/lang/vn_lang.lpp.hpp"
 #include "vn/lang/vn_lang.location.hpp"
-#include "vn_recogniser.hpp"
 
 #include <iostream>
 #include <fstream>

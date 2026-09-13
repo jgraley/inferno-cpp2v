@@ -5,7 +5,7 @@
 #include "tree/node_names.hpp"
 #include "declarators.hpp"
 #include "vn/lang/vn_types.hpp"     
-#include <any> // to dep-break the generated headers
+#include "node/syntax.hpp"     
 
 namespace YY
 {
@@ -31,54 +31,54 @@ public:
 	TreePtr<Node> OnStar( TreePtr<Node> restriction );
 	TreePtr<Node> OnStuff( TreePtr<Node> terminus, TreePtr<Node> recurse_restriction, Limit limit );
 	TreePtr<Node> OnDelta( TreePtr<Node> through, TreePtr<Node> overlay );
-	TreePtr<Node> FinishExplicitNode( TreePtr<Node> dest, any node_name_loc, Itemisation itemisation );
+	TreePtr<Node> FinishExplicitNode( TreePtr<Node> dest, Syntax::Location node_name_loc, Itemisation itemisation );
 	TreePtr<Node> OnEmbeddedCommands( list<shared_ptr<Command>> commands );
-	TreePtr<Node> OnRestrict( TreePtr<Node> node, any node_name_loc, TreePtr<Node> target, any target_loc );
+	TreePtr<Node> OnRestrict( TreePtr<Node> node, Syntax::Location node_name_loc, TreePtr<Node> target, Syntax::Location target_loc );
 	
-	TreePtr<Node> OnTypeSpecifierSeq( multiset<string> specifiers, any loc );
+	TreePtr<Node> OnTypeSpecifierSeq( multiset<string> specifiers, Syntax::Location loc );
 	
 	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
 	TreePtr<Node> OnPrefixOperator( string tok );
 	TreePtr<Node> OnPostfixOperator( string tok );
-	TreePtr<Node> OnIntegralLiteral( string text, any loc ); 
+	TreePtr<Node> OnIntegralLiteral( string text, Syntax::Location loc ); 
 	TreePtr<Node> OnStringLiteral( wstring value );
-	TreePtr<Node> OnCast( TreePtr<Node> type, any type_loc, TreePtr<Node> target, any target_loc );	
+	TreePtr<Node> OnCast( TreePtr<Node> type, Syntax::Location type_loc, TreePtr<Node> target, Syntax::Location target_loc );	
 	TreePtr<Node> OnConditionalOperator( TreePtr<Node> condition, TreePtr<Node> expr_then, TreePtr<Node> expr_else );	
 	TreePtr<Node> OnSubscript();	
-	TreePtr<Node> OnCompound( list<TreePtr<Node>> members, any memb_loc, list<TreePtr<Node>> statements, any stmt_loc );	
-	TreePtr<Node> OnCodeUnit( list<TreePtr<Node>> members, any memb_loc );	
+	TreePtr<Node> OnCompound( list<TreePtr<Node>> members, Syntax::Location memb_loc, list<TreePtr<Node>> statements, Syntax::Location stmt_loc );	
+	TreePtr<Node> OnCodeUnit( list<TreePtr<Node>> members, Syntax::Location memb_loc );	
 	TreePtr<Node> OnArrayInitialiser( list<TreePtr<Node>> elements );	
-	TreePtr<Node> OnLabel( TreePtr<Node> identifier, any loc );	
-	TreePtr<Node> OnCase( TreePtr<Node> value, any loc );	
-	TreePtr<Node> OnRangeCase( TreePtr<Node> value_lo, any lo_loc, TreePtr<Node> value_hi, any hi_loc );	
-	TreePtr<Node> OnDefault( any loc );	
-	TreePtr<Node> OnNop( any loc );	
-	TreePtr<Node> OnFuncOnType( string keyword, any keyword_loc, TreePtr<Node> type_arg, any type_arg_loc );
+	TreePtr<Node> OnLabel( TreePtr<Node> identifier, Syntax::Location loc );	
+	TreePtr<Node> OnCase( TreePtr<Node> value, Syntax::Location loc );	
+	TreePtr<Node> OnRangeCase( TreePtr<Node> value_lo, Syntax::Location lo_loc, TreePtr<Node> value_hi, Syntax::Location hi_loc );	
+	TreePtr<Node> OnDefault( Syntax::Location loc );	
+	TreePtr<Node> OnNop( Syntax::Location loc );	
+	TreePtr<Node> OnFuncOnType( string keyword, Syntax::Location keyword_loc, TreePtr<Node> type_arg, Syntax::Location type_arg_loc );
 			
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
 	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
 	NodeAndGnomon MakeScopeGnomonForNode( TreePtr<Node> node ) const;
-	TreePtr<Node> OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, any type_loc, TreePtr<Node> declarator, any decl_loc );
-	TreePtr<Node> OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, any middle_loc );	
-	TreePtr<Node> OnEnumerator( any loc );
-	TreePtr<Node> OnConstructorDecl( any loc, const list<QualifierData> &quals, list<TreePtr<Node>> params );	
-	void UpdateCurrentAccess( any loc, TreePtr<Node> access );	
-	TreePtr<Node> OnMemberInitialiser( TreePtr<Node> member_id, any member_loc, TreePtr<Node> initialiser, any initialiser_loc );
-	TreePtr<Node> OnAbDeclType( any loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	
+	TreePtr<Node> OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, Syntax::Location type_loc, TreePtr<Node> declarator, Syntax::Location decl_loc );
+	TreePtr<Node> OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, Syntax::Location middle_loc );	
+	TreePtr<Node> OnEnumerator( Syntax::Location loc );
+	TreePtr<Node> OnConstructorDecl( Syntax::Location loc, const list<QualifierData> &quals, list<TreePtr<Node>> params );	
+	void UpdateCurrentAccess( Syntax::Location loc, TreePtr<Node> access );	
+	TreePtr<Node> OnMemberInitialiser( TreePtr<Node> member_id, Syntax::Location member_loc, TreePtr<Node> initialiser, Syntax::Location initialiser_loc );
+	TreePtr<Node> OnAbDeclType( Syntax::Location loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	
 	shared_ptr<Gnomon> MakeRecordScopeGnomon( TreePtr<Node> record );
-	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type, any loc );	
+	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type, Syntax::Location loc );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified
 	Declarators::CVQuals OnCVQuals( const list<QualifierData> &quals, bool nice=false );
 	
-	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, any id_loc, TreePtr<Node> value );
+	TreePtr<Node> OnIdValuePair( TreePtr<Node> id, Syntax::Location id_loc, TreePtr<Node> value );
 	TreePtr<Node> OnMapArgs();
 	TreePtr<Node> OnSeqArgs();
 	TreePtr<Node> OnCall( TreePtr<Node> callee, TreePtr<Node> argumentation );
 	TreePtr<Node> OnLookup();
 
-	TreePtr<Node> OnIdByName( TreePtr<Node> node, any id_disc_loc, wstring wname, any name_loc );
-	TreePtr<Node> OnBuildId( TreePtr<Node> node, any id_disc_loc, wstring wformat, any name_loc, Item sources );
-	TreePtr<Node> OnTransform( string kind, any kind_loc, TreePtr<Node> pattern, any pattern_loc );
+	TreePtr<Node> OnIdByName( TreePtr<Node> node, Syntax::Location id_disc_loc, wstring wname, Syntax::Location name_loc );
+	TreePtr<Node> OnBuildId( TreePtr<Node> node, Syntax::Location id_disc_loc, wstring wformat, Syntax::Location name_loc, Item sources );
+	TreePtr<Node> OnTransform( string kind, Syntax::Location kind_loc, TreePtr<Node> pattern, Syntax::Location pattern_loc );
 	TreePtr<Node> OnNegation( TreePtr<Node> operand );
 	TreePtr<Node> OnConjunction( TreePtr<Node> left, TreePtr<Node> right );
 	TreePtr<Node> OnDisjunction( TreePtr<Node> left, TreePtr<Node> right );
@@ -86,9 +86,9 @@ public:
 	TreePtr<Node> OnPointerIs( TreePtr<Node> pointer );
 	TreePtr<Node> OnBuildSize( TreePtr<Node> container );
 	TreePtr<Node> OnStringize( TreePtr<Node> source );
-	TreePtr<Node> OnNeedSoloStatement( list<TreePtr<Node>> source, any loc );
+	TreePtr<Node> OnNeedSoloStatement( list<TreePtr<Node>> source, Syntax::Location loc );
 	
-	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, any loc );
+	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, Syntax::Location loc );
 	
 	void AddGnomon( shared_ptr<Gnomon> gnomon );
 	

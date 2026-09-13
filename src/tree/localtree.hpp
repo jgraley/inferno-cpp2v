@@ -6,6 +6,10 @@
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 
+// TODO drop once usages are out of line
+#include "vn/lang/vn_lang.ypp.hpp"
+#include "vn/lang/vn_lang.location.hpp"
+
 #define RENDER_AS_BASE_IN_CPP_ONLY(BASE) \
     string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override \
     { \

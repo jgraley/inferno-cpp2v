@@ -7,18 +7,10 @@
 #include "helpers/simple_compare.hpp"
 #include "tree/misc.hpp"
 #include "indenter.hpp"
+#include "vn/lang/vn_types.hpp"     
 #include "vn/lang/vn_lang.ypp.hpp"
 #include "vn/lang/vn_lang.lpp.hpp"
 #include "vn/lang/vn_lang.location.hpp"
-
-// WHAT WE NEED
-// A "name info" struct containing a variety of handy info relating to a name we saw:
-// - unicode/ASCII flag
-// - A subtree if the name was designated
-// - An archetype if the type is known
-// - An enum of TYPE, OTHER etc which has been deduced from the above according to some priority scheme
-// It is this enum that the scanner will use to decide what token to issue
-// Alternatively, WE could choose the token and put that in the struct instead.
 
 namespace YY
 {
@@ -37,19 +29,8 @@ TreePtr<Node> MakeStandardAgent(NodeTag ne);
 class DesignationGnomon : public Gnomon
 {
 public:	
-	DesignationGnomon( std::wstring name_, TreePtr<Node> node_, Syntax::Token token_ ) : 
-		name( name_ ),
-		node( node_ ),
-		token( token_ )
-	{
-		ASSERT( !name.empty() );
-		// Pattern can be NULL for eg singular wildcard
-	}
-
-	string GetTrace() const
-	{
-		return ToASCII(name) + "⪮" + Trace(node) + "(" + Trace((unsigned)any_cast<YY::VNLangParser::token::token_kind_type>(token)) + ")";
-	}
+	DesignationGnomon( std::wstring name_, TreePtr<Node> node_, Syntax::Token token_ );
+	string GetTrace() const;
 	
 private:
 	friend class VNLangRecogniser;
@@ -62,10 +43,7 @@ private:
 class TransformNameScopeGnomon : public ScopeGnomon
 {
 public:	
-	string GetMessageText() const final
-	{
-		return "transformation name scope";
-	}
+	string GetMessageText() const final;
 };	
 		
 		
