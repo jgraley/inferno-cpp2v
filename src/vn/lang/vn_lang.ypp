@@ -639,7 +639,7 @@ expr_entry			: expr_comma_op
                                    
 expr_comma_op       : expr_no_comma_op
 // Operator comma removed due to ambiguity with ∧ and ∨. Comma is lower in the case of eg parameters but higher here.
-//                    | expr_comma_op ',' expr_no_comma_op						{ $$ = vn->OnInfixOperator(",", $1, $3); }  
+//                    | expr_comma_op ',' expr_no_comma_op						{ $$ = vn->OnInfixOperator(",")->OnArgsList({$1, $3}, @$); }  
                     
 expr_no_comma_op 	: expr_id_value
 
@@ -647,48 +647,48 @@ expr_id_value		: expr_assignment
 					| expr_id_value MAP_ARG_OP expr_assignment					{ $$ = vn->OnIdValuePair($1, @1, $3); }
 					
 expr_assignment 	: expr_logical_or 
-					| 				   expr_logical_or C_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
-					|         expr_logical_or C_COMPOUND_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					| 				   expr_logical_or C_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2)->OnObject($1, @1)->OnArgsList({$3}, @3); }
+					|         expr_logical_or C_COMPOUND_ASSIGN expr_assignment	{ $$ = vn->OnInfixOperator($2)->OnObject($1, @1)->OnArgsList({$3}, @3); }
 					|   	 expr_logical_or '?' expr_entry ':' expr_assignment	{ $$ = vn->OnConditionalOperator($1, $3, $5); }
 
 expr_logical_or 	: expr_logical_and
-					| expr_logical_or C_LOGICAL_OR_OP expr_logical_and			{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					| expr_logical_or C_LOGICAL_OR_OP expr_logical_and			{ $$ = vn->OnInfixOperator($2)->OnArgsList({$1, $3}, @$); }
 		
 expr_logical_and	: expr_bitwise_or
-					| expr_logical_and C_LOGICAL_AND_OP expr_bitwise_or			{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					| expr_logical_and C_LOGICAL_AND_OP expr_bitwise_or			{ $$ = vn->OnInfixOperator($2)->OnArgsList({$1, $3}, @$); }
 
 expr_bitwise_or 	: expr_bitwise_xor
-					| expr_bitwise_or C_BITWISE_OR_OP expr_bitwise_xor			{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					| expr_bitwise_or C_BITWISE_OR_OP expr_bitwise_xor			{ $$ = vn->OnInfixOperator($2)->OnArgsList({$1, $3}, @$); }
 		
 expr_bitwise_xor	: expr_bitwise_and
-					| expr_bitwise_xor C_BITWISE_XOR_OP expr_bitwise_and		{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					| expr_bitwise_xor C_BITWISE_XOR_OP expr_bitwise_and		{ $$ = vn->OnInfixOperator($2)->OnArgsList({$1, $3}, @$); }
 		
 expr_bitwise_and	: expr_equality
-					| expr_bitwise_and '&' expr_equality						{ $$ = vn->OnInfixOperator("&", $1, $3); }
+					| expr_bitwise_and '&' expr_equality						{ $$ = vn->OnInfixOperator("&")->OnArgsList({$1, $3}, @$); }
 
 expr_equality 		: expr_relational
-					| expr_equality C_EQUALITY_OP expr_relational				{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					| expr_equality C_EQUALITY_OP expr_relational				{ $$ = vn->OnInfixOperator($2)->OnArgsList({$1, $3}, @$); }
 
 expr_relational 	: expr_shift
-					| expr_relational C_RELATIONAL_OP expr_shift				{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					| expr_relational C_RELATIONAL_OP expr_shift				{ $$ = vn->OnInfixOperator($2)->OnArgsList({$1, $3}, @$); }
 
 expr_shift			: expr_add_etc
-					| expr_shift C_SHIFT_OP expr_add_etc						{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					| expr_shift C_SHIFT_OP expr_add_etc						{ $$ = vn->OnInfixOperator($2)->OnArgsList({$1, $3}, @$); }
 		
 expr_add_etc 		: expr_mul_etc
-					| expr_add_etc C_ADD_SUB_OP expr_mul_etc					{ $$ = vn->OnInfixOperator($2, $1, $3); }
+					| expr_add_etc C_ADD_SUB_OP expr_mul_etc					{ $$ = vn->OnInfixOperator($2)->OnArgsList({$1, $3}, @$); }
 		
 expr_mul_etc 		: expr_prefix
-					| expr_mul_etc C_DIV_MOD_OP expr_prefix						{ $$ = vn->OnInfixOperator($2, $1, $3); }
-					| expr_mul_etc '*' expr_prefix								{ $$ = vn->OnInfixOperator("*", $1, $3); }
+					| expr_mul_etc C_DIV_MOD_OP expr_prefix						{ $$ = vn->OnInfixOperator($2)->OnArgsList({$1, $3}, @$); }
+					| expr_mul_etc '*' expr_prefix								{ $$ = vn->OnInfixOperator("*")->OnArgsList({$1, $3}, @$); }
 		
 expr_prefix : expr_postfix
-			| 					            C_PREFIX_OP	expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnSoloArg($2, @2); }
-			| 					                    '&' expr_prefix	{ $$ = vn->OnPrefixOperator("&")->OnSoloArg($2, @2); }
-			| 					                    '*' expr_prefix	{ $$ = vn->OnPrefixOperator("*")->OnSoloArg($2, @2); }
-			| 					           C_ADD_SUB_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnSoloArg($2, @2); }
-			| 					      C_PRE_OR_INFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnSoloArg($2, @2); }
-			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnSoloArg($2, @2); }
+			| 					            C_PREFIX_OP	expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnArgsList({$2}, @2); }
+			| 					                    '&' expr_prefix	{ $$ = vn->OnPrefixOperator("&")->OnArgsList({$2}, @2); }
+			| 					                    '*' expr_prefix	{ $$ = vn->OnPrefixOperator("*")->OnArgsList({$2}, @2); }
+			| 					           C_ADD_SUB_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnArgsList({$2}, @2); }
+			| 					      C_PRE_OR_INFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnArgsList({$2}, @2); }
+			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnArgsList({$2}, @2); }
 			| 						     GREEN_GRASS_OP expr_prefix	{ $$ = vn->OnGrass($2); }
 			| 						      POINTER_IS_OP expr_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
@@ -706,9 +706,9 @@ stuff_depth		: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 };
 // Postfix operators are treated like method calls, operand is regarded as object
 expr_postfix: expr_primary     
 			| expr_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2)->OnObject($1, @1); }
-			| expr_postfix '[' stmt_entry ']'	 					{ $$ = vn->OnSubscript()->OnObject($1, @1)->OnSoloArg($3, @3); }
+			| expr_postfix '[' stmt_entry ']'	 					{ $$ = vn->OnSubscript()->OnObject($1, @1)->OnArgsList({$3}, @3); }
 			| expr_postfix argumentation							{ $$ = vn->OnCall()->OnObject($1, @1)->OnArgumentation($2, @2); } 
-			| expr_postfix '.' id_primary							{ $$ = vn->OnLookup()->OnObject($1, @1)->OnSoloArg($3, @3); }
+			| expr_postfix '.' id_primary							{ $$ = vn->OnLookup()->OnObject($1, @1)->OnArgsList({$3}, @3); }
 			| LIBRARY_FUNC '(' comma_sep_exprs ')'   				{ $$ = $1->OnArgsList($3, @3); }	
 			| LIBRARY_FUNC '(' ')'   							
 			| expr_postfix '.' LIBRARY_METHOD '(' comma_sep_exprs ')' 	{ $$ = $3->OnObject($1, @1)->OnArgsList($5, @5); }			

@@ -37,7 +37,7 @@ public:
 	
 	TreePtr<Node> OnTypeSpecifierSeq( multiset<string> specifiers, Syntax::Location loc );
 	
-	TreePtr<Node> OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right );
+	TreePtr<Node> OnInfixOperator( string tok );
 	TreePtr<Node> OnPrefixOperator( string tok );
 	TreePtr<Node> OnPostfixOperator( string tok );
 	TreePtr<Node> OnIntegralLiteral( string text, Syntax::Location loc ); 

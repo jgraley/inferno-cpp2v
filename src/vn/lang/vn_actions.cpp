@@ -341,16 +341,11 @@ TreePtr<Node> VNLangActions::OnPostfixOperator( string tok )
 }
 
 
-TreePtr<Node> VNLangActions::OnInfixOperator( string tok, TreePtr<Node> left, TreePtr<Node> right )
+TreePtr<Node> VNLangActions::OnInfixOperator( string tok )
 {
 #define INFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
     if( tok==TEXT ) \
-    { \
-		auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::NAME>>(); \
-		node->operands.push_back(left); \
-		node->operands.push_back(right); \
-        return node; \
-	}
+		return MakeTreeNode<StandardAgentWrapper<CPPTree::NAME>>(); 
 #include "tree/operator_data.inc"	
 	ASSERTFAIL("Infix operator parsed but not found in operator_data.inc"); 
 }
