@@ -2,6 +2,7 @@
 #include "systemc_raising.hpp"
 #include "clean_up.hpp"
 #include "tree/cpptree.hpp"
+#include "tree/sctree.hpp"
 #include "tree/typeof.hpp"
 #include "pattern_helpers.hpp"
 

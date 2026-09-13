@@ -2,6 +2,7 @@
 #include "sort_decls.hpp"
 #include "tree/misc.hpp"
 #include "helpers/simple_compare.hpp"
+#include "tree/cpptree.hpp" 
 
 using namespace CPPTree;
 
@@ -81,7 +82,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
 
     // Actually, we really want to see whether declaration a depends on the identifier of b
     // since the rest of b is irrelevent (apart from the above).
-    TreePtr<Identifier> ib = GetIdentifierOfDeclaration( b ).GetTreePtr();
+    TreePtr<Node> ib = GetIdentifierOfDeclaration( b ).GetTreePtr();
     if(!ib)
 		return false;
           

@@ -1,13 +1,17 @@
 #ifndef RENDER_HPP
 #define RENDER_HPP
 
-#include "tree/cpptree.hpp"
-#include "tree/sctree.hpp"
 #include "helpers/transformation.hpp"
 #include "uniquify_identifiers.hpp"
 #include "helpers/simple_compare.hpp"
 #include "tree/misc.hpp"
 #include "indenter.hpp"
+
+namespace CPPTree
+{
+	class Permission;
+	class Identifier;
+};
 
 namespace VN 
 {
@@ -17,7 +21,6 @@ struct RenderKit
 {	
 	RendererInterface *renderer;
 };
-
 
 class Render : public RendererInterface
 {

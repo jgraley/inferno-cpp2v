@@ -1,6 +1,7 @@
 #include "declarators.hpp"
 
 #include "vn/agents/all.hpp"
+#include "tree/cpptree.hpp"
 
 using namespace Declarators;
 

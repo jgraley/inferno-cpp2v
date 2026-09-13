@@ -1,8 +1,6 @@
 #ifndef VN_SHIM_HPP
 #define VN_SHIM_HPP
 
-#include "tree/cpptree.hpp"
-#include "tree/sctree.hpp"
 #include "tree/node_names.hpp"
 #include "helpers/transformation.hpp"
 #include "uniquify_identifiers.hpp"

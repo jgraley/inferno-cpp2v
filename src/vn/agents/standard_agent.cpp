@@ -31,8 +31,11 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
 	// planning due to coupling within a step, but not between them. Luckily,
 	// there isn't really anything in the plan that would need to be different
 	// since identifiers have no children, so just re-use the plan.
-	if( dynamic_cast<CPPTree::SpecificIdentifier *>(algo) && algo->planned )
+	if( algo->planned )
+	{
+		ASSERT( algo->IsSpecificIdentifier() );
 		return; 
+	}
 	
     ASSERT( !algo->planned );
     ASSERT( sequences.empty() );
@@ -622,7 +625,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutOverlayUsingPattern( const
 
 	// With identifiers, Duplicate() would return *this as a replace node which 
 	// we don't support. Use BuildxxxIdentifierAgent for most cases. For exotic cases see #819.
-	ASSERT( !dynamic_cast<CPPTree::SpecificIdentifier *>(this) );		
+	ASSERT( !IsSpecificIdentifier() );		
     TreePtr<Node> dest = Duplicate::DuplicateNode(me_plink.GetPatternTreePtr());
     
     // We "invent" dest, because of information coming from this pattern node.
@@ -893,7 +896,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
 		
 	// With identifiers, Duplicate() would return *this as a replace node which 
 	// we don't support. Use BuildxxxIdentifierAgent for most cases. For exotic cases see #819.
-	//ASSERT( !dynamic_cast<CPPTree::SpecificIdentifier *>(this) );		
+	//ASSERT( !algo->IsSpecificIdentifier() );		
     TreePtr<Node> dest = Duplicate::DuplicateNode(me_plink.GetPatternTreePtr());
     
     ASSERT( dest->IsFinal() )(*this)(" trying to build non-final ")(*dest)("\n"); 

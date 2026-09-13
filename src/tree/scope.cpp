@@ -1,6 +1,7 @@
 #include "scope.hpp"
 #include "helpers/walk.hpp"
 #include "misc.hpp"
+#include "cpptree.hpp"
 
 using namespace CPPTree;
 

@@ -128,14 +128,8 @@ string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Produ
 	TreePtr<Node> restriction{ *GetRestriction() };
 	if( !restriction ) // A restriction establishes the kind of node
 	{			
-		if( dynamic_pointer_cast<CPPTree::Type>( policy.pointer_archetype ) )		 
-			s += "⍑";		
-		else if( dynamic_pointer_cast<CPPTree::Declaration>( policy.pointer_archetype ) )
-		{
-			// Using parent's child-pointer type rather than Declaration since that's a 
-			// clearer hint that no actual restriction is required.
-			restriction = dynamic_pointer_cast<Node>( policy.pointer_archetype );
-		}
+		if( policy.pointer_archetype && policy.pointer_archetype->IsType() )		 
+			s += "⍑";				
 	}
 		
 	s += "★";

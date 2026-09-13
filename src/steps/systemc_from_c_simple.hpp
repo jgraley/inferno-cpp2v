@@ -3,8 +3,6 @@
 
 // These transformations convert C code into SystemC.
 
-#include "tree/cpptree.hpp"
-#include "tree/sctree.hpp"
 #include "vn/vn_step.hpp"
 
 namespace Steps {

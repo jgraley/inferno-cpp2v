@@ -5,9 +5,21 @@
 // name and node pattern within input code, and substitute the 
 // Inferno SystemC nodes.
 
-#include "tree/cpptree.hpp"
-#include "tree/sctree.hpp"
 #include "vn/vn_step.hpp"
+
+namespace CPPTree
+{
+	class Type;
+};
+
+namespace SCTree
+{
+	class SCRecord;
+	class SCDynamicFunction;
+	class SCFunction;
+	class TerminationFunction;
+	class Process;
+};
 
 namespace Steps {
 

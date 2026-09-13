@@ -8,8 +8,13 @@
 #ifndef UNCOMBABLE_HPP
 #define UNCOMBABLE_HPP
 
-#include "tree/cpptree.hpp"
 #include "common/common.hpp"
+#include "node/tree_ptr.hpp"
+
+namespace CPPTree
+{
+	class Statement;
+};
 
 namespace Steps {
 

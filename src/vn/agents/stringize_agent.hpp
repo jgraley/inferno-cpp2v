@@ -2,14 +2,17 @@
 #define STRINGIZE_AGENT_HPP
 
 #include "vn/agents/relocating_agent.hpp"
-#include "tree/cpptree.hpp" 
 #include "helpers/transformation.hpp"
-#include "tree/sctree.hpp"
 #include "vn/agents/star_agent.hpp"
 #include "vn/agents/builder_agent.hpp"
 #include "vn/sym/expression.hpp"
 
 using namespace VN;
+
+namespace CPPTree
+{
+	class String;
+};
 
 // Make a String node containing the token string of an identifier. No uniquing is attempted.
 struct StringizeAgent : Special<CPPTree::String>,

@@ -2,8 +2,6 @@
 #define VN_SCRIPT_HPP
 
 #include "vn_commands.hpp"
-#include "tree/cpptree.hpp"
-#include "tree/sctree.hpp"
 #include "helpers/transformation.hpp"
 #include "uniquify_identifiers.hpp"
 #include "helpers/simple_compare.hpp"

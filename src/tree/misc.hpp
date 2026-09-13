@@ -1,9 +1,17 @@
 #ifndef MISC_HPP
 #define MISC_HPP
 
-#include "cpptree.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
+
+namespace CPPTree
+{
+	class Identifier;
+	class Declaration;
+	class TypeIdentifier;
+	class Record;
+	class Instance;
+};
 
 // Really, Declaration should point to an Identifier and that would be that, but at present
 // there are differnent kinds of Declaration that point to different kinds of Node.

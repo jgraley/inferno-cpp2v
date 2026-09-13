@@ -2,9 +2,13 @@
 #define SORT_DECLS_HPP
 
 #include "common/common.hpp"
-#include "tree/cpptree.hpp"
 #include "helpers/walk.hpp"
 #include "uniquify_identifiers.hpp"
+
+namespace CPPTree
+{
+	class Declaration;
+};
 
 // Does declaration of a depend on (ie use) declaration of b?
 // set ignore_ptr_ref_record to make function ignore the case where a's type contains a pointer or 

@@ -188,7 +188,9 @@ public:
     static string::size_type GetLineBreakThreshold();
     virtual string GetKeyword( Policy policy ) const;    
 	string RenderNodeTypeName() const; 
-	
+	virtual	bool IsType() const; 
+	virtual	bool IsSpecificIdentifier() const; 
+
 	virtual YY::VNLangParser::token::token_kind_type GetSignifierToken() const;
 	virtual YY::VNLangParser::token::token_kind_type GetExplicitToken() const;
 	virtual YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const;

@@ -106,6 +106,18 @@ string Syntax::RenderNodeTypeName() const
 }
 
 
+bool Syntax::IsType() const
+{
+	return false;
+}
+
+
+bool Syntax::IsSpecificIdentifier() const
+{
+	return false;
+}
+
+
 YY::VNLangParser::token::token_kind_type Syntax::GetSignifierToken() const
 {
 	throw UnimplementedToken();

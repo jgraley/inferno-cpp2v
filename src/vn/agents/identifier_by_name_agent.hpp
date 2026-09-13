@@ -2,14 +2,21 @@
 #define IDENTIFIER_BY_NAME_AGENT_HPP
 
 #include "vn/agents/relocating_agent.hpp"
-#include "tree/cpptree.hpp" 
 #include "helpers/transformation.hpp"
-#include "tree/sctree.hpp"
 #include "vn/agents/star_agent.hpp"
 #include "vn/agents/builder_agent.hpp"
 #include "vn/sym/expression.hpp"
 
 using namespace VN;
+
+namespace CPPTree
+{
+	class SpecificIdentifier;
+	class InstanceIdentifier;
+	class TypeIdentifier;
+	class LabelIdentifier;
+	class PreprocessorIdentifier;
+};
 
 //---------------------------------- IdentifierByNameAgent ------------------------------------    
 // 

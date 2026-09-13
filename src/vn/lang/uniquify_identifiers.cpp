@@ -4,6 +4,7 @@
 #include "node/syntax.hpp"
 #include "helpers/flatten.hpp"
 #include "agents/embedded_scr_agent.hpp"
+#include "tree/cpptree.hpp" 
 
 using namespace CPPTree;
 using namespace VN;

@@ -106,6 +106,9 @@ struct Type : virtual Node
 
     // Render a simple type only, no declarators
 	virtual string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy );    
+	
+	bool IsType() const override;
+
 	YY::VNLangParser::token::token_kind_type GetExplicitToken() const override;
 	YY::VNLangParser::token::token_kind_type GetPrerestrictToken() const override;
 	YY::VNLangParser::token::token_kind_type GetIdByNameToken() const override;
@@ -199,10 +202,12 @@ struct SpecificIdentifier : virtual Property
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
     string GetIdentifierName() const override; /// This is relied upon to just return the identifier name 
     string GetDesignationNameHint() const override;
-    bool IsDesignationNamedIdentifier() const override;
+    bool IsDesignationNamedIdentifier() const override;	
+	bool IsSpecificIdentifier() const override;
+	
     string GetGraphName() const override;
     string GetTrace() const override;
-	
+
     BoundingRole addr_bounding_role;
     string name; // TODO split this out into NamedIdentifier
 

@@ -3,9 +3,22 @@
 
 // These transformations lower SystemC nodes into somehting we can render.
 
-#include "tree/cpptree.hpp"
-#include "tree/sctree.hpp"
 #include "vn/vn_step.hpp"
+
+namespace CPPTree
+{
+	class Type;
+	class InstanceIdentifier;
+};
+
+namespace SCTree
+{
+	class SCRecord;
+	class SCDynamicFunction;
+	class SCFunction;
+	class TerminationFunction;
+	class Process;
+};
 
 namespace Steps {
 

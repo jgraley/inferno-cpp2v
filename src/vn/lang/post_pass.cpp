@@ -4,6 +4,7 @@
 #include "db/mutator.hpp"
 #include "agents/embedded_scr_agent.hpp"
 #include "agents/relocating_agent.hpp"
+#include "tree/cpptree.hpp"
 
 using namespace CPPTree;
 using namespace VN;

@@ -138,6 +138,11 @@ string Type::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 }
 
 
+bool Type::IsType() const
+{
+	return true;
+}
+
 YY::VNLangParser::token::token_kind_type Type::GetExplicitToken() const
 {
 	return YY::VNLangParser::token::TOK_EXPLICIT_TYPE;
@@ -410,6 +415,23 @@ bool SpecificIdentifier::IsDesignationNamedIdentifier() const
 }
 
 
+string SpecificIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy )
+{
+	auto me = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
+	ASSERT(me);	
+
+	string s = renderer->GetUniqueIdentifierName(me);          
+    ASSERT(s.size()>0)(*me)(" rendered to an empty string\n");
+    return s;
+}
+
+
+bool SpecificIdentifier::IsSpecificIdentifier() const
+{
+	return true;
+}
+
+
 string SpecificIdentifier::GetGraphName() const
 {
     // Since this is text from the program, use single quotes
@@ -434,16 +456,6 @@ string SpecificIdentifier::GetTrace() const
     return GetName() + "(" + GetGraphName() + ")" + GetSerialString();
 }
 
-
-string SpecificIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy )
-{
-	auto me = TreePtr<SpecificIdentifier>::DynamicCast( TreePtr<Node>(shared_from_this()) );
-	ASSERT(me);	
-
-	string s = renderer->GetUniqueIdentifierName(me);          
-    ASSERT(s.size()>0)(*me)(" rendered to an empty string\n");
-    return s;
-}
 
 //////////////////////////// InstanceIdentifier //////////////////////////////
 

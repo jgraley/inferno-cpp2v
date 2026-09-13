@@ -2,7 +2,15 @@
 #define TYPEOF_HPP
 
 #include "helpers/transformation.hpp"
-#include "cpptree.hpp"
+
+namespace CPPTree
+{
+	class Type;
+	class Expression;
+	class Operator;
+	class Numeric;
+	class Literal;
+};
 
 // Really a GetTypeOf class, but named for the way it appears in pattern graphs
 class TypeOf : public Transformation

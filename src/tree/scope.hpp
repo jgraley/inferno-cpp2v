@@ -1,7 +1,15 @@
 #ifndef SCOPE_HPP
 #define SCOPE_HPP
 
-#include "tree/cpptree.hpp"
+#include "node/node.hpp"
+#include "node/tree_ptr.hpp"
+#include "common/mismatch.hpp"
+
+namespace CPPTree
+{
+	class Scope;
+	class Identifier;
+};
 
 //
 // Handy helper to get the node that is the "scope" of the supplied node - ie basically the

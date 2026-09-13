@@ -176,7 +176,7 @@ string StuffAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Prod
 	policy.context = any(); // No access spec here
 
 	string s;
-	if( dynamic_pointer_cast<CPPTree::Type>( policy.pointer_archetype ) )		 
+	if( policy.pointer_archetype && policy.pointer_archetype->IsType() )		 
 		s += "⍑";			
 	s += "⩨";
 	if( recurse_restriction )

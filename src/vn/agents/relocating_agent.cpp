@@ -1,10 +1,6 @@
 #include "relocating_agent.hpp"
 
 #include "link.hpp"
-
-// Temporary
-#include "tree/cpptree.hpp"
-
 #include "transform_of_agent.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"

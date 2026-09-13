@@ -1,8 +1,6 @@
 #ifndef VN_COMMANDS_HPP
 #define VN_COMMANDS_HPP
 
-#include "tree/cpptree.hpp"
-#include "tree/sctree.hpp"
 #include "helpers/transformation.hpp"
 #include "uniquify_identifiers.hpp"
 #include "helpers/simple_compare.hpp"
