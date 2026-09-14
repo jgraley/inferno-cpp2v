@@ -715,13 +715,14 @@ const TransKit *Render::GetTransKit() const
 }
 
 
-string Render::GetKeyword( const Node *node, 
-						   Syntax::Policy policy )
+string Render::GetSignifier( const Node *node, 
+					   	     Syntax::Policy policy )
 {
+	// Signifier can be keyword, operator text, or short-form explicit
     try
     {
 		return node->GetKeyword(policy);
-		// If no keyword, usually throw UnimplementedKeyword
+		// If no keyword, usually throws UnimplementedKeyword
 	}
 	catch( Syntax::Refusal & ) 
 	{

@@ -1048,7 +1048,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // syntax.
 
 // NODE: implementing GetSignifierToken gives the node syntax in the parser, so for render to match, GetRender()
-// must be implemented. The impl should call renderer->GetKeyword() for the element that will parse with the 
+// must be implemented. The impl should call renderer->GetSignifier() for the element that will parse with the 
 // signifier token.
 
 // NOTE on sub-hierarchies of add-on nodes:
