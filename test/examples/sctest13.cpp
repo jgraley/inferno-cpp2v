@@ -12,6 +12,7 @@ public:
     {
         SC_THREAD(T);        
     }
+private:
     void T()
     {
         x = 0;

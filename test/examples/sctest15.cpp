@@ -10,6 +10,7 @@ public:
     {
         SC_THREAD(U);
     }
+private:
     void U()
     {
         HelperU();

@@ -94,6 +94,9 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     s_rec->members = (decls, fn);
     r_rec->members = (decls, fn, r_var);
     fn->permission = MakePatternNode<NonConst>();    
+    // Rule #910: SC processes to be Memeber, with NonVirtual and Private
+    fn->dispatch = MakePatternNode<NonVirtual>();
+    fn->access = MakePatternNode<Private>();
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes

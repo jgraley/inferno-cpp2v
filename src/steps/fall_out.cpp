@@ -153,6 +153,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     //s_module->bases = (bases);
     //s_module->identifier = module_id;
     func->permission = MakePatternNode<NonConst>();
+    func->dispatch = MakePatternNode<NonVirtual>();
+    func->access = MakePatternNode<Private>();
     func->type = gg;
     gg->through = thread;
     func->identifier = func_id;
@@ -613,7 +615,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
 
 InsertInferredYield::InsertInferredYield()
 {
-    auto fn = MakePatternNode<Instance>();
+    auto fn = MakePatternNode<Member>();
     auto fn_id = MakePatternNode<InstanceIdentifier>();
     auto thread = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
     auto func_comp = MakePatternNode<Compound>();
@@ -637,6 +639,8 @@ InsertInferredYield::InsertInferredYield()
     auto assign = MakePatternNode< Assign >();
           
     fn->permission = MakePatternNode<NonConst>();
+    fn->dispatch = MakePatternNode<NonVirtual>();
+    fn->access = MakePatternNode<Private>();
     fn->type = thread;
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  

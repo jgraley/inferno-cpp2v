@@ -18,6 +18,7 @@ public:
     { 
         SC_METHOD(method);
     }
+private:
     void method()
     {
         gvar++;

@@ -11,12 +11,14 @@ public:
     {
         SC_THREAD(T);        
     }
+private:
     void T()
     {
         x = 0;
         recurser(1);
         cease(x);
     }
+public:    
     void recurser( int i )
     {
         x++; // x is a total, so just increment

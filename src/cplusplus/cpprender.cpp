@@ -87,20 +87,6 @@ Syntax::Policy CppRender::GetDefaultPolicy()
 	return policy;
 }
 
-/*
-Syntax::Production CppRender::GetNodeProduction( TreePtr<Node> node, Syntax::Policy policy ) const
-{
-	try
-	{
-		return node->GetMyProduction(this, policy);       
-	}
-	catch( Syntax::Refusal &r )
-	{
-		ASSERT(false)(node)(" unknown production");
-	}
-	ASSERTFAIL();
-}
-*/
 
 string CppRender::OnRefusalToRender( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {

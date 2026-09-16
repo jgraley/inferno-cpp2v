@@ -279,6 +279,9 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     r_process_macro->identifier = token;
     r_process_macro->arguments = (id);
     
+    // Rule #910: SC processes to be Member, with NonVirtual and Private
+    process->dispatch = MakePatternNode<NonVirtual>();
+    process->access = MakePatternNode<Private>();
     process->permission = MakePatternNode<NonConst>();    
     process->type = overtype;
     process->identifier = id;

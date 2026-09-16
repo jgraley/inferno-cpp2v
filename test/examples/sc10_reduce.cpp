@@ -11,6 +11,7 @@ public:
     {
         SC_THREAD(T);        
     }
+private:    
     void T()
     {
         cease( f(1) );

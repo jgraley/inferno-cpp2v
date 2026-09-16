@@ -131,7 +131,7 @@ MainToThread::MainToThread()
 	r_member->identifier = s_identifier;
 	r_member->type = MakePatternNode<Thread>();
 	r_member->dispatch = MakePatternNode<NonVirtual>();
-	r_member->access = MakePatternNode<Public>();
+	r_member->access = MakePatternNode<Private>();
 	r_member->permission = MakePatternNode<NonConst>();
 	auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( body, e_stuff );
 	r_member->initialiser = r_embedded;

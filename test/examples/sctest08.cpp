@@ -17,6 +17,7 @@ public:
        // sc_trace(GetSCTraceFP(), j, "j");
         SC_THREAD(T);        
     }
+private:
     void T()
     {
         gvar = 1;

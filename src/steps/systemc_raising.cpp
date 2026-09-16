@@ -221,6 +221,9 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     lr_comp->members = l_cdecls;
     lr_comp->statements = (l_pre, l_post);
     
+    // Rule #910: SC processes to be Member, with NonVirtual and Private
+    l_process->dispatch = MakePatternNode<NonVirtual>();
+    l_process->access = MakePatternNode<Private>();
     l_process->permission = MakePatternNode<NonConst>();
     l_process->identifier = ls_id;
     l_process->type = l_overtype;
