@@ -112,7 +112,7 @@ TreePtr<Node> Mutator::ExchangeChild( TreePtr<Node> free_child ) const
 		case Mode::Root:
 		{
 			*tpi_root_node = free_child;
-			TRACE("Singular mutated ")(old_child)(" into ")(free_child)("\n");   
+			TRACE("Root mutated ")(old_child)(" into ")(free_child)("\n");   
 			break;
 		}
 

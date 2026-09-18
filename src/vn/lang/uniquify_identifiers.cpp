@@ -369,7 +369,7 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 				// An undeclared indentifier cannot safely be renamed and so must have a non-empty name
 				if( node->GetIdentifierName().empty() )
 				{
-					FTRACE("WARNING found undeclared identifier with empty name, which will be unresolvable");
+					FTRACE("WARNING found undeclared identifier with empty name, which will be unresolvable\n");
 					continue;
 				}
 		

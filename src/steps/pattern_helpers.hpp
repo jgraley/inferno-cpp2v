@@ -17,7 +17,7 @@ public:
     template<typename ... CP>
     static inline TreePtr<NODE_TYPE> MakeNode(const CP &...cp)
     {
-        auto agent_node = MakeTreeNode<StandardAgentWrapper<NODE_TYPE>>(cp...);
+        auto agent_node = MakeTreeNode< StandardAgentWrapper<NODE_TYPE> >(cp...);
         return agent_node;        
     }    
 };

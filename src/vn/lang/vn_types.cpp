@@ -85,8 +85,8 @@ TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(Syntax::Location l
 				any_cast<YY::VNLangParser::location_type>(loc),
 				"static is not allowed for parameters.");
 
-	auto param = MakeTreeNode<StandardAgentWrapper<CPPTree::Parameter>>();
-	param->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
+	auto param = MakeTreeNode<CPPTree::Parameter>();
+	param->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
 	return param;
 }
 
@@ -146,6 +146,6 @@ TreePtr<Node> PrerestrictScopeGnomon::GetDeclarationNode(Syntax::Location loc, b
 					DiagQuote(Traceable::TypeIdName( *(node) )) + 
 					" cannot disambiguate an instance declaration" + 
 					note); // TODO it could if the pre-restriction was to eg a Record etc			
-	instance->initialiser = MakeTreeNode<StandardAgentWrapper<CPPTree::Uninitialised>>();
+	instance->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
 	return instance;
 }

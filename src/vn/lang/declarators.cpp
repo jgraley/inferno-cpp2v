@@ -43,7 +43,7 @@ Pointer::Pointer(CVQuals cv_quals_decl_, TreePtr<Node> child_) :
 
 Result Pointer::DeclaratorReduce( TreePtr<Node> type_view, CVQuals cv_quals_view ) const
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Pointer>>();
+	auto node = MakeTreeNode<CPPTree::Pointer>();
 	node->destination = type_view;
 	node->permission = cv_quals_view.permission; 
 	return DoReduce(child, node, cv_quals_decl);
@@ -52,7 +52,7 @@ Result Pointer::DeclaratorReduce( TreePtr<Node> type_view, CVQuals cv_quals_view
 
 Result Reference::DeclaratorReduce( TreePtr<Node> type_view, CVQuals cv_quals_view ) const
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Reference>>();
+	auto node = MakeTreeNode<CPPTree::Reference>();
 	node->destination = type_view;
 	node->permission = cv_quals_view.permission; 
 	return DoReduce(child, node, cv_quals_view); // Copy the constness => alias behaviour, not pointer behaviour.
@@ -68,7 +68,7 @@ Array::Array(TreePtr<Node> child_, TreePtr<Node> size_) :
 
 Result Array::DeclaratorReduce( TreePtr<Node> type_view, CVQuals cv_quals_view ) const
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Array>>();
+	auto node = MakeTreeNode<CPPTree::Array>();
 	node->element = type_view;
 	node->size = size;
 	return DoReduce(child, node, cv_quals_view); // Copy the constness for containment
@@ -85,7 +85,7 @@ Function::Function(TreePtr<Node> child_, list<TreePtr<Node>> params_, CVQuals cv
 
 Result Function::DeclaratorReduce( TreePtr<Node> type_view, CVQuals cv_quals_view ) const
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Function>>();
+	auto node = MakeTreeNode<CPPTree::Function>();
 	node->return_type = type_view;
 	(void)cv_quals_view; // cv_quals_view would set constness of return value. 
 	// Functions can in fact have const return values TODO

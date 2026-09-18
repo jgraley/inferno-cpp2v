@@ -209,8 +209,8 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 			render_it = false; 
 
 		// We prefer to elide when both final and the same type. Parse should duplicate the nodes in this case TODO 
-		if( new_access && current_access && new_access->IsFinal() && current_access->IsFinal() && sc.Compare3Way(new_access, current_access)==0 )
-			render_it = false; 
+		//if( new_access && current_access && new_access->IsFinal() && current_access->IsFinal() && sc.Compare3Way(new_access, current_access)==0 )
+		//	render_it = false; 
 
 		*(policy.context) = (TreePtr<CPPTree::AccessSpec>)new_access;
 	}
@@ -353,8 +353,8 @@ TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, any &, Loc
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
 			"static is not supported at code unit level (TODO).");
-	auto instance = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
-	instance->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
+	auto instance = MakeTreeNode<CPPTree::Global>(); 
+	instance->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
 	return instance;
 }
 
@@ -377,6 +377,12 @@ shared_ptr<Cloner> SpecificIdentifier::Duplicate( shared_ptr<Cloner> p )
 {
     return p; // duplicating specific identifiers just gets the same id, since they are unique.
     // This means x.Duplicate() matches x, wheras x.Clone() does not
+}
+
+
+void SpecificIdentifier::SetFrom( shared_ptr<Cloner> p )
+{
+	name = dynamic_cast<SpecificIdentifier &>(*p).name;
 }
 
 
@@ -1528,8 +1534,8 @@ TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, any 
 		throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(loc),
 				"static is not allowed for parameters.");
-	auto instance = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Parameter>>();
-	instance->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
+	auto instance = MakeTreeNode<CPPTree::Parameter>();
+	instance->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
 	return instance;
 }
 
@@ -2025,18 +2031,18 @@ TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context
 	TreePtr<Instance> instance;
 	if( static_keyword_specified )
 	{
-		instance = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
+		instance = MakeTreeNode<CPPTree::Global>(); 
 	}
 	else
 	{
-		auto memb = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Member>>();
+		auto memb = MakeTreeNode<CPPTree::Member>();
 		// Use the currently stored access spec
 		// Note: the access spec set here can be overridden by UpdateCurrentAccess()
 		memb->access = any_cast<TreePtr<AccessSpec>>(context); // Don't duplicate the subtree - we want coupling behaviour		
-		memb->dispatch = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::NonVirtual>>();	
+		memb->dispatch = MakeTreeNode<CPPTree::NonVirtual>();	
 		instance = memb;
 	}
-	instance->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
+	instance->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
 	return instance;
 }
 
@@ -2090,16 +2096,16 @@ TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, any &, 
 		throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(loc),
 				"static is not allowed for enumerators.");
-	auto er = MakeTreeNode<VN::StandardAgentWrapper<Enumerator>>(); 
+	auto er = MakeTreeNode<Enumerator>(); 
 	
 	// Whatever we're called, that's the type of our enumerations. Would still be true if we're given
 	// explicit underlying type.
 	er->type = identifier;
 	
 	// Enumerators are always const
-	er->permission = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Const>>(); 
+	er->permission = MakeTreeNode<CPPTree::Const>(); 
 
-	er->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
+	er->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
 	
 	return er;
 }
@@ -2585,11 +2591,11 @@ TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, any
 {
 	TreePtr<Instance> instance;
 	if( static_keyword_specified )
-		instance = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Global>>(); 
+		instance = MakeTreeNode<CPPTree::Global>(); 
 	else
-		instance = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Local>>(); 	
+		instance = MakeTreeNode<CPPTree::Local>(); 	
 
-	instance->initialiser = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Uninitialised>>();
+	instance->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
 	return instance;
 }
 
@@ -2798,7 +2804,7 @@ TreePtr<Node> If::OnArgsList( list<TreePtr<Node>> args, Location loc )
 TreePtr<Node> If::OnBody( TreePtr<Node> body_, Location )
 {
 	body = body_;	
-	body_else = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::Nop>>();
+	body_else = MakeTreeNode<CPPTree::Nop>();
 	return (TreePtr<Node>)shared_from_this();
 } 
 
@@ -3041,7 +3047,7 @@ TreePtr<Node> Case::OnArgsList( list<TreePtr<Node>> args, Location loc )
 			
 		case 2:
 		{
-			auto rc = MakeTreeNode<VN::StandardAgentWrapper<CPPTree::RangeCase>>();
+			auto rc = MakeTreeNode<CPPTree::RangeCase>();
 			rc->value_lo = args.front();
 			rc->value_hi = args.back();
 			return rc;

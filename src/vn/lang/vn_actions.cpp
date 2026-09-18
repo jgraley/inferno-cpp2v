@@ -117,26 +117,6 @@ TreePtr<Node> VNLangActions::OnEmbeddedCommands( list<shared_ptr<Command>> comma
 }
 
 
-static TreePtr<Node> MakeStandardAgentFromTypeID(const type_info &ti)
-{
-#define NODE(NS, NAME) \
-	if( ti == typeid(NS::NAME) ) \
-		return MakeTreeNode<StandardAgentWrapper<NS::NAME>>(); \
-	else
-#include "tree/node_names.inc"			
-#define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
-#define POSTFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
-#define INFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
-#include "tree/operator_data.inc"
-#undef NODE
-		
-		// By design we should have a case for every value of the node enum
-		ASSERT(false)("Could not find node for type info: ")(Traceable::CPPFilt(ti.name()));  // be the last else clause
-		
-	ASSERTFAIL();
-}
-
-
 TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, Syntax::Location node_name_loc, Itemisation src_itemisation )
 {
     Syntax::Location prev_loc = src_itemisation.loc;
@@ -231,9 +211,15 @@ TreePtr<Node> VNLangActions::FinishExplicitNode( TreePtr<Node> dest, Syntax::Loc
 
 TreePtr<Node> VNLangActions::OnRestrict( TreePtr<Node> node, Syntax::Location node_name_loc, TreePtr<Node> target, Syntax::Location target_loc )
 {
+	if( Traceable::TypeIdName( *target ) == Traceable::TypeIdName( *node ) ) // TODO don't use strings!
+		return target; // discarding the pre-restrict 
+		
 	NodeTag tag = node_names->GetTagOfNode(node);	
 	Agent *agent = Agent::TryAsAgent(target);
-	ASSERT( agent )("We are parsing a pattern so everything should be agents");
+	if( !agent ) 
+		throw YY::VNLangParser::syntax_error( 
+			any_cast<YY::VNLangParser::location_type>(node_name_loc)+any_cast<YY::VNLangParser::location_type>(target_loc), 
+			"Attempt to prerestrict " + DiagQuote(Traceable::TypeIdName( *target )) + " to " + DiagQuote(Traceable::TypeIdName( *node )) + " but is regular node"); // should already be unambiguous
 		
 	auto pspecial = dynamic_cast<SpecialBase *>(agent);
 	if( pspecial )
@@ -254,13 +240,13 @@ TreePtr<Node> VNLangActions::OnTypeSpecifierSeq( multiset<string> specifiers, Sy
 	int width_bits = 0;
 	bool is_signed = true;
 	if( specifiers.extract("float") )
-		float_sem = MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificFloatSemantics>>(TypeDb::float_semantics);
+		float_sem = MakeTreeNode<CPPTree::SpecificFloatSemantics>(TypeDb::float_semantics);
 	else if( specifiers.extract("double") )
 	{
 		if( specifiers.extract("long") )
-			float_sem = MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificFloatSemantics>>(TypeDb::long_double_semantics);
+			float_sem = MakeTreeNode<CPPTree::SpecificFloatSemantics>(TypeDb::long_double_semantics);
 		else
-			float_sem = MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificFloatSemantics>>(TypeDb::double_semantics);
+			float_sem = MakeTreeNode<CPPTree::SpecificFloatSemantics>(TypeDb::double_semantics);
 	}
 	else if( specifiers.extract("char") )	
 	{
@@ -292,16 +278,16 @@ TreePtr<Node> VNLangActions::OnTypeSpecifierSeq( multiset<string> specifiers, Sy
 			
 	    TreePtr<CPPTree::Integral> i;
 		if (is_signed)
-			i = MakeTreeNode<StandardAgentWrapper<CPPTree::Signed>>();
+			i = MakeTreeNode<CPPTree::Signed>();
 		else
-			i = MakeTreeNode<StandardAgentWrapper<CPPTree::Unsigned>>();
+			i = MakeTreeNode<CPPTree::Unsigned>();
 
-		i->width = MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificInteger>>( width_bits );
+		i->width = MakeTreeNode<CPPTree::SpecificInteger>( width_bits );
 		type = i;
 	}
 	else if( float_sem )
 	{
-		auto f = MakeTreeNode<StandardAgentWrapper<CPPTree::Floating>>();
+		auto f = MakeTreeNode<CPPTree::Floating>();
 		f->semantics = float_sem;
 		type = f;
 	}
@@ -325,7 +311,7 @@ TreePtr<Node> VNLangActions::OnPrefixOperator( string tok )
 {
 #define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
     if( tok==TEXT ) \
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::NAME>>(); 
+		return MakeTreeNode<CPPTree::NAME>(); 
 #include "tree/operator_data.inc"
 	ASSERTFAIL("Prefix operator parsed but not found in operator_data.inc"); 
 }
@@ -335,7 +321,7 @@ TreePtr<Node> VNLangActions::OnPostfixOperator( string tok )
 {
 #define POSTFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
     if( tok==TEXT ) \
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::NAME>>(); 
+		return MakeTreeNode<CPPTree::NAME>(); 
 #include "tree/operator_data.inc"	
 	ASSERTFAIL("Postfix operator parsed but not found in operator_data.inc"); 	
 }
@@ -345,7 +331,7 @@ TreePtr<Node> VNLangActions::OnInfixOperator( string tok )
 {
 #define INFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) \
     if( tok==TEXT ) \
-		return MakeTreeNode<StandardAgentWrapper<CPPTree::NAME>>(); 
+		return MakeTreeNode<CPPTree::NAME>(); 
 #include "tree/operator_data.inc"	
 	ASSERTFAIL("Infix operator parsed but not found in operator_data.inc"); 
 }
@@ -367,31 +353,31 @@ TreePtr<Node> VNLangActions::OnIntegralLiteral( string text, Syntax::Location lo
 TreePtr<Node> VNLangActions::OnStringLiteral( wstring wvalue )
 {
 	string value = Unquote(ToASCII(wvalue));
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificString>>(value);
+	return MakeTreeNode<CPPTree::SpecificString>(value);
 }
 
 
 TreePtr<Node> VNLangActions::OnConditionalOperator()
 {
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::ConditionalOperator>>();
+	return MakeTreeNode<CPPTree::ConditionalOperator>();
 }
 	
 
 TreePtr<Node> VNLangActions::OnSubscript()
 {
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::Subscript>>();
+	return MakeTreeNode<CPPTree::Subscript>();
 }
 	
 
 TreePtr<Node> VNLangActions::OnArrayInitialiser()
 {
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::ArrayInitialiser>>();
+	return MakeTreeNode<CPPTree::ArrayInitialiser>();
 }
 
 
 TreePtr<Node> VNLangActions::OnLabel( TreePtr<Node> identifier, Syntax::Location loc )
 {
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::LabelDeclaration>>();
+	auto node = MakeTreeNode<CPPTree::LabelDeclaration>();
 	node->identifier = identifier;
 	return node;
 }
@@ -399,13 +385,13 @@ TreePtr<Node> VNLangActions::OnLabel( TreePtr<Node> identifier, Syntax::Location
 
 TreePtr<Node> VNLangActions::OnNop( Syntax::Location loc )
 {
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::Nop>>();
+	return MakeTreeNode<CPPTree::Nop>();
 }
 
 
 TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
 {
-	auto ret = MakeTreeNode<StandardAgentWrapper<CPPTree::Constructor>>();
+	auto ret = MakeTreeNode<CPPTree::Constructor>();
 	for( auto p : params )
 		ret->params.insert(p);
 	return ret;
@@ -531,7 +517,7 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( Syntax::Location loc, const list
 		if( q.cat == QualCat::STATIC )
 			q_static = &q;
 
-	//auto member = MakeTreeNode<StandardAgentWrapper<CPPTree::Member>>();
+	//auto member = MakeTreeNode<CPPTree::Member>();
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
 	if( !spg ) 
@@ -540,12 +526,12 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( Syntax::Location loc, const list
 			"Cannot disambiguate declaration because no surrounding scope." );
 	TreePtr<CPPTree::Member> member = spg->GetDeclarationNode(any_cast<YY::VNLangParser::location_type>(loc), !!q_static); 
 
-	auto cons_type = MakeTreeNode<StandardAgentWrapper<CPPTree::Constructor>>();
+	auto cons_type = MakeTreeNode<CPPTree::Constructor>();
 	for( auto param : params )
 		cons_type->params.push_back(param);	
 	
 	member->OnType(cons_type, any_cast<YY::VNLangParser::location_type>(loc));
-	member->OnPermission( MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>(), any_cast<YY::VNLangParser::location_type>(loc) );
+	member->OnPermission( MakeTreeNode<CPPTree::NonConst>(), any_cast<YY::VNLangParser::location_type>(loc) );
 
 	// Now fill in fields derived from the qualifiers	
 	for( const QualifierData &q : quals )
@@ -582,7 +568,7 @@ void VNLangActions::UpdateCurrentAccess( Syntax::Location loc, TreePtr<Node> acc
 
 TreePtr<Node> VNLangActions::OnMemberInitialiser( TreePtr<Node> member_id, Syntax::Location member_loc, TreePtr<Node> initialiser, Syntax::Location initialiser_loc )
 {
-	auto memb_init = MakeTreeNode<StandardAgentWrapper<CPPTree::MemberInitialiser>>();
+	auto memb_init = MakeTreeNode<CPPTree::MemberInitialiser>();
 	
 	memb_init->member_id = member_id;
 	memb_init->initialiser = initialiser;
@@ -623,7 +609,7 @@ TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> access, TreePtr<Node> type, S
 	  		  any_cast<YY::VNLangParser::location_type>(loc),
 			  "Unexpected qualifier: "+DiagQuote(Traceable::TypeIdName( *access ))+"; was expecting an access spec" );		
 
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Base>>();	
+	auto node = MakeTreeNode<CPPTree::Base>();	
 	node->access = access; 
 	node->record = type;
 	return node;
@@ -638,7 +624,7 @@ TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> type )
 	if( agent->IsSubContainer() )
 		return type;
 		
-	auto node = MakeTreeNode<StandardAgentWrapper<CPPTree::Base>>();	
+	auto node = MakeTreeNode<CPPTree::Base>();	
 	auto arch = dynamic_pointer_cast<CPPTree::Qualifier>(node->access.MakeValueArchetype());
 	node->access = arch->GetDefaultNode(type);
 	node->record = type;
@@ -650,7 +636,7 @@ Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals,
 {
 	Declarators::CVQuals cv_quals
 	{
-		MakeTreeNode<StandardAgentWrapper<CPPTree::NonConst>>()
+		MakeTreeNode<CPPTree::NonConst>()
 	};
 		
 	bool got_const = false;
@@ -684,19 +670,19 @@ Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals,
 
 TreePtr<Node> VNLangActions::OnIdValuePair()
 {
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::IdValuePair>>();
+	return MakeTreeNode<CPPTree::IdValuePair>();
 }	
 
 
 TreePtr<Node> VNLangActions::OnMapArgs()
 {
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::MapArgumentation>>();
+	return MakeTreeNode<CPPTree::MapArgumentation>();
 }	
 
 
 TreePtr<Node> VNLangActions::OnSeqArgs()
 {
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::SeqArgumentation>>();
+	return MakeTreeNode<CPPTree::SeqArgumentation>();
 }	
 
 
@@ -708,7 +694,7 @@ TreePtr<Node> VNLangActions::OnCall()
 
 TreePtr<Node> VNLangActions::OnLookup()
 {
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::Lookup>>();
+	return MakeTreeNode<CPPTree::Lookup>();
 }
 
 
@@ -853,7 +839,7 @@ TreePtr<Node> VNLangActions::CreateIntegralLiteral( bool uns, bool lng, bool lng
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(loc),
 			"Integer literal: could not fit value " + to_string(val) + " into required type.");
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::SpecificInteger>>( rv );
+	return MakeTreeNode<CPPTree::SpecificInteger>( rv );
 }
 
 
@@ -884,7 +870,7 @@ static NodeTag GetNodeEnum( list<string> typ, Syntax::Location loc )
 
 TreePtr<Node> CPPTree::Dispatch::GetDefaultNode(TreePtr<Node>) const
 {
-	return MakeTreeNode<StandardAgentWrapper<NonVirtual>>();
+	return MakeTreeNode<NonVirtual>();
 }
 
 //////////////////////////// AccessSpec //////////////////////////////
@@ -905,7 +891,7 @@ TreePtr<Node> CPPTree::AccessSpec::GetDefaultNode(TreePtr<Node> type) const
 
 TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 {
-	return MakeTreeNode<StandardAgentWrapper<NonConst>>();
+	return MakeTreeNode<NonConst>();
 }
 
 

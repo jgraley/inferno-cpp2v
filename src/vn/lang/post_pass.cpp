@@ -14,7 +14,7 @@ static TreePtr<Node> MakeStandardAgentFromTypeID(const type_info &ti)
 {
 #define NODE(NS, NAME) \
 	if( ti == typeid(NS::NAME) ) \
-		return MakeTreeNode<StandardAgentWrapper<NS::NAME>>(); \
+		return MakeTreeNode< StandardAgentWrapper<NS::NAME> >(); \
 	else
 #include "tree/node_names.inc"			
 #define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
@@ -46,20 +46,34 @@ TreePtr<Node> PostPass::Run( TreePtr<Node> root )
 
 void PostPass::ProcessMutator( Mutator mutator, DData dd )
 {	
+	INDENT("M");
 	TreePtr<Node> old_x = mutator.GetChildTreePtr();
 	
 	bool needs_standard_agent = !Agent::TryAsAgent(old_x);
-	if( needs_standard_agent )
+	if( changes.contains(old_x) )
+	{	
+		// Coupled node we've reached before: don't recurse into it, just swap it in
+		TreePtr<Node> new_x = changes.at(old_x);
+		TRACE(old_x)(" -> ")(new_x)(" (revisit)\n");
+		(void)mutator.ExchangeChild(new_x);		
+	}
+	else if( needs_standard_agent )
 	{
 		const type_info &old_x_ti = typeid(*old_x);
 		TreePtr<Node> new_x = MakeStandardAgentFromTypeID(old_x_ti);
-		(void)mutator.ExchangeChild(new_x);		
+		new_x->SetFrom(old_x); // things like strings numbers etc
+		TRACE(old_x)(" -> ")(new_x)("\n");
+		(void)mutator.ExchangeChild(new_x);	
 		// Copy children from old to new
 		ProcessNode( old_x, new_x, dd );	
+		
+		// In case a coupling that we'll reach again
+		changes[old_x] = new_x;
 	}
 	else
 	{
 		// Alias old and new prevents any copying
+		TRACE(old_x)("\n");
 		ProcessNode( old_x, old_x, dd );
 	}
 }
@@ -81,14 +95,6 @@ void PostPass::ProcessChildren( TreePtr<Node> old_x, TreePtr<Node> new_x, DData 
     vector< Itemiser::Element * > old_x_items = old_x->Itemise();
     vector< Itemiser::Element * > new_x_items = new_x->Itemise();
     
-  /*  Agent *a = Agent::TryAsAgent(x);
-    if( a && !dynamic_cast<StandardAgent *>(a) )
-    {
-		shared_ptr<PatternQuery> pq = a->GetPatternQuery();
-		list<PatternLink> al = pq->GetAllLinks();
-		FTRACE(x)(" itemises to ")(x_items)("\n and pqs to ")(al)("\n");
-	}
-    */
     for( pair<Itemiser::Element *, Itemiser::Element *> p : Zip(old_x_items, new_x_items) )
     {
         if( auto *old_x_seq = dynamic_cast<SequenceInterface *>(p.first) )
@@ -120,6 +126,7 @@ void PostPass::ProcessSingularItem( TreePtr<Node> new_x, TreePtrInterface *old_p
 	if( old_p_x_sing != new_p_x_sing ) // new does not alias old so populate it
 	{
 		ASSERT( !*new_p_x_sing ); // new must alias old or be empty
+		TRACE("pointer at ")(new_p_x_sing)(" becomes ")(*old_p_x_sing)("\n");
 		*new_p_x_sing = *old_p_x_sing;
 	}
 		
@@ -142,8 +149,8 @@ void PostPass::ProcessSequence( TreePtr<Node> new_x, SequenceInterface *old_x_se
 		}
     }
     
-    for( SequenceInterface::iterator it = old_x_seq->begin();
-		 it != old_x_seq->end();
+    for( SequenceInterface::iterator it = new_x_seq->begin();
+		 it != new_x_seq->end();
 		 ++it )
     {
 		ASSERT((TreePtr<Node>)*it)("Got NULL in a Sequence, which isn't allowed even for patterns");
@@ -166,8 +173,8 @@ void PostPass::ProcessCollection( TreePtr<Node> new_x, CollectionInterface *old_
 		}
     }
     
-    for( CollectionInterface::iterator it = old_x_col->begin();
-		 it != old_x_col->end();
+    for( CollectionInterface::iterator it = new_x_col->begin();
+		 it != new_x_col->end();
 		 ++it )
     {
 		ASSERT((TreePtr<Node>)*it)("Got NULL in a Collection, which isn't allowed even for patterns");		

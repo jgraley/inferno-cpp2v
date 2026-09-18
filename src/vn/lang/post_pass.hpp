@@ -28,8 +28,8 @@ private:
     void ProcessSingularItem( TreePtr<Node> new_x, TreePtrInterface *old_p_x_sing, TreePtrInterface *new_p_x_sing, DData dd );
     void ProcessSequence( TreePtr<Node> new_x, SequenceInterface *old_x_seq, SequenceInterface *new_x_seq, DData dd );
     void ProcessCollection( TreePtr<Node> new_x, CollectionInterface *old_x_col, CollectionInterface *new_x_col, DData dd );    
-    
-private:
+	
+	map<TreePtr<Node>, TreePtr<Node>> changes;
 };
 
 };

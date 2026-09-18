@@ -152,7 +152,7 @@ string WaitStatic::GetKeyword( Policy ) const
 TreePtr<Node> WaitStatic::OnSoloArg( TreePtr<Node> arg, Location loc )
 {
 	// Seeing an argument makes this node evolve into WaitDynamic
-	return MakeTreeNode<VN::StandardAgentWrapper<WaitDynamic>>()->OnSoloArg( arg, loc ); 
+	return MakeTreeNode<WaitDynamic>()->OnSoloArg( arg, loc ); 
 }
 
 //////////////////////////// WaitDelta ///////////////////////////////
@@ -228,7 +228,7 @@ string NextTriggerStatic::GetKeyword( Policy ) const
 TreePtr<Node> NextTriggerStatic::OnSoloArg( TreePtr<Node> arg, Location loc )
 {
 	// Evolve into NextTriggerDynamic and try again
-	return MakeTreeNode<VN::StandardAgentWrapper<NextTriggerDynamic>>()->OnSoloArg(arg, loc);
+	return MakeTreeNode<NextTriggerDynamic>()->OnSoloArg(arg, loc);
 }
 
 //////////////////////////// NextTriggerDelta ///////////////////////////////

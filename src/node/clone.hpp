@@ -23,6 +23,8 @@ public:
         shared_ptr<Cloner> clone = make_shared<TYPE>(*source);        
         return clone;
     }    
+
+    virtual void SetFrom( shared_ptr<Cloner> p );
 };
 
 // Outside of class to allow partial specialisation; PS prevents
