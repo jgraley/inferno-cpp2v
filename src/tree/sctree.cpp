@@ -11,6 +11,18 @@
 /// SCTree namespace contains node definitions that represent elements of SystemC, as native language elements
 using namespace SCTree;
 
+//////////////////////////// SCRecord ///////////////////////////////
+
+any SCRecord::GetStartingScopeContext() const
+{
+	// SystemC-on-C++ uses class for module and interface. Also, modules
+	// shouldn't receive calls except from the SC kernel, and interfaces
+	// should only fill in pure virtuals, apparently. It looks like channels
+	// are the things that offer public methods, so maybe when channels
+	// are added they can default public.
+	return (TreePtr<CPPTree::AccessSpec>)(MakeTreeNode<CPPTree::Private>());
+}
+
 //////////////////////////// SCFunction ///////////////////////////////
 
 Syntax::Production SCFunction::GetMyProductionTerminal() const

@@ -121,7 +121,7 @@ public:
 			missing_access_to_public(true),
 			refuse_preprocessor(false),
 			refuse_identifiers(false),
-			context() {}
+			context(make_shared<any>()) {}
 		bool rendering_definitions;
 		bool force_incomplete_records;
 		bool split_bulky_statics;
@@ -146,7 +146,7 @@ public:
 		bool refuse_preprocessor;
 		bool refuse_identifiers;
 		shared_ptr<Syntax> pointer_archetype;
-		any context;
+		shared_ptr<any> context;
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:

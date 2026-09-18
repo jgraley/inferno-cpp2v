@@ -185,19 +185,45 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 	// for example a delta pattern can be used to change the access spec of a member.
 	
 	list<string> ls;	
-	if( policy.context.has_value() )
+	bool render_it = false;
+	ASSERT(policy.context);
+	if( policy.context->has_value() )
 	{
-		//ls.push_back( "/* "+Trace(*policy.context)+" -> "+Trace(new_access)+" */" );
-		if( new_access.get() != any_cast<TreePtr<AccessSpec>>(policy.context).get() )			
-			ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );	
-		policy.context = new_access;
+		FTRACE(policy.context)("\n");
+		auto current_access = any_cast<TreePtr<AccessSpec>>(*(policy.context));
+		SimpleCompare sc;
+		render_it = true;
+		
+		ls.push_back( "/* "+
+		              Trace(current_access) +
+		              (!current_access ? "(NULL)" : current_access->IsFinal()?"(final)":"(inter)") +
+		              " -> " +
+		              Trace(new_access) +
+		              (!new_access ? "NULL" : new_access->IsFinal()?"(final)":"(inter)") +
+		              SSPrintf("comp=%d", sc.Compare3Way(new_access, current_access)) +
+		              " " +
+		              Trace(policy.context) +
+		              " */" );
+
+		// Must elide when coupled to indicate the coupling
+		if( new_access.get() == current_access.get() ) // equal pointers mean coupled		
+			render_it = false; 
+
+		// We prefer to elide when both final and the same type. Parse should duplicate the nodes in this case TODO 
+		if( new_access && current_access && new_access->IsFinal() && current_access->IsFinal() && sc.Compare3Way(new_access, current_access)==0 )
+			render_it = false; 
+
+		*(policy.context) = (TreePtr<CPPTree::AccessSpec>)new_access;
 	}
 	else if( force )
 	{
 		//ls.push_back( "/* forced */" );
 		// Parser cannot determine the access any other way, so treat as if always given
-		ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );
+		render_it = true;
 	}
+
+	if( render_it )
+		ls.push_back( renderer->DoRenderPreserve( new_access, Production::BARE_STMT_DECL, policy ) + ":" );
 
 	return ls;
 }
@@ -236,7 +262,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
     string s;
 	(void)surround_prod;
  	policy.permit_static_keyword = false; // No support for code-unit statics
-	policy.context = any(); // No access specs here
+	policy.context = make_shared<any>(); // No access specs here
 
 	if( !policy.full_render_code_unit )
 	{
@@ -1187,7 +1213,8 @@ bool Instance::ShouldSplitInstance( Policy ) const
 
 list<string> Instance::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
 {
-	if( policy.context.has_value() ) // are we in a record scope that maintains access spec, and yet are not a member
+	ASSERT(policy.context);
+	if( policy.context->has_value() ) // are we in a record scope that maintains access spec, and yet are not a member
 		throw NoAccessInstanceInAccessRecord(); 
 		
 	// Patterns managed to get an Instance that isn't a Member into a Record body.
@@ -1511,7 +1538,7 @@ TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, any 
 string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy)
 {
 	INDENT("P");
-	policy.context = any(); // No access spec here
+	policy.context = make_shared<any>(); // No access specs here
 		
     list<string> strings;
     for( auto &d : params )	
@@ -1937,7 +1964,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Production, Policy po
 		Append( ls, ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, renderer, policy ) );// see #877
 
 	// For our members
-	policy.context = GetStartingScopeContext();
+	policy.context = make_shared<any>( GetStartingScopeContext() );
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
@@ -2580,7 +2607,7 @@ string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy 
 	INDENT("C");
     string s = "{\n";
  	policy.permit_static_keyword = true; // In a compound, static means global
-	policy.context = any(); // No access spec here
+	policy.context = make_shared<any>(); // No access specs here
 
     for( auto &m : members )    
         s += renderer->DoRender( &m, Production::STMT_DECL, policy );    
@@ -2609,12 +2636,12 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 		// If we can't render syntactially, call RenderLongFormExplicit() directly so it
 		// gets the updated policy. 
 		policy.permit_static_keyword = true; // In a compound, static means global
-		policy.context = any(); // No access spec here
+		policy.context = make_shared<any>(); // No access specs here
 		return renderer->RenderLongFormExplicit(shared_from_this(), production, policy);
 	}
 	    
  	policy.permit_static_keyword = true; // In a compound, static means global
-    policy.context = any();
+	policy.context = make_shared<any>(); // No access specs here
       
     string s = "({ ";
 	for( TreePtr<Declaration> m : members )    

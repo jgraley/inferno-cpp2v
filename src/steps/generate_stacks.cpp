@@ -509,7 +509,7 @@ GenerateStacks::GenerateStacks()
     s_fi->access = MakePatternNode<Public>();
 
     s_not->negand = sx_any;
-    sx_any->disjuncts = (sx_thread, sx_method); // Do not provide stacks for these because they do not recurse
+    sx_any->disjuncts = (sx_thread, sx_method); // Do not provide stacks for these because they do not recurse TODO and cthread? or SCProcess wildcard?
     s_fi->initialiser = s_and;   
     r_fi->initialiser = temp;   
     r_fi->dispatch = MakePatternNode<NonVirtual>();
@@ -589,6 +589,8 @@ MergeFunctions::MergeFunctions()
     s_module->members = (members, thread, s_func);
     r_module->members = (members, thread);
     thread->permission = MakePatternNode<NonConst>();    
+    thread->dispatch = MakePatternNode<NonVirtual>();
+    thread->access = MakePatternNode<Private>();    
     thread->type = thread_type;
     thread->initialiser = thread_over;
     thread_over->through = s_all;

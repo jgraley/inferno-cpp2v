@@ -115,6 +115,17 @@ string Trace(const std::type_info &ti)
 }
 
 
+string Trace(const any &a)
+{
+	string s = "any@";
+	if( a.has_value() )
+		s += string(a.type().name());
+	else
+		s += "NULL";
+	return s;
+}
+
+
 string GetTrace()
 {
     return "::";

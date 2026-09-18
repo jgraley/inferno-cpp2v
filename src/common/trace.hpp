@@ -14,6 +14,7 @@ using namespace std;
 #include <unordered_set>
 #include <unordered_map>
 #include <exception>
+#include <any>
     
 #define CONTAINER_SEP ", "    
 //#define SUPPRESS_ADDRESSES    
@@ -53,7 +54,8 @@ string Trace(float i);
 string Trace(const exception &e); 
 string Trace(const void *p); 
 string Trace(const Progress &progress); 
-string Trace(const std::type_info &ti);
+string Trace(const type_info &ti);
+string Trace(const any &a);
 
 enum class NodeTag : unsigned int; // Forward-declare the enum - this works if we provide a type
 string Trace(const NodeTag&);

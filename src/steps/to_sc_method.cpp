@@ -150,6 +150,8 @@ DeclsToModule::DeclsToModule()
     fn->permission = MakePatternNode<NonConst>();    
     fn->type = ft;
     fn->initialiser = stuff;
+    fn->dispatch = MakePatternNode<NonVirtual>();
+    fn->access = MakePatternNode<Private>();
     // TODO recurse restriction for locally declared classes
     stuff->terminus = delta;
     delta->through = s_comp;
@@ -166,8 +168,8 @@ DeclsToModule::DeclsToModule()
 
 ThreadToMethod::ThreadToMethod()
 {
-    auto s_thread = MakePatternNode<Instance>();
-    auto r_method = MakePatternNode<Instance>();
+    auto s_thread = MakePatternNode<Member>();
+    auto r_method = MakePatternNode<Member>();
     auto s_thread_type = MakePatternNode<Thread>();
     auto r_method_type = MakePatternNode<Method>();
     auto s_comp = MakePatternNode<Compound>();
@@ -196,6 +198,8 @@ ThreadToMethod::ThreadToMethod()
     auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_m, ls_wait_dynamic, lr_nt_dynamic);
 
     s_thread->permission = MakePatternNode<NonConst>();    
+    s_thread->dispatch = MakePatternNode<NonVirtual>();
+    s_thread->access = MakePatternNode<Private>();
     s_thread->type = s_thread_type;
     s_thread->initialiser = s_comp;
     s_thread->identifier = id;
@@ -206,6 +210,8 @@ ThreadToMethod::ThreadToMethod()
     loop_comp->members = (loop_decls);
     loop_comp->statements = (loop_stmts);
     r_method->permission = MakePatternNode<NonConst>();        
+    r_method->dispatch = MakePatternNode<NonVirtual>();
+    r_method->access = MakePatternNode<Private>();
     r_method->type = r_method_type;
     r_method->initialiser = embedded_l;
     r_method->identifier = id;

@@ -17,6 +17,7 @@ struct SCRecord : virtual SCNode,
                   CPPTree::InheritanceRecord 
 {
     NODE_FUNCTIONS
+	any GetStartingScopeContext() const override;    
 };
 
 /// Anything derived from this renders like a function
