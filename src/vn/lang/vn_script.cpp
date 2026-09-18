@@ -16,6 +16,7 @@
 #include "vn/lang/vn_lang.lpp.hpp"
 #include "vn/lang/vn_lang.location.hpp"
 #include "vn_recogniser.hpp"
+#include "post_pass.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -61,6 +62,9 @@ void VNScript::SetLoweringForRenderStep()
 
 void VNScript::AddStep(const VN::ScriptKit &kit, TreePtr<Node> stem)
 {
+	PostPass pp;    
+	stem = pp.Run( stem );
+
 	filesystem::path path( kit.script_filepath );
 	string basename = path.replace_extension().filename().string();
 #ifdef ELIMINATE_STEP_NUMBER

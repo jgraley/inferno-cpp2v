@@ -189,7 +189,6 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 	ASSERT(policy.context);
 	if( policy.context->has_value() )
 	{
-		FTRACE(policy.context)("\n");
 		auto current_access = any_cast<TreePtr<AccessSpec>>(*(policy.context));
 		SimpleCompare sc;
 		render_it = true;

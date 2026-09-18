@@ -1,6 +1,5 @@
-
-#ifndef UNIQUIFY_IDENTIFIERS_HPP
-#define UNIQUIFY_IDENTIFIERS_HPP
+#ifndef POST_PASS_HPP
+#define POST_PASS_HPP
 
 #include <map>
 #include <vector>
@@ -21,7 +20,6 @@ public:
 private:
 	struct DData // passed by value to descendants
 	{
-		bool can_accept_code_unit;
 	};
 	
 	void ProcessMutator( Mutator mutator, DData dd );

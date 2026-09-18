@@ -1,4 +1,5 @@
 #include "trace.hpp"
+#include "standard.hpp"
 
 #include "progress.hpp"
 #include "read_args.hpp"
@@ -119,7 +120,7 @@ string Trace(const any &a)
 {
 	string s = "any@";
 	if( a.has_value() )
-		s += string(a.type().name());
+		s += Traceable::CPPFilt(a.type().name());
 	else
 		s += "NULL";
 	return s;

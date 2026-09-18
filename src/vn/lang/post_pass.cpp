@@ -17,7 +17,6 @@ TreePtr<Node> PostPass::Run( TreePtr<Node> root )
 {
 	
 	DData dd;
-	dd.can_accept_code_unit = true;
 	ProcessMutator( Mutator::CreateTreeRoot( &root ), dd );
 	return root;
 }
@@ -25,36 +24,13 @@ TreePtr<Node> PostPass::Run( TreePtr<Node> root )
 
 void PostPass::ProcessMutator( Mutator mutator, DData dd )
 {	
-	if( !dd.can_accept_code_unit )
-	{
-		if( auto cu = TreePtr<CPPTree::CodeUnit>(mutator.GetChildTreePtr()) )
-		{
-			ASSERT( cu->members.size() != 0 )("Unexpected empty CodeUnit"); // Genuine internal error
-			ASSERT( cu->members.size() == 1 )("Unexpected multiple statement/decls\n")(cu->members); // TODO add location info
-			(void)mutator.ExchangeChild(cu->members.front());			
-		}
-	}
-
 	ProcessNode( mutator.GetChildTreePtr(), dd );
 }
 
 
 void PostPass::ProcessNode( TreePtr<Node> x, DData dd )
 {
-	ASSERT( x );
-
-	if( Agent *a = Agent::TryAsAgent(x) )
-	{
-		if( dynamic_cast<ColocatingAgent *>(a) || // includes Stuff
-			dynamic_cast<RelocatingAgent *>(a) )
-			dd.can_accept_code_unit = false; 
-	}
-	else
-	{
-		// Cannot accept a code unit strictly-under ANY non-agent node including other code units
-		dd.can_accept_code_unit = false;
-	}	
-
+	ASSERT( x );	
 	ProcessChildren( x, dd );
 }
 
