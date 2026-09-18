@@ -702,7 +702,7 @@ TreePtr<Node> VNLangActions::OnSeqArgs()
 
 TreePtr<Node> VNLangActions::OnCall()
 {
-	return MakeTreeNode<StandardAgentWrapper<CPPTree::Call>>();
+	return MakeTreeNode<CPPTree::Call>();
 }	
 
 

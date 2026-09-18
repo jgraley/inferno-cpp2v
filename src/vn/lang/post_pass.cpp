@@ -51,13 +51,17 @@ void PostPass::ProcessMutator( Mutator mutator, DData dd )
 	bool needs_standard_agent = !Agent::TryAsAgent(old_x);
 	if( needs_standard_agent )
 	{
-		const type_info &old_x_ti = typeid(old_x);
+		const type_info &old_x_ti = typeid(*old_x);
 		TreePtr<Node> new_x = MakeStandardAgentFromTypeID(old_x_ti);
-		(void)new_x;
-		//(void)mutator.ExchangeChild(cu->members.front());			
+		(void)mutator.ExchangeChild(new_x);		
+		// Copy children from old to new
+		ProcessNode( old_x, new_x, dd );	
 	}
-	
-	ProcessNode( old_x, old_x, dd );
+	else
+	{
+		// Alias old and new prevents any copying
+		ProcessNode( old_x, old_x, dd );
+	}
 }
 
 
