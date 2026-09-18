@@ -113,7 +113,12 @@ void PostPass::ProcessChildren( TreePtr<Node> old_x, TreePtr<Node> new_x, DData 
 
 void PostPass::ProcessSingularItem( TreePtr<Node> new_x, TreePtrInterface *old_p_x_sing, TreePtrInterface *new_p_x_sing, DData dd )
 {
-	ASSERT( old_p_x_sing==new_p_x_sing );
+	if( old_p_x_sing != new_p_x_sing ) // new does not alias old so populate it
+	{
+		ASSERT( !*new_p_x_sing ); // new must alias old or be empty
+		*new_p_x_sing = *old_p_x_sing;
+	}
+		
 	if( *new_p_x_sing ) // Permitting NULL because patterns
 		ProcessMutator( Mutator::CreateTreeSingular( new_x, new_p_x_sing ), dd );
 }
@@ -121,7 +126,18 @@ void PostPass::ProcessSingularItem( TreePtr<Node> new_x, TreePtrInterface *old_p
 
 void PostPass::ProcessSequence( TreePtr<Node> new_x, SequenceInterface *old_x_seq, SequenceInterface *new_x_seq, DData dd )
 {
- 	ASSERT( old_x_seq==new_x_seq );
+ 	if( old_x_seq!=new_x_seq ) // new does not alias old so populate it
+ 	{
+		ASSERT( new_x_seq->empty() ); // new must alias old or be empty
+		for( SequenceInterface::iterator it = old_x_seq->begin();
+			it != old_x_seq->end();
+			++it )
+		{
+			ASSERT((TreePtr<Node>)*it)("Got NULL in a Sequence, which isn't allowed even for patterns");
+			new_x_seq->insert(*it);
+		}
+    }
+    
     for( SequenceInterface::iterator it = old_x_seq->begin();
 		 it != old_x_seq->end();
 		 ++it )
@@ -134,7 +150,18 @@ void PostPass::ProcessSequence( TreePtr<Node> new_x, SequenceInterface *old_x_se
 
 void PostPass::ProcessCollection( TreePtr<Node> new_x, CollectionInterface *old_x_col, CollectionInterface *new_x_col, DData dd )
 {
- 	ASSERT( old_x_col==new_x_col );
+ 	if( old_x_col!=new_x_col ) // new does not alias old so populate it
+ 	{
+		ASSERT( new_x_col->empty() ); // new must alias old or be empty
+		for( SequenceInterface::iterator it = old_x_col->begin();
+			it != old_x_col->end();
+			++it )
+		{
+			ASSERT((TreePtr<Node>)*it)("Got NULL in a Collection, which isn't allowed even for patterns");
+			new_x_col->insert(*it);
+		}
+    }
+    
     for( CollectionInterface::iterator it = old_x_col->begin();
 		 it != old_x_col->end();
 		 ++it )
