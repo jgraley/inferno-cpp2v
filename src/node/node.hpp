@@ -92,6 +92,8 @@ struct Node : NodeBases,
                                                    
     virtual string GetGraphId() const override;    
     virtual string GetTrace() const override;    
+
+	TreePtr<Node> TreePtrThis() override { return (TreePtr<Node>)shared_from_this(); } 
 };
 
 class TransKit;

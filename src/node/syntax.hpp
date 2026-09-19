@@ -225,6 +225,7 @@ public:
 	virtual any GetStartingScopeContext() const;    
 	virtual void UpdateContext( TreePtr<Node> node, any &context, Location loc );	
 	virtual TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const; 
+	virtual TreePtr<Node> TreePtrThis() = 0; 
 };
 
 #define DEFAULT_NODE_NAMESPACE "CPPTree"

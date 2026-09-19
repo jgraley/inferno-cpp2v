@@ -233,6 +233,9 @@ TreePtr<Node> Syntax::OnArgsList( list<TreePtr<Node>> args, Location loc )
 {
 	switch( args.size() )
 	{
+		case 0: // Ignore by default - there's no loss of information if no args were supplied 
+		return TreePtrThis();	
+		
 		case 1:
 		return OnSoloArg( SoloElementOf(args), loc );
 		

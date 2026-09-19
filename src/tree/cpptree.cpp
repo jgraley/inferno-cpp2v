@@ -2824,11 +2824,25 @@ Syntax::Production Breakable::GetMyProductionTerminal() const
 }
 
 
+string Breakable::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetSignifier(this, policy) + 
+	       "()\n" +
+		   renderer->DoRender( &body, Production::STMT_DECL, policy );		   
+}
+
+
 TreePtr<Node> Breakable::OnBody( TreePtr<Node> body_, Location ) 
 {
 	body = body_;	
 	return (TreePtr<Node>)shared_from_this();
 } 
+
+
+Syntax::Token Breakable::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT;
+}
 
 //////////////////////////// While ///////////////////////////////
 

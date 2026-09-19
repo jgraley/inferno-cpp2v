@@ -618,6 +618,8 @@ arrival		: ARRIVAL_KEYWORD ':'
 
 statement_nl: bare_statement ';'										
 			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts #905
+			| control_stmt_sign '(' ')' stmt_comp	
+			  %prec KEYWORD_CONTROL_STMT									{ $$ = $1->OnArgsList({}, @2+@3)->OnBody($4, @4); }
 			| control_stmt_sign '(' semicolon_args ')' stmt_comp	
 			  %prec KEYWORD_CONTROL_STMT									{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| control_stmt_sign '(' semicolon_args ')' stmt_comp

@@ -1575,6 +1575,8 @@ struct Breakable : Statement
     TreePtr<Statement> body; ///< a break in here jumps to the end of here
 
 	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 	TreePtr<Node> OnBody( TreePtr<Node> body, Location loc ) override;
 };
 
