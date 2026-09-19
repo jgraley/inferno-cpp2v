@@ -204,10 +204,10 @@ public:
     StandardAgentWrapper(CP... cp) : 
         NODE_TYPE(forward<CP>(cp)...) {}
   
-    // disambiguate between Agent and Node: Node wins but we clarify
+    // disambiguate between Agent and Node: Agent wins
     virtual string GetTrace() const override
     {
-        return string("StandardAgentWrapper<") + NODE_TYPE::GetTrace() + ">";
+        return StandardAgent::GetTrace();
     }
     
     virtual TreePtr<Node> GetArchetypeNode() const override

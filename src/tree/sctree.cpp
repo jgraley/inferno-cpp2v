@@ -3,7 +3,6 @@
 #include "node/specialise_oostd.hpp"
 #include "tree/type_data.hpp"
 #include "tree/type_data.hpp"
-#include "vn/agents/standard_agent.hpp"
 #include "vn/lang/vn_lang.ypp.hpp"
 #include "vn/lang/vn_lang.location.hpp"
 #include <string>

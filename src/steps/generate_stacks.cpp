@@ -491,7 +491,7 @@ GenerateStacks::GenerateStacks()
     l_fi->initialiser = stuff;
     l_fi->identifier = fi_id;
     l_fi->dispatch = MakePatternNode<NonVirtual>(); // TODO can we generalise?
-    l_fi->access = MakePatternNode<Public>(); // TODO can we generalise?
+    l_fi->access = MakePatternNode<Private>(); // TODO can we generalise?
     
     auto r_mid = MakePatternNode<EmbeddedCompareReplaceAgent, Scope>( r_module, ls_module, lr_module ); // stuff, stuff
 
@@ -506,14 +506,14 @@ GenerateStacks::GenerateStacks()
     s_fi->identifier = r_fi->identifier = fi_id;
     s_fi->type = r_fi->type = s_not;
     s_fi->dispatch = MakePatternNode<NonVirtual>();
-    s_fi->access = MakePatternNode<Public>();
+    s_fi->access = MakePatternNode<Private>();
 
     s_not->negand = sx_any;
     sx_any->disjuncts = (sx_thread, sx_method); // Do not provide stacks for these because they do not recurse TODO and cthread? or SCProcess wildcard?
     s_fi->initialiser = s_and;   
     r_fi->initialiser = temp;   
     r_fi->dispatch = MakePatternNode<NonVirtual>();
-    r_fi->access = MakePatternNode<Public>();
+    r_fi->access = MakePatternNode<Private>();
 
     s_top_comp->members = ( top_decls );
     s_top_comp->statements = ( top_pre );

@@ -12,10 +12,8 @@ class TopLevel:public sc_module
     void U();
   private:
     void (*HelperU_return_address);
-  public:
     void (HelperT) ();
     void (HelperU) ();
-  private:
     void T();
     void (*HelperT_return_address);
 };

@@ -18,7 +18,7 @@ private:
         recurser(1);
         cease(x);
     }
-public:    
+
     void recurser( int i )
     {
         x++; // x is a total, so just increment

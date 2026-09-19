@@ -31,15 +31,6 @@ private:
         }      
         cease( gvar );
     }
-   /* int helper( int its, int var )
-    {
-        for( j=0; j<its; j++ )
-        {                        
-            wait(SC_ZERO_TIME);      
-            var++;
-        }    
-        return var;
-    }*/
     void helper( int n )
     {
         for( j=0; j<n; j=j+1 )

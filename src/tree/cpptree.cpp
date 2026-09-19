@@ -5,7 +5,7 @@
 #include "vn/lang/render.hpp"
 #include "vn/lang/vn_lang.ypp.hpp"
 #include "vn/lang/vn_lang.location.hpp"
-#include "vn/agents/standard_agent.hpp"
+#include "helpers/simple_duplicate.hpp"
 #include "typeof.hpp"
 
 #define EXPLICIT_BASE 0
@@ -184,6 +184,11 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 	// Note 2: access specs are attached to declarations, not the surrounding record, so that
 	// for example a delta pattern can be used to change the access spec of a member.
 	
+	// Get rid of StandardAgentWrapper so can compare correctly 
+	TreePtr<Node> new_access_no_sa;
+	if( new_access )
+		new_access_no_sa = SimpleDuplicate::DuplicateSubtree(new_access);	
+	
 	list<string> ls;	
 	bool render_it = false;
 	ASSERT(policy.context);
@@ -193,6 +198,7 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 		SimpleCompare sc;
 		render_it = true;
 		
+#if 0		
 		ls.push_back( "/* "+
 		              Trace(current_access) +
 		              (!current_access ? "(NULL)" : current_access->IsFinal()?"(final)":"(inter)") +
@@ -203,14 +209,15 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 		              " " +
 		              Trace(policy.context) +
 		              " */" );
+#endif
 
 		// Must elide when coupled to indicate the coupling
 		if( new_access.get() == current_access.get() ) // equal pointers mean coupled		
 			render_it = false; 
 
 		// We prefer to elide when both final and the same type. Parse should duplicate the nodes in this case TODO 
-		//if( new_access && current_access && new_access->IsFinal() && current_access->IsFinal() && sc.Compare3Way(new_access, current_access)==0 )
-		//	render_it = false; 
+		if( new_access && current_access && new_access->IsFinal() && current_access->IsFinal() && sc.Compare3Way(new_access_no_sa, current_access)==0 )
+			render_it = false; 
 
 		*(policy.context) = (TreePtr<CPPTree::AccessSpec>)new_access;
 	}

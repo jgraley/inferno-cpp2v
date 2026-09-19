@@ -85,7 +85,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 	er_member->identifier = es_id;
 	er_member->initialiser = es_instance->initialiser;
 	er_member->dispatch = MakePatternNode<NonVirtual>();
-	er_member->access = MakePatternNode<Public>();
+	er_member->access = MakePatternNode<Private>(); // For now: protocol phase should deal with public methods
 	
 	// Through, search, replace
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Scope>( delta, es_scope, er_scope );
