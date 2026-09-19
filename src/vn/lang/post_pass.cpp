@@ -10,11 +10,16 @@
 using namespace CPPTree;
 using namespace VN;
 
-static TreePtr<Node> MakeStandardAgentFromTypeID(const type_info &ti)
+static TreePtr<Node> CloneToStandardAgent(TreePtr<Node> x)
 {
+	const type_info &ti = typeid(*x);
 #define NODE(NS, NAME) \
 	if( ti == typeid(NS::NAME) ) \
-		return MakeTreeNode< StandardAgentWrapper<NS::NAME> >(); \
+	{ \
+		auto tx = TreePtr<NS::NAME>::DynamicCast(x); \
+		TreePtr<Node> ax = MakeTreeNode< StandardAgentWrapper<NS::NAME> >(*tx); \
+		return ax; \
+	} \
 	else
 #include "tree/node_names.inc"			
 #define PREFIX(TOK, TEXT, NAME, BASE, CAT, PROD, ASSOC) NODE(CPPTree, NAME)
@@ -58,9 +63,8 @@ void PostPass::ProcessMutator( Mutator mutator, DData dd )
 		(void)mutator.ExchangeChild(new_x);		
 	}
 	else if( needs_standard_agent )
-	{
-		const type_info &old_x_ti = typeid(*old_x);
-		TreePtr<Node> new_x = MakeStandardAgentFromTypeID(old_x_ti);
+	{		
+		TreePtr<Node> new_x = CloneToStandardAgent(old_x);
 		new_x->SetFrom(old_x); // things like strings numbers etc
 		TRACE(old_x)(" -> ")(new_x)("\n");
 		(void)mutator.ExchangeChild(new_x);	
@@ -121,23 +125,23 @@ void PostPass::ProcessChildren( TreePtr<Node> old_x, TreePtr<Node> new_x, DData 
 }
 
 
-void PostPass::ProcessSingularItem( TreePtr<Node> new_x, TreePtrInterface *old_p_x_sing, TreePtrInterface *new_p_x_sing, DData dd )
+void PostPass::ProcessSingularItem( TreePtr<Node> new_x, TreePtrInterface *, TreePtrInterface *new_p_x_sing, DData dd )
 {
-	if( old_p_x_sing != new_p_x_sing ) // new does not alias old so populate it
+/*	if( old_p_x_sing != new_p_x_sing ) // new does not alias old so populate it
 	{
 		ASSERT( !*new_p_x_sing ); // new must alias old or be empty
 		TRACE("pointer at ")(new_p_x_sing)(" becomes ")(*old_p_x_sing)("\n");
 		*new_p_x_sing = *old_p_x_sing;
 	}
-		
+*/		
 	if( *new_p_x_sing ) // Permitting NULL because patterns
 		ProcessMutator( Mutator::CreateTreeSingular( new_x, new_p_x_sing ), dd );
 }
 
 
-void PostPass::ProcessSequence( TreePtr<Node> new_x, SequenceInterface *old_x_seq, SequenceInterface *new_x_seq, DData dd )
+void PostPass::ProcessSequence( TreePtr<Node> new_x, SequenceInterface *, SequenceInterface *new_x_seq, DData dd )
 {
- 	if( old_x_seq!=new_x_seq ) // new does not alias old so populate it
+ /*	if( old_x_seq!=new_x_seq ) // new does not alias old so populate it
  	{
 		ASSERT( new_x_seq->empty() ); // new must alias old or be empty
 		for( SequenceInterface::iterator it = old_x_seq->begin();
@@ -148,7 +152,7 @@ void PostPass::ProcessSequence( TreePtr<Node> new_x, SequenceInterface *old_x_se
 			new_x_seq->insert(*it);
 		}
     }
-    
+   */ 
     for( SequenceInterface::iterator it = new_x_seq->begin();
 		 it != new_x_seq->end();
 		 ++it )
@@ -159,9 +163,9 @@ void PostPass::ProcessSequence( TreePtr<Node> new_x, SequenceInterface *old_x_se
 }
 
 
-void PostPass::ProcessCollection( TreePtr<Node> new_x, CollectionInterface *old_x_col, CollectionInterface *new_x_col, DData dd )
+void PostPass::ProcessCollection( TreePtr<Node> new_x, CollectionInterface *, CollectionInterface *new_x_col, DData dd )
 {
- 	if( old_x_col!=new_x_col ) // new does not alias old so populate it
+ /*	if( old_x_col!=new_x_col ) // new does not alias old so populate it
  	{
 		ASSERT( new_x_col->empty() ); // new must alias old or be empty
 		for( SequenceInterface::iterator it = old_x_col->begin();
@@ -172,7 +176,7 @@ void PostPass::ProcessCollection( TreePtr<Node> new_x, CollectionInterface *old_
 			new_x_col->insert(*it);
 		}
     }
-    
+   */ 
     for( CollectionInterface::iterator it = new_x_col->begin();
 		 it != new_x_col->end();
 		 ++it )

@@ -20,7 +20,9 @@ namespace CPPTree {
  have a Specific<Foo> node that actually contains the datatype (eg int, string
  etc). The intermediates should be the target of SharedPtrs and may be used in
  search patterns. The actual tree nodes for a program should always be the leaf
- node type. */
+ node type. 
+ NOTE: we must come out of virtual inheritance before adding any data members, 
+ whether they be child pointers or other data, see rule #915 */
 struct Property : virtual Node 
 { 
     NODE_FUNCTIONS 
@@ -1800,14 +1802,14 @@ protected:
 struct Include : virtual PreProcDecl 
 {
     NODE_FUNCTIONS
-    TreePtr<String> filename;   
+    TreePtr<String> filename;     
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy );
 	virtual string CustomiseFilenameForInclude(TreePtr<String>, VN::RendererInterface *, Policy) { ASSERTFAIL() };
 };
 
 
 /// Instruction to include a system header file in <>
-struct SystemInclude : virtual Include 
+struct SystemInclude : Include 
 {
     NODE_FUNCTIONS_FINAL
 	string CustomiseFilenameForInclude(TreePtr<String> name, VN::RendererInterface *renderer, Policy policy) override;
@@ -1815,7 +1817,7 @@ struct SystemInclude : virtual Include
 
 
 /// Instruction to include a system header file in ""
-struct LocalInclude : virtual Include 
+struct LocalInclude : Include 
 {
     NODE_FUNCTIONS_FINAL
 	string CustomiseFilenameForInclude(TreePtr<String> name, VN::RendererInterface *renderer, Policy policy) override;

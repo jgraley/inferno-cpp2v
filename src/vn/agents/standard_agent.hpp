@@ -203,11 +203,16 @@ public:
     template<typename ... CP>
     StandardAgentWrapper(const CP &...cp) : 
         NODE_TYPE(cp...) {}
-       
-    // disambiguate between Agent and Node: Agent wins
+      
+    // TODO try this  
+    //template<typename ... CP>
+    //StandardAgentWrapper(CP... cp) : 
+    //    NODE_TYPE(forward<CP>(cp)...) {}
+  
+    // disambiguate between Agent and Node: Node wins but we clarify
     virtual string GetTrace() const override
     {
-        return StandardAgent::GetTrace();
+        return string("StandardAgentWrapper<") + NODE_TYPE::GetTrace() + ">";
     }
     
     virtual TreePtr<Node> GetArchetypeNode() const override

@@ -3245,7 +3245,7 @@ string Include::GetRender( VN::RendererInterface *renderer, Production, Policy p
 //////////////////////////// SystemInclude ///////////////////////////////
 
 string SystemInclude::CustomiseFilenameForInclude( TreePtr<String> name, VN::RendererInterface *, Policy  )
-{
+{	
 	return "<" + name->GetString() + ">"; 
 }
 

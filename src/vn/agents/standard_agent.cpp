@@ -6,6 +6,7 @@
 #include "star_agent.hpp"
 #include "scr_engine.hpp"
 #include "link.hpp"
+#include "../tree/cpptree.hpp"
 #include "sym/boolean_operators.hpp"
 #include "sym/predicate_operators.hpp"
 #include "sym/symbol_operators.hpp"
