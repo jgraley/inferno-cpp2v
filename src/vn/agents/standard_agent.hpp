@@ -199,15 +199,10 @@ class StandardAgentWrapper : public virtual NODE_TYPE,
 {
 public:
     StandardAgentWrapper() : NODE_TYPE() {}
-
-    template<typename ... CP>
-    StandardAgentWrapper(const CP &...cp) : 
-        NODE_TYPE(cp...) {}
       
-    // TODO try this  
-    //template<typename ... CP>
-    //StandardAgentWrapper(CP... cp) : 
-    //    NODE_TYPE(forward<CP>(cp)...) {}
+    template<typename ... CP>
+    StandardAgentWrapper(CP... cp) : 
+        NODE_TYPE(forward<CP>(cp)...) {}
   
     // disambiguate between Agent and Node: Node wins but we clarify
     virtual string GetTrace() const override
