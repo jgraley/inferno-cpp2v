@@ -197,7 +197,6 @@ struct SpecificIdentifier : virtual Property
     SpecificIdentifier(); ///< default constructor, for making archetypes 
     SpecificIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ); ///< construct with a given name
     virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ); /// Overloaded duplication function for search&replace
-    virtual void SetFrom( shared_ptr<Cloner> p );
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare

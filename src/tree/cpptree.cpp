@@ -380,12 +380,6 @@ shared_ptr<Cloner> SpecificIdentifier::Duplicate( shared_ptr<Cloner> p )
 }
 
 
-void SpecificIdentifier::SetFrom( shared_ptr<Cloner> p )
-{
-	name = dynamic_cast<SpecificIdentifier &>(*p).name;
-}
-
-
 bool SpecificIdentifier::IsLocalMatchCovariant( const Matcher &candidate ) const 
 {
     return &candidate == this;

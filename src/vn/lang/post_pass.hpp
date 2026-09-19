@@ -23,11 +23,11 @@ private:
 	};
 	
 	void ProcessMutator( Mutator mutator, DData dd );
-    void ProcessNode( TreePtr<Node> old_x, TreePtr<Node> new_x, DData dd );
-    void ProcessChildren( TreePtr<Node> old_x, TreePtr<Node> new_x, DData dd );
-    void ProcessSingularItem( TreePtr<Node> new_x, TreePtrInterface *old_p_x_sing, TreePtrInterface *new_p_x_sing, DData dd );
-    void ProcessSequence( TreePtr<Node> new_x, SequenceInterface *old_x_seq, SequenceInterface *new_x_seq, DData dd );
-    void ProcessCollection( TreePtr<Node> new_x, CollectionInterface *old_x_col, CollectionInterface *new_x_col, DData dd );    
+    void ProcessNode( TreePtr<Node> new_x, DData dd );
+    void ProcessChildren( TreePtr<Node> new_x, DData dd );
+    void ProcessSingularItem( TreePtr<Node> new_x, TreePtrInterface *new_p_x_sing, DData dd );
+    void ProcessSequence( TreePtr<Node> new_x, SequenceInterface *new_x_seq, DData dd );
+    void ProcessCollection( TreePtr<Node> new_x, CollectionInterface *new_x_col, DData dd );    
 	
 	map<TreePtr<Node>, TreePtr<Node>> changes;
 };
