@@ -367,7 +367,7 @@ prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({},
 				| qualifiers XSTRUCTOR id_primary parameterisation		{ $$ = vn->OnConstructorDecl(@$, $1, $4)->OnIdentifier($3, @3); } // for virtual destructor but needs ~
 
 assign_init		: expr_entry
-				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser()->OnArgsList({}, @2); } 
+				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser()->OnArgsList({}, @1+@2); } 
 				| '{' comma_sep_exprs '}'      							{ $$ = vn->OnArrayInitialiser()->OnArgsList($2, @2); }               
 
 decl_prefix : decl_postfix
