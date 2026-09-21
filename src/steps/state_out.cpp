@@ -30,7 +30,7 @@ GotoAfterWait::GotoAfterWait()
     auto sx_pre = MakePatternNode<StarAgent, StmtDecl>();
     auto sx_post = MakePatternNode<StarAgent, StmtDecl>();
     auto wait = MakePatternNode<Wait>();
-    auto notmatch = MakePatternNode<NegationAgent, Statement>();
+    auto notmatch = MakePatternNode<NegationAgent, StmtDecl>();
     auto all = MakePatternNode<ConjunctionAgent, Statement>();
     auto anynode = MakePatternNode<ChildAgent, Statement>();
     auto delta = MakePatternNode<DeltaAgent, StmtDecl>();
@@ -67,7 +67,7 @@ GotoAfterWait::GotoAfterWait()
     auto pre = MakePatternNode<StarAgent, StmtDecl>();
     auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto wait = MakePatternNode<Wait>();
-    auto notmatch = MakePatternNode<NegationAgent, Statement>();
+    auto notmatch = MakePatternNode<NegationAgent, StmtDecl>();
     auto sx_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<LabelDeclaration>();
@@ -105,7 +105,7 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     auto label = MakePatternNode< LabelDeclaration >();
     auto label_id = MakePatternNode< BuildSpecificLabelIdentifierAgent >("PROCEED");
     auto s_all = MakePatternNode<ConjunctionAgent, Statement>();
-    auto sx_not = MakePatternNode<NegationAgent, Statement>();
+    auto sx_not = MakePatternNode<NegationAgent, StmtDecl>();
     
     s_all->conjuncts = (s_comp, sx_not);
     sx_not->negand = sx_comp;    
@@ -221,7 +221,7 @@ EnsureBootstrap::EnsureBootstrap()
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("BOOTSTRAP");
-    auto stop = MakePatternNode<NegationAgent, Statement>();
+    auto stop = MakePatternNode<NegationAgent, StmtDecl>();
     auto sx_goto = MakePatternNode<Goto>();
         
     fn->permission = MakePatternNode<NonConst>();    
@@ -300,8 +300,8 @@ EnsureSuperLoop::EnsureSuperLoop()
     auto thread = MakePatternNode<Thread>();
     auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
-    auto sx_not = MakePatternNode<NegationAgent, Statement>();
-    auto s_limit = MakePatternNode<NegationAgent, Statement>();
+    auto sx_not = MakePatternNode<NegationAgent, StmtDecl>();
+    auto s_limit = MakePatternNode<NegationAgent, StmtDecl>();
     auto sx_stuff = MakePatternNode<StuffAgent, Compound>();
     auto sx_goto = MakePatternNode< Goto >();
     auto first_goto = MakePatternNode< Goto >();
@@ -380,8 +380,8 @@ SwitchCleanUp::SwitchCleanUp()
     auto tail = MakePatternNode<StarAgent, StmtDecl>();
     auto label = MakePatternNode<LabelDeclaration>();
     auto cond = MakePatternNode<Expression>();
-    auto sx_not_tail = MakePatternNode<NegationAgent, Statement>();
-    auto sx_not_main = MakePatternNode<NegationAgent, Statement>();
+    auto sx_not_tail = MakePatternNode<NegationAgent, StmtDecl>();
+    auto sx_not_main = MakePatternNode<NegationAgent, StmtDecl>();
     auto sx_any_tail = MakePatternNode<DisjunctionAgent, Statement>();
 
     s_switch->condition = cond;
@@ -445,8 +445,8 @@ FixFallthrough::FixFallthrough()
     auto case1 = MakePatternNode<Case>();
     auto case2 = MakePatternNode<Case>();
     auto breakk = MakePatternNode<Break>();
-    auto s_not1 = MakePatternNode<NegationAgent, Statement>();
-    auto s_not2 = MakePatternNode<NegationAgent, Statement>();
+    auto s_not1 = MakePatternNode<NegationAgent, StmtDecl>();
+    auto s_not2 = MakePatternNode<NegationAgent, StmtDecl>();
     
     s_comp->members = (decls);
     s_comp->statements = (pre, case1, cb1,              case2, cb2, breakk, post);
@@ -726,8 +726,8 @@ LoopRotation::LoopRotation()
     auto outer_bottom_stuff_noyield = MakePatternNode<StuffAgent, StmtDecl>();
     auto loop_bottom_matchall = MakePatternNode<ConjunctionAgent, Statement>();
     auto outer_bottom_matchall = MakePatternNode<ConjunctionAgent, Statement>();
-    auto loop_bottom_notmatch = MakePatternNode<NegationAgent, Statement>();
-    auto outer_bottom_notmatch = MakePatternNode<NegationAgent, Statement>();
+    auto loop_bottom_notmatch = MakePatternNode<NegationAgent, StmtDecl>();
+    auto outer_bottom_notmatch = MakePatternNode<NegationAgent, StmtDecl>();
     auto s_notmatch = MakePatternNode<NegationAgent, Compound>();
     auto inner_state = MakePatternNode<DisjunctionAgent, If>();
     

@@ -420,7 +420,7 @@ CleanupVoidStatementExpression::CleanupVoidStatementExpression()
     auto s_ce = MakePatternNode<StatementExpression>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto stmts = MakePatternNode<StarAgent, StmtDecl>();
-    auto last = MakePatternNode<NegationAgent, Statement>();
+    auto last = MakePatternNode<NegationAgent, StmtDecl>();
     auto sx_expr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
     auto sx_type_not = MakePatternNode<NegationAgent, Type>();
     auto sx_void = MakePatternNode<Void>();

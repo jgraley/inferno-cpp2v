@@ -68,7 +68,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto lr_equal = MakePatternNode<Equal>();
     auto l_loop = MakePatternNode<Loop>();
     auto l_over = MakePatternNode<DeltaAgent, StmtDecl>();
-    auto l_not = MakePatternNode<NegationAgent, Statement>();
+    auto l_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto m_stuff_func = MakePatternNode<StuffAgent, Scope>();
     auto l_module = MakePatternNode<Record>();
     auto l_func = MakePatternNode<Member>();
@@ -330,8 +330,8 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     auto state_var_id = MakePatternNode<InstanceIdentifier>();
     auto state_id = MakePatternNode<InstanceIdentifier>();
     auto label = MakePatternNode<LocalTree::StateLabel>();
-    auto sx_pre = MakePatternNode<NegationAgent, Statement>();
-    auto sx_body = MakePatternNode<NegationAgent, Statement>();
+    auto sx_pre = MakePatternNode<NegationAgent, StmtDecl>();
+    auto sx_body = MakePatternNode<NegationAgent, StmtDecl>();
     auto sx_uncombable = MakePatternNode<Uncombable>();
     auto r_if = MakePatternNode<If>();
     auto r_equal = MakePatternNode<Equal>();
@@ -383,9 +383,9 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     auto state_var_id = MakePatternNode<InstanceIdentifier>();
     auto state_id = MakePatternNode<InstanceIdentifier>();
     auto label = MakePatternNode<LocalTree::StateLabel>();
-    auto sx_pre = MakePatternNode<NegationAgent, Statement>();
-    auto sx_body1 = MakePatternNode<NegationAgent, Statement>();
-    auto sx_body2 = MakePatternNode<NegationAgent, Statement>();
+    auto sx_pre = MakePatternNode<NegationAgent, StmtDecl>();
+    auto sx_body1 = MakePatternNode<NegationAgent, StmtDecl>();
+    auto sx_body2 = MakePatternNode<NegationAgent, StmtDecl>();
     auto r_if = MakePatternNode<If>();
     auto r_equal = MakePatternNode<Equal>();
     auto wait = MakePatternNode<Wait>();
@@ -432,8 +432,8 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     auto state_var_id = MakePatternNode<InstanceIdentifier>();
     auto state_id = MakePatternNode<InstanceIdentifier>();
     auto label = MakePatternNode<LocalTree::StateLabel>();
-    auto sx_pre = MakePatternNode<NegationAgent, Statement>();
-    auto sx_body = MakePatternNode<NegationAgent, Statement>();
+    auto sx_pre = MakePatternNode<NegationAgent, StmtDecl>();
+    auto sx_body = MakePatternNode<NegationAgent, StmtDecl>();
     auto r_if = MakePatternNode<If>();
     auto r_if2 = MakePatternNode<If>();
     auto r_equal = MakePatternNode<Equal>();
@@ -481,7 +481,7 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     auto sx_post_label = MakePatternNode<LabelDeclaration>();
     auto iif = MakePatternNode<If>();
     auto equal = MakePatternNode<Equal>();
-    auto sx_post = MakePatternNode<NegationAgent, Statement>();
+    auto sx_post = MakePatternNode<NegationAgent, StmtDecl>();
     auto state_var_id = MakePatternNode<InstanceIdentifier>();
     auto state_id = MakePatternNode<InstanceIdentifier>();
     auto label_star = MakePatternNode<StarAgent, LabelDeclaration>();
@@ -511,7 +511,7 @@ ApplyTopPolicy::ApplyTopPolicy()
     auto label = MakePatternNode<LabelDeclaration>();
     auto sx_label = MakePatternNode<LabelDeclaration>();
     auto sx_label2 = MakePatternNode<LabelDeclaration>();
-    auto sx_stmt = MakePatternNode<NegationAgent, Statement>();
+    auto sx_stmt = MakePatternNode<NegationAgent, StmtDecl>();
     auto r_if = MakePatternNode<If>();
     auto r_equal = MakePatternNode<Equal>();
     auto r_delta_count = MakePatternNode<DeltaCount>();
@@ -519,8 +519,8 @@ ApplyTopPolicy::ApplyTopPolicy()
     auto wait = MakePatternNode<Wait>();
     auto s_stuff = MakePatternNode<StuffAgent, Compound>();
     auto gotoo = MakePatternNode<Goto>();
-    auto sx_body1 = MakePatternNode<NegationAgent, Statement>();
-    auto sx_body2 = MakePatternNode<NegationAgent, Statement>();
+    auto sx_body1 = MakePatternNode<NegationAgent, StmtDecl>();
+    auto sx_body2 = MakePatternNode<NegationAgent, StmtDecl>();
     auto sx_uncombable1 = MakePatternNode<Uncombable>();
     auto sx_uncombable2 = MakePatternNode<Uncombable>();
        
@@ -552,7 +552,7 @@ EnsureResetYield::EnsureResetYield()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, StmtDecl>();
     auto post = MakePatternNode<StarAgent, StmtDecl>();
-    auto sx_not = MakePatternNode<NegationAgent, Statement>();
+    auto sx_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto sx_any = MakePatternNode<DisjunctionAgent, Statement>();
     auto gotoo = MakePatternNode<Goto>();
     auto r_yield = MakePatternNode<WaitDelta>();
@@ -580,7 +580,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     auto s_ifgoto = MakePatternNode<If>();
     auto s_goto = MakePatternNode<Goto>();
     auto cond = MakePatternNode<Expression>();
-    auto sx_not = MakePatternNode<NegationAgent, Statement>();
+    auto sx_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto r_do = MakePatternNode<Do>();
     auto delta = MakePatternNode<DeltaAgent, Compound>();
     

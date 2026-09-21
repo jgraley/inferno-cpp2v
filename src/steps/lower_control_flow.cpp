@@ -24,7 +24,7 @@ DetectUncombableSwitch::DetectUncombableSwitch()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, StmtDecl>();
     auto post = MakePatternNode<StarAgent, StmtDecl>();
-    auto x_not = MakePatternNode<NegationAgent, Statement>();
+    auto x_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto x_break = MakePatternNode<Break>();
     auto target = MakePatternNode<SwitchTarget>();
     auto r_uswitch = MakePatternNode<UncombableSwitch>();
@@ -96,7 +96,7 @@ DetectCombableFor::DetectCombableFor()
     auto assign2 = MakePatternNode<Assign>();
     auto add = MakePatternNode<Add>();
     auto sub = MakePatternNode<Subtract>();
-    auto body = MakePatternNode<NegationAgent, Statement>();
+    auto body = MakePatternNode<NegationAgent, StmtDecl>();
     auto astuff = MakePatternNode<StuffAgent, StmtDecl>();
     auto assignop = MakePatternNode<AssignmentOperator>();
     
@@ -214,7 +214,7 @@ ForToWhile::ForToWhile()
     auto r_body = MakePatternNode<Compound>();
     auto l_stuff = MakePatternNode<StuffAgent, StmtDecl>();
     auto l_overlay = MakePatternNode<DeltaAgent, StmtDecl>();
-    auto l_s_not = MakePatternNode<NegationAgent, Statement>();
+    auto l_s_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto l_s_loop = MakePatternNode< Loop >();
     
     auto l_s_cont = MakePatternNode<Continue>();
@@ -282,7 +282,7 @@ IfToIfGoto::IfToIfGoto()
     auto body = MakePatternNode<Statement>();
     auto body_else = MakePatternNode<Statement>();
     auto cond = MakePatternNode<Expression>();
-    auto l_r_not = MakePatternNode<NegationAgent, Statement>();
+    auto l_r_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto l_r_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_goto_else = MakePatternNode<Goto>();
@@ -468,7 +468,7 @@ DoToIfGoto::DoToIfGoto()
     auto l_stuff = MakePatternNode<StuffAgent, StmtDecl>();
     auto l_overlay = MakePatternNode<DeltaAgent, StmtDecl>();
     auto l_s_cont = MakePatternNode<Continue>();
-    auto l_s_not = MakePatternNode<NegationAgent, Statement>();
+    auto l_s_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto l_s_loop = MakePatternNode< Loop >();
 
     l_s_not->negand = l_s_loop;
@@ -506,7 +506,7 @@ BreakToGoto::BreakToGoto()
     auto sx_breakable = MakePatternNode<Breakable>();
     auto stuff = MakePatternNode<StuffAgent, StmtDecl>();
     auto overlay = MakePatternNode<DeltaAgent, StmtDecl>();
-    auto sx_not = MakePatternNode<NegationAgent, Statement>();
+    auto sx_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto s_break = MakePatternNode<Break>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("BREAK");

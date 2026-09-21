@@ -249,7 +249,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto macro_args = MakePatternNode<StarAgent, Node>();
     auto process = MakePatternNode< Member >();
     auto pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto statements_negation = MakePatternNode<NegationAgent, Statement>();    
+    auto statements_negation = MakePatternNode<NegationAgent, StmtDecl>();    
     auto sx_process_macro = MakePatternNode< MacroStatement >();
     auto id = MakePatternNode< InstanceIdentifier >(); 
     auto bases = MakePatternNode<StarAgent, Base>();

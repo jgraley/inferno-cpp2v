@@ -217,7 +217,7 @@ AddLinkAddress::AddLinkAddress()
     auto mr_label = MakePatternNode<LabelDeclaration>();
     auto mr_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("LINK");
     auto m_all = MakePatternNode<ConjunctionAgent, Statement>();
-    auto ms_not = MakePatternNode<NegationAgent, Statement>();
+    auto ms_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto m_over = MakePatternNode<DeltaAgent, StmtDecl>();
     auto l_func_over = MakePatternNode<DeltaAgent, Function>();
     auto ls_func = MakePatternNode<Function>();
@@ -230,7 +230,7 @@ AddLinkAddress::AddLinkAddress()
     auto llr_assign = MakePatternNode<Assign>();
     auto llsx_assign = MakePatternNode<Assign>();
     auto ll_all = MakePatternNode<ConjunctionAgent, Statement>();
-    auto lls_not = MakePatternNode<NegationAgent, Statement>();
+    auto lls_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto ll_over = MakePatternNode<DeltaAgent, StmtDecl>();
     auto m_gg = MakePatternNode<GreenGrassAgent, Statement>();
     auto ll_gg = MakePatternNode<GreenGrassAgent, Statement>();
