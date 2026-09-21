@@ -70,6 +70,10 @@ struct Uninitialised : Initialiser
 struct StmtDecl : virtual Node 
 {
 	NODE_FUNCTIONS
+    virtual string GetColour() const { return "/set28/2"; }    
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 };
 
 /// Represents a statement as found inside a function body. 
@@ -79,10 +83,6 @@ struct StmtDecl : virtual Node
 struct Statement : virtual StmtDecl 
 { 
     NODE_FUNCTIONS 
-    virtual string GetColour() const { return "/set28/2"; }    
-	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-   	Token GetSignifierToken() const override;
 };
 
 
@@ -1795,6 +1795,7 @@ struct MacroField : Declaration,
     
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;        
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy );
+	Token GetSignifierToken() const override;
 };
 
 
@@ -1830,6 +1831,7 @@ struct Include : virtual PreProcDecl
     TreePtr<String> filename;     
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy );
 	virtual string CustomiseFilenameForInclude(TreePtr<String>, VN::RendererInterface *, Policy) { ASSERTFAIL() };
+	Token GetSignifierToken() const override;
 };
 
 

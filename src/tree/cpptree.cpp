@@ -79,21 +79,20 @@ string Uninitialised::GetRender( VN::RendererInterface *, Production, Policy pol
 	return "";
 }
 
-//////////////////////////// Statement ///////////////////////////////
+//////////////////////////// StmtDecl ///////////////////////////////
 
-Syntax::Production Statement::GetMyProductionTerminal() const
+Syntax::Production StmtDecl::GetMyProductionTerminal() const
 {
 	return Production::BARE_STMT_DECL;
 }
 
-
-string Statement::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string StmtDecl::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return renderer->GetSignifier(this, policy);
 }
 
 
-Syntax::Token Statement::GetSignifierToken() const
+Syntax::Token StmtDecl::GetSignifierToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }
@@ -3357,6 +3356,12 @@ string MacroField::GetRender( VN::RendererInterface *renderer, Production, Polic
 	return Join( ls, " " );
 }
 
+
+Syntax::Token MacroField::GetSignifierToken() const
+{
+	throw UnimplementedToken();
+}
+
 //////////////////////////// MacroStatement ///////////////////////////////
 
 Syntax::Production MacroStatement::GetMyProductionTerminal() const
@@ -3382,9 +3387,7 @@ string MacroStatement::GetRender( VN::RendererInterface *renderer, Production, P
 
 Syntax::Token MacroStatement::GetSignifierToken() const
 {
-	// Disable because there isn't really a single token in the Instance
-	// syntax that we can attach the node to.
-	return Syntax::GetSignifierToken();
+	throw UnimplementedToken();
 }
 
 //////////////////////////// PreProcDecl ///////////////////////////////
@@ -3407,6 +3410,12 @@ string PreProcDecl::RenderPreProcDirective(string s, Policy policy) const
 string Include::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return RenderPreProcDirective("include "+CustomiseFilenameForInclude(filename, renderer, policy), policy);
+}
+
+
+Syntax::Token Include::GetSignifierToken() const
+{
+	throw UnimplementedToken();
 }
 
 //////////////////////////// SystemInclude ///////////////////////////////
