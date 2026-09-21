@@ -39,7 +39,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 }
     
     
-MoveInstanceDeclarations::MoveInstanceDeclarations()
+MoveDeclarationsToTheTop::MoveDeclarationsToTheTop()
 {    
     // Just move the decl to the decls collection
     auto sc = MakePatternNode<Compound>();

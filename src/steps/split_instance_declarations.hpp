@@ -18,10 +18,10 @@ public:
 
 /** Where variables are declared in the statement body and are not
     initialised, move the decl into the decls body. */
-class MoveInstanceDeclarations : public VNStep
+class MoveDeclarationsToTheTop : public VNStep
 {
 public:
-    MoveInstanceDeclarations();
+    MoveDeclarationsToTheTop();
 };
 
 }; // end namespace

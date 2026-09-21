@@ -87,7 +87,7 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
 		sequence->push_back( make_shared<AddLinkAddress>() );
 		sequence->push_back( make_shared<ParamsViaTemps>() );
 		sequence->push_back( make_shared<SplitInstanceDeclarations>() );
-		sequence->push_back( make_shared<MoveInstanceDeclarations>() );
+		sequence->push_back( make_shared<MoveDeclarationsToTheTop>() );
 		sequence->push_back( make_shared<AutosToModule>() );
 		sequence->push_back( make_shared<GenerateStacks>() );
 		sequence->push_back( make_shared<MergeFunctions>() );
@@ -161,7 +161,7 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     }    
 
     sequence->push_back( make_shared<CleanupCompoundMulti>() );
-	sequence->push_back( make_shared<MoveInstanceDeclarations>() ); // keep decls at top so fallout doesn't localise them
+	sequence->push_back( make_shared<MoveDeclarationsToTheTop>() ); // keep decls at top so fallout doesn't localise them
 
     { 
 		// ---------------------- Create fallthrough machine ----------------------
