@@ -97,7 +97,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 MainToThread::MainToThread()
 {
 	auto e_stuff = MakePatternNode<StuffAgent, Compound>();
-	auto e_delta = MakePatternNode<DeltaAgent, StmtDecl>();
+	auto e_delta = MakePatternNode<DeltaAgent, Statement>();
 	auto es_return = MakePatternNode<Return>();
 	auto er_cease = MakePatternNode<Cease>();
 	
@@ -123,7 +123,7 @@ MainToThread::MainToThread()
 	s_member->type = s_func;
 	s_member->initialiser = body;
 	body->members = ( MakePatternNode<StarAgent, Declaration>() );
-	body->statements = ( MakePatternNode<StarAgent, StmtDecl>() );
+	body->statements = ( MakePatternNode<StarAgent, Statement>() );
 	//s_func->members = ()        require no parameters
 	s_func->return_type = MakePatternNode<Integral>();
 	delta->overlay = r_member;

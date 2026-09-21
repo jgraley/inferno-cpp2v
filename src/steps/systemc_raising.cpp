@@ -174,8 +174,8 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto ls_cons = MakePatternNode< Member >();
     auto lr_cons = MakePatternNode< Member >();
     auto l_process = MakePatternNode< Member >();
-    auto l_pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto l_post = MakePatternNode<StarAgent, StmtDecl>();
+    auto l_pre = MakePatternNode<StarAgent, Statement>();
+    auto l_post = MakePatternNode<StarAgent, Statement>();
     auto ls_id = MakePatternNode< InstanceIdentifier >();
     auto l_bases = MakePatternNode<StarAgent, Base>();
     auto l_ctype = MakePatternNode<Constructor>();

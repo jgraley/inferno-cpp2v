@@ -20,8 +20,8 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     si->initialiser = MakePatternNode<Expression>();  // Only acting on initialised Instances
     auto decls = MakePatternNode<StarAgent, Declaration>();
     sc->members = { decls };
-    auto pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto post = MakePatternNode<StarAgent, StmtDecl>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
     sc->statements = ( pre, delta, post );
 
     auto rc = MakePatternNode<Compound>();
@@ -46,8 +46,8 @@ MoveInstanceDeclarations::MoveInstanceDeclarations()
     auto var = MakePatternNode<Local>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     sc->members = ( decls );
-    auto pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto post = MakePatternNode<StarAgent, StmtDecl>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
     sc->statements = ( pre, var, post );
 
     auto rc = MakePatternNode<Compound>();

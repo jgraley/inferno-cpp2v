@@ -79,20 +79,20 @@ string Uninitialised::GetRender( VN::RendererInterface *, Production, Policy pol
 	return "";
 }
 
-//////////////////////////// StmtDecl ///////////////////////////////
+//////////////////////////// Statement ///////////////////////////////
 
-Syntax::Production StmtDecl::GetMyProductionTerminal() const
+Syntax::Production Statement::GetMyProductionTerminal() const
 {
 	return Production::BARE_STMT_DECL;
 }
 
-string StmtDecl::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string Statement::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return renderer->GetSignifier(this, policy);
 }
 
 
-Syntax::Token StmtDecl::GetSignifierToken() const
+Syntax::Token Statement::GetSignifierToken() const
 {
 	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
 }
@@ -2773,7 +2773,7 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
     string s = "({ ";
 	for( TreePtr<Declaration> m : members )    
 		s += renderer->DoRender( &m, Syntax::Production::STMT_DECL, policy );       
-	for( TreePtr<StmtDecl> st : statements )    
+	for( TreePtr<Statement> st : statements )    
 		s += renderer->DoRender( &st, Syntax::Production::STMT_DECL_LOW, policy );    
 	return s + " })";
 }

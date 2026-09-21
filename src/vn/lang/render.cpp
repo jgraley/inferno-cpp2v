@@ -310,7 +310,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod,
 
     switch(node_prod)
     {
-        case Syntax::Production::BOOT...Syntax::Production::TOP_STMT_DECL: // StmtDecl productions at different precedences
+        case Syntax::Production::BOOT...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
 			if( policy.boot_statements_using_braces )
 			{
 				// Braces can actually work in expressions, eg in {}. The nodes are STATEMENT_SEQ and we stmt_boot to BOTTOM_STMT_DECL

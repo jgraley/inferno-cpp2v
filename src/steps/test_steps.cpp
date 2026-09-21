@@ -10,15 +10,15 @@ using namespace Steps;
 EmbeddedSCRTest::EmbeddedSCRTest()
 {
     auto s_for = MakePatternNode<For>();
-    auto s_body = MakePatternNode<StmtDecl>();
+    auto s_body = MakePatternNode<Statement>();
 
     s_for->body = s_body;
 
     auto r_comp = MakePatternNode<Compound>();
-    auto r_body = MakePatternNode<StmtDecl>();
+    auto r_body = MakePatternNode<Statement>();
     auto ss_cont = MakePatternNode<Continue>();
     auto sr_break = MakePatternNode<Break>();
-    auto r_embedded = MakePatternNode< EmbeddedCompareReplaceAgent, StmtDecl >( r_body, ss_cont, sr_break );
+    auto r_embedded = MakePatternNode< EmbeddedCompareReplaceAgent, Statement >( r_body, ss_cont, sr_break );
     r_comp->statements = ( r_embedded );
 
     Configure( SEARCH_REPLACE, s_for, r_comp );
@@ -124,9 +124,9 @@ DroppedTreeZone::DroppedTreeZone()
 {
     // For #754
     auto root_stuff = MakePatternNode<StuffAgent, Compound>();
-    auto delta = MakePatternNode<DeltaAgent, StmtDecl>(); // pre-restriction forces result to be type-correct
-    auto mid_stuff = MakePatternNode<StuffAgent, StmtDecl>();
-    auto mid_child = MakePatternNode<ChildAgent, StmtDecl>(); // anti-spin
+    auto delta = MakePatternNode<DeltaAgent, Statement>(); // pre-restriction forces result to be type-correct
+    auto mid_stuff = MakePatternNode<StuffAgent, Statement>();
+    auto mid_child = MakePatternNode<ChildAgent, Statement>(); // anti-spin
     auto sub_stuff = MakePatternNode<StuffAgent, Expression>(); // end will be StandardAgent which makes a FreeZone, so get a non-empty tree zone in here
     auto leaf = MakePatternNode< InstanceIdentifier >();
 

@@ -70,7 +70,7 @@ struct Uninitialised : Initialiser
 /// Represents a statement as found inside a function body. 
 /** Basically anything that ends with a ; inside a function body, as well as labels (which we consider as 
  statements in their own right). */
-struct StmtDecl : virtual Node 
+struct Statement : virtual Node 
 {
 	NODE_FUNCTIONS
     virtual string GetColour() const { return "/set28/2"; }    
@@ -82,7 +82,7 @@ struct StmtDecl : virtual Node
 
 /// An expression that computes a result value. 
 /** Can be used anywhere a statement can, per C syntax rules. */
-struct Expression : virtual StmtDecl,
+struct Expression : virtual Statement,
                     Initialiser 
 { 
     NODE_FUNCTIONS 
@@ -125,7 +125,7 @@ struct Type : virtual Node
 /// A declaration specifies the creation of a TypeDeclaration or an Instance. 
 /** Declaration can appear where statements can and also inside structs etc
  and at top level. */
-struct Declaration : virtual StmtDecl 
+struct Declaration : virtual Statement 
 { 
     NODE_FUNCTIONS 
     
@@ -508,7 +508,7 @@ struct False : BoolLiteral
 // identifier. 
 
 /// Initialise a member from inside a constructor body
-struct MemberInitialiser : StmtDecl // TODO not a StmtDecl, just virtual Node now
+struct MemberInitialiser : Statement // TODO not a Statement, just virtual Node now
 {
 	NODE_FUNCTIONS_FINAL
 
@@ -1489,13 +1489,13 @@ struct AlignOf : FuncOnType
 /// A sequence of statements in a scope that shall execute in sequence
 /** Note that local declarations
  can go in the members of the Scope or in the statements (since Declaration
- derives from StmtDecl). There is a sequence point between each statement. */
+ derives from Statement). There is a sequence point between each statement. */
 struct SequentialScope : DeclScope,
-                         virtual StmtDecl
+                         virtual Statement
 {
     NODE_FUNCTIONS
-    Sequence<StmtDecl> statements; ///< Can contain local declarations and code
-    virtual string GetColour() const { return StmtDecl::GetColour(); } // StmtDecl wins    
+    Sequence<Statement> statements; ///< Can contain local declarations and code
+    virtual string GetColour() const { return Statement::GetColour(); } // Statement wins    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
    	Token GetSignifierToken() const override;
@@ -1531,7 +1531,7 @@ struct StatementExpression : Expression, ///< Evaluates to whatever the last sta
 /// The return statement of a function
 /** return_value is an Expression giving the return value or 
  Uninitialised if none is present. */
-struct Return : StmtDecl
+struct Return : Statement
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Initialiser> return_value; ///< return value or Uninitialised
@@ -1549,7 +1549,7 @@ struct Return : StmtDecl
  it is expected to be useful during sequential lowering (state-out).
  Therefore we do not directly require LabelIdentifier, but the Expression
  must evaluate to one. No * or && needed. */
-struct Goto : StmtDecl, Uncombable
+struct Goto : Statement, Uncombable
 {
     NODE_FUNCTIONS_FINAL
     // Dest is an expression for goto-a-variable support.
@@ -1565,12 +1565,12 @@ struct Goto : StmtDecl, Uncombable
 
 
 /// If statement
-struct If : StmtDecl
+struct If : Statement
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< condition to test
-    TreePtr<StmtDecl> body;       ///< executes when true
-    TreePtr<StmtDecl> body_else;  ///< executes when false, can be Nop if no else clause
+    TreePtr<Statement> body;       ///< executes when true
+    TreePtr<Statement> body_else;  ///< executes when false, can be Nop if no else clause
 
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
@@ -1587,10 +1587,10 @@ struct If : StmtDecl
     and then execution commences immediately after this statement.
     We must specify a body here; the break statement will be 
     within the body */
-struct Breakable : StmtDecl 
+struct Breakable : Statement 
 {
     NODE_FUNCTIONS
-    TreePtr<StmtDecl> body; ///< a break in here jumps to the end of here
+    TreePtr<Statement> body; ///< a break in here jumps to the end of here
 
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
@@ -1638,7 +1638,7 @@ struct Do : Loop, Uncombable // a do..while() construct
 struct For : Loop
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<StmtDecl>   initialisation; // Initialiser; use Nop if absent
+    TreePtr<Statement>   initialisation; // Initialiser; use Nop if absent
     TreePtr<Expression> condition;      // Condition; use True if absent
     TreePtr<Expression> increment;      // Increment; use Nop if absent
     // Note: K&R has all three as expressions but init needs to be a statement
@@ -1672,7 +1672,7 @@ struct Switch : Breakable
 
 
 /// Intermediate for labels in a switch statement.
-struct SwitchTarget : StmtDecl 
+struct SwitchTarget : Statement 
 { 
 	NODE_FUNCTIONS 
 
@@ -1720,7 +1720,7 @@ struct Default : SwitchTarget
 
 
 /// Continue (to innermost Loop)
-struct Continue : StmtDecl, Uncombable 
+struct Continue : Statement, Uncombable 
 { 
 	NODE_FUNCTIONS_FINAL 
 
@@ -1732,7 +1732,7 @@ struct Continue : StmtDecl, Uncombable
 
 
 /// Break (from innermost Breakable)
-struct Break : StmtDecl 
+struct Break : Statement 
 { 
 	NODE_FUNCTIONS_FINAL 
 
@@ -1744,7 +1744,7 @@ struct Break : StmtDecl
 
 
 /// Do nothing; these get optimised out where possible
-struct Nop : StmtDecl 
+struct Nop : Statement 
 { 
 	NODE_FUNCTIONS_FINAL 
 
@@ -1796,7 +1796,7 @@ struct MacroField : Declaration,
 
 /// A proprocessor macro usage that may be used as a statement, and takes 
 /// arbitrary operands.
-struct MacroStatement : StmtDecl 
+struct MacroStatement : Statement 
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<PreprocessorIdentifier> identifier;

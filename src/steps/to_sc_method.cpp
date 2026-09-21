@@ -16,7 +16,7 @@ AutosToModule::AutosToModule()
     auto r_rec = MakePatternNode<Record>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
-    auto vstmts = MakePatternNode<StarAgent, StmtDecl>();
+    auto vstmts = MakePatternNode<StarAgent, Statement>();
     auto s_var = MakePatternNode<Local>();
     auto fn = MakePatternNode<Member>();
     auto r_var = MakePatternNode<Member>();
@@ -73,7 +73,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     auto r_rec = MakePatternNode<Record>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
-    auto vstmts = MakePatternNode<StarAgent, StmtDecl>();
+    auto vstmts = MakePatternNode<StarAgent, Statement>();
     auto var = MakePatternNode<DisjunctionAgent, Instance>();
     auto s_tempvar = MakePatternNode<Temporary>();
     auto s_staticvar = MakePatternNode<Global>();
@@ -135,7 +135,7 @@ DeclsToModule::DeclsToModule()
     auto r_rec = MakePatternNode<Record>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
-    auto vstmts = MakePatternNode<StarAgent, StmtDecl>();
+    auto vstmts = MakePatternNode<StarAgent, Statement>();
     auto fn = MakePatternNode<Member>();
     auto ut = MakePatternNode<TypeDeclaration>();
     auto ft = MakePatternNode<Thread>();
@@ -178,7 +178,7 @@ ThreadToMethod::ThreadToMethod()
     auto s_loop = MakePatternNode<Do>();
     auto s_loop_cond = MakePatternNode<True>();
     auto loop_decls = MakePatternNode<StarAgent, Declaration>();
-    auto loop_stmts = MakePatternNode<StarAgent, StmtDecl>();
+    auto loop_stmts = MakePatternNode<StarAgent, Statement>();
     auto ls_wait_dynamic = MakePatternNode<WaitDynamic>();
     auto lr_nt_dynamic = MakePatternNode<NextTriggerDynamic>();
     auto ms_wait_static = MakePatternNode<WaitStatic>();
@@ -238,10 +238,10 @@ ExplicitiseReturns::ExplicitiseReturns()
     auto m_return = MakePatternNode<Return>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto m_decls = MakePatternNode<StarAgent, Declaration>();
-    auto stmts = MakePatternNode<StarAgent, StmtDecl>();
-    auto m_pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto m_mid = MakePatternNode<StarAgent, StmtDecl>();
-    auto m_post = MakePatternNode<StarAgent, StmtDecl>();
+    auto stmts = MakePatternNode<StarAgent, Statement>();
+    auto m_pre = MakePatternNode<StarAgent, Statement>();
+    auto m_mid = MakePatternNode<StarAgent, Statement>();
+    auto m_post = MakePatternNode<StarAgent, Statement>();
     auto r_flag = MakePatternNode<Temporary>();
     auto r_boolean = MakePatternNode<Boolean>();
     auto r_flag_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("enabled");
@@ -251,11 +251,11 @@ ExplicitiseReturns::ExplicitiseReturns()
     auto ls_uninit = MakePatternNode<Uninitialised>();
     auto m_uninit = MakePatternNode<Uninitialised>();
     auto lr_assign = MakePatternNode<Assign>();
-    auto m_stuff = MakePatternNode<StuffAgent, StmtDecl>();
-    auto ms_affected = MakePatternNode<NegationAgent, StmtDecl>();
+    auto m_stuff = MakePatternNode<StuffAgent, Statement>();
+    auto ms_affected = MakePatternNode<NegationAgent, Statement>();
     auto ms_if = MakePatternNode<If>();
     auto mr_if = MakePatternNode<If>();
-    auto m_over = MakePatternNode<DeltaAgent, StmtDecl>();
+    auto m_over = MakePatternNode<DeltaAgent, Statement>();
     
     m_comp->members = (m_decls);
     m_comp->statements = (m_pre, m_stuff, m_mid, m_over, m_post);

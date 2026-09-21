@@ -14,7 +14,7 @@ using namespace CPPTree;
 using namespace Steps;
 using namespace VN;
  
-TreePtr<Node> Steps::MakeCheckUncombable( TreePtr<CPPTree::StmtDecl> construct )
+TreePtr<Node> Steps::MakeCheckUncombable( TreePtr<CPPTree::Statement> construct )
 {
     auto all = MakePatternNode<ConjunctionAgent, Node>();
     auto stuff = MakePatternNode<StuffAgent, Node>();
@@ -22,7 +22,7 @@ TreePtr<Node> Steps::MakeCheckUncombable( TreePtr<CPPTree::StmtDecl> construct )
     
     all->conjuncts = (construct, stuff);
     stuff->terminus = uncombable;
-    //TODO maybe restrict recursion to StmtDecl, in case of inline functions, classes etc (though
+    //TODO maybe restrict recursion to Statement, in case of inline functions, classes etc (though
     // we may never support these, or else lower them out in advance)
     
     return all;

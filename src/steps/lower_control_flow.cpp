@@ -22,9 +22,9 @@ DetectUncombableSwitch::DetectUncombableSwitch()
     auto expr = MakePatternNode<Expression>();
     auto comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto post = MakePatternNode<StarAgent, StmtDecl>();
-    auto x_not = MakePatternNode<NegationAgent, StmtDecl>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
+    auto x_not = MakePatternNode<NegationAgent, Statement>();
     auto x_break = MakePatternNode<Break>();
     auto target = MakePatternNode<SwitchTarget>();
     auto r_uswitch = MakePatternNode<UncombableSwitch>();
@@ -52,10 +52,10 @@ MakeAllForUncombable::MakeAllForUncombable()
     auto s_not = MakePatternNode<NegationAgent, For>();
     auto sx_ufor = MakePatternNode<UncombableFor>();
     auto s_for = MakePatternNode<For>();
-    auto init = MakePatternNode<StmtDecl>();
+    auto init = MakePatternNode<Statement>();
     auto test = MakePatternNode<Expression>();
     auto inc = MakePatternNode<Expression>();
-    auto body = MakePatternNode<StmtDecl>();
+    auto body = MakePatternNode<Statement>();
     auto r_ufor = MakePatternNode<UncombableFor>();
     
     s_all->conjuncts = (s_not, s_for);
@@ -96,8 +96,8 @@ DetectCombableFor::DetectCombableFor()
     auto assign2 = MakePatternNode<Assign>();
     auto add = MakePatternNode<Add>();
     auto sub = MakePatternNode<Subtract>();
-    auto body = MakePatternNode<NegationAgent, StmtDecl>();
-    auto astuff = MakePatternNode<StuffAgent, StmtDecl>();
+    auto body = MakePatternNode<NegationAgent, Statement>();
+    auto astuff = MakePatternNode<StuffAgent, Statement>();
     auto assignop = MakePatternNode<AssignmentOperator>();
     
     auto r_for = MakePatternNode<CombableFor>();
@@ -147,10 +147,10 @@ MakeAllBreakUncombable::MakeAllBreakUncombable()
     auto s_not = MakePatternNode<NegationAgent, Break>();
     auto sx_ubreak = MakePatternNode<UncombableBreak>();
     auto s_break = MakePatternNode<Break>();
-    auto init = MakePatternNode<StmtDecl>();
+    auto init = MakePatternNode<Statement>();
     auto test = MakePatternNode<Expression>();
-    auto inc = MakePatternNode<StmtDecl>();
-    auto body = MakePatternNode<StmtDecl>();
+    auto inc = MakePatternNode<Statement>();
+    auto body = MakePatternNode<Statement>();
     auto r_ubreak = MakePatternNode<UncombableBreak>();
     
     s_not->negand = sx_ubreak;
@@ -172,8 +172,8 @@ DetectCombableBreak::DetectCombableBreak()
     auto expr = MakePatternNode<Expression>();
     auto comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto post = MakePatternNode<StarAgent, StmtDecl>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, Statement>();
     auto delta = MakePatternNode<DeltaAgent, Break>();
     auto s_ubreak = MakePatternNode<UncombableBreak>();
     auto r_break = MakePatternNode<CombableBreak>();
@@ -205,16 +205,16 @@ ForToWhile::ForToWhile()
     // restriction, like in BreakToGoto.
     
     auto s_for = MakePatternNode<For>();
-    auto forbody = MakePatternNode<StmtDecl>();
-    auto init = MakePatternNode<StmtDecl>();
+    auto forbody = MakePatternNode<Statement>();
+    auto init = MakePatternNode<Statement>();
     auto cond = MakePatternNode<Expression>();
     auto inc = MakePatternNode<Expression>();
     auto r_while = MakePatternNode<While>();
     auto r_outer = MakePatternNode<Compound>();
     auto r_body = MakePatternNode<Compound>();
-    auto l_stuff = MakePatternNode<StuffAgent, StmtDecl>();
-    auto l_overlay = MakePatternNode<DeltaAgent, StmtDecl>();
-    auto l_s_not = MakePatternNode<NegationAgent, StmtDecl>();
+    auto l_stuff = MakePatternNode<StuffAgent, Statement>();
+    auto l_overlay = MakePatternNode<DeltaAgent, Statement>();
+    auto l_s_not = MakePatternNode<NegationAgent, Statement>();
     auto l_s_loop = MakePatternNode< Loop >();
     
     auto l_s_cont = MakePatternNode<Continue>();
@@ -229,7 +229,7 @@ ForToWhile::ForToWhile()
     l_overlay->overlay = lr_goto;
     lr_goto->destination = r_cont_labelid;
     l_s_not->negand = l_s_loop;
-    auto r_embedded = MakePatternNode<EmbeddedCompareReplaceAgent, StmtDecl>( forbody, l_stuff, l_stuff );
+    auto r_embedded = MakePatternNode<EmbeddedCompareReplaceAgent, Statement>( forbody, l_stuff, l_stuff );
     
     s_for->body = forbody;
     s_for->initialisation = init;
@@ -250,7 +250,7 @@ WhileToDo::WhileToDo()
     // Just need to insert an "if" statement for the case 
     // where there are 0 iterations.
     auto s_while = MakePatternNode<While>();
-    auto body = MakePatternNode<StmtDecl>();
+    auto body = MakePatternNode<Statement>();
     auto cond = MakePatternNode<Expression>();
     auto r_nop = MakePatternNode<Nop>();
     auto r_if = MakePatternNode<If>();
@@ -275,14 +275,14 @@ IfToIfGoto::IfToIfGoto()
     // to a more specific kind (the condiitonal goto pattern) we have to 
     // exclude the conditional goto explicitly using and-not in the search 
     // pattern. Otherwise we would spin forever expanding them delta and delta.
-    auto s_and = MakePatternNode<ConjunctionAgent, StmtDecl>();
+    auto s_and = MakePatternNode<ConjunctionAgent, Statement>();
     auto s_if = MakePatternNode<If>();
     auto l_r_if = MakePatternNode<If>();
     auto r_if = MakePatternNode<If>();
-    auto body = MakePatternNode<StmtDecl>();
-    auto body_else = MakePatternNode<StmtDecl>();
+    auto body = MakePatternNode<Statement>();
+    auto body_else = MakePatternNode<Statement>();
     auto cond = MakePatternNode<Expression>();
-    auto l_r_not = MakePatternNode<NegationAgent, StmtDecl>();
+    auto l_r_not = MakePatternNode<NegationAgent, Statement>();
     auto l_r_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_goto_else = MakePatternNode<Goto>();
@@ -336,7 +336,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     // because cases should not overlap. 
     auto s_switch = MakePatternNode<Switch>();
     auto r_comp = MakePatternNode<Compound>();
-    auto body = MakePatternNode<StmtDecl>();
+    auto body = MakePatternNode<Statement>();
     auto cond_type = MakePatternNode<Type>();
     auto r_decl = MakePatternNode<Local>();
     auto id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("switch_value");
@@ -346,8 +346,8 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l1_s_body = MakePatternNode<Compound>();
     auto l1_r_body = MakePatternNode<Compound>();
     auto l1_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l1_pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto l1_post = MakePatternNode<StarAgent, StmtDecl>();
+    auto l1_pre = MakePatternNode<StarAgent, Statement>();
+    auto l1_post = MakePatternNode<StarAgent, Statement>();
     auto l1_s_default = MakePatternNode< Default >();
     auto l1_r_label = MakePatternNode< LabelDeclaration >();
     auto l1_r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("DEFAULT");
@@ -361,14 +361,14 @@ SwitchToIfGoto::SwitchToIfGoto()
     l1_r_goto->destination = l1_r_labelid;
     l1_r_label->identifier = l1_r_labelid;
     
-    auto r_embedded_1 = MakePatternNode<EmbeddedCompareReplaceAgent, StmtDecl>( body, l1_s_body, l1_r_body );
+    auto r_embedded_1 = MakePatternNode<EmbeddedCompareReplaceAgent, Statement>( body, l1_s_body, l1_r_body );
 
     // embedded pattern for normal case statements (single value)
     auto l2_s_body = MakePatternNode<Compound>();
     auto l2_r_body = MakePatternNode<Compound>();
     auto l2_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l2_pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto l2_post = MakePatternNode<StarAgent, StmtDecl>();
+    auto l2_pre = MakePatternNode<StarAgent, Statement>();
+    auto l2_post = MakePatternNode<StarAgent, Statement>();
     auto l2_s_case = MakePatternNode< Case >();
     auto l2_r_label = MakePatternNode< LabelDeclaration >();
     auto l2_r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("CASE");
@@ -391,14 +391,14 @@ SwitchToIfGoto::SwitchToIfGoto()
     l2_r_goto->destination = l2_r_labelid;
     l2_r_label->identifier = l2_r_labelid;
     
-    auto r_embedded_2 = MakePatternNode<EmbeddedCompareReplaceAgent, StmtDecl>( r_embedded_1, l2_s_body, l2_r_body );
+    auto r_embedded_2 = MakePatternNode<EmbeddedCompareReplaceAgent, Statement>( r_embedded_1, l2_s_body, l2_r_body );
     
     // EmbeddedSearchReplace for range cases (GCC extension) eg case 5..7:    
     auto l3_s_body = MakePatternNode<Compound>();
     auto l3_r_body = MakePatternNode<Compound>();
     auto l3_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l3_pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto l3_post = MakePatternNode<StarAgent, StmtDecl>();
+    auto l3_pre = MakePatternNode<StarAgent, Statement>();
+    auto l3_post = MakePatternNode<StarAgent, Statement>();
     auto l3_s_case = MakePatternNode< RangeCase >();
     auto l3_r_label = MakePatternNode< LabelDeclaration >();
     auto l3_r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("CASE");
@@ -427,7 +427,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     l3_r_goto->destination = l3_r_labelid;
     l3_r_label->identifier = l3_r_labelid;
     
-    auto r_embedded_3 = MakePatternNode<EmbeddedCompareReplaceAgent, StmtDecl>( r_embedded_2, l3_s_body, l3_r_body );
+    auto r_embedded_3 = MakePatternNode<EmbeddedCompareReplaceAgent, Statement>( r_embedded_2, l3_s_body, l3_r_body );
 
     // Finish up top-level
     s_cond->pattern = cond_type;
@@ -455,7 +455,7 @@ DoToIfGoto::DoToIfGoto()
     
     auto s_do = MakePatternNode<Do>();
     auto r_if = MakePatternNode<If>();
-    auto body = MakePatternNode<StmtDecl>();
+    auto body = MakePatternNode<Statement>();
     auto cond = MakePatternNode<Expression>();
     auto r_goto = MakePatternNode<Goto>();
     auto l_r_goto = MakePatternNode<Goto>();
@@ -465,10 +465,10 @@ DoToIfGoto::DoToIfGoto()
     auto l_r_cont_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("CONTINUE");
     auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_cont_label = MakePatternNode<LabelDeclaration>();
-    auto l_stuff = MakePatternNode<StuffAgent, StmtDecl>();
-    auto l_overlay = MakePatternNode<DeltaAgent, StmtDecl>();
+    auto l_stuff = MakePatternNode<StuffAgent, Statement>();
+    auto l_overlay = MakePatternNode<DeltaAgent, Statement>();
     auto l_s_cont = MakePatternNode<Continue>();
-    auto l_s_not = MakePatternNode<NegationAgent, StmtDecl>();
+    auto l_s_not = MakePatternNode<NegationAgent, Statement>();
     auto l_s_loop = MakePatternNode< Loop >();
 
     l_s_not->negand = l_s_loop;
@@ -477,7 +477,7 @@ DoToIfGoto::DoToIfGoto()
     l_overlay->overlay = l_r_goto;
     l_r_goto->destination = l_r_cont_labelid;
     
-    auto r_embedded = MakePatternNode<EmbeddedCompareReplaceAgent, StmtDecl>( body, l_stuff, l_stuff );
+    auto r_embedded = MakePatternNode<EmbeddedCompareReplaceAgent, Statement>( body, l_stuff, l_stuff );
     l_stuff->terminus = l_overlay;
     
     s_do->condition = cond;
@@ -504,9 +504,9 @@ BreakToGoto::BreakToGoto()
     //    blocks, so we won't find a Break that is not for us.
     auto breakable = MakePatternNode<Breakable>();
     auto sx_breakable = MakePatternNode<Breakable>();
-    auto stuff = MakePatternNode<StuffAgent, StmtDecl>();
-    auto overlay = MakePatternNode<DeltaAgent, StmtDecl>();
-    auto sx_not = MakePatternNode<NegationAgent, StmtDecl>();
+    auto stuff = MakePatternNode<StuffAgent, Statement>();
+    auto overlay = MakePatternNode<DeltaAgent, Statement>();
+    auto sx_not = MakePatternNode<NegationAgent, Statement>();
     auto s_break = MakePatternNode<Break>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("BREAK");

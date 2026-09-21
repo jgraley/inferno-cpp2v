@@ -26,8 +26,8 @@ ExplicitiseReturn::ExplicitiseReturn()
     auto s_comp = MakePatternNode<Compound>();
     auto sx_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto sx_pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto sx_pre = MakePatternNode<StarAgent, Statement>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto sx_decls = MakePatternNode<StarAgent, Declaration>();
     auto delta = MakePatternNode<DeltaAgent, Compound>();
@@ -117,7 +117,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto s_body = MakePatternNode<Compound>();
     auto r_body = MakePatternNode<Compound>();
     auto lr_comp = MakePatternNode<Compound>();
-    auto statements = MakePatternNode<StarAgent, StmtDecl>();
+    auto statements = MakePatternNode<StarAgent, Statement>();
     auto locals = MakePatternNode<StarAgent, Declaration>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto module_id = MakePatternNode<TypeIdentifier>();
@@ -205,8 +205,8 @@ AddLinkAddress::AddLinkAddress()
     auto ls_comp = MakePatternNode<Compound>();
     auto lr_comp = MakePatternNode<Compound>();
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l_stmts = MakePatternNode<StarAgent, StmtDecl>();
-    auto msx_stmts = MakePatternNode<StarAgent, StmtDecl>();
+    auto l_stmts = MakePatternNode<StarAgent, Statement>();
+    auto msx_stmts = MakePatternNode<StarAgent, Statement>();
     auto msx_assign = MakePatternNode<Assign>();
     auto ms_call = MakePatternNode<Call>();
     auto ms_args = MakePatternNode<MapArgumentation>();
@@ -216,9 +216,9 @@ AddLinkAddress::AddLinkAddress()
     auto msx_comp = MakePatternNode<Compound>();
     auto mr_label = MakePatternNode<LabelDeclaration>();
     auto mr_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("LINK");
-    auto m_all = MakePatternNode<ConjunctionAgent, StmtDecl>();
-    auto ms_not = MakePatternNode<NegationAgent, StmtDecl>();
-    auto m_over = MakePatternNode<DeltaAgent, StmtDecl>();
+    auto m_all = MakePatternNode<ConjunctionAgent, Statement>();
+    auto ms_not = MakePatternNode<NegationAgent, Statement>();
+    auto m_over = MakePatternNode<DeltaAgent, Statement>();
     auto l_func_over = MakePatternNode<DeltaAgent, Function>();
     auto ls_func = MakePatternNode<Function>();
     auto lr_func = MakePatternNode<Function>();
@@ -229,11 +229,11 @@ AddLinkAddress::AddLinkAddress()
     auto llsx_comp = MakePatternNode<Compound>();
     auto llr_assign = MakePatternNode<Assign>();
     auto llsx_assign = MakePatternNode<Assign>();
-    auto ll_all = MakePatternNode<ConjunctionAgent, StmtDecl>();
-    auto lls_not = MakePatternNode<NegationAgent, StmtDecl>();
-    auto ll_over = MakePatternNode<DeltaAgent, StmtDecl>();
-    auto m_gg = MakePatternNode<GreenGrassAgent, StmtDecl>();
-    auto ll_gg = MakePatternNode<GreenGrassAgent, StmtDecl>();
+    auto ll_all = MakePatternNode<ConjunctionAgent, Statement>();
+    auto lls_not = MakePatternNode<NegationAgent, Statement>();
+    auto ll_over = MakePatternNode<DeltaAgent, Statement>();
+    auto m_gg = MakePatternNode<GreenGrassAgent, Statement>();
+    auto ll_gg = MakePatternNode<GreenGrassAgent, Statement>();
     auto mr_new_arg = MakePatternNode<IdValuePair>();
     auto func_access = MakePatternNode<AccessSpec>();
 
@@ -312,7 +312,7 @@ ParamsViaTemps::ParamsViaTemps()
     auto s_body = MakePatternNode<Compound>();
     auto r_body = MakePatternNode<Compound>();
     auto mr_comp = MakePatternNode<Compound>();
-    auto statements = MakePatternNode<StarAgent, StmtDecl>();
+    auto statements = MakePatternNode<StarAgent, Statement>();
     auto locals = MakePatternNode<StarAgent, Declaration>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto param_id = MakePatternNode<InstanceIdentifier>();
@@ -412,10 +412,10 @@ GenerateStacks::GenerateStacks()
     auto r_ret_comp = MakePatternNode<Compound>();
     auto temp = MakePatternNode<Compound>();
     auto top_decls = MakePatternNode<StarAgent, Declaration>();
-    auto top_pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto top_pre = MakePatternNode<StarAgent, Statement>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto cs_stuff = MakePatternNode<StuffAgent, Compound>();
-    auto overlay = MakePatternNode<DeltaAgent, StmtDecl>();
+    auto overlay = MakePatternNode<DeltaAgent, Statement>();
     auto delta = MakePatternNode<DeltaAgent, Declaration>();
     auto cs_instance = MakePatternNode<Local>();
     auto s_instance = MakePatternNode<Local>();
@@ -431,7 +431,7 @@ GenerateStacks::GenerateStacks()
     auto s_and3 = MakePatternNode<ConjunctionAgent, Node>();
     auto r_index_identifier = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_stack_index");
     auto r_identifier = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_stack");
-    auto s_gg = MakePatternNode<GreenGrassAgent, StmtDecl>();
+    auto s_gg = MakePatternNode<GreenGrassAgent, Statement>();
     auto r_index_init = MakePatternNode<Assign>();
     auto members = MakePatternNode<StarAgent, Declaration>();
     auto s_module = MakePatternNode<Record>();
@@ -446,14 +446,14 @@ GenerateStacks::GenerateStacks()
     auto r_vcomp = MakePatternNode<Compound>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
     auto l_members = MakePatternNode<StarAgent, Declaration>();
-    auto vstmts = MakePatternNode<StarAgent, StmtDecl>();
+    auto vstmts = MakePatternNode<StarAgent, Statement>();
     auto fi_id = MakePatternNode<InstanceIdentifier>();
 
     // Sub-embedded pattern replace with a subscript into the array
     l_r_sub->destination = r_identifier;
     l_r_sub->index = r_index_identifier;
     
-    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, StmtDecl>( r_vcomp, s_identifier, l_r_sub );
+    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Statement>( r_vcomp, s_identifier, l_r_sub );
 
     // EmbeddedSearchReplace search to find automatic variables within the function
     stuff->terminus = overlay;
@@ -495,7 +495,7 @@ GenerateStacks::GenerateStacks()
     
     auto r_mid = MakePatternNode<EmbeddedCompareReplaceAgent, Scope>( r_module, ls_module, lr_module ); // stuff, stuff
 
-    auto r_embedded_3 = MakePatternNode<EmbeddedSearchReplaceAgent, StmtDecl>( r_top_comp, s_gg, r_ret_comp );
+    auto r_embedded_3 = MakePatternNode<EmbeddedSearchReplaceAgent, Statement>( r_top_comp, s_gg, r_ret_comp );
     temp->statements = (r_embedded_3);
     
     // Master search - look for functions satisfying the construct limitation and get
@@ -554,7 +554,7 @@ MergeFunctions::MergeFunctions()
     auto func_type = MakePatternNode<Callable>();
     auto members = MakePatternNode<StarAgent, Declaration>();
     auto thread_decls = MakePatternNode<StarAgent, Declaration>();
-    auto thread_stmts = MakePatternNode<StarAgent, StmtDecl>();
+    auto thread_stmts = MakePatternNode<StarAgent, Statement>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto thread_over = MakePatternNode<DeltaAgent, Compound>();
     auto s_thread_comp = MakePatternNode<Compound>();

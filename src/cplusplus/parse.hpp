@@ -112,8 +112,8 @@ private:
         // The statement after a label is parsed as a sub-construct under the label which
         // is not how the inferno tree does it. Remember that relationship here and
         // generate the extra nodes when rendering a compound statement.
-        map<TreePtr<LabelDeclaration>, TreePtr<StmtDecl> > backing_labels;
-        map<TreePtr<SwitchTarget>, TreePtr<StmtDecl> > backing_targets;
+        map<TreePtr<LabelDeclaration>, TreePtr<Statement> > backing_labels;
+        map<TreePtr<SwitchTarget>, TreePtr<Statement> > backing_targets;
         map<TreePtr<Declaration>, TreePtr<Declaration> >
                 backing_paired_decl;
 
@@ -135,7 +135,7 @@ private:
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Base, DeclTy *> hold_base;
         RCHold<Expression, ExprTy *> hold_expr;
-        RCHold<StmtDecl, StmtTy *> hold_stmt;
+        RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
         RCHold<LabelIdentifier, void *> hold_label_identifier;
         RCHold<Node, CXXScopeTy *> hold_scope;
@@ -146,7 +146,7 @@ private:
         // into the tree by the time we need them, thanks to the
         // way clang works. Decls go in here immediately.
 
-        OwningStmtResult ToStmt(TreePtr<StmtDecl> s)
+        OwningStmtResult ToStmt(TreePtr<Statement> s)
         {
             return OwningStmtResult(*this, hold_stmt.ToRaw(s));
         }
@@ -156,7 +156,7 @@ private:
             return OwningExprResult(*this, hold_expr.ToRaw(e));
         }
 
-        TreePtr<StmtDecl> FromClang(const StmtArg &s)
+        TreePtr<Statement> FromClang(const StmtArg &s)
         {
             return hold_stmt.FromRaw(s.get());
         }
@@ -166,7 +166,7 @@ private:
             return hold_expr.FromRaw(e.get());
         }
 
-        struct DeclarationAsStatement: StmtDecl
+        struct DeclarationAsStatement: Statement
         {
             NODE_FUNCTIONS
             TreePtr<Declaration> d;
@@ -1171,7 +1171,7 @@ private:
             s->members.insert( d );
     }
     
-    void AddStatementToCompound( TreePtr<Compound> s, TreePtr<StmtDecl> st )
+    void AddStatementToCompound( TreePtr<Compound> s, TreePtr<Statement> st )
     {
         /* if( TreePtr<ParseTwin> pt = DynamicTreePtrCast<ParseTwin>( st ) )
          {
@@ -1229,9 +1229,9 @@ private:
     {
         TreePtr<Declaration> d( hold_decl.FromRaw(Decl) );
         // Basically we are being asked to turn a Declaration, which has already been parsed,
-        // into a StmtDecl. Instances are already both Declarations and StmtDecls, so that's
+        // into a Statement. Instances are already both Declarations and StmtDecls, so that's
         // OK. In other cases, we have to package up the Declaration in a special kind of
-        // StmtDecl node and pass it through that way. We will unpack later.
+        // Statement node and pass it through that way. We will unpack later.
         if( TreePtr<Instance> i = DynamicTreePtrCast<Instance>(d) )
         {
             return ToStmt( i );
@@ -1356,7 +1356,7 @@ private:
     virtual StmtResult ActOnFinishSwitchStmt(clang::SourceLocation,
             StmtTy *rsw, ExprTy *Body)
     {
-        TreePtr<StmtDecl> s( hold_stmt.FromRaw( rsw ) );
+        TreePtr<Statement> s( hold_stmt.FromRaw( rsw ) );
         TreePtr<Switch> sw( DynamicTreePtrCast<Switch>(s) );
         ASSERT(sw)("expecting a switch statement");
 

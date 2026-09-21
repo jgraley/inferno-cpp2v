@@ -75,7 +75,7 @@ struct SCDynamicFunction : virtual SCFunction
     in a few fundamentally different ways and to be explicit we use specialised
     nodes for each. All waits must be done in local execution contexts
     like threads. Waits allow the SystemC kernel to run other processes. */
-struct Wait : CPPTree::StmtDecl,
+struct Wait : CPPTree::Statement,
               virtual SCFunction, 
               CPPTree::Uncombable
 {
@@ -121,7 +121,7 @@ struct WaitDelta : Wait
     nodes for each. All next_triggers must be done in combable contexts like SC_METHOD.
     Next_triggers do NOT allow the SystemC kernel to run other processes until
     the combable block completes. */
-struct NextTrigger : CPPTree::StmtDecl,
+struct NextTrigger : CPPTree::Statement,
                      virtual SCFunction
 {
     NODE_FUNCTIONS
@@ -165,7 +165,7 @@ struct NextTriggerDelta : NextTrigger
 /** Triggers the event instance given in the expression. It must be an lvalue of
     type Event I would think. This is an intermediate because there are a few
     distinct flavours. */
-struct Notify : CPPTree::StmtDecl,
+struct Notify : CPPTree::Statement,
                 virtual SCFunction
 {
     NODE_FUNCTIONS
@@ -273,7 +273,7 @@ struct DeltaCount : CPPTree::Operator,
 /** These are used to stop the program and produce an exit code because 
     SystemC does not allow control of the return value from its main 
     function. */
-struct TerminationFunction : CPPTree::StmtDecl,
+struct TerminationFunction : CPPTree::Statement,
                              virtual SCFunction
 {
     NODE_FUNCTIONS
