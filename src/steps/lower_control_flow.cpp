@@ -346,8 +346,8 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l1_s_body = MakePatternNode<Compound>();
     auto l1_r_body = MakePatternNode<Compound>();
     auto l1_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l1_pre = MakePatternNode<StarAgent, Statement>();
-    auto l1_post = MakePatternNode<StarAgent, Statement>();
+    auto l1_pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto l1_post = MakePatternNode<StarAgent, StmtDecl>();
     auto l1_s_default = MakePatternNode< Default >();
     auto l1_r_label = MakePatternNode< LabelDeclaration >();
     auto l1_r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("DEFAULT");
@@ -367,8 +367,8 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l2_s_body = MakePatternNode<Compound>();
     auto l2_r_body = MakePatternNode<Compound>();
     auto l2_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l2_pre = MakePatternNode<StarAgent, Statement>();
-    auto l2_post = MakePatternNode<StarAgent, Statement>();
+    auto l2_pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto l2_post = MakePatternNode<StarAgent, StmtDecl>();
     auto l2_s_case = MakePatternNode< Case >();
     auto l2_r_label = MakePatternNode< LabelDeclaration >();
     auto l2_r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("CASE");
@@ -397,8 +397,8 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l3_s_body = MakePatternNode<Compound>();
     auto l3_r_body = MakePatternNode<Compound>();
     auto l3_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l3_pre = MakePatternNode<StarAgent, Statement>();
-    auto l3_post = MakePatternNode<StarAgent, Statement>();
+    auto l3_pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto l3_post = MakePatternNode<StarAgent, StmtDecl>();
     auto l3_s_case = MakePatternNode< RangeCase >();
     auto l3_r_label = MakePatternNode< LabelDeclaration >();
     auto l3_r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("CASE");

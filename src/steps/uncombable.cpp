@@ -14,7 +14,7 @@ using namespace CPPTree;
 using namespace Steps;
 using namespace VN;
  
-TreePtr<Node> Steps::MakeCheckUncombable( TreePtr<CPPTree::Statement> construct )
+TreePtr<Node> Steps::MakeCheckUncombable( TreePtr<CPPTree::StmtDecl> construct )
 {
     auto all = MakePatternNode<ConjunctionAgent, Node>();
     auto stuff = MakePatternNode<StuffAgent, Node>();

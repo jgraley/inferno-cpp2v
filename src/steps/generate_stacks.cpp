@@ -27,7 +27,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     auto sx_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto sx_pre = MakePatternNode<StarAgent, Statement>();
+    auto sx_pre = MakePatternNode<StarAgent, StmtDecl>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto sx_decls = MakePatternNode<StarAgent, Declaration>();
     auto delta = MakePatternNode<DeltaAgent, Compound>();
@@ -117,7 +117,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto s_body = MakePatternNode<Compound>();
     auto r_body = MakePatternNode<Compound>();
     auto lr_comp = MakePatternNode<Compound>();
-    auto statements = MakePatternNode<StarAgent, Statement>();
+    auto statements = MakePatternNode<StarAgent, StmtDecl>();
     auto locals = MakePatternNode<StarAgent, Declaration>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto module_id = MakePatternNode<TypeIdentifier>();
@@ -205,8 +205,8 @@ AddLinkAddress::AddLinkAddress()
     auto ls_comp = MakePatternNode<Compound>();
     auto lr_comp = MakePatternNode<Compound>();
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l_stmts = MakePatternNode<StarAgent, Statement>();
-    auto msx_stmts = MakePatternNode<StarAgent, Statement>();
+    auto l_stmts = MakePatternNode<StarAgent, StmtDecl>();
+    auto msx_stmts = MakePatternNode<StarAgent, StmtDecl>();
     auto msx_assign = MakePatternNode<Assign>();
     auto ms_call = MakePatternNode<Call>();
     auto ms_args = MakePatternNode<MapArgumentation>();
@@ -312,7 +312,7 @@ ParamsViaTemps::ParamsViaTemps()
     auto s_body = MakePatternNode<Compound>();
     auto r_body = MakePatternNode<Compound>();
     auto mr_comp = MakePatternNode<Compound>();
-    auto statements = MakePatternNode<StarAgent, Statement>();
+    auto statements = MakePatternNode<StarAgent, StmtDecl>();
     auto locals = MakePatternNode<StarAgent, Declaration>();
     auto func_id = MakePatternNode<InstanceIdentifier>();
     auto param_id = MakePatternNode<InstanceIdentifier>();
@@ -412,7 +412,7 @@ GenerateStacks::GenerateStacks()
     auto r_ret_comp = MakePatternNode<Compound>();
     auto temp = MakePatternNode<Compound>();
     auto top_decls = MakePatternNode<StarAgent, Declaration>();
-    auto top_pre = MakePatternNode<StarAgent, Statement>();
+    auto top_pre = MakePatternNode<StarAgent, StmtDecl>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto cs_stuff = MakePatternNode<StuffAgent, Compound>();
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
@@ -446,7 +446,7 @@ GenerateStacks::GenerateStacks()
     auto r_vcomp = MakePatternNode<Compound>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
     auto l_members = MakePatternNode<StarAgent, Declaration>();
-    auto vstmts = MakePatternNode<StarAgent, Statement>();
+    auto vstmts = MakePatternNode<StarAgent, StmtDecl>();
     auto fi_id = MakePatternNode<InstanceIdentifier>();
 
     // Sub-embedded pattern replace with a subscript into the array
@@ -554,7 +554,7 @@ MergeFunctions::MergeFunctions()
     auto func_type = MakePatternNode<Callable>();
     auto members = MakePatternNode<StarAgent, Declaration>();
     auto thread_decls = MakePatternNode<StarAgent, Declaration>();
-    auto thread_stmts = MakePatternNode<StarAgent, Statement>();
+    auto thread_stmts = MakePatternNode<StarAgent, StmtDecl>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto thread_over = MakePatternNode<DeltaAgent, Compound>();
     auto s_thread_comp = MakePatternNode<Compound>();

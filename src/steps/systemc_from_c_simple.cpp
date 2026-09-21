@@ -123,7 +123,7 @@ MainToThread::MainToThread()
 	s_member->type = s_func;
 	s_member->initialiser = body;
 	body->members = ( MakePatternNode<StarAgent, Declaration>() );
-	body->statements = ( MakePatternNode<StarAgent, Statement>() );
+	body->statements = ( MakePatternNode<StarAgent, StmtDecl>() );
 	//s_func->members = ()        require no parameters
 	s_func->return_type = MakePatternNode<Integral>();
 	delta->overlay = r_member;

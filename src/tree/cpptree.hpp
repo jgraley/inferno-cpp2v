@@ -67,7 +67,7 @@ struct Uninitialised : Initialiser
 }; 
 
 
-struct StmtDecl: virtual Node 
+struct StmtDecl : virtual Node 
 {
 	NODE_FUNCTIONS
 };

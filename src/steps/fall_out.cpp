@@ -24,7 +24,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto thread = MakePatternNode<Thread>();
     auto func_decls = MakePatternNode<StarAgent, Declaration>();
     auto module_decls = MakePatternNode<StarAgent, Declaration>();
-    auto func_stmts = MakePatternNode<StarAgent, Statement>();
+    auto func_stmts = MakePatternNode<StarAgent, StmtDecl>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_module_enum = MakePatternNode<Enumeration>();
     auto r_enum_id = MakePatternNode<BuildSpecificTypeIdentifierAgent>("%sStates");
@@ -34,13 +34,13 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_enum_vals = MakePatternNode<StarAgent, Declaration>();
     auto l_decls = MakePatternNode<StarAgent, Declaration>();
     auto l_module_decls = MakePatternNode<StarAgent, Declaration>();
-    auto l_func_pre = MakePatternNode<StarAgent, Statement>();
-    auto l_func_post = MakePatternNode<StarAgent, Statement>();
-    auto l_pre = MakePatternNode<StarAgent, Statement>();
-    auto l_block = MakePatternNode<StarAgent, Statement>();
-    auto l_post = MakePatternNode<StarAgent, Statement>();
-    auto l_stmts = MakePatternNode<StarAgent, Statement>();
-    auto l_dead_gotos = MakePatternNode<StarAgent, Statement>();
+    auto l_func_pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto l_func_post = MakePatternNode<StarAgent, StmtDecl>();
+    auto l_pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto l_block = MakePatternNode<StarAgent, StmtDecl>();
+    auto l_post = MakePatternNode<StarAgent, StmtDecl>();
+    auto l_stmts = MakePatternNode<StarAgent, StmtDecl>();
+    auto l_dead_gotos = MakePatternNode<StarAgent, StmtDecl>();
     auto l_switch = MakePatternNode<Switch>();
     auto l_delta_enum = MakePatternNode<DeltaAgent, Enumeration>();
     auto ls_enum = MakePatternNode<Enumeration>();
@@ -113,7 +113,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     l_func->identifier = func_id;
     l_func->initialiser = l_comp;
     l_comp->members = (MakePatternNode<StarAgent, Declaration>(), l_lmap);
-    l_comp->statements = (MakePatternNode<StarAgent, Statement>(), l_stuff, MakePatternNode<StarAgent, Statement>());
+    l_comp->statements = (MakePatternNode<StarAgent, StmtDecl>(), l_stuff, MakePatternNode<StarAgent, StmtDecl>());
     ls_goto->destination = var_id;
     ls_label->identifier = ls_label_id;
     ls_enum->members = (l_enum_vals);
@@ -163,7 +163,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     l_delta_comp->overlay = r_comp;
     s_comp->members = (comp_membs);
     r_comp->members = (comp_membs, r_lmap);
-    r_comp->statements = s_comp->statements = (MakePatternNode<StarAgent, Statement>());
+    r_comp->statements = s_comp->statements = (MakePatternNode<StarAgent, StmtDecl>());
     s_module->members = (module_decls, func);
     r_module->members = (module_decls, func, r_module_enum);
     //r_module->bases = (bases);
@@ -321,7 +321,7 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     auto r_body_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto body = MakePatternNode<StarAgent, Statement>();
+    auto body = MakePatternNode<StarAgent, StmtDecl>();
     auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto gotooo = MakePatternNode<Goto>();
     auto sx_pre_goto = MakePatternNode<Goto>();
@@ -373,8 +373,8 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     auto r_body_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto body1 = MakePatternNode<StarAgent, Statement>();
-    auto body2 = MakePatternNode<StarAgent, Statement>();
+    auto body1 = MakePatternNode<StarAgent, StmtDecl>();
+    auto body2 = MakePatternNode<StarAgent, StmtDecl>();
     auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto gotooo = MakePatternNode<Goto>();
     auto sx_pre_goto = MakePatternNode<Goto>();
@@ -424,7 +424,7 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     auto r_body_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto body = MakePatternNode<StarAgent, Statement>();
+    auto body = MakePatternNode<StarAgent, StmtDecl>();
     auto goto1 = MakePatternNode<Goto>();
     auto sx_pre_goto = MakePatternNode<Goto>();
     auto sub = MakePatternNode<Subscript>();
@@ -505,8 +505,8 @@ ApplyTopPolicy::ApplyTopPolicy()
     auto r_comp = MakePatternNode<Compound>();
     auto r_body_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto body1 = MakePatternNode<StarAgent, Statement>();
-    auto body2 = MakePatternNode<StarAgent, Statement>();
+    auto body1 = MakePatternNode<StarAgent, StmtDecl>();
+    auto body2 = MakePatternNode<StarAgent, StmtDecl>();
     auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto label = MakePatternNode<LabelDeclaration>();
     auto sx_label = MakePatternNode<LabelDeclaration>();
@@ -575,7 +575,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     auto r_comp = MakePatternNode<Compound>();
     auto r_body_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto body = MakePatternNode<StarAgent, Statement>();
+    auto body = MakePatternNode<StarAgent, StmtDecl>();
     auto s_label = MakePatternNode<LabelDeclaration>();
     auto s_ifgoto = MakePatternNode<If>();
     auto s_goto = MakePatternNode<Goto>();
@@ -624,8 +624,8 @@ InsertInferredYield::InsertInferredYield()
     auto r_comp = MakePatternNode<Compound>();
     auto func_decls = MakePatternNode<StarAgent, Declaration>();
     auto loop_decls = MakePatternNode<StarAgent, Declaration>();
-    auto stmts = MakePatternNode<StarAgent, Statement>();
-    auto sx_pre = MakePatternNode<StarAgent, Statement>();
+    auto stmts = MakePatternNode<StarAgent, StmtDecl>();
+    auto sx_pre = MakePatternNode<StarAgent, StmtDecl>();
     auto delta = MakePatternNode<DeltaAgent, Statement>();
     auto flag_id = MakePatternNode<InstanceIdentifier>();
     auto r_yield = MakePatternNode<WaitDelta>();
