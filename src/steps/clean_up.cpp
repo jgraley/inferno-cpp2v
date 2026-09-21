@@ -26,7 +26,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
      // all sequence points that need preserving co-incide with the semicolons
      // in a Compound or StatementExpression. It also requires that there be no loops.
      //
-     // Everything in a StatementExpression is a Statement, even the final one that
+     // Everything in a StatementExpression is a StmtDecl, even the final one that
      // gets evaluated (by order of gcc). If this is not an Expression then the type
      // of the StatementExpression is Void. However, this looks like an "evaluate and
      // discard" kind of statement, and we could act on it accordingly (in the case 
@@ -126,8 +126,8 @@ CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not all
     Configure( SEARCH_REPLACE, s_outer, r_comp );
 }
 
-// Act on all Compound with single Statement. Won't work because
-// Compound is an Initialiser while Statement is not.
+// Act on all Compound with single StmtDecl. Won't work because
+// Compound is an Initialiser while StmtDecl is not.
 //#define CLEANUP_COMP_SINGLE_STRONG
 
 CleanupCompoundSingle::CleanupCompoundSingle() 
@@ -135,7 +135,7 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     // Find a compound block with no decls and one statemewnt. Replace
     // with just the statement
     //
-    //{a} -> a TODO need to restrict parent node to Statement: For, If etc OK; Instance is NOT OK
+    //{a} -> a TODO need to restrict parent node to StmtDecl: For, If etc OK; Instance is NOT OK
     //         TODO OR maybe just fix renderer for that case
     // Note: this hits eg If(x){a;} which the "Multi" version misses 
     auto all = MakePatternNode<ConjunctionAgent, Node>();

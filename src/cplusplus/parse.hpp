@@ -112,9 +112,9 @@ private:
         // The statement after a label is parsed as a sub-construct under the label which
         // is not how the inferno tree does it. Remember that relationship here and
         // generate the extra nodes when rendering a compound statement.
-        map<TreePtr<LabelDeclaration> , TreePtr<Statement> > backing_labels;
-        map<TreePtr<SwitchTarget> , TreePtr<Statement> > backing_targets;
-        map<TreePtr<Declaration> , TreePtr<Declaration> >
+        map<TreePtr<LabelDeclaration>, TreePtr<StmtDecl> > backing_labels;
+        map<TreePtr<SwitchTarget>, TreePtr<StmtDecl> > backing_targets;
+        map<TreePtr<Declaration>, TreePtr<Declaration> >
                 backing_paired_decl;
 
         // Members of records go in an unordered collection, but when parsing
@@ -146,7 +146,7 @@ private:
         // into the tree by the time we need them, thanks to the
         // way clang works. Decls go in here immediately.
 
-        OwningStmtResult ToStmt(TreePtr<Statement> s)
+        OwningStmtResult ToStmt(TreePtr<StmtDecl> s)
         {
             return OwningStmtResult(*this, hold_stmt.ToRaw(s));
         }
@@ -156,7 +156,7 @@ private:
             return OwningExprResult(*this, hold_expr.ToRaw(e));
         }
 
-        TreePtr<Statement> FromClang(const StmtArg &s)
+        TreePtr<StmtDecl> FromClang(const StmtArg &s)
         {
             return hold_stmt.FromRaw(s.get());
         }
@@ -1171,7 +1171,7 @@ private:
             s->members.insert( d );
     }
     
-    void AddStatementToCompound( TreePtr<Compound> s, TreePtr<Statement> st )
+    void AddStatementToCompound( TreePtr<Compound> s, TreePtr<StmtDecl> st )
     {
         /* if( TreePtr<ParseTwin> pt = DynamicTreePtrCast<ParseTwin>( st ) )
          {
@@ -1356,7 +1356,7 @@ private:
     virtual StmtResult ActOnFinishSwitchStmt(clang::SourceLocation,
             StmtTy *rsw, ExprTy *Body)
     {
-        TreePtr<Statement> s( hold_stmt.FromRaw( rsw ) );
+        TreePtr<StmtDecl> s( hold_stmt.FromRaw( rsw ) );
         TreePtr<Switch> sw( DynamicTreePtrCast<Switch>(s) );
         ASSERT(sw)("expecting a switch statement");
 

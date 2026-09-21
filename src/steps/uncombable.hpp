@@ -19,7 +19,7 @@ namespace CPPTree
 namespace Steps {
 
 /// Make a sub-pattern for search that restricts for uncombability
-/** Insert in search pattern at the base of a construct, which can be a Statement
+/** Insert in search pattern at the base of a construct, which can be a StmtDecl
     or an Expression, and this step will restrict the search so that it only 
     matches if the construct contains something uncombable, somewhere underneath. */
 TreePtr<Node> MakeCheckUncombable( TreePtr<CPPTree::StmtDecl> construct );
