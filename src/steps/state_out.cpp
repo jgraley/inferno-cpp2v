@@ -31,8 +31,8 @@ GotoAfterWait::GotoAfterWait()
     auto sx_post = MakePatternNode<StarAgent, StmtDecl>();
     auto wait = MakePatternNode<Wait>();
     auto notmatch = MakePatternNode<NegationAgent, StmtDecl>();
-    auto all = MakePatternNode<ConjunctionAgent, Statement>();
-    auto anynode = MakePatternNode<ChildAgent, Statement>();
+    auto all = MakePatternNode<ConjunctionAgent, StmtDecl>();
+    auto anynode = MakePatternNode<ChildAgent, StmtDecl>();
     auto delta = MakePatternNode<DeltaAgent, StmtDecl>();
     auto all_over = MakePatternNode<DeltaAgent, StmtDecl>();
     auto sx_goto = MakePatternNode<Goto>();
@@ -104,7 +104,7 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     auto sx_post = MakePatternNode<StarAgent, StmtDecl>();
     auto label = MakePatternNode< LabelDeclaration >();
     auto label_id = MakePatternNode< BuildSpecificLabelIdentifierAgent >("PROCEED");
-    auto s_all = MakePatternNode<ConjunctionAgent, Statement>();
+    auto s_all = MakePatternNode<ConjunctionAgent, StmtDecl>();
     auto sx_not = MakePatternNode<NegationAgent, StmtDecl>();
     
     s_all->conjuncts = (s_comp, sx_not);
@@ -194,7 +194,7 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
 }
 
 
-static TreePtr<Statement> MakeResetAssignmentPattern()
+static TreePtr<StmtDecl> MakeResetAssignmentPattern()
 {
     auto ass = MakePatternNode<Assign>();
     auto decl = MakePatternNode<TransformOfAgent, InstanceIdentifier>( &DeclarationOf::instance );
@@ -276,7 +276,7 @@ AddStateLabelVar::AddStateLabelVar()
     lr_assign->operands = (state_var_id, lsx_not);
     lr_goto->destination = state_var_id;
             
-    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Statement>( r_comp, ls_goto, lr_compound );
+    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, StmtDecl>( r_comp, ls_goto, lr_compound );
      
     s_comp->members = (decls);
     s_comp->statements = (pre, sx_goto, post); 
@@ -382,7 +382,7 @@ SwitchCleanUp::SwitchCleanUp()
     auto cond = MakePatternNode<Expression>();
     auto sx_not_tail = MakePatternNode<NegationAgent, StmtDecl>();
     auto sx_not_main = MakePatternNode<NegationAgent, StmtDecl>();
-    auto sx_any_tail = MakePatternNode<DisjunctionAgent, Statement>();
+    auto sx_any_tail = MakePatternNode<DisjunctionAgent, StmtDecl>();
 
     s_switch->condition = cond;
     s_switch->body = s_body;
@@ -634,7 +634,7 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     auto r_equal = MakePatternNode<Equal>();
     auto func_over = MakePatternNode<DeltaAgent, Compound>();
     auto delta = MakePatternNode<DeltaAgent, Compound>();
-    auto first_init = MakePatternNode<Statement>();
+    auto first_init = MakePatternNode<StmtDecl>();
                     
     fn->permission = MakePatternNode<NonConst>();    
     fn->dispatch = MakePatternNode<NonVirtual>();
@@ -724,8 +724,8 @@ LoopRotation::LoopRotation()
     auto loop_bottom_stuff_noyield = MakePatternNode<StuffAgent, StmtDecl>();
     auto yield_stuff = MakePatternNode<StuffAgent, StmtDecl>();
     auto outer_bottom_stuff_noyield = MakePatternNode<StuffAgent, StmtDecl>();
-    auto loop_bottom_matchall = MakePatternNode<ConjunctionAgent, Statement>();
-    auto outer_bottom_matchall = MakePatternNode<ConjunctionAgent, Statement>();
+    auto loop_bottom_matchall = MakePatternNode<ConjunctionAgent, StmtDecl>();
+    auto outer_bottom_matchall = MakePatternNode<ConjunctionAgent, StmtDecl>();
     auto loop_bottom_notmatch = MakePatternNode<NegationAgent, StmtDecl>();
     auto outer_bottom_notmatch = MakePatternNode<NegationAgent, StmtDecl>();
     auto s_notmatch = MakePatternNode<NegationAgent, Compound>();
