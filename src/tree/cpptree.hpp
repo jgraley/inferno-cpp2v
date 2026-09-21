@@ -830,7 +830,6 @@ struct SpecificLabelIdentifier : LabelIdentifier,
  It serves to declare the label; the identifier should be
  used for references. */
 struct LabelDeclaration : Declaration, //TODO commonize with Case and Default
-                          Statement,
                           Uncombable
 {
     NODE_FUNCTIONS_FINAL
@@ -1496,7 +1495,7 @@ struct AlignOf : FuncOnType
 /// A sequence of statements in a scope that shall execute in sequence
 /** Note that local declarations
  can go in the members of the Scope or in the statements (since Declaration
- derives from Statement). There is a sequence point between each statement. */
+ derives from StmtDecl). There is a sequence point between each statement. */
 struct SequentialScope : DeclScope,
                          virtual StmtDecl
 {
