@@ -115,7 +115,7 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
     {
         if( ce->statements.empty() ) // TODO trap operator -> as a dep leak
             return kit.utils->MakeAugTreeNode<Void>(); 
-        AugTreePtr<Statement> last = GET_CHILD_BACK(ce, statements);
+        AugTreePtr<StmtDecl> last = GET_CHILD_BACK(ce, statements);
         if( auto e = AugTreePtr<Expression>::DynamicCast(last) )
             return Get(kit, e);
         else

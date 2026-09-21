@@ -42,7 +42,7 @@ TreePtr<Scope> GetScope( TreePtr<Node> context, TreePtr<Identifier> id )
     for( const TreePtrInterface &n : walkc )
     {
         if( auto c = DynamicTreePtrCast<Compound>((TreePtr<Node>)n) )
-            for( TreePtr<Statement> s : c->statements )
+            for( TreePtr<StmtDecl> s : c->statements )
             {
                 if( auto d = DynamicTreePtrCast<Instance>(s) )
                     if( id == GetIdentifierOfDeclaration( d ).GetTreePtr() )

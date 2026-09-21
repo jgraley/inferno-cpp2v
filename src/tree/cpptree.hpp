@@ -1576,8 +1576,8 @@ struct If : Statement
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< condition to test
-    TreePtr<Statement> body;       ///< executes when true
-    TreePtr<Statement> body_else;  ///< executes when false, can be Nop if no else clause
+    TreePtr<StmtDecl> body;       ///< executes when true
+    TreePtr<StmtDecl> body_else;  ///< executes when false, can be Nop if no else clause
 
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
@@ -1597,7 +1597,7 @@ struct If : Statement
 struct Breakable : Statement 
 {
     NODE_FUNCTIONS
-    TreePtr<Statement> body; ///< a break in here jumps to the end of here
+    TreePtr<StmtDecl> body; ///< a break in here jumps to the end of here
 
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
@@ -1645,7 +1645,7 @@ struct Do : Loop, Uncombable // a do..while() construct
 struct For : Loop
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<Statement>  initialisation; // Initialiser; use Nop if absent
+    TreePtr<StmtDecl>   initialisation; // Initialiser; use Nop if absent
     TreePtr<Expression> condition;      // Condition; use True if absent
     TreePtr<Expression> increment;      // Increment; use Nop if absent
     // Note: K&R has all three as expressions but init needs to be a statement
