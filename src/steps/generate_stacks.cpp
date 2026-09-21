@@ -446,7 +446,8 @@ GenerateStacks::GenerateStacks()
     auto r_vcomp = MakePatternNode<Compound>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
     auto l_members = MakePatternNode<StarAgent, Declaration>();
-    auto vstmts = MakePatternNode<StarAgent, Statement>();
+    auto vstmts_pre = MakePatternNode<StarAgent, Statement>();
+    auto vstmts_post = MakePatternNode<StarAgent, Statement>();
     auto fi_id = MakePatternNode<InstanceIdentifier>();
 
     // Sub-embedded pattern replace with a subscript into the array
@@ -458,8 +459,8 @@ GenerateStacks::GenerateStacks()
     // EmbeddedSearchReplace search to find automatic variables within the function
     stuff->terminus = overlay;
     overlay->through = s_vcomp;
-    s_vcomp->members = (vdecls, s_instance);
-    s_vcomp->statements = (vstmts);
+    s_vcomp->members = (vdecls);
+    s_vcomp->statements = (vstmts_pre, s_instance, vstmts_post);
     s_instance->identifier = s_identifier;
     s_instance->initialiser = MakePatternNode<Uninitialised>(); 
     s_instance->type = MakePatternNode<Type>();
@@ -469,7 +470,7 @@ GenerateStacks::GenerateStacks()
     r_instance->initialiser = MakePatternNode<Uninitialised>();
     overlay->overlay = r_embedded;
     r_vcomp->members = (vdecls);
-    r_vcomp->statements = (vstmts);
+    r_vcomp->statements = (vstmts_pre, vstmts_post);
     r_identifier->sources = (s_identifier);
     r_instance->identifier = r_identifier;
     r_instance->type = r_array;

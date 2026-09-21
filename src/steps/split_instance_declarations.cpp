@@ -45,14 +45,17 @@ MoveInstanceDeclarations::MoveInstanceDeclarations()
     auto sc = MakePatternNode<Compound>();
     auto var = MakePatternNode<Local>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto decls2 = MakePatternNode<StarAgent, Declaration>();
     sc->members = ( decls );
     auto pre = MakePatternNode<StarAgent, Statement>();
+    auto non_decl = MakePatternNode<NegationAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
-    sc->statements = ( pre, var, post );
+    sc->statements = ( decls2, non_decl, pre, var, post );
 
     auto rc = MakePatternNode<Compound>();
-    rc->members = ( var, decls ); // Instance now in unordered decls part
-    rc->statements = ( pre, post );
+    rc->members = ( decls ); // Instance now in unordered decls part
+    rc->statements = ( decls2, var, non_decl, pre, post );
+    non_decl->negand = MakePatternNode<Declaration>();
 
     Configure( SEARCH_REPLACE,sc, rc);
 }

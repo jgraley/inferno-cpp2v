@@ -505,13 +505,13 @@ ApplyTopPolicy::ApplyTopPolicy()
     auto r_comp = MakePatternNode<Compound>();
     auto r_body_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto body1 = MakePatternNode<StarAgent, Statement>();
+    auto decls2 = MakePatternNode<StarAgent, Declaration>();
+    auto stmts1 = MakePatternNode<StarAgent, Statement>();
     auto body2 = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
     auto label = MakePatternNode<LabelDeclaration>();
     auto sx_label = MakePatternNode<LabelDeclaration>();
     auto sx_label2 = MakePatternNode<LabelDeclaration>();
-    auto sx_stmt = MakePatternNode<NegationAgent, Statement>();
     auto r_if = MakePatternNode<If>();
     auto r_equal = MakePatternNode<Equal>();
     auto r_delta_count = MakePatternNode<DeltaCount>();
@@ -519,18 +519,21 @@ ApplyTopPolicy::ApplyTopPolicy()
     auto wait = MakePatternNode<Wait>();
     auto s_stuff = MakePatternNode<StuffAgent, Compound>();
     auto gotoo = MakePatternNode<Goto>();
-    auto sx_body1 = MakePatternNode<NegationAgent, Statement>();
+    auto sx_stmts1 = MakePatternNode<NegationAgent, Statement>();
+    auto sx_any = MakePatternNode<DisjunctionAgent, Statement>();
     auto sx_body2 = MakePatternNode<NegationAgent, Statement>();
     auto sx_uncombable1 = MakePatternNode<Uncombable>();
     auto sx_uncombable2 = MakePatternNode<Uncombable>();
+    auto sx_decl1 = MakePatternNode<Declaration>();
        
     s_all->conjuncts = (s_comp, s_stuff);
     s_comp->members = r_comp->members = (decls);
-    s_comp->statements = (body1, wait, body2, label, post);
-    r_comp->statements = (label, r_if, post);
+    s_comp->statements = (decls2, stmts1, wait, body2, label, post);
+    r_comp->statements = (decls2, label, r_if, post);
     s_stuff->terminus = gotoo;
-    body1->restriction = sx_body1;
-    sx_body1->negand = sx_uncombable1;
+    stmts1->restriction = sx_stmts1;
+    sx_stmts1->negand = sx_any;
+    sx_any->disjuncts = (sx_uncombable1, sx_decl1);
     body2->restriction = sx_body2;
     sx_body2->negand = sx_uncombable2;
     
@@ -538,7 +541,7 @@ ApplyTopPolicy::ApplyTopPolicy()
     r_equal->operands = (r_delta_count, r_zero);
     r_if->body = r_body_comp;
     //r_body_comp->members = ();
-    r_body_comp->statements = (body1, wait, body2, gotoo);
+    r_body_comp->statements = (stmts1, wait, body2, gotoo);
     r_if->body_else = MakePatternNode<Nop>();
     
     Configure( SEARCH_REPLACE, s_all, r_comp );
