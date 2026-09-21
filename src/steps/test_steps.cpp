@@ -10,12 +10,12 @@ using namespace Steps;
 EmbeddedSCRTest::EmbeddedSCRTest()
 {
     auto s_for = MakePatternNode<For>();
-    auto s_body = MakePatternNode<Statement>();
+    auto s_body = MakePatternNode<StmtDecl>();
 
     s_for->body = s_body;
 
     auto r_comp = MakePatternNode<Compound>();
-    auto r_body = MakePatternNode<Statement>();
+    auto r_body = MakePatternNode<StmtDecl>();
     auto ss_cont = MakePatternNode<Continue>();
     auto sr_break = MakePatternNode<Break>();
     auto r_embedded = MakePatternNode< EmbeddedCompareReplaceAgent, Statement >( r_body, ss_cont, sr_break );

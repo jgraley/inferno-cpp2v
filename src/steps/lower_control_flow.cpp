@@ -55,7 +55,7 @@ MakeAllForUncombable::MakeAllForUncombable()
     auto init = MakePatternNode<Statement>();
     auto test = MakePatternNode<Expression>();
     auto inc = MakePatternNode<Expression>();
-    auto body = MakePatternNode<Statement>();
+    auto body = MakePatternNode<StmtDecl>();
     auto r_ufor = MakePatternNode<UncombableFor>();
     
     s_all->conjuncts = (s_not, s_for);
@@ -150,7 +150,7 @@ MakeAllBreakUncombable::MakeAllBreakUncombable()
     auto init = MakePatternNode<Statement>();
     auto test = MakePatternNode<Expression>();
     auto inc = MakePatternNode<Statement>();
-    auto body = MakePatternNode<Statement>();
+    auto body = MakePatternNode<StmtDecl>();
     auto r_ubreak = MakePatternNode<UncombableBreak>();
     
     s_not->negand = sx_ubreak;
@@ -205,7 +205,7 @@ ForToWhile::ForToWhile()
     // restriction, like in BreakToGoto.
     
     auto s_for = MakePatternNode<For>();
-    auto forbody = MakePatternNode<Statement>();
+    auto forbody = MakePatternNode<StmtDecl>();
     auto init = MakePatternNode<Statement>();
     auto cond = MakePatternNode<Expression>();
     auto inc = MakePatternNode<Expression>();
@@ -250,7 +250,7 @@ WhileToDo::WhileToDo()
     // Just need to insert an "if" statement for the case 
     // where there are 0 iterations.
     auto s_while = MakePatternNode<While>();
-    auto body = MakePatternNode<Statement>();
+    auto body = MakePatternNode<StmtDecl>();
     auto cond = MakePatternNode<Expression>();
     auto r_nop = MakePatternNode<Nop>();
     auto r_if = MakePatternNode<If>();
@@ -279,7 +279,7 @@ IfToIfGoto::IfToIfGoto()
     auto s_if = MakePatternNode<If>();
     auto l_r_if = MakePatternNode<If>();
     auto r_if = MakePatternNode<If>();
-    auto body = MakePatternNode<Statement>();
+    auto body = MakePatternNode<StmtDecl>();
     auto body_else = MakePatternNode<Statement>();
     auto cond = MakePatternNode<Expression>();
     auto l_r_not = MakePatternNode<NegationAgent, StmtDecl>();
@@ -336,7 +336,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     // because cases should not overlap. 
     auto s_switch = MakePatternNode<Switch>();
     auto r_comp = MakePatternNode<Compound>();
-    auto body = MakePatternNode<Statement>();
+    auto body = MakePatternNode<StmtDecl>();
     auto cond_type = MakePatternNode<Type>();
     auto r_decl = MakePatternNode<Local>();
     auto id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("switch_value");
@@ -455,7 +455,7 @@ DoToIfGoto::DoToIfGoto()
     
     auto s_do = MakePatternNode<Do>();
     auto r_if = MakePatternNode<If>();
-    auto body = MakePatternNode<Statement>();
+    auto body = MakePatternNode<StmtDecl>();
     auto cond = MakePatternNode<Expression>();
     auto r_goto = MakePatternNode<Goto>();
     auto l_r_goto = MakePatternNode<Goto>();

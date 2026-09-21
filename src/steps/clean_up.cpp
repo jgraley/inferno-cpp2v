@@ -491,7 +491,7 @@ CleanupNestedIf::CleanupNestedIf()
     auto s_outer_if = MakePatternNode<If>();
     auto s_inner_if = MakePatternNode<If>();
     auto r_if = MakePatternNode<If>();
-    auto body = MakePatternNode<Statement>();
+    auto body = MakePatternNode<StmtDecl>();
     auto s_inner_nop = MakePatternNode<Nop>();
     auto s_outer_nop = MakePatternNode<Nop>();
     auto r_nop = MakePatternNode<Nop>();
