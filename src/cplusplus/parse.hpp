@@ -135,7 +135,7 @@ private:
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Base, DeclTy *> hold_base;
         RCHold<Expression, ExprTy *> hold_expr;
-        RCHold<Statement, StmtTy *> hold_stmt;
+        RCHold<StmtDecl, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
         RCHold<LabelIdentifier, void *> hold_label_identifier;
         RCHold<Node, CXXScopeTy *> hold_scope;
@@ -166,7 +166,7 @@ private:
             return hold_expr.FromRaw(e.get());
         }
 
-        struct DeclarationAsStatement: Statement
+        struct DeclarationAsStatement: StmtDecl
         {
             NODE_FUNCTIONS
             TreePtr<Declaration> d;
@@ -1229,9 +1229,9 @@ private:
     {
         TreePtr<Declaration> d( hold_decl.FromRaw(Decl) );
         // Basically we are being asked to turn a Declaration, which has already been parsed,
-        // into a Statement. Instances are already both Declarations and Statements, so that's
+        // into a StmtDecl. Instances are already both Declarations and StmtDecls, so that's
         // OK. In other cases, we have to package up the Declaration in a special kind of
-        // Statement node and pass it through that way. We will unpack later.
+        // StmtDecl node and pass it through that way. We will unpack later.
         if( TreePtr<Instance> i = DynamicTreePtrCast<Instance>(d) )
         {
             return ToStmt( i );
