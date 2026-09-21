@@ -665,8 +665,7 @@ struct View : virtual Node
  The latter case is used where initialisaiton/construction demands ordering. It points
  to an InstanceIdentifier, and all usages of the instance actually point to the
  InstanceIdentifier. */
-struct Instance : Declaration,
-                  Statement
+struct Instance : Declaration
 {
     NODE_FUNCTIONS
  
@@ -1501,7 +1500,7 @@ struct SequentialScope : DeclScope,
 {
     NODE_FUNCTIONS
     Sequence<StmtDecl> statements; ///< Can contain local declarations and code
-    virtual string GetColour() const { return StmtDecl::GetColour(); } // Statement wins    
+    virtual string GetColour() const { return StmtDecl::GetColour(); } // StmtDecl wins    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
    	Token GetSignifierToken() const override;
