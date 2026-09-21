@@ -26,7 +26,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     auto s_comp = MakePatternNode<Compound>();
     auto sx_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto sx_decls = MakePatternNode<StarAgent, Declaration>();

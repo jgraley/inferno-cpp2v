@@ -64,8 +64,8 @@ GotoAfterWait::GotoAfterWait()
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto wait = MakePatternNode<Wait>();
     auto notmatch = MakePatternNode<NegationAgent, Statement>();
     auto sx_goto = MakePatternNode<Goto>();
@@ -98,9 +98,9 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     auto r_goto = MakePatternNode< Goto >();
     auto sx_goto = MakePatternNode< Goto >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto sx_post = MakePatternNode<StarAgent, Statement>();
     auto label = MakePatternNode< LabelDeclaration >();
     auto label_id = MakePatternNode< BuildSpecificLabelIdentifierAgent >("PROCEED");
@@ -136,8 +136,8 @@ CompactGotos::CompactGotos()
     auto s_else_goto = MakePatternNode< Goto >();
     auto r_goto = MakePatternNode< Goto >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto multiplexer = MakePatternNode< ConditionalOperator >();
     
     s_then_goto->destination = MakePatternNode<Expression>();    
@@ -169,8 +169,8 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
     auto r_goto = MakePatternNode< Goto >();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto sx_decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
     auto sx_post = MakePatternNode<StarAgent, Statement>();
     auto label = MakePatternNode< LabelDeclaration >();
@@ -215,9 +215,9 @@ EnsureBootstrap::EnsureBootstrap()
     auto r_body = MakePatternNode<Compound>();
     auto sx_body = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("BOOTSTRAP");
@@ -258,8 +258,8 @@ AddStateLabelVar::AddStateLabelVar()
     auto r_comp = MakePatternNode<Compound>();
     auto lr_compound = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto ls_goto = MakePatternNode<Goto>();
     auto lr_goto = MakePatternNode<Goto>();
     auto sx_goto = MakePatternNode<Goto>();
@@ -308,8 +308,8 @@ EnsureSuperLoop::EnsureSuperLoop()
     auto s_body = MakePatternNode<Compound>();
     auto r_body = MakePatternNode<Compound>();
     auto r_loop_body = MakePatternNode<Compound>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto r_loop = MakePatternNode<Do>();
         
@@ -345,8 +345,8 @@ ShareGotos::ShareGotos()
     auto s_body = MakePatternNode<Compound>();
     auto r_body = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto first_goto = MakePatternNode< Goto >();
     auto r_goto = MakePatternNode< Goto >();
     auto r_label = MakePatternNode<LabelDeclaration>();
@@ -410,8 +410,8 @@ InferBreak::InferBreak()
     auto label = MakePatternNode<LabelDeclaration>();
     auto label_id = MakePatternNode<LabelIdentifier>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto breakable = MakePatternNode<Breakable>();
     auto lr_break = MakePatternNode<Break>();
     auto s_comp = MakePatternNode<Compound>();
@@ -438,10 +438,10 @@ FixFallthrough::FixFallthrough()
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
     auto cb1 = MakePatternNode<StarAgent, Statement>();
     auto cb2 = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto case1 = MakePatternNode<Case>();
     auto case2 = MakePatternNode<Case>();
     auto breakk = MakePatternNode<Break>();

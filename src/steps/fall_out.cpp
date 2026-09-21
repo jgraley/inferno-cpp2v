@@ -266,8 +266,8 @@ AddStateEnumVar::AddStateEnumVar()
     auto r_comp = MakePatternNode<Compound>();
     auto lr_compound = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto ls_goto = MakePatternNode<Goto>();
     auto lr_goto = MakePatternNode<Goto>();
     auto s_goto = MakePatternNode<Goto>();
@@ -320,9 +320,9 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     auto r_comp = MakePatternNode<Compound>();
     auto r_body_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
     auto body = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto gotooo = MakePatternNode<Goto>();
     auto sx_pre_goto = MakePatternNode<Goto>();
     auto sub = MakePatternNode<Subscript>();
@@ -372,10 +372,10 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     auto r_comp = MakePatternNode<Compound>();
     auto r_body_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
     auto body1 = MakePatternNode<StarAgent, Statement>();
     auto body2 = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto gotooo = MakePatternNode<Goto>();
     auto sx_pre_goto = MakePatternNode<Goto>();
     auto sub = MakePatternNode<Subscript>();
@@ -423,7 +423,7 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     auto r_comp = MakePatternNode<Compound>();
     auto r_body_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
     auto body = MakePatternNode<StarAgent, Statement>();
     auto goto1 = MakePatternNode<Goto>();
     auto sx_pre_goto = MakePatternNode<Goto>();
@@ -474,8 +474,8 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     auto r_comp = MakePatternNode<Compound>();
     auto r_body_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto item_name = MakePatternNode<LocalTree::StateLabel>();
     auto item_extra = MakePatternNode<LabelDeclaration>();
     auto sx_post_label = MakePatternNode<LabelDeclaration>();
@@ -507,7 +507,7 @@ ApplyTopPolicy::ApplyTopPolicy()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto body1 = MakePatternNode<StarAgent, Statement>();
     auto body2 = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto label = MakePatternNode<LabelDeclaration>();
     auto sx_label = MakePatternNode<LabelDeclaration>();
     auto sx_label2 = MakePatternNode<LabelDeclaration>();
@@ -550,8 +550,8 @@ EnsureResetYield::EnsureResetYield()
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto sx_not = MakePatternNode<NegationAgent, Statement>();
     auto sx_any = MakePatternNode<DisjunctionAgent, Statement>();
     auto gotoo = MakePatternNode<Goto>();

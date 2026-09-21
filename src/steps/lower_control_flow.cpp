@@ -22,8 +22,8 @@ DetectUncombableSwitch::DetectUncombableSwitch()
     auto expr = MakePatternNode<Expression>();
     auto comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto x_not = MakePatternNode<NegationAgent, Statement>();
     auto x_break = MakePatternNode<Break>();
     auto target = MakePatternNode<SwitchTarget>();
@@ -172,8 +172,8 @@ DetectCombableBreak::DetectCombableBreak()
     auto expr = MakePatternNode<Expression>();
     auto comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto delta = MakePatternNode<DeltaAgent, Break>();
     auto s_ubreak = MakePatternNode<UncombableBreak>();
     auto r_break = MakePatternNode<CombableBreak>();
