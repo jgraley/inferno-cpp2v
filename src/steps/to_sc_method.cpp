@@ -251,7 +251,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     auto ls_uninit = MakePatternNode<Uninitialised>();
     auto m_uninit = MakePatternNode<Uninitialised>();
     auto lr_assign = MakePatternNode<Assign>();
-    auto m_stuff = MakePatternNode<StuffAgent, Statement>();
+    auto m_stuff = MakePatternNode<StuffAgent, StmtDecl>();
     auto ms_affected = MakePatternNode<NegationAgent, Statement>();
     auto ms_if = MakePatternNode<If>();
     auto mr_if = MakePatternNode<If>();

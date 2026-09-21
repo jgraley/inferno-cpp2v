@@ -719,11 +719,11 @@ LoopRotation::LoopRotation()
     auto outer_top_stuff = MakePatternNode<StuffAgent, Expression>();
     auto loop_top_equal = MakePatternNode<Equal>();
     auto outer_top_equal = MakePatternNode<Equal>();
-    auto loop_bottom_stuff_enum = MakePatternNode<StuffAgent, Statement>();
-    auto outer_bottom_stuff_enum = MakePatternNode<StuffAgent, Statement>();
-    auto loop_bottom_stuff_noyield = MakePatternNode<StuffAgent, Statement>();
-    auto yield_stuff = MakePatternNode<StuffAgent, Statement>();
-    auto outer_bottom_stuff_noyield = MakePatternNode<StuffAgent, Statement>();
+    auto loop_bottom_stuff_enum = MakePatternNode<StuffAgent, StmtDecl>();
+    auto outer_bottom_stuff_enum = MakePatternNode<StuffAgent, StmtDecl>();
+    auto loop_bottom_stuff_noyield = MakePatternNode<StuffAgent, StmtDecl>();
+    auto yield_stuff = MakePatternNode<StuffAgent, StmtDecl>();
+    auto outer_bottom_stuff_noyield = MakePatternNode<StuffAgent, StmtDecl>();
     auto loop_bottom_matchall = MakePatternNode<ConjunctionAgent, Statement>();
     auto outer_bottom_matchall = MakePatternNode<ConjunctionAgent, Statement>();
     auto loop_bottom_notmatch = MakePatternNode<NegationAgent, Statement>();

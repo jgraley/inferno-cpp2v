@@ -81,7 +81,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto lr_make = MakePatternNode<ArrayInitialiser>();
     auto lls_make = MakePatternNode<ArrayInitialiser>();
     auto l_mover = MakePatternNode<DeltaAgent, Expression>();
-    auto l_stuff = MakePatternNode<StuffAgent, Statement>();
+    auto l_stuff = MakePatternNode<StuffAgent, StmtDecl>();
     auto l_existing = MakePatternNode<StarAgent, Expression>();
     auto l_mnot = MakePatternNode<NegationAgent, Expression>();
     auto ll_sub = MakePatternNode< Subscript >();
