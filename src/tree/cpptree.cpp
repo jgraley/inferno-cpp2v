@@ -2744,21 +2744,9 @@ Syntax::Production Compound::GetMyProductionTerminal() const
 }
 
 
-string Compound::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string Compound::GetKeyword( Policy ) const 
 {
-	INDENT("C");
-    string s = "{\n";
- 	policy.permit_static_keyword = true; // In a compound, static means global
-	policy.context = make_shared<any>(); // No access specs here
-
-    for( auto &m : members )    
-        s += renderer->DoRender( &m, Production::STMT_DECL, policy );    
-    if( policy.compound_uses_vn_separator )
-		s += "⚬";
-    for( auto &st : statements )    
-		s += renderer->DoRender( &st, Production::STMT_DECL_LOW, policy );    
-    s += "}\n";
-    return s;
+	return ""; // empty keyword means parser must match us using another rule aside from signifier
 }
 
 //////////////////////////// StatementExpression ///////////////////////////////
