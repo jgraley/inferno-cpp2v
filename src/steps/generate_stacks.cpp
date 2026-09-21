@@ -218,7 +218,7 @@ AddLinkAddress::AddLinkAddress()
     auto mr_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("LINK");
     auto m_all = MakePatternNode<ConjunctionAgent, Statement>();
     auto ms_not = MakePatternNode<NegationAgent, Statement>();
-    auto m_over = MakePatternNode<DeltaAgent, Statement>();
+    auto m_over = MakePatternNode<DeltaAgent, StmtDecl>();
     auto l_func_over = MakePatternNode<DeltaAgent, Function>();
     auto ls_func = MakePatternNode<Function>();
     auto lr_func = MakePatternNode<Function>();
@@ -231,7 +231,7 @@ AddLinkAddress::AddLinkAddress()
     auto llsx_assign = MakePatternNode<Assign>();
     auto ll_all = MakePatternNode<ConjunctionAgent, Statement>();
     auto lls_not = MakePatternNode<NegationAgent, Statement>();
-    auto ll_over = MakePatternNode<DeltaAgent, Statement>();
+    auto ll_over = MakePatternNode<DeltaAgent, StmtDecl>();
     auto m_gg = MakePatternNode<GreenGrassAgent, Statement>();
     auto ll_gg = MakePatternNode<GreenGrassAgent, Statement>();
     auto mr_new_arg = MakePatternNode<IdValuePair>();
@@ -415,7 +415,7 @@ GenerateStacks::GenerateStacks()
     auto top_pre = MakePatternNode<StarAgent, StmtDecl>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto cs_stuff = MakePatternNode<StuffAgent, Compound>();
-    auto overlay = MakePatternNode<DeltaAgent, Statement>();
+    auto overlay = MakePatternNode<DeltaAgent, StmtDecl>();
     auto delta = MakePatternNode<DeltaAgent, Declaration>();
     auto cs_instance = MakePatternNode<Local>();
     auto s_instance = MakePatternNode<Local>();

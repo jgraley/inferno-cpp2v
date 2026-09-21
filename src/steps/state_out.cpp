@@ -33,8 +33,8 @@ GotoAfterWait::GotoAfterWait()
     auto notmatch = MakePatternNode<NegationAgent, Statement>();
     auto all = MakePatternNode<ConjunctionAgent, Statement>();
     auto anynode = MakePatternNode<ChildAgent, Statement>();
-    auto delta = MakePatternNode<DeltaAgent, Statement>();
-    auto all_over = MakePatternNode<DeltaAgent, Statement>();
+    auto delta = MakePatternNode<DeltaAgent, StmtDecl>();
+    auto all_over = MakePatternNode<DeltaAgent, StmtDecl>();
     auto sx_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
     auto r_label = MakePatternNode<LabelDeclaration>();
@@ -569,7 +569,7 @@ AddInferredYield::AddInferredYield()
     auto func_pre = MakePatternNode<StarAgent, StmtDecl>();
     auto stmts = MakePatternNode<StarAgent, StmtDecl>();
     auto sx_pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto delta = MakePatternNode<DeltaAgent, Statement>();
+    auto delta = MakePatternNode<DeltaAgent, StmtDecl>();
     auto flag_decl = MakePatternNode<Local>();
     auto flag_id = MakePatternNode<InstanceIdentifier>();
     auto r_yield = MakePatternNode<WaitDelta>();

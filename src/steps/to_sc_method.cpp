@@ -255,7 +255,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     auto ms_affected = MakePatternNode<NegationAgent, Statement>();
     auto ms_if = MakePatternNode<If>();
     auto mr_if = MakePatternNode<If>();
-    auto m_over = MakePatternNode<DeltaAgent, Statement>();
+    auto m_over = MakePatternNode<DeltaAgent, StmtDecl>();
     
     m_comp->members = (m_decls);
     m_comp->statements = (m_pre, m_stuff, m_mid, m_over, m_post);

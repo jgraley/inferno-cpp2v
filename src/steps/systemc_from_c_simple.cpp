@@ -97,7 +97,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 MainToThread::MainToThread()
 {
 	auto e_stuff = MakePatternNode<StuffAgent, Compound>();
-	auto e_delta = MakePatternNode<DeltaAgent, Statement>();
+	auto e_delta = MakePatternNode<DeltaAgent, StmtDecl>();
 	auto es_return = MakePatternNode<Return>();
 	auto er_cease = MakePatternNode<Cease>();
 	

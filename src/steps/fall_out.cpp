@@ -67,7 +67,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto lr_if = MakePatternNode<If>();
     auto lr_equal = MakePatternNode<Equal>();
     auto l_loop = MakePatternNode<Loop>();
-    auto l_over = MakePatternNode<DeltaAgent, Statement>();
+    auto l_over = MakePatternNode<DeltaAgent, StmtDecl>();
     auto l_not = MakePatternNode<NegationAgent, Statement>();
     auto m_stuff_func = MakePatternNode<StuffAgent, Scope>();
     auto l_module = MakePatternNode<Record>();
@@ -89,7 +89,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto r_comp = MakePatternNode<Compound>();
     auto l_comp = MakePatternNode<Compound>();
     auto l_delta_comp = MakePatternNode<DeltaAgent, Compound>();
-    auto l_overll = MakePatternNode<DeltaAgent, Statement>();
+    auto l_overll = MakePatternNode<DeltaAgent, StmtDecl>();
     auto l_state_label = MakePatternNode< LocalTree::StateLabel >();
     auto comp_membs = MakePatternNode<StarAgent, Declaration>();
             
@@ -626,7 +626,7 @@ InsertInferredYield::InsertInferredYield()
     auto loop_decls = MakePatternNode<StarAgent, Declaration>();
     auto stmts = MakePatternNode<StarAgent, StmtDecl>();
     auto sx_pre = MakePatternNode<StarAgent, StmtDecl>();
-    auto delta = MakePatternNode<DeltaAgent, Statement>();
+    auto delta = MakePatternNode<DeltaAgent, StmtDecl>();
     auto flag_id = MakePatternNode<InstanceIdentifier>();
     auto r_yield = MakePatternNode<WaitDelta>();
     auto loop = MakePatternNode<Loop>();
