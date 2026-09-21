@@ -294,7 +294,7 @@ AddStateEnumVar::AddStateEnumVar()
     lr_sub->destination = array;
     lr_sub->index = state_var_id;
 
-    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Statement>( r_comp, ls_goto, lr_compound );
+    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, StmtDecl>( r_comp, ls_goto, lr_compound );
      
     s_gg->through = s_comp;
     s_comp->members = (decls);
@@ -553,7 +553,7 @@ EnsureResetYield::EnsureResetYield()
     auto pre = MakePatternNode<StarAgent, StmtDecl>();
     auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto sx_not = MakePatternNode<NegationAgent, StmtDecl>();
-    auto sx_any = MakePatternNode<DisjunctionAgent, Statement>();
+    auto sx_any = MakePatternNode<DisjunctionAgent, StmtDecl>();
     auto gotoo = MakePatternNode<Goto>();
     auto r_yield = MakePatternNode<WaitDelta>();
     
@@ -584,15 +584,15 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     auto r_do = MakePatternNode<Do>();
     auto delta = MakePatternNode<DeltaAgent, Compound>();
     
-    auto embedded_ll = MakePatternNode<EmbeddedSearchReplaceAgent, Statement>( r_body_comp, MakePatternNode<Goto>(), MakePatternNode<Continue>() );    
+    auto embedded_ll = MakePatternNode<EmbeddedSearchReplaceAgent, StmtDecl>( r_body_comp, MakePatternNode<Goto>(), MakePatternNode<Continue>() );    
     
     inst->type = MakePatternNode<Callable>();
     inst->initialiser = delta;
     delta->through = s_comp;
     s_comp->members = (decls);
     s_comp->statements = (s_label, body, is_conditional_goto 
-                                         ? TreePtr<Statement>(s_ifgoto) 
-                                         : TreePtr<Statement>(s_goto) );
+                                         ? TreePtr<StmtDecl>(s_ifgoto) 
+                                         : TreePtr<StmtDecl>(s_goto) );
     body->restriction = sx_not;
     sx_not->negand = MakePatternNode<LabelDeclaration>(); // so s_label is the only one - all gotos must go to it.
     s_ifgoto->condition = cond;
