@@ -37,22 +37,27 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     auto root_not = MakePatternNode<NegationAgent, Node>();
     auto root_ce = MakePatternNode< StatementExpression >();
           
-    auto s_all = MakePatternNode<ConjunctionAgent, Statement>();
-    auto sx_pointeris = MakePatternNode<PointerIsAgent, Statement>();
-    auto sx_not = MakePatternNode<NegationAgent, Statement>();
+    // we want the root_overlay [sic] delta to find the statement that contains
+    // the StatementExpression and not any intermediate expression. But 
+    // that statement is likely itself to be an espression (eg Assign)
+    // so we have to check the parent pointer.
+    auto s_all = MakePatternNode<ConjunctionAgent, StmtDecl>();
+    auto sx_pointeris = MakePatternNode<PointerIsAgent, StmtDecl>();
+    auto sx_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto sx_expr = MakePatternNode<Expression>();
     
-    auto stuff = MakePatternNode<StuffAgent, Statement>();
-    auto sr_not = MakePatternNode<NegationAgent, Statement>();
+    // We want the outermost StatementExpression, see above.
+    auto stuff = MakePatternNode<StuffAgent, StmtDecl>();
+    auto sr_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto sr_comp = MakePatternNode<SequentialScope>();
     auto sr_cdecls = MakePatternNode<StarAgent, Declaration>();
-    auto sr_cstmts = MakePatternNode<StarAgent, Statement>();
+    auto sr_cstmts = MakePatternNode<StarAgent, StmtDecl>();
     
     auto s_ce = MakePatternNode<StatementExpression>();
     auto r_comp = MakePatternNode<Compound>();
-    auto s_pre = MakePatternNode<StarAgent, Statement>();
-    auto s_post = MakePatternNode<StarAgent, Statement>();
-    auto body = MakePatternNode<StarAgent, Statement>();
+    auto s_pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto s_post = MakePatternNode<StarAgent, StmtDecl>();
+    auto body = MakePatternNode<StarAgent, StmtDecl>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto r_temp = MakePatternNode<Temporary>();
     auto last = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
@@ -65,7 +70,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     root_stuff->recurse_restriction = root_not;
     root_not->negand = root_ce;
     root_ce->members = ( MakePatternNode<StarAgent, Declaration>() );
-    root_ce->statements = ( MakePatternNode<StarAgent, Statement>() );
+    root_ce->statements = ( MakePatternNode<StarAgent, StmtDecl>() );
     root_overlay->through = s_all;
     root_overlay->overlay = r_comp;
     
@@ -105,9 +110,9 @@ CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not all
     auto s_inner = MakePatternNode<Compound>();
     auto s_outer = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
-    auto s_pre = MakePatternNode<StarAgent, Statement>();
-    auto s_post = MakePatternNode<StarAgent, Statement>();
-    auto s_body = MakePatternNode<StarAgent, Statement>();
+    auto s_pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto s_post = MakePatternNode<StarAgent, StmtDecl>();
+    auto s_body = MakePatternNode<StarAgent, StmtDecl>();
     auto s_inner_decls = MakePatternNode<StarAgent, Declaration>();
     auto s_outer_decls = MakePatternNode<StarAgent, Declaration>();
 
@@ -139,7 +144,7 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     auto node = MakePatternNode<ChildAgent, Node>();
     auto delta = MakePatternNode<DeltaAgent, Node>();
     auto s_comp = MakePatternNode<Compound>();
-    auto body = MakePatternNode< Statement >();
+    auto body = MakePatternNode< StmtDecl >();
 
     all->conjuncts = (node, sx_not);
     node->terminus = delta;
@@ -166,8 +171,8 @@ CleanupNop::CleanupNop()
     auto r_comp = MakePatternNode<Compound>();
     auto s_nop = MakePatternNode<Nop>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
 
     s_comp->members = decls;
     s_comp->statements = (pre, s_nop, post);
@@ -198,15 +203,15 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     auto s_instance = MakePatternNode<Instance>();
     auto r_instance = MakePatternNode<Instance>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
-    auto overlay = MakePatternNode<DeltaAgent, Statement>();
+    auto overlay = MakePatternNode<DeltaAgent, StmtDecl>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto s_label1 = MakePatternNode<LabelDeclaration>(); // keep l1 and elide l2
     auto s_label2 = MakePatternNode<LabelDeclaration>();
     auto r_label1 = MakePatternNode<LabelDeclaration>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto s_labelid1 = MakePatternNode<LabelIdentifier>();
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
@@ -259,13 +264,13 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     auto s_instance = MakePatternNode<Instance>();
     auto r_instance = MakePatternNode<Instance>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
-    auto overlay = MakePatternNode<DeltaAgent, Statement>();
+    auto overlay = MakePatternNode<DeltaAgent, StmtDecl>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto s_label = MakePatternNode<LabelDeclaration>(); // keep l1 and elide l2
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto s_labelid1 = MakePatternNode<LabelIdentifier>();
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
@@ -313,8 +318,8 @@ CleanupIneffectualGoto::CleanupIneffectualGoto()
     auto r_label = MakePatternNode<LabelDeclaration>();
     auto labelid = MakePatternNode<LabelIdentifier>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
 
     s_comp->members = decls;
     s_comp->statements = (pre, s_goto, s_label, post);
@@ -343,13 +348,13 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     auto r_instance = MakePatternNode<Instance>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto sx_stuff = MakePatternNode<StuffAgent, Compound>();
-    auto overlay = MakePatternNode<DeltaAgent, Statement>();
+    auto overlay = MakePatternNode<DeltaAgent, StmtDecl>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto s_label = MakePatternNode<LabelDeclaration>(); // keep l1 and elide l2
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
     auto labelid = MakePatternNode<LabelIdentifier>();
     auto sx_goto = MakePatternNode<Goto>();
     auto s_andrule = MakePatternNode<ConjunctionAgent, Compound>();
@@ -390,11 +395,11 @@ CleanUpDeadCode::CleanUpDeadCode()
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
-    auto s_dead_not = MakePatternNode<NegationAgent, Statement>();
-    auto s_dead_any = MakePatternNode<DisjunctionAgent, Statement>();
-    auto s_exit_any = MakePatternNode<DisjunctionAgent, Statement>();
+    auto pre = MakePatternNode<StarAgent, StmtDecl>();
+    auto post = MakePatternNode<StarAgent, StmtDecl>();
+    auto s_dead_not = MakePatternNode<NegationAgent, StmtDecl>();
+    auto s_dead_any = MakePatternNode<DisjunctionAgent, StmtDecl>();
+    auto s_exit_any = MakePatternNode<DisjunctionAgent, StmtDecl>();
     auto casee = MakePatternNode<Case>();
     auto breakk = MakePatternNode<Break>();
      
@@ -414,7 +419,7 @@ CleanupVoidStatementExpression::CleanupVoidStatementExpression()
 {
     auto s_ce = MakePatternNode<StatementExpression>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto stmts = MakePatternNode<StarAgent, Statement>();
+    auto stmts = MakePatternNode<StarAgent, StmtDecl>();
     auto last = MakePatternNode<NegationAgent, Statement>();
     auto sx_expr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
     auto sx_type_not = MakePatternNode<NegationAgent, Type>();

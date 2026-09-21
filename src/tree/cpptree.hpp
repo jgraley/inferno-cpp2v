@@ -67,11 +67,16 @@ struct Uninitialised : Initialiser
 }; 
 
 
+struct StmtDecl: virtual Node 
+{
+	NODE_FUNCTIONS
+};
+
 /// Represents a statement as found inside a function body. 
 /** Basically anything 
  that ends with a ; inside a function body, as well as labels (which we consider as 
  statements in their own right). */
-struct Statement : virtual Node 
+struct Statement : virtual StmtDecl 
 { 
     NODE_FUNCTIONS 
     virtual string GetColour() const { return "/set28/2"; }    
@@ -126,7 +131,7 @@ struct Type : virtual Node
 /// A declaration specifies the creation of a TypeDeclaration or an Instance. 
 /** Declaration can appear where statements can and also inside structs etc
  and at top level. */
-struct Declaration : virtual Node 
+struct Declaration : virtual StmtDecl 
 { 
     NODE_FUNCTIONS 
     
@@ -1496,7 +1501,7 @@ struct SequentialScope : DeclScope,
                          virtual Statement
 {
     NODE_FUNCTIONS
-    Sequence<Statement> statements; ///< Can contain local declarations and code
+    Sequence<StmtDecl> statements; ///< Can contain local declarations and code
     virtual string GetColour() const { return Statement::GetColour(); } // Statement wins    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
