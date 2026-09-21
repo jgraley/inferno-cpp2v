@@ -161,6 +161,7 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     }    
 
     sequence->push_back( make_shared<CleanupCompoundMulti>() );
+	sequence->push_back( make_shared<MoveInstanceDeclarations>() ); // keep decls at top so fallout doesn't localise them
 
     { 
 		// ---------------------- Create fallthrough machine ----------------------

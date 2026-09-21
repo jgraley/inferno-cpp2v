@@ -30,10 +30,10 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     delta->overlay = ri;
     ri->permission = MakePatternNode<NonConst>();  
     ri->initialiser = MakePatternNode<Uninitialised>();
-    rc->members = ( delta, decls );
+    rc->members = ( decls );
     auto ra = MakePatternNode<Assign>();
     ra->operands = ( si->identifier, si->initialiser );
-    rc->statements = ( pre, ra, post );
+    rc->statements = ( pre, delta, ra, post );
 
     Configure( SEARCH_REPLACE,sc, rc);
 }

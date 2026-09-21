@@ -1248,7 +1248,7 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production surround
 	// Pre-restrict if the incoming pointer is not some kind of Declaration. This catches cases
 	// like Stuff terminus, where the parser won't have enough information to determine whether
 	// we have Local, Global, Member etc. TODO reduce these by keeping a scope stack just like the parser
-	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
+	if( !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
 	{
 		s = "‽" + 
 		    RenderNodeTypeName() + 
