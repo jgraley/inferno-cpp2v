@@ -1498,7 +1498,7 @@ struct AlignOf : FuncOnType
  can go in the members of the Scope or in the statements (since Declaration
  derives from Statement). There is a sequence point between each statement. */
 struct SequentialScope : DeclScope,
-                         virtual Statement
+                         virtual StmtDecl
 {
     NODE_FUNCTIONS
     Sequence<StmtDecl> statements; ///< Can contain local declarations and code
