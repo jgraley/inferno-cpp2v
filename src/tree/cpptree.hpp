@@ -75,6 +75,9 @@ struct Statement : virtual Node
 { 
     NODE_FUNCTIONS 
     virtual string GetColour() const { return "/set28/2"; }    
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 };
 
 
@@ -85,6 +88,9 @@ struct Expression : virtual Statement,
 { 
     NODE_FUNCTIONS 
     virtual string GetColour() const { return "/set28/6"; }    
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 };
 
 
@@ -253,7 +259,10 @@ struct SpecificInstanceIdentifier : InstanceIdentifier,
     SpecificInstanceIdentifier() {} ///< Default constructor
     SpecificInstanceIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
-    NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL    
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 };
                             
 
@@ -262,7 +271,10 @@ struct SpecificConstructorIdentifier : ConstructorIdentifier,
                                        SpecificIdentifier
 {
     NODE_FUNCTIONS_FINAL
+	Production GetMyProductionTerminal() const override;
 	string GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy ) override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 };
                             
 
@@ -271,7 +283,10 @@ struct SpecificDestructorIdentifier : DestructorIdentifier,
                                       SpecificIdentifier
 {
     NODE_FUNCTIONS_FINAL
+	Production GetMyProductionTerminal() const override;
 	string GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy ) override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 };
                             
 
@@ -680,6 +695,8 @@ struct Instance : Declaration,
 	TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc ) override;
 	TreePtr<Node> OnType( TreePtr<Node> type, Location loc ) override;
 	TreePtr<Node> OnInitialiser( TreePtr<Node> init, Location loc ) override;
+
+	Token GetSignifierToken() const override;
 };
 
 
@@ -1481,6 +1498,8 @@ struct SequentialScope : DeclScope,
     NODE_FUNCTIONS
     Sequence<Statement> statements; ///< Can contain local declarations and code
     virtual string GetColour() const { return Statement::GetColour(); } // Statement wins    
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 	TreePtr<Node> OnStatements( list<TreePtr<Node>> statements, Location loc ) override;
 	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
 };
@@ -1507,6 +1526,7 @@ struct StatementExpression : Expression, ///< Evaluates to whatever the last sta
     virtual string GetColour() const { return Expression::GetColour(); } // Expression wins    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 };                   
 
 
@@ -1659,6 +1679,8 @@ struct SwitchTarget : Statement
 	NODE_FUNCTIONS 
 
 	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 };
 
 
@@ -1672,8 +1694,7 @@ struct RangeCase : SwitchTarget
 
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
-    // We don't have a token but Case does. TryGetByKeywordIfToken() 
-    // will find Case because it requires a GetSignifierToken() that succeeds.
+   	Token GetSignifierToken() const override;
 }; 
 
 
@@ -1695,7 +1716,6 @@ struct Default : SwitchTarget
 { 
 	NODE_FUNCTIONS_FINAL
 	
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
    	Token GetSignifierToken() const override;
 };
@@ -1785,6 +1805,7 @@ struct MacroStatement : Statement
    	
    	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy );
+	Token GetSignifierToken() const override;
 };
 
 

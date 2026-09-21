@@ -70,6 +70,7 @@ Syntax::Production Uninitialised::GetMyProductionTerminal() const
 	return Production::ANONYMOUS;
 }
 
+
 string Uninitialised::GetRender( VN::RendererInterface *, Production, Policy policy )
 {	
 	if( policy.refuse_invisibles )
@@ -80,6 +81,44 @@ string Uninitialised::GetRender( VN::RendererInterface *, Production, Policy pol
 
 //////////////////////////// Statement ///////////////////////////////
 
+Syntax::Production Statement::GetMyProductionTerminal() const
+{
+	return Production::BARE_STMT_DECL;
+}
+
+
+string Statement::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetSignifier(this, policy);
+}
+
+
+Syntax::Token Statement::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+}
+
+//////////////////////////// Expression ///////////////////////////////
+
+Syntax::Production Expression::GetMyProductionTerminal() const
+{
+	// Use Syntax version to disable
+	return Syntax::GetMyProductionTerminal();
+}
+
+
+string Expression::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
+{
+	// Use Syntax version to disable
+	return Syntax::GetRender(renderer, production, policy);
+}
+
+
+Syntax::Token Expression::GetSignifierToken() const
+{
+	// Use Syntax version to disable
+	return Syntax::GetSignifierToken();
+}
 
 //////////////////////////// Type ///////////////////////////////
 
@@ -496,6 +535,27 @@ Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
 	return Production::PRIMARY_EXPR; 
 }
 
+//////////////////////////// SpecificInstanceIdentifier //////////////////////////////
+
+Syntax::Production SpecificInstanceIdentifier::GetMyProductionTerminal() const
+{
+	// InstanceIdentifier wins
+	return InstanceIdentifier::GetMyProductionTerminal();	
+}
+
+
+string SpecificInstanceIdentifier::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
+{
+	// SpecificIdentifier wins
+	return SpecificIdentifier::GetRender( renderer, production, policy );
+}
+
+
+Syntax::Token SpecificInstanceIdentifier::GetSignifierToken() const
+{
+	// Disable by calling to default impl
+	return Syntax::GetSignifierToken();
+}
 
 //////////////////////////// SpecificConstructorIdentifier //////////////////////////////
 
@@ -505,6 +565,13 @@ Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
 // identifiers render differently: where the name would go you have [Scope::][~]Class
 // TODO we don't want the name we inherit from SpecificIdentifier so split a NamedIdentifier 
 // out and use for named cases, but not these.
+
+Syntax::Production SpecificConstructorIdentifier::GetMyProductionTerminal() const
+{
+	// InstanceIdentifier wins
+	return InstanceIdentifier::GetMyProductionTerminal();	
+}
+
 
 string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy )
 {
@@ -519,7 +586,28 @@ string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterfa
     return renderer->DoRender( &rec->identifier, Production::PRIMARY_EXPR, id_policy );	
 }
 
+
+string SpecificConstructorIdentifier::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
+{
+	// SpecificIdentifier wins
+	return SpecificIdentifier::GetRender( renderer, production, policy );
+}
+
+
+Syntax::Token SpecificConstructorIdentifier::GetSignifierToken() const
+{
+	// Disable by calling to default impl
+	return Syntax::GetSignifierToken();
+}
+
 //////////////////////////// SpecificDestructorIdentifier //////////////////////////////
+
+Syntax::Production SpecificDestructorIdentifier::GetMyProductionTerminal() const
+{
+	// InstanceIdentifier wins
+	return InstanceIdentifier::GetMyProductionTerminal();	
+}
+
 
 string SpecificDestructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy )
 {
@@ -533,6 +621,20 @@ string SpecificDestructorIdentifier::GetRenderWithoutScope( VN::RendererInterfac
 		   
     return "~" + 
            renderer->DoRender( &rec->identifier, Production::PRIMARY_EXPR, id_policy );	
+}
+
+
+string SpecificDestructorIdentifier::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
+{
+	// SpecificIdentifier wins
+	return SpecificIdentifier::GetRender( renderer, production, policy );
+}
+
+
+Syntax::Token SpecificDestructorIdentifier::GetSignifierToken() const
+{
+	// Disable by calling to default impl
+	return Syntax::GetSignifierToken();
 }
 
 //////////////////////////// TypeIdentifier //////////////////////////////
@@ -1287,6 +1389,13 @@ TreePtr<Node> Instance::OnInitialiser( TreePtr<Node> init, Location )
 	return (TreePtr<Node>)shared_from_this();	
 }
 
+
+Syntax::Token Instance::GetSignifierToken() const
+{
+	// Disable because there isn't really a single token in the Instance
+	// syntax that we can attach the node to. But see #902 qualifier teeing TODO
+	return Syntax::GetSignifierToken();
+}
 
 //////////////////////////// Global //////////////////////////////
 
@@ -2580,6 +2689,33 @@ string AlignOf::GetKeyword( Policy ) const
 
 //////////////////////////// SequentialScope ///////////////////////////////
 
+string SequentialScope::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	INDENT("C");
+	// The most general form has a signifier just before { which can signify 
+	// alternatives to Compound eg this class or StatementExpression
+    string s = renderer->GetSignifier(this, policy);
+    s += "{\n";
+ 	policy.permit_static_keyword = true; // In a compound, static means global
+	policy.context = make_shared<any>(); // No access specs here
+
+    for( auto &m : members )    
+        s += renderer->DoRender( &m, Production::STMT_DECL, policy );    
+    if( policy.compound_uses_vn_separator )
+		s += "⚬";
+    for( auto &st : statements )    
+		s += renderer->DoRender( &st, Production::STMT_DECL_LOW, policy );    
+    s += "}\n";
+    return s;
+}
+
+
+Syntax::Token SequentialScope::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_COMPOUND_SIGN;
+}
+
+
 TreePtr<Node> SequentialScope::OnStatements( list<TreePtr<Node>> statements_, Location )
 {
 	for( TreePtr<Node> statement : statements_ )
@@ -2639,11 +2775,8 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 
     if( policy.refuse_statement_expression )
 	{
-		// If we can't render syntactially, call RenderLongFormExplicit() directly so it
-		// gets the updated policy. 
-		policy.permit_static_keyword = true; // In a compound, static means global
-		policy.context = make_shared<any>(); // No access specs here
-		return renderer->RenderLongFormExplicit(shared_from_this(), production, policy);
+		// If we can't render syntactially, let SequentialScope() win
+		return SequentialScope::GetRender(renderer, production, policy);
 	}
 	    
  	policy.permit_static_keyword = true; // In a compound, static means global
@@ -2655,6 +2788,13 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 	for( TreePtr<Statement> st : statements )    
 		s += renderer->DoRender( &st, Syntax::Production::STMT_DECL_LOW, policy );    
 	return s + " })";
+}
+
+
+Syntax::Token StatementExpression::GetSignifierToken() const
+{
+	// Sequential scope wins
+	return SequentialScope::GetSignifierToken();
 }
 
 //////////////////////////// Return ///////////////////////////////
@@ -3013,9 +3153,22 @@ TreePtr<Node> Switch::OnArgsList( list<TreePtr<Node>> args, Location loc )
 
 //////////////////////////// SwitchTarget ///////////////////////////////
 
+string SwitchTarget::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	// See LabelDeclaration::GetRender() about the ;
+	return renderer->GetSignifier(this, policy) + ":" + ";";	
+}
+
+
 Syntax::Production SwitchTarget::GetMyProductionTerminal() const
 { 
 	return Production::LABEL; 
+}
+
+
+Syntax::Token SwitchTarget::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_ARRIVAL_KEYWORD;
 }
 
 //////////////////////////// RangeCase //////////////////////////////
@@ -3035,6 +3188,15 @@ string RangeCase::GetRender( VN::RendererInterface *renderer, Production, Policy
 string RangeCase::GetKeyword( Policy ) const 
 {
 	return "case";
+}
+
+
+Syntax::Token RangeCase::GetSignifierToken() const
+{	
+    // We don't have a token but Case does. TryGetByKeywordIfToken() 
+    // will find Case because it requires a GetSignifierToken() that succeeds.
+    // Case then evolves into RangeCase if required.
+	throw UnimplementedToken();
 }
 
 //////////////////////////// Case //////////////////////////////
@@ -3082,13 +3244,6 @@ Syntax::Token Case::GetSignifierToken() const
 }
 
 //////////////////////////// Default //////////////////////////////
-
-string Default::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
-{
-	// See LabelDeclaration::GetRender() about the ;
-	return renderer->GetSignifier(this, policy) + ":" + ";";	
-}
-
 
 string Default::GetKeyword( Policy ) const 
 {
@@ -3233,6 +3388,14 @@ string MacroStatement::GetRender( VN::RendererInterface *renderer, Production, P
         renders.push_back( renderer->DoRender( &node, Syntax::Production::COMMA_SEP, policy) );
     s += Join(renders, ", ", "(", ");\n");
     return s;
+}
+
+
+Syntax::Token MacroStatement::GetSignifierToken() const
+{
+	// Disable because there isn't really a single token in the Instance
+	// syntax that we can attach the node to.
+	return Syntax::GetSignifierToken();
 }
 
 //////////////////////////// PreProcDecl ///////////////////////////////

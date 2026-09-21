@@ -44,9 +44,9 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     
     auto stuff = MakePatternNode<StuffAgent, Statement>();
     auto sr_not = MakePatternNode<NegationAgent, Statement>();
-    auto sr_comp = MakePatternNode<SequentialScope>();
-    auto sr_cdecls = MakePatternNode<StarAgent, Declaration>();
-    auto sr_cstmts = MakePatternNode<StarAgent, Statement>();
+    auto sr_any = MakePatternNode<DisjunctionAgent, Statement>();
+    auto sr_comp = MakePatternNode<Compound>();
+    auto sr_ce = MakePatternNode<StatementExpression>();
     
     auto s_ce = MakePatternNode<StatementExpression>();
     auto r_comp = MakePatternNode<Compound>();
@@ -73,9 +73,12 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     sx_pointeris->pointer = sx_not;
     sx_not->negand = sx_expr;
     stuff->recurse_restriction = sr_not;
-    sr_not->negand = sr_comp;
-    sr_comp->members = sr_cdecls;
-    sr_comp->statements = sr_cstmts;
+    sr_not->negand = sr_any;
+    sr_any->disjuncts = (sr_comp, sr_ce);
+    sr_comp->members = MakePatternNode<StarAgent, Declaration>();
+    sr_comp->statements = MakePatternNode<StarAgent, Statement>();
+    sr_ce->members = MakePatternNode<StarAgent, Declaration>();
+    sr_ce->statements = MakePatternNode<StarAgent, Statement>();
     
     stuff->terminus = overlay;
     overlay->through = s_ce;
