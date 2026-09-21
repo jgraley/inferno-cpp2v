@@ -216,7 +216,7 @@ AddLinkAddress::AddLinkAddress()
     auto msx_comp = MakePatternNode<Compound>();
     auto mr_label = MakePatternNode<LabelDeclaration>();
     auto mr_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("LINK");
-    auto m_all = MakePatternNode<ConjunctionAgent, Statement>();
+    auto m_all = MakePatternNode<ConjunctionAgent, StmtDecl>();
     auto ms_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto m_over = MakePatternNode<DeltaAgent, StmtDecl>();
     auto l_func_over = MakePatternNode<DeltaAgent, Function>();
@@ -229,11 +229,11 @@ AddLinkAddress::AddLinkAddress()
     auto llsx_comp = MakePatternNode<Compound>();
     auto llr_assign = MakePatternNode<Assign>();
     auto llsx_assign = MakePatternNode<Assign>();
-    auto ll_all = MakePatternNode<ConjunctionAgent, Statement>();
+    auto ll_all = MakePatternNode<ConjunctionAgent, StmtDecl>();
     auto lls_not = MakePatternNode<NegationAgent, StmtDecl>();
     auto ll_over = MakePatternNode<DeltaAgent, StmtDecl>();
-    auto m_gg = MakePatternNode<GreenGrassAgent, Statement>();
-    auto ll_gg = MakePatternNode<GreenGrassAgent, Statement>();
+    auto m_gg = MakePatternNode<GreenGrassAgent, StmtDecl>();
+    auto ll_gg = MakePatternNode<GreenGrassAgent, StmtDecl>();
     auto mr_new_arg = MakePatternNode<IdValuePair>();
     auto func_access = MakePatternNode<AccessSpec>();
 
@@ -431,7 +431,7 @@ GenerateStacks::GenerateStacks()
     auto s_and3 = MakePatternNode<ConjunctionAgent, Node>();
     auto r_index_identifier = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_stack_index");
     auto r_identifier = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_stack");
-    auto s_gg = MakePatternNode<GreenGrassAgent, Statement>();
+    auto s_gg = MakePatternNode<GreenGrassAgent, StmtDecl>();
     auto r_index_init = MakePatternNode<Assign>();
     auto members = MakePatternNode<StarAgent, Declaration>();
     auto s_module = MakePatternNode<Record>();
@@ -453,7 +453,7 @@ GenerateStacks::GenerateStacks()
     l_r_sub->destination = r_identifier;
     l_r_sub->index = r_index_identifier;
     
-    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Statement>( r_vcomp, s_identifier, l_r_sub );
+    auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, StmtDecl>( r_vcomp, s_identifier, l_r_sub );
 
     // EmbeddedSearchReplace search to find automatic variables within the function
     stuff->terminus = overlay;
@@ -495,7 +495,7 @@ GenerateStacks::GenerateStacks()
     
     auto r_mid = MakePatternNode<EmbeddedCompareReplaceAgent, Scope>( r_module, ls_module, lr_module ); // stuff, stuff
 
-    auto r_embedded_3 = MakePatternNode<EmbeddedSearchReplaceAgent, Statement>( r_top_comp, s_gg, r_ret_comp );
+    auto r_embedded_3 = MakePatternNode<EmbeddedSearchReplaceAgent, StmtDecl>( r_top_comp, s_gg, r_ret_comp );
     temp->statements = (r_embedded_3);
     
     // Master search - look for functions satisfying the construct limitation and get
