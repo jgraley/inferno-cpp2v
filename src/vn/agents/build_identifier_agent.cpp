@@ -14,7 +14,10 @@ using namespace CPPTree;
 
 TreePtr<Node> BuildIdentifierAgent::BuildNewSubtree(const SCREngine *acting_engine)
 {
-    return BuildSpecificIdentifier( GetNewName(acting_engine) ); 
+	string s = GetNewName(acting_engine);
+	if( s.size() > 40 )
+		s = s.substr(0, 35)+"_ETC"; // See #916
+    return BuildSpecificIdentifier( s ); 
 }
 
 

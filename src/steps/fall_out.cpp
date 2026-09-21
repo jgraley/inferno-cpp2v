@@ -92,7 +92,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_overll = MakePatternNode<DeltaAgent, Statement>();
     auto l_state_label = MakePatternNode< LocalTree::StateLabel >();
     auto comp_membs = MakePatternNode<StarAgent, Declaration>();
-            
+	auto comp_stmts = MakePatternNode<StarAgent, Statement>();
+	
     ll_all_over->through = ll_all;
     ll_all_over->overlay = ll_any;
     ll_all->conjuncts = (ll_any, lls_not1, lls_not2); 
@@ -112,8 +113,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     
     l_func->identifier = func_id;
     l_func->initialiser = l_comp;
-    l_comp->members = (MakePatternNode<StarAgent, Declaration>(), l_lmap);
-    l_comp->statements = (MakePatternNode<StarAgent, Statement>(), l_stuff, MakePatternNode<StarAgent, Statement>());
+    l_comp->members = (MakePatternNode<StarAgent, Declaration>());
+    l_comp->statements = (MakePatternNode<StarAgent, Statement>(), l_lmap, MakePatternNode<StarAgent, Statement>(), l_stuff, MakePatternNode<StarAgent, Statement>());
     ls_goto->destination = var_id;
     ls_label->identifier = ls_label_id;
     ls_enum->members = (l_enum_vals);
@@ -162,8 +163,9 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     l_delta_comp->through = s_comp;
     l_delta_comp->overlay = r_comp;
     s_comp->members = (comp_membs);
-    r_comp->members = (comp_membs, r_lmap);
-    r_comp->statements = s_comp->statements = (MakePatternNode<StarAgent, Statement>());
+    r_comp->members = (comp_membs);
+    s_comp->statements = (comp_stmts);
+    r_comp->statements = (r_lmap, comp_stmts);
     s_module->members = (module_decls, func);
     r_module->members = (module_decls, func, r_module_enum);
     //r_module->bases = (bases);
@@ -175,7 +177,6 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     r_lmap->identifier = r_lmap_id;
     r_lmap->initialiser = r_make;    
     r_lmap->permission = MakePatternNode<Const>();        
-//    r_lmap->dispatch = MakePatternNode<NonVirtual>();
   //  r_lmap->access = MakePatternNode<Private>();    
     r_array->element = MakePatternNode<Labeley>();
     r_array->size = MakePatternNode<Uninitialised>();
@@ -304,8 +305,8 @@ AddStateEnumVar::AddStateEnumVar()
     s_sub->index = s_index;
     s_index->pattern = type;
         
-    r_comp->members = (state_var, decls);
-    r_comp->statements = (pre, s_goto, post); 
+    r_comp->members = (decls);
+    r_comp->statements = (state_var, pre, s_goto, post); 
     state_var->identifier = state_var_id;
     state_var->type = type;    
     state_var->initialiser = MakePatternNode<Uninitialised>();
