@@ -1498,6 +1498,7 @@ struct SequentialScope : DeclScope,
     NODE_FUNCTIONS
     Sequence<Statement> statements; ///< Can contain local declarations and code
     virtual string GetColour() const { return Statement::GetColour(); } // Statement wins    
+	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
    	Token GetSignifierToken() const override;
 	TreePtr<Node> OnStatements( list<TreePtr<Node>> statements, Location loc ) override;
@@ -1510,7 +1511,6 @@ struct Compound : SequentialScope,  ///< Local declarations go in here (preferab
                   Initialiser       ///< Can "initialise" a function (with the body) 
 {
     NODE_FUNCTIONS_FINAL
-	Production GetMyProductionTerminal() const override;	
 	string GetKeyword( Policy ) const;
 };                   
 

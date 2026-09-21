@@ -2689,6 +2689,12 @@ string AlignOf::GetKeyword( Policy ) const
 
 //////////////////////////// SequentialScope ///////////////////////////////
 
+Syntax::Production SequentialScope::GetMyProductionTerminal() const
+{ 
+	return Production::COMPOUND;
+}
+
+
 string SequentialScope::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	INDENT("C");
@@ -2738,12 +2744,6 @@ TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, any
 
 //////////////////////////// Compound ///////////////////////////////
 
-Syntax::Production Compound::GetMyProductionTerminal() const
-{ 
-	return Production::COMPOUND;
-}
-
-
 string Compound::GetKeyword( Policy ) const 
 {
 	return ""; // empty keyword means parser must match us using another rule aside from signifier
@@ -2753,7 +2753,8 @@ string Compound::GetKeyword( Policy ) const
 
 Syntax::Production StatementExpression::GetMyProductionTerminal() const
 { 
-	return Production::PARENTHESISED; 
+	// SequentialScope wins
+	return SequentialScope::GetMyProductionTerminal();
 }
 
 
@@ -2763,7 +2764,7 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 
     if( policy.refuse_statement_expression )
 	{
-		// If we can't render syntactially, let SequentialScope() win
+		// If we can't render syntactially, let SequentialScope win
 		return SequentialScope::GetRender(renderer, production, policy);
 	}
 	    
@@ -2781,7 +2782,7 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 
 Syntax::Token StatementExpression::GetSignifierToken() const
 {
-	// Sequential scope wins
+	// SequentialScope wins
 	return SequentialScope::GetSignifierToken();
 }
 
