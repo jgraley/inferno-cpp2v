@@ -18,7 +18,7 @@ EmbeddedSCRTest::EmbeddedSCRTest()
     auto r_body = MakePatternNode<StmtDecl>();
     auto ss_cont = MakePatternNode<Continue>();
     auto sr_break = MakePatternNode<Break>();
-    auto r_embedded = MakePatternNode< EmbeddedCompareReplaceAgent, Statement >( r_body, ss_cont, sr_break );
+    auto r_embedded = MakePatternNode< EmbeddedCompareReplaceAgent, StmtDecl >( r_body, ss_cont, sr_break );
     r_comp->statements = ( r_embedded );
 
     Configure( SEARCH_REPLACE, s_for, r_comp );

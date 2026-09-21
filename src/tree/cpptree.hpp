@@ -79,11 +79,6 @@ struct StmtDecl : virtual Node
    	Token GetSignifierToken() const override;
 };
 
-struct Statement : virtual StmtDecl 
-{ 
-    NODE_FUNCTIONS 
-};
-
 
 /// An expression that computes a result value. 
 /** Can be used anywhere a statement can, per C syntax rules. */
@@ -513,7 +508,7 @@ struct False : BoolLiteral
 // identifier. 
 
 /// Initialise a member from inside a constructor body
-struct MemberInitialiser : StmtDecl // TODO not a Statement, just virtual Node now
+struct MemberInitialiser : StmtDecl // TODO not a StmtDecl, just virtual Node now
 {
 	NODE_FUNCTIONS_FINAL
 
@@ -656,7 +651,8 @@ struct View : virtual Node
 /** Instance represents a variable/object or a function. In case of function, type is a
  type under Callable and initialiser is a Compound (or Uninitialised for a function
  declaration). For a variable/object, type is basically anything else, and if there is
- an initialiser, it is an Expression. We allow init here for various reasons including
+ an initialiser, it is an Expression or ConstructInitialiser. We allow init here for 
+ various reasons including
  - it can be hard to know where to put stand-alone init for statics
  - C++ constructors tie init to declaration
  - Fits in with single-static-assignment style
