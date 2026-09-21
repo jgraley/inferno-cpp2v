@@ -1802,7 +1802,7 @@ struct MacroField : Declaration,
 
 /// A proprocessor macro usage that may be used as a statement, and takes 
 /// arbitrary operands.
-struct MacroStatement : Statement 
+struct MacroStatement : StmtDecl 
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<PreprocessorIdentifier> identifier;
