@@ -1502,7 +1502,7 @@ struct SequentialScope : DeclScope,
 {
     NODE_FUNCTIONS
     Sequence<StmtDecl> statements; ///< Can contain local declarations and code
-    virtual string GetColour() const { return Statement::GetColour(); } // Statement wins    
+    virtual string GetColour() const { return StmtDecl::GetColour(); } // Statement wins    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
    	Token GetSignifierToken() const override;
@@ -1538,7 +1538,7 @@ struct StatementExpression : Expression, ///< Evaluates to whatever the last sta
 /// The return statement of a function
 /** return_value is an Expression giving the return value or 
  Uninitialised if none is present. */
-struct Return : Statement
+struct Return : StmtDecl
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Initialiser> return_value; ///< return value or Uninitialised
@@ -1556,7 +1556,7 @@ struct Return : Statement
  it is expected to be useful during sequential lowering (state-out).
  Therefore we do not directly require LabelIdentifier, but the Expression
  must evaluate to one. No * or && needed. */
-struct Goto : Statement, Uncombable
+struct Goto : StmtDecl, Uncombable
 {
     NODE_FUNCTIONS_FINAL
     // Dest is an expression for goto-a-variable support.
@@ -1572,7 +1572,7 @@ struct Goto : Statement, Uncombable
 
 
 /// If statement
-struct If : Statement
+struct If : StmtDecl
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< condition to test
@@ -1594,7 +1594,7 @@ struct If : Statement
     and then execution commences immediately after this statement.
     We must specify a body here; the break statement will be 
     within the body */
-struct Breakable : Statement 
+struct Breakable : StmtDecl 
 {
     NODE_FUNCTIONS
     TreePtr<StmtDecl> body; ///< a break in here jumps to the end of here
@@ -1679,7 +1679,7 @@ struct Switch : Breakable
 
 
 /// Intermediate for labels in a switch statement.
-struct SwitchTarget : Statement 
+struct SwitchTarget : StmtDecl 
 { 
 	NODE_FUNCTIONS 
 
@@ -1727,7 +1727,7 @@ struct Default : SwitchTarget
 
 
 /// Continue (to innermost Loop)
-struct Continue : Statement, Uncombable 
+struct Continue : StmtDecl, Uncombable 
 { 
 	NODE_FUNCTIONS_FINAL 
 
@@ -1739,7 +1739,7 @@ struct Continue : Statement, Uncombable
 
 
 /// Break (from innermost Breakable)
-struct Break : Statement 
+struct Break : StmtDecl 
 { 
 	NODE_FUNCTIONS_FINAL 
 
@@ -1751,7 +1751,7 @@ struct Break : Statement
 
 
 /// Do nothing; these get optimised out where possible
-struct Nop : Statement 
+struct Nop : StmtDecl 
 { 
 	NODE_FUNCTIONS_FINAL 
 
