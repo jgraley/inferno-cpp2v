@@ -1501,10 +1501,12 @@ struct SequentialScope : virtual Statement
 {
     NODE_FUNCTIONS
 
-    Collection<Declaration> members; /// NOTE: NOW UNUSED (manual steps fill this in, but have been modified so that it has no effect)
+	// NOTE: NOW UNUSED
+	// Manual steps fill this in, but have been modified so that it has no effect.
+	// This is checked by having them not appear in VN renders
+    Collection<Declaration> members; 
 
     Sequence<Statement> statements; ///< Can contain local declarations and code
-    virtual string GetColour() const { return Statement::GetColour(); } // Statement wins    
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
    	Token GetSignifierToken() const override;
