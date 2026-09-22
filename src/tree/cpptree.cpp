@@ -2704,9 +2704,6 @@ string SequentialScope::GetRender( VN::RendererInterface *renderer, Production, 
  	policy.permit_static_keyword = true; // In a compound, static means global
 	policy.context = make_shared<any>(); // No access specs here
     
-    if( policy.compound_uses_vn_separator )
-		s += "⚬";
-		
     for( auto &st : statements )    
 		s += renderer->DoRender( &st, Production::STMT_DECL_LOW, policy );    
     s += "}\n";
