@@ -41,21 +41,28 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     
 MoveDeclarationsToTheTop::MoveDeclarationsToTheTop()
 {    
-    // Just move the decls to the top of the body
+    // Just move the decls to the top of the body. Use AdvanceDeclaration
+    // so we move Instance and TypeDeclaration but not LabelDeclaration, which maybe 
+    // shouldn't be a Declaration at all.
     auto sc = MakePatternNode<Compound>();
-    auto var = MakePatternNode<Instance>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
-    auto decls2 = MakePatternNode<StarAgent, Declaration>();
-    sc->members = ( decls );
-    auto pre = MakePatternNode<StarAgent, Statement>();
-    auto non_decl = MakePatternNode<NegationAgent, Statement>();
-    auto post = MakePatternNode<StarAgent, Statement>();
-    sc->statements = ( decls2, non_decl, pre, var, post );
+    auto pre_decls = MakePatternNode<StarAgent, AdvanceDeclaration>();
+    auto first_non_decl = MakePatternNode<NegationAgent, Statement>();
+    auto post_any = MakePatternNode<StarAgent, Statement>();
+    auto mid_decl = MakePatternNode<AdvanceDeclaration>();
+    auto mid_not_decls = MakePatternNode<StarAgent, Statement>();
+    auto x_post = MakePatternNode<NegationAgent, Statement>();
 
+	// Carefully preserve the relative order of the decls, as well as the statements.
+    sc->members = ( decls );
+    sc->statements = ( pre_decls, first_non_decl, mid_not_decls, mid_decl, post_any );
+    first_non_decl->negand = MakePatternNode<AdvanceDeclaration>();
+    mid_not_decls->restriction = x_post;
+    x_post->negand = MakePatternNode<AdvanceDeclaration>();
+	
     auto rc = MakePatternNode<Compound>();
     rc->members = ( decls ); // Instance now in unordered decls part
-    rc->statements = ( decls2, var, non_decl, pre, post );
-    non_decl->negand = MakePatternNode<Declaration>();
+    rc->statements = ( pre_decls, mid_decl, first_non_decl, mid_not_decls, post_any );
 
     Configure( SEARCH_REPLACE,sc, rc);
 }

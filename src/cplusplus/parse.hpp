@@ -1168,7 +1168,7 @@ private:
         if( TreePtr<Instance> i = DynamicTreePtrCast<Instance>(d) )
             AddStatementToCompound( s, i ); // Instances can have inits that require being in order, so append as a statement
         else
-            s->members.insert( d );
+            s->statements.push_back( d );
     }
     
     void AddStatementToCompound( TreePtr<Compound> s, TreePtr<Statement> st )

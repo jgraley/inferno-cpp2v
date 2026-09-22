@@ -137,6 +137,12 @@ struct Declaration : virtual Statement
 };
 
 
+// A declaration that maust appear before usages - i.e. not a label
+struct AdvanceDeclaration : virtual Declaration 
+{
+	NODE_FUNCTIONS
+};
+
 /// A scope is any space in a program where declarations may appear. Declarations
 /** are associated with the scope node but unordered. Scopes are used for name 
  * resolution during parse. */
@@ -660,7 +666,7 @@ struct View : virtual Node
  The latter case is used where initialisaiton/construction demands ordering. It points
  to an InstanceIdentifier, and all usages of the instance actually point to the
  InstanceIdentifier. */
-struct Instance : Declaration
+struct Instance : AdvanceDeclaration
 {
     NODE_FUNCTIONS
  
@@ -1095,7 +1101,7 @@ struct Labeley : Type
 /* The user type node is a declaration and goes into a declaration scope. It points
  to a TypeIdentifier, and all usages of the type actually point to the
  TypeIdentifier. TODO rename to TypeDecl or similar */
-struct TypeDeclaration : Declaration 
+struct TypeDeclaration : AdvanceDeclaration 
 { 
     NODE_FUNCTIONS
     TreePtr<TypeIdentifier> identifier; ///< The handle to the type that has been declared
@@ -1780,7 +1786,7 @@ struct SpecificPreprocessorIdentifier : PreprocessorIdentifier,
 
 /// A proprocessor macro usage that may be used as a field, and takes 
 /// arbitrary operands.
-struct MacroField : Declaration,
+struct MacroField : AdvanceDeclaration,
 					MembInitSeq
 {
     NODE_FUNCTIONS_FINAL
@@ -1810,7 +1816,7 @@ struct MacroStatement : Statement
 
 
 /// Preprocessor decl-like stuff: includes, defines
-struct PreProcDecl : virtual Declaration 
+struct PreProcDecl : virtual AdvanceDeclaration 
 {
     NODE_FUNCTIONS
    	Production GetMyProductionTerminal() const override;   	
