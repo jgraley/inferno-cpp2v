@@ -609,12 +609,12 @@ ConditionalOperatorToIf::ConditionalOperatorToIf()
     s_mux->expr_else = op3;
     op2->pattern = type;
     
-    r_comp->members = (r_temp);
+    //r_comp->members = ();
     r_temp->identifier = r_temp_id;
     r_temp->type= type;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
     r_temp->permission = MakePatternNode<NonConst>();    
-    r_comp->statements = (r_if, r_temp_id);
+    r_comp->statements = (r_temp, r_if, r_temp_id);
     r_if->condition = op1;
     r_if->body = r_assignt;
     r_if->body_else = r_assignf;

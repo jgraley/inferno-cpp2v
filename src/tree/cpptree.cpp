@@ -2711,7 +2711,7 @@ string SequentialScope::GetRender( VN::RendererInterface *renderer, Production, 
     //if( policy.compound_uses_vn_separator )
 	//	ASSERT( members.size() <= 1 )(ms);		
 	//else
-//		ASSERT( members.empty() )(ms);		
+	//	ASSERT( members.empty() )(ms);		
     s += ms;
     
     if( policy.compound_uses_vn_separator )

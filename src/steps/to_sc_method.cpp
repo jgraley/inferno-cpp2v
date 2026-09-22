@@ -74,7 +74,8 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     auto r_rec = MakePatternNode<Record>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
-    auto vstmts = MakePatternNode<StarAgent, Statement>();
+    auto vstmts_pre = MakePatternNode<StarAgent, Statement>();
+    auto vstmts_post = MakePatternNode<StarAgent, Statement>();
     auto var = MakePatternNode<DisjunctionAgent, Instance>();
     auto s_tempvar = MakePatternNode<Temporary>();
     auto s_staticvar = MakePatternNode<Global>();
@@ -103,8 +104,8 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     // TODO recurse restriction for locally declared classes
     stuff->terminus = delta;
     delta->through = s_comp;
-    s_comp->members = (vdecls, s_tempvar);
-    s_comp->statements = (vstmts);
+    s_comp->members = (vdecls);
+    s_comp->statements = (vstmts_pre, s_tempvar, vstmts_post);
     var->disjuncts = (s_tempvar, s_staticvar);
      
     s_tempvar->type = var_type;
@@ -124,7 +125,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
      
     delta->overlay = r_comp;
     r_comp->members = (vdecls);
-    r_comp->statements = (vstmts);
+    r_comp->statements = (vstmts_pre, vstmts_post);
     
     Configure( SEARCH_REPLACE, s_rec, r_rec );
 }

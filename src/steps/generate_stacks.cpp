@@ -91,11 +91,11 @@ UseTempForReturnValue::UseTempForReturnValue()
     auto id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("temp_retval");
     r_newvar->identifier = id;
     r_newvar->initialiser = MakePatternNode<Uninitialised>();
-    r_sub_comp->members = ( r_newvar );
+    // r_sub_comp->members = ();
     auto r_assign = MakeTreeNode<Assign>();
     r_assign->operands.push_back( id );
     r_assign->operands.push_back( retval );
-    r_sub_comp->statements.push_back( r_assign );
+    r_sub_comp->statements = ( r_newvar, r_assign );
     auto r_return = MakeTreeNode<Return>();
     r_sub_comp->statements.push_back( r_return );
     r_return->return_value = id;
