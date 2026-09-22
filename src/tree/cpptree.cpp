@@ -2712,7 +2712,7 @@ string SequentialScope::GetRender( VN::RendererInterface *renderer, Production, 
 		ASSERT( members.size() <= 1 )(ms);		
 	else
 		ASSERT( members.empty() )(ms);		
-    s += ms;
+    //s += ms;
     
     if( policy.compound_uses_vn_separator )
 		s += "⚬";
