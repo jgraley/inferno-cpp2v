@@ -1497,10 +1497,12 @@ struct AlignOf : FuncOnType
 /** Note that local declarations
  can go in the members of the Scope or in the statements (since Declaration
  derives from Statement). There is a sequence point between each statement. */
-struct SequentialScope : DeclScope,
-                         virtual Statement
+struct SequentialScope : virtual Statement
 {
     NODE_FUNCTIONS
+
+    Collection<Declaration> members; /// NOTE: NOW UNUSED (manual steps fill this in, but have been modified so that it has no effect)
+
     Sequence<Statement> statements; ///< Can contain local declarations and code
     virtual string GetColour() const { return Statement::GetColour(); } // Statement wins    
 	Production GetMyProductionTerminal() const override;	
