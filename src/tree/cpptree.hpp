@@ -767,6 +767,7 @@ struct Enumerator : Instance
  across recursion or between calls (such a variable could safely be implemented as any of
  Global, Member or Local since it supports only those guarantees common to all). */
 // TODO Really a local node, move out of here
+// TODO inherit from Local
 struct Temporary : Instance
 {
     NODE_FUNCTIONS_FINAL

@@ -161,7 +161,8 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
     }    
 
     sequence->push_back( make_shared<CleanupCompoundMulti>() );
-	sequence->push_back( make_shared<MoveDeclarationsToTheTop>() ); // keep decls at top so fallout doesn't localise them
+    // keep decls at top so fallout doesn't localise them. TODO maybe move above the first introduction of a goto, to avoid jumping over initialisation
+	sequence->push_back( make_shared<MoveDeclarationsToTheTop>() ); 
 
     { 
 		// ---------------------- Create fallthrough machine ----------------------

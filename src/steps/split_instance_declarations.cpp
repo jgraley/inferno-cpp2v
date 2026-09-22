@@ -41,9 +41,9 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     
 MoveDeclarationsToTheTop::MoveDeclarationsToTheTop()
 {    
-    // Just move the decl to the decls collection
+    // Just move the decls to the top of the body
     auto sc = MakePatternNode<Compound>();
-    auto var = MakePatternNode<Local>();
+    auto var = MakePatternNode<Instance>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto decls2 = MakePatternNode<StarAgent, Declaration>();
     sc->members = ( decls );

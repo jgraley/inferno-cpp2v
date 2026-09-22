@@ -284,8 +284,9 @@ ExplicitiseReturns::ExplicitiseReturns()
     l_delta_comp->through = s_comp;
     l_delta_comp->overlay = r_comp;
     s_comp->members = (decls);
-    r_comp->members = (decls, r_flag);
-    s_comp->statements = r_comp->statements = (stmts);
+    r_comp->members = (decls);
+    s_comp->statements = (stmts);
+    r_comp->statements = (r_flag, stmts);
     r_flag->type = r_boolean;
     r_flag->identifier = r_flag_id;
     r_flag->initialiser = r_true;

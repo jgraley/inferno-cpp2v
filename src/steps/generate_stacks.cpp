@@ -273,7 +273,8 @@ AddLinkAddress::AddLinkAddress()
     ls_comp->members = (l_decls);
     ls_comp->statements = (l_stmts);
     l_over->overlay = embedded_ll;
-    lr_comp->members = (l_decls, lr_temp_retaddr);
+    lr_comp->members = (l_decls);
+    lr_comp->statements = (lr_temp_retaddr, l_stmts);
     lr_retaddr->identifier = lr_retaddr_id;
     lr_retaddr->type = MakePatternNode<Labeley>();
     lr_retaddr->initialiser = MakePatternNode<Uninitialised>();
@@ -282,7 +283,6 @@ AddLinkAddress::AddLinkAddress()
     lr_temp_retaddr->type = MakePatternNode<Labeley>();
     lr_temp_retaddr->initialiser = MakePatternNode<Uninitialised>();
     lr_temp_retaddr->permission = MakePatternNode<NonConst>();
-    lr_comp->statements = (l_stmts);
     
     s_module->members = (gg, decls);
     r_module->members = (gg, decls, r_retaddr);
