@@ -2708,10 +2708,10 @@ string SequentialScope::GetRender( VN::RendererInterface *renderer, Production, 
     for( auto &m : members )    
         ms += renderer->DoRender( &m, Production::STMT_DECL, policy );   
     //Note: not sure all fixed TODO try with eg -qT80 etc
-    //if( policy.compound_uses_vn_separator )
-	//	ASSERT( members.size() <= 1 )(ms);		
-	//else
-	//	ASSERT( members.empty() )(ms);		
+    if( policy.compound_uses_vn_separator )
+		ASSERT( members.size() <= 1 )(ms);		
+	else
+		ASSERT( members.empty() )(ms);		
     s += ms;
     
     if( policy.compound_uses_vn_separator )

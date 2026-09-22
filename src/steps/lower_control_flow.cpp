@@ -543,12 +543,12 @@ LogicalAndToIf::LogicalAndToIf()
     
     s_and->operands = (op1, op2);
     
-    r_comp->members = (r_temp);
+    //r_comp->members = ();
     r_temp->identifier = r_temp_id;
     r_temp->type= r_boolean;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
     r_temp->permission = MakePatternNode<NonConst>();    
-    r_comp->statements = (r_assign1, r_if, r_temp_id);
+    r_comp->statements = (r_temp, r_assign1, r_if, r_temp_id);
     r_assign1->operands = (r_temp_id, op1);
     r_if->condition = r_temp_id;
     r_if->body = r_assign2;
@@ -574,12 +574,12 @@ LogicalOrToIf::LogicalOrToIf()
     
     s_or->operands = (op1, op2);
     
-    r_comp->members = (r_temp);
+    //r_comp->members = ();
     r_temp->identifier = r_temp_id;
     r_temp->type= r_boolean;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
     r_temp->permission = MakePatternNode<NonConst>();    
-    r_comp->statements = (r_assign1, r_if, r_temp_id);
+    r_comp->statements = (r_temp, r_assign1, r_if, r_temp_id);
     r_assign1->operands = (r_temp_id, op1);
     r_if->condition = r_temp_id;
     r_if->body = MakePatternNode<Nop>();

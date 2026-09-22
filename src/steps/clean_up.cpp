@@ -121,7 +121,7 @@ CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not all
     s_outer->statements = ( s_pre, s_inner, s_post );
     s_outer->members = ( s_outer_decls );
     r_comp->statements = ( s_pre, s_body, s_post );
-    r_comp->members = ( s_inner_decls, s_outer_decls );
+    //r_comp->members = ( s_inner_decls, s_outer_decls );
 
     Configure( SEARCH_REPLACE, s_outer, r_comp );
 }
