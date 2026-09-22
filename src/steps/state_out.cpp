@@ -283,8 +283,8 @@ AddStateLabelVar::AddStateLabelVar()
     sx_goto->destination = sx_not;
     sx_not->negand = MakePatternNode<InstanceIdentifier>();
         
-    r_comp->members = (state_var, decls);
-    r_comp->statements = (pre, sx_goto, post); 
+    r_comp->members = (decls);
+    r_comp->statements = (state_var, pre, sx_goto, post); 
     state_var->identifier = state_var_id;
     state_var->type = MakePatternNode<Labeley>();    
     state_var->initialiser = MakePatternNode<Uninitialised>();

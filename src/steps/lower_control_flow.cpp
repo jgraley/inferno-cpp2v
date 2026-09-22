@@ -670,13 +670,13 @@ ExtractCallParams::ExtractCallParams()
     s_call->callee = func_id;
     x_not->negand = x_id; // this restriction to become light-touch restriction
     
-    r_ce->members = (r_temp);
+    //r_ce->members = ();
     r_temp->identifier = r_temp_id;
     r_temp_id->sources = (id);
     r_temp->initialiser = MakePatternNode<Uninitialised>();
     r_temp->type = type;
     r_temp->permission = MakePatternNode<NonConst>();    
-    r_ce->statements = (r_assign, r_call);
+    r_ce->statements = (r_temp, r_assign, r_call);
     r_assign->operands = (r_temp_id, value);
     r_call->argumentation = r_args;
     r_args->arguments = (params, r_param);

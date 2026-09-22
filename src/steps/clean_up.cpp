@@ -87,8 +87,8 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     s_ce->members = ( decls );
     s_ce->statements = ( body, last );
     
-    r_comp->statements = ( body, r_assign, stuff );
-    r_comp->members = ( decls, r_temp );
+    r_comp->members = ( decls );
+    r_comp->statements = ( r_temp, body, r_assign, stuff );
     r_temp->identifier = r_temp_id;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
     r_temp->type = r_type;
