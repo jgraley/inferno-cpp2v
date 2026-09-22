@@ -684,6 +684,7 @@ LoopRotation::LoopRotation()
     auto x_comp_decls = MakePatternNode<StarAgent, Declaration>();
     auto s_cur_enum = MakePatternNode<Enumerator>();
     auto s_outer_enum = MakePatternNode<Global>();
+    auto func_pre = MakePatternNode<StarAgent, Statement>();
     auto inits = MakePatternNode<StarAgent, Statement>();
     auto stmts = MakePatternNode<StarAgent, Statement>();
     auto prepre = MakePatternNode<StarAgent, Statement>();
@@ -737,14 +738,15 @@ LoopRotation::LoopRotation()
     fn->type = thread;
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  
-    func_comp->members = (func_decls, /*s_enum,*/ s_var_decl); // enum removed because it is class member, not local to the function
+    func_comp->members = (func_decls); 
     s_enum->identifier = s_enum_id;
 	s_enum->members = (s_enums, s_cur_enum);
     s_cur_enum->identifier = s_cur_enum_id;
     s_outer_enum->identifier = s_outer_enum_id;
     s_var_decl->type = s_enum_id;
     s_var_decl->identifier = s_var_id;
-    func_comp->statements = (inits, loop);
+    // s_enum removed because it is class member, not local to the function
+    func_comp->statements = ( func_pre, s_var_decl, inits, loop);
     loop->body = delta;
     delta->through = s_all;
     s_all->conjuncts = (s_comp_loop, s_comp_yield, s_notmatch);

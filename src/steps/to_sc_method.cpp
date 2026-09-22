@@ -16,7 +16,8 @@ AutosToModule::AutosToModule()
     auto r_rec = MakePatternNode<Record>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
-    auto vstmts = MakePatternNode<StarAgent, Statement>();
+    auto vstmts_pre = MakePatternNode<StarAgent, Statement>();
+    auto vstmts_post = MakePatternNode<StarAgent, Statement>();
     auto s_var = MakePatternNode<Local>();
     auto fn = MakePatternNode<Member>();
     auto r_var = MakePatternNode<Member>();
@@ -46,15 +47,15 @@ AutosToModule::AutosToModule()
     sx_not->negand = sx_stuff;
     sx_stuff->terminus = sx_call;
     sx_call->argumentation = sx_args;
-    s_comp->members = (vdecls, s_var);
-    s_comp->statements = (vstmts);
+    s_comp->members = (vdecls);
+    s_comp->statements = (vstmts_pre, s_var, vstmts_post);
     s_var->type = type;
     s_var->identifier = var_id;
     s_var->initialiser = var_init;
      
     delta->overlay = r_comp;
     r_comp->members = (vdecls);
-    r_comp->statements = (vstmts);
+    r_comp->statements = (vstmts_pre, vstmts_post);
     r_var->type = type;
     r_var->identifier = var_id;
     r_var->initialiser = var_init;
@@ -135,7 +136,8 @@ DeclsToModule::DeclsToModule()
     auto r_rec = MakePatternNode<Record>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
-    auto vstmts = MakePatternNode<StarAgent, Statement>();
+    auto vstmts_pre = MakePatternNode<StarAgent, Statement>();
+    auto vstmts_post = MakePatternNode<StarAgent, Statement>();
     auto fn = MakePatternNode<Member>();
     auto ut = MakePatternNode<TypeDeclaration>();
     auto ft = MakePatternNode<Thread>();
@@ -155,12 +157,12 @@ DeclsToModule::DeclsToModule()
     // TODO recurse restriction for locally declared classes
     stuff->terminus = delta;
     delta->through = s_comp;
-    s_comp->members = (vdecls, ut);
-    s_comp->statements = (vstmts);
+    s_comp->members = (vdecls);
+    s_comp->statements = (vstmts_pre, ut, vstmts_post);
      
     delta->overlay = r_comp;
     r_comp->members = (vdecls);
-    r_comp->statements = (vstmts);
+    r_comp->statements = (vstmts_pre, vstmts_post);
     
     Configure( SEARCH_REPLACE, s_rec, r_rec );
 }
