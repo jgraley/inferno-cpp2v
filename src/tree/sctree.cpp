@@ -45,7 +45,7 @@ string Event::GetKeyword( Policy ) const
 
 Syntax::Token Event::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_TYPE_KEYWORD;
+	return YY::VNLangParser::token::TOK_TYPE_SIGN;
 }
 
 //////////////////////////// Module ///////////////////////////////
@@ -329,7 +329,7 @@ Syntax::Production Process::GetMyProductionTerminal() const
 
 Syntax::Token Process::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_TYPE_KEYWORD;
+	return YY::VNLangParser::token::TOK_TYPE_SIGN;
 }
 
 //////////////////////////// Method ///////////////////////////////

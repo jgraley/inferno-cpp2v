@@ -884,6 +884,7 @@ struct CallableParams : Callable, Scope
 	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
     string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy) override;
 	Token GetSignifierToken() const override;
+	virtual TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc );
 };
 
 
@@ -896,6 +897,7 @@ struct CallableParamsReturn : CallableParams
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
                                        TreePtr<Node> constant ) override;
+	Token GetSignifierToken() const override;
 };
 
 
@@ -932,6 +934,7 @@ struct Constructor : Procedure // TODO be CallableParams
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
                                        TreePtr<Node> constant ) final;
+	Token GetSignifierToken() const override;
 };
 
 

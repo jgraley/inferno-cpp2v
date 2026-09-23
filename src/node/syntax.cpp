@@ -290,6 +290,13 @@ TreePtr<Node> Syntax::OnElseBody( TreePtr<Node>, Location loc )
 } 
 
 
+TreePtr<Node> Syntax::OnParams( list<TreePtr<Node>>, Location loc )
+{
+	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
+		MyBestErrName() + " cannot be used with parameters.");		
+}
+
+
 any Syntax::GetStartingScopeContext() const
 {
 	return any();	// std::any is nullable

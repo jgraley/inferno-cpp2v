@@ -221,6 +221,7 @@ public:
 	virtual TreePtr<Node> OnObject( TreePtr<Node> object, Location loc );
 	virtual TreePtr<Node> OnBody( TreePtr<Node> body, Location loc );
 	virtual TreePtr<Node> OnElseBody( TreePtr<Node> body, Location loc );
+	virtual TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc );
 	
 	virtual any GetStartingScopeContext() const;    
 	virtual void UpdateContext( TreePtr<Node> node, any &context, Location loc );	

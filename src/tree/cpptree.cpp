@@ -1597,22 +1597,24 @@ Syntax::Production Callable::GetMyProductionTerminal() const
 {
 	// Rendering as a type.
 	// We will require an abstract declarator (we'll hit this node first)
-	return Production::DECLARATOR_IN_USE; 
+	return Production::PRIMARY_TYPE; 
 }
 
 
 Syntax::Production Callable::GetOperandInDeclaratorProduction() const
 {
-	// Rendering a non-abstract declarator.
-	return Production::POSTFIX; // eg int a();
+	// As with Type.
+	return Production::BOTTOM_EXPR; 
 }
 
 
 string Callable::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 											 Production , Production, Policy policy,
-											 TreePtr<Node>  )
+											 TreePtr<Node> constant )
 {
+	auto dc = TreePtr<Permission>::DynamicCast(constant);	
 	return renderer->GetSignifier( this, policy ) + 
+		   renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
 	       (declarator != "" ? " "+declarator : "");
 }
 
@@ -1635,16 +1637,20 @@ string Callable::GetRenderParameterisation(VN::RendererInterface *, Policy )
 
 Syntax::Token Callable::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_TYPE_KEYWORD;
+	return YY::VNLangParser::token::TOK_TYPE_SIGN;
 }
 
 //////////////////////////// CallableParams //////////////////////////////
 
-string CallableParams::GetRenderTypeAndDeclarator( VN::RendererInterface *, string , 
-											 Production , Production, Policy ,
-											 TreePtr<Node>  )
+string CallableParams::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+											 Production , Production, Policy policy,
+											 TreePtr<Node> constant )
 {
-	throw Unimplemented();
+	auto dc = TreePtr<Permission>::DynamicCast(constant);	
+	return renderer->GetSignifier( this, policy ) + 
+		   GetRenderParameterisation( renderer, policy ) +
+		   renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
+	       (declarator != "" ? " "+declarator : "");
 }
 
 
@@ -1675,7 +1681,15 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 
 Syntax::Token CallableParams::GetSignifierToken() const
 {
-	throw UnimplementedToken();
+	return YY::VNLangParser::token::TOK_TYPE_W_ARGS_SIGN;
+}
+
+
+TreePtr<Node> CallableParams::OnParams( list<TreePtr<Node>> params_, Location )
+{
+    for( TreePtr<Node> p : params_ )	
+		params.push_back(p);
+	return (TreePtr<Node>)shared_from_this();	
 }
 
 //////////////////////////// CallableParamsReturn //////////////////////////////
@@ -1693,6 +1707,12 @@ string CallableParamsReturn::GetRenderTypeAndDeclarator( VN::RendererInterface *
                                                 MakeTreeNode<NonConst>() );
 }
 
+Syntax::Token CallableParamsReturn::GetSignifierToken() const
+{
+	throw Unimplemented(); // No signifier: declarator syntax is used instead
+}
+
+
 //////////////////////////// Constructor //////////////////////////////
 
 string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
@@ -1704,6 +1724,12 @@ string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer,
 		return "⨤" + d2; 
 	else
 		return d2; 
+}
+
+
+Syntax::Token Constructor::GetSignifierToken() const
+{
+	throw Unimplemented(); // No signifier: declarator syntax is used instead
 }
 
 //////////////////////////// Destructor //////////////////////////////
@@ -1832,7 +1858,7 @@ string Void::GetKeyword( Policy ) const
 
 Syntax::Token Void::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_TYPE_KEYWORD;
+	return YY::VNLangParser::token::TOK_TYPE_SIGN;
 }
 
 //////////////////////////// Boolean ///////////////////////////////
@@ -1851,7 +1877,7 @@ string Boolean::GetKeyword( Policy ) const
 
 Syntax::Token Boolean::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_TYPE_KEYWORD;
+	return YY::VNLangParser::token::TOK_TYPE_SIGN;
 }
 
 //////////////////////////// Numeric ///////////////////////////////
