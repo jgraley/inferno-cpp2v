@@ -1717,7 +1717,7 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 
 Syntax::Token CallableParams::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_TYPE_W_PARAMS_SIGN;
+	return YY::VNLangParser::token::TOK_TYPE_SIGN;
 }
 
 
