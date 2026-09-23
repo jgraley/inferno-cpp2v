@@ -105,6 +105,7 @@ struct Type : virtual Node
 	Production GetOperandInDeclaratorProduction() const override;   
 
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
+	string UseAnonymousDeclarator(VN::RendererInterface *renderer, Production surround_prod, Policy policy);
 
 	virtual string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                                Production object_prod, Production surround_prod, Policy policy,
@@ -119,6 +120,7 @@ struct Type : virtual Node
 	Token GetPrerestrictToken() const override;
 	Token GetIdByNameToken() const override;
 	Token GetIdBuilderToken() const override;
+	Token GetSignifierToken() const override;
 };
 
 
@@ -302,6 +304,7 @@ struct TypeIdentifier : Identifier,
     NODE_FUNCTIONS
     virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
 	Production GetMyProductionTerminal() const override;
+   	Token GetSignifierToken() const override;
 };
 
                            
@@ -316,6 +319,7 @@ struct SpecificTypeIdentifier : TypeIdentifier,
 
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
 	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 };
 
 
@@ -867,6 +871,7 @@ struct Callable : Type
 	virtual string UpdateDeclarator( VN::RendererInterface *renderer, string declarator, Policy policy, TreePtr<Node> constant );
     virtual string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy);
 	Token GetSignifierToken() const override;
+	TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc ) override;
 };
 
 
@@ -877,6 +882,8 @@ struct CallableParams : Callable, Scope
 {
     NODE_FUNCTIONS
     Collection<Declaration> params; // TODO be Parameter #803
+
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
                                        TreePtr<Node> constant ) override;
@@ -884,7 +891,7 @@ struct CallableParams : Callable, Scope
 	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
     string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy) override;
 	Token GetSignifierToken() const override;
-	virtual TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc );
+	TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc ) override;
 };
 
 
@@ -957,6 +964,7 @@ struct Array : Type
     TreePtr<Initialiser> size; ///< evaluates to the size or Uninitialised if not given eg []
    
 	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
 	Production GetOperandInDeclaratorProduction() const override;
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
@@ -972,6 +980,7 @@ struct Indirection : Type
 	TreePtr<Permission> permission;  ///< is the destination const?
 
 	Production GetMyProductionTerminal() const override;	
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
 	Production GetOperandInDeclaratorProduction() const override;
 	TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc ) override;
 };
@@ -1045,6 +1054,7 @@ struct Integral : Numeric
                                        TreePtr<Node> constant ) final;
 	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
 	virtual bool IsSigned() { throw Unimplemented(); }
+	Token GetSignifierToken() const override;
 };
 
 /// Type of a signed integer number (2's complement).
@@ -1090,6 +1100,7 @@ struct Floating : Numeric
 	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
 }; 
 
+
 /// Type of a variable that can hold a label. Similar to the GCC extension
 /// for labels-in-variables but we use this type not void * (which is 
 /// inconvenient for stataic analysis). To declare a conventional label
@@ -1100,6 +1111,7 @@ struct Labeley : Type
     
 	Production GetMyProductionTerminal() const override;	    
 	string GetRenderTypeSpecSeq( VN::RendererInterface *, Policy ) final;
+	Token GetSignifierToken() const override;
 };
 
 //////////////////////////// User-defined Types ////////////////////////////

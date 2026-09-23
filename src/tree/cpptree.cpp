@@ -136,11 +136,13 @@ Syntax::Production Type::GetOperandInDeclaratorProduction() const
 }
 
 
-string Type::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) try
+string Type::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return GetRenderTypeSpecSeq(renderer, policy);
 }
-catch( Unimplemented & )
+	
+	
+string Type::UseAnonymousDeclarator(VN::RendererInterface *renderer, Production surround_prod, Policy policy)
 {
 	// Declarator may be needed so enter declarator vcall but ask for anonymous by
 	// setting declarator string to "". This corresponds to a type-id in https://alx71hub.github.io/hcb/ 
@@ -166,13 +168,13 @@ string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string
 }                                           
 
 
-string Type::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
+string Type::GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy )
 {
 	// This would be a type-specifier-seq in https://alx71hub.github.io/hcb/ 
 	// Try GetKeyword() for simple keyword types eg bool, void. Otherwise 
 	// this method should be overloaded, otherwise Type::GetRender() will do
 	// something ugly with ⍑
-	return GetKeyword(policy);
+	return renderer->GetSignifier(this, policy);
 }
 
 
@@ -202,6 +204,12 @@ Syntax::Token Type::GetIdByNameToken() const
 Syntax::Token Type::GetIdBuilderToken() const
 {
 	return YY::VNLangParser::token::TOK_ID_BUILDER_TYPE;	
+}
+
+
+Syntax::Token Type::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_TYPE_SIGN;
 }
 
 //////////////////////////// Declaration ///////////////////////////////
@@ -643,6 +651,12 @@ Syntax::Production TypeIdentifier::GetMyProductionTerminal() const
 	return Production::PRIMARY_EXPR; 
 }
 
+
+Syntax::Token TypeIdentifier::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_TYPE_SIGN;
+}
+
 //////////////////////////// SpecificTypeIdentifier //////////////////////////////
 
 string SpecificTypeIdentifier::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
@@ -656,6 +670,12 @@ string SpecificTypeIdentifier::GetRenderTypeSpecSeq( VN::RendererInterface *rend
 {
 	// Yes to scope resolution, otherwise we drop scope resolution on type usages
 	return SpecificIdentifier::GetRender(renderer, Production::PRIMARY_EXPR, policy); 
+}
+
+
+Syntax::Token SpecificTypeIdentifier::GetSignifierToken() const
+{
+	throw UnimplementedToken();
 }
 
 //////////////////////////// IdValuePair ///////////////////////////////
@@ -1640,7 +1660,23 @@ Syntax::Token Callable::GetSignifierToken() const
 	return YY::VNLangParser::token::TOK_TYPE_SIGN;
 }
 
+
+TreePtr<Node> Callable::OnParams( list<TreePtr<Node>> params, Location loc )
+{
+    if( !params.empty() )
+    	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " cannot accept parameters.");	
+		
+	return (TreePtr<Node>)shared_from_this();	
+}
+
 //////////////////////////// CallableParams //////////////////////////////
+
+string CallableParams::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+{
+	return UseAnonymousDeclarator(renderer, surround_prod, policy);
+}
+
 
 string CallableParams::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 											 Production , Production, Policy policy,
@@ -1681,7 +1717,7 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 
 Syntax::Token CallableParams::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_TYPE_W_ARGS_SIGN;
+	return YY::VNLangParser::token::TOK_TYPE_W_PARAMS_SIGN;
 }
 
 
@@ -1707,11 +1743,11 @@ string CallableParamsReturn::GetRenderTypeAndDeclarator( VN::RendererInterface *
                                                 MakeTreeNode<NonConst>() );
 }
 
+
 Syntax::Token CallableParamsReturn::GetSignifierToken() const
 {
-	throw Unimplemented(); // No signifier: declarator syntax is used instead
+	throw UnimplementedToken(); // No signifier: declarator syntax is used instead
 }
-
 
 //////////////////////////// Constructor //////////////////////////////
 
@@ -1729,7 +1765,7 @@ string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer,
 
 Syntax::Token Constructor::GetSignifierToken() const
 {
-	throw Unimplemented(); // No signifier: declarator syntax is used instead
+	return YY::VNLangParser::token::TOK_TYPE_SIGN;
 }
 
 //////////////////////////// Destructor //////////////////////////////
@@ -1755,6 +1791,12 @@ Syntax::Production Array::GetMyProductionTerminal() const
 	// Rendering as a type.
 	// We will require an abstract declarator (we'll hit this node first)
 	return Production::DECLARATOR_IN_USE; 
+}
+
+
+string Array::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+{
+	return UseAnonymousDeclarator(renderer, surround_prod, policy);
 }
 
 
@@ -1788,6 +1830,12 @@ Syntax::Production Indirection::GetMyProductionTerminal() const
 	// Rendering as a type.
 	// We will require an abstract declarator (we'll hit this node first)
 	return Production::DECLARATOR_IN_USE;
+}
+
+
+string Indirection::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+{
+	return UseAnonymousDeclarator(renderer, surround_prod, policy);
 }
 
 
@@ -1964,6 +2012,12 @@ string Integral::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
     return s;	
 }
 
+
+Syntax::Token Integral::GetSignifierToken() const
+{
+	throw UnimplementedToken(); // Integral::GetRenderTypeSpecSeq() can fail so need long-form explicit
+}
+
 //////////////////////////// SpecificFloatSemantics ///////////////////////////////
 
 SpecificFloatSemantics::SpecificFloatSemantics() 
@@ -2039,6 +2093,7 @@ Syntax::Production Labeley::GetMyProductionTerminal() const
 	return Production::POSTFIX; // renders as void *
 }
 
+
 string Labeley::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 {
 	if( policy.permit_inherited_keyword ) 
@@ -2051,6 +2106,12 @@ string Labeley::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
 	// back to const void *.
 	// Raising requires usage analysis but only needed if goto-a-variable is 
 	// accepted as input.
+}
+
+
+Syntax::Token Labeley::GetSignifierToken() const
+{
+	throw UnimplementedToken(); 
 }
 
 //////////////////////////// TypeDeclaration ///////////////////////////////
