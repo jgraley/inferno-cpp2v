@@ -438,7 +438,7 @@ CleanupVoidStatementExpression::CleanupVoidStatementExpression()
 }
 
 
-CleanupUnusedVariables::CleanupUnusedVariables()
+CleanupUnusedMembersAndTopLevelVars::CleanupUnusedMembersAndTopLevelVars()
 {
     auto s_all = MakePatternNode<ConjunctionAgent, Scope>();
     auto s_scope = MakePatternNode<DeclScope>();
@@ -465,6 +465,55 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     delta_scope->overlay = r_scope;
     s_scope->members = (inst, decls);
     r_scope->members = (decls);
+    inst->type = nested_array;
+    inst->identifier = id;
+    nested_array->recurse_restriction = MakePatternNode<Array>();
+    nested_array->terminus = sx_not;
+    sx_not->negand = sx_any;
+    sx_any->disjuncts = ( MakePatternNode<Array>(), // ensure we recursed out of arrays
+                          MakePatternNode<Callable>(),
+                          getdecl );
+    getdecl->pattern = sx_ir;
+    sx_ir->members = MakePatternNode<StarAgent, Declaration>();
+    sx_ir->bases = MakePatternNode<StarAgent, Base>();
+    s_nscope->negand = s_stuff2;
+    s_stuff2->terminus = s_antip;
+    s_antip->conjuncts = (s_anynode, s_nm);
+    s_anynode->terminus = id;
+    s_nm->negand = inst;
+                        
+    Configure( COMPARE_REPLACE, s_all, stuff1 );
+}
+
+
+CleanupUnusedLocals::CleanupUnusedLocals()
+{
+    auto s_all = MakePatternNode<ConjunctionAgent, Scope>();
+    auto s_seq_scope = MakePatternNode<SequentialScope>();
+    auto r_seq_scope = MakePatternNode<SequentialScope>();
+    auto delta_scope = MakePatternNode<DeltaAgent, Scope>();
+    auto stmts_pre = MakePatternNode<StarAgent, Statement>();
+    auto stmts_post = MakePatternNode<StarAgent, Statement>();
+    auto inst = MakePatternNode<Instance>();
+    auto nested_array = MakePatternNode<StuffAgent, Type>();
+    auto sx_not = MakePatternNode<NegationAgent, Type>();
+    auto sx_any = MakePatternNode<DisjunctionAgent, Type>();
+    auto getdecl = MakePatternNode<TransformOfAgent, TypeIdentifier>( &TypeDeclarationOf::instance ); // TODO should be modulo typedefs
+    auto id = MakePatternNode<InstanceIdentifier>();
+    auto stuff1 = MakePatternNode<StuffAgent, Scope>();
+    auto s_stuff2 = MakePatternNode<StuffAgent, Scope>();
+    auto s_antip = MakePatternNode<ConjunctionAgent, Node>();
+    auto s_anynode = MakePatternNode<ChildAgent, Node>();
+    auto s_nm = MakePatternNode<NegationAgent, Node>();
+    auto sx_ir = MakePatternNode<InheritanceRecord>();
+    auto s_nscope = MakePatternNode<NegationAgent, Scope>();
+    
+    s_all->conjuncts = (stuff1, s_nscope);
+    stuff1->terminus = delta_scope;
+    delta_scope->through = s_seq_scope;
+    delta_scope->overlay = r_seq_scope;
+    s_seq_scope->statements = (stmts_pre, inst, stmts_post);
+    r_seq_scope->statements = (stmts_pre, stmts_post);
     inst->type = nested_array;
     inst->identifier = id;
     nested_array->recurse_restriction = MakePatternNode<Array>();

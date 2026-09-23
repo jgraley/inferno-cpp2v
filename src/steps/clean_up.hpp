@@ -87,12 +87,20 @@ public:
     CleanupVoidStatementExpression();
 };
 
-/** Remove instances not used anywhere - except Callables and instances of InheritanceRecord since
+/** Remove members not used anywhere - except Callables and instances of InheritanceRecord since
     these might do something useful even when not referenced.*/
-class CleanupUnusedVariables : public VNStep
+class CleanupUnusedMembersAndTopLevelVars : public VNStep
 {
 public:
-    CleanupUnusedVariables();
+    CleanupUnusedMembersAndTopLevelVars();
+};
+
+/** Remove local vars not used anywhere - except Callables and instances of InheritanceRecord since
+    these might do something useful even when not referenced.*/
+class CleanupUnusedLocals : public VNStep
+{
+public:
+    CleanupUnusedLocals();
 };
 
 /// Simplify if(x) if(y) z using &&

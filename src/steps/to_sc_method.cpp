@@ -176,7 +176,8 @@ ThreadToMethod::ThreadToMethod()
     auto s_thread_type = MakePatternNode<Thread>();
     auto r_method_type = MakePatternNode<Method>();
     auto s_comp = MakePatternNode<Compound>();
-    auto loop_comp = MakePatternNode<Compound>();
+    auto s_loop_comp = MakePatternNode<Compound>();
+    auto r_loop_comp = MakePatternNode<Compound>();
     auto id = MakePatternNode<InstanceIdentifier>();
     auto s_loop = MakePatternNode<Do>();
     auto s_loop_cond = MakePatternNode<True>();
@@ -195,7 +196,7 @@ ThreadToMethod::ThreadToMethod()
     
     or_return->return_value = or_retval;
     
-    auto embedded_o = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( loop_comp, os_continue, or_return);
+    auto embedded_o = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( r_loop_comp, os_continue, or_return);
     auto embedded_n = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_o, ns_wait_delta, nr_nt_delta);
     auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_n, ms_wait_static, mr_nt_static);
     auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_m, ls_wait_dynamic, lr_nt_dynamic);
@@ -209,9 +210,9 @@ ThreadToMethod::ThreadToMethod()
 //    s_comp->members = (); important - locals in the body scope not allowed, they would lose their values every itheration in SC_METHOD
     s_comp->statements = s_loop;
     s_loop->condition = s_loop_cond; 
-    s_loop->body = loop_comp;
-    loop_comp->members = (loop_decls);
-    loop_comp->statements = (loop_stmts);
+    s_loop->body = s_loop_comp;
+    s_loop_comp->statements = (loop_stmts);
+    r_loop_comp->statements = (loop_stmts, MakePatternNode<NextTriggerDelta>()); // ... or whatever re-triggers when we fall out of the fall through machine
     r_method->permission = MakePatternNode<NonConst>();        
     r_method->dispatch = MakePatternNode<NonVirtual>();
     r_method->access = MakePatternNode<Private>();

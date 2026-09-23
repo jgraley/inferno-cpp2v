@@ -593,8 +593,8 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     inst->type = MakePatternNode<Callable>();
     inst->initialiser = delta;
     delta->through = s_comp;
-    s_comp->members = (decls);
-    s_comp->statements = (s_label, body, is_conditional_goto 
+    // Keep the decls before the label out of the loop, in case they have inits
+    s_comp->statements = (decls, s_label, body, is_conditional_goto 
                                          ? TreePtr<Statement>(s_ifgoto) 
                                          : TreePtr<Statement>(s_goto) );
     body->restriction = sx_not;
@@ -604,14 +604,13 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     s_ifgoto->body_else = MakePatternNode<Nop>();
     
     delta->overlay = r_comp;
-    r_comp->members = (decls);
-    r_comp->statements = (r_do);
+    r_comp->statements = (decls, r_do);
     r_do->condition = is_conditional_goto 
                       ? cond 
                       : TreePtr<Expression>(MakePatternNode<True>());
     r_do->body = embedded_ll;
     //r_body_comp->members = ();
-    r_body_comp->statements = body;
+    r_body_comp->statements = (body);
     
     Configure( SEARCH_REPLACE, inst );
 }
