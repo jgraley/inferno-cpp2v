@@ -2,6 +2,7 @@
 
 #include "vn/agents/all.hpp"
 #include "tree/cpptree.hpp"
+#include "node/syntax.hpp"
 
 using namespace Declarators;
 
@@ -89,7 +90,6 @@ Result Function::DeclaratorReduce( TreePtr<Node> type_view, CVQuals cv_quals_vie
 	node->return_type = type_view;
 	(void)cv_quals_view; // cv_quals_view would set constness of return value. 
 	// Functions can in fact have const return values TODO
-	for( auto param : params )
-		node->params.push_back(param);
+	node->OnParams(params, Location() );
 	return DoReduce(child, node, cv_quals_decl);
 }

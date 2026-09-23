@@ -1624,7 +1624,7 @@ string Callable::UpdateDeclarator( VN::RendererInterface *renderer, string decla
 {
 	auto dc = TreePtr<Permission>::DynamicCast(constant);	
 	return declarator + 
-	       GetRenderParameterisation(renderer, policy) +	             
+		   GetRenderParameterisation(renderer, policy) +
 	       renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy);
 }                  
 
