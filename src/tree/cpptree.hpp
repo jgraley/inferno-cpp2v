@@ -853,7 +853,8 @@ struct LabelDeclaration : Declaration, //TODO commonize with Case and Default
 /** Types under Callable refer to a function's interface as seen by 
  caller and as used in eg function pointers (which is simply Pointer to
  the function type). To actually have a function, with a body, you need
- an Instance with type filled in to something derived from Callable. */
+ an Instance with type filled in to something derived from Callable. 
+ Callable renders as a type, not a declarator.*/
 struct Callable : Type
 {
     NODE_FUNCTIONS
@@ -865,6 +866,7 @@ struct Callable : Type
                                        TreePtr<Node> constant ) override;
 	virtual string UpdateDeclarator( VN::RendererInterface *renderer, string declarator, Policy policy, TreePtr<Node> constant );
     virtual string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy);
+	Token GetSignifierToken() const override;
 };
 
 
@@ -875,11 +877,13 @@ struct CallableParams : Callable, Scope
 {
     NODE_FUNCTIONS
     Collection<Declaration> params; // TODO be Parameter #803
+	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
+                                       Production object_prod, Production surround_prod, Policy policy,
+                                       TreePtr<Node> constant ) override;
     virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
 	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
-
-protected:    
     string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy) override;
+	Token GetSignifierToken() const override;
 };
 
 

@@ -1610,13 +1610,10 @@ Syntax::Production Callable::GetOperandInDeclaratorProduction() const
 
 string Callable::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 											 Production , Production, Policy policy,
-											 TreePtr<Node> constant )
+											 TreePtr<Node>  )
 {
-	throw RefuseDifficultSyntax(); 
-	// This will render into something ambiguous with expressions
-	
-	// We have no return type, so we can't recurse and might as well complete the render here
-	return UpdateDeclarator( renderer, declarator, policy, constant );
+	return renderer->GetSignifier( this, policy ) + 
+	       (declarator != "" ? " "+declarator : "");
 }
 
 
@@ -1635,7 +1632,21 @@ string Callable::GetRenderParameterisation(VN::RendererInterface *, Policy )
 	return "()";
 }
 
+
+Syntax::Token Callable::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_TYPE_KEYWORD;
+}
+
 //////////////////////////// CallableParams //////////////////////////////
+
+string CallableParams::GetRenderTypeAndDeclarator( VN::RendererInterface *, string , 
+											 Production , Production, Policy ,
+											 TreePtr<Node>  )
+{
+	throw Unimplemented();
+}
+
 
 TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, any &, Location loc) const
 {
@@ -1659,6 +1670,12 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 		strings.push_back( renderer->DoRender( &d, Production::BARE_STMT_DECL, policy ) );       
 
     return Join( strings, ", ", "(", ")" );
+}
+
+
+Syntax::Token CallableParams::GetSignifierToken() const
+{
+	throw UnimplementedToken();
 }
 
 //////////////////////////// CallableParamsReturn //////////////////////////////

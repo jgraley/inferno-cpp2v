@@ -17,7 +17,9 @@ sc_trace_file *GetSCTraceFP()
 int sc_main(int argc, char* argv[])
 {
     sc_start();
-    printf("dropped out of sc_start()\n");
+    printf("Dropped out of sc_start()\n");
+    printf("This probably means an SC_THREAD or SC_METHOD returned without calling next_trigger()\n");
+    printf("In Inferno tests we use cease(x) to emit a result value, so this is probably an error\n");
     return 0;
 }
 
