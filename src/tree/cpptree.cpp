@@ -154,7 +154,7 @@ string Type::UseAnonymousDeclarator(VN::RendererInterface *renderer, Production 
 		surround_prod = Production::BOOT_TYPE;
 	string s = GetRenderTypeAndDeclarator( renderer, "", Production::ANONYMOUS, surround_prod, policy, MakeTreeNode<NonConst>() );
 	if( policy.disambiguate_type_id )
-		s = "⍑(" + s + ")"; 
+		s = "⍑ (" + s + ")"; 
 	return s;
 }
 
@@ -188,12 +188,6 @@ string Type::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy )
 bool Type::IsType() const
 {
 	return true;
-}
-
-
-bool Type::IsSelfDeclaring() const
-{
-	return false;
 }
 
 
@@ -1494,16 +1488,32 @@ TreePtr<Node> Member::OnAccess( TreePtr<Node> access_, Location )
 list<string> XStructor::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
 {
 	ASSERT(record_id);
-	string declarator = renderer->DoRender( &identifier, 
-											Production::PRIMARY_EXPR, 
-											id_policy );   
-	FTRACE("XStructor declarator is ")(declarator)("\n");
-	return { renderer->DoRenderTypeAndDeclarator( &type, 
-												  declarator, 
-												  Production::PRIMARY_EXPR, 
-												  Production::BARE_STMT_DECL, 
-												  policy, 
-												  permission) };		
+	list<string> ls;
+	string s;
+	
+	// Indicate to VN parser that we have an xtstructor TODO do this by recognising the class id designation
+	if( policy.use_vn_xstructor_style )
+		s += "⨤";
+
+	if( id_policy.resolve_identifier_scope )
+	{
+		// Use id_policy so we resolve any scopes outside the record
+		s += renderer->DoRender( &record_id, Production::PRIMARY_EXPR, policy );
+		s += "::";
+	}
+	s += GetLeadingText(policy);
+	Policy local_id_policy = id_policy;
+	local_id_policy.resolve_identifier_scope = false;
+	// Absolutely no scope resolving this time
+	s += renderer->DoRender( &record_id, Production::SPACE_SEP_STMT_DECL, local_id_policy );		
+	s += renderer->DoRender( &type, Production::SPACE_SEP_TYPE, policy );		
+	
+	// Required for resolved constructors - allows to tie directly to constructor usages
+	ls.push_back( s );
+	if( policy.use_vn_xstructor_style )
+		ls.push_back( renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) );   
+		
+	return ls;
 }
 
 
@@ -1747,7 +1757,7 @@ TreePtr<Node> CallableParams::OnParams( list<TreePtr<Node>> params_, Location )
 
 //////////////////////////// CallableParamsReturn //////////////////////////////
 
-string CallableParams::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+string CallableParamsReturn::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {
 	return UseAnonymousDeclarator(renderer, surround_prod, policy);
 }
@@ -1774,52 +1784,9 @@ Syntax::Token CallableParamsReturn::GetSignifierToken() const
 
 //////////////////////////// Constructor //////////////////////////////
 
-#ifndef NEWS
-string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-												Production , Production, Policy policy,
-												TreePtr<Node> constant )
-{
-	string d2 = UpdateDeclarator(renderer, declarator, policy, constant);
-	if( policy.use_vn_xstructor_symbol )
-		return "⨤" + d2; 
-	else
-		return d2; 
-}
-#else
-
-
-// TODO use GetKeyword() and drop the GetRenderParameterisation( renderer, policy )
 string Constructor::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy )
 {
-	if( policy.use_vn_xstructor_symbol )
-	{
-		return "⨤" + GetRenderParameterisation( renderer, policy ); 
-	}
-	else
-	{
-		if( record_id )
-		{
-			return renderer->DoRender( &record_id, 
-                                       Production::PRIMARY_EXPR, 
-                                       id_policy ) +
-				   GetRenderParameterisation( renderer, policy );
-		}
-		else
-		{
-			return "CANNOT RENDER CONSTRUCTOR AS record_id IS NULL";
-		}
-	}
-}
-#endif
-
-
-bool Constructor::IsSelfDeclaring() const
-{
-#ifdef NEWS
-	return true;
-#else
-	return false;
-#endif
+	return GetRenderParameterisation( renderer, policy ); 
 }
 
 
@@ -1830,19 +1797,17 @@ Syntax::Token Constructor::GetSignifierToken() const
 
 //////////////////////////// Destructor //////////////////////////////
 
-string Destructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-											   Production , Production, Policy policy,
-											   TreePtr<Node> constant)
+string Destructor::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy )
 {
-	if( declarator.empty() )
-		declarator = "~";
-		
-	string d2 = UpdateDeclarator(renderer, declarator, policy, constant);
-	if( policy.use_vn_xstructor_symbol )
-		return "⨤" + d2;
-	else
-		return d2; 
+	return GetRenderParameterisation( renderer, policy ); 
 }
+
+
+Syntax::Token Destructor::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_TYPE_SIGN;
+}
+
 
 //////////////////////////// Array //////////////////////////////
 

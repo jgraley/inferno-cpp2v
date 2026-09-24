@@ -115,7 +115,6 @@ struct Type : virtual Node
 	virtual string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy );    
 	
 	bool IsType() const override;
-	virtual bool IsSelfDeclaring() const;
 
 	Token GetExplicitToken() const override;
 	Token GetPrerestrictToken() const override;
@@ -913,7 +912,6 @@ struct CallableParams : Callable, Scope
     Collection<Declaration> params; // TODO be Parameter #803
 
 	string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy ) override;
-	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
     virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
 	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
     string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy) override;
@@ -928,6 +926,7 @@ struct CallableParamsReturn : CallableParams
     NODE_FUNCTIONS
     TreePtr<Type> return_type; ///< The return type
 
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
                                        TreePtr<Node> constant ) override;
@@ -964,16 +963,8 @@ struct Function : CallableParamsReturn
 struct Constructor : Procedure // TODO be CallableParams
 { 
 	NODE_FUNCTIONS_FINAL 
-	// we're saying that the type of a constructor depends on the class it constructs, as 
-	// well as parameters.
-#ifndef NEWS
-	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Production object_prod, Production surround_prod, Policy policy,
-                                       TreePtr<Node> constant ) final;
-#else
+
 	string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy ) override;
-#endif
-	bool IsSelfDeclaring() const override;
 	Token GetSignifierToken() const override;
 };
 
@@ -983,9 +974,8 @@ struct Destructor : Subroutine // TODO be Callable
 { 
 	NODE_FUNCTIONS_FINAL 
 
-	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Production object_prod, Production surround_prod, Policy policy,
-                                       TreePtr<Node> constant ) final;
+	string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy ) override;
+	Token GetSignifierToken() const override;
 };
 
 

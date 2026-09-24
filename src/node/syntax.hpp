@@ -115,7 +115,7 @@ public:
 			definitions(nullptr),
 			can_split_instances(false),
 			resolve_identifier_scope(true),
-			use_vn_xstructor_symbol(true),
+			use_vn_xstructor_style(true),
 			disambiguate_type_id(true),
 			refuse_invisibles(true),
 			missing_access_to_public(true),
@@ -139,7 +139,7 @@ public:
 	    queue<shared_ptr<Syntax>> *definitions;
 		bool can_split_instances;
 		bool resolve_identifier_scope;
-		bool use_vn_xstructor_symbol;
+		bool use_vn_xstructor_style;
 		bool disambiguate_type_id;
 		bool refuse_invisibles; // To be dropped, see #906
 		bool missing_access_to_public; // See #877
