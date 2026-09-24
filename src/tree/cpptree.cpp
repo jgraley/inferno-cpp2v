@@ -1465,20 +1465,6 @@ list<string> Member::RenderAccessSpec( VN::RendererInterface *renderer, Policy p
 
 list<string> Member::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy) const 
 { 
-	// Demand consistency between type and identifier, as well as limitations on qualifiers
-	if( TreePtr<Constructor>::DynamicCast(type) )
-	{
-		ASSERT( !identifier || TreePtr<ConstructorIdentifier>::DynamicCast(identifier) )(identifier);
-		ASSERT( TreePtr<NonConst>::DynamicCast(permission) )(permission);
-		ASSERT( TreePtr<NonVirtual>::DynamicCast(dispatch) )(dispatch);
-	}
-	if( TreePtr<Destructor>::DynamicCast(type) )
-	{
-		ASSERT( TreePtr<NonConst>::DynamicCast(permission) )(permission);
-		ASSERT( !identifier || TreePtr<DestructorIdentifier>::DynamicCast(identifier) )(identifier);	
-		// Virtual is allowed for destructors
-	}
-
 	return { renderer->DoRender(&dispatch, Production::SPACE_SEP_STMT_DECL, policy) };
 }
 
@@ -1503,13 +1489,15 @@ TreePtr<Node> Member::OnAccess( TreePtr<Node> access_, Location )
 }
 
 
-//////////////////////////// ConstructorDecl //////////////////////////////
+//////////////////////////// XStructor //////////////////////////////
 
-list<string> ConstructorDecl::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+list<string> XStructor::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
 {
+	ASSERT(record_id);
 	string declarator = renderer->DoRender( &identifier, 
 											Production::PRIMARY_EXPR, 
 											id_policy );   
+	FTRACE("XStructor declarator is ")(declarator)("\n");
 	return { renderer->DoRenderTypeAndDeclarator( &type, 
 												  declarator, 
 												  Production::PRIMARY_EXPR, 
@@ -1518,19 +1506,24 @@ list<string> ConstructorDecl::RenderMiddlePart( VN::RendererInterface *renderer,
 												  permission) };		
 }
 
+
+string XStructor::GetLeadingText(Policy) const
+{
+	return "X"; // TODO choose better
+}
+
+//////////////////////////// ConstructorDecl //////////////////////////////
+
+string ConstructorDecl::GetLeadingText(Policy) const
+{
+	return "";
+}
+
 //////////////////////////// DestructorDecl //////////////////////////////
 
-list<string> DestructorDecl::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+string DestructorDecl::GetLeadingText(Policy) const
 {
-	string declarator = renderer->DoRender( &identifier, 
-											Production::PRIMARY_EXPR, 
-											id_policy );   
-	return { renderer->DoRenderTypeAndDeclarator( &type, 
-												  declarator, 
-												  Production::PRIMARY_EXPR, 
-												  Production::BARE_STMT_DECL, 
-												  policy, 
-												  permission) };		
+	return "~";
 }
 
 //////////////////////////// Enumerator //////////////////////////////

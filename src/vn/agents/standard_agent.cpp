@@ -33,7 +33,12 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
 	// since identifiers have no children, so just re-use the plan.
 	if( algo->planned )
 	{
-		ASSERT( algo->IsSpecificIdentifier() );
+		string now = Progress::GetCurrent().GetPrefix(4);
+		ASSERT( algo->IsSpecificIdentifier() )
+		        ("Node ")(algo)(" appears to be shared between multiple VN steps\n")
+		        ("(")(algo->planned_at)(" and ")(now)(")\n")
+		        ("This is only possible with SpecificIdentifiers\n")
+		        ("Or maybe it's unkeyed or undeclared\n");
 		return; 
 	}
 	
@@ -59,6 +64,7 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
         ii++;
     }
     algo->planned = true;
+    algo->planned_at = Progress::GetCurrent().GetPrefix(4);
 }
 
 

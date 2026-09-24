@@ -166,6 +166,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto ls_comp = MakePatternNode< Compound >();
     auto lr_comp = MakePatternNode< Compound >();
     auto l_module = MakePatternNode< Module >();
+    auto l_module_id = MakePatternNode<TypeIdentifier>();
     auto ls_pcall = MakePatternNode<Call>();
     auto ls_pargs = MakePatternNode<MapArgumentation>();
     auto ls_arg = MakePatternNode< IdValuePair >();
@@ -178,7 +179,8 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto l_post = MakePatternNode<StarAgent, Statement>();
     auto ls_id = MakePatternNode< InstanceIdentifier >();
     auto l_bases = MakePatternNode<StarAgent, Base>();
-    auto l_ctype = MakePatternNode<Constructor>();
+    auto ls_ctype = MakePatternNode<Constructor>();
+    auto lr_ctype = MakePatternNode<Constructor>();
     auto l_ident = MakePatternNode<ConstructorIdentifier>();
     auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( lr_scprocess->GetLoweredIdOrMacroName() ); 
     auto s_arg_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "func" );
@@ -194,18 +196,19 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     s_instance->type = MakePatternNode<Callable>(); // just narrow things a little        
     r_program->members = (decls);   
             
+    l_module->identifier = l_module_id;
     l_module->members = (l_overcons, l_process, l_decls);
     l_module->bases = (l_bases);
     l_overcons->through = ls_cons;   
-    ls_cons->record_id = l_module->identifier;
+    ls_cons->record_id = l_module_id;
     ls_cons->dispatch = MakePatternNode<NonVirtual>();
     ls_cons->permission = MakePatternNode<NonConst>();
-    ls_cons->type = l_ctype;
+    ls_cons->type = ls_ctype;
     ls_cons->identifier = l_ident;
     ls_cons->initialiser = ls_comp;
     ls_comp->members = l_cdecls;
     ls_comp->statements = (l_pre, ls_pcall, l_post);
-    l_ctype->params = (l_ctype_param); // one parameter
+    ls_ctype->params = (l_ctype_param); // one parameter
     l_ctype_param->permission = MakePatternNode<NonConst>();
     l_ctype_param->initialiser = MakePatternNode<Uninitialised>();
     ls_pcall->callee = s_token;
@@ -214,14 +217,15 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_arg->key = s_arg_id;
     ls_arg->value = ls_id;
     l_overcons->overlay = lr_cons;
-    lr_cons->record_id = l_module->identifier;
+    lr_cons->record_id = l_module_id;
     lr_cons->dispatch = MakePatternNode<NonVirtual>();
     lr_cons->permission = MakePatternNode<NonConst>();    
-    lr_cons->type = l_ctype;
+    lr_cons->type = lr_ctype;
     lr_cons->identifier = l_ident;
     lr_cons->initialiser = lr_comp;
     lr_comp->members = l_cdecls;
     lr_comp->statements = (l_pre, l_post);
+    lr_ctype->params = (l_ctype_param); // one parameter
     
     // Rule #910: SC processes to be Member, with NonVirtual and Private
     l_process->dispatch = MakePatternNode<NonVirtual>();
@@ -347,7 +351,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     s_module->identifier = module_typeid;
     s_module->bases = (bases);
     s_module->members = (s_cons, decls);
-    s_cons->record_id = s_module->identifier;
+    s_cons->record_id = module_typeid;
     s_cons->dispatch = MakePatternNode<NonVirtual>();
     s_cons->permission = MakePatternNode<NonConst>();
     s_cons->initialiser = s_comp;
@@ -363,7 +367,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     l_record->bases = (l_record_bases);
     l_record->members = (l_delta, l_record_decls);
     l_delta->through = ls_member;
-    ls_member->record_id = l_record->identifier;
+    ls_member->record_id = l_record_typeid;
     ls_member->dispatch = MakePatternNode<NonVirtual>();
     ls_member->permission = MakePatternNode<NonConst>();
     ls_member->type = ls_ctype;

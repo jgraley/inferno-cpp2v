@@ -189,6 +189,7 @@ public:
 private:
     Plan plan; // can't be const because children added after construct
     bool planned = false;
+    string planned_at;
 };
 
 

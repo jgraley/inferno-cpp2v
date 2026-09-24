@@ -743,21 +743,30 @@ struct Member : Instance,
 };
 
 
-struct ConstructorDecl : Member
+struct XStructor : Member
 {
-	NODE_FUNCTIONS_FINAL
+	NODE_FUNCTIONS
 	TreePtr<TypeIdentifier> record_id;
 
 	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
+
+	virtual string GetLeadingText(Policy policy) const;
 };
 
 
-struct DestructorDecl : Member
+struct ConstructorDecl : XStructor
 {
 	NODE_FUNCTIONS_FINAL
-	TreePtr<TypeIdentifier> record_id;
+	
+	string GetLeadingText(Policy policy) const override;
+};
 
-	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
+
+struct DestructorDecl : XStructor
+{
+	NODE_FUNCTIONS_FINAL
+
+	string GetLeadingText(Policy policy) const override;
 };
 
 
