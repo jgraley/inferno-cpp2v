@@ -138,10 +138,12 @@ Syntax::Production Type::GetOperandInDeclaratorProduction() const
 
 string Type::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return GetRenderTypeSpecSeq(renderer, policy);
+	return GetRenderTypeSpec(renderer, policy);
 }
 	
 	
+// This method STARTS UP the declarator rendering process and can be called by any X::GetRender() that
+// needs declarator form.
 string Type::UseAnonymousDeclarator(VN::RendererInterface *renderer, Production surround_prod, Policy policy)
 {
 	// Declarator may be needed so enter declarator vcall but ask for anonymous by
@@ -157,18 +159,23 @@ string Type::UseAnonymousDeclarator(VN::RendererInterface *renderer, Production 
 }
 
 
+// This method (specifically this one on Type::) COMPLETES the declarator rendering process 
+// for types that do not participate. Such types implement GetRenderTypeSpec() and 
+// neither of GetRenderTypeAndDeclarator() or GetRender()
 string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                          Production, Production, Policy policy,
                                          TreePtr<Node> constant)
 {
 	auto dc = TreePtr<Permission>::DynamicCast(constant);	
-	return GetRenderTypeSpecSeq( renderer, policy ) + 
+	return GetRenderTypeSpec( renderer, policy ) + 
 		   renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
 	       (declarator != "" ? " "+declarator : "");
 }                                           
 
 
-string Type::GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy )
+// Render the type. In declarator grammar, this is just the part on the left of the 
+// actual declarator.
+string Type::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy )
 {
 	// This would be a type-specifier-seq in https://alx71hub.github.io/hcb/ 
 	// Try GetKeyword() for simple keyword types eg bool, void. Otherwise 
@@ -666,7 +673,7 @@ string SpecificTypeIdentifier::GetRender( VN::RendererInterface *renderer, Produ
 }
 
 
-string SpecificTypeIdentifier::GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy )
+string SpecificTypeIdentifier::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy )
 {
 	// Yes to scope resolution, otherwise we drop scope resolution on type usages
 	return SpecificIdentifier::GetRender(renderer, Production::PRIMARY_EXPR, policy); 
@@ -1628,17 +1635,6 @@ Syntax::Production Callable::GetOperandInDeclaratorProduction() const
 }
 
 
-string Callable::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-											 Production , Production, Policy policy,
-											 TreePtr<Node> constant )
-{
-	auto dc = TreePtr<Permission>::DynamicCast(constant);	
-	return renderer->GetSignifier( this, policy ) + 
-		   renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
-	       (declarator != "" ? " "+declarator : "");
-}
-
-
 string Callable::UpdateDeclarator( VN::RendererInterface *renderer, string declarator, Policy policy,
                                    TreePtr<Node> constant ) 
 {
@@ -1672,21 +1668,10 @@ TreePtr<Node> Callable::OnParams( list<TreePtr<Node>> params, Location loc )
 
 //////////////////////////// CallableParams //////////////////////////////
 
-string CallableParams::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+string CallableParams::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy )
 {
-	return UseAnonymousDeclarator(renderer, surround_prod, policy);
-}
-
-
-string CallableParams::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-											 Production , Production, Policy policy,
-											 TreePtr<Node> constant )
-{
-	auto dc = TreePtr<Permission>::DynamicCast(constant);	
 	return renderer->GetSignifier( this, policy ) + 
-		   GetRenderParameterisation( renderer, policy ) +
-		   renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
-	       (declarator != "" ? " "+declarator : "");
+		   GetRenderParameterisation( renderer, policy );
 }
 
 
@@ -1717,18 +1702,25 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 
 Syntax::Token CallableParams::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_TYPE_SIGN;
+	return YY::VNLangParser::token::TOK_TYPE_W_PARAMS_SIGN;
 }
 
 
 TreePtr<Node> CallableParams::OnParams( list<TreePtr<Node>> params_, Location )
 {
+	ASSERT( params.empty() );
     for( TreePtr<Node> p : params_ )	
 		params.push_back(p);
 	return (TreePtr<Node>)shared_from_this();	
 }
 
 //////////////////////////// CallableParamsReturn //////////////////////////////
+
+string CallableParams::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+{
+	return UseAnonymousDeclarator(renderer, surround_prod, policy);
+}
+
 
 string CallableParamsReturn::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 											 Production, Production surround_prod, Policy policy,
@@ -1751,6 +1743,7 @@ Syntax::Token CallableParamsReturn::GetSignifierToken() const
 
 //////////////////////////// Constructor //////////////////////////////
 
+#ifndef NEWS
 string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
 												Production , Production, Policy policy,
 												TreePtr<Node> constant )
@@ -1761,7 +1754,32 @@ string Constructor::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer,
 	else
 		return d2; 
 }
+#else
 
+
+// TODO use GetKeyword() and drop the GetRenderParameterisation( renderer, policy )
+string Constructor::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy )
+{
+	if( policy.use_vn_xstructor_symbol )
+	{
+		return "⨤" + GetRenderParameterisation( renderer, policy ); 
+	}
+	else
+	{
+		if( record_id )
+		{
+			return renderer->DoRender( &record_id, 
+                                       Production::PRIMARY_EXPR, 
+                                       id_policy ) +
+				   GetRenderParameterisation( renderer, policy );
+		}
+		else
+		{
+			return "CANNOT RENDER CONSTRUCTOR AS record_id IS NULL";
+		}
+	}
+}
+#endif
 
 Syntax::Token Constructor::GetSignifierToken() const
 {
@@ -1967,7 +1985,7 @@ string Integral::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, st
 }
 
 
-string Integral::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
+string Integral::GetRenderTypeSpec( VN::RendererInterface *, Policy )
 {
     bool ds;
     int64_t width_bits;
@@ -2015,7 +2033,7 @@ string Integral::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
 
 Syntax::Token Integral::GetSignifierToken() const
 {
-	throw UnimplementedToken(); // Integral::GetRenderTypeSpecSeq() can fail so need long-form explicit
+	throw UnimplementedToken(); // Integral::GetRenderTypeSpec() can fail so need long-form explicit
 }
 
 //////////////////////////// SpecificFloatSemantics ///////////////////////////////
@@ -2068,7 +2086,7 @@ SpecificFloatSemantics::operator const llvm::fltSemantics &() const
 
 //////////////////////////// Floating ///////////////////////////////
 
-string Floating::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy )
+string Floating::GetRenderTypeSpec( VN::RendererInterface *, Policy )
 {
     string s;
     TreePtr<SpecificFloatSemantics> sem = DynamicTreePtrCast<SpecificFloatSemantics>(semantics);
@@ -2094,7 +2112,7 @@ Syntax::Production Labeley::GetMyProductionTerminal() const
 }
 
 
-string Labeley::GetRenderTypeSpecSeq( VN::RendererInterface *, Policy policy )
+string Labeley::GetRenderTypeSpec( VN::RendererInterface *, Policy policy )
 {
 	if( policy.permit_inherited_keyword ) 
 		return "void *"; // Effecively inherited, this is the underlying C type for a label
@@ -2183,6 +2201,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Production, Policy po
 
 	// For our members
 	policy.context = make_shared<any>( GetStartingScopeContext() );
+	policy.surrounding_record = TreePtr<Record>(shared_from_this());
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring

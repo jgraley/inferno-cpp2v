@@ -288,7 +288,7 @@ private:
             }
         }
 
-        TreePtr<Type> CreateTypeNode(clang::Declarator &D, unsigned depth = 0, TreePtr<Permission> *permission = nullptr)
+        TreePtr<Type> CreateTypeNode(clang::Declarator &D, unsigned depth = 0, TreePtr<Permission> *permission = nullptr, TreePtr<Record> surrounding_record = nullptr)
         {
             ASSERT( depth<=D.getNumTypeObjects() );
 
@@ -384,6 +384,8 @@ private:
                     {
                         auto c = MakeTreeNode<Constructor>();
                         FillParameters(c, fchunk);
+                        ASSERT(surrounding_record);
+                        c->record_id = surrounding_record->identifier;
                         return c;
                     }
                     case clang::Declarator::DK_Destructor:
@@ -502,7 +504,10 @@ private:
             else
                 permission = MakeTreeNode<NonConst>();
 */
-			TreePtr<Type> type = CreateTypeNode(D, 0, &permission);			
+            TreePtr<Node> cur( ident_track.GetCurrent() );
+            auto record = DynamicTreePtrCast<Record>(cur); // Will be NULL if not in a record
+
+			TreePtr<Type> type = CreateTypeNode(D, 0, &permission, record);			
             ASSERT( permission );
             TreePtr<Instance> o;
 

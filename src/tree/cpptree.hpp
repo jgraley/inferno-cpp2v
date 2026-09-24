@@ -112,7 +112,7 @@ struct Type : virtual Node
                                                TreePtr<Node> constant );
 
     // Render a simple type only, no declarators
-	virtual string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy );    
+	virtual string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy );    
 	
 	bool IsType() const override;
 
@@ -217,6 +217,7 @@ struct SpecificIdentifier : virtual Property
     string GetIdentifierName() const override; /// This is relied upon to just return the identifier name 
     string GetDesignationNameHint() const override;
     bool IsDesignationNamedIdentifier() const override;	
+	virtual string GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy );
 	bool IsSpecificIdentifier() const override;
 	
     string GetGraphName() const override;
@@ -224,9 +225,6 @@ struct SpecificIdentifier : virtual Property
 
     BoundingRole addr_bounding_role;
     string name; // TODO split this out into NamedIdentifier
-
-protected:
-	virtual string GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy );
 };
 
 /// Identifier for any Instance (variable or object or function)
@@ -318,7 +316,7 @@ struct SpecificTypeIdentifier : TypeIdentifier,
     NODE_FUNCTIONS_FINAL
 
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
-	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
+	string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy ) override;
    	Token GetSignifierToken() const override;
 };
 
@@ -859,15 +857,17 @@ struct LabelDeclaration : Declaration, //TODO commonize with Case and Default
  the function type). To actually have a function, with a body, you need
  an Instance with type filled in to something derived from Callable. 
  Callable renders as a type, not a declarator.*/
+// Note: callables that lack a return value should not use any kind
+// of declarator form, because inevitably the signifier will look
+// like a return value. For example: sc_thread foo() says that 
+// foo is a Function returning an sc_thread. Actual thread is 
+// sc_thread foo {...}
 struct Callable : Type
 {
     NODE_FUNCTIONS
     
 	Production GetMyProductionTerminal() const override;	
 	Production GetOperandInDeclaratorProduction() const override;
-	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Production object_prod, Production surround_prod, Policy policy,
-                                       TreePtr<Node> constant ) override;
 	virtual string UpdateDeclarator( VN::RendererInterface *renderer, string declarator, Policy policy, TreePtr<Node> constant );
     virtual string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy);
 	Token GetSignifierToken() const override;
@@ -883,10 +883,8 @@ struct CallableParams : Callable, Scope
     NODE_FUNCTIONS
     Collection<Declaration> params; // TODO be Parameter #803
 
+	string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy ) override;
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
-	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
-                                       Production object_prod, Production surround_prod, Policy policy,
-                                       TreePtr<Node> constant ) override;
     virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
 	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
     string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy) override;
@@ -937,10 +935,16 @@ struct Function : CallableParamsReturn
 struct Constructor : Procedure // TODO be CallableParams
 { 
 	NODE_FUNCTIONS_FINAL 
-
+	// we're saying that the type of a constructor depends on the class it constructs, as 
+	// well as parameters.
+	TreePtr<SpecificTypeIdentifier> record_id;
+#ifndef NEWS
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
                                        TreePtr<Node> constant ) final;
+#else
+	string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy ) override;
+#endif
 	Token GetSignifierToken() const override;
 };
 
@@ -1052,7 +1056,7 @@ struct Integral : Numeric
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,
                                        TreePtr<Node> constant ) final;
-	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
+	string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy ) override;
 	virtual bool IsSigned() { throw Unimplemented(); }
 	Token GetSignifierToken() const override;
 };
@@ -1097,7 +1101,7 @@ struct Floating : Numeric
 
 	struct UnimplementedFloatingType : Unimplemented {};
 
-	string GetRenderTypeSpecSeq( VN::RendererInterface *renderer, Policy policy ) override;
+	string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy ) override;
 }; 
 
 
@@ -1110,7 +1114,7 @@ struct Labeley : Type
     NODE_FUNCTIONS_FINAL   
     
 	Production GetMyProductionTerminal() const override;	    
-	string GetRenderTypeSpecSeq( VN::RendererInterface *, Policy ) final;
+	string GetRenderTypeSpec( VN::RendererInterface *, Policy ) final;
 	Token GetSignifierToken() const override;
 };
 

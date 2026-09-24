@@ -147,6 +147,7 @@ public:
 		bool refuse_identifiers;
 		shared_ptr<Syntax> pointer_archetype;
 		shared_ptr<any> context;
+		any surrounding_record;
 	};
 	
 	// We deal with syntactical association only, not mathematical, because:

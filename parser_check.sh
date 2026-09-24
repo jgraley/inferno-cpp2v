@@ -3,7 +3,7 @@
 I=$*
 I_NO_SPACES=`echo ${I} | tr -d '[:space:]'`
 
-make -j 20
+make -j 32
 P1=p1${I_NO_SPACES}
 GP1=gp1${I_NO_SPACES}
 P2=p2${I_NO_SPACES}
@@ -35,4 +35,4 @@ QA=T130+
 #diff --color out_builtin.cpp out_p1.cpp
 
 # Full test run using patterns we previously wrote to p1/
-make -j 20 test I="${I} ${P1} -q${QA}"
+make -j 32 test I="${I} ${P1} -q${QA}"

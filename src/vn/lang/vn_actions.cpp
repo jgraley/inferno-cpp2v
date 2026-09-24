@@ -1042,4 +1042,8 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // whereas GetKeyword() is usually only implemented in leaf classes so only they get keywords 
 // GetRender() is usually implemented in intermediate to gove consistent syntax
 
+// NOTE where generalised functions (Callables) have no return value (by design, not just void)
+// we don;t use declarator syntax for them, but just make them a direct callable type. If there
+// are parameters, they follow the type in (). This is used for constructor, destructor, sc_thread,
+// sc_
 
