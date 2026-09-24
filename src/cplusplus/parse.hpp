@@ -287,12 +287,12 @@ private:
                 p->params.insert(param);
             }
         }
-
+		
         TreePtr<Type> CreateTypeNode(clang::Declarator &D, unsigned depth = 0, TreePtr<Permission> *permission = nullptr, TreePtr<Record> surrounding_record = nullptr)
         {
             ASSERT( depth<=D.getNumTypeObjects() );
 
-            if (depth == D.getNumTypeObjects())
+            if (depth == D.getNumTypeObjects()) // Type specs
             {
                 const clang::DeclSpec &DS = D.getDeclSpec();
 				if( permission )
@@ -361,7 +361,7 @@ private:
                     break;
                 }
             }
-            else
+            else // Declarator types
             {
                 const clang::DeclaratorChunk &chunk = D.getTypeObject(depth);
                 switch (chunk.Kind)
@@ -514,25 +514,34 @@ private:
             TRACE("scope flags 0x%x\n", S->getFlags());
             if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
 			{
-				TreePtr<Member> no = MakeTreeNode<Member> ();
-				o = no;
+				TreePtr<Member> no;
+				switch( D.getKind() )
+				{
+					case clang::Declarator::DK_Constructor:
+						no = MakeTreeNode<ConstructorDecl>();
+						break;
+						
+					case clang::Declarator::DK_Destructor:
+						no = MakeTreeNode<DestructorDecl>();
+						break;
+						
+					default:
+						no = MakeTreeNode<Member>();
+						break;
+				}
 				if (DS.isVirtualSpecified())
-				{
 					no->dispatch = MakeTreeNode<Virtual> ();
-				}
 				else
-				{
 					no->dispatch = MakeTreeNode<NonVirtual> ();
-				}
 				no->access = access;
+				o = no;
 			}
 			else if (S->getFnParent()) // in code
 			{
 				o = MakeTreeNode<Local> ();
 			}
 			else // top level
-			{
-				
+			{				
 				o = MakeTreeNode<Global> ();
 			}
 

@@ -517,22 +517,16 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( Syntax::Location loc, const list
 		if( q.cat == QualCat::STATIC )
 			q_static = &q;
 
-	//auto member = MakeTreeNode<CPPTree::Member>();
-	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
-	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
-	if( !spg ) 
-		throw YY::VNLangParser::syntax_error(
-			any_cast<YY::VNLangParser::location_type>(loc),
-			"Cannot disambiguate declaration because no surrounding scope." );
-	TreePtr<CPPTree::Member> member = spg->GetDeclarationNode(any_cast<YY::VNLangParser::location_type>(loc), !!q_static); 
+	TreePtr<CPPTree::ConstructorDecl> constructor = MakeTreeNode<CPPTree::ConstructorDecl>(); 
 
 	auto cons_type = MakeTreeNode<CPPTree::Constructor>();
 	for( auto param : params )
 		cons_type->params.push_back(param);	
 	
-	member->OnType(cons_type, any_cast<YY::VNLangParser::location_type>(loc));
-	member->OnPermission( MakeTreeNode<CPPTree::NonConst>(), any_cast<YY::VNLangParser::location_type>(loc) );
-
+	constructor->OnType(cons_type, any_cast<YY::VNLangParser::location_type>(loc));
+	constructor->OnPermission( MakeTreeNode<CPPTree::NonConst>(), any_cast<YY::VNLangParser::location_type>(loc) );
+	constructor->OnDispatch( MakeTreeNode<CPPTree::NonVirtual>(), any_cast<YY::VNLangParser::location_type>(loc) );
+	
 	// Now fill in fields derived from the qualifiers	
 	for( const QualifierData &q : quals )
 	{
@@ -552,7 +546,7 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( Syntax::Location loc, const list
 		}
 	}
 	
-	return member;
+	return constructor;
 }
 
 

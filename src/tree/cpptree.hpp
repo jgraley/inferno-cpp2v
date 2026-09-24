@@ -115,6 +115,7 @@ struct Type : virtual Node
 	virtual string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy );    
 	
 	bool IsType() const override;
+	virtual bool IsSelfDeclaring() const;
 
 	Token GetExplicitToken() const override;
 	Token GetPrerestrictToken() const override;
@@ -742,6 +743,21 @@ struct Member : Instance,
 };
 
 
+struct ConstructorDecl : Member
+{
+	NODE_FUNCTIONS_FINAL
+	//list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;	
+};
+
+
+struct DestructorDecl : Member
+{
+	NODE_FUNCTIONS_FINAL
+	//list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;	
+};
+
+
+
 /// A local variable with automatic allocation
 /** A variable with one instance for each *invocation* of a function, ie
     non-static locals. Safe across recursion. */
@@ -945,6 +961,7 @@ struct Constructor : Procedure // TODO be CallableParams
 #else
 	string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy ) override;
 #endif
+	bool IsSelfDeclaring() const override;
 	Token GetSignifierToken() const override;
 };
 

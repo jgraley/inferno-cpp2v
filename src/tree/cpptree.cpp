@@ -190,6 +190,13 @@ bool Type::IsType() const
 	return true;
 }
 
+
+bool Type::IsSelfDeclaring() const
+{
+	return false;
+}
+
+
 Syntax::Token Type::GetExplicitToken() const
 {
 	return YY::VNLangParser::token::TOK_EXPLICIT_TYPE;
@@ -1364,15 +1371,15 @@ list<string> Instance::RenderDeclSpecPre( VN::RendererInterface *, Policy ) cons
 
 list<string> Instance::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
 {
-    string declarator = renderer->DoRender( &identifier, 
-                                            Production::PRIMARY_EXPR, 
-                                            id_policy );   
-    return { renderer->DoRenderTypeAndDeclarator(&type, 
-                                                      declarator, 
-                                                      Production::PRIMARY_EXPR, 
-                                                      Production::BARE_STMT_DECL, 
-                                                      policy, 
-                                                      permission) };	
+	string declarator = renderer->DoRender( &identifier, 
+											Production::PRIMARY_EXPR, 
+											id_policy );   
+	return { renderer->DoRenderTypeAndDeclarator( &type, 
+												  declarator, 
+												  Production::PRIMARY_EXPR, 
+												  Production::BARE_STMT_DECL, 
+												  policy, 
+												  permission) };	
 }
 
 
@@ -1780,6 +1787,17 @@ string Constructor::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy p
 	}
 }
 #endif
+
+
+bool Constructor::IsSelfDeclaring() const
+{
+#ifdef NEWS
+	return true;
+#else
+	return false;
+#endif
+}
+
 
 Syntax::Token Constructor::GetSignifierToken() const
 {
