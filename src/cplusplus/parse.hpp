@@ -290,6 +290,7 @@ private:
 		
         TreePtr<Type> CreateTypeNode(clang::Declarator &D, unsigned depth = 0, TreePtr<Permission> *permission = nullptr, TreePtr<Record> surrounding_record = nullptr)
         {
+			(void)surrounding_record;
             ASSERT( depth<=D.getNumTypeObjects() );
 
             if (depth == D.getNumTypeObjects()) // Type specs
@@ -384,8 +385,6 @@ private:
                     {
                         auto c = MakeTreeNode<Constructor>();
                         FillParameters(c, fchunk);
-                        ASSERT(surrounding_record);
-                        c->record_id = surrounding_record->identifier;
                         return c;
                     }
                     case clang::Declarator::DK_Destructor:
@@ -504,26 +503,38 @@ private:
             else
                 permission = MakeTreeNode<NonConst>();
 */
-            TreePtr<Node> cur( ident_track.GetCurrent() );
-            auto record = DynamicTreePtrCast<Record>(cur); // Will be NULL if not in a record
+			ASSERT( !inferno_scope_stack.empty() );
+			auto record = TreePtr<Record>::DynamicCast(inferno_scope_stack.top());
 
-			TreePtr<Type> type = CreateTypeNode(D, 0, &permission, record);			
+			TreePtr<Type> type = CreateTypeNode(D, 0, &permission);			
             ASSERT( permission );
             TreePtr<Instance> o;
-
             TRACE("scope flags 0x%x\n", S->getFlags());
             if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
 			{
+				ASSERT(record);
+				ASSERT(record->identifier);
+
 				TreePtr<Member> no;
 				switch( D.getKind() )
 				{
 					case clang::Declarator::DK_Constructor:
-						no = MakeTreeNode<ConstructorDecl>();
+					{
+						auto xo = MakeTreeNode<ConstructorDecl>();
+						xo->record_id = record->identifier;
+						TRACE("Made constructor ")(xo)(" id ")(xo->record_id)("\n");
+						no = xo;
 						break;
+					}
 						
 					case clang::Declarator::DK_Destructor:
-						no = MakeTreeNode<DestructorDecl>();
+					{
+						auto xo = MakeTreeNode<DestructorDecl>();
+						xo->record_id = record->identifier;
+						TRACE("Made destructor ")(xo)(" id ")(xo->record_id)("\n");
+						no = xo;
 						break;
+					}
 						
 					default:
 						no = MakeTreeNode<Member>();
@@ -1618,6 +1629,7 @@ private:
             h->identifier = CreateTypeIdentifier(an);
             ident_track.Add(nullptr, h, S);
         }
+        TRACE("Named ")(h)(" ")(h->identifier)("\n");
 
         //TODO should we do something with TagKind? Maybe needed for render.
         //TODO use the attibutes

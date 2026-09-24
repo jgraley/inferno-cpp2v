@@ -196,7 +196,8 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
             
     l_module->members = (l_overcons, l_process, l_decls);
     l_module->bases = (l_bases);
-    l_overcons->through = ls_cons;       
+    l_overcons->through = ls_cons;   
+    ls_cons->record_id = l_module->identifier;
     ls_cons->dispatch = MakePatternNode<NonVirtual>();
     ls_cons->permission = MakePatternNode<NonConst>();
     ls_cons->type = l_ctype;
@@ -213,6 +214,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_arg->key = s_arg_id;
     ls_arg->value = ls_id;
     l_overcons->overlay = lr_cons;
+    lr_cons->record_id = l_module->identifier;
     lr_cons->dispatch = MakePatternNode<NonVirtual>();
     lr_cons->permission = MakePatternNode<NonConst>();    
     lr_cons->type = l_ctype;
@@ -345,6 +347,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     s_module->identifier = module_typeid;
     s_module->bases = (bases);
     s_module->members = (s_cons, decls);
+    s_cons->record_id = s_module->identifier;
     s_cons->dispatch = MakePatternNode<NonVirtual>();
     s_cons->permission = MakePatternNode<NonConst>();
     s_cons->initialiser = s_comp;
@@ -360,6 +363,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     l_record->bases = (l_record_bases);
     l_record->members = (l_delta, l_record_decls);
     l_delta->through = ls_member;
+    ls_member->record_id = l_record->identifier;
     ls_member->dispatch = MakePatternNode<NonVirtual>();
     ls_member->permission = MakePatternNode<NonConst>();
     ls_member->type = ls_ctype;

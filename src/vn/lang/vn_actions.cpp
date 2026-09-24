@@ -517,6 +517,17 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( Syntax::Location loc, const list
 		if( q.cat == QualCat::STATIC )
 			q_static = &q;
 
+	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	if( !spg ) 
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			"Constructor not in record (no scope).");
+	auto rspg = dynamic_pointer_cast<RegularScopeGnomon>(spg);
+	if( !rspg ) 
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			"Constructor not in record (scope is not regular).");
+	
 	TreePtr<CPPTree::ConstructorDecl> constructor = MakeTreeNode<CPPTree::ConstructorDecl>(); 
 
 	auto cons_type = MakeTreeNode<CPPTree::Constructor>();
@@ -526,6 +537,15 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( Syntax::Location loc, const list
 	constructor->OnType(cons_type, any_cast<YY::VNLangParser::location_type>(loc));
 	constructor->OnPermission( MakeTreeNode<CPPTree::NonConst>(), any_cast<YY::VNLangParser::location_type>(loc) );
 	constructor->OnDispatch( MakeTreeNode<CPPTree::NonVirtual>(), any_cast<YY::VNLangParser::location_type>(loc) );
+	
+	auto record = TreePtr<CPPTree::Record>::DynamicCast(rspg->GetNode());
+	if( !record ) 
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			"Constructor not in record (scope is not Record).");
+	constructor->record_id = record->identifier;
+	ASSERT( constructor->record_id ); // check assumption
+	ASSERT( TreePtr<CPPTree::TypeIdentifier>::DynamicCast(constructor->record_id) ); // check assumption
 	
 	// Now fill in fields derived from the qualifiers	
 	for( const QualifierData &q : quals )

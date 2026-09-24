@@ -746,14 +746,18 @@ struct Member : Instance,
 struct ConstructorDecl : Member
 {
 	NODE_FUNCTIONS_FINAL
-	//list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;	
+	TreePtr<TypeIdentifier> record_id;
+
+	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
 };
 
 
 struct DestructorDecl : Member
 {
 	NODE_FUNCTIONS_FINAL
-	//list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;	
+	TreePtr<TypeIdentifier> record_id;
+
+	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
 };
 
 
@@ -953,7 +957,6 @@ struct Constructor : Procedure // TODO be CallableParams
 	NODE_FUNCTIONS_FINAL 
 	// we're saying that the type of a constructor depends on the class it constructs, as 
 	// well as parameters.
-	TreePtr<SpecificTypeIdentifier> record_id;
 #ifndef NEWS
 	string GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string declarator, 
                                        Production object_prod, Production surround_prod, Policy policy,

@@ -1502,6 +1502,37 @@ TreePtr<Node> Member::OnAccess( TreePtr<Node> access_, Location )
 	return (TreePtr<Node>)shared_from_this();	
 }
 
+
+//////////////////////////// ConstructorDecl //////////////////////////////
+
+list<string> ConstructorDecl::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+{
+	string declarator = renderer->DoRender( &identifier, 
+											Production::PRIMARY_EXPR, 
+											id_policy );   
+	return { renderer->DoRenderTypeAndDeclarator( &type, 
+												  declarator, 
+												  Production::PRIMARY_EXPR, 
+												  Production::BARE_STMT_DECL, 
+												  policy, 
+												  permission) };		
+}
+
+//////////////////////////// DestructorDecl //////////////////////////////
+
+list<string> DestructorDecl::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+{
+	string declarator = renderer->DoRender( &identifier, 
+											Production::PRIMARY_EXPR, 
+											id_policy );   
+	return { renderer->DoRenderTypeAndDeclarator( &type, 
+												  declarator, 
+												  Production::PRIMARY_EXPR, 
+												  Production::BARE_STMT_DECL, 
+												  policy, 
+												  permission) };		
+}
+
 //////////////////////////// Enumerator //////////////////////////////
 
 Syntax::Production Enumerator::GetMyProduction(const VN::RendererInterface *, Policy) const
