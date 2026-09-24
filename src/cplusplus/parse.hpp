@@ -581,11 +581,11 @@ private:
             }
             else if( TreePtr<Constructor>::DynamicCast(type) )
             {
-				o->identifier = MakeTreeNode<SpecificConstructorIdentifier>();
+				o->identifier = MakeTreeNode<SpecificInstanceIdentifier>();
 			}
             else if( TreePtr<Destructor>::DynamicCast(type) )
             {
-				o->identifier = MakeTreeNode<SpecificDestructorIdentifier>();
+				o->identifier = MakeTreeNode<SpecificInstanceIdentifier>();
 			}
 			else
             {
