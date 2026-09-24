@@ -1506,6 +1506,8 @@ list<string> XStructor::RenderMiddlePart( VN::RendererInterface *renderer, Polic
 	local_id_policy.resolve_identifier_scope = false;
 	// Absolutely no scope resolving this time
 	s += renderer->DoRender( &record_id, Production::SPACE_SEP_STMT_DECL, local_id_policy );		
+	
+	// Gives us the parameterisation
 	s += renderer->DoRender( &type, Production::SPACE_SEP_TYPE, policy );		
 	
 	// Required for resolved constructors - allows to tie directly to constructor usages
