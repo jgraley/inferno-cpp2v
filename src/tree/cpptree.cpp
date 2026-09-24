@@ -588,24 +588,15 @@ Syntax::Production SpecificConstructorIdentifier::GetMyProductionTerminal() cons
 }
 
 
-string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy )
+string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *, Policy  )
 {
-	Policy id_policy = policy;
-	id_policy.resolve_identifier_scope = false;// prevents scope resolution
-	auto me = TreePtr<Node>(shared_from_this());		
-	
-    TreePtr<Record> rec = DynamicTreePtrCast<Record>( renderer->TryGetScope( me ) );
-    if( !rec )
-		throw Unimplemented(); // Constructor must be declared in a record       
-		
-    return renderer->DoRender( &rec->identifier, Production::PRIMARY_EXPR, id_policy );	
+	ASSERTFAIL();
 }
 
 
-string SpecificConstructorIdentifier::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
+string SpecificConstructorIdentifier::GetRender( VN::RendererInterface *, Production , Policy  )
 {
-	// SpecificIdentifier wins
-	return SpecificIdentifier::GetRender( renderer, production, policy );
+	ASSERTFAIL();
 }
 
 
@@ -624,25 +615,15 @@ Syntax::Production SpecificDestructorIdentifier::GetMyProductionTerminal() const
 }
 
 
-string SpecificDestructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *renderer, Policy policy )
+string SpecificDestructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *, Policy  )
 {
-	Policy id_policy = policy;
-	id_policy.resolve_identifier_scope = false; // prevents scope resolution
-	auto me = TreePtr<Node>(shared_from_this());	
-	
-    TreePtr<Record> rec = DynamicTreePtrCast<Record>( renderer->TryGetScope( me ) );
-    if( !rec )
-		throw Unimplemented(); // Constructor must be declared in a record    
-		   
-    return "~" + 
-           renderer->DoRender( &rec->identifier, Production::PRIMARY_EXPR, id_policy );	
+	ASSERTFAIL();
 }
 
 
-string SpecificDestructorIdentifier::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
+string SpecificDestructorIdentifier::GetRender( VN::RendererInterface *, Production , Policy  )
 {
-	// SpecificIdentifier wins
-	return SpecificIdentifier::GetRender( renderer, production, policy );
+	ASSERTFAIL();
 }
 
 
