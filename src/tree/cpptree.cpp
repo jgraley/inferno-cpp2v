@@ -542,7 +542,6 @@ string SpecificIdentifier::GetTrace() const
     return GetName() + "(" + GetGraphName() + ")" + GetSerialString();
 }
 
-
 //////////////////////////// InstanceIdentifier //////////////////////////////
 
 Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
@@ -567,67 +566,6 @@ string SpecificInstanceIdentifier::GetRender( VN::RendererInterface *renderer, P
 
 
 Syntax::Token SpecificInstanceIdentifier::GetSignifierToken() const
-{
-	// Disable by calling to default impl
-	return Syntax::GetSignifierToken();
-}
-
-//////////////////////////// SpecificConstructorIdentifier //////////////////////////////
-
-// Constructors and destructors have identifiers because the tree is "resolved" which means
-// we already know exactly which decl a function call should reach. Mediating the relationship via
-// identifiers allows patterns to use couplings to get from usage to decl. These 
-// identifiers render differently: where the name would go you have [Scope::][~]Class
-// TODO we don't want the name we inherit from SpecificIdentifier so split a NamedIdentifier 
-// out and use for named cases, but not these.
-
-Syntax::Production SpecificConstructorIdentifier::GetMyProductionTerminal() const
-{
-	// InstanceIdentifier wins
-	return InstanceIdentifier::GetMyProductionTerminal();	
-}
-
-
-string SpecificConstructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *, Policy  )
-{
-	ASSERTFAIL();
-}
-
-
-string SpecificConstructorIdentifier::GetRender( VN::RendererInterface *, Production , Policy  )
-{
-	ASSERTFAIL();
-}
-
-
-Syntax::Token SpecificConstructorIdentifier::GetSignifierToken() const
-{
-	// Disable by calling to default impl
-	return Syntax::GetSignifierToken();
-}
-
-//////////////////////////// SpecificDestructorIdentifier //////////////////////////////
-
-Syntax::Production SpecificDestructorIdentifier::GetMyProductionTerminal() const
-{
-	// InstanceIdentifier wins
-	return InstanceIdentifier::GetMyProductionTerminal();	
-}
-
-
-string SpecificDestructorIdentifier::GetRenderWithoutScope( VN::RendererInterface *, Policy  )
-{
-	ASSERTFAIL();
-}
-
-
-string SpecificDestructorIdentifier::GetRender( VN::RendererInterface *, Production , Policy  )
-{
-	ASSERTFAIL();
-}
-
-
-Syntax::Token SpecificDestructorIdentifier::GetSignifierToken() const
 {
 	// Disable by calling to default impl
 	return Syntax::GetSignifierToken();

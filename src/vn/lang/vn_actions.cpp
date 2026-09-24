@@ -1058,6 +1058,8 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 
 // NOTE where generalised functions (Callables) have no return value (by design, not just void)
 // we don;t use declarator syntax for them, but just make them a direct callable type. If there
-// are parameters, they follow the type in (). This is used for constructor, destructor, sc_thread,
-// sc_
+// are parameters, they follow the type in (). This is used for constructor, destructor, sc_thread etc
 
+// NOTE Constructors and destructors have identifiers because the tree is "resolved" which means
+// we already know exactly which decl a function call should reach. Mediating the relationship via
+// identifiers allows patterns to use couplings to get from usage to decl. 
