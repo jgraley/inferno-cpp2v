@@ -162,7 +162,6 @@
 <TreePtr<Node>> QUAL_NODE_KEYWORD		_("C qualifier")
 <TreePtr<Node>> TYPEDEF_KEYWORD			_("C typedef keyword")
 <TreePtr<Node>> TYPE_SIGN				_("type signifier")
-<TreePtr<Node>> TYPE_W_PARAMS_SIGN		_("type with arguments signifier")
 <TreePtr<Node>> COMPOUND_SIGN			_("compound signifier") // not really C/C++
 stmt_low 
 stmt_high
@@ -804,7 +803,6 @@ type_for_declarator : type_primary
 type_primary: type_vn_prim
 			| '(' type_boot ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
             | TYPE_SIGN														
-            | TYPE_W_PARAMS_SIGN parameterisation									{ $$ = $1->OnParams($2, @2); }		
 			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }				
 			| TYPE_INDICATOR '(' type_id ')'									{ $$ = $3; } // See #909
 			

@@ -1041,3 +1041,5 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // GetSignifierToken() is generally implemented in intermediate so intermediate can be used grammatically
 // whereas GetKeyword() is usually only implemented in leaf classes so only they get keywords 
 // GetRender() is usually implemented in intermediate to gove consistent syntax
+
+
