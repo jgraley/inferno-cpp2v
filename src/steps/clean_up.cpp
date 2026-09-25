@@ -143,21 +143,25 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     auto sx_entity = MakePatternNode<Entity>();
     auto node = MakePatternNode<ChildAgent, Node>();
     auto delta = MakePatternNode<DeltaAgent, Node>();
-    auto s_comp = MakePatternNode<Compound>();
+    auto s_comp1 = MakePatternNode<Compound>();
+    auto s_comp2 = MakePatternNode<Compound>();
+    auto s_comp3 = MakePatternNode<Compound>();
     auto body = MakePatternNode< Statement >();
 
     all->conjuncts = (node, sx_not);
     node->terminus = delta;
     sx_not->negand = sx_entity;
-    sx_entity->initialiser = s_comp;
-    delta->through = s_comp;
+    sx_entity->initialiser = s_comp3;
+    delta->through = s_comp1;
     delta->overlay = body;
 
-    s_comp->statements = body;
+    s_comp1->statements = body;
+    s_comp2->statements = body;
+    s_comp3->statements = body;
     // Note: leaving s_comp empty meaning no decls allowed
 
 #ifdef CLEANUP_COMP_SINGLE_STRONG
-    Configure( SEARCH_REPLACE, s_comp, body );
+    Configure( SEARCH_REPLACE, s_comp2, body );
 #else    
     Configure( SEARCH_REPLACE, all, node );
 #endif    
