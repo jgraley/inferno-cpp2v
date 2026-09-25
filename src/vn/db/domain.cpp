@@ -31,6 +31,8 @@ void Domain::DeleteTree(TreeZone &zone)
 void Domain::InsertAction(const DBWalk::WalkInfo &walk_info)
 {
     //TRACE("INSERT ")(walk_info.xlink)(" is_terminus=")(walk_info.at_terminus)("\n");
+    ASSERT( !unordered_domain.contains(walk_info.xlink) )
+          ("The same XLink was found twice in x tree: ")(walk_info.xlink)(" implying multi-parent nodes with children");
     InsertSolo( unordered_domain, walk_info.xlink );   
 }
 
@@ -38,6 +40,7 @@ void Domain::InsertAction(const DBWalk::WalkInfo &walk_info)
 void Domain::DeleteAction(const DBWalk::WalkInfo &walk_info)
 {        
     //TRACE("DELETE ")(walk_info.xlink)(" is_terminus=")(walk_info.at_terminus)("\n");
+    ASSERT( unordered_domain.contains(walk_info.xlink) );
     EraseSolo( unordered_domain, walk_info.xlink );
 }
 

@@ -1448,8 +1448,8 @@ list<string> XStructor::RenderMiddlePart( VN::RendererInterface *renderer, Polic
 	// Absolutely no scope resolving this time
 	s += renderer->DoRender( &record_id, Production::SPACE_SEP_STMT_DECL, local_id_policy );		
 	
-	// Gives us the parameterisation
-	s += renderer->DoRender( &type, Production::SPACE_SEP_TYPE, policy );		
+	// Params as per subclass
+	s += RenderParams(renderer, policy);
 	
 	// Required for resolved constructors - allows to tie directly to constructor usages
 	ls.push_back( s );
@@ -1457,6 +1457,12 @@ list<string> XStructor::RenderMiddlePart( VN::RendererInterface *renderer, Polic
 		ls.push_back( renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) );   
 		
 	return ls;
+}
+
+
+string XStructor::RenderParams(VN::RendererInterface *, Policy ) const
+{
+	return "()";
 }
 
 
@@ -1486,6 +1492,19 @@ TreePtr<Node> XStructor::OnAccess( TreePtr<Node> access_, Location )
 }
 
 //////////////////////////// ConstructorDecl //////////////////////////////
+
+string ConstructorDecl::RenderParams(VN::RendererInterface *renderer, Policy policy) const
+{
+	// Gives us the parameterisation
+	policy.context = make_shared<any>(); // No access specs here
+		
+    list<string> lsp;
+    for( auto &p : const_cast<ConstructorDecl *>(this)->params )	
+		lsp.push_back( renderer->DoRender( &p, Production::BARE_STMT_DECL, policy ) );       
+
+    return Join( lsp, ", ", "(", ")" );
+}
+
 
 list<string> ConstructorDecl::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
 {

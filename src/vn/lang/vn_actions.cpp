@@ -529,10 +529,10 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( Syntax::Location loc, const list
 			"Constructor not in record (scope is not regular).");
 	
 	TreePtr<CPPTree::ConstructorDecl> constructor = MakeTreeNode<CPPTree::ConstructorDecl>(); 
+	for( auto param : params )
+		constructor->params.push_back(param);	
 
 	auto cons_type = MakeTreeNode<CPPTree::Constructor>();
-	for( auto param : params )
-		cons_type->params.push_back(param);	
 	
 	constructor->OnType(cons_type, any_cast<YY::VNLangParser::location_type>(loc));
 	constructor->OnPermission( MakeTreeNode<CPPTree::NonConst>(), any_cast<YY::VNLangParser::location_type>(loc) );

@@ -208,7 +208,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_cons->initialiser = ls_comp;
     ls_comp->members = l_cdecls;
     ls_comp->statements = (l_pre, ls_pcall, l_post);
-    ls_ctype->params = (l_ctype_param); // one parameter
+    ls_cons->params = (l_ctype_param); // one parameter
     l_ctype_param->permission = MakePatternNode<NonConst>();
     l_ctype_param->initialiser = MakePatternNode<Uninitialised>();
     ls_pcall->callee = s_token;
@@ -225,7 +225,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     lr_cons->initialiser = lr_comp;
     lr_comp->members = l_cdecls;
     lr_comp->statements = (l_pre, l_post);
-    lr_ctype->params = (l_ctype_param); // one parameter
+    lr_cons->params = (l_ctype_param); // one parameter
     
     // Rule #910: SC processes to be Member, with NonVirtual and Private
     l_process->dispatch = MakePatternNode<NonVirtual>();
@@ -359,7 +359,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     s_cons->initialiser = s_comp;
     s_cons->identifier = s_constructor_id;
     s_cons->type = s_ctype;
-    s_ctype->params = (s_params); // any parameters
+    s_cons->params = (s_params); // any parameters
     r_module->members = (decls);
     r_module->bases = (bases);
     r_module->identifier = module_typeid;
@@ -374,7 +374,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     ls_member->dispatch = MakePatternNode<NonVirtual>();
     ls_member->permission = MakePatternNode<NonConst>();
     ls_member->type = ls_ctype;
-    ls_ctype->params = (l_params); // any parameters
+    ls_member->params = (l_params); // any parameters
     ls_member->memb_inits = (l_pre, l1s_memb_init, l_post);
 	l1s_memb_init->initialiser = l1s_cons_init;
 	l1s_cons_init->constructor_id = s_constructor_id;
@@ -384,7 +384,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     lr_member->dispatch = MakePatternNode<NonVirtual>();
     lr_member->permission = MakePatternNode<NonConst>();
     lr_member->type = lr_ctype;
-    lr_ctype->params = (l_params); // any parameters
+    lr_member->params = (l_params); // any parameters
     lr_member->memb_inits = (l_pre, l_post);
 
     // Embedded 3: dispense with any init constructs using s_constructor_id

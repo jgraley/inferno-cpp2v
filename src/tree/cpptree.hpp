@@ -720,6 +720,7 @@ struct XStructor : Instance, CPPQuals
 
 	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
    	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
+	virtual string RenderParams(VN::RendererInterface *renderer, Policy policy) const;
 	bool ShouldSplitInstance( Policy ) const override;
 	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
 
@@ -734,7 +735,10 @@ struct ConstructorDecl : XStructor,
                          MembInitSeq
 {
 	NODE_FUNCTIONS_FINAL
-	
+
+    Collection<Declaration> params; // TODO be Parameter #803
+
+	string RenderParams(VN::RendererInterface *renderer, Policy policy) const override;
 	list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy ) override;
 	string GetLeadingText(Policy policy) const override;
 };

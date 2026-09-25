@@ -274,20 +274,33 @@ private:
             return f;
         }
 
-        void FillParameters(TreePtr<CallableParams> p,
-                            const clang::DeclaratorChunk::FunctionTypeInfo &fchunk)
+        void FillParameters(TreePtr<Node> p,
+                            const clang::DeclaratorChunk::FunctionTypeInfo *fchunk)
         {
             backing_ordering[p].clear(); // ensure at least an empty sequence is in the map
-            for (unsigned i = 0; i < fchunk.NumArgs; i++)
+            for (unsigned i = 0; i < fchunk->NumArgs; i++)
             {
-                TreePtr<Declaration> d = hold_decl.FromRaw(fchunk.ArgInfo[i].Param);
+                TreePtr<Declaration> d = hold_decl.FromRaw(fchunk->ArgInfo[i].Param);
                 auto param = DynamicTreePtrCast<Parameter> (d);
                 ASSERT( param );
                 backing_ordering[p].push_back(param);
-                p->params.insert(param);
+                if( auto cp = TreePtr<CallableParams>::DynamicCast(p) )
+					cp->params.insert(param);
+				else if( auto cd = TreePtr<ConstructorDecl>::DynamicCast(p) )
+					cd->params.insert(param);
             }
         }
 		
+        const clang::DeclaratorChunk::FunctionTypeInfo *TryGetFChunk(clang::Declarator &D, unsigned depth = 0)
+ 		{
+			if( depth == D.getNumTypeObjects() ) // Type specs
+				return nullptr;
+			const clang::DeclaratorChunk &chunk = D.getTypeObject(depth);
+			if( chunk.Kind != clang::DeclaratorChunk::Function )
+				return nullptr;
+			return &(chunk.Fun);
+		}
+
         TreePtr<Type> CreateTypeNode(clang::Declarator &D, unsigned depth = 0, TreePtr<Permission> *permission = nullptr, TreePtr<Record> surrounding_record = nullptr)
         {
 			(void)surrounding_record;
@@ -369,7 +382,7 @@ private:
                 {
                 case clang::DeclaratorChunk::Function:
                 {
-                    const clang::DeclaratorChunk::FunctionTypeInfo &fchunk = chunk.Fun;
+                    const clang::DeclaratorChunk::FunctionTypeInfo *fchunk = &(chunk.Fun);
 					if( permission )				
 						*permission = MakeTreeNode<NonConst>();					     
                     switch (D.getKind())
@@ -384,7 +397,7 @@ private:
                     case clang::Declarator::DK_Constructor:
                     {
                         auto c = MakeTreeNode<Constructor>();
-                        FillParameters(c, fchunk);
+                        //FillParameters(c, fchunk); now done in CreateInstanceNode because params are in the decl
                         return c;
                     }
                     case clang::Declarator::DK_Destructor:
@@ -402,10 +415,10 @@ private:
                 {
                     // TODO attributes
                     TRACE("pointer to...\n");
-                    const clang::DeclaratorChunk::PointerTypeInfo &pchunk = chunk.Ptr;
+                    const clang::DeclaratorChunk::PointerTypeInfo *pchunk = &(chunk.Ptr);
 					if( permission )
 					{						
-						if( pchunk.TypeQuals & clang::DeclSpec::TQ_const )
+						if( pchunk->TypeQuals & clang::DeclSpec::TQ_const )
 							*permission = MakeTreeNode<Const>();
 						else
 							*permission = MakeTreeNode<NonConst>();
@@ -497,17 +510,9 @@ private:
             if (!access)
                 access = MakeTreeNode<Private>(); // Most scopes are private unless specified otherwise
 
-            TreePtr<Permission> permission;
-/*            if (DS.getTypeQualifiers() & clang::DeclSpec::TQ_const)
-                permission = MakeTreeNode<Const>();
-            else
-                permission = MakeTreeNode<NonConst>();
-*/
 			ASSERT( !inferno_scope_stack.empty() );
 			auto record = TreePtr<Record>::DynamicCast(inferno_scope_stack.top());
 
-			TreePtr<Type> type = CreateTypeNode(D, 0, &permission);			
-            ASSERT( permission );
             TreePtr<Instance> o;
             TRACE("scope flags 0x%x\n", S->getFlags());
             if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
@@ -523,6 +528,9 @@ private:
 						auto xo = MakeTreeNode<ConstructorDecl>();
 						xo->record_id = record->identifier;
 						TRACE("Made constructor ")(xo)(" id ")(xo->record_id)("\n");
+						auto fchunk = TryGetFChunk(D, 0);
+						ASSERT( fchunk );
+						FillParameters( xo, fchunk );
 						o = xo;
 						cppqo = xo;
 						break;
@@ -582,11 +590,7 @@ private:
                 o->identifier = CreateInstanceIdentifier(ID);
                 ident_track.Add(ID, o, S);
             }
-            else if( TreePtr<Constructor>::DynamicCast(type) )
-            {
-				o->identifier = MakeTreeNode<SpecificInstanceIdentifier>();
-			}
-            else if( TreePtr<Destructor>::DynamicCast(type) )
+            else if( TreePtr<XStructor>::DynamicCast(o) )
             {
 				o->identifier = MakeTreeNode<SpecificInstanceIdentifier>();
 			}
@@ -595,8 +599,11 @@ private:
 				ASSERTFAIL();
                 o->identifier = CreateInstanceIdentifier();
             }
-            o->type = type;
+            
+            TreePtr<Permission> permission;
+            o->type = CreateTypeNode(D, 0, &permission);			
             o->initialiser = MakeTreeNode<Uninitialised> ();
+            ASSERT( permission );
             o->permission = permission;
 
             return o;
@@ -861,7 +868,7 @@ private:
             ASSERT( cd );
             ASSERT( cd->identifier );
 			auto ci = MakeTreeNode<ConstructInitialiser>();
-			ci->argumentation = CreateMapArgumentation( args, cd->type );
+			ci->argumentation = CreateMapArgumentation( args, cd );
 			ASSERT( ci->argumentation );
 			ci->constructor_id = cd->identifier;
 			our_inst->initialiser = ci;				
@@ -1158,9 +1165,7 @@ private:
     {
         auto a = MakeTreeNode<MapArgumentation>();
 
-        // If CallableParams, fill in the args map based on the supplied args and original function type
-        if( TreePtr<CallableParams> p = DynamicTreePtrCast<CallableParams>(t) )
-            PopulateMapOperator( a->arguments, args, p );
+        PopulateMapOperator( a->arguments, args, t );
 
         return a;
     }
@@ -1526,7 +1531,7 @@ private:
         TreePtr<ConstructorDecl> cd = GetConstructor( our_field->type );
         ASSERT( cd );
 		auto ci = MakeTreeNode<ConstructInitialiser>();
-		ci->argumentation = CreateMapArgumentation( args, cd->type );
+		ci->argumentation = CreateMapArgumentation( args, cd );
 		ASSERT( ci->argumentation );
 		ci->constructor_id = cd->identifier;
 		
@@ -1811,6 +1816,7 @@ private:
             TreePtr<Node> key ) // Original Scope that established ordering, must be in backing_ordering
     {
         // Get a reference to the ordered list of members for this scope from a backing list
+        ASSERT( backing_ordering.contains(key) )("backing_ordering: ")(backing_ordering)("\ndoes not contain ")(key);
         Sequence<Declaration> &ordered = backing_ordering.at(key);
 
         // Go over the entire scope, keeping track of where we are in the Sequence
