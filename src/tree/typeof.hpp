@@ -23,6 +23,7 @@ public:
     class UnsupportedSpecialMismatch : public UnsupportedMismatch {};
     class UnsupportedLiteralMismatch : public UnsupportedMismatch {};
     class DeleteUnsupportedMismatch : public UnsupportedMismatch {};
+    class TypelessDeclUnsupportedMismatch : public UnsupportedMismatch {};
     class UsageMismatch : public Mismatch {};
     class NumericalOperatorUsageMismatch : public UsageMismatch {};
     class NumericalOperatorUsageMismatch1 : public NumericalOperatorUsageMismatch {};

@@ -28,7 +28,8 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
     {        
         AugTreePtr<Node> n = DeclarationOf().TryApplyTransformation(kit, ii);
         auto i = AugTreePtr<Instance>::DynamicCast(n);
-        ASSERT(i);
+        if( !i )
+			throw TypelessDeclUnsupportedMismatch();
         return GET_CHILD(i, type); 
     }
     else if( auto op = AugTreePtr<NonCommutativeOperator>::DynamicCast(o) ) // operator

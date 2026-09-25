@@ -531,10 +531,7 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( Syntax::Location loc, const list
 	TreePtr<CPPTree::ConstructorDecl> constructor = MakeTreeNode<CPPTree::ConstructorDecl>(); 
 	for( auto param : params )
 		constructor->params.push_back(param);	
-
-	auto cons_type = MakeTreeNode<CPPTree::Constructor>();
 	
-	constructor->OnType(cons_type, any_cast<YY::VNLangParser::location_type>(loc));
 	constructor->OnPermission( MakeTreeNode<CPPTree::NonConst>(), any_cast<YY::VNLangParser::location_type>(loc) );
 	constructor->OnDispatch( MakeTreeNode<CPPTree::NonVirtual>(), any_cast<YY::VNLangParser::location_type>(loc) );
 	

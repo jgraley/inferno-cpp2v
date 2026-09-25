@@ -179,8 +179,6 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto l_post = MakePatternNode<StarAgent, Statement>();
     auto ls_id = MakePatternNode< InstanceIdentifier >();
     auto l_bases = MakePatternNode<StarAgent, Base>();
-    auto ls_ctype = MakePatternNode<Constructor>();
-    auto lr_ctype = MakePatternNode<Constructor>();
     auto l_ident = MakePatternNode<InstanceIdentifier>();
     auto s_token = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( lr_scprocess->GetLoweredIdOrMacroName() ); 
     auto s_arg_id = MakePatternNode< SpecificInstanceIdentifierByNameAgent >( "func" );
@@ -203,7 +201,6 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_cons->record_id = l_module_id;
     ls_cons->dispatch = MakePatternNode<NonVirtual>();
     ls_cons->permission = MakePatternNode<NonConst>();
-    ls_cons->type = ls_ctype;
     ls_cons->identifier = l_ident;
     ls_cons->initialiser = ls_comp;
     ls_comp->members = l_cdecls;
@@ -220,7 +217,6 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     lr_cons->record_id = l_module_id;
     lr_cons->dispatch = MakePatternNode<NonVirtual>();
     lr_cons->permission = MakePatternNode<NonConst>();    
-    lr_cons->type = lr_ctype;
     lr_cons->identifier = l_ident;
     lr_cons->initialiser = lr_comp;
     lr_comp->members = l_cdecls;
@@ -322,9 +318,6 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto s_comp = MakePatternNode< Compound >();
     auto s_constructor_id = MakePatternNode< InstanceIdentifier >();
     auto l_constructor_id = MakePatternNode< InstanceIdentifier >();
-    auto s_ctype = MakePatternNode<Constructor>();
-    auto ls_ctype = MakePatternNode<Constructor>();
-    auto lr_ctype = MakePatternNode<Constructor>();
     auto s_params = MakePatternNode<StarAgent, Parameter>();
     auto l_params = MakePatternNode<StarAgent, Parameter>();
     auto s_module = MakePatternNode< Module >();
@@ -358,7 +351,6 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     s_cons->permission = MakePatternNode<NonConst>();
     s_cons->initialiser = s_comp;
     s_cons->identifier = s_constructor_id;
-    s_cons->type = s_ctype;
     s_cons->params = (s_params); // any parameters
     r_module->members = (decls);
     r_module->bases = (bases);
@@ -373,7 +365,6 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
 	ls_member->identifier = l_constructor_id;
     ls_member->dispatch = MakePatternNode<NonVirtual>();
     ls_member->permission = MakePatternNode<NonConst>();
-    ls_member->type = ls_ctype;
     ls_member->params = (l_params); // any parameters
     ls_member->memb_inits = (l_pre, l1s_memb_init, l_post);
 	l1s_memb_init->initialiser = l1s_cons_init;
@@ -383,7 +374,6 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
 	lr_member->identifier = l_constructor_id;
     lr_member->dispatch = MakePatternNode<NonVirtual>();
     lr_member->permission = MakePatternNode<NonConst>();
-    lr_member->type = lr_ctype;
     lr_member->params = (l_params); // any parameters
     lr_member->memb_inits = (l_pre, l_post);
 

@@ -673,6 +673,8 @@ struct Instance : Entity
 	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;
 
 	TreePtr<Node> OnType( TreePtr<Node> type, Location loc ) override;
+
+	Token GetSignifierToken() const override;
 };
 
 
@@ -713,7 +715,7 @@ struct Member : Instance, CPPQuals
 };
 
 
-struct XStructor : Instance, CPPQuals
+struct XStructor : Entity, CPPQuals
 {
 	NODE_FUNCTIONS
 	TreePtr<TypeIdentifier> record_id;

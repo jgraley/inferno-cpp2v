@@ -384,7 +384,7 @@ private:
                 {
                     const clang::DeclaratorChunk::FunctionTypeInfo *fchunk = &(chunk.Fun);
 					if( permission )				
-						*permission = MakeTreeNode<NonConst>();					     
+						*permission = MakeTreeNode<NonConst>(); // TODO BUG we're not picking up const for member functions					     
                     switch (D.getKind())
                     {
                     case clang::Declarator::DK_Normal:
@@ -395,16 +395,8 @@ private:
                         return f;
                     }
                     case clang::Declarator::DK_Constructor:
-                    {
-                        auto c = MakeTreeNode<Constructor>();
-                        //FillParameters(c, fchunk); now done in CreateInstanceNode because params are in the decl
-                        return c;
-                    }
                     case clang::Declarator::DK_Destructor:
-                    {
-                        auto d = MakeTreeNode<Destructor>();
-                        return d;
-                    }
+                        return nullptr; // These don't have types
                     default:
                         ASSERTFAIL();
                     }
@@ -861,9 +853,8 @@ private:
             Sequence<Expression> args;
             CollectArgs( &args, Args, NumArgs );
             // Free-standing direct initialiser: we initialise with
-            // a call to the InstanceIdentifier of a Member of type 
-            // Constructor. We don't bother with a Lookup since the
-            // obejct is obviously the one we're delclaring.
+            // a call to the ConstructorDecl. We don't bother with a 
+            // Lookup since the object is obviously the one we're declaring.
             TreePtr<Declaration> d = hold_decl.FromRaw(Dcl);
             auto our_inst = DynamicTreePtrCast<Instance> (d);
             ASSERT( our_inst )(d);
@@ -884,12 +875,10 @@ private:
         // puts all the params back in the current scope assuming:
         // 1. They have been added to the Function node correctly and
         // 2. They feature in the backing list for params
-        void AddParamsToScope( TreePtr<CallableParams> pp,
+        void AddParamsToScope( Collection<Declaration> &params,
                                clang::Scope *FnBodyScope)
         {
-            ASSERT(pp);
-
-            for(auto param : pp->params )
+            for(auto param : params )
             {        
                 TRACE();
                 clang::IdentifierInfo *paramII = backing_params[param];
@@ -927,11 +916,16 @@ private:
     {
 		INDENT("A");
         //TRACE("FnBodyScope S%p\n", FnBodyScope);
-        TreePtr<Instance> o = DynamicTreePtrCast<Instance>(hold_decl.FromRaw(D));
-        ASSERT(o);               
+        auto e = DynamicTreePtrCast<Entity>(hold_decl.FromRaw(D));
+        ASSERT(e);               
 
-        if( TreePtr<CallableParams> pp = DynamicTreePtrCast<CallableParams>( o->type ) )
-        AddParamsToScope( pp, FnBodyScope );
+        if( auto o = TreePtr<Instance>::DynamicCast(e) )
+        {
+			if( auto pp = DynamicTreePtrCast<CallableParams>( o->type ) )
+                AddParamsToScope( pp->params, FnBodyScope );
+		}
+		else if( auto cd = TreePtr<ConstructorDecl>::DynamicCast(e) )
+            AddParamsToScope( cd->params, FnBodyScope );
 
         // This is just a junk scope because we will not use scopes collected
         // via the inferno_scope_stack mechanism within functions; instead, they
@@ -941,25 +935,25 @@ private:
         // statement hierarchy.
         inferno_scope_stack.push( MakeTreeNode<DeclScope>() );
  
-        return hold_decl.ToRaw( o );
+        return hold_decl.ToRaw( e );
     }
 
     virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtArg Body)
     {
         INDENT("B");
-        TreePtr<Instance> o( DynamicTreePtrCast<Instance>( hold_decl.FromRaw(Decl) ) );
-        ASSERT(o);
-        TreePtr<Compound> cb( DynamicTreePtrCast<Compound>( FromClang( Body ) ) );
+        auto e = DynamicTreePtrCast<Entity>( hold_decl.FromRaw(Decl) );
+        ASSERT(e);
+        auto cb = DynamicTreePtrCast<Compound>( FromClang( Body ) );
         ASSERT(cb); // function body must be a scope or 0
 
-        if( DynamicTreePtrCast<Uninitialised>( o->initialiser ) )
-			o->initialiser = cb;
-        else if( TreePtr<Compound> c = DynamicTreePtrCast<Compound>( o->initialiser ) )
+        if( DynamicTreePtrCast<Uninitialised>( e->initialiser ) )
+			e->initialiser = cb;
+        else if( auto c = DynamicTreePtrCast<Compound>( e->initialiser ) )
 			c->statements = c->statements + cb->statements;
         else
 			ASSERTFAIL("wrong thing in function instance");
 
-        TRACE("finish fn %d statements %d total\n", cb->statements.size(), (DynamicTreePtrCast<Compound>(o->initialiser))->statements.size() );
+        TRACE("finish fn %d statements %d total\n", cb->statements.size(), (DynamicTreePtrCast<Compound>(e->initialiser))->statements.size() );
 
         inferno_scope_stack.pop(); // we dont use these - we use the clang-managed compound statement instead (passed in via Body)
 	

@@ -276,7 +276,7 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production node_prod,
 	string s;
 
 	if( ReadArgs::use.contains("c") )
-		s += SSPrintf("\n//  %s Node %s, surround prod: %d, node prod: %d\n", 
+		s += SSPrintf("\n//%s Node %s, surround prod: %d, node prod: %d\n", 
 					  Tracer::GetPrefix().c_str(), 
 					  node ? Traceable::TypeIdName(*node).c_str() : "NULL", // No serial numbers because we diff these
 					  Syntax::GetPrecedence(surround_prod), 
@@ -290,7 +290,8 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production node_prod,
 	if( node_prod != Syntax::Production::COMPOUND ) // no = for COMPOUND
 	{
 		if( ReadArgs::use.contains("c") )
-			s += SSPrintf("// Add init assignment, surround prod to ASSIGN\n");
+			s += SSPrintf("\n//%s Add init assignment, surround prod to ASSIGN\n",
+			               Tracer::GetPrefix().c_str());
 		return s + "= " + AccomodateBoot(node, node_prod, Syntax::Production::ASSIGN, policy );
 	}
 	else
@@ -325,7 +326,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod,
 					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 					  
 				if( ReadArgs::use.contains("c") )
-					s += SSPrintf("// Booting statement, surround prod to BOTTOM_STMT_DECL\n");
+					s += SSPrintf("\n//%s Booting statement, surround prod to BOTTOM_STMT_DECL\n", Tracer::GetPrefix().c_str());
 					
 				return s + "{\n " + 
 					   AccomodateSemicolon( node, node_prod, Syntax::Production::BOOT, policy ) +	
@@ -341,7 +342,8 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod,
 				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 					  
 			if( ReadArgs::use.contains("c") )
-				s += SSPrintf("// Booting expression, surround prod to BOTTOM_EXPR\n");
+				s += SSPrintf("\n//%s Booting expression, surround prod to BOTTOM_EXPR\n",
+							  Tracer::GetPrefix().c_str());
 
             s += "( " +
 				   AccomodateSemicolon( node, node_prod, Syntax::Production::BOOT, policy ) +
@@ -375,7 +377,7 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_
         Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) &&
         node_prod != Syntax::Production::COMPOUND )
     {
-		explain += SSPrintf("/* Adding semicolon, reason 1, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
+		explain += SSPrintf("\n//%s Adding semicolon, reason 1, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
         semicolon = true;
     }
         
@@ -387,12 +389,12 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_
 			Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) &&
 			node_prod != Syntax::Production::COMPOUND )
 		{
-			explain += SSPrintf("/* Adding semicolon, reason 2, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
+			explain += SSPrintf("\n\\%s Adding semicolon, reason 2, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
 			semicolon = true;
 		}			
           
     if( !semicolon )
-		explain += SSPrintf("/* Not adding semicolon, %d %d */", Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));	
+		explain += SSPrintf("\n//%s Not adding semicolon, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));	
 	
 	if( !ReadArgs::use.contains("c") )
 		explain = ""; // shush!

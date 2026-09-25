@@ -140,7 +140,7 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     // Note: this hits eg If(x){a;} which the "Multi" version misses 
     auto all = MakePatternNode<ConjunctionAgent, Node>();
     auto sx_not = MakePatternNode<NegationAgent, Node>();
-    auto sx_instance = MakePatternNode<Instance>();
+    auto sx_entity = MakePatternNode<Entity>();
     auto node = MakePatternNode<ChildAgent, Node>();
     auto delta = MakePatternNode<DeltaAgent, Node>();
     auto s_comp = MakePatternNode<Compound>();
@@ -148,8 +148,8 @@ CleanupCompoundSingle::CleanupCompoundSingle()
 
     all->conjuncts = (node, sx_not);
     node->terminus = delta;
-    sx_not->negand = sx_instance;
-    sx_instance->initialiser = s_comp;
+    sx_not->negand = sx_entity;
+    sx_entity->initialiser = s_comp;
     delta->through = s_comp;
     delta->overlay = body;
 

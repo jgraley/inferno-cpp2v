@@ -1247,6 +1247,12 @@ string Entity::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
  	if( ReadArgs::use.contains("c") )
 		ls.push_back( "/* Instance initialiser */" );
 		
+	// Check for things we can't render (won't act if there's an agent but still cateches some problems).
+	// A regular statement like Return won't render correctly because the accomodations get it wrong and
+	// insert both = and {}
+	if( auto st = TreePtr<Statement>::DynamicCast(initialiser) )
+		ASSERT( TreePtr<Initialiser>::DynamicCast(st) || TreePtr<Expression>::DynamicCast(st) );
+	
 	// Use DIRECT_INIT so accomodation maybe adds an = depending on the node
     if( !TreePtr<Uninitialised>::DynamicCast(initialiser) )
 		ls.push_back( renderer->DoRender(&initialiser, Production::DIRECT_INIT, sub_policy) );
@@ -1292,7 +1298,6 @@ bool Entity::ShouldSplitInstance( Policy ) const
 
 list<string> Entity::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
 {
-	// Just an example implementation
 	return { renderer->GetSignifier(this, policy), 
 		     renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) };
 }
@@ -1321,9 +1326,7 @@ TreePtr<Node> Entity::OnInitialiser( TreePtr<Node> init, Location )
 
 Syntax::Token Entity::GetSignifierToken() const
 {
-	// Disable because there isn't really a single token in the Instance
-	// syntax that we can attach the node to. But see #902 qualifier teeing TODO
-	return Syntax::GetSignifierToken();
+	return YY::VNLangParser::token::TOK_ENTITY_SIGN;
 }
 
 //////////////////////////// Instance //////////////////////////////
@@ -1356,6 +1359,14 @@ TreePtr<Node> Instance::OnType( TreePtr<Node> type_, Location )
 {
 	type = type_;
 	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+Syntax::Token Instance::GetSignifierToken() const
+{
+	// Disable because there isn't really a single token in the Instance
+	// syntax that we can attach the node to. But see #902 qualifier teeing TODO
+	return Syntax::GetSignifierToken();
 }
 
 //////////////////////////// Global //////////////////////////////
