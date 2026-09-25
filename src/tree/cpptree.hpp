@@ -734,7 +734,7 @@ struct XStructor : Entity, CPPQuals
 
 
 struct Constructor : XStructor,
-                         MembInitSeq
+                     MembInitSeq
 {
 	NODE_FUNCTIONS_FINAL
 

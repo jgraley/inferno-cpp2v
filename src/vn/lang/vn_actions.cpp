@@ -1045,9 +1045,14 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // GetRender() is usually implemented in intermediate to gove consistent syntax
 
 // NOTE where generalised functions (Callables) have no return value (by design, not just void)
-// we don;t use declarator syntax for them, but just make them a direct callable type. If there
-// are parameters, they follow the type in (). This is used for constructor, destructor, sc_thread etc
+// we don't use declarator syntax for them, but just make them a direct callable type. If there
+// are parameters, they follow the type or specifier in (). This is used for constructor, 
+// destructor, sc_thread etc
 
 // NOTE Constructors and destructors have identifiers because the tree is "resolved" which means
 // we already know exactly which decl a function call should reach. Mediating the relationship via
 // identifiers allows patterns to use couplings to get from usage to decl. 
+
+// NOTE terminology:
+// Entity - has an identifier so it can have usages (explicit because resolved language) and survives type lowering (i.e. not a type).
+// Instance - an entity and an instantiation of a type. Many of the details will be found in/under the type node.
