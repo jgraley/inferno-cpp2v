@@ -1054,5 +1054,6 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // identifiers allows patterns to use couplings to get from usage to decl. 
 
 // NOTE terminology:
-// Entity - has an identifier so it can have usages (explicit because resolved language) and survives type lowering (i.e. not a type).
+// Entity - has an identifier so it can have usages (explicit because resolved language) and survives type lowering 
+// (i.e. not a type) and would tend to consume RAM/ROM/silicon resources.
 // Instance - an entity and an instantiation of a type. Many of the details will be found in/under the type node.
