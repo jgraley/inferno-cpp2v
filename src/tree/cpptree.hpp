@@ -611,7 +611,43 @@ struct View : virtual Node
 };
 
 
-/// Declaration of a variable, object or function
+struct Entity : AdvanceDeclaration
+{
+	NODE_FUNCTIONS
+
+	struct NoAccessInstanceInAccessRecord : Unimplemented {};
+	
+    TreePtr<InstanceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
+    TreePtr<Initialiser> initialiser; ///< init value for data, body for Callable type
+    TreePtr<Permission> permission; ///< is the instance constant (ie compile time value)?
+    
+    set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
+	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
+	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
+	string GetRenderImpl( VN::RendererInterface *renderer, Policy policy );
+	// Optional access spec - only called if in a Record scope
+	virtual list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const;
+	// Extras like static, virtual, const come before the type (techically among them, but we don't support that)
+	virtual list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const;
+	// Extras like override, final, const come after declarator
+	virtual list<string> RenderDeclSpecPost( VN::RendererInterface *renderer, Policy policy );
+	// Extras like member inits come before the initialiser
+	virtual list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy );
+
+	virtual bool ShouldSplitInstance( Policy ) const;
+	// The main type/declarator goes here, if using declarator syntax, otherwise some 
+	// representation of the type and identifier that also disambiguates the declaration node.
+	virtual list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;
+
+	TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc ) override;
+	TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc ) override;
+	TreePtr<Node> OnInitialiser( TreePtr<Node> init, Location loc ) override;
+
+	Token GetSignifierToken() const override;
+};
+
+
+/// Declaration of a variable, object or function with a type
 /** Instance represents a variable/object or a function. In case of function, type is a
  type under Callable and initialiser is a Compound (or Uninitialised for a function
  declaration). For a variable/object, type is basically anything else, and if there is
@@ -624,42 +660,18 @@ struct View : virtual Node
  The latter case is used where initialisaiton/construction demands ordering. It points
  to an InstanceIdentifier, and all usages of the instance actually point to the
  InstanceIdentifier. */
-struct Instance : AdvanceDeclaration
+struct Instance : Entity
 {
     NODE_FUNCTIONS
  
-	struct NoAccessInstanceInAccessRecord : Unimplemented {};
-
     // Note: the order here determines the ordering of declarations in rendered code
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
-    TreePtr<InstanceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
-    TreePtr<Initialiser> initialiser; ///< init value for data, body for Callable type
-    TreePtr<Permission> permission; ///< is the instance constant (ie compile time value)?
-    
-    virtual string GetColour() const { return Declaration::GetColour(); } // Declaration wins
-    set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
-	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
-	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
-	string GetRenderImpl( VN::RendererInterface *renderer, Policy policy );
+
 	bool ShouldSplitInstance( Policy policy ) const override;
 	
-	// Optional access spec - only called if in a Record scope
-	virtual list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const;
-	// Extras like static, virtual, const come before the type (techically among them, but we don't support that)
-	virtual list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const;
-	// The main type/declarator goes here, if using declarator syntax
-	virtual list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;
-	// Extras like override, final, const come after declarator
-	virtual list<string> RenderDeclSpecPost( VN::RendererInterface *renderer, Policy policy );
-	// Extras like member inits come before the initialiser
-	virtual list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy );
+	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;
 
-	TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc ) override;
-	TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc ) override;
 	TreePtr<Node> OnType( TreePtr<Node> type, Location loc ) override;
-	TreePtr<Node> OnInitialiser( TreePtr<Node> init, Location loc ) override;
-
-	Token GetSignifierToken() const override;
 };
 
 
@@ -703,6 +715,7 @@ struct XStructor : Member
 	NODE_FUNCTIONS
 	TreePtr<TypeIdentifier> record_id;
 
+	bool ShouldSplitInstance( Policy ) const override;
 	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
 
 	virtual string GetLeadingText(Policy policy) const;

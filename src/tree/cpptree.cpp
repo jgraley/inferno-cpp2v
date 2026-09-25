@@ -1168,9 +1168,9 @@ TreePtr<Node> View::OnPermission( TreePtr<Node> c, Location )
 	return (TreePtr<Node>)shared_from_this();	
 }
 
-//////////////////////////// Instance //////////////////////////////
+//////////////////////////// Entity //////////////////////////////
 
-Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Policy policy) const
+Syntax::Production Entity::GetMyProduction(const VN::RendererInterface *, Policy policy) const
 { 
 	bool will_split = policy.can_split_instances && 
 					  !policy.rendering_definitions && 
@@ -1185,7 +1185,7 @@ Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *, Poli
 }
 
 
-string Instance::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+string Entity::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {        
 	(void)surround_prod;
 	string s;
@@ -1208,7 +1208,7 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production surround
 }
 
 			
-string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
+string Entity::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 {
 	list<string> ls;
 	
@@ -1255,17 +1255,7 @@ string Instance::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 }
 
 
-// Decide what gets split into a part that goes into the record (main line of rendering) and
-// a part that goes separately (definitions get appended at end of code unit).
-bool Instance::ShouldSplitInstance( Policy ) const
-{
-	// By default for Instance, split a function but not a data object. There are overrides, 
-	// and a more general default in Declaration.
-    return !!DynamicTreePtrCast<Callable>( type );
-}
-
-
-list<string> Instance::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
+list<string> Entity::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
 {
 	ASSERT(policy.context);
 	if( policy.context->has_value() ) // are we in a record scope that maintains access spec, and yet are not a member
@@ -1276,9 +1266,75 @@ list<string> Instance::RenderAccessSpec( VN::RendererInterface *, Policy policy 
 }
 
 
-list<string> Instance::RenderDeclSpecPre( VN::RendererInterface *, Policy ) const 
+list<string> Entity::RenderDeclSpecPre( VN::RendererInterface *, Policy ) const 
 { 
 	return {}; 
+}
+
+
+list<string> Entity::RenderDeclSpecPost( VN::RendererInterface *, Policy )
+{
+	return {};
+}
+
+
+list<string> Entity::RenderInitPre( VN::RendererInterface *, Policy ) 
+{
+	return {};
+}
+
+
+bool Entity::ShouldSplitInstance( Policy ) const
+{
+	return false;
+}
+
+
+list<string> Entity::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+{
+	// Just an example implementation
+	return { renderer->GetSignifier(this, policy), 
+		     renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) };
+}
+
+
+TreePtr<Node> Entity::OnIdentifier( TreePtr<Node> id, Location )
+{
+	identifier = id;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+TreePtr<Node> Entity::OnPermission( TreePtr<Node> c, Location )
+{
+	permission = c;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+TreePtr<Node> Entity::OnInitialiser( TreePtr<Node> init, Location )
+{
+	initialiser = init;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+Syntax::Token Entity::GetSignifierToken() const
+{
+	// Disable because there isn't really a single token in the Instance
+	// syntax that we can attach the node to. But see #902 qualifier teeing TODO
+	return Syntax::GetSignifierToken();
+}
+
+//////////////////////////// Instance //////////////////////////////
+
+// Decide what gets split into a part that goes into the record (main line of rendering) and
+// a part that goes separately (definitions get appended at end of code unit).
+bool Instance::ShouldSplitInstance( Policy ) const
+{
+	// By default for Instance, split a function but not a data object. There are overrides, 
+	// and a more general default in Declaration.
+    return !!DynamicTreePtrCast<Callable>( type );
 }
 
 
@@ -1296,51 +1352,10 @@ list<string> Instance::RenderMiddlePart( VN::RendererInterface *renderer, Policy
 }
 
 
-list<string> Instance::RenderDeclSpecPost( VN::RendererInterface *, Policy )
-{
-	return {};
-}
-
-
-list<string> Instance::RenderInitPre( VN::RendererInterface *, Policy ) 
-{
-	return {};
-}
-
-
-TreePtr<Node> Instance::OnIdentifier( TreePtr<Node> id, Location )
-{
-	identifier = id;
-	return (TreePtr<Node>)shared_from_this();	
-}
-
-
-TreePtr<Node> Instance::OnPermission( TreePtr<Node> c, Location )
-{
-	permission = c;
-	return (TreePtr<Node>)shared_from_this();	
-}
-
-
 TreePtr<Node> Instance::OnType( TreePtr<Node> type_, Location )
 {
 	type = type_;
 	return (TreePtr<Node>)shared_from_this();	
-}
-
-
-TreePtr<Node> Instance::OnInitialiser( TreePtr<Node> init, Location )
-{
-	initialiser = init;
-	return (TreePtr<Node>)shared_from_this();	
-}
-
-
-Syntax::Token Instance::GetSignifierToken() const
-{
-	// Disable because there isn't really a single token in the Instance
-	// syntax that we can attach the node to. But see #902 qualifier teeing TODO
-	return Syntax::GetSignifierToken();
 }
 
 //////////////////////////// Global //////////////////////////////
@@ -1435,6 +1450,12 @@ list<string> XStructor::RenderMiddlePart( VN::RendererInterface *renderer, Polic
 		ls.push_back( renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) );   
 		
 	return ls;
+}
+
+
+bool XStructor::ShouldSplitInstance( Policy ) const
+{
+	return true;
 }
 
 
