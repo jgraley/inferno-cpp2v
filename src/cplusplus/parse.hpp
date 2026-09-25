@@ -515,7 +515,7 @@ private:
 				ASSERT(record);
 				ASSERT(record->identifier);
 
-				TreePtr<Member> no;
+				TreePtr<CPPQuals> cppqo;
 				switch( D.getKind() )
 				{
 					case clang::Declarator::DK_Constructor:
@@ -523,7 +523,8 @@ private:
 						auto xo = MakeTreeNode<ConstructorDecl>();
 						xo->record_id = record->identifier;
 						TRACE("Made constructor ")(xo)(" id ")(xo->record_id)("\n");
-						no = xo;
+						o = xo;
+						cppqo = xo;
 						break;
 					}
 						
@@ -532,20 +533,22 @@ private:
 						auto xo = MakeTreeNode<DestructorDecl>();
 						xo->record_id = record->identifier;
 						TRACE("Made destructor ")(xo)(" id ")(xo->record_id)("\n");
-						no = xo;
+						o = xo;
+						cppqo = xo;
 						break;
 					}
 						
 					default:
-						no = MakeTreeNode<Member>();
+						auto mo = MakeTreeNode<Member>();
+						o = mo;
+						cppqo = mo;
 						break;
 				}
 				if (DS.isVirtualSpecified())
-					no->dispatch = MakeTreeNode<Virtual> ();
+					cppqo->dispatch = MakeTreeNode<Virtual> ();
 				else
-					no->dispatch = MakeTreeNode<NonVirtual> ();
-				no->access = access;
-				o = no;
+					cppqo->dispatch = MakeTreeNode<NonVirtual> ();
+				cppqo->access = access;
 			}
 			else if (S->getFnParent()) // in code
 			{
@@ -854,13 +857,13 @@ private:
             auto our_inst = DynamicTreePtrCast<Instance> (d);
             ASSERT( our_inst )(d);
             ASSERT( our_inst->identifier );            
-            TreePtr<Member> memb_o = GetConstructor( our_inst->type );
-            ASSERT( memb_o );
-            ASSERT( memb_o->identifier );
+            TreePtr<ConstructorDecl> cd = GetConstructor( our_inst->type );
+            ASSERT( cd );
+            ASSERT( cd->identifier );
 			auto ci = MakeTreeNode<ConstructInitialiser>();
-			ci->argumentation = CreateMapArgumentation( args, memb_o->type );
+			ci->argumentation = CreateMapArgumentation( args, cd->type );
 			ASSERT( ci->argumentation );
-			ci->constructor_id = memb_o->identifier;
+			ci->constructor_id = cd->identifier;
 			our_inst->initialiser = ci;				
         }
         
@@ -1496,7 +1499,7 @@ private:
     }
 
 
-    MemInitResult ActOnMemInitializer(DeclTy *ConstructorDecl,
+    MemInitResult ActOnMemInitializer(DeclTy *constructor_decl,
                                       clang::Scope *,
                                       clang::IdentifierInfo *MemberOrBase,
                                       clang::SourceLocation,
@@ -1506,7 +1509,7 @@ private:
                                       clang::SourceLocation) final
     {		
 		// MemberOrBase -> our field -> type -> memb record -> a suitable constructor -> a call to it		
-		TreePtr<Declaration> d = hold_decl.FromRaw(ConstructorDecl);
+		TreePtr<Declaration> d = hold_decl.FromRaw(constructor_decl);
 		TreePtr<Node> our_field_node( ident_track.Get( MemberOrBase ) );
 		auto our_field( DynamicTreePtrCast<Member>(our_field_node) );
 		ASSERT( our_field )("Didn't get a Member for the thing being initialised - is it a base? TODO!!");
@@ -1514,18 +1517,18 @@ private:
 		Sequence<Expression> args;
 		CollectArgs( &args, Args, NumArgs );
 			
-		TRACE("ActOnMemInitializer() ConstructorDecl: ")(d)(" MemberOrBase:")(our_field)(" Args: ")(args)("\n");
+		TRACE("ActOnMemInitializer() constructor_decl: ")(d)(" MemberOrBase:")(our_field)(" Args: ")(args)("\n");
 
 		ASSERT( our_field )("Didn't get type for ")(our_field);
         DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
 
-        TreePtr<Member> memb_o = GetConstructor( our_field->type );
-        ASSERT( memb_o );
+        TreePtr<ConstructorDecl> cd = GetConstructor( our_field->type );
+        ASSERT( cd );
 		auto ci = MakeTreeNode<ConstructInitialiser>();
-		ci->argumentation = CreateMapArgumentation( args, memb_o->type );
+		ci->argumentation = CreateMapArgumentation( args, cd->type );
 		ASSERT( ci->argumentation );
-		ci->constructor_id = memb_o->identifier;
+		ci->constructor_id = cd->identifier;
 		
 		auto mi = MakeTreeNode<MemberInitialiser>();
 		mi->member_id = our_field->identifier;
@@ -2052,7 +2055,7 @@ private:
         ident_track.PopScope( S );       
     }
 
-    TreePtr<Member> GetConstructor( TreePtr<Type> t ) 
+    TreePtr<ConstructorDecl> GetConstructor( TreePtr<Type> t ) 
     {
         TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(t);
         ASSERT(id);
@@ -2062,11 +2065,9 @@ private:
 
         for( TreePtr<Declaration> d : r->members )
         {
-            TreePtr<Member> member( DynamicTreePtrCast<Instance>(d) );
-            if( !member )
-                continue;
-            if( DynamicTreePtrCast<Constructor>(member->type) )
-                return member;
+            auto cd = DynamicTreePtrCast<ConstructorDecl>(d);
+            if( cd )
+                return cd;
         }
         ASSERTFAIL("missing constructor");
     }
@@ -2096,8 +2097,8 @@ private:
         auto pa = MakeTreeNode<SeqArgumentation>();
         n->placement_argumentation = pa;
         CollectArgs( &(pa->arguments), PlacementArgs, NumPlaceArgs );
-        TreePtr<Member> memb_o = GetConstructor( n->type );
-        n->constructor_id = memb_o->identifier;
+        TreePtr<ConstructorDecl> cd = GetConstructor( n->type );
+        n->constructor_id = cd->identifier;
         auto ca = MakeTreeNode<SeqArgumentation>();
         n->constructor_argumentation = ca;
         CollectArgs( &(ca->arguments), ConstructorArgs, NumConsArgs );

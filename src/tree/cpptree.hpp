@@ -133,6 +133,7 @@ struct Declaration : virtual Statement
     
     virtual string GetColour() const { return "/set28/1"; }
 	virtual bool ShouldSplitInstance( Policy policy ) const;
+	// TODO move into CPPQuals
 	virtual list<string> ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bool force, VN::RendererInterface *renderer, Policy policy ) const;
 	Token GetExplicitToken() const;
 	Token GetPrerestrictToken() const override;
@@ -284,7 +285,7 @@ struct IdValuePair : virtual Node
     NODE_FUNCTIONS_FINAL
     TreePtr<InstanceIdentifier> key; ///< the handle for this particular operand
     TreePtr<Expression> value; ///< the Expression for this operand
-    
+   
     virtual string GetColour() const { return "/set28/8"; }    
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
@@ -687,19 +688,23 @@ struct Global : Instance
 };
 
 
+struct CPPQuals : virtual Node
+{
+    TreePtr<Dispatch> dispatch; ///< Is the member virtual?
+    TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
+};
+
+
 /// A non-static member Instance (function or variable)
 /** A variable or function with one instance for each object of the containing class, ie
  non-static members. Functions have a "this" pointer. Note that access and permission
  are intended to control the generation of read/write lines for modules. This usage of
  Permission differs from that in Global, so we do not try to introduce a common intermediate.
  Note that static members are Global, not Member */
-struct Member : Instance
+struct Member : Instance, CPPQuals
 {
     NODE_FUNCTIONS_FINAL
-    
-    TreePtr<Dispatch> dispatch; ///< Is the member virtual?
-    TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
-    
+        
 	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
    	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 
@@ -708,15 +713,20 @@ struct Member : Instance
 };
 
 
-struct XStructor : Member
+struct XStructor : Instance, CPPQuals
 {
 	NODE_FUNCTIONS
 	TreePtr<TypeIdentifier> record_id;
 
+	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
+   	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 	bool ShouldSplitInstance( Policy ) const override;
 	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
 
 	virtual string GetLeadingText(Policy policy) const;
+
+	TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc ) override;
+	TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc ) override;
 };
 
 

@@ -1410,8 +1410,21 @@ TreePtr<Node> Member::OnAccess( TreePtr<Node> access_, Location )
 	return (TreePtr<Node>)shared_from_this();	
 }
 
-
 //////////////////////////// XStructor //////////////////////////////
+
+list<string> XStructor::RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const
+{		
+	// If we don't have a current access, the fact that this is a member 
+	// over-rides, so force an access spec to be rendered.
+	return ApplyAndRenderAccessSpec( access, true, renderer, policy );
+}
+
+
+list<string> XStructor::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy) const 
+{ 
+	return { renderer->DoRender(&dispatch, Production::SPACE_SEP_STMT_DECL, policy) };
+}
+
 
 list<string> XStructor::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
 {
@@ -1456,6 +1469,20 @@ bool XStructor::ShouldSplitInstance( Policy ) const
 string XStructor::GetLeadingText(Policy) const
 {
 	return "X"; // TODO choose better
+}
+
+
+TreePtr<Node> XStructor::OnDispatch( TreePtr<Node> d, Location ) 
+{
+	dispatch = d;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+TreePtr<Node> XStructor::OnAccess( TreePtr<Node> access_, Location )
+{
+	access = access_;
+	return (TreePtr<Node>)shared_from_this();	
 }
 
 //////////////////////////// ConstructorDecl //////////////////////////////
