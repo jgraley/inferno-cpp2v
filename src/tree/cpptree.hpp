@@ -693,8 +693,7 @@ struct Global : Instance
  are intended to control the generation of read/write lines for modules. This usage of
  Permission differs from that in Global, so we do not try to introduce a common intermediate.
  Note that static members are Global, not Member */
-struct Member : Instance,
-                MembInitSeq
+struct Member : Instance
 {
     NODE_FUNCTIONS_FINAL
     
@@ -703,7 +702,6 @@ struct Member : Instance,
     
 	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
    	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
-	list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy ) override;
 
 	TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc ) override;
 	TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc ) override;
@@ -722,10 +720,12 @@ struct XStructor : Member
 };
 
 
-struct ConstructorDecl : XStructor
+struct ConstructorDecl : XStructor,
+                         MembInitSeq
 {
 	NODE_FUNCTIONS_FINAL
 	
+	list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy ) override;
 	string GetLeadingText(Policy policy) const override;
 };
 

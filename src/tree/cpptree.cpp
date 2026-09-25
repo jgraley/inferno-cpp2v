@@ -1397,12 +1397,6 @@ list<string> Member::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy 
 }
 
 
-list<string> Member::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
-{
-	return RenderMemberInits(renderer, policy);
-}
-
-
 TreePtr<Node> Member::OnDispatch( TreePtr<Node> d, Location ) 
 {
 	dispatch = d;
@@ -1465,6 +1459,12 @@ string XStructor::GetLeadingText(Policy) const
 }
 
 //////////////////////////// ConstructorDecl //////////////////////////////
+
+list<string> ConstructorDecl::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
+{
+	return RenderMemberInits(renderer, policy);
+}
+
 
 string ConstructorDecl::GetLeadingText(Policy) const
 {

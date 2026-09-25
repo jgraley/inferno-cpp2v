@@ -96,7 +96,7 @@ void CommonTest()
 
 // Max number of characters Join() will generate before deciding to 
 // insert newline after each separator 
-#define MAX_INLINE_JOIN 100
+#define MAX_INLINE_JOIN 200
 
 string Join( const list<string> &ls, string sep, string pre, string post )
 {

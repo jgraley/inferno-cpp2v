@@ -323,8 +323,9 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto s_constructor_id = MakePatternNode< InstanceIdentifier >();
     auto s_ctype = MakePatternNode<Constructor>();
     auto ls_ctype = MakePatternNode<Constructor>();
+    auto lr_ctype = MakePatternNode<Constructor>();
     auto s_params = MakePatternNode<StarAgent, Parameter>();
-    auto ls_params = MakePatternNode<StarAgent, Parameter>();
+    auto l_params = MakePatternNode<StarAgent, Parameter>();
     auto s_module = MakePatternNode< Module >();
     auto r_module = MakePatternNode< Module >();
     auto l1s_memb_init = MakePatternNode<MemberInitialiser>();
@@ -337,7 +338,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto l_record_bases = MakePatternNode<StarAgent, Base>();
     auto l_record_decls = MakePatternNode<StarAgent, Declaration>();
     auto ls_member = MakePatternNode<ConstructorDecl>();  
-    auto lr_member = MakePatternNode<Member>();  
+    auto lr_member = MakePatternNode<ConstructorDecl>();  
     auto l_delta = MakePatternNode<DeltaAgent, Member>();
 
     auto bases = MakePatternNode<StarAgent, Base>();
@@ -371,13 +372,16 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     ls_member->dispatch = MakePatternNode<NonVirtual>();
     ls_member->permission = MakePatternNode<NonConst>();
     ls_member->type = ls_ctype;
-    ls_ctype->params = (ls_params); // any parameters
+    ls_ctype->params = (l_params); // any parameters
     ls_member->memb_inits = (l_pre, l1s_memb_init, l_post);
 	l1s_memb_init->initialiser = l1s_cons_init;
 	l1s_cons_init->constructor_id = s_constructor_id;
     l_delta->overlay = lr_member;
+    lr_member->record_id = l_record_typeid;
     lr_member->dispatch = MakePatternNode<NonVirtual>();
     lr_member->permission = MakePatternNode<NonConst>();
+    lr_member->type = lr_ctype;
+    lr_ctype->params = (l_params); // any parameters
     lr_member->memb_inits = (l_pre, l_post);
 
     // Embedded 3: dispense with any init constructs using s_constructor_id
