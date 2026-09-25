@@ -55,7 +55,6 @@ public:
 	TreePtr<Node> OnFuncOnType( string keyword, Syntax::Location keyword_loc, TreePtr<Node> type_arg, Syntax::Location type_arg_loc );
 			
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
-	TreePtr<Node> OnConstructorType( list<TreePtr<Node>> params );	
 	NodeAndGnomon MakeScopeGnomonForNode( TreePtr<Node> node ) const;
 	TreePtr<Node> OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, Syntax::Location type_loc, TreePtr<Node> declarator, Syntax::Location decl_loc );
 	TreePtr<Node> OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, Syntax::Location middle_loc );	

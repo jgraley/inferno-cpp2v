@@ -1781,33 +1781,6 @@ Syntax::Token CallableParamsReturn::GetSignifierToken() const
 	throw UnimplementedToken(); // No signifier: declarator syntax is used instead
 }
 
-//////////////////////////// Constructor //////////////////////////////
-
-string Constructor::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy )
-{
-	return GetRenderParameterisation( renderer, policy ); 
-}
-
-
-Syntax::Token Constructor::GetSignifierToken() const
-{
-	return YY::VNLangParser::token::TOK_TYPE_SIGN;
-}
-
-//////////////////////////// Destructor //////////////////////////////
-
-string Destructor::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy )
-{
-	return GetRenderParameterisation( renderer, policy ); 
-}
-
-
-Syntax::Token Destructor::GetSignifierToken() const
-{
-	return YY::VNLangParser::token::TOK_TYPE_SIGN;
-}
-
-
 //////////////////////////// Array //////////////////////////////
 
 Syntax::Production Array::GetMyProductionTerminal() const

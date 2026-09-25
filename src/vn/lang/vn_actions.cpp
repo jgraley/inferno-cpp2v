@@ -389,15 +389,6 @@ TreePtr<Node> VNLangActions::OnNop( Syntax::Location loc )
 }
 
 
-TreePtr<Node> VNLangActions::OnConstructorType( list<TreePtr<Node>> params )
-{
-	auto ret = MakeTreeNode<CPPTree::Constructor>();
-	for( auto p : params )
-		ret->params.insert(p);
-	return ret;
-}
-
-
 NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 {	
 	shared_ptr<Gnomon> gnomon;

@@ -944,26 +944,6 @@ struct Function : CallableParamsReturn
 };
 
 
-/// A C++ constructor. The init list is just zero or more calls to constructors in the body
-struct Constructor : Procedure // TODO be CallableParams
-{ 
-	NODE_FUNCTIONS_FINAL 
-
-	string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy ) override;
-	Token GetSignifierToken() const override;
-};
-
-
-/// A C++ destructor
-struct Destructor : Subroutine // TODO be Callable
-{ 
-	NODE_FUNCTIONS_FINAL 
-
-	string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy ) override;
-	Token GetSignifierToken() const override;
-};
-
-
 /// This is the type of an array that contains the specified number of elements of the specified type.
 struct Array : Type
 {
