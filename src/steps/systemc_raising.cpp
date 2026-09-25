@@ -321,6 +321,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto s_cons = MakePatternNode< ConstructorDecl >();
     auto s_comp = MakePatternNode< Compound >();
     auto s_constructor_id = MakePatternNode< InstanceIdentifier >();
+    auto l_constructor_id = MakePatternNode< InstanceIdentifier >();
     auto s_ctype = MakePatternNode<Constructor>();
     auto ls_ctype = MakePatternNode<Constructor>();
     auto lr_ctype = MakePatternNode<Constructor>();
@@ -369,6 +370,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     l_record->members = (l_delta, l_record_decls);
     l_delta->through = ls_member;
     ls_member->record_id = l_record_typeid;
+	ls_member->identifier = l_constructor_id;
     ls_member->dispatch = MakePatternNode<NonVirtual>();
     ls_member->permission = MakePatternNode<NonConst>();
     ls_member->type = ls_ctype;
@@ -378,6 +380,7 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
 	l1s_cons_init->constructor_id = s_constructor_id;
     l_delta->overlay = lr_member;
     lr_member->record_id = l_record_typeid;
+	lr_member->identifier = l_constructor_id;
     lr_member->dispatch = MakePatternNode<NonVirtual>();
     lr_member->permission = MakePatternNode<NonConst>();
     lr_member->type = lr_ctype;
