@@ -513,7 +513,7 @@ private:
 			ASSERT( !inferno_scope_stack.empty() );
 			auto record = TreePtr<Record>::DynamicCast(inferno_scope_stack.top());
 
-            TreePtr<Instance> o;
+            TreePtr<Entity> o;
             TRACE("scope flags 0x%x\n", S->getFlags());
             if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
 			{
@@ -601,10 +601,14 @@ private:
             }
             
             TreePtr<Permission> permission;
-            o->type = CreateTypeNode(D, 0, &permission);			
-            o->initialiser = MakeTreeNode<Uninitialised> ();
+            if( auto inst = TreePtr<Instance>::DynamicCast(o) )            
+				inst->type = CreateTypeNode(D, 0, &permission);	
+			else
+				(void)CreateTypeNode(D, 0, &permission);
             ASSERT( permission );
             o->permission = permission;
+
+            o->initialiser = MakeTreeNode<Uninitialised> ();
 
             return o;
         }
