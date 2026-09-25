@@ -733,7 +733,7 @@ struct XStructor : Entity, CPPQuals
 };
 
 
-struct ConstructorDecl : XStructor,
+struct Constructor : XStructor,
                          MembInitSeq
 {
 	NODE_FUNCTIONS_FINAL
@@ -746,7 +746,7 @@ struct ConstructorDecl : XStructor,
 };
 
 
-struct DestructorDecl : XStructor
+struct Destructor : XStructor
 {
 	NODE_FUNCTIONS_FINAL
 

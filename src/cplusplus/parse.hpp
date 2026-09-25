@@ -286,7 +286,7 @@ private:
                 backing_ordering[p].push_back(param);
                 if( auto cp = TreePtr<CallableParams>::DynamicCast(p) )
 					cp->params.insert(param);
-				else if( auto cd = TreePtr<ConstructorDecl>::DynamicCast(p) )
+				else if( auto cd = TreePtr<Constructor>::DynamicCast(p) )
 					cd->params.insert(param);
             }
         }
@@ -517,7 +517,7 @@ private:
 				{
 					case clang::Declarator::DK_Constructor:
 					{
-						auto xo = MakeTreeNode<ConstructorDecl>();
+						auto xo = MakeTreeNode<Constructor>();
 						xo->record_id = record->identifier;
 						TRACE("Made constructor ")(xo)(" id ")(xo->record_id)("\n");
 						auto fchunk = TryGetFChunk(D, 0);
@@ -530,7 +530,7 @@ private:
 						
 					case clang::Declarator::DK_Destructor:
 					{
-						auto xo = MakeTreeNode<DestructorDecl>();
+						auto xo = MakeTreeNode<Destructor>();
 						xo->record_id = record->identifier;
 						TRACE("Made destructor ")(xo)(" id ")(xo->record_id)("\n");
 						o = xo;
@@ -859,7 +859,7 @@ private:
             auto our_inst = DynamicTreePtrCast<Instance> (d);
             ASSERT( our_inst )(d);
             ASSERT( our_inst->identifier );            
-            TreePtr<ConstructorDecl> cd = GetConstructor( our_inst->type );
+            TreePtr<Constructor> cd = GetConstructor( our_inst->type );
             ASSERT( cd );
             ASSERT( cd->identifier );
 			auto ci = MakeTreeNode<ConstructInitialiser>();
@@ -924,7 +924,7 @@ private:
 			if( auto pp = DynamicTreePtrCast<CallableParams>( o->type ) )
                 AddParamsToScope( pp->params, FnBodyScope );
 		}
-		else if( auto cd = TreePtr<ConstructorDecl>::DynamicCast(e) )
+		else if( auto cd = TreePtr<Constructor>::DynamicCast(e) )
             AddParamsToScope( cd->params, FnBodyScope );
 
         // This is just a junk scope because we will not use scopes collected
@@ -1526,7 +1526,7 @@ private:
         DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
 
-        TreePtr<ConstructorDecl> cd = GetConstructor( our_field->type );
+        TreePtr<Constructor> cd = GetConstructor( our_field->type );
         ASSERT( cd );
 		auto ci = MakeTreeNode<ConstructInitialiser>();
 		ci->argumentation = CreateMapArgumentation( args, cd );
@@ -2059,7 +2059,7 @@ private:
         ident_track.PopScope( S );       
     }
 
-    TreePtr<ConstructorDecl> GetConstructor( TreePtr<Type> t ) 
+    TreePtr<Constructor> GetConstructor( TreePtr<Type> t ) 
     {
         TreePtr<TypeIdentifier> id = DynamicTreePtrCast<TypeIdentifier>(t);
         ASSERT(id);
@@ -2069,7 +2069,7 @@ private:
 
         for( TreePtr<Declaration> d : r->members )
         {
-            auto cd = DynamicTreePtrCast<ConstructorDecl>(d);
+            auto cd = DynamicTreePtrCast<Constructor>(d);
             if( cd )
                 return cd;
         }
@@ -2101,7 +2101,7 @@ private:
         auto pa = MakeTreeNode<SeqArgumentation>();
         n->placement_argumentation = pa;
         CollectArgs( &(pa->arguments), PlacementArgs, NumPlaceArgs );
-        TreePtr<ConstructorDecl> cd = GetConstructor( n->type );
+        TreePtr<Constructor> cd = GetConstructor( n->type );
         n->constructor_id = cd->identifier;
         auto ca = MakeTreeNode<SeqArgumentation>();
         n->constructor_argumentation = ca;

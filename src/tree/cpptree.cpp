@@ -1502,35 +1502,35 @@ TreePtr<Node> XStructor::OnAccess( TreePtr<Node> access_, Location )
 	return (TreePtr<Node>)shared_from_this();	
 }
 
-//////////////////////////// ConstructorDecl //////////////////////////////
+//////////////////////////// Constructor //////////////////////////////
 
-string ConstructorDecl::RenderParams(VN::RendererInterface *renderer, Policy policy) const
+string Constructor::RenderParams(VN::RendererInterface *renderer, Policy policy) const
 {
 	// Gives us the parameterisation
 	policy.context = make_shared<any>(); // No access specs here
 		
     list<string> lsp;
-    for( auto &p : const_cast<ConstructorDecl *>(this)->params )	
+    for( auto &p : const_cast<Constructor *>(this)->params )	
 		lsp.push_back( renderer->DoRender( &p, Production::BARE_STMT_DECL, policy ) );       
 
     return Join( lsp, ", ", "(", ")" );
 }
 
 
-list<string> ConstructorDecl::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
+list<string> Constructor::RenderInitPre( VN::RendererInterface *renderer, Policy policy ) 
 {
 	return RenderMemberInits(renderer, policy);
 }
 
 
-string ConstructorDecl::GetLeadingText(Policy) const
+string Constructor::GetLeadingText(Policy) const
 {
 	return "";
 }
 
-//////////////////////////// DestructorDecl //////////////////////////////
+//////////////////////////// Destructor //////////////////////////////
 
-string DestructorDecl::GetLeadingText(Policy) const
+string Destructor::GetLeadingText(Policy) const
 {
 	return "~";
 }

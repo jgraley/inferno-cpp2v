@@ -498,7 +498,7 @@ TreePtr<Node> VNLangActions::OnEnumerator( Syntax::Location loc )
 }
 
 
-TreePtr<Node> VNLangActions::OnConstructorDecl( Syntax::Location loc, const list<QualifierData> &quals, list<TreePtr<Node>> params )
+TreePtr<Node> VNLangActions::OnConstructor( Syntax::Location loc, const list<QualifierData> &quals, list<TreePtr<Node>> params )
 {
 	// TODO process the qualifiers in one loop at the top, with lots of checking. Check for:
 	// - wrong qualifier eg an access spec
@@ -519,7 +519,7 @@ TreePtr<Node> VNLangActions::OnConstructorDecl( Syntax::Location loc, const list
 			any_cast<YY::VNLangParser::location_type>(loc),
 			"Constructor not in record (scope is not regular).");
 	
-	TreePtr<CPPTree::ConstructorDecl> constructor = MakeTreeNode<CPPTree::ConstructorDecl>(); 
+	TreePtr<CPPTree::Constructor> constructor = MakeTreeNode<CPPTree::Constructor>(); 
 	for( auto param : params )
 		constructor->params.push_back(param);	
 	

@@ -375,8 +375,8 @@ prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({},
 				| qualifiers type_for_declarator declarator				{ $$ = vn->OnDeclaratorDecl($1, $2, @2, $3, @3); } // eg const int a	
 				| type_for_declarator qualifiers declarator				{ $$ = vn->OnDeclaratorDecl($2, $1, @1, $3, @3); } // eg int const a 	
 				| qualifiers type_for_declarator qualifiers declarator	{ $$ = vn->OnDeclaratorDecl($1+$3, $2, @2, $4, @4); } 
-				| XSTRUCTOR type_primary parameterisation id_primary				{ $$ = vn->OnConstructorDecl(@$, {}, $3)->OnIdentifier($4, @4); }
-				| qualifiers XSTRUCTOR type_primary parameterisation id_primary		{ $$ = vn->OnConstructorDecl(@$, $1, $4)->OnIdentifier($5, @5); } // for virtual destructor but needs ~
+				| XSTRUCTOR type_primary parameterisation id_primary				{ $$ = vn->OnConstructor(@$, {}, $3)->OnIdentifier($4, @4); }
+				| qualifiers XSTRUCTOR type_primary parameterisation id_primary		{ $$ = vn->OnConstructor(@$, $1, $4)->OnIdentifier($5, @5); } // for virtual destructor but needs ~
 				| ENTITY_SIGN id_primary								{ $$ = $1->OnIdentifier($2, @2); }
 				
 assign_init		: expr_entry
