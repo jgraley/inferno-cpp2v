@@ -51,10 +51,7 @@ string TransformNameScopeGnomon::GetMessageText() const
 void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 {
 	ASSERT( gnomon );
-	
-	if( auto scope_gnomon = dynamic_pointer_cast<const ScopeGnomon>(gnomon) )
-		scope_gnomons.Push( scope_gnomon ); // front is top
-	else if( auto designation_gnomon = dynamic_pointer_cast<const DesignationGnomon>(gnomon) )
+	if( auto designation_gnomon = dynamic_pointer_cast<const DesignationGnomon>(gnomon) )
 		designation_gnomons.insert( make_pair( designation_gnomon->name, designation_gnomon ) );
 	else 
 		ASSERT(false)("Recogniser doesn't know about gnomon: ")(*gnomon);
@@ -143,7 +140,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnTransformLexeme(wstring text, 
 
 	// In these scopes, there are no designations so we must succeed and can raise an error here if we don#t
 	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
-	    SSPrintf("Unrecognised transform: %s %s", DiagQuote(text).c_str(), GetContextText().c_str()) ); 
+	    SSPrintf("Unrecognised transform: %s", DiagQuote(text).c_str()) ); 
 }
 
 
@@ -188,9 +185,6 @@ TreePtr<Node> VNLangRecogniser::CreateNodeFromName(string text, Syntax::Location
 
 YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool ascii, Syntax::Location loc) const
 {
-	const ScopeGnomon *scope = nullptr;
-	shared_ptr<const ScopeGnomon> spg = scope_gnomons.TryLockTop();
-		
 	try	{
 		return RecogniseKeyword( text, ascii, loc );
 	} catch( Unrecognised& ) {}	
@@ -232,6 +226,14 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring tex
 		throw Unrecognised();
 	
 	TreePtr<Node> node = designation_gnomon->node;
+	
+	//shared_ptr<const ScopeGnomon> spg = scope_gnomons.TryLockTop();
+	//auto rspg = dynamic_pointer_cast<const RegularScopeGnomon>(spg);
+	//ASSERT(!spg);
+	//ASSERT( !(rspg && rspg->GetNode() == node) );
+	//if( rspg )
+	//	FTRACE("Scope node ")(rspg->GetNode())(" designated node ")(node)("\n");
+	
 	// The designation_gnomon->token is based on syntax in particurar and there's no expectation
 	// that the node should know what it should be. It's a parser -> parser message in effect.
 	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(designation_gnomon->token), 
@@ -239,7 +241,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring tex
 	                                      any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
-
+/*
 string VNLangRecogniser::GetContextText() const
 {
 	list<string> ls;
@@ -250,5 +252,5 @@ string VNLangRecogniser::GetContextText() const
 	
 	return Join( ls, ", " );
 }
-
+*/
 

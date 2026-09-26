@@ -11,6 +11,7 @@
 #include "vn/lang/vn_lang.ypp.hpp"
 #include "vn/lang/vn_lang.lpp.hpp"
 #include "vn/lang/vn_lang.location.hpp"
+#include "vn_actions.hpp"
 
 namespace YY
 {
@@ -70,12 +71,7 @@ private:
 	YY::VNLangParser::symbol_type RecogniseDesignation(wstring text, Syntax::Location loc) const;
 
 	class Unrecognised : Exception {};
-	
-	string GetContextText() const;
-
-	// store with weak_ptr => these will expire when the parser exists the scope
-	WeakStack<const ScopeGnomon> scope_gnomons;
-	
+		
 	// Store with shared_ptr => these will stick around until we ditch them
 	map<wstring, shared_ptr<const DesignationGnomon>> designation_gnomons;
 };
