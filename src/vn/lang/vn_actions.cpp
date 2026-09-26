@@ -457,7 +457,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 			q_static = &q;
 
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
-	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon();	
 	if( !spg ) 
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(middle_loc),
@@ -492,7 +492,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 
 TreePtr<Node> VNLangActions::OnEnumerator( Syntax::Location loc )
 {
-	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon();	
 	ASSERT( spg );
 	return spg->GetDeclarationNode(loc, false);
 }
@@ -508,7 +508,7 @@ TreePtr<Node> VNLangActions::OnConstructor( Syntax::Location loc, const list<Qua
 		if( q.cat == QualCat::STATIC )
 			q_static = &q;
 
-	shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop();	
+	shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon();	
 	if( !spg ) 
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
@@ -563,7 +563,7 @@ void VNLangActions::UpdateCurrentAccess( Syntax::Location loc, TreePtr<Node> acc
 	// OnInstance() will still try to program the current access. But this fn will try to update it.
 
 	// If we're in a record scope, update the stored access spec for future fields to use
-	if( shared_ptr<ScopeGnomon> spg = declaration_scope_gnomons.TryLockTop() )	
+	if( shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon() )	
 		spg->UpdateContext(loc, access);
 }
 
@@ -853,6 +853,12 @@ void VNLangActions::AddGnomon( shared_ptr<Gnomon> gnomon )
 		declaration_scope_gnomons.Push( scope_gnomon ); // front is top
 	else 
 		ASSERT(false)("VNLangActions doesn't know about gnomon: ")(*gnomon);
+}
+
+
+shared_ptr<ScopeGnomon> VNLangActions::TryGetTopScopeGnomon()
+{
+	return declaration_scope_gnomons.TryLockTop();
 }
 
 

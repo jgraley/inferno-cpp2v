@@ -120,8 +120,8 @@ void VNScript::ProcessVNFile(string spath)
 Command::List VNScript::ParseFile(string spath)
 {
 	// The flow is scanner -> recogniser <-> parser -> actions
-	VNLangRecogniser recogniser;
-	VNLangActions actions;//(recogniser);
+	VNLangActions actions;
+	VNLangRecogniser recogniser(&actions);
 	YY::VNLangScanner scanner(&recogniser, reflex::Input(), std::cerr);
 	YY::VNLangParser parser(scanner, &actions, &recogniser);
 	

@@ -1444,8 +1444,8 @@ list<string> XStructor::RenderMiddlePart( VN::RendererInterface *renderer, Polic
 	string s;
 	
 	// Indicate to VN parser that we have an xtstructor TODO do this by recognising the class id designation
-	if( policy.use_vn_xstructor_style )
-		s += "⨤";
+	//if( policy.use_vn_xstructor_style )
+	//	s += "⨤";
 
 	if( id_policy.resolve_identifier_scope )
 	{

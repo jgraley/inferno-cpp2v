@@ -49,6 +49,7 @@ public:
 class VNLangRecogniser
 {
 public:	
+	VNLangRecogniser( VNLangActions *actions );
 	void AddGnomon( shared_ptr<Gnomon> gnomon );
 
 	void Designate( wstring name, TreePtr<Node> sub_pattern );
@@ -71,6 +72,8 @@ private:
 	YY::VNLangParser::symbol_type RecogniseDesignation(wstring text, Syntax::Location loc) const;
 
 	class Unrecognised : Exception {};
+		
+	VNLangActions * const actions;
 		
 	// Store with shared_ptr => these will stick around until we ditch them
 	map<wstring, shared_ptr<const DesignationGnomon>> designation_gnomons;

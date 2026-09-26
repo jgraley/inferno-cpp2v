@@ -89,6 +89,7 @@ public:
 	TreePtr<Node> CreateIntegralLiteral( bool uns, bool lng, bool lng2, uint64_t val, Syntax::Location loc );
 	
 	void AddGnomon( shared_ptr<Gnomon> gnomon );
+	shared_ptr<ScopeGnomon> TryGetTopScopeGnomon();
 	
 private: 
 	unique_ptr<AvailableNodeData> node_names;	

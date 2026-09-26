@@ -48,6 +48,13 @@ string TransformNameScopeGnomon::GetMessageText() const
 
 ///////////////////////////////// VNLangRecogniser //////////////////////////////////
 
+
+VNLangRecogniser::VNLangRecogniser( VNLangActions *actions_ ) :
+	actions(actions_)
+{
+}
+
+
 void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 {
 	ASSERT( gnomon );
@@ -227,13 +234,15 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring tex
 	
 	TreePtr<Node> node = designation_gnomon->node;
 	
-	//shared_ptr<const ScopeGnomon> spg = scope_gnomons.TryLockTop();
-	//auto rspg = dynamic_pointer_cast<const RegularScopeGnomon>(spg);
-	//ASSERT(!spg);
-	//ASSERT( !(rspg && rspg->GetNode() == node) );
-	//if( rspg )
-	//	FTRACE("Scope node ")(rspg->GetNode())(" designated node ")(node)("\n");
-	
+	// Spot the case where the desingation happens to be the current record identifier and we're in a record
+	shared_ptr<const ScopeGnomon> spg = actions->TryGetTopScopeGnomon();
+	if( auto rspg = dynamic_pointer_cast<const RegularScopeGnomon>(spg) )
+		if( auto record = TreePtr<Record>::DynamicCast( rspg->GetNode() ) )
+			if( record->identifier == node )
+				return YY::VNLangParser::symbol_type( YY::VNLangParser::token::TOK_DESIGNATED_CURRENT_RECORD_ID, 
+	                                      std::move(node), 
+	                                      any_cast<YY::VNLangParser::location_type>(loc) );
+
 	// The designation_gnomon->token is based on syntax in particurar and there's no expectation
 	// that the node should know what it should be. It's a parser -> parser message in effect.
 	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(designation_gnomon->token), 
