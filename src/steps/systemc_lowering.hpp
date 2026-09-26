@@ -8,7 +8,7 @@
 namespace CPPTree
 {
 	class Type;
-	class InstanceIdentifier;
+	class ResourceIdentifier;
 };
 
 namespace SCTree
@@ -56,7 +56,7 @@ class LowerSCDynamic : public LoweringStep
 {
 public:
     LowerSCDynamic( TreePtr<SCTree::SCDynamicFunction> s_dynamic,
-                    TreePtr<CPPTree::InstanceIdentifier> r_dest );
+                    TreePtr<CPPTree::ResourceIdentifier> r_dest );
 };
 
 
@@ -64,7 +64,7 @@ class LowerSCStatic : public LoweringStep
 {
 public:
     LowerSCStatic( TreePtr<SCTree::SCFunction> s_dynamic,
-                   TreePtr<CPPTree::InstanceIdentifier> r_dest );
+                   TreePtr<CPPTree::ResourceIdentifier> r_dest );
 };
 
 
@@ -72,8 +72,8 @@ class LowerSCDelta : public LoweringStep
 {
 public:
     LowerSCDelta( TreePtr<SCTree::SCFunction> s_delta,
-                  TreePtr<CPPTree::InstanceIdentifier> r_dest,
-                  TreePtr<CPPTree::InstanceIdentifier> zero_time_id );
+                  TreePtr<CPPTree::ResourceIdentifier> r_dest,
+                  TreePtr<CPPTree::ResourceIdentifier> zero_time_id );
 };
 
 
@@ -101,7 +101,7 @@ public:
 class LowerSCNotifyDelta : public LoweringStep
 {
 public:
-    LowerSCNotifyDelta( TreePtr<CPPTree::InstanceIdentifier> zero_time_id );
+    LowerSCNotifyDelta( TreePtr<CPPTree::ResourceIdentifier> zero_time_id );
 };
 
 

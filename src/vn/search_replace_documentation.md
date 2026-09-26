@@ -209,7 +209,7 @@ Note that if the pattern is maximally wild, then `TypeOf` will match any valid e
 
 ### 7.2 `DeclarationOf`
 
-DeclarationOf is a utility transformation in the form of a singleton class, which we can embed by constructing `TransformOf<InstanceIdentifier> mynode( &DeclarationOf::instance )`. It is used in the context of an `InstanceIdentifier`. During a search, the `DeclarationOf` algorithm will search for the declaration of an identifier in the input program, and then compare that with the declaration pointed to by the `pattern` member. 
+DeclarationOf is a utility transformation in the form of a singleton class, which we can embed by constructing `TransformOf<ResourceIdentifier> mynode( &DeclarationOf::instance )`. It is used in the context of an `ResourceIdentifier`. During a search, the `DeclarationOf` algorithm will search for the declaration of an identifier in the input program, and then compare that with the declaration pointed to by the `pattern` member. 
 
 ### 7.3 Notes on transformation interface
 
@@ -222,7 +222,7 @@ The `OutOfPlaceTransformation` interface guarantees not to modify the supplied t
 `IdentifierByName` matches only a `SpecificIdentifier` whose name matches the name created by the builder. This is the only way to search for a particular identifier name, since SpecificIdentifier hides the name in the general Vida Nova interface.
 
 There are three variants:
- - `InstanceIdentifierByName`, which matches any `SpecificInstanceIdentifier` with the same name
+ - `ResourceIdentifierByName`, which matches any `SpecificResourceIdentifier` with the same name
  - `TypeIdentifierByName`, which matches any `SpecificTypeIdentifier` with the same name
  - `LabelIdentifierByName`, which matches any `SpecificLabelIdentifier` with the same name
   
@@ -242,17 +242,17 @@ In general, builder nodes are able to key a coupling. Therefore, it is possible 
 
 ### 9.1 `BuildIdentifier`
 
-`BuildIdentifier` is a builder node that constructs identifiers with new names using a `printf()` format string. At present, `InstanceIdentifier` can be built using `BuildInstanceIdentifier`, and `LabelIdentifier` can be built using `BuildLabelIdentifier`. 
+`BuildIdentifier` is a builder node that constructs identifiers with new names using a `printf()` format string. At present, `ResourceIdentifier` can be built using `BuildResourceIdentifier`, and `LabelIdentifier` can be built using `BuildLabelIdentifier`. 
 
 These special nodes have to be initialised with a format string and an optional flags string. Additionally, they contain a member called `sources`, which is a sequence of `TreePtr<Identifier>`. The format is a `printf()` format string for the name of the newly built identifier. Each `%s` format specifier will be replaced by the name of the node pointed to by the corresponding element of `sources` (can be any kind of identifier). The sources will normally need to be coupled into the search pattern in order to obtain a name from the input program tree. The builder node itself may be coupled in the replace pattern to create multiple references.
 
-For example, if a replace pattern is to contain a new variable, and that variable is the count of times a label was jumped to, we might create the variable instance in the replace pattern, and for its identifier we point to a `BuildInstanceIdentifier` node. We might set the format to "%s_count" and place a pointer to the `LabelIdentifier` of the label whose jumps we are counting in the sources sequence. If a label is seen called `"EXIT"`, we will get a variable called `"EXIT_count"`. 
+For example, if a replace pattern is to contain a new variable, and that variable is the count of times a label was jumped to, we might create the variable instance in the replace pattern, and for its identifier we point to a `BuildResourceIdentifier` node. We might set the format to "%s_count" and place a pointer to the `LabelIdentifier` of the label whose jumps we are counting in the sources sequence. If a label is seen called `"EXIT"`, we will get a variable called `"EXIT_count"`. 
 
 The optional flags field permits the following changes to behaviour:
 
  - `BYPASS_WHEN_IDENTICAL`: For use when there are 2 or more sources. If the names of the sources are all identical to each other, then this common name will be used for the generated identififer, bypassing the `printf()`-like operation. This can help avoid duplication in merging scenarios.
 
-Usages of the new variable elsewhere in the replace pattern can just couple directly to the `BuildInstanceIdentifier` node.
+Usages of the new variable elsewhere in the replace pattern can just couple directly to the `BuildResourceIdentifier` node.
 
 ## 10 Embedded Search/Compare and Replace
 
@@ -319,7 +319,7 @@ A common solution is to insert `Conjunction` in the search pattern, with a `Nega
 
 #### 11.2.1 Anti-parenting
 
-As an aside, the but-not pattern is useful for anti-parenting. This is where you want to find occurrences of a node whose parentage is _not_ some specific pattern. For example, if you want to differentiate between declarations and usages of a variable, the declarations may be matched easily as `Declaration( identifier:my_variable )`. But to find usages, we have to allow any other node that might point to an `InstanceIdentifier`, like `Operator`, `If` etc _including_ `Declaration` where the variable is used as the initialiser - obviously a usage.
+As an aside, the but-not pattern is useful for anti-parenting. This is where you want to find occurrences of a node whose parentage is _not_ some specific pattern. For example, if you want to differentiate between declarations and usages of a variable, the declarations may be matched easily as `Declaration( identifier:my_variable )`. But to find usages, we have to allow any other node that might point to an `ResourceIdentifier`, like `Operator`, `If` etc _including_ `Declaration` where the variable is used as the initialiser - obviously a usage.
 
 There are a few ways to do this in Vida Nova, but the preferred one uses a combination of `Conjunction` and `Negation` to create an and-not pattern; the undesired parentage is expressed in the `Negation` branch, and the other branch points to the target node via `Child` in order to match any other parentage. Written down, it looks like 
 

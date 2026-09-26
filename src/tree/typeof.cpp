@@ -24,7 +24,7 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
 {
     ASSERT(o);
     
-    if( auto ii = AugTreePtr<SpecificInstanceIdentifier>::DynamicCast(o) ) // object or function instance
+    if( auto ii = AugTreePtr<SpecificResourceIdentifier>::DynamicCast(o) ) // object or function instance
     {        
         AugTreePtr<Node> n = DeclarationOf().TryApplyTransformation(kit, ii);
         auto i = AugTreePtr<Instance>::DynamicCast(n);

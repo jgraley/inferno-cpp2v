@@ -466,13 +466,13 @@ private:
             }
         }
 
-        TreePtr<InstanceIdentifier> CreateInstanceIdentifier(
+        TreePtr<ResourceIdentifier> CreateResourceIdentifier(
                 clang::IdentifierInfo *ID = 0)
         {
             if (ID)            
-                return MakeTreeNode<SpecificInstanceIdentifier>( ID->getName() );            
+                return MakeTreeNode<SpecificResourceIdentifier>( ID->getName() );            
             else
-                return MakeTreeNode<SpecificInstanceIdentifier>();            
+                return MakeTreeNode<SpecificResourceIdentifier>();            
         }
 
         TreePtr<TypeIdentifier> CreateTypeIdentifier(
@@ -579,17 +579,17 @@ private:
             clang::IdentifierInfo *ID = D.getIdentifier();
             if (ID)
             {
-                o->identifier = CreateInstanceIdentifier(ID);
+                o->identifier = CreateResourceIdentifier(ID);
                 ident_track.Add(ID, o, S);
             }
             else if( TreePtr<XStructor>::DynamicCast(o) )
             {
-				o->identifier = MakeTreeNode<SpecificInstanceIdentifier>();
+				o->identifier = MakeTreeNode<SpecificResourceIdentifier>();
 			}
 			else
             {
 				ASSERTFAIL();
-                o->identifier = CreateInstanceIdentifier();
+                o->identifier = CreateResourceIdentifier();
             }
             
             TreePtr<Permission> permission;
@@ -624,12 +624,12 @@ private:
             clang::IdentifierInfo *ID = D.getIdentifier();
             if (ID)
             {
-                param->identifier = CreateInstanceIdentifier(ID);
+                param->identifier = CreateResourceIdentifier(ID);
                 ident_track.Add(ID, param, S);
             }
             else
             {
-                param->identifier = CreateInstanceIdentifier();
+                param->identifier = CreateResourceIdentifier();
             }
             param->type = type;
             param->initialiser = MakeTreeNode<Uninitialised> ();
@@ -1884,7 +1884,7 @@ private:
         TreePtr<Enumeration> en( DynamicTreePtrCast<Enumeration>(d) );
 		auto er = MakeTreeNode<Enumerator>();
         all_decls->members.insert(er);
-        er->identifier = CreateInstanceIdentifier(Id);
+        er->identifier = CreateResourceIdentifier(Id);
         er->permission = MakeTreeNode<Const>(); // static const member need not consume storage!!
         er->type = en->identifier;//CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
         if( Val )

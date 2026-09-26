@@ -101,7 +101,7 @@ DetectCombableFor::DetectCombableFor()
     auto assignop = MakePatternNode<AssignmentOperator>();
     
     auto r_for = MakePatternNode<CombableFor>();
-    auto loopvar = MakePatternNode<TransformOfAgent, InstanceIdentifier>( &TypeOf::instance );
+    auto loopvar = MakePatternNode<TransformOfAgent, ResourceIdentifier>( &TypeOf::instance );
     auto type = MakePatternNode<Integral>();
     
     s_ufor->initialisation = init;
@@ -339,7 +339,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto body = MakePatternNode<Statement>();
     auto cond_type = MakePatternNode<Type>();
     auto r_decl = MakePatternNode<Local>();
-    auto id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("switch_value");
+    auto id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("switch_value");
     auto s_cond = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
     
     // EmbeddedSearchReplace for default
@@ -534,7 +534,7 @@ LogicalAndToIf::LogicalAndToIf()
     auto op1 = MakePatternNode<Expression>();
     auto op2 = MakePatternNode<Expression>();
     auto r_comp = MakePatternNode<StatementExpression>();
-    auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("andtemp");
+    auto r_temp_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("andtemp");
     auto r_temp = MakePatternNode<Temporary>();
     auto r_boolean = MakePatternNode<Boolean>();
     auto r_if = MakePatternNode<If>();
@@ -565,7 +565,7 @@ LogicalOrToIf::LogicalOrToIf()
     auto op1 = MakePatternNode<Expression>();
     auto op2 = MakePatternNode<Expression>();
     auto r_comp = MakePatternNode<StatementExpression>();
-    auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("ortemp");
+    auto r_temp_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("ortemp");
     auto r_temp = MakePatternNode<Temporary>();
     auto r_boolean = MakePatternNode<Boolean>();
     auto r_if = MakePatternNode<If>();
@@ -596,7 +596,7 @@ ConditionalOperatorToIf::ConditionalOperatorToIf()
     auto op1 = MakePatternNode<Expression>();
     auto op3 = MakePatternNode<Expression>();
     auto r_comp = MakePatternNode<StatementExpression>();
-    auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("muxtemp");
+    auto r_temp_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("muxtemp");
     auto r_temp = MakePatternNode<Temporary>();
     auto op2 = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
     auto type = MakePatternNode<Type>();
@@ -633,13 +633,13 @@ ExtractCallParams::ExtractCallParams()
     auto delta = MakePatternNode<DeltaAgent, Node>();
     auto member = MakePatternNode<Member>();
     auto func = MakePatternNode<Function>();
-    auto func_id = MakePatternNode<InstanceIdentifier>();
+    auto func_id = MakePatternNode<ResourceIdentifier>();
     
     auto s_call = MakePatternNode<Call>();
     auto s_args = MakePatternNode<MapArgumentation>();
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<MapArgumentation>();
-    auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("temp_%s");
+    auto r_temp_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("temp_%s");
     auto r_temp = MakePatternNode<Temporary>();
     auto r_ce = MakePatternNode<StatementExpression>();
     auto r_assign = MakePatternNode<Assign>();
@@ -648,10 +648,10 @@ ExtractCallParams::ExtractCallParams()
     auto r_param = MakePatternNode<IdValuePair>();
     auto value = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
     auto type = MakePatternNode<Type>();
-    auto id = MakePatternNode<InstanceIdentifier>();
+    auto id = MakePatternNode<ResourceIdentifier>();
     auto all = MakePatternNode<ConjunctionAgent, Expression>();
     auto x_not = MakePatternNode<NegationAgent, Expression>();
-    auto x_id = MakePatternNode<InstanceIdentifier>();
+    auto x_id = MakePatternNode<ResourceIdentifier>();
     
     module->members = (stuff, member, other_decls);
     stuff->terminus = delta;

@@ -36,11 +36,11 @@ GlobalScopeToModule::GlobalScopeToModule()
 	auto er_gmodule = MakePatternNode< LocalTree::GlobalsModule >();
 	auto er_scope = MakePatternNode< CodeUnit >();
 	auto er_member = MakePatternNode<Member>();
-	auto es_id = MakePatternNode<InstanceIdentifier>();
+	auto es_id = MakePatternNode<ResourceIdentifier>();
 	auto es_constancy = MakePatternNode<Permission>();
 #ifdef ALSO_MOVE_VARS
-	auto es_id_all = MakePatternNode<ConjunctionAgent, InstanceIdentifier>();
-	auto es_id_not = MakePatternNode<NegationAgent, InstanceIdentifier>();
+	auto es_id_all = MakePatternNode<ConjunctionAgent, ResourceIdentifier>();
+	auto es_id_not = MakePatternNode<NegationAgent, ResourceIdentifier>();
 #endif		
 	delta->through = s_all;
 	s_all->conjuncts = (s_scope, s_despin);
@@ -54,7 +54,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 	r_scope->members = ( r_gmodule, r_gmodule_inst, s_decls );
 	r_gmodule->identifier = r_gmodule_tid;
 	r_gmodule_inst->type = r_gmodule_tid;
-	r_gmodule_inst->identifier = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("globals");
+	r_gmodule_inst->identifier = MakePatternNode<BuildSpecificResourceIdentifierAgent>("globals");
 	r_gmodule_inst->initialiser = MakePatternNode<Uninitialised>();
 	r_gmodule_inst->permission = MakePatternNode<NonConst>();
 	
@@ -112,7 +112,7 @@ MainToThread::MainToThread()
     auto body = MakePatternNode<Compound>();
 	auto s_member = MakePatternNode< Member >();
     auto s_func = MakePatternNode<Function>();
-    auto s_identifier = MakePatternNode<SpecificInstanceIdentifierByNameAgent>("main");
+    auto s_identifier = MakePatternNode<SpecificResourceIdentifierByNameAgent>("main");
 	auto r_member = MakePatternNode< Member >();
 	
 	gmodule->bases = ( MakePatternNode<StarAgent, Base>() );

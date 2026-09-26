@@ -20,7 +20,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto gg = MakePatternNode<GreenGrassAgent, Type>();
     auto func = MakePatternNode<Member>();
     auto m_func = MakePatternNode<Member>();
-    auto func_id = MakePatternNode<InstanceIdentifier>();
+    auto func_id = MakePatternNode<ResourceIdentifier>();
     auto thread = MakePatternNode<Thread>();
     auto func_decls = MakePatternNode<StarAgent, Declaration>();
     auto module_decls = MakePatternNode<StarAgent, Declaration>();
@@ -28,7 +28,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_module_enum = MakePatternNode<Enumeration>();
     auto r_enum_id = MakePatternNode<BuildSpecificTypeIdentifierAgent>("%sStates");
-    auto var_id = MakePatternNode<InstanceIdentifier>();
+    auto var_id = MakePatternNode<ResourceIdentifier>();
     auto module_id = MakePatternNode<TypeIdentifier>();
     auto l_func_decls = MakePatternNode<StarAgent, Declaration>();
     auto l_enum_vals = MakePatternNode<StarAgent, Declaration>();
@@ -46,7 +46,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto ls_enum = MakePatternNode<Enumeration>();
     auto lr_enum = MakePatternNode<Enumeration>();
     auto lr_state_decl = MakePatternNode<Enumerator>();
-    auto lr_state_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("%s_STATE_%s");
+    auto lr_state_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("%s_STATE_%s");
     auto lr_case = MakePatternNode<Case>();
     auto lr_int = MakePatternNode<Signed>();
     auto lr_count = MakePatternNode<BuildContainerSizeAgent>();
@@ -74,7 +74,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_func = MakePatternNode<Member>();
     auto r_lmap = MakePatternNode<Global>();
     auto l_lmap = MakePatternNode<Global>();
-    auto r_lmap_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("lmap");
+    auto r_lmap_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("lmap");
     auto r_array = MakePatternNode<Array>();
     auto r_make = MakePatternNode<ArrayInitialiser>();
     auto ls_make = MakePatternNode<ArrayInitialiser>();
@@ -204,7 +204,7 @@ LabelTypeToEnum::LabelTypeToEnum()
     auto lmap = MakePatternNode<Global>();
     auto lmap_const = MakePatternNode<Const>();
     auto lmap_type = MakePatternNode<Array>();
-    auto lmap_id = MakePatternNode<InstanceIdentifier>();
+    auto lmap_id = MakePatternNode<ResourceIdentifier>();
     auto l_stuff = MakePatternNode<StuffAgent, Scope>();
     auto l_apnot = MakePatternNode<NegationAgent, Node>();
     auto l_apall_over = MakePatternNode<DeltaAgent, Node>();
@@ -212,7 +212,7 @@ LabelTypeToEnum::LabelTypeToEnum()
     auto ms_sub = MakePatternNode<Subscript>();
     auto nr_sub = MakePatternNode<Subscript>();
     auto nsx_sub = MakePatternNode<Subscript>();
-    auto m_state_id = MakePatternNode<InstanceIdentifier>();
+    auto m_state_id = MakePatternNode<ResourceIdentifier>();
     auto ns_goto = MakePatternNode<Goto>();
     auto nr_goto = MakePatternNode<Goto>();
     auto n_dest_expr = MakePatternNode<NegationAgent, Expression>();
@@ -275,19 +275,19 @@ AddStateEnumVar::AddStateEnumVar()
     auto lr_assign = MakePatternNode<Assign>();
     auto state_var = MakePatternNode<Local>();
     auto lx_not = MakePatternNode<NegationAgent, Expression>();
-    auto state_var_id = MakePatternNode< BuildSpecificInstanceIdentifierAgent >("state");
+    auto state_var_id = MakePatternNode< BuildSpecificResourceIdentifierAgent >("state");
     auto s_gg = MakePatternNode<GreenGrassAgent, Compound>();
     auto s_sub = MakePatternNode<Subscript>();
     auto ls_sub = MakePatternNode<Subscript>();
     auto lr_sub = MakePatternNode<Subscript>();
-    auto array = MakePatternNode<InstanceIdentifier>();
+    auto array = MakePatternNode<ResourceIdentifier>();
     auto s_index = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
     auto type = MakePatternNode<Integral>(); // TODO use the enum type, and ensure properly supported in TypeOf
     
     ls_goto->destination = ls_sub;
     ls_sub->destination = array;
     ls_sub->index = lx_not;
-    lx_not->negand = state_var_id; //  MakePatternNode<InstanceIdentifier>();
+    lx_not->negand = state_var_id; //  MakePatternNode<ResourceIdentifier>();
     
     lr_compound->statements = (lr_assign, lr_goto);
     lr_assign->operands = (state_var_id, lx_not);
@@ -327,9 +327,9 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     auto gotooo = MakePatternNode<Goto>();
     auto sx_pre_goto = MakePatternNode<Goto>();
     auto sub = MakePatternNode<Subscript>();
-    auto lmap_id = MakePatternNode<InstanceIdentifier>();
-    auto state_var_id = MakePatternNode<InstanceIdentifier>();
-    auto state_id = MakePatternNode<InstanceIdentifier>();
+    auto lmap_id = MakePatternNode<ResourceIdentifier>();
+    auto state_var_id = MakePatternNode<ResourceIdentifier>();
+    auto state_id = MakePatternNode<ResourceIdentifier>();
     auto label = MakePatternNode<LocalTree::StateLabel>();
     auto sx_pre = MakePatternNode<NegationAgent, Statement>();
     auto sx_body = MakePatternNode<NegationAgent, Statement>();
@@ -380,9 +380,9 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     auto gotooo = MakePatternNode<Goto>();
     auto sx_pre_goto = MakePatternNode<Goto>();
     auto sub = MakePatternNode<Subscript>();
-    auto lmap_id = MakePatternNode<InstanceIdentifier>();
-    auto state_var_id = MakePatternNode<InstanceIdentifier>();
-    auto state_id = MakePatternNode<InstanceIdentifier>();
+    auto lmap_id = MakePatternNode<ResourceIdentifier>();
+    auto state_var_id = MakePatternNode<ResourceIdentifier>();
+    auto state_id = MakePatternNode<ResourceIdentifier>();
     auto label = MakePatternNode<LocalTree::StateLabel>();
     auto sx_pre = MakePatternNode<NegationAgent, Statement>();
     auto sx_body1 = MakePatternNode<NegationAgent, Statement>();
@@ -429,9 +429,9 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     auto goto1 = MakePatternNode<Goto>();
     auto sx_pre_goto = MakePatternNode<Goto>();
     auto sub = MakePatternNode<Subscript>();
-    auto lmap_id = MakePatternNode<InstanceIdentifier>();
-    auto state_var_id = MakePatternNode<InstanceIdentifier>();
-    auto state_id = MakePatternNode<InstanceIdentifier>();
+    auto lmap_id = MakePatternNode<ResourceIdentifier>();
+    auto state_var_id = MakePatternNode<ResourceIdentifier>();
+    auto state_id = MakePatternNode<ResourceIdentifier>();
     auto label = MakePatternNode<LocalTree::StateLabel>();
     auto sx_pre = MakePatternNode<NegationAgent, Statement>();
     auto sx_body = MakePatternNode<NegationAgent, Statement>();
@@ -483,8 +483,8 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     auto iif = MakePatternNode<If>();
     auto equal = MakePatternNode<Equal>();
     auto sx_post = MakePatternNode<NegationAgent, Statement>();
-    auto state_var_id = MakePatternNode<InstanceIdentifier>();
-    auto state_id = MakePatternNode<InstanceIdentifier>();
+    auto state_var_id = MakePatternNode<ResourceIdentifier>();
+    auto state_id = MakePatternNode<ResourceIdentifier>();
     auto label_star = MakePatternNode<StarAgent, LabelDeclaration>();
         
     s_comp->members = r_comp->members = (decls);
@@ -619,7 +619,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
 InsertInferredYield::InsertInferredYield()
 {
     auto fn = MakePatternNode<Member>();
-    auto fn_id = MakePatternNode<InstanceIdentifier>();
+    auto fn_id = MakePatternNode<ResourceIdentifier>();
     auto thread = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
     auto func_comp = MakePatternNode<Compound>();
     auto s_comp = MakePatternNode<Compound>();
@@ -630,7 +630,7 @@ InsertInferredYield::InsertInferredYield()
     auto stmts = MakePatternNode<StarAgent, Statement>();
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
     auto delta = MakePatternNode<DeltaAgent, Statement>();
-    auto flag_id = MakePatternNode<InstanceIdentifier>();
+    auto flag_id = MakePatternNode<ResourceIdentifier>();
     auto r_yield = MakePatternNode<WaitDelta>();
     auto loop = MakePatternNode<Loop>();
     auto r_if = MakePatternNode<If>();

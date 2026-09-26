@@ -979,7 +979,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 
 
 // Constructors etc:
-// - Fix parse of my_type ( my_instanceidentifier ∧ ‽InstanceIdentifier ¬globals ) my_initialiser;
+// - Fix parse of my_type ( my_instanceidentifier ∧ ‽ResourceIdentifier ¬globals ) my_initialiser;
 //   - Good example of VN stuff in a decl: ∧ has caused () but parser don't like ( when expecting identifier here
 // - Fix remaining mis-parses with Instance::GetRender() enabled
 // - Fill in OnInstance() properly and pass parser test

@@ -542,30 +542,30 @@ string SpecificIdentifier::GetTrace() const
     return GetName() + "(" + GetGraphName() + ")" + GetSerialString();
 }
 
-//////////////////////////// InstanceIdentifier //////////////////////////////
+//////////////////////////// ResourceIdentifier //////////////////////////////
 
-Syntax::Production InstanceIdentifier::GetMyProductionTerminal() const
+Syntax::Production ResourceIdentifier::GetMyProductionTerminal() const
 { 
 	return Production::PRIMARY_EXPR; 
 }
 
-//////////////////////////// SpecificInstanceIdentifier //////////////////////////////
+//////////////////////////// SpecificResourceIdentifier //////////////////////////////
 
-Syntax::Production SpecificInstanceIdentifier::GetMyProductionTerminal() const
+Syntax::Production SpecificResourceIdentifier::GetMyProductionTerminal() const
 {
-	// InstanceIdentifier wins
-	return InstanceIdentifier::GetMyProductionTerminal();	
+	// ResourceIdentifier wins
+	return ResourceIdentifier::GetMyProductionTerminal();	
 }
 
 
-string SpecificInstanceIdentifier::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
+string SpecificResourceIdentifier::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
 {
 	// SpecificIdentifier wins
 	return SpecificIdentifier::GetRender( renderer, production, policy );
 }
 
 
-Syntax::Token SpecificInstanceIdentifier::GetSignifierToken() const
+Syntax::Token SpecificResourceIdentifier::GetSignifierToken() const
 {
 	// Disable by calling to default impl
 	return Syntax::GetSignifierToken();

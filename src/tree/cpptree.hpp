@@ -229,7 +229,7 @@ struct SpecificIdentifier : virtual Property
 };
 
 /// Identifier for any Instance (variable or object or function)
-struct InstanceIdentifier : Identifier,
+struct ResourceIdentifier : Identifier,
                             Expression 
 { 
     NODE_FUNCTIONS 
@@ -239,11 +239,11 @@ struct InstanceIdentifier : Identifier,
                                
 
 /// Identifier for a specific Instance, linked to by a particular Declaration                           
-struct SpecificInstanceIdentifier : InstanceIdentifier,
+struct SpecificResourceIdentifier : ResourceIdentifier,
                                     SpecificIdentifier
 {
-    SpecificInstanceIdentifier() {} ///< Default constructor
-    SpecificInstanceIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
+    SpecificResourceIdentifier() {} ///< Default constructor
+    SpecificResourceIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
     NODE_FUNCTIONS_FINAL    
 	Production GetMyProductionTerminal() const override;
@@ -278,12 +278,12 @@ struct SpecificTypeIdentifier : TypeIdentifier,
 };
 
 
-/// Associates an Expression with an InstanceIdentifier. 
+/// Associates an Expression with an ResourceIdentifier. 
 /** Basically a key-value pair of identifier and value. Use in Maps. */
 struct IdValuePair : virtual Node 
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<InstanceIdentifier> key; ///< the handle for this particular operand
+    TreePtr<ResourceIdentifier> key; ///< the handle for this particular operand
     TreePtr<Expression> value; ///< the Expression for this operand
    
     virtual string GetColour() const { return "/set28/8"; }    
@@ -477,7 +477,7 @@ struct MemberInitialiser : Statement // TODO not a Statement, just virtual Node 
 {
 	NODE_FUNCTIONS_FINAL
 
-	TreePtr<InstanceIdentifier> member_id;
+	TreePtr<ResourceIdentifier> member_id;
 	TreePtr<Initialiser> initialiser;
 
 	Production GetMyProductionTerminal() const override;
@@ -623,7 +623,7 @@ struct Resource : AdvanceDeclaration
 
 	struct NoAccessInstanceInAccessRecord : Unimplemented {};
 	
-    TreePtr<InstanceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
+    TreePtr<ResourceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
     TreePtr<Initialiser> initialiser; ///< init value for data, body for Callable type
     TreePtr<Permission> permission; ///< is the instance constant (ie compile time value)?
     
@@ -664,8 +664,8 @@ struct Resource : AdvanceDeclaration
  - Fits in with single-static-assignment style
  The instance node can go into a Declaration Collection or a Statement Sequence.
  The latter case is used where initialisaiton/construction demands ordering. It points
- to an InstanceIdentifier, and all usages of the instance actually point to the
- InstanceIdentifier. */
+ to an ResourceIdentifier, and all usages of the instance actually point to the
+ ResourceIdentifier. */
 struct Instance : Resource
 {
     NODE_FUNCTIONS
@@ -1388,7 +1388,7 @@ struct New : Operator
     NODE_FUNCTIONS_FINAL
     TreePtr<Type> type; ///< Type of object to be constructed
     TreePtr<Argumentation> placement_argumentation; ///< arguments for placement usage
-	TreePtr<InstanceIdentifier> constructor_id; // We use resolved constructors, so it has an identifier
+	TreePtr<ResourceIdentifier> constructor_id; // We use resolved constructors, so it has an identifier
     TreePtr<Argumentation> constructor_argumentation; ///< arguments to the constructor
     TreePtr<Globality> global; ///< whether placement is global
 
@@ -1417,7 +1417,7 @@ struct Lookup : Operator
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> object; ///< the Record instance we look in
-    TreePtr<InstanceIdentifier> member; ///< the member to find
+    TreePtr<ResourceIdentifier> member; ///< the member to find
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
@@ -1463,7 +1463,7 @@ struct Call : GoSub, Expression
 struct ConstructInitialiser : Initialiser
 {
 	NODE_FUNCTIONS_FINAL
-	TreePtr<InstanceIdentifier> constructor_id; // We use resolved constructors, so it has an identifier
+	TreePtr<ResourceIdentifier> constructor_id; // We use resolved constructors, so it has an identifier
 	// TODO could generalise to include built-in "constructor"
     TreePtr<Argumentation> argumentation; 
 

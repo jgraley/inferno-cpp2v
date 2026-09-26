@@ -61,7 +61,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto r_temp = MakePatternNode<Temporary>();
     auto last = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
-    auto r_temp_id = MakePatternNode<BuildSpecificInstanceIdentifierAgent>("result");
+    auto r_temp_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("result");
     auto r_assign = MakePatternNode<Assign>();
     auto overlay = MakePatternNode<DeltaAgent, Expression>();
     auto r_type = MakePatternNode<Type>();
@@ -220,7 +220,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
     auto l_s_orrule = MakePatternNode<DisjunctionAgent, LabelIdentifier>();
-    auto identifier = MakePatternNode<InstanceIdentifier>();
+    auto identifier = MakePatternNode<ResourceIdentifier>();
     auto type = MakePatternNode<Callable>();
     
     l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
@@ -279,7 +279,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
     auto l_s_orrule = MakePatternNode<DisjunctionAgent, LabelIdentifier>();
-    auto identifier = MakePatternNode<InstanceIdentifier>();
+    auto identifier = MakePatternNode<ResourceIdentifier>();
     auto type = MakePatternNode<Callable>();
     auto s_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
@@ -365,7 +365,7 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     auto sx_notrule = MakePatternNode<NegationAgent, Compound>();
     auto sxx_notrule = MakePatternNode<NegationAgent, Node>();
     auto sxx_label = MakePatternNode< LabelDeclaration >();
-    auto identifier = MakePatternNode<InstanceIdentifier>();
+    auto identifier = MakePatternNode<ResourceIdentifier>();
     auto type = MakePatternNode<Callable>();
 
     s_instance->initialiser = s_andrule;
@@ -454,7 +454,7 @@ CleanupUnusedMembersAndTopLevelVars::CleanupUnusedMembersAndTopLevelVars()
     auto sx_not = MakePatternNode<NegationAgent, Type>();
     auto sx_any = MakePatternNode<DisjunctionAgent, Type>();
     auto getdecl = MakePatternNode<TransformOfAgent, TypeIdentifier>( &TypeDeclarationOf::instance ); // TODO should be modulo typedefs
-    auto id = MakePatternNode<InstanceIdentifier>();
+    auto id = MakePatternNode<ResourceIdentifier>();
     auto stuff1 = MakePatternNode<StuffAgent, Scope>();
     auto s_stuff2 = MakePatternNode<StuffAgent, Scope>();
     auto s_antip = MakePatternNode<ConjunctionAgent, Node>();
@@ -503,7 +503,7 @@ CleanupUnusedLocals::CleanupUnusedLocals()
     auto sx_not = MakePatternNode<NegationAgent, Type>();
     auto sx_any = MakePatternNode<DisjunctionAgent, Type>();
     auto getdecl = MakePatternNode<TransformOfAgent, TypeIdentifier>( &TypeDeclarationOf::instance ); // TODO should be modulo typedefs
-    auto id = MakePatternNode<InstanceIdentifier>();
+    auto id = MakePatternNode<ResourceIdentifier>();
     auto stuff1 = MakePatternNode<StuffAgent, Scope>();
     auto s_stuff2 = MakePatternNode<StuffAgent, Scope>();
     auto s_antip = MakePatternNode<ConjunctionAgent, Node>();

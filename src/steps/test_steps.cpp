@@ -128,7 +128,7 @@ DroppedTreeZone::DroppedTreeZone()
     auto mid_stuff = MakePatternNode<StuffAgent, Statement>();
     auto mid_child = MakePatternNode<ChildAgent, Statement>(); // anti-spin
     auto sub_stuff = MakePatternNode<StuffAgent, Expression>(); // end will be StandardAgent which makes a FreeZone, so get a non-empty tree zone in here
-    auto leaf = MakePatternNode< InstanceIdentifier >();
+    auto leaf = MakePatternNode< ResourceIdentifier >();
 
     root_stuff->terminus = delta;
     delta->through = mid_stuff;
