@@ -96,7 +96,6 @@
 	BUILD_SIZE_OP							    _("build-container-size operator 🄽")
 	STRINGIZE_OP							    _("stringise operator §")
 	PRERESTRICT_OP						        _("prerestriction operator ‽")
-	XSTRUCTOR							        _("constructor/destructor virtual type ⨤")
 	TYPE_INDICATOR						        _("type indicator ⍑")
 	CODE_UNIT 							        _("code unit ∞")
 	RESOLUTION_OP 						        _("C scope-resolution operator ::")
@@ -377,6 +376,7 @@ bare_initialiser: C_ASSIGN assign_init									{ $$ = $2; }
 
 // Note: C++ grammar allwos to go directly into declarator, but we don't since we want to resolve "real" declarators 
 // immediately, and don't want to invoke that mechanism for things that turn out to be something other than a prototype.
+// Use of strict declarators with DESIGNATED_CURRENT_RECORD_ID is for constructors. See See #919.
 prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({}, $1, @1, $2, @2); }	
 				| qualifiers type_for_declarator declarator				{ $$ = vn->OnDeclaratorDecl($1, $2, @2, $3, @3); } // eg const int a	
 				| type_for_declarator qualifiers declarator				{ $$ = vn->OnDeclaratorDecl($2, $1, @1, $3, @3); } // eg int const a 	
@@ -385,8 +385,6 @@ prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({},
 				| qualifiers DESIGNATED_CURRENT_RECORD_ID st_declarator				{ $$ = vn->OnDeclaratorDecl($1, $2, @2, $3, @3); } // eg const int a	
 				| DESIGNATED_CURRENT_RECORD_ID qualifiers st_declarator				{ $$ = vn->OnDeclaratorDecl($2, $1, @1, $3, @3); } // eg int const a 	
 				| qualifiers DESIGNATED_CURRENT_RECORD_ID qualifiers st_declarator	{ $$ = vn->OnDeclaratorDecl($1+$3, $2, @2, $4, @4); } 
-				| XSTRUCTOR DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnConstructor(@$, {}, $3)->OnIdentifier($4, @4); }
-				| qualifiers XSTRUCTOR DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary		{ $$ = vn->OnConstructor(@$, $1, $4)->OnIdentifier($5, @5); } // for virtual destructor but needs ~
 				| DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnConstructor(@$, {}, $2)->OnIdentifier($3, @3); }
 				| qualifiers DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary		{ $$ = vn->OnConstructor(@$, $1, $3)->OnIdentifier($4, @4); } // for virtual destructor but needs ~
 				| ENTITY_SIGN id_parens								{ $$ = $1->OnIdentifier($2, @2); }

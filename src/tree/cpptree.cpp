@@ -1442,10 +1442,6 @@ list<string> XStructor::RenderMiddlePart( VN::RendererInterface *renderer, Polic
 	ASSERT(record_id);
 	list<string> ls;
 	string s;
-	
-	// Indicate to VN parser that we have an xtstructor TODO do this by recognising the class id designation
-	//if( policy.use_vn_xstructor_style )
-	//	s += "⨤";
 
 	if( id_policy.resolve_identifier_scope )
 	{
@@ -1464,7 +1460,7 @@ list<string> XStructor::RenderMiddlePart( VN::RendererInterface *renderer, Polic
 	
 	// Required for resolved constructors - allows to tie directly to constructor usages
 	ls.push_back( s );
-	if( policy.use_vn_xstructor_style )
+	if( policy.show_xstructor_identifiers )
 		ls.push_back( renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) );   
 		
 	return ls;
