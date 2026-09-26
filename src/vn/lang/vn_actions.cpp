@@ -498,7 +498,7 @@ TreePtr<Node> VNLangActions::OnEnumerator( Syntax::Location loc )
 }
 
 
-TreePtr<Node> VNLangActions::OnXStructorDecl( bool con, Syntax::Location loc, const list<QualifierData> &quals, list<TreePtr<Node>> params )
+TreePtr<Node> VNLangActions::OnXStructorDecl( bool con, Syntax::Location loc, const list<QualifierData> &quals )
 {
 	// TODO process the qualifiers in one loop at the top, with lots of checking. Check for:
 	// - wrong qualifier eg an access spec
@@ -526,9 +526,6 @@ TreePtr<Node> VNLangActions::OnXStructorDecl( bool con, Syntax::Location loc, co
 		xstructor = MakeTreeNode<CPPTree::Constructor>(); 
 	else
 		xstructor = MakeTreeNode<CPPTree::Destructor>(); 
-	
-	for( auto param : params )
-		xstructor->params.push_back(param);	
 	
 	xstructor->OnPermission( MakeTreeNode<CPPTree::NonConst>(), any_cast<YY::VNLangParser::location_type>(loc) );
 	xstructor->OnDispatch( MakeTreeNode<CPPTree::NonVirtual>(), any_cast<YY::VNLangParser::location_type>(loc) );
@@ -1067,6 +1064,6 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // identifiers allows patterns to use couplings to get from usage to decl. 
 
 // NOTE terminology:
-// Entity - has an identifier so it can have usages (explicit because resolved language) and survives type lowering 
+// Resource - has an identifier so it can have usages (explicit because resolved language) and survives type lowering 
 // (i.e. not a type) and would tend to consume RAM/ROM/silicon resources.
 // Instance - an entity and an instantiation of a type. Many of the details will be found in/under the type node.

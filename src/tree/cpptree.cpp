@@ -1168,9 +1168,9 @@ TreePtr<Node> View::OnPermission( TreePtr<Node> c, Location )
 	return (TreePtr<Node>)shared_from_this();	
 }
 
-//////////////////////////// Entity //////////////////////////////
+//////////////////////////// Resource //////////////////////////////
 
-Syntax::Production Entity::GetMyProduction(const VN::RendererInterface *, Policy policy) const
+Syntax::Production Resource::GetMyProduction(const VN::RendererInterface *, Policy policy) const
 { 
 	bool will_split = policy.can_split_instances && 
 					  !policy.rendering_definitions && 
@@ -1185,7 +1185,7 @@ Syntax::Production Entity::GetMyProduction(const VN::RendererInterface *, Policy
 }
 
 
-string Entity::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+string Resource::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {        
 	(void)surround_prod;
 	string s;
@@ -1208,7 +1208,7 @@ string Entity::GetRender( VN::RendererInterface *renderer, Production surround_p
 }
 
 			
-string Entity::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
+string Resource::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 {
 	list<string> ls;
 	
@@ -1261,7 +1261,7 @@ string Entity::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 }
 
 
-list<string> Entity::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
+list<string> Resource::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
 {
 	ASSERT(policy.context);
 	if( policy.context->has_value() ) // are we in a record scope that maintains access spec, and yet are not a member
@@ -1272,59 +1272,59 @@ list<string> Entity::RenderAccessSpec( VN::RendererInterface *, Policy policy ) 
 }
 
 
-list<string> Entity::RenderDeclSpecPre( VN::RendererInterface *, Policy ) const 
+list<string> Resource::RenderDeclSpecPre( VN::RendererInterface *, Policy ) const 
 { 
 	return {}; 
 }
 
 
-list<string> Entity::RenderDeclSpecPost( VN::RendererInterface *, Policy )
+list<string> Resource::RenderDeclSpecPost( VN::RendererInterface *, Policy )
 {
 	return {};
 }
 
 
-list<string> Entity::RenderInitPre( VN::RendererInterface *, Policy ) 
+list<string> Resource::RenderInitPre( VN::RendererInterface *, Policy ) 
 {
 	return {};
 }
 
 
-bool Entity::ShouldSplitInstance( Policy ) const
+bool Resource::ShouldSplitInstance( Policy ) const
 {
 	return false;
 }
 
 
-list<string> Entity::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+list<string> Resource::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
 {
 	return { renderer->GetSignifier(this, policy), 
 		     renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) };
 }
 
 
-TreePtr<Node> Entity::OnIdentifier( TreePtr<Node> id, Location )
+TreePtr<Node> Resource::OnIdentifier( TreePtr<Node> id, Location )
 {
 	identifier = id;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
 
-TreePtr<Node> Entity::OnPermission( TreePtr<Node> c, Location )
+TreePtr<Node> Resource::OnPermission( TreePtr<Node> c, Location )
 {
 	permission = c;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
 
-TreePtr<Node> Entity::OnInitialiser( TreePtr<Node> init, Location )
+TreePtr<Node> Resource::OnInitialiser( TreePtr<Node> init, Location )
 {
 	initialiser = init;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
 
-Syntax::Token Entity::GetSignifierToken() const
+Syntax::Token Resource::GetSignifierToken() const
 {
 	return YY::VNLangParser::token::TOK_ENTITY_SIGN;
 }
@@ -1498,6 +1498,15 @@ TreePtr<Node> XStructor::OnAccess( TreePtr<Node> access_, Location )
 	return (TreePtr<Node>)shared_from_this();	
 }
 
+
+TreePtr<Node> XStructor::OnParams( list<TreePtr<Node>> params, Location loc )
+{
+	if( !params.empty() )
+		throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
+				MyBestErrName() + " cannot accept parameters.");		
+	return (TreePtr<Node>)shared_from_this();	
+}
+
 //////////////////////////// Constructor //////////////////////////////
 
 string Constructor::RenderParams(VN::RendererInterface *renderer, Policy policy) const
@@ -1522,6 +1531,15 @@ list<string> Constructor::RenderInitPre( VN::RendererInterface *renderer, Policy
 string Constructor::GetLeadingText(Policy) const
 {
 	return "";
+}
+
+
+TreePtr<Node> Constructor::OnParams( list<TreePtr<Node>> params_, Location )
+{
+	ASSERT( params.empty() );
+	for( auto param : params_ )
+		params.push_back(param);		
+	return (TreePtr<Node>)shared_from_this();	
 }
 
 //////////////////////////// Destructor //////////////////////////////

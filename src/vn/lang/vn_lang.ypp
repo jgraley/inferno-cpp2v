@@ -385,9 +385,9 @@ prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({},
 				| qualifiers DESIGNATED_CURRENT_RECORD_ID st_declarator				{ $$ = vn->OnDeclaratorDecl($1, $2, @2, $3, @3); } // eg const int a	
 				| DESIGNATED_CURRENT_RECORD_ID qualifiers st_declarator				{ $$ = vn->OnDeclaratorDecl($2, $1, @1, $3, @3); } // eg int const a 	
 				| qualifiers DESIGNATED_CURRENT_RECORD_ID qualifiers st_declarator	{ $$ = vn->OnDeclaratorDecl($1+$3, $2, @2, $4, @4); } 
-				| DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$, {}, $2)->OnIdentifier($3, @3); }
-				| '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$, {}, $3)->OnIdentifier($4, @4); }
-				| qualifiers '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary		{ $$ = vn->OnXStructorDecl(true, @$, $1, $4)->OnIdentifier($5, @5); }
+				| DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$, {})->OnParams($2, @2)->OnIdentifier($3, @3); }
+				| '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$, {})->OnParams($3, @3)->OnIdentifier($4, @4); }
+				| qualifiers '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary		{ $$ = vn->OnXStructorDecl(true, @$, $1)->OnParams($4, @4)->OnIdentifier($5, @5); }
 				| ENTITY_SIGN id_parens								{ $$ = $1->OnIdentifier($2, @2); }
 				
 assign_init		: expr_entry

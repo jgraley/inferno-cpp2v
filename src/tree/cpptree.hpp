@@ -612,7 +612,12 @@ struct View : virtual Node
 };
 
 
-struct Entity : AdvanceDeclaration
+/// Declares that some reource must be made available i.e. ROM/RAM, gates/flops etc. 
+/** These have an 
+ identifier so that the resource can be used (i.e. usages refer to the resource by identifier).
+ There may not be a type - in some cases, we don't want to use a type to make pointers, 
+ aggregates etc the declaration node itself is sufficient as a recipe for how to use the resource. */
+struct Resource : AdvanceDeclaration
 {
 	NODE_FUNCTIONS
 
@@ -648,7 +653,7 @@ struct Entity : AdvanceDeclaration
 };
 
 
-/// Declaration of a variable, object or function with a type
+/// Declaration of a variable, object or function with a type. It "instantiates" the type.
 /** Instance represents a variable/object or a function. In case of function, type is a
  type under Callable and initialiser is a Compound (or Uninitialised for a function
  declaration). For a variable/object, type is basically anything else, and if there is
@@ -661,19 +666,16 @@ struct Entity : AdvanceDeclaration
  The latter case is used where initialisaiton/construction demands ordering. It points
  to an InstanceIdentifier, and all usages of the instance actually point to the
  InstanceIdentifier. */
-struct Instance : Entity
+struct Instance : Resource
 {
     NODE_FUNCTIONS
  
     // Note: the order here determines the ordering of declarations in rendered code
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
 
-	bool ShouldSplitInstance( Policy policy ) const override;
-	
+	bool ShouldSplitInstance( Policy policy ) const override;	
 	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;
-
 	TreePtr<Node> OnType( TreePtr<Node> type, Location loc ) override;
-
 	Token GetSignifierToken() const override;
 };
 
@@ -690,7 +692,7 @@ struct Global : Instance
 };
 
 
-struct CPPQuals : virtual Node
+struct CPPQuals : virtual Node // TODO #918 to drop this
 {
     TreePtr<Dispatch> dispatch; ///< Is the member virtual?
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
@@ -715,7 +717,7 @@ struct Member : Instance, CPPQuals
 };
 
 
-struct XStructor : Entity, CPPQuals
+struct XStructor : Resource, CPPQuals
 {
 	NODE_FUNCTIONS
 	TreePtr<TypeIdentifier> record_id;
@@ -730,6 +732,7 @@ struct XStructor : Entity, CPPQuals
 
 	TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc ) override;
 	TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc ) override;
+	TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc ) override;
 };
 
 
@@ -743,6 +746,8 @@ struct Constructor : XStructor,
 	string RenderParams(VN::RendererInterface *renderer, Policy policy) const override;
 	list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy ) override;
 	string GetLeadingText(Policy policy) const override;
+
+	TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc ) override;
 };
 
 

@@ -505,7 +505,7 @@ private:
 			ASSERT( !inferno_scope_stack.empty() );
 			auto record = TreePtr<Record>::DynamicCast(inferno_scope_stack.top());
 
-            TreePtr<Entity> o;
+            TreePtr<Resource> o;
             TRACE("scope flags 0x%x\n", S->getFlags());
             if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
 			{
@@ -916,7 +916,7 @@ private:
     {
 		INDENT("A");
         //TRACE("FnBodyScope S%p\n", FnBodyScope);
-        auto e = DynamicTreePtrCast<Entity>(hold_decl.FromRaw(D));
+        auto e = DynamicTreePtrCast<Resource>(hold_decl.FromRaw(D));
         ASSERT(e);               
 
         if( auto o = TreePtr<Instance>::DynamicCast(e) )
@@ -941,7 +941,7 @@ private:
     virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtArg Body)
     {
         INDENT("B");
-        auto e = DynamicTreePtrCast<Entity>( hold_decl.FromRaw(Decl) );
+        auto e = DynamicTreePtrCast<Resource>( hold_decl.FromRaw(Decl) );
         ASSERT(e);
         auto cb = DynamicTreePtrCast<Compound>( FromClang( Body ) );
         ASSERT(cb); // function body must be a scope or 0
