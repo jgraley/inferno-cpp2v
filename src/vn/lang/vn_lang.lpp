@@ -92,7 +92,7 @@ node_name               ({ascii_name}|::)*
 \|\|		  	{ return YY::VNLangParser::make_C_LOGICAL_OR_OP(str(), location()); }
 &&			  	{ return YY::VNLangParser::make_C_LOGICAL_AND_OP(str(), location()); }
 <<|>>		  	{ return YY::VNLangParser::make_C_SHIFT_OP(str(), location()); }
-!|~				{ return YY::VNLangParser::make_C_PREFIX_OP(str(), location()); };
+!				{ return YY::VNLangParser::make_C_PREFIX_OP(str(), location()); };
 \+\+|--			{ return YY::VNLangParser::make_C_PRE_OR_POSTFIX_OP(str(), location()); };
 =			  	{ return YY::VNLangParser::make_C_ASSIGN(str(), location()); }
 -|\+		  	{ return YY::VNLangParser::make_C_ADD_SUB_OP(str(), location()); }
@@ -102,7 +102,7 @@ node_name               ({ascii_name}|::)*
 
 \.\. 			{ return YY::VNLangParser::make_RANGE_OP(location()); };
 
-[()\{\};?:\[\]\.,&\*]	{ return YY::VNLangParser::symbol_type(chr(), location()); }
+[()\{\};?:\[\]\.,&\*~]	{ return YY::VNLangParser::symbol_type(chr(), location()); }
 
 static			{ return YY::VNLangParser::make_STATIC_KEYWORD(location()); }
 typename		{ return YY::VNLangParser::make_TYPENAME_KEYWORD(location()); }

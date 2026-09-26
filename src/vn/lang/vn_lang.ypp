@@ -385,10 +385,10 @@ prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({},
 				| qualifiers DESIGNATED_CURRENT_RECORD_ID st_declarator				{ $$ = vn->OnDeclaratorDecl($1, $2, @2, $3, @3); } // eg const int a	
 				| DESIGNATED_CURRENT_RECORD_ID qualifiers st_declarator				{ $$ = vn->OnDeclaratorDecl($2, $1, @1, $3, @3); } // eg int const a 	
 				| qualifiers DESIGNATED_CURRENT_RECORD_ID qualifiers st_declarator	{ $$ = vn->OnDeclaratorDecl($1+$3, $2, @2, $4, @4); } 
-				| DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnConstructor(@$, {}, $2)->OnIdentifier($3, @3); }
-				| qualifiers DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary		{ $$ = vn->OnConstructor(@$, $1, $3)->OnIdentifier($4, @4); } // for virtual destructor but needs ~
+				| DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$, {}, $2)->OnIdentifier($3, @3); }
+				| '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$, {}, $3)->OnIdentifier($4, @4); }
+				| qualifiers '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary		{ $$ = vn->OnXStructorDecl(true, @$, $1, $4)->OnIdentifier($5, @5); }
 				| ENTITY_SIGN id_parens								{ $$ = $1->OnIdentifier($2, @2); }
-
 				
 assign_init		: expr_entry
 				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser()->OnArgsList({}, @1+@2); } 
@@ -728,6 +728,7 @@ expr_prefix : expr_postfix
 			| 					            C_PREFIX_OP	expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnArgsList({$2}, @2); }
 			| 					                    '&' expr_prefix	{ $$ = vn->OnPrefixOperator("&")->OnArgsList({$2}, @2); }
 			| 					                    '*' expr_prefix	{ $$ = vn->OnPrefixOperator("*")->OnArgsList({$2}, @2); }
+			| 					                    '~' expr_prefix	{ $$ = vn->OnPrefixOperator("~")->OnArgsList({$2}, @2); }
 			| 					           C_ADD_SUB_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnArgsList({$2}, @2); }
 			| 					      C_PRE_OR_INFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnArgsList({$2}, @2); }
 			| 					    C_PRE_OR_POSTFIX_OP expr_prefix	{ $$ = vn->OnPrefixOperator($1)->OnArgsList({$2}, @2); }

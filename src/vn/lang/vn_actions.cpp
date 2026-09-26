@@ -498,7 +498,7 @@ TreePtr<Node> VNLangActions::OnEnumerator( Syntax::Location loc )
 }
 
 
-TreePtr<Node> VNLangActions::OnConstructor( Syntax::Location loc, const list<QualifierData> &quals, list<TreePtr<Node>> params )
+TreePtr<Node> VNLangActions::OnXStructorDecl( bool con, Syntax::Location loc, const list<QualifierData> &quals, list<TreePtr<Node>> params )
 {
 	// TODO process the qualifiers in one loop at the top, with lots of checking. Check for:
 	// - wrong qualifier eg an access spec
@@ -508,32 +508,39 @@ TreePtr<Node> VNLangActions::OnConstructor( Syntax::Location loc, const list<Qua
 		if( q.cat == QualCat::STATIC )
 			q_static = &q;
 
+	string name = con ? "Constructor" : "Destructor";
+
 	shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon();	
 	if( !spg ) 
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
-			"Constructor not in record (no scope).");
+			name + " not in record (no scope).");
 	auto rspg = dynamic_pointer_cast<RegularScopeGnomon>(spg);
 	if( !rspg ) 
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
-			"Constructor not in record (scope is not regular).");
+			name + " not in record (scope is not regular).");
 	
-	TreePtr<CPPTree::Constructor> constructor = MakeTreeNode<CPPTree::Constructor>(); 
+	TreePtr<CPPTree::Constructor> xstructor;
+	if( con )
+		xstructor = MakeTreeNode<CPPTree::Constructor>(); 
+	else
+		xstructor = MakeTreeNode<CPPTree::Destructor>(); 
+	
 	for( auto param : params )
-		constructor->params.push_back(param);	
+		xstructor->params.push_back(param);	
 	
-	constructor->OnPermission( MakeTreeNode<CPPTree::NonConst>(), any_cast<YY::VNLangParser::location_type>(loc) );
-	constructor->OnDispatch( MakeTreeNode<CPPTree::NonVirtual>(), any_cast<YY::VNLangParser::location_type>(loc) );
+	xstructor->OnPermission( MakeTreeNode<CPPTree::NonConst>(), any_cast<YY::VNLangParser::location_type>(loc) );
+	xstructor->OnDispatch( MakeTreeNode<CPPTree::NonVirtual>(), any_cast<YY::VNLangParser::location_type>(loc) );
 	
 	auto record = TreePtr<CPPTree::Record>::DynamicCast(rspg->GetNode());
 	if( !record ) 
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
 			"Constructor not in record (scope is not Record).");
-	constructor->record_id = record->identifier;
-	ASSERT( constructor->record_id ); // check assumption
-	ASSERT( TreePtr<CPPTree::TypeIdentifier>::DynamicCast(constructor->record_id) ); // check assumption
+	xstructor->record_id = record->identifier;
+	ASSERT( xstructor->record_id ); // check assumption
+	ASSERT( TreePtr<CPPTree::TypeIdentifier>::DynamicCast(xstructor->record_id) ); // check assumption
 	
 	// Now fill in fields derived from the qualifiers	
 	for( const QualifierData &q : quals )
@@ -554,7 +561,7 @@ TreePtr<Node> VNLangActions::OnConstructor( Syntax::Location loc, const list<Qua
 		}
 	}
 	
-	return constructor;
+	return xstructor;
 }
 
 

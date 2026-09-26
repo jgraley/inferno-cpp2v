@@ -59,7 +59,7 @@ public:
 	TreePtr<Node> OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, Syntax::Location type_loc, TreePtr<Node> declarator, Syntax::Location decl_loc );
 	TreePtr<Node> OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, Syntax::Location middle_loc );	
 	TreePtr<Node> OnEnumerator( Syntax::Location loc );
-	TreePtr<Node> OnConstructor( Syntax::Location loc, const list<QualifierData> &quals, list<TreePtr<Node>> params );	
+	TreePtr<Node> OnXStructorDecl( bool con, Syntax::Location loc, const list<QualifierData> &quals, list<TreePtr<Node>> params );	
 	void UpdateCurrentAccess( Syntax::Location loc, TreePtr<Node> access );	
 	TreePtr<Node> OnMemberInitialiser( TreePtr<Node> member_id, Syntax::Location member_loc, TreePtr<Node> initialiser, Syntax::Location initialiser_loc );
 	TreePtr<Node> OnAbDeclType( Syntax::Location loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	
