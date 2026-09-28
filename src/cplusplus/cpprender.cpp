@@ -7,6 +7,7 @@
 #include "helpers/walk.hpp"
 #include "helpers/simple_duplicate.hpp"
 #include "tree/misc.hpp"
+#include "tree/node_names.hpp"
 #include "tree/scope.hpp"
 #include "vn/lang/sort_decls.hpp"
 #include "vn/agents/agent.hpp"
@@ -45,7 +46,8 @@ string CppRender::RenderToString( TreePtr<Node> root )
 		.include_single_parent = true,
 		.include_multi_parent = true,
 		.include_designation_named_identifiers = false,
-		.preserve_undeclared_ids = true
+		.preserve_undeclared_ids = true,
+		.keywords = AvailableNodeData().GetKeywords()
 	};
 	
 	UniquifyNames identifiers_uniqifier(uniquifier_policy); 

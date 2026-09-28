@@ -16,6 +16,7 @@
 #include "agents/special_agent.hpp"
 #include "agents/standard_agent.hpp"
 #include "indenter.hpp"
+#include "tree/node_names.hpp"
 
 using namespace CPPTree; // TODO should not need
 using namespace VN;
@@ -52,7 +53,8 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 		.include_single_parent = false,
 		.include_multi_parent = true,
 		.include_designation_named_identifiers = true,
-		.preserve_undeclared_ids = false
+		.preserve_undeclared_ids = false,
+		.keywords = AvailableNodeData().GetKeywords()
 	};
     UniquifyNames coupling_names_uniqifier(un_policy);
     trans_kit = TransKit{ utils.get() };

@@ -458,6 +458,7 @@ declarator_postfix	: declarator_primary
 					| declarator_postfix '[' stmt_entry ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
                 
 declarator_primary	: id_parens  									{ $$ = make_shared<Declarators::Concrete>($1); } 
+
                      
 //////////////////////////////// STRICT CONCRETE DECLARATORS /////////////////////////////////////         
 // Strict means no parens around the central identifier

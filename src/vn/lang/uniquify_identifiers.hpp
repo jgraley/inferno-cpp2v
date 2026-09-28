@@ -22,7 +22,7 @@ struct UniquifyNames;
 class UniqueNameGenerator
 {
 public:    
-	UniqueNameGenerator( string (Syntax::*name_getter_)() const );
+	UniqueNameGenerator( string (Syntax::*name_getter_)() const, list<string> keywords );
     string AddNode( TreePtr<Node> node );
     void AddNodeNoRename( TreePtr<Node> node );
 
@@ -88,6 +88,7 @@ public:
 		bool include_multi_parent;
 		bool include_designation_named_identifiers;
 		bool preserve_undeclared_ids;		    // Refuse to rename identifiers that have no definition
+		list<string> keywords;					// Don't conflict with the keywords
 	};
     typedef pair<const TreePtr<Node>, string> NodeAndNamePair;
     typedef map< TreePtr<Node>, string> NodeToNameMap;

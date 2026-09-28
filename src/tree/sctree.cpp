@@ -39,7 +39,7 @@ string Event::GetLoweredIdOrMacroName() const
 
 string Event::GetKeyword( Policy ) const
 {
-	return "event";
+	return "sc_event";
 }
 
 
@@ -58,7 +58,7 @@ string Module::GetLoweredIdOrMacroName() const
 
 string Module::GetKeyword( Policy ) const
 {
-	return "module";
+	return "sc_module";
 }
 
 
@@ -77,7 +77,7 @@ string Interface::GetLoweredIdOrMacroName() const
 
 string Interface::GetKeyword( Policy ) const
 {
-	return "interface";
+	return "sc_interface";
 }
 
 
@@ -124,7 +124,7 @@ string WaitDynamic::GetRender( VN::RendererInterface *renderer, Production, Poli
 
 string WaitDynamic::GetKeyword( Policy ) const 
 {
-	return "wait"; 
+	return "sc_wait"; 
 }
 
 
@@ -144,7 +144,7 @@ TreePtr<Node> WaitDynamic::OnSoloArg( TreePtr<Node> arg, Location )
 
 string WaitStatic::GetKeyword( Policy ) const 
 {
-	return "wait"; 
+	return "sc_wait"; 
 }
 
 
@@ -158,8 +158,8 @@ TreePtr<Node> WaitStatic::OnSoloArg( TreePtr<Node> arg, Location loc )
 
 string WaitDelta::GetKeyword( Policy ) const 
 {
-	// Keep as wait_delta to differentiate from WaitStatic which is just wait with no args
-	return "wait_delta"; 
+	// Keep as sc_wait_delta to differentiate from WaitStatic which is just sc_wait with no args
+	return "sc_wait_delta"; 
 }
 
 //////////////////////////// NextTrigger ///////////////////////////////
@@ -200,7 +200,7 @@ string NextTriggerDynamic::GetRender( VN::RendererInterface *renderer, Productio
 
 string NextTriggerDynamic::GetKeyword( Policy ) const 
 {
-	return "next_trigger"; 
+	return "sc_next_trigger"; 
 }
 
 
@@ -220,7 +220,7 @@ TreePtr<Node> NextTriggerDynamic::OnSoloArg( TreePtr<Node> arg, Location )
 
 string NextTriggerStatic::GetKeyword( Policy ) const 
 {
-	return "next_trigger"; 
+	return "sc_next_trigger"; 
 }
 
 
@@ -235,7 +235,7 @@ TreePtr<Node> NextTriggerStatic::OnSoloArg( TreePtr<Node> arg, Location loc )
 string NextTriggerDelta::GetKeyword( Policy ) const 
 {
 	// Keep as next_trigger_delta to differentiate from NextTriggerStatic which is just next trigger with no args
-	return "next_trigger_delta"; 
+	return "sc_next_trigger_delta"; 
 }
 
 //////////////////////////// Notify ///////////////////////////////
@@ -277,15 +277,15 @@ TreePtr<Node> Notify::OnObject( TreePtr<Node> object, Location )
 
 string NotifyImmediate::GetKeyword( Policy ) const 
 {
-	return "notify"; 
+	return "sc_notify"; 
 }
 
 //////////////////////////// NotifyDelta ///////////////////////////////
 
 string NotifyDelta::GetKeyword( Policy ) const 
 {
-	// Keep as notify_delta to differentiate from NotifyImmediate which is just notify with one arg
-	return "notify_delta"; 
+	// Keep as sc_notify_delta to differentiate from NotifyImmediate which is just sc_notify with one arg
+	return "sc_notify_delta"; 
 }
 
 //////////////////////////// NotifyTimed ///////////////////////////////
@@ -303,7 +303,7 @@ string NotifyTimed::GetRender( VN::RendererInterface *renderer, Production, Poli
 
 string NotifyTimed::GetKeyword( Policy ) const 
 {
-	return "notify"; 
+	return "sc_notify"; 
 }
 
 
@@ -342,7 +342,7 @@ string Method::GetLoweredIdOrMacroName() const
 
 string Method::GetKeyword( Policy ) const 
 {
-	return "method"; 
+	return "sc_method"; 
 }
 
 //////////////////////////// Thread ///////////////////////////////
@@ -355,7 +355,7 @@ string Thread::GetLoweredIdOrMacroName() const
 
 string Thread::GetKeyword( Policy ) const 
 {
-	return "thread"; 
+	return "sc_thread"; 
 }
 
 //////////////////////////// ClockedThread ///////////////////////////////
@@ -367,7 +367,7 @@ string ClockedThread::GetLoweredIdOrMacroName() const
 
 string ClockedThread::GetKeyword( Policy ) const 
 {
-	return "cthread"; 
+	return "sc_cthread"; 
 }
 
 //////////////////////////// DeltaCount ///////////////////////////////
@@ -392,7 +392,7 @@ string DeltaCount::GetRender( VN::RendererInterface *renderer, Production, Polic
 
 string DeltaCount::GetKeyword( Policy ) const 
 {
-	return "delta_count"; 
+	return "sc_delta_count"; 
 }
 
 

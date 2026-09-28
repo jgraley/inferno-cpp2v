@@ -83,6 +83,18 @@ NodeTag AvailableNodeData::GetTagOfNode(TreePtr<Node> node) const
 }
 
 
+list<string> AvailableNodeData::GetKeywords() const
+{
+	if( keyword_to_tag_map.empty() )
+		InitialiseMap();
+
+	set<string> ss; // keyword_to_tag_map is multimap so uniquify
+	for( auto p : keyword_to_tag_map )
+		ss.insert( p.first );
+	return ToList(ss);
+}
+
+
 optional<NodeTag> AvailableNodeData::TryGetByKeywordIfToken( string keyword ) const
 {
 	if( keyword_to_tag_map.empty() )

@@ -18,16 +18,12 @@ using namespace VN;
 
 //////////////////////////// UniqueNameGenerator ///////////////////////////////
 
-UniqueNameGenerator::UniqueNameGenerator( string (Syntax::*name_getter_)() const ) :
+UniqueNameGenerator::UniqueNameGenerator( string (Syntax::*name_getter_)() const, list<string> keywords ) :
     name_getter( name_getter_ )
 {	
 	// See #907
-	name_usages.insert( NameUsagesPair( "wait", {{0, nullptr}} ) );
-	name_usages.insert( NameUsagesPair( "next_trigger", {{0, nullptr}} ) );
-	name_usages.insert( NameUsagesPair( "notify", {{0, nullptr}} ) );
-	name_usages.insert( NameUsagesPair( "delta_count", {{0, nullptr}} ) );
-	name_usages.insert( NameUsagesPair( "exit", {{0, nullptr}} ) );
-	name_usages.insert( NameUsagesPair( "cease", {{0, nullptr}} ) );
+	for( string k : keywords )
+		name_usages.insert( NameUsagesPair( k, {{0, nullptr}} ) );
 }
 
 
@@ -349,7 +345,7 @@ UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, Tr
 		}
 	}
 	
-	UniqueNameGenerator name_gen( policy.name_getter );
+	UniqueNameGenerator name_gen( policy.name_getter, policy.keywords );
 	NodeToNameMap nodes_to_names;
 
 	// Deal with undeclared (system) identifiers which must be preserved    
