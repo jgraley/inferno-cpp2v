@@ -11,15 +11,15 @@ int gvar = 0;
 int tot = 0; 
 
 
-class TopLevel : sc_module
+class TopLevel : public sc_module
 {
 public:
     SC_CTOR(TopLevel)
     { 
-        SC_METHOD(method);
+        SC_METHOD(mymethod);
     }
 private:
-    void method()
+    void mymethod()
     {
         gvar++;
         tot+=gvar;

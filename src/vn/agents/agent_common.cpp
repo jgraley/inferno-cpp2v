@@ -14,6 +14,13 @@
 #include "sym/rewriters.hpp"
 #include "up/tree_update.hpp"
 
+//#define SEE_INTERESTING_COUPLINGS
+
+#ifdef SEE_INTERESTING_COUPLINGS
+#include "tree/cpptree.hpp"
+#include "identifier_by_name_agent.hpp"
+#endif
+
 #include <stdexcept>
 
 using namespace VN;
@@ -96,6 +103,15 @@ Lazy<BooleanExpression> AgentCommon::SymbolicCouplingQuery(PatternLink keyer, co
         expr &= MakeLazy<IsSimpleCompareEquivalentOperator>( keyer_expr, residual_expr ) |
                 (keyer_expr == mmax_expr) | // See thought on #384
                 (residual_expr == mmax_expr);
+                
+#ifdef SEE_INTERESTING_COUPLINGS
+		bool keyer_is_identifier =
+		     (TreePtr<CPPTree::Identifier>::DynamicCast(keyer.GetPatternTreePtr())) ||
+		     (dynamic_cast<IdentifierByNameAgent *>(keyer.GetChildAgent())) ||
+		     (dynamic_cast<BuildIdentifierAgent *>(keyer.GetChildAgent()));
+        if( !keyer_is_identifier && !residuals.empty() )
+			FTRACE("Non-identifier coupling with residuals: ")(keyer)(" ")(residuals);
+#endif			
     }
     return expr;
 }

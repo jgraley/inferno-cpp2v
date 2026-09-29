@@ -67,6 +67,7 @@ RaiseSCHierarchicalClass::RaiseSCHierarchicalClass( TreePtr< SCRecord > lr_sccla
     ls_class->members = (l_decls);
     ls_class->bases = (l_bases, ls_base);       
     ls_base->record = s_token;
+    ls_base->access = MakePatternNode<Public>();
     lr_scclass->identifier = l_tid;       
     lr_scclass->members = (l_decls);
     lr_scclass->bases = (l_bases);

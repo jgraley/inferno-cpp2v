@@ -691,11 +691,31 @@ TreePtr<Argumentation> MapArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expr
 	// and resolve the map into a sequence.
 
 	// Determine the type of the callee function or constructor
-	TreePtr<Type> callee_type;
+	Sequence<Declaration> decl_sequence;   	
 	try
 	{
-		callee_type = TypeOf::instance.Get(*renderer->GetTransKit(), callee).GetTreePtr();
+		TreePtr<Type> callee_type = TypeOf::instance.Get(*renderer->GetTransKit(), callee).GetTreePtr();
 		ASSERT( callee_type );
+		// Convert f->params from Parameters to Declarations and settle on an arbitrary 
+		// ordering. This needs to be the same on each visit with a given callee.
+		if( auto f = TreePtr<CallableParams>::DynamicCast(callee_type) )  
+			for( auto param : f->params )
+				decl_sequence.push_back(param); 
+	}
+	catch( TypeOf::TypelessDeclUnsupportedMismatch &tdus )
+	{
+		// Try to deal with XStructors and Resourcees in general which won't typeof
+		// Note that when TypeOf acts on a function it calls DeclarationOf anyway. So 
+		// why not: 
+		// - TypeOf that stops at identifier - only on outermost level eg it goes though id of a pointer that's being dereferenced
+		// - DeclarationOf
+		// - Grab the type if it's an instance otherwise use directly
+		TreePtr<Node> n = DeclarationOf().TryApplyTransformation(*renderer->GetTransKit(), callee).GetTreePtr();;
+		ASSERT(n);
+		ASSERT(TreePtr<XStructor>::DynamicCast(n));
+		if( auto cd = TreePtr<Constructor>::DynamicCast(n) )  
+			for( auto param : cd->params )
+				decl_sequence.push_back(param); 
 	}
 	catch( BaseDeclarationOf::DeclarationNotFound &dnf )
 	{
@@ -705,13 +725,6 @@ TreePtr<Argumentation> MapArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expr
 	{
 		ASSERT(false)("TypeOf failure: ")(ex.what())(" on ")(callee);
 	}	
-
-	// Convert f->params from Parameters to Declarations and settle on an arbitrary 
-	// ordering. This needs to be the same on each visit with a given callee.
-	Sequence<Declaration> decl_sequence;   
-	if( auto f = TreePtr<CallableParams>::DynamicCast(callee_type) )  
-		for( auto param : f->params )
-			decl_sequence.push_back(param); 
 
 	// Determine args sequence using param sequence
 	auto sa = MakeTreeNode<SeqArgumentation>();
