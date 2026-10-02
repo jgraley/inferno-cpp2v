@@ -234,7 +234,9 @@ struct ResourceIdentifier : Identifier,
 { 
     NODE_FUNCTIONS 
     virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
+	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
 	Production GetMyProductionTerminal() const override;
+   	Token GetSignifierToken() const override;
 };
                                
 

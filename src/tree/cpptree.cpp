@@ -101,22 +101,19 @@ Syntax::Token Statement::GetSignifierToken() const
 
 Syntax::Production Expression::GetMyProductionTerminal() const
 {
-	// Use Syntax version to disable
-	return Syntax::GetMyProductionTerminal();
+	throw Unimplemented();
 }
 
 
-string Expression::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
+string Expression::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {
-	// Use Syntax version to disable
-	return Syntax::GetRender(renderer, production, policy);
+	return Syntax::GetRender( renderer, surround_prod, policy );
 }
 
 
 Syntax::Token Expression::GetSignifierToken() const
 {
-	// Use Syntax version to disable
-	return Syntax::GetSignifierToken();
+	throw UnimplementedToken();
 }
 
 //////////////////////////// Type ///////////////////////////////
@@ -547,6 +544,18 @@ string SpecificIdentifier::GetTrace() const
 Syntax::Production ResourceIdentifier::GetMyProductionTerminal() const
 { 
 	return Production::PRIMARY_EXPR; 
+}
+
+
+string ResourceIdentifier::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->GetSignifier(this, policy);
+}
+	
+
+Syntax::Token ResourceIdentifier::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_RESOURCE_ID_SIGN;
 }
 
 //////////////////////////// SpecificResourceIdentifier //////////////////////////////
@@ -1339,7 +1348,7 @@ TreePtr<Node> Resource::OnInitialiser( TreePtr<Node> init, Location )
 
 Syntax::Token Resource::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_ENTITY_SIGN;
+	return YY::VNLangParser::token::TOK_RESOURCE_SIGN;
 }
 
 //////////////////////////// Instance //////////////////////////////
