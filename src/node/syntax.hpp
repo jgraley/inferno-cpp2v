@@ -178,9 +178,6 @@ public:
 	
 	virtual string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy );
 	
-	// Like GetRender, but without a kit it can't render sub-productions, so it can only work for terminals
-	virtual string GetRenderTerminal( Production surround_prod ) const;
-	
 	virtual Production GetMyProduction(const VN::RendererInterface *renderer, Policy policy ) const;
 	virtual Production GetMyProductionTerminal() const;
 	virtual Production GetOperandInDeclaratorProduction() const;

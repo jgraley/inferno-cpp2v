@@ -40,13 +40,7 @@ bool Syntax::IsDesignationNamedIdentifier() const
 }
 
 
-string Syntax::GetRender( VN::RendererInterface *, Production production, Policy )
-{
-	return GetRenderTerminal(production);
-}
-
-
-string Syntax::GetRenderTerminal( Production ) const
+string Syntax::GetRender( VN::RendererInterface *, Production, Policy )
 {
 	throw Unimplemented();
 }

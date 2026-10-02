@@ -105,9 +105,9 @@ Syntax::Production Expression::GetMyProductionTerminal() const
 }
 
 
-string Expression::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+string Expression::GetRender( VN::RendererInterface *, Production, Policy )
 {
-	return Syntax::GetRender( renderer, surround_prod, policy );
+	throw Unimplemented();
 }
 
 
@@ -794,7 +794,7 @@ string Literal::GetName() const
 	string value_string;
 	try
 	{
-		value_string = "(" + GetRenderTerminal(Production::BOTTOM_EXPR) + ")";
+		value_string = "(" + const_cast<Literal *>(this)->GetRender(nullptr, Production::BOTTOM_EXPR, Policy()) + ")";
 	}
 	catch(Refusal &) {}
 	return Traceable::GetName() + value_string;
@@ -828,7 +828,7 @@ Orderable::Diff SpecificString::OrderCompare3WayCovariant( const Orderable &righ
 }
  
  
-string SpecificString::GetRenderTerminal( Production ) const
+string SpecificString::GetRender( VN::RendererInterface *, Production, Policy )
 {
 	// TODO use \n \r etc 
 	string s;
@@ -935,7 +935,7 @@ Orderable::Diff SpecificInteger::OrderCompare3WayCovariant( const Orderable &rig
 }
  
  
-string SpecificInteger::GetRenderTerminal( Production ) const 
+string SpecificInteger::GetRender( VN::RendererInterface *, Production, Policy )
 {
     return string(value.toString(10)) + // decimal
            (value.isUnsigned() ? "U" : "") +
@@ -999,7 +999,7 @@ Orderable::Diff SpecificFloat::OrderCompare3WayCovariant( const Orderable &right
 }
  
 
-string SpecificFloat::GetRenderTerminal( Production ) const
+string SpecificFloat::GetRender( VN::RendererInterface *, Production, Policy )
 {
     char hs[256];
     // generate hex float since it can be exact
@@ -2616,7 +2616,7 @@ Syntax::Production This::GetMyProductionTerminal() const
 }
 
 
-string This::GetRenderTerminal( Production ) const
+string This::GetRender( VN::RendererInterface *, Production, Policy )
 {
 	return "this";
 }

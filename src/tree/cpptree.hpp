@@ -375,7 +375,7 @@ struct SpecificString : String
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetRenderTerminal( Production surround_prod ) const; 
+    string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
 	Production GetMyProductionTerminal() const override;
 	string GetString() final { return value; }
 private:
@@ -411,7 +411,7 @@ struct SpecificInteger : Integer
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetRenderTerminal( Production surround_prod ) const; 
+    string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
 	Production GetMyProductionTerminal() const override;
 	
 private:
@@ -435,7 +435,7 @@ struct SpecificFloat : Float, llvm::APFloat
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
-    virtual string GetRenderTerminal( Production surround_prod ) const; 
+    string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
     Production GetMyProductionTerminal() const override;
 };
 
@@ -800,7 +800,6 @@ struct Temporary : Instance
 {
     NODE_FUNCTIONS_FINAL
     
-	string GetRenderTerminal( Production ) const { throw Unimplemented(); }    
 	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;	
 };
 
@@ -1349,7 +1348,7 @@ struct This : Operator
 	NODE_FUNCTIONS_FINAL	
 	
 	Production GetMyProductionTerminal() const override;
-	string GetRenderTerminal( Production ) const final;
+    string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
    	Token GetSignifierToken() const override;
 };
 
