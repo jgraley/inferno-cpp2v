@@ -99,7 +99,7 @@ Syntax::Token Statement::GetSignifierToken() const
 
 //////////////////////////// Expression ///////////////////////////////
 
-Syntax::Production Expression::GetMyProductionTerminal() const
+/*Syntax::Production Expression::GetMyProductionTerminal() const
 {
 	throw Unimplemented();
 }
@@ -114,7 +114,7 @@ string Expression::GetRender( VN::RendererInterface *, Production, Policy )
 Syntax::Token Expression::GetSignifierToken() const
 {
 	throw UnimplementedToken();
-}
+}*/
 
 //////////////////////////// Type ///////////////////////////////
 
@@ -555,7 +555,7 @@ string ResourceIdentifier::GetRender( VN::RendererInterface *renderer, Productio
 
 Syntax::Token ResourceIdentifier::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_RESOURCE_ID_SIGN;
+	return YY::VNLangParser::token::TOK_NORMAL_ID_SIGN;
 }
 
 //////////////////////////// SpecificResourceIdentifier //////////////////////////////
@@ -788,6 +788,24 @@ TreePtr<Node> SeqArgumentation::OnArgsList( list<TreePtr<Node>> args, Location )
 }
 
 //////////////////////////// Literal ///////////////////////////////
+
+Syntax::Production Literal::GetMyProductionTerminal() const
+{
+	throw Unimplemented();
+}
+
+
+string Literal::GetRender( VN::RendererInterface *, Production, Policy )
+{
+	throw Unimplemented();
+}
+
+
+Syntax::Token Literal::GetSignifierToken() const
+{
+	throw UnimplementedToken();
+}
+
 
 string Literal::GetName() const
 {
@@ -1619,6 +1637,12 @@ string Base::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 Syntax::Production LabelIdentifier::GetMyProductionTerminal() const
 { 
 	return Production::PURE_IDENTIFIER; 
+}
+
+
+Syntax::Token LabelIdentifier::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_NORMAL_ID_SIGN;
 }
 
 //////////////////////////// SpecificLabelIdentifier //////////////////////////////

@@ -165,7 +165,7 @@
 <TreePtr<Node>> TYPE_W_PARAMS_SIGN		_("type with arguments signifier")
 <TreePtr<Node>> COMPOUND_SIGN			_("compound signifier") // not really C/C++
 <TreePtr<Node>> RESOURCE_SIGN			_("resource signifier") // unifies functions and cons/destructors
-<TreePtr<Node>> RESOURCE_ID_SIGN		_("resource identifier signifier") 
+<TreePtr<Node>> NORMAL_ID_SIGN		_("resource identifier signifier") 
 
 stmt_low 
 stmt_high
@@ -793,7 +793,7 @@ id_primary  : vn_primary
 
 vn_primary	: pure_wildcard
 			| DESIGNATED_NORMAL       			
-			| RESOURCE_ID_SIGN	  			
+			| NORMAL_ID_SIGN	  			
 			| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
