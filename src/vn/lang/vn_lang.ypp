@@ -200,7 +200,7 @@ stmt_high
 %type <TreePtr<Node>> 				enum_node enum
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					vn_name
-%type <list<shared_ptr<VN::Command>>>			commands sep_commands decl_commands
+%type <list<shared_ptr<VN::Command>>>			commands sep_commands decl_commands acc_memb_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
 %type <VN::Itemisation>				itemisation items_bare items_sep
@@ -211,7 +211,7 @@ stmt_high
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
 %type <VN::NodeAndGnomon>			norm_full_explicit_start type_full_explicit_start decl_full_explicit_start qual_full_explicit_start mi_full_explicit_start
 %type <VN::NodeAndGnomon>			record_scope enum_scope
-%type <TreePtr<Node>> 				acc_memb_boot member comp_member bare_member bare_member_nvn 
+%type <TreePtr<Node>> 				acc_memb_boot acc_memb_entry member comp_member bare_member bare_member_nvn 
 %type <TreePtr<Node>> 				acc_memb_prefix acc_memb_postfix acc_memb_paren acc_memb_primary
 %type <list<TreePtr<Node>>>			stmt_decl stmt_decls decl decls 
 %type <list<TreePtr<Node>>>			members enumerators
@@ -531,8 +531,13 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
                                                                                                                                                          
 members			: member													{ $$.push_back($1); }
 				| members member 											{ $$ = $1; $$.push_back($2); }
+     
+acc_memb_boot	: acc_memb_entry								
+				| acc_memb_commands											{ $$ = vn->OnEmbeddedCommands($1); }
+     
+acc_memb_commands   : acc_memb_entry COMMAND_TERM commands					{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 
-acc_memb_boot	: bare_member_nvn     
+acc_memb_entry	: bare_member_nvn     
 				| bare_member_nvn ';'	
 				| comp_member
 				| acc_memb_prefix
@@ -543,8 +548,7 @@ member			: bare_member ';'											{ $$ = $1; }
 // access_clause: OnInstance() will still try to program the current access. But the new fn will override it with the parsed acess, and then try to update the current access
 comp_member		: comp_decl_nvn		
 				| access_clause comp_decl_nvn								{ $$ = $2->OnAccess($1, @1);
-				                                                              vn->UpdateCurrentAccess(@1, $1); }	
-				
+				                                                              vn->UpdateCurrentAccess(@1, $1); }					
 bare_member		: bare_member_nvn
 				| acc_memb_prefix  
 

@@ -225,7 +225,7 @@ bool Declaration::ShouldSplitInstance( Policy ) const
 	return false; 
 }	
 
-
+//#define EXPLAIN_ACCESS_SPEC
 list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bool force, VN::RendererInterface *renderer, Policy policy ) const
 {
 	// Note 1: we will render an access spec if the pointer changes, even if it's just switching
@@ -246,35 +246,58 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 	if( policy.context->has_value() )
 	{
 		auto current_access = any_cast<TreePtr<AccessSpec>>(*(policy.context));
+		TreePtr<Node> current_access_no_sa;
+		if( current_access )
+			current_access_no_sa = SimpleDuplicate::DuplicateSubtree(current_access);	
 		SimpleCompare sc;
-		render_it = true;
 		
-#if 0		
+#ifdef EXPLAIN_ACCESS_SPEC
 		ls.push_back( "/* "+
+					  Trace(policy.context) + 
+					  " = " +
 		              Trace(current_access) +
 		              (!current_access ? "(NULL)" : current_access->IsFinal()?"(final)":"(inter)") +
 		              " -> " +
 		              Trace(new_access) +
 		              (!new_access ? "NULL" : new_access->IsFinal()?"(final)":"(inter)") +
-		              SSPrintf("comp=%d", sc.Compare3Way(new_access, current_access)) +
-		              " " +
-		              Trace(policy.context) +
-		              " */" );
+		              SSPrintf(" C3W=%d", sc.Compare3Way(new_access_no_sa, current_access_no_sa)) );	
 #endif
 
 		// Must elide when coupled to indicate the coupling
 		if( new_access.get() == current_access.get() ) // equal pointers mean coupled		
+		{
+#ifdef EXPLAIN_ACCESS_SPEC
+			ls.push_back( "coupled so elide" );
+#endif
 			render_it = false; 
-
+		}
 		// We prefer to elide when both final and the same type. Parse should duplicate the nodes in this case TODO 
-		if( new_access && current_access && new_access->IsFinal() && current_access->IsFinal() && sc.Compare3Way(new_access_no_sa, current_access)==0 )
+		else if( new_access && current_access && new_access->IsFinal() && current_access->IsFinal() && sc.Compare3Way(new_access_no_sa, current_access_no_sa)==0 )
+		{
+#ifdef EXPLAIN_ACCESS_SPEC
+			ls.push_back( "equal and final so elide" );
+#endif
 			render_it = false; 
+		}
+		else
+		{
+#ifdef EXPLAIN_ACCESS_SPEC
+			ls.push_back( "render it" );
+#endif
+			render_it = true;
+		}
+		
+#ifdef EXPLAIN_ACCESS_SPEC
+		ls.push_back( "*/" );
+#endif
 
 		*(policy.context) = (TreePtr<CPPTree::AccessSpec>)new_access;
 	}
 	else if( force )
 	{
-		//ls.push_back( "/* forced */" );
+#ifdef EXPLAIN_ACCESS_SPEC
+		ls.push_back( "/* forced: render it */" );
+#endif		
 		// Parser cannot determine the access any other way, so treat as if always given
 		render_it = true;
 	}
