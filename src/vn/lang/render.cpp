@@ -377,7 +377,6 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_
     if( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
         Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) &&
         Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) &&
-        Syntax::GetPrecedence(node_prod) != Syntax::GetPrecedence(Syntax::Production::ARRIVAL) &&
         node_prod != Syntax::Production::COMPOUND )
     {
 		explain += SSPrintf("\n//%s Adding semicolon, reason 1, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
@@ -390,7 +389,6 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_
          Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_VN)) )
         if( Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) &&
 			Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) &&
-			Syntax::GetPrecedence(node_prod) != Syntax::GetPrecedence(Syntax::Production::ARRIVAL) &&
 			node_prod != Syntax::Production::COMPOUND )
 		{
 			explain += SSPrintf("\n\\%s Adding semicolon, reason 2, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));

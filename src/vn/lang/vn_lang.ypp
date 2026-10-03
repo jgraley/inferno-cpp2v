@@ -183,8 +183,8 @@ stmt_high
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
 %type <TreePtr<Node>> 				unified_entry unified_prefix pure_wildcard
 %type <TreePtr<Node>> 				arrival
-%type <TreePtr<Node>> 				bare_statement statement_nl stmt_comp statement control_stmt_sign       
-%type <list<TreePtr<Node>>>			statement_l statement_e statement_nc 
+%type <TreePtr<Node>> 				stmt_decl bare_statement statement_na stmt_comp control_stmt_sign       
+%type <TreePtr<Node>>   			statement 
 %type <TreePtr<Node>> 				open_declaration decl_boot decl_entry decl_disjunction decl_conjunction declaration 
 %type <TreePtr<Node>> 				prototype bare_decl_nvn comp_decl_nvn bare_declaration bare_initialiser
 %type <TreePtr<Node>> 				assign_init
@@ -213,7 +213,7 @@ stmt_high
 %type <VN::NodeAndGnomon>			record_scope enum_scope
 %type <TreePtr<Node>> 				acc_memb_boot acc_memb_entry member comp_member bare_member bare_member_nvn 
 %type <TreePtr<Node>> 				acc_memb_prefix acc_memb_postfix acc_memb_paren acc_memb_primary
-%type <list<TreePtr<Node>>>			stmt_decl stmt_decls decl decls 
+%type <list<TreePtr<Node>>>			stmt_decls decl decls 
 %type <list<TreePtr<Node>>>			members enumerators
 %type <TreePtr<Node>> 				enumerator prototype_enumerator
 %type <list<TreePtr<Node>>>			comma_sep_exprs semicolon_args parameters parameterisation
@@ -317,12 +317,12 @@ compound_scope	: '{'														{ $$ = make_shared<VN::RegularScopeGnomon>(Mak
 code_unit_scope	: CODE_UNIT '{'												{ $$ = make_shared<VN::RegularScopeGnomon>(MakeTreeNode<CPPTree::CodeUnit>()); 
 																			  vn->AddGnomon($$); }
 
-stmt_decls	: stmt_decl											
-			| stmt_decl stmt_decls											{ $$ = $1 + $2; }
+stmt_decls	: stmt_decl											            { $$ = {$1}; } 
+			| stmt_decl stmt_decls											{ $$ = $2; $$.push_front($1); }
 
-stmt_decl	: statement_l													
-			| compound_entry												{ $$ = {$1}; } 
-			| declaration													{ $$ = {$1}; } 
+stmt_decl	: statement											
+			| compound_entry										
+			| declaration												
 
 decls		: decl												
 			| decl decls													{ $$ = $1 + $2; }
@@ -643,28 +643,22 @@ stmt_conjunction_nc : open_statement_nc
 open_statement_nc 	: expr_entry
 					| statement		
 					
-stmt_comp	: statement_l													{ $$ = vn->OnNeedSoloStatement($1, @1); }
+stmt_comp	: statement												
 			| compound_entry	
 			
-statement	: statement_l													{ $$ = vn->OnNeedSoloStatement($1, @1); }
+statement   : statement_na												
+			| arrival
 
-statement_l : statement_e									
-			| ';'															{ $$ = { vn->OnNop(@1) }; }      
-
-// Putting arrivals on compound or expr_entry causes conflicts
-statement_e : statement_nc %prec ';'											
-
-statement_nc: statement_nl													{ $$ = {$1}; }
-//			| arrival statement_nc											{ $$ = $2; $$.push_front($1);} 
-			| arrival 		 											{ $$ = {$1}; } // Note no Nop
-
+// Note: as of C++23, a compound statement CAN and in a label. So, we take the fully general 
+// approach here and parse a label (up to and including the :) as a full statement. No need
+// to try and absorb extra semicolons introduced by render: they've gone too. 
 // #903 generalise to comma separated args
 arrival		: ARRIVAL_KEYWORD ':'										
 			| ARRIVAL_KEYWORD expr_entry ':'								{ $$ = $1->OnArgsList({$2}, @2); } 
 			| ARRIVAL_KEYWORD expr_entry RANGE_OP expr_entry ':' 			{ $$ = $1->OnArgsList({$2, $4}, @2+@4); }
 			| id_primary ':' 			 									{ $$ = vn->OnLabel($1, @1); } 
 
-statement_nl: bare_statement ';'										
+statement_na: bare_statement ';'										
 			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts #905
 			| control_stmt_sign '(' ')' stmt_comp	
 			  %prec KEYWORD_CONTROL_STMT									{ $$ = $1->OnArgsList({}, @2+@3)->OnBody($4, @4); }
@@ -672,6 +666,7 @@ statement_nl: bare_statement ';'
 			  %prec KEYWORD_CONTROL_STMT									{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 			| control_stmt_sign '(' semicolon_args ')' stmt_comp
 			  ELSE_KEYWORD stmt_comp										{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5)->OnElseBody($7, @6); }
+			| ';'															{ $$ = vn->OnNop(@1); }      
 
 bare_statement	: KEYWORD_SIMPLE_STMT										
 				| KEYWORD_SIMPLE_STMT expr_entry							{ $$ = $1->OnArgsList({$2}, @2); }
