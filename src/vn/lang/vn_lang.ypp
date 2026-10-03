@@ -200,7 +200,7 @@ stmt_high
 %type <TreePtr<Node>> 				enum_node enum
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					vn_name
-%type <list<shared_ptr<VN::Command>>>			commands sep_commands decl_commands acc_memb_commands
+%type <list<shared_ptr<VN::Command>>>			commands sep_commands stmt_commands decl_commands acc_memb_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
 %type <VN::Itemisation>				itemisation items_bare items_sep
@@ -236,8 +236,6 @@ stmt_high
 
 vnscript 		: commands 								{ vn->OnVNScript($1); }
      
-stmt_boot		: commands								{ $$ = vn->OnEmbeddedCommands($1); }
-     
 // This is to make the ⨟ optional on last command
 commands        : sep_commands								{ $$ = $1; }
 				| sep_commands COMMAND_TERM					{ $$ = $1; }
@@ -250,7 +248,6 @@ sep_commands 	: sep_commands COMMAND_TERM script_command		{ $$ = $1; $$.push_bac
 			
 // Add more commands here
 script_command	: ENGINE_COMMAND unified_entry   		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
-				| stmt_entry 			  					{ $$ = make_shared<VN::PatternCommand>($1, @$); } // in trivial cases, this decays back to the node
 				| ATTRIBUTE_COMMAND		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
@@ -615,6 +612,11 @@ prototype_enumerator 		: id_parens 									{ $$ = vn->OnEnumerator(@1)->OnIdent
 
 //////////////////////////////// STATEMENTS ////////////////////////////////////                 
 
+stmt_boot		: stmt_entry 
+				| stmt_commands										{ $$ = vn->OnEmbeddedCommands($1); }
+
+stmt_commands   : stmt_entry COMMAND_TERM commands					{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
+     
 stmt_entry			: stmt_disjunction
 
 stmt_disjunction	: stmt_conjunction
