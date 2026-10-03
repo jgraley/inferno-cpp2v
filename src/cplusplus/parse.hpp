@@ -1213,7 +1213,7 @@ private:
          */
         if( TreePtr<Declaration> d = DynamicTreePtrCast<Declaration>( st ) )
         {
-            if( backing_paired_decl.count(d) > 0 )
+            if( backing_paired_decl.contains(d) )
             {
                 TreePtr<Declaration> bd = backing_paired_decl[d];
                 ASSERT( bd );

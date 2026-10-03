@@ -102,9 +102,9 @@ string CppRender::OnRefusalToRender( Syntax::Refusal &ex, TreePtr<Node> node, Sy
 
 string CppRender::GetUniqueIdentifierName( TreePtr<Node> id ) const 
 {
-	ASSERT( unique_identifier_names.count(id) > 0 )
-	      (id)
-	      (" (\"%s\") missing from unique_identifier_names", id->GetIdentifierName().c_str() );
+	ASSERT( unique_identifier_names.contains(id) )
+	        (id)
+	        (" (\"%s\") missing from unique_identifier_names", id->GetIdentifierName().c_str() );
 	return unique_identifier_names.at(id);
 }
 

@@ -158,7 +158,7 @@ TreePtr<Node> VNLangRecogniser::CreateNodeFromName(string text, Syntax::Location
 	ASSERT( namespace_block ); // Internal error: no root block
 
 	// If the first part won't match, try the default namespace
-	if( namespace_block->sub_blocks.count(parts.front()) == 0 ) 
+	if( !namespace_block->sub_blocks.contains(parts.front()) ) 
 	{
 		const ANDBlock *default_block = namespace_block->sub_blocks.at(DEFAULT_NODE_NAMESPACE).get();
 		if( auto nsb = dynamic_cast<const AvailableNodeData::NamespaceBlock *>(default_block) )
@@ -169,7 +169,7 @@ TreePtr<Node> VNLangRecogniser::CreateNodeFromName(string text, Syntax::Location
 
 	for( string part : parts )
 	{
-		if( namespace_block->sub_blocks.count(part) == 0 )
+		if( !namespace_block->sub_blocks.contains(part) )
 			throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
 				SSPrintf("Unrecognised %s in explicit name", DiagQuote(part).c_str() ) ); 
 
@@ -227,7 +227,7 @@ YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseKeyword(wstring text, b
 YY::VNLangParser::symbol_type VNLangRecogniser::RecogniseDesignation(wstring text, Syntax::Location loc) const
 {
 	shared_ptr<const DesignationGnomon> designation_gnomon;
-	if( designation_gnomons.count(text) > 0 )	
+	if( designation_gnomons.contains(text) )	
 	    designation_gnomon = designation_gnomons.at(text);
 	else
 		throw Unrecognised();

@@ -31,8 +31,8 @@ public:
         c.function = function;
         c.prefix = prefix;
         int count=0;
-        if( counter.count( c ) > 0 )        
-            count = counter[c];
+        if( counter.contains( c ) )        
+            count = counter.at(c);
         count++;
         counter[c] = count;            
     }

@@ -33,7 +33,7 @@ bool BackjumpingSolver::AssignUnsuccessful()
         if( cease )
             return true;
         
-        backjump = ( possibly_conflicted_vars.count(current_var_index) == 0 &&
+        backjump = ( !possibly_conflicted_vars.contains(current_var_index) &&
                      can_backjump );        
     } while( backjump ); // backjump into possibly_conflicted_vars
         

@@ -23,7 +23,7 @@ const LinkTable::Row &LinkTable::GetRow(XLink xlink) const
 bool LinkTable::HasRow(XLink xlink) const
 {
     ASSERT( xlink );
-    return rows.count(xlink) > 0;
+    return rows.contains(xlink);
 }
 
  

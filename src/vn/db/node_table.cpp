@@ -27,7 +27,7 @@ const NodeTable::Row &NodeTable::GetRow(TreePtr<Node> node) const
 bool NodeTable::HasRow(TreePtr<Node> node) const
 {
     ASSERT( node );
-    return rows.count(node) > 0;
+    return rows.contains(node);
 }
 
 
@@ -41,7 +41,7 @@ bool NodeTable::IsDeclarer(XLink xlink) const
         case DBCommon::IN_COLLECTION:
         {
             set<const TreePtrInterface *> declared = link_row.parent_node->GetDeclared();
-            return declared.count( xlink.GetTreePtrInterface() ) > 0;
+            return declared.contains( xlink.GetTreePtrInterface() );
         }
         default:
         {

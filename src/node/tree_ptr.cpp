@@ -132,7 +132,7 @@ void TreePtrCommon::AddRef(const Traceable *ref) const
 	ref_count++; 
 	
 #ifdef TREE_POINTER_REF_TRACKING
-	ASSERT( references.count(ref)==0 )
+	ASSERT( !references.contains(ref) )
 	      ("Link: ")
 	      (ref)
 	      (" added more than once\n")

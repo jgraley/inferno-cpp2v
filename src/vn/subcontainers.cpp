@@ -226,14 +226,9 @@ const ContainerInterface::iterator &SubContainerRangeExclusions::end()
 bool SubContainerRangeExclusions::IsExcluded( const iterator_interface &ib ) const
 {
     if(ib == my_end) 
-    {
         return false; // can't dereference end iterator - but can't exclude it either
-    }
     else
-    {
-        bool exc = exclusions->count( &*ib );
-        return exc > 0;
-    }
+        return exclusions->contains( &*ib );
 }
 
 

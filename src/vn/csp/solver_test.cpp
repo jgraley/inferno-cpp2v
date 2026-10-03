@@ -42,7 +42,7 @@ void SolverTest::Run( const SolutionReportFunction &solution_report_function,
     TRACE("############ RUNNING SOLVER UNDER TEST #############\n");
     auto under_test_srl = [&](const Solution &solution)
     { 
-        ASSERT( reference_solutions.count( solution ) > 0 );
+        ASSERT( reference_solutions.contains( solution ) );
         under_test_solutions.insert( solution );
     };
     auto under_test_rrl = [&](const Assignments &assigns)

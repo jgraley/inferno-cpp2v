@@ -239,7 +239,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
             continue;
         }    
 
-		if( in_order_bases.count(tz_base) > 0 )
+		if( in_order_bases.contains(tz_base) )
 		{
 			// This TZ is known to have been accepted as in-order somewhere else in the layout
 			TRACE("Global duplicate rejected: index=%d patch=", i)(patch_records[i].patch_ptr)("\n");
@@ -326,7 +326,7 @@ void OrderingPass::FindOutOfOrderTreePatches( PatchRecords &patch_records,
 		
     // Patches are out of order if their index is missing from the ordering
     for( size_t i=0; i<patch_records.size(); i++ )   
-		patch_records[i].out_of_order = (indices_simple.count( i ) == 0);
+		patch_records[i].out_of_order = !indices_simple.contains( i );
 }
  
  

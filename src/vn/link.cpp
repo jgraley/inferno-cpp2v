@@ -502,14 +502,10 @@ SolutionMap VN::MapForPattern( const list<PatternLink> &plinks,
     for( PatternLink plink : plinks )
     {
         XLink xlink;
-        if( basic_solution.count(plink) > 0 )
-        {            
+        if( basic_solution.contains(plink) )
             xlink = basic_solution.at(plink);
-        }
         else // missing; probably a SubContainer
-        {
             xlink = XLink();
-        }
         m[plink] = xlink;
     }
     return m;

@@ -132,11 +132,11 @@ void Orderings::InsertActionSCAndCAT(const DBWalk::WalkInfo &walk_info)
 		return;
 
 	// Multiple parents: only if not already
-	if( simple_compare_ordering.count(walk_info.node)==0 )
+	if( !simple_compare_ordering.contains(walk_info.node) )
 		InsertSolo( simple_compare_ordering, walk_info.node );               
 
 	// Multiple parents: only if not already
-	if( category_ordering.count(walk_info.node) == 0 )
+	if( !category_ordering.contains(walk_info.node) )
 	{
 		TRACE("CAT inserts: ")(walk_info.node)("\n");
 		InsertSolo( category_ordering, walk_info.node );            	
@@ -185,7 +185,7 @@ set<TreePtr<Node>> Orderings::GetTerminusAndBaseAncestors( const TreeZone &tz ) 
 		x = tz.GetTerminusXLink(i);
 		while( (x = db->TryGetParentXLink(x)) )
 		{
-			if( sn.count(x.GetChildTreePtr())!=0 )
+			if( sn.contains(x.GetChildTreePtr()) )
 				break; // There will already be a path to root from here
 			InsertSolo(sn, x.GetChildTreePtr());			
 		}

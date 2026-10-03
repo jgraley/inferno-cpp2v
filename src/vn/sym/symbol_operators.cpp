@@ -92,7 +92,7 @@ unique_ptr<SymbolicResult> SymbolVariable::Evaluate( const EvalKit &kit ) const
 {
     // This is an ERROR. You could perfectly easily have called GetRequiredVariables(),
     // done a quick set difference and KNOWN that it would come to this.
-    ASSERT( kit.hypothesis_links->count(plink) > 0 );
+    ASSERT( kit.hypothesis_links->contains(plink) );
     return make_unique<UniqueResult>( kit.hypothesis_links->at(plink) );
 }
 

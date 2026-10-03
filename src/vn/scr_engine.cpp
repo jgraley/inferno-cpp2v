@@ -95,9 +95,9 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
     for( PatternLink plink : visible_plinks )
     {
         unsigned int phase = (unsigned int)in_progress_agent_phases[plink.GetChildAgent()];
-        if( visible_compare_plinks.count(plink) == 0 )
+        if( !visible_compare_plinks.contains(plink) )
             phase |= Agent::IN_REPLACE_ONLY;
-        else if( visible_replace_plinks.count(plink) == 0 )
+        else if( !visible_replace_plinks.contains(plink) )
             phase |= Agent::IN_COMPARE_ONLY;
         else
             phase |= Agent::IN_COMPARE_AND_REPLACE;
@@ -113,26 +113,26 @@ void SCREngine::Plan::CategoriseAgents( const set<PatternLink> &enclosing_plinks
     my_plinks.clear();
     //my_agent_plinks = DifferenceOf( visible_plinks, enclosing_plinks );
     for( PatternLink plink : visible_plinks )
-        if( enclosing_plinks.count( plink ) == 0 ) // exclude by agent
+        if( !enclosing_plinks.contains( plink ) ) // exclude by agent
             InsertSolo( my_plinks, plink );
     
     my_agent_plinks.clear();
     //my_agent_plinks = DifferenceOf( visible_plinks, enclosing_plinks );
     for( PatternLink plink : visible_plinks )
-        if( enclosing_agents.count( plink.GetChildAgent() ) == 0 ) // exclude by agent
+        if( !enclosing_agents.contains( plink.GetChildAgent() ) ) // exclude by agent
             InsertSolo( my_agent_plinks, plink );
 
     // Need the replace plinks in the same order that GenReplaceLayout() walks the tree
     for( PatternLink plink : visible_replace_plinks_postorder )
     {		
-        if( enclosing_plinks.count(plink) == 0 )
+        if( !enclosing_plinks.contains(plink) )
         {          
             Agent *agent = plink.GetChildAgent();
             if( agent->GetEmbeddedSearchPattern() ||
                 agent->GetEmbeddedReplacePattern() )
                 my_embedded_plinks_postorder.push_back(plink);        
                 
-            if( visible_compare_plinks.count(plink) == 0 )
+            if( !visible_compare_plinks.contains(plink) )
 				my_replace_only_plinks_postorder.push_back( plink ); // be exclusive of shared contexts. See #822     
 		}
 	}
@@ -270,7 +270,7 @@ void SCREngine::Plan::PlanReplace()
         Agent *agent = plink.GetChildAgent();
 		
 		// Only want to be here when not already keyed, i.e. exclusively replace context.
-		ASSERT( all_keyer_plinks.count(plink)==0 )(plink);
+		ASSERT( !all_keyer_plinks.contains(plink) )(plink);
 			
 		bool need_replace_key = !IsAgentKeyer(agent); // not keyed by any OTHER incoming plink
 		
@@ -590,7 +590,7 @@ bool SCREngine::IsKeyedBeforeReplace( PatternLink plink ) const
     
     // This can be determined entirely from the plan. Node is keyed if 
     // our AndRuleEngine did it or enclosing SCREngine did it.
-    return plan.keyed_before_replace_plinks.count(plink) == 1;
+    return plan.keyed_before_replace_plinks.contains(plink);
 }
 
 
@@ -600,7 +600,7 @@ bool SCREngine::IsKeyedBeforeReplace( const Agent *agent ) const
     
     // This can be determined entirely from the plan. Node is keyed if 
     // our AndRuleEngine did it or enclosing SCREngine did it.
-    return plan.keyed_before_replace_plinks.count(plan.all_agents_to_keyers.at(agent)) == 1;
+    return plan.keyed_before_replace_plinks.contains(plan.all_agents_to_keyers.at(agent));
 }
 
 
@@ -608,7 +608,7 @@ XLink SCREngine::GetKey( PatternLink plink ) const
 {
     ASSERT( plink );
     ASSERT( universal_assignments );
-    ASSERT( universal_assignments->count(plink)>0 )("Could not find plink: ")(plink)(" in matching assignments");
+    ASSERT( universal_assignments->contains(plink) )("Could not find plink: ")(plink)(" in matching assignments");
     return universal_assignments->at(plink);
 }
 
@@ -624,7 +624,7 @@ XLink SCREngine::GetKey( const Agent *agent ) const
 bool SCREngine::IsKeyedByAndRuleEngine( Agent *agent ) const
 {
     ASSERT( plan.and_rule_engine );
-    return plan.and_rule_engine->GetKeyedAgents().count( agent );
+    return plan.and_rule_engine->GetKeyedAgents().contains( agent );
 }
 
 
@@ -642,7 +642,7 @@ void SCREngine::SetOverlayBottomLayer(const Agent *agent, PatternLink bottom_lay
 
 PatternLink SCREngine::TryGetOverlayBottomLayer(const Agent *agent) const
 {
-	if( plan.all_agents_to_bottom_layer.count(agent)==1 )
+	if( plan.all_agents_to_bottom_layer.contains(agent) )
     	return plan.all_agents_to_bottom_layer.at(agent);
     else
 		return PatternLink();

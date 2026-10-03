@@ -219,7 +219,7 @@ LeakCheck &LeakCheck::operator=( const LeakCheck &)
 
 void LeakCheck::Construct()
 {
-    if( instance_counts.count(origin)==0 )
+    if( !instance_counts.contains(origin) )
         instance_counts[origin] = {0, {}};
     instance_counts.at(origin).count++;
 }

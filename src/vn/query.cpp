@@ -75,7 +75,7 @@ void DecidedQueryCommon::AssertMatchingLinks( const DecidedQueryCommon::Links &m
     {
         PatternLink plink = rp.first;
         XLink ref_xlink = rp.second;
-        ASSERT( mut_links.count(plink) == 1 );
+        ASSERT( mut_links.count(plink) == 1 ); // list could have count>1
         XLink mut_xlink = mut_links.at(plink);        
         if( auto mxssr = dynamic_cast<SubContainer *>(mut_xlink.GetChildTreePtr().get()) )        
             mxssr->AssertMatchingContents( ref_xlink.GetChildTreePtr() ); // only the contents will actually match        
@@ -96,7 +96,7 @@ void DecidedQueryCommon::AssertMatchingNodes( const DecidedQueryCommon::Nodes &m
     {
         PatternLink plink = rp.first;
         TreePtr<Node> ref_node = rp.second;
-        ASSERT( mut_nodes.count(plink) == 1 );
+        ASSERT( mut_nodes.contains(plink) ); 
         TreePtr<Node> mut_node = mut_nodes.at(plink);        
         if( auto mxssr = dynamic_cast<SubContainer *>(mut_node.get()) )        
             mxssr->AssertMatchingContents( ref_node ); // only the contents will actually match        

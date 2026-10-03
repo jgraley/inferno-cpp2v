@@ -69,24 +69,24 @@ void ReferenceSolver::Plan::DeduceVariables()
         set<int> c_free_var_indices;
         for( VariableId v : c_vars )
         {
-            if( free_variables_set.count(v) == 1 )
+            if( free_variables_set.contains(v) )
             {
                 c_free_vars.insert(v);
                 c_free_var_indices.insert( free_variables_to_indices.at(v) );
             }
-            if( arbitrary_forced_variables.count(v) == 1 )
+            if( arbitrary_forced_variables.contains(v) )
             {
                 // Enforce rule #525 - the arbitrary forces can be outside the
                 // domain and won't have x_tree_db xlink_table. This is OK as long
                 // as constraints that have to deal with them don't need xlink_table.
-                ASSERT( c->GetVariablesRequiringDB().count(v) == 0 )
+                ASSERT( !c->GetVariablesRequiringDB().contains(v) )
                       ( "Constraint:\n")(c)("\nrequires NUGGETS but ")(v)(" is arbitrary\n");
             }
         }        
         for( int i : c_free_var_indices )
         {
             affected_constraints[i].insert(c);
-            if( free_variables_used_by_constraints.count(i) == 0 )
+            if( !free_variables_used_by_constraints.contains(i) )
                 free_variables_used_by_constraints.insert(i);
         }
                         
@@ -103,7 +103,7 @@ void ReferenceSolver::Plan::DeduceVariables()
                 cumulative_free_vars.insert(i);
                 bool got_all_c_free_vars = true;
                 for( set<int>::size_type j : c_free_var_indices )
-                    if( cumulative_free_vars.count(j) == 0 )
+                    if( !cumulative_free_vars.contains(j) )
                         got_all_c_free_vars = false;
                 if( got_all_c_free_vars )
                 {
@@ -120,7 +120,7 @@ void ReferenceSolver::Plan::DeduceVariables()
     // Ensure that every free variable supplied to our constructor is
     // used by at least one constraint.
     for( vector<VariableId>::size_type i=0; i<free_variables.size(); i++ )
-        ASSERT( free_variables_used_by_constraints.count(i) == 1 )
+        ASSERT( free_variables_used_by_constraints.contains(i) )
               ("free_variables:\n")(free_variables)
               ("\nfree_variables_used_by_constraints:\n")(free_variables_used_by_constraints); 
 }
@@ -153,9 +153,9 @@ void ReferenceSolver::Start( const Assignments &forces,
 
     // Check that the forces passed to us here match the plan
     for( VariableId v : plan.domain_forced_variables )           
-        ASSERT( forces.count(v) == 1 );
+        ASSERT( forces.contains(v) );
     for( VariableId v : plan.arbitrary_forced_variables )           
-        ASSERT( forces.count(v) == 1 );
+        ASSERT( forces.contains(v) );
     ASSERT( forces.size() == plan.domain_forced_variables.size()+
                              plan.arbitrary_forced_variables.size() );
 
@@ -380,7 +380,7 @@ void ReferenceSolver::ShowBestAssignment()
     for( VariableId var : plan.free_variables )
     {
         TRACEC(var);
-        if( assignments_to_show.count(var) > 0 )
+        if( assignments_to_show.contains(var) )
         {
             TRACE(" assigned ")(assignments_to_show.at(var));
             if( var.GetChildAgent()->IsLocalMatch(*(assignments_to_show.at(var).GetChildTreePtr())) || 
@@ -428,7 +428,7 @@ void ReferenceSolver::CheckPlan() const
     }
     for( VariableId v : plan.free_variables )
     {
-        ASSERT( variables_used.count(v) > 0 )
+        ASSERT( variables_used.contains(v) )
               ("Planning error: variable ")(v)(" is not used by any constraints\n")
               ("Variables used: ")(variables_used)("\n");
     }

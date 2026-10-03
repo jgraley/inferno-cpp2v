@@ -140,7 +140,7 @@ void AvailableNodeData::InitialiseMap()
 		list<string> flat_list = p.first;
 		NodeTag tag = p.second;
 		
-		if( node_names_root.sub_blocks.count(flat_list.front())==0 )
+		if( !node_names_root.sub_blocks.contains(flat_list.front()) )
 		{
 			auto sb = make_unique<NamespaceBlock>();
 			node_names_root.sub_blocks[flat_list.front()] = move(sb);

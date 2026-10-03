@@ -431,7 +431,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
 
         if( run->predecessor )
         {
-            if( hypothesis_links->count(run->predecessor) == 0 )         
+            if( !hypothesis_links->contains(run->predecessor) )         
                 break; // can't do any more in the current run
             
             XLink pred_xlink = hypothesis_links->at(run->predecessor);
@@ -447,7 +447,7 @@ void StandardAgent::RegenerationQuerySequence( DecidedQueryAgentInterface &query
         
         if( run->successor )
         {
-            if( hypothesis_links->count(run->successor) == 0 )         
+            if( !hypothesis_links->contains(run->successor) )         
                 break; // can't do any more in the current run
             
             XLink succ_xlink = hypothesis_links->at(run->successor);

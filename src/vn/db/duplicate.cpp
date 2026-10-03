@@ -35,7 +35,7 @@ TreePtr<Node> Duplicate::DuplicateSubtree( XLink source_base_xlink,
     ASSERTS( source_base_xlink );
 
     // Terminus at root: we can subsitute but we can't make a mutator.
-    if( terminii_map.count(source_base_xlink) == 1 ) 
+    if( terminii_map.contains(source_base_xlink) ) 
     {
         TerminusInfo &terminus_info = terminii_map.at(source_base_xlink);
         TreePtr<Node> dest_terminus = terminus_info.dest;
@@ -87,7 +87,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
                 ASSERTS( source_elt ); // present simplified scheme disallows nullptr
                 XLink source_child_xlink = XLink(&source_elt);
 
-                if( terminii_map.count(source_child_xlink) == 1 ) 
+                if( terminii_map.contains(source_child_xlink) ) 
                 {
                     TerminusInfo &terminus_info = terminii_map.at(source_child_xlink);
                     TreePtr<Node> dest_terminus = terminus_info.dest;
@@ -116,7 +116,7 @@ TreePtr<Node> Duplicate::DuplicateSubtreeWorker( TreePtr<Node> source,
             ASSERTS( *source_singular )("source should be non-nullptr");
             XLink source_child_xlink = XLink(source_singular);
             
-            if( terminii_map.count(source_child_xlink) == 1 ) 
+            if( terminii_map.contains(source_child_xlink) ) 
             {
                 TerminusInfo &terminus_info = terminii_map.at(source_child_xlink);
                 TreePtr<Node> dest_terminus = terminus_info.dest;

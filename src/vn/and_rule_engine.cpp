@@ -94,7 +94,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
     PopulateNormalAgents( &normal_agents, &normal_links, base_plink );    
     
     for( PatternLink plink : normal_links )
-        if( surrounding_agents.count( plink.GetChildAgent() ) == 0 )
+        if( !surrounding_agents.contains( plink.GetChildAgent() ) )
             my_normal_links.insert( plink );
             
     my_normal_agents = DifferenceOf( normal_agents, surrounding_agents );       
@@ -121,7 +121,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
 
     boundary_keyer_links.clear();
     for( PatternLink plink : surrounding_keyer_plinks )
-        if( boundary_agents.count(plink.GetChildAgent()) == 1 )
+        if( boundary_agents.contains(plink.GetChildAgent()) )
             boundary_keyer_links.insert( plink );
                
     my_fixed_keyer_links = { base_plink };
@@ -139,7 +139,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_,
         ASSERT( my_normal_agents.empty() );
         // Root link obviously isn't in my_normal_links because that's empty, 
         // so it needs to be found in my_boundary_links
-        ASSERT( my_boundary_links.count(base_plink) == 1 )
+        ASSERT( my_boundary_links.contains(base_plink) )
               ("\nmbrl:\n")(my_boundary_links);
     }
     else
@@ -202,12 +202,12 @@ void AndRuleEngine::Plan::PopulateNormalAgents( set<Agent *> *normal_agents,
     // Note that different links can point to the same agent, so 
     // unique agents is the stronger condition
     
-    if( normal_links->count(link) != 0 )
+    if( normal_links->contains(link) )
         return; // Links must be uniquified (weaker condition)
     normal_links->insert(link);
     
     Agent *agent = link.GetChildAgent();    
-    if( normal_agents->count(agent) != 0 )
+    if( normal_agents->contains(agent) )
         return; // Agents must be uniquified (stronger condition)
     normal_agents->insert(agent);
 
@@ -227,7 +227,7 @@ void AndRuleEngine::Plan::PopulateBoundaryAgents( PatternLink link,
     // 2. It's not the child of a surrounding agent (we don't recurse on them)
     // See #125
     
-    if( reached_links.count(link) > 0 )    
+    if( reached_links.contains(link) )    
         return; 
     reached_links.insert(link);
     // ------------ Now unique by plink (weaker) -------------
@@ -235,17 +235,17 @@ void AndRuleEngine::Plan::PopulateBoundaryAgents( PatternLink link,
     Agent *agent = link.GetChildAgent();
     
     // Note: here, we WILL see root if root is a surrounding agent (i.e. trivial pattern)
-    if( surrounding_agents.count( agent ) )
+    if( surrounding_agents.contains( agent ) )
         my_boundary_links.insert( link );
 
     normal_and_boundary_links_preorder.push_back( link );    
 
-    if( reached_agents.count(agent) > 0 )    
+    if( reached_agents.contains(agent) )    
         return; 
     reached_agents.insert(agent);
     
     // ------------ Now unique by agent (stronger) -------------
-    if( surrounding_agents.count( agent ) > 0 )
+    if( surrounding_agents.contains( agent ) )
     {
         // At boundary so don't recurse
         boundary_agents.insert( agent );
@@ -264,7 +264,7 @@ void AndRuleEngine::Plan::DetermineKeyersModuloDisjunction( PatternLink plink,
                                                             set<Agent *> *senior_agents,
                                                             set<Agent *> *disjunction_agents )
 {
-    if( senior_agents->count( plink.GetChildAgent() ) > 0 )
+    if( senior_agents->contains( plink.GetChildAgent() ) )
         return; // will be fixed values for our solver
     senior_agents->insert( plink.GetChildAgent() );
 
@@ -332,7 +332,7 @@ void AndRuleEngine::Plan::DetermineResiduals( Agent *agent,
         
         if( keyer && keyer != link )
         {
-            ASSERT( coupling_residual_links.count(link) == 0 );
+            ASSERT( !coupling_residual_links.contains(link) );
             coupling_residual_links.insert(link);
             continue; // Coupling residuals do not recurse (keyer does that and it only needs to be done once)
         }
@@ -376,7 +376,7 @@ void AndRuleEngine::Plan::DeduceCSPVariables()
 {
     for( PatternLink link : normal_and_boundary_links_preorder )
     {
-        if( my_fixed_keyer_links.count(link)==0 )
+        if( !my_fixed_keyer_links.contains(link) )
             free_normal_links_ordered.push_back( link );
         current_solve_plinks.insert( link );
     }
@@ -392,10 +392,10 @@ void AndRuleEngine::Plan::CreateMyFullSymbolics()
     {
         Agent *agent = keyer_plink.GetChildAgent();
         //FTRACE("SymbolicQuery: ")(agent)("\n");
-		ASSERT( agents_to_keyers.count(agent)>0 )
+		ASSERT( agents_to_keyers.contains(agent) )
 		      ("agent: ")(agent)
 		      ("\nagents_to_keyers: ")(agents_to_keyers);
-		ASSERT( agents_to_residuals.count(agent)>0 )
+		ASSERT( agents_to_residuals.contains(agent) )
 		      ("agent: ")(agent)
 		      ("\agents_to_residuals: ")(agents_to_residuals);
         ASSERT(agents_to_keyers.at(agent))(agents_to_keyers);
@@ -432,10 +432,10 @@ void AndRuleEngine::Plan::CreateBoundarySymbolics()
         Agent *agent = keyer_plink.GetChildAgent();                    
 		
         //FTRACE("SymbolicQuery: ")(agent)("\n");
-		ASSERT( agents_to_keyers.count(agent)>0 )
+		ASSERT( agents_to_keyers.contains(agent) )
 		      ("agent: ")(agent)
 		      ("\nagents_to_keyers: ")(agents_to_keyers);
-		ASSERT( agents_to_residuals.count(agent)>0 )
+		ASSERT( agents_to_residuals.contains(agent) )
 		      ("agent: ")(agent)
 		      ("\agents_to_residuals: ")(agents_to_residuals);
         PatternLink keyer = agents_to_keyers.at(agent);
@@ -728,7 +728,7 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN      
     for( XLink xlink : pq->GetNormalLinks() )    
-        ASSERT( x_tree_db->domain.count(xlink) > 0 )(xlink)(" not found in ")(x_tree_db->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
+        ASSERT( x_tree_db->domain.contains(xlink) )(xlink)(" not found in ")(x_tree_db->domain)(" (see issue #202)\n"); // #202 expected to cause this to fail
 #endif
 
     PatternLink keyer_plink = plan.agents_to_keyers.at(agent);
@@ -758,11 +758,11 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
                 ASSERT( xlink );
                 
                 // Actions if evaluator link
-                if( plan.my_evaluator_abnormal_engines.count( p.first ) )                
+                if( plan.my_evaluator_abnormal_engines.contains( p.first ) )                
                     InsertSolo( solution_for_evaluators, make_pair(p.first, xlink) );                
                 
                 // Actions if free link
-                if( plan.my_free_abnormal_engines.count( p.first ) )
+                if( plan.my_free_abnormal_engines.contains( p.first ) )
                 {
                     shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at( p.first );
                     (void)e->Compare( xlink, &solution_for_subordinates, keep_alive_nodes );
@@ -773,15 +773,15 @@ void AndRuleEngine::AgentRegeneration( Agent *agent,
             for( const auto &p : query->GetMultiplicityNodes() )
             {
 				ASSERT( p.second );
-                if( plan.my_evaluator_abnormal_engines.count( p.first ) )
+                if( plan.my_evaluator_abnormal_engines.contains( p.first ) )
                     InsertSolo( solution_for_evaluators, make_pair(p.first, XLink::CreateFrom(&p.second)) );                
 
-                if( plan.my_multiplicity_engines.count( p.first ) )
+                if( plan.my_multiplicity_engines.contains( p.first ) )
                     CompareMultiplicityNode( p.first, p.second, &solution_for_subordinates, keep_alive_nodes );  
             }
 
             // Try matching the evaluator agents.
-            if( plan.my_evaluators.count( agent ) )
+            if( plan.my_evaluators.contains( agent ) )
                 CompareEvaluatorLinks( agent, &solution_for_subordinates, &solution_for_evaluators, keep_alive_nodes );                    
         }
         catch( const ::Mismatch &e )
@@ -831,7 +831,7 @@ void AndRuleEngine::OnSolution(SolutionMap basic_solution,
 
 	// Is the solution now complete? 
 	for( auto plink : plan.my_normal_links )
-		ASSERT( basic_solution.count(plink) > 0 )("Cannot find normal link ")(plink)("\nIn ")(basic_solution)("\n");
+		ASSERT( basic_solution.contains(plink) )("Cannot find normal link ")(plink)("\nIn ")(basic_solution)("\n");
 	
 	try
 	{
@@ -890,7 +890,7 @@ SolutionMap AndRuleEngine::Compare( XLink base_xlink,
 
 #ifdef CHECK_EVERYTHING_IS_IN_DOMAIN
     if( !dynamic_cast<StarAgent*>(plan.base_plink.GetChildAgent()) ) // Stars are based at SubContainers which don't go into domain    
-        ASSERT( x_tree_db->domain.count(base_xlink) > 0 )(base_xlink)(" not found in ")(x_tree_db->GetOrderings()->domain)(" (see issue #202)\n");
+        ASSERT( x_tree_db->domain.contains(base_xlink) )(base_xlink)(" not found in ")(x_tree_db->GetOrderings()->domain)(" (see issue #202)\n");
 #endif
     
     // Determine my fixed (just root pattern link to base x link)
@@ -1055,9 +1055,9 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
                 Graph::Figure::Link link;
                 link.short_name = plink.GetShortName();
                 link.pptr = plink.GetPatternTreePtrInterface();
-                if( residuals.count(plink) > 0 )
+                if( residuals.contains(plink) )
                     link.details.planned_as = Graph::LINK_RESIDUAL;
-                else if( keyers.count(plink) > 0 )
+                else if( keyers.contains(plink) )
                     link.details.planned_as = Graph::LINK_KEYER;
                 else
                     link.details.planned_as = Graph::LINK_DEFAULT;
@@ -1083,7 +1083,7 @@ void AndRuleEngine::GenerateMyGraphRegion( Graph &graph, string scr_engine_id ) 
         set< shared_ptr<AndRuleEngine> > reached;
         for( auto p : engines )
         {
-            ASSERT( reached.count(p.second) == 0 );
+            ASSERT( !reached.contains(p.second) );
             reached.insert( p.second );
             
             Graph::Figure::Agent base_agent;

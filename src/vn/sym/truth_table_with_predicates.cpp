@@ -92,7 +92,7 @@ TruthTableWithPredicates TruthTableWithPredicates::GetSlice( TruthTable::SliceSp
     vector<string> new_pred_labels;
     for( unsigned axis=0; axis<GetDegree(); axis++ )
     {  
-        if( slice.count(axis) == 0 ) // this is NOT one of the fixed axes
+        if( !slice.contains(axis) ) // this is NOT one of the fixed axes
         {
             new_predicates.push_back( predicates.at(axis) );
             new_pred_labels.push_back( pred_labels.at(axis) );
@@ -113,7 +113,7 @@ TruthTableWithPredicates TruthTableWithPredicates::GetFolded( set<int> fold_axes
     vector<string> new_pred_labels;
     for( unsigned axis=0; axis<GetDegree(); axis++ )
     {  
-        if( fold_axes.count(axis) == 0 ) // this is NOT one of the fold axes
+        if( !fold_axes.contains(axis) ) // this is NOT one of the fold axes
         {
             new_predicates.push_back( predicates.at(axis) );
             new_pred_labels.push_back( pred_labels.at(axis) );
@@ -130,7 +130,7 @@ TruthTableWithPredicates TruthTableWithPredicates::GetFolded( set<int> fold_axes
     
 bool TruthTableWithPredicates::PredExists( shared_ptr<PredicateOperator> pred ) const
 {
-    return pred_to_index.count( pred ) == 1;
+    return pred_to_index.contains( pred );
 }
 
 

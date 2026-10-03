@@ -47,7 +47,7 @@ void TruthTable::SetSlice( SliceSpec slice, CellType new_value )
     // Determine what the free axes must be
     vector<int> free_axes;
     for( unsigned i=0; i<degree; i++ )
-        if( slice.count(i) == 0 )
+        if( !slice.contains(i) )
             free_axes.push_back(i);
     ASSERT( free_axes.size() + slice.size() == degree );
 
@@ -75,7 +75,7 @@ void TruthTable::SetSlice( SliceSpec slice, const TruthTable &new_values )
     // Determine what the free axes must be
     vector<int> free_axes;
     for( unsigned i=0; i<degree; i++ )
-        if( slice.count(i) == 0 )
+        if( !slice.contains(i) )
             free_axes.push_back(i);
     ASSERT( free_axes.size() + slice.size() == degree );
 
@@ -132,7 +132,7 @@ TruthTable TruthTable::GetSlice( SliceSpec slice ) const
     // Determine what the free axes must be
     vector<int> dest_axes;
     for( unsigned i=0; i<degree; i++ )
-        if( slice.count(i) == 0 )
+        if( !slice.contains(i) )
             dest_axes.push_back(i);
     ASSERT( dest_axes.size() + slice.size() == degree );
     TruthTable dest( dest_axes.size(), CellType::FALSE );
@@ -163,7 +163,7 @@ TruthTable TruthTable::GetFolded( set<int> fold_axes ) const
     // Determine what the destination axes must be
     vector<int> dest_axes;
     for( unsigned i=0; i<degree; i++ )
-        if( fold_axes.count(i) == 0 )
+        if( !fold_axes.contains(i) )
             dest_axes.push_back(i);
     ASSERT( dest_axes.size() + fold_axes.size() == degree );
     TruthTable dest( dest_axes.size(), CellType::FALSE );
@@ -216,7 +216,7 @@ int TruthTable::CountInSlice( SliceSpec slice, CellType target_value ) const
     // Determine what the free axes must be
     vector<int> free_axes;
     for( unsigned i=0; i<degree; i++ )
-        if( slice.count(i) == 0 )
+        if( !slice.contains(i) )
             free_axes.push_back(i);
     ASSERT( free_axes.size() + slice.size() == degree );
 
@@ -338,7 +338,7 @@ string TruthTable::Render( set<int> column_axes, vector<string> pred_labels, uns
     // Determine what the row axes must be
     vector<int> row_axes;
     for( unsigned i=0; i<degree; i++ )
-        if( column_axes.count(i) == 0 )
+        if( !column_axes.contains(i) )
             row_axes.push_back(i);
     ASSERT( row_axes.size() + column_axes.size() == degree )
           ("row_axes=\n")(row_axes)("\ncolumn_axes=\n")(column_axes)("\ndegree=%d\n", degree);

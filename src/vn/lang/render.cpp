@@ -204,7 +204,7 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 					  node ? Traceable::TypeIdName(*node).c_str() : "NULL", // No serial numbers because we diff these
 					  RETURN_ADDR() );
 	
-	if( unique_coupling_names.count(node) > 0 )			
+	if( unique_coupling_names.contains(node) )			
 	{
 		Syntax::Production node_prod;
 		try
@@ -423,7 +423,7 @@ string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production 
 		return Dispatch( node, node_prod, surround_prod, policy );
 	
 	bool prerestricted = false;
-	ASSERT( incoming_links_map.count(node)>0 )(incoming_links_map)("\nNode: ")(node);
+	ASSERT( incoming_links_map.contains(node) )(incoming_links_map)("\nNode: ")(node);
 	for( const TreePtrInterface *tpi : incoming_links_map.at(node) )
 		prerestricted |= agent->IsNonTrivialPreRestriction(tpi);
 		
@@ -575,7 +575,7 @@ string Render::DoRenderTypeAndDeclaratorPreserve( TreePtr<Node> type, string dec
 		type = MakeTreeNode<Type>();
 	}
 	
-	if( unique_coupling_names.count(type) > 0 )					
+	if( unique_coupling_names.contains(type) )					
 		return unique_coupling_names.at(type) + " " + declarator;	
 	else 
 		return AccomodateBootTypeAndDeclarator(type, declarator, declarator_prod, surround_prod, policy, constant);

@@ -186,7 +186,7 @@ inline unordered_set<S> DifferenceOf( const unordered_set<S> &s1, const unordere
     unordered_set<S> result;
     
     for( const S &s : s1 )
-        if( s2.count(s)==0 )
+        if( !s2.contains(s) )
             result.insert(s);
        
     return result; 

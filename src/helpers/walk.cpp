@@ -282,7 +282,7 @@ bool UniqueFilter::IsMatch( TreePtr<Node> context,
     
     //TRACE("Got ")(*root)("\n");
     
-    if( seen.count( root ) > 0 )
+    if( seen.contains( root ) )
         return false;
     
     seen.insert( root );

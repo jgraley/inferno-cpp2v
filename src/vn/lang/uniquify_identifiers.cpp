@@ -35,7 +35,7 @@ string UniqueNameGenerator::AddNode( TreePtr<Node> node )
     SplitName( node, &base_name, &n_want );
 
     // Do we have the base name already? If so, add this new instance
-    if( name_usages.count(base_name) > 0 )
+    if( name_usages.contains(base_name) )
     {
         unsigned n_got = AssignNumber( name_usages.at(base_name), node, n_want );
         return MakeUniqueName( base_name, n_got );
@@ -63,7 +63,7 @@ void UniqueNameGenerator::AddNodeNoRename( TreePtr<Node> node )
     // declared "somewhere else" and that to rename them would break things. In
     // fact they're probably system node ids. These have the usual identifier 
     // semantics; do a #819 when introducing.
-    ASSERT( name_usages.count(base_name) == 0 )
+    ASSERT( !name_usages.contains(base_name) )
             ("Name conflict among undeclared identifiers (would force a rename - unsafe)\n")
             ("node: ")(node)(" name: ")((node.get()->*name_getter)())("\n")  
             ("previous usages: ")(name_usages); 
@@ -190,7 +190,7 @@ void Fingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 	ASSERT( x );
 		
     // Record the fingerprints and increment index in depth-first pre-order
-    bool first = fingerprints.count(x)==0;
+    bool first = !fingerprints.contains(x);
 
     // Recurse into our child nodes
     // Notw: not worried about repeat visits of arbitrary nodes due to couplings

@@ -868,7 +868,7 @@ shared_ptr<ScopeGnomon> VNLangActions::TryGetTopScopeGnomon()
 
 static NodeTag GetNodeEnum( list<string> typ, Syntax::Location loc )
 {
-	if( !AvailableNodeData().GetNameToTagMap().count(typ) )
+	if( !AvailableNodeData().GetNameToTagMap().contains(typ) )
 	{
 		throw YY::VNLangParser::syntax_error(
 		    any_cast<YY::VNLangParser::location_type>(loc),

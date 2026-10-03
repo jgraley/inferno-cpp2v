@@ -44,7 +44,7 @@ DomainExtension::DomainExtension( XTreeDatabase *db, ExtenderSet extenders )
 
 const DomainExtensionChannel *DomainExtension::GetChannel( const Extender *extender ) const
 {
-    ASSERT( channels.count(extender) );
+    ASSERT( channels.contains(extender) );
     return channels.at(extender).get();
 }
 
@@ -156,13 +156,13 @@ void DomainExtensionChannel::DeleteAction(XLink xlink)
 
     // First deal with the case where the deleted xlink is the stimulus for a domain 
     // extension: in this case, we want to remove every trace of this extension.
-    if( stimulus_to_induced_root_and_deps.count(xlink)>0 )
+    if( stimulus_to_induced_root_and_deps.contains(xlink) )
     {
         TRACE("Extender ")(extender)(": drop stimulus: ")(xlink)("\n");
         DropStimulusXLink( xlink );
         // Don't add to recheck set: stimulus was deleted, we won't want the DE back
     }
-    else if( stimulii_to_recheck.count(xlink)>0 )
+    else if( stimulii_to_recheck.contains(xlink) )
     {
         // Remove from recheck set: we won't want the DE back
         EraseSolo(stimulii_to_recheck, xlink);
@@ -172,12 +172,12 @@ void DomainExtensionChannel::DeleteAction(XLink xlink)
     // Now deal with the case where the deleted xlink is a dependency of a domain 
     // extension: in this case, we want to remove it but remember that we want to 
     // recheck the stimulus xlink after updates are done.
-    if( dep_to_all_stimulii.count(xlink)>0 )
+    if( dep_to_all_stimulii.contains(xlink) )
     {
         const set<XLink> stimulus_xlinks = dep_to_all_stimulii.at(xlink);
         for( XLink stimulus_xlink : stimulus_xlinks )
         {
-            ASSERT( stimulus_to_induced_root_and_deps.count(stimulus_xlink)>0 );
+            ASSERT( stimulus_to_induced_root_and_deps.contains(stimulus_xlink) );
             
             TRACE("Extender ")(extender)(": drop stimulus: ")(stimulus_xlink)(" via dep: ")(xlink)("\n");
             DropStimulusXLink( stimulus_xlink );
@@ -191,14 +191,14 @@ void DomainExtensionChannel::DeleteAction(XLink xlink)
 XLink DomainExtensionChannel::GetUniqueDomainExtension( XLink stimulus_xlink, TreePtr<Node> generated_root ) const
 {   
     ASSERT( generated_root );
-    ASSERT( induced_root_to_tree_ordinal_and_ref_count.count(generated_root) > 0 )
+    ASSERT( induced_root_to_tree_ordinal_and_ref_count.contains(generated_root) )
           ("Generated root ")(generated_root)(" not found in induced_root_to_tree_ordinal_and_ref_count:\n")
           (induced_root_to_tree_ordinal_and_ref_count);
     
     // Cross-checks using stimulus_xlink (rather than acting as a cache, 
     // which we can now do, see #700)
     ASSERT( stimulus_xlink );
-    ASSERT( stimulus_to_induced_root_and_deps.count(stimulus_xlink)>0 );
+    ASSERT( stimulus_to_induced_root_and_deps.contains(stimulus_xlink) );
     TreePtr<Node> induced_root = stimulus_to_induced_root_and_deps.at(stimulus_xlink).induced_root;    
     SimpleCompare sc;
     ASSERT( sc.Compare3Way(generated_root, induced_root)==0 ); 
@@ -261,7 +261,7 @@ void DomainExtensionChannel::CheckStimulusXLink( XLink stimulus_xlink )
     // TODO try SC search over entire DB. Early-out if in main tree. Otherwise
     // continue, but induced_root_to_tree_ordinal_and_ref_count is now keyed by
     // tree id (even if the hit was not at base). This provides the required keep-alive effect.
-    if( induced_root_to_tree_ordinal_and_ref_count.count(info.induced_base_node) > 0 )
+    if( induced_root_to_tree_ordinal_and_ref_count.contains(info.induced_base_node) )
     {
         induced_root_to_tree_ordinal_and_ref_count.at(info.induced_base_node).ref_count++;
     }
@@ -288,7 +288,7 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
 	INDENT("R");
     TRACE("Stimulus: ")(stimulus_xlink)("\n");
     // Be strict here: all these data structures need to remain in synch
-    ASSERT( stimulus_to_induced_root_and_deps.count(stimulus_xlink)>0 );
+    ASSERT( stimulus_to_induced_root_and_deps.contains(stimulus_xlink) );
    
 	//Validate();    
  
@@ -303,7 +303,7 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
 	// dep completely
 	for( XLink dep : deps )
 	{
-		ASSERT( dep_to_all_stimulii.count(dep)>0 );
+		ASSERT( dep_to_all_stimulii.contains(dep) );
 		ASSERT( !dep_to_all_stimulii.at(dep).empty() );
 		EraseSolo(dep_to_all_stimulii.at(dep), stimulus_xlink);
 		if( dep_to_all_stimulii.at(dep).empty() )
@@ -317,7 +317,7 @@ void DomainExtensionChannel::DropStimulusXLink( XLink stimulus_xlink )
 
 	// Remove a reference to this induced root from domain extension classes, possibly
 	// dropping the extension class completely.
-	ASSERT( induced_root_to_tree_ordinal_and_ref_count.count(induced_root) > 0 )
+	ASSERT( induced_root_to_tree_ordinal_and_ref_count.contains(induced_root) )
 		  ("Induced root ")(induced_root)(" was expected to be in ")(induced_root_to_tree_ordinal_and_ref_count);
 	int new_rc = --induced_root_to_tree_ordinal_and_ref_count.at(induced_root).ref_count;    
 	if( new_rc > 0 )
@@ -367,13 +367,13 @@ void DomainExtensionChannel::Validate() const
     {
         XLink stimulus_xlink = p.first;
         for( XLink dep : p.second.deps )
-            ASSERT( dep_to_all_stimulii.count(dep) != 0 )
+            ASSERT( dep_to_all_stimulii.contains(dep) )
                   (dep)
                   (": domain %d: %d stimulii, %d deps:", db->GetDomain().unordered_domain.size(), stimulus_to_induced_root_and_deps.size(), dep_to_all_stimulii.size())
                   (dep_to_all_stimulii);            
         
         auto induced_root = p.second.induced_root;
-        ASSERT( induced_root_to_tree_ordinal_and_ref_count.count(induced_root)==1 )
+        ASSERT( induced_root_to_tree_ordinal_and_ref_count.contains(induced_root) )
               (induced_root)
               (": domain %d: %d stimulii, %d deps\n", db->GetDomain().unordered_domain.size(), stimulus_to_induced_root_and_deps.size(), dep_to_all_stimulii.size())
               (induced_root_to_tree_ordinal_and_ref_count);
@@ -386,7 +386,7 @@ void DomainExtensionChannel::Validate() const
     for( auto p : dep_to_all_stimulii )
     {
         for( XLink stimulus_xlink : p.second )
-            ASSERT( stimulus_to_induced_root_and_deps.count(stimulus_xlink) == 1 )
+            ASSERT( stimulus_to_induced_root_and_deps.contains(stimulus_xlink) )
                   (stimulus_xlink)
                   (": domain %d: %d stimulii, %d deps\n", db->GetDomain().unordered_domain.size(), stimulus_to_induced_root_and_deps.size(), dep_to_all_stimulii.size());            
     }    

@@ -452,7 +452,7 @@ string Lacing::DecisionNodeLeaf::Render(string pre)
         
 const list<pair<int, int>> &Lacing::TryGetRangeListForCategory( TreePtr<Node> archetype ) const
 {
-    if( cats_to_lacing_range_lists.count(archetype)>0 )
+    if( cats_to_lacing_range_lists.contains(archetype) )
     {
         auto &lrl = cats_to_lacing_range_lists.at(archetype);
         ASSERT( !lrl.empty() );

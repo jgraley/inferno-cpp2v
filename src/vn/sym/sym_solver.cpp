@@ -92,7 +92,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     for( unsigned axis=0; axis<ttwp->GetDegree(); axis++ )
     {
         auto pred = ttwp->GetFrontPredicate(axis);
-        if( evaluatable_preds.count(pred)==0 && pred_solves.count(pred)==0 )
+        if( !evaluatable_preds.contains(pred) && !pred_solves.contains(pred) )
             dead_axes.insert(axis);
     }    
     if( !dead_axes.empty() )
@@ -103,7 +103,7 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
     // folding, which changes them. 
     vector<int> evaluatable_axes, solveable_axes;
     for( unsigned axis=0; axis<folded_ttwp.GetDegree(); axis++ )
-        if( pred_solves.count(folded_ttwp.GetFrontPredicate(axis)) ) 
+        if( pred_solves.contains(folded_ttwp.GetFrontPredicate(axis)) ) 
             solveable_axes.push_back(axis);
     TRACE("Truth table after fold out dead: ")(folded_ttwp.Render( ToSet(solveable_axes), false ))("\n");
 
@@ -131,11 +131,11 @@ shared_ptr<SymbolExpression> TruthTableSolver::TrySolveForGiven( shared_ptr<Symb
                 pred = dynamic_pointer_cast<PredicateOperator>(clause_in);
             ASSERT( pred );
 
-            if( evaluatable_preds.count(pred) )
+            if( evaluatable_preds.contains(pred) )
             {            
                 clauses_out.push_back( clause_in );
             }
-            else if( pred_solves.count(pred) )
+            else if( pred_solves.contains(pred) )
             {
                 shared_ptr<SymbolExpression> interand = pred_solves.at(pred);
             

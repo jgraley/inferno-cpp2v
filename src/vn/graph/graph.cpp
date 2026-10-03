@@ -294,7 +294,7 @@ void Graph::PopulateFromSubBlocks( list<const Graphable *> &graphables, const Gr
     {
         for( shared_ptr<const Graphable::Link> link : sub_block.links )
         {
-            if( link->child && reached.count(link->child)==0 )
+            if( link->child && !reached.contains(link->child) )
             {
                 PopulateFrom( graphables, link->child );
                 reached.insert( link->child );
@@ -355,7 +355,7 @@ void Graph::CheckLinks( list<MyNodeBlock> blocks )
                 auto my_link = dynamic_pointer_cast<const MyLink>(link);
                 ASSERT( my_link );
 
-                ASSERT( base_ids.count( my_link->child_id ) > 0 )
+                ASSERT( base_ids.contains( my_link->child_id ) )
                       ("NodeBlock: ")(block)("\nSub-block: ")(sub_block)("\nLink: ")(*my_link)("\n")
                       ("Link to child id ")(my_link->child_id)(" but no such block");
             }
@@ -406,7 +406,7 @@ void Graph::TrimLinksByChild( list<MyNodeBlock> &blocks,
             list< shared_ptr<Graphable::Link> > new_links;
             for( shared_ptr<Graphable::Link> link : sub_block.links )
             {
-                if( to_keep.count(link->child) > 0 )
+                if( to_keep.contains(link->child) )
                 {
                     ASSERT( link->child )(block.title)(" ")(sub_block.item_name);
                     new_links.push_back( link );
@@ -428,7 +428,7 @@ void Graph::TrimLinksByPhase( list<MyNodeBlock> &blocks,
             list< shared_ptr<Graphable::Link> > new_links;
             for( shared_ptr<Graphable::Link> link : sub_block.links )
             {
-                if( to_keep.count(link->phase) > 0 )
+                if( to_keep.contains(link->phase) )
                     new_links.push_back( link );
             }
             sub_block.links = new_links;
@@ -585,7 +585,7 @@ void Graph::PostProcessBlocks( list<MyNodeBlock> &blocks )
 
 void Graph::PostProcessBlock( MyNodeBlock &block )
 {
-    if( block_ids_show_prerestriction.count( block.base_id ) > 0 )
+    if( block_ids_show_prerestriction.contains( block.base_id ) )
     {          
         // Note: using push_front to get pre-restriction near the top (under title)
         block.item_blocks.push_front( { "("+block.prerestriction_name+")", 

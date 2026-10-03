@@ -46,7 +46,7 @@ void Conjecture::Plan::RecordWalk( AgentRecords::iterator rit )
 {
     AgentRecord &record = rit->second;
 
-    if( reached.count(&record) > 0 ) // TODO put the rits in there?
+    if( reached.contains(&record) ) // TODO put the rits in there?
         return; // already reached: probably a coupling
     reached.insert(&record);
 

@@ -113,7 +113,7 @@ bool SymbolicConstraint::IsSatisfied( const Assignments &assignments ) const
 
 #ifdef CHECK_ASSIGNMENTS_INLCUDES_REQUIRED_VARS
     for( VariableId v : plan.variables )
-        ASSERT( assignments.count(v)==1 );
+        ASSERT( assignments.contains(v) );
 #endif        
     SYM::Expression::EvalKit kit { &assignments, x_tree_db };    
     unique_ptr<SYM::BooleanResult> result = plan.consistency_expression->Evaluate( kit );
@@ -139,11 +139,11 @@ unique_ptr<SYM::SubsetResult> SymbolicConstraint::GetSuggestedValues( const Assi
 
     SYM::TruthTableSolver::GivenSymbolSet givens;
     for( VariableId v : plan.variables )            
-        if( v != target_var && assignments.count(v) > 0 )
+        if( v != target_var && assignments.contains(v) )
             givens.insert( v );
 
-    if( plan.suggestion_expressions.count(target_var)==0 ||
-        plan.suggestion_expressions.at(target_var).count(givens)==0 )
+    if( !plan.suggestion_expressions.contains(target_var) ||
+        !plan.suggestion_expressions.at(target_var).contains(givens) )
         return nullptr;
         
     shared_ptr<SYM::SymbolExpression> hint_expression = plan.suggestion_expressions.at(target_var).at(givens);
