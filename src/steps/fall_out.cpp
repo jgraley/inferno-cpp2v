@@ -105,7 +105,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     lls_not1->negand = lls_make;
     lls_make->elements = (MakePatternNode<StarAgent, Expression>(), 
                           ls_label_id,
-                          MakePatternNode<StarAgent, Expression>()); // TODO too strong, will hit (arr){LABEL} in original code
+                          MakePatternNode<StarAgent, Expression>()); // TODO too strong, will hit (arr){ARRIVAL} in original code
     lls_not2->negand = lls_label;
     lls_label->identifier = ls_label_id; // leave labels alone in the body
 

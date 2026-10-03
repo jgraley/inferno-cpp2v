@@ -42,8 +42,8 @@ public:
 		MAX_SURR_SEMICOLON,	// Note: surroundings lower than here /\ can get ";" added.
 
 		// ----- Parts of statements and declarations
-		LABEL = 40,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.		
-		MIN_NODE_SEMICOLON, // Note: nodes higher than here \/ can get ";" added.
+		MIN_NODE_SEMICOLON = 40, // Note: nodes higher than here \/ can get ";" added.
+		ARRIVAL,  // Anything with a : after it. Could be (a) like a bare statement needing a ; or (b) a prefix on statements.		
 		BARE_STMT_DECL, // Statement/declaration with no semicolon
 		SPACE_SEP_STMT_DECL, // eg throw <here>;
 		TYPE_IN_DECLARATION, // the type in typedef <here>;

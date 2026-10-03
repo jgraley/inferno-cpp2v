@@ -1692,7 +1692,7 @@ string SpecificLabelIdentifier::GetRender( VN::RendererInterface *renderer, Prod
 
 Syntax::Production LabelDeclaration::GetMyProductionTerminal() const
 { 
-	return Production::LABEL; 
+	return Production::ARRIVAL; 
 }
 
 
@@ -1711,7 +1711,7 @@ string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production,
 	if( !s.empty() )
 		s += " ";
 	s += renderer->DoRender( &identifier, Production::PURE_IDENTIFIER, id_policy);
-	return  s + ":" + ";";	
+	return  s + ": ";	
 }
 
 
@@ -3325,13 +3325,13 @@ TreePtr<Node> Switch::OnArgsList( list<TreePtr<Node>> args, Location loc )
 string SwitchTarget::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	// See LabelDeclaration::GetRender() about the ;
-	return renderer->GetSignifier(this, policy) + ":" + ";";	
+	return renderer->GetSignifier(this, policy) + ": ";	
 }
 
 
 Syntax::Production SwitchTarget::GetMyProductionTerminal() const
 { 
-	return Production::LABEL; 
+	return Production::ARRIVAL; 
 }
 
 
@@ -3350,7 +3350,7 @@ string RangeCase::GetRender( VN::RendererInterface *renderer, Production, Policy
 	       renderer->DoRender( &value_lo, Production::EXPR_CONST, policy) + 
 	       ".." +
 	       renderer->DoRender( &value_hi, Production::EXPR_CONST, policy) + 
-	       ":" + ";";	
+	       ": ";	
 }
 
 
@@ -3373,7 +3373,7 @@ Syntax::Token RangeCase::GetSignifierToken() const
 string Case::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	// See LabelDeclaration::GetRender() about the ;
-	return renderer->GetSignifier(this, policy) + " " + renderer->DoRender( &value, Production::EXPR_CONST, policy) + ":" + ";";	
+	return renderer->GetSignifier(this, policy) + " " + renderer->DoRender( &value, Production::EXPR_CONST, policy) + ": ";	
 }
 
 

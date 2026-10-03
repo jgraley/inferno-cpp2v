@@ -655,8 +655,8 @@ statement_l : statement_e
 statement_e : statement_nc %prec ';'											
 
 statement_nc: statement_nl													{ $$ = {$1}; }
-			| arrival statement_nl											{ $$ = {$1, $2}; } 
-			| arrival ';'		 											{ $$ = {$1}; } // Note no Nop
+//			| arrival statement_nc											{ $$ = $2; $$.push_front($1);} 
+			| arrival 		 											{ $$ = {$1}; } // Note no Nop
 
 // #903 generalise to comma separated args
 arrival		: ARRIVAL_KEYWORD ':'										
