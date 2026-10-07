@@ -38,6 +38,7 @@ void StandardAgent::Plan::ConstructPlan( StandardAgent *algo_, Phase phase )
 		        ("Node ")(algo)(" appears to be shared between multiple VN steps\n")
 		        ("(")(algo->planned_at)(" and ")(now)(")\n")
 		        ("This is only possible with SpecificIdentifiers\n")
+		        ("Or Identifier coupled between two embedded patterns without being keyed in surrounding pattern\n")
 		        ("Or maybe it's unkeyed or undeclared\n");
 		return; 
 	}

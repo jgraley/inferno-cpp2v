@@ -324,10 +324,12 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     auto s_module = MakePatternNode< Module >();
     auto r_module = MakePatternNode< Module >();
     auto l1s_memb_init = MakePatternNode<MemberInitialiser>();
-    auto l1s_cons_init = MakePatternNode<ConstructInitialiser>();    
+    auto l1s_cons_init = MakePatternNode<Call>();    
+    auto l1s_cons_args = MakePatternNode<MapArgumentation>();
     auto l3_instance = MakePatternNode<Instance>();  
     auto l3_delta = MakePatternNode<DeltaAgent, Initialiser>();  
-    auto l3s_construct_init = MakePatternNode<ConstructInitialiser>();
+    auto l3s_construct_init = MakePatternNode<Call>();
+    auto l3s_construct_args = MakePatternNode<MapArgumentation>();
     auto l_record = MakePatternNode<Module>();  
     auto l_record_typeid = MakePatternNode<TypeIdentifier>();
     auto l_record_bases = MakePatternNode<StarAgent, Base>();
@@ -369,7 +371,9 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     ls_member->params = (l_params); // any parameters
     ls_member->memb_inits = (l_pre, l1s_memb_init, l_post);
 	l1s_memb_init->initialiser = l1s_cons_init;
-	l1s_cons_init->constructor_id = s_constructor_id;
+	l1s_cons_init->callee = s_constructor_id;
+	l1s_cons_init->argumentation = l1s_cons_args;
+	l1s_cons_args->arguments = MakePatternNode<StarAgent, IdValuePair>();
     l_delta->overlay = lr_member;
     lr_member->record_id = l_record_typeid;
 	lr_member->identifier = l_constructor_id;
@@ -384,8 +388,10 @@ RemoveEmptyModuleConstructors::RemoveEmptyModuleConstructors()
     l3_instance->initialiser = l3_delta;
 	
 	l3_delta->through = l3s_construct_init;
-	l3s_construct_init->constructor_id = s_constructor_id;
-
+	l3s_construct_init->callee = s_constructor_id;
+	l3s_construct_init->argumentation = l3s_construct_args;
+	l3s_construct_args->arguments = MakePatternNode<StarAgent, IdValuePair>();
+	
     l3_delta->overlay = MakePatternNode< Uninitialised >();
             
     Configure( COMPARE_REPLACE, stuff, r_embedded_1 );

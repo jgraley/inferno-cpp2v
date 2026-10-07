@@ -75,7 +75,7 @@ Syntax::Policy CppRender::GetDefaultPolicy()
 	policy.can_split_instances = true;
 		
 	// Render constructors and destructors per C++ standard
-	policy.show_xstructor_identifiers = false;
+	policy.hide_xstructor_identifiers = true;
 	
 	// Just use type ids directly (aka abstract declarators)
 	policy.disambiguate_type_id = false;

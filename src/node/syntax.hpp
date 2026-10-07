@@ -104,7 +104,6 @@ public:
 			permit_static_keyword(false),
 			refuse_c_style_cast(false),
 			refuse_statement_expression(false),
-			detect_and_render_constructor(true),
 			convert_argumentation_to_seq(true),
 			boot_statements_using_braces(true),
 			compound_uses_vn_separator(false),
@@ -115,7 +114,7 @@ public:
 			definitions(nullptr),
 			can_split_instances(false),
 			resolve_identifier_scope(true),
-			show_xstructor_identifiers(true),
+			hide_xstructor_identifiers(false),
 			disambiguate_type_id(true),
 			refuse_invisibles(true),
 			missing_access_to_public(true),
@@ -128,7 +127,6 @@ public:
 		bool permit_static_keyword;
 		bool refuse_c_style_cast;		
 		bool refuse_statement_expression;		
-		bool detect_and_render_constructor;
 		bool convert_argumentation_to_seq;
 		bool boot_statements_using_braces;
 		bool compound_uses_vn_separator;
@@ -139,7 +137,7 @@ public:
 	    queue<shared_ptr<Syntax>> *definitions;
 		bool can_split_instances;
 		bool resolve_identifier_scope;
-		bool show_xstructor_identifiers;
+		bool hide_xstructor_identifiers;
 		bool disambiguate_type_id;
 		bool refuse_invisibles; // To be dropped, see #906
 		bool missing_access_to_public; // See #877

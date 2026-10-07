@@ -25,14 +25,14 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto s_decls_negation = MakePatternNode<NegationAgent, Declaration>();
-    auto sx_cons_macro = MakePatternNode< MacroField >(); 
+    auto sx_cons_macro = MakePatternNode< MacroConstructor >(); 
     auto sx_params = MakePatternNode<StarAgent, Node>();
     
 	auto r_scclass = MakePatternNode< SCRecord >();
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
     auto r_token = MakePatternNode< SpecificTypeIdentifier >( ""/*s_scclass->GetLoweredIdOrMacroName() TODO SCRecord is intermediate and has no lowered id name */ ); 
-    auto r_cons_macro = MakePatternNode< MacroField >(); 
+    auto r_cons_macro = MakePatternNode< MacroConstructor >(); 
     auto r_comp = MakePatternNode< Compound >();
     auto ctor_macro_name = MakePatternNode< SpecificPreprocessorIdentifier >( "SC_CTOR" ); // #819 style
     auto ctor_macro_byname = MakePatternNode< SpecificPreprocessorIdentifierByNameAgent >( "SC_CTOR" );                
@@ -50,12 +50,12 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     decls->restriction = s_decls_negation;
     s_decls_negation->negand = sx_cons_macro;
 #ifdef RECREATE_856
-    sx_cons_macro->identifier = ctor_macro_name;
+    sx_cons_macro->macro_name = ctor_macro_name;
 #else
 #ifdef RECREATE_857
-    sx_cons_macro->identifier = ctor_macro_byname;
+    sx_cons_macro->macro_name = ctor_macro_byname;
 #else
-    sx_cons_macro->identifier = ctor_macro_wildname;
+    sx_cons_macro->macro_name = ctor_macro_wildname;
 #endif        
 #endif    
     sx_cons_macro->arguments = sx_params;
@@ -63,9 +63,10 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     r_scclass->identifier = tid;       
     r_scclass->members = (decls, r_cons_macro); 
     r_scclass->bases = (bases);    
+    r_cons_macro->macro_name = ctor_macro_name;
+    r_cons_macro->identifier = MakePatternNode< BuildSpecificResourceIdentifierAgent >("constructor_id_should_not_appear_in_code");
     r_cons_macro->initialiser = r_comp;
     r_cons_macro->arguments = (tid);
-    r_cons_macro->identifier = ctor_macro_name;
 
     Configure( SEARCH_REPLACE, s_scclass, r_scclass );
 }
@@ -80,18 +81,21 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto r_base = MakePatternNode< Base >();
     auto tid = MakePatternNode< TypeIdentifier >();
     auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetLoweredIdOrMacroName() ); 
+    auto macro_cons = MakePatternNode< MacroConstructor >(); 
+    auto macro_cons_id = MakePatternNode<ResourceIdentifier>();
     
     auto l1_class = MakePatternNode< InheritanceRecord >();
     auto l1_members = MakePatternNode<StarAgent, Declaration>();
     auto l1_bases = MakePatternNode<StarAgent, Base>();
     auto l1_macro_args = MakePatternNode<StarAgent, Node>();    
+    auto l1_macro_cons_id = MakePatternNode<ResourceIdentifier>();
     auto l1_member_inst_member = MakePatternNode< Member >();
     auto l1_member_id = MakePatternNode< ResourceIdentifier >();
-    auto l1_delta = MakePatternNode<DeltaAgent, MacroField>();  
-    auto l1s_macro_member = MakePatternNode< MacroField >(); 
-    auto l1r_macro_member = MakePatternNode< MacroField >(); 
+    auto l1_delta = MakePatternNode<DeltaAgent, MacroConstructor>();  
+    auto l1s_macro_cons = MakePatternNode< MacroConstructor >(); 
+    auto l1r_macro_cons = MakePatternNode< MacroConstructor >(); 
     auto l1r_memb_init = MakePatternNode<MemberInitialiser>();
-    auto l1r_cons_init = MakePatternNode<ConstructInitialiser>();
+    auto l1r_cons_init = MakePatternNode<Call>();
     auto l1r_args = MakePatternNode<SeqArgumentation>();
 	auto l1r_arg = MakePatternNode< StringizeAgent >();
     auto l1_memb_inits = MakePatternNode< StarAgent, MemberInitialiser >();
@@ -103,7 +107,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l2_instance = MakePatternNode<Instance>();  
     auto l2_inst_id = MakePatternNode<ResourceIdentifier>();  
     auto l2_delta = MakePatternNode<DeltaAgent, Initialiser>();  
-    auto l2r_cons_init = MakePatternNode<ConstructInitialiser>();
+    auto l2r_cons_init = MakePatternNode<Call>();
     auto l2r_args = MakePatternNode<SeqArgumentation>();
 	auto l2r_arg = MakePatternNode< StringizeAgent >();
     
@@ -112,30 +116,36 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     delta->through = s_scclass;
     delta->overlay = r_class;
     s_scclass->identifier = tid;       
-    s_scclass->members = (decls);
+    s_scclass->members = (decls, macro_cons);
     s_scclass->bases = (bases);    
     r_class->identifier = tid;       
-    r_class->members = (decls);
+    r_class->members = (decls, macro_cons);
     r_class->bases = (bases, r_base);       
     r_base->record = r_token;
     r_base->access = MakePatternNode< Public >();
+    macro_cons->macro_name = MakePatternNode< PreprocessorIdentifier >();
+    macro_cons->identifier = macro_cons_id;
+    macro_cons->arguments = MakePatternNode< StarAgent, Node >();
+    macro_cons->memb_inits = (MakePatternNode< StarAgent, MemberInitialiser >());
        
     // Member decl of our module in some OTHER class: add call to all constructors
     l1_class->identifier = MakePatternNode< TypeIdentifier >(); // not tid, the OTHER class
     
     // Looking for: 
     // - some random unrelated fields
-    // - the macro field for parent class constructor - to which which we need to add a member init for child class
+    // - the macro constructor for parent class - to which which we need to add a member init for child class
     // - the instance member of the child class
     l1_class->members = (l1_members, l1_delta, l1_member_inst_member); 
     l1_class->bases = (l1_bases);
-    l1_delta->through = l1s_macro_member;
-    l1_delta->overlay = l1r_macro_member;
-    l1s_macro_member->identifier = MakePatternNode< PreprocessorIdentifier >();
-    l1s_macro_member->arguments = l1_macro_args;
-    l1s_macro_member->memb_inits = (l1_memb_inits);
-    l1r_macro_member->arguments = l1_macro_args;
-    l1r_macro_member->memb_inits = (l1_memb_inits, l1r_memb_init); 
+    l1_delta->through = l1s_macro_cons;
+    l1_delta->overlay = l1r_macro_cons;
+    l1s_macro_cons->macro_name = MakePatternNode< PreprocessorIdentifier >();
+    l1s_macro_cons->identifier = l1_macro_cons_id;
+    l1s_macro_cons->arguments = l1_macro_args;
+    l1s_macro_cons->memb_inits = (l1_memb_inits);
+    l1r_macro_cons->identifier = l1_macro_cons_id;
+    l1r_macro_cons->arguments = l1_macro_args;
+    l1r_macro_cons->memb_inits = (l1_memb_inits, l1r_memb_init); 
     
     l1_member_inst_member->type = tid;
     l1_member_inst_member->identifier = l1_member_id;
@@ -146,7 +156,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
 	
 	l1r_memb_init->member_id = l1_member_id;
 	l1r_memb_init->initialiser = l1r_cons_init;
-	l1r_cons_init->constructor_id = MakePatternNode< SpecificResourceIdentifier >("constructor_id_should_not_appear_in_code");
+	l1r_cons_init->callee = macro_cons_id; // TODO declaration is not being found in spite of MacroConstructor just above
 	l1r_cons_init->argumentation = l1r_args;
 
 	l1r_args->arguments = (l1r_arg);
@@ -160,7 +170,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     l2_instance->identifier = l2_inst_id;
     l2_delta->through = MakePatternNode< Uninitialised >();
 	l2_delta->overlay = l2r_cons_init;
-	l2r_cons_init->constructor_id = MakePatternNode< SpecificResourceIdentifier >("constructor_id_should_not_appear_in_code");
+	l2r_cons_init->callee = macro_cons_id;
 	l2r_cons_init->argumentation = l2r_args;	
 	
     l2r_args->arguments = (l2r_arg);
@@ -244,8 +254,10 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto r_process_macro = MakePatternNode< MacroStatement >();
     auto overcons = MakePatternNode<DeltaAgent, Declaration>();
     auto overtype = MakePatternNode<DeltaAgent, Type>();
-    auto s_cons_macro = MakePatternNode< MacroField >();
-    auto r_cons_macro = MakePatternNode< MacroField >();
+    auto s_cons_macro = MakePatternNode< MacroConstructor >();
+    auto r_cons_macro = MakePatternNode< MacroConstructor >();
+    auto macro_cons_name = MakePatternNode<PreprocessorIdentifier>();
+    auto macro_cons_id = MakePatternNode<ResourceIdentifier>();
     auto macro_args = MakePatternNode<StarAgent, Node>();
     auto process = MakePatternNode< Member >();
     auto pre = MakePatternNode<StarAgent, Statement>();
@@ -253,15 +265,15 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto sx_process_macro = MakePatternNode< MacroStatement >();
     auto id = MakePatternNode< ResourceIdentifier >(); 
     auto bases = MakePatternNode<StarAgent, Base>();
-    auto ident = MakePatternNode<PreprocessorIdentifier>();
     auto token = MakePatternNode< SpecificPreprocessorIdentifier >( s_scprocess->GetLoweredIdOrMacroName() ); // #819 style
     auto r_func = MakePatternNode<Function>();
                 
     module->members = (overcons, process, decls);
     module->bases = (bases);
     overcons->through = s_cons_macro;       
-    s_cons_macro->identifier = ident;
-    s_cons_macro->arguments = macro_args;
+    s_cons_macro->macro_name = macro_cons_name;
+    s_cons_macro->identifier = macro_cons_id;
+    s_cons_macro->arguments = (macro_args);
     s_cons_macro->initialiser = s_comp;
     s_comp->members = cdecls;
     s_comp->statements = (pre);
@@ -271,7 +283,8 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     
     // ctype->params = (); // no parameters
     overcons->overlay = r_cons_macro;
-    r_cons_macro->identifier = ident;
+    r_cons_macro->macro_name = macro_cons_name;
+    r_cons_macro->identifier = macro_cons_id;
     r_cons_macro->arguments = macro_args;
     r_cons_macro->initialiser = r_comp;
     r_comp->members = cdecls;

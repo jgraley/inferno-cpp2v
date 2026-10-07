@@ -736,13 +736,13 @@ TreePtr<Argumentation> MapArgumentation::ConvertToSeqIfPolicyAllows(TreePtr<Expr
 	}
 	catch( TypeOf::TypelessDeclUnsupportedMismatch &tdus )
 	{
-		// Try to deal with XStructors and Resourcees in general which won't typeof
+		// Try to deal with XStructors and Resources in general which won't typeof
 		// Note that when TypeOf acts on a function it calls DeclarationOf anyway. So 
 		// why not: 
 		// - TypeOf that stops at identifier - only on outermost level eg it goes though id of a pointer that's being dereferenced
 		// - DeclarationOf
 		// - Grab the type if it's an instance otherwise use directly
-		TreePtr<Node> n = DeclarationOf().TryApplyTransformation(*renderer->GetTransKit(), callee).GetTreePtr();;
+		TreePtr<Node> n = DeclarationOf().TryApplyTransformation(*renderer->GetTransKit(), callee).GetTreePtr();
 		ASSERT(n);
 		ASSERT(TreePtr<XStructor>::DynamicCast(n));
 		if( auto cd = TreePtr<Constructor>::DynamicCast(n) )  
@@ -1523,7 +1523,7 @@ list<string> XStructor::RenderMiddlePart( VN::RendererInterface *renderer, Polic
 	
 	// Required for resolved constructors - allows to tie directly to constructor usages
 	ls.push_back( s );
-	if( policy.show_xstructor_identifiers )
+	if( !policy.hide_xstructor_identifiers )
 		ls.push_back( renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) );   
 		
 	return ls;
@@ -2767,16 +2767,58 @@ TreePtr<Node> GoSub::OnObject( TreePtr<Node> object_, Location )
 
 //////////////////////////// Call ///////////////////////////////
 
-Syntax::Production Call::GetMyProductionTerminal() const
+Syntax::Production Call::GetMyProduction(const VN::RendererInterface *renderer, Policy policy ) const
 {
-	return Production::POSTFIX; 	
+	bool hide_callee = false;
+	if( policy.hide_xstructor_identifiers )
+	{
+		if( auto id = TreePtr<SpecificResourceIdentifier>::DynamicCast(callee) ) // called on an id, not some expression
+		{
+			try
+			{
+				FTRACE("TIME TO GET DECLARATION\n");
+				TreePtr<Node> n = DeclarationOf().TryApplyTransformation(*renderer->GetTransKit(), callee).GetTreePtr();
+				ASSERT(n);
+				hide_callee = TreePtr<XStructor>::DynamicCast(n) || TreePtr<MacroConstructor>::DynamicCast(n); // TODO 
+			}
+			catch( BaseDeclarationOf::DeclarationNotFound &dnf )
+			{
+				// Could be an undeclared library function eg cease() TODO fix by having the #include node declare them
+			}
+		}	
+	}
+	return hide_callee ? Production::DIRECT_INIT : Production::POSTFIX; 	
 }
 
 
 string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {				
-	string s = renderer->DoRender( &callee, Production::POSTFIX, policy );
+	ASSERT( argumentation )("Call always requires an arumentation, for wild put a star in it");
 	
+	string s;
+	bool hide_callee = false; // TODO just call GetMyProduction() instead of duplicating
+	if( policy.hide_xstructor_identifiers )
+	{
+		if( auto id = TreePtr<SpecificResourceIdentifier>::DynamicCast(callee) ) // called on an id, not some expression
+		{
+			try
+			{
+				TreePtr<Node> n = DeclarationOf().TryApplyTransformation(*renderer->GetTransKit(), callee).GetTreePtr();
+				ASSERT(n);
+				hide_callee = TreePtr<XStructor>::DynamicCast(n) || TreePtr<MacroConstructor>::DynamicCast(n); // TODO 
+				s += "/* decl "+Trace(n)+" */";
+			}
+			catch( BaseDeclarationOf::DeclarationNotFound &dnf )
+			{
+				s += "/* no decl */";
+				// Could be an undeclared library function eg cease() TODO fix by having the #include node declare them
+			}
+		}	
+	}
+	
+	if( !hide_callee )
+		s += renderer->DoRender( &callee, Production::POSTFIX, policy );
+
 	// We may need to convert the argumentation into a suitable form depending on policy.
 	// If a conversion occurs, the callee is needed in order to transform the arguments.
 	TreePtr<Argumentation> arg = argumentation->ConvertToSeqIfPolicyAllows(callee, renderer, policy);
@@ -2809,11 +2851,18 @@ string ConstructInitialiser::GetRender( VN::RendererInterface *renderer, Product
 	// and maybe other steps. We *should* be able to parse ConstructInitialiser when 
 	// parens are present because there's no = although it's going to be harder under VN 
 	// nodes. So maybe only render in DIRECT_INIT production. The new grammar might live near Compound.
-	if( !policy.detect_and_render_constructor )
-		throw RefusedByPolicy(); 			
+	//if( !policy.detect_and_render_constructor )
+	//	throw RefusedByPolicy(); 			
 
-	if( !argumentation )
-		throw RefuseDifficultSyntax(); // Nothing would be rendered to disambiguate the ☆ into ConstructInitialiser
+	ASSERT( argumentation )("ConstructInitialiser always requires an argumentation, for wild put a star in it");
+
+	string s;
+	
+	if( !policy.hide_xstructor_identifiers ) 
+		s += renderer->DoRender(&constructor_id, Production::PURE_IDENTIFIER, policy);
+
+	//if( !argumentation )
+	//	throw RefuseDifficultSyntax(); // Nothing would be rendered to disambiguate the ☆ into ConstructInitialiser
 
 	// We may need to convert the argumentation into a suitable form depending on policy.
 	// If a conversion occurs, the callee is needed in order to transform the arguments.
@@ -2821,7 +2870,7 @@ string ConstructInitialiser::GetRender( VN::RendererInterface *renderer, Product
 			
 	// We never render the identifier for constructors - they are "invisible" and represent
 	// the choice of which overload we are bound to.		
-	return arg->DirectRenderArgumentation(renderer, policy);	
+	return s + arg->DirectRenderArgumentation(renderer, policy);	
 }
 
 
@@ -3501,9 +3550,16 @@ Syntax::Production PreprocessorIdentifier::GetMyProductionTerminal() const
 	return Production::PRIMARY_EXPR; 
 }
 
-//////////////////////////// MacroField ///////////////////////////////
+//////////////////////////// MacroConstructor ///////////////////////////////
 
-Syntax::Production MacroField::GetMyProduction(const VN::RendererInterface *, Policy) const
+set<const TreePtrInterface *> MacroConstructor::GetDeclared()
+{
+	FTRACE("I declare ")(identifier)("\n");
+	return { &identifier };
+}
+
+
+Syntax::Production MacroConstructor::GetMyProduction(const VN::RendererInterface *, Policy) const
 { 
 	if( !DynamicTreePtrCast<Expression>(initialiser) )
 		return Production::STMT_DECL;
@@ -3512,7 +3568,7 @@ Syntax::Production MacroField::GetMyProduction(const VN::RendererInterface *, Po
 }
 
 
-string MacroField::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string MacroConstructor::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
     list<string> ls;
 
@@ -3523,7 +3579,7 @@ string MacroField::GetRender( VN::RendererInterface *renderer, Production, Polic
 	    Append( ls, ApplyAndRenderAccessSpec( MakeTreeNode<Public>(), false, renderer, policy ) ); // see #877
 
     // ---- Proto ----
-	ls.push_back( renderer->DoRender( &identifier, Syntax::Production::POSTFIX, policy ) );
+	ls.push_back( renderer->DoRender( &macro_name, Syntax::Production::POSTFIX, policy ) );
 	list<string> renders;
 	for( TreePtr<Node> node : arguments )
 		renders.push_back( renderer->DoRender(&node, Syntax::Production::COMMA_SEP, policy) );
@@ -3538,7 +3594,7 @@ string MacroField::GetRender( VN::RendererInterface *renderer, Production, Polic
 }
 
 
-Syntax::Token MacroField::GetSignifierToken() const
+Syntax::Token MacroConstructor::GetSignifierToken() const
 {
 	throw UnimplementedToken();
 }

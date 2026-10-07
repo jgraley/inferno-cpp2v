@@ -146,6 +146,7 @@ struct AdvanceDeclaration : virtual Declaration
 	NODE_FUNCTIONS
 };
 
+
 /// A scope is any space in a program where declarations may appear. Declarations
 /** are associated with the scope node but unordered. Scopes are used for name 
  * resolution during parse. */
@@ -1458,7 +1459,7 @@ struct Call : GoSub, Expression
     NODE_FUNCTIONS_FINAL
     TreePtr<Argumentation> argumentation; 
 	
-	Production GetMyProductionTerminal() const override;
+	Production GetMyProduction(const VN::RendererInterface *renderer, Policy policy ) const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 	TreePtr<Node> OnArgumentation( TreePtr<Node> argumentation_, Location loc ) override;
 };  
@@ -1807,15 +1808,17 @@ struct SpecificPreprocessorIdentifier : PreprocessorIdentifier,
 
 /// A proprocessor macro usage that may be used as a field, and takes 
 /// arbitrary operands.
-struct MacroField : AdvanceDeclaration,
-					MembInitSeq
+struct MacroConstructor : AdvanceDeclaration,
+						  MembInitSeq
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<PreprocessorIdentifier> identifier;
+    TreePtr<PreprocessorIdentifier> macro_name;
+    TreePtr<ResourceIdentifier> identifier;
     Sequence<Node> arguments; ///< Args taken in order, macro so can be anything
     TreePtr<Initialiser> initialiser;
     // TODO access, also see #877
     
+    set<const TreePtrInterface *> GetDeclared() override;
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;        
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy );
 	Token GetSignifierToken() const override;

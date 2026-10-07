@@ -862,10 +862,10 @@ private:
             TreePtr<Constructor> cd = GetConstructor( our_inst->type );
             ASSERT( cd );
             ASSERT( cd->identifier );
-			auto ci = MakeTreeNode<ConstructInitialiser>();
+			auto ci = MakeTreeNode<Call>();
 			ci->argumentation = CreateMapArgumentation( args, cd );
 			ASSERT( ci->argumentation );
-			ci->constructor_id = cd->identifier;
+			ci->callee = cd->identifier;
 			our_inst->initialiser = ci;				
         }
         
@@ -1528,10 +1528,10 @@ private:
 
         TreePtr<Constructor> cd = GetConstructor( our_field->type );
         ASSERT( cd );
-		auto ci = MakeTreeNode<ConstructInitialiser>();
+		auto ci = MakeTreeNode<Call>();
 		ci->argumentation = CreateMapArgumentation( args, cd );
 		ASSERT( ci->argumentation );
-		ci->constructor_id = cd->identifier;
+		ci->callee = cd->identifier;
 		
 		auto mi = MakeTreeNode<MemberInitialiser>();
 		mi->member_id = our_field->identifier;

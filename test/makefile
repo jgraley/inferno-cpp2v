@@ -3,7 +3,7 @@
 # Slower ones first for optimial multi-core usage (whole suite time)
 SC_CASES = sctest13.cpp sctest03.cpp sctest11.cpp sctest12.cpp sctest08.cpp sctest10.cpp sctest02.cpp 
 SC_CASES += sctest01.cpp sctest04.cpp sctest05.cpp sctest06.cpp sctest07.cpp sctest09.cpp sctest15.cpp
-SC_CASES += scissue677.cpp scissue667.cpp sc10_reduce.cpp
+SC_CASES += scissue677.cpp scissue667.cpp sc10_reduce.cpp nested.cpp
 
 # Quicker ones first for exploratory (max feedback ASAP)
 #SC_CASES =  sctest09.cpp  sctest15.cpp  sctest06.cpp  sctest07.cpp  

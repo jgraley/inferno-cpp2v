@@ -28,6 +28,7 @@ AugTreePtr<Identifier> GetIdentifierOfDeclaration( AugTreePtr<Declaration> d )
 AugTreePtr<Node> BaseDeclarationOf::TryApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const try
 {    
     set<AugTreePtr<Node>> declarers = kit.utils->GetDeclarers( node );
+    FTRACE(node)(" declared by ")(declarers)("\n");
     
     if( declarers.empty() )
     {
@@ -37,11 +38,7 @@ AugTreePtr<Node> BaseDeclarationOf::TryApplyTransformation( const TransKit &kit,
         throw DeclarationNotFound();
     }
     
-    if( declarers.size() > 1 )
-    {
-        FTRACE("Warning: declaration of ")(node)(" is ambiguous (has %u declarer links)\n", declarers.size());
-        throw DeclarationNotFound();
-    }
+    ASSERT( declarers.size()==1 )(node)(" has multiple declarers: ")(declarers);
     
     // function decl/def are folded, so we expect only one declarer
     return SoloElementOf( declarers ); 

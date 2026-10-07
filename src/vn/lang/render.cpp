@@ -140,10 +140,7 @@ Syntax::Policy Render::GetDefaultPolicy()
 	policy.refuse_c_style_cast = true; 
 		
 	// No parse for this at the momnet, could be hard to parse TODO try
-	policy.refuse_statement_expression = true;
-	
-	// constructor syntax will probably ambiguate
-	policy.detect_and_render_constructor = false;
+	policy.refuse_statement_expression = true;	
 	
 	// Permit map args with their non-C syntax
 	policy.convert_argumentation_to_seq = false;

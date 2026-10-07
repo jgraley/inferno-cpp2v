@@ -151,7 +151,7 @@ NODE(CPPTree, Nop)
 // Preprocessor stuff
 NODE(CPPTree, PreprocessorIdentifier)
 NODE(CPPTree, SpecificPreprocessorIdentifier)
-NODE(CPPTree, MacroField)
+NODE(CPPTree, MacroConstructor)
 NODE(CPPTree, MacroStatement)
 NODE(CPPTree, PreProcDecl)
 NODE(CPPTree, Include)
