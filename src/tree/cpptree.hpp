@@ -1465,20 +1465,6 @@ struct Call : GoSub, Expression
 };  
 
 
-/// Initialiser that will require a constructor call eg the (a) in MyType x(a);
-struct ConstructInitialiser : Initialiser
-{
-	NODE_FUNCTIONS_FINAL
-	TreePtr<ResourceIdentifier> constructor_id; // We use resolved constructors, so it has an identifier
-	// TODO could generalise to include built-in "constructor"
-    TreePtr<Argumentation> argumentation; 
-
-	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-	TreePtr<Node> OnArgumentation( TreePtr<Node> argumentation_, Location loc ) override;
-};
-
-
 /// Operator that operates on data types as parameters. 
 /** Where either is allowed we use the type one, since it's more concise. */
 struct FuncOnType : Expression
@@ -1795,6 +1781,7 @@ struct PreprocessorIdentifier : Identifier
 	Production GetMyProductionTerminal() const override;    
 };
 
+
 /// Identifier for a specific label that has been declared somewhere.
 struct SpecificPreprocessorIdentifier : PreprocessorIdentifier,
                                         SpecificIdentifier
@@ -1855,6 +1842,7 @@ struct Include : virtual PreProcDecl
 {
     NODE_FUNCTIONS
     TreePtr<String> filename;     
+
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy );
 	virtual string CustomiseFilenameForInclude(TreePtr<String>, VN::RendererInterface *, Policy) { ASSERTFAIL() };
 	Token GetSignifierToken() const override;

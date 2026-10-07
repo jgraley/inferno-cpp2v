@@ -61,11 +61,12 @@ AugTreePtr<CPPTree::Type> TypeOf::Get( const TransKit &kit, AugTreePtr<Expressio
     else if( auto c = AugTreePtr<GoSub>::DynamicCast(o) )
     {
         AugTreePtr<Type> t = Get(kit, GET_CHILD(c, callee)); // get type of the function itself
-        ASSERT( AugTreePtr<Callable>::DynamicCast(t) )( "Trying to call something that is not Callable: ")(*t);
-        if( auto f = AugTreePtr<Function>::DynamicCast(t) )
+        // A call on something not CallableReturn is assumed to return void, since only 
+        // CallableReturn specifies a return type.
+        if( auto f = AugTreePtr<CallableParamsReturn>::DynamicCast(t) )
             return GET_CHILD(f, return_type);
         else
-            return kit.utils->MakeAugTreeNode<Void>(); 
+            return kit.utils->MakeAugTreeNode<Void>();
     }
     else if( auto l = AugTreePtr<Lookup>::DynamicCast(o) ) // a.b; just return type of b
     {

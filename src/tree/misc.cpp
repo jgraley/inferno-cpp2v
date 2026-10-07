@@ -28,7 +28,7 @@ AugTreePtr<Identifier> GetIdentifierOfDeclaration( AugTreePtr<Declaration> d )
 AugTreePtr<Node> BaseDeclarationOf::TryApplyTransformation( const TransKit &kit, AugTreePtr<Node> node ) const try
 {    
     set<AugTreePtr<Node>> declarers = kit.utils->GetDeclarers( node );
-    FTRACE(node)(" declared by ")(declarers)("\n");
+    //FTRACE(node)(" declared by ")(declarers)("\n");
     
     if( declarers.empty() )
     {

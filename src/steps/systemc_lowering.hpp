@@ -56,7 +56,7 @@ class LowerSCDynamic : public LoweringStep
 {
 public:
     LowerSCDynamic( TreePtr<SCTree::SCDynamicFunction> s_dynamic,
-                    TreePtr<CPPTree::ResourceIdentifier> r_dest );
+                    string r_dest );
 };
 
 
@@ -64,7 +64,7 @@ class LowerSCStatic : public LoweringStep
 {
 public:
     LowerSCStatic( TreePtr<SCTree::SCFunction> s_dynamic,
-                   TreePtr<CPPTree::ResourceIdentifier> r_dest );
+                   string r_dest );
 };
 
 
@@ -72,7 +72,7 @@ class LowerSCDelta : public LoweringStep
 {
 public:
     LowerSCDelta( TreePtr<SCTree::SCFunction> s_delta,
-                  TreePtr<CPPTree::ResourceIdentifier> r_dest,
+                  string r_dest,
                   TreePtr<CPPTree::ResourceIdentifier> zero_time_id );
 };
 

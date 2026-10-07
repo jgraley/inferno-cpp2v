@@ -115,6 +115,7 @@ public:
 			can_split_instances(false),
 			resolve_identifier_scope(true),
 			hide_xstructor_identifiers(false),
+			conformalise_irregular_callees(false),
 			disambiguate_type_id(true),
 			refuse_invisibles(true),
 			missing_access_to_public(true),
@@ -138,6 +139,7 @@ public:
 		bool can_split_instances;
 		bool resolve_identifier_scope;
 		bool hide_xstructor_identifiers;
+		bool conformalise_irregular_callees;
 		bool disambiguate_type_id;
 		bool refuse_invisibles; // To be dropped, see #906
 		bool missing_access_to_public; // See #877

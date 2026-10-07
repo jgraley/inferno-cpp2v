@@ -76,6 +76,9 @@ Syntax::Policy CppRender::GetDefaultPolicy()
 		
 	// Render constructors and destructors per C++ standard
 	policy.hide_xstructor_identifiers = true;
+		
+	// Eg on a call to a string, dequote the string so it could conform to C++
+	policy.conformalise_irregular_callees = true;
 	
 	// Just use type ids directly (aka abstract declarators)
 	policy.disambiguate_type_id = false;

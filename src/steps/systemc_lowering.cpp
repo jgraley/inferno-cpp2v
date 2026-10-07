@@ -183,7 +183,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
 
 
 LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicFunction> s_dynamic,
-                                TreePtr<ResourceIdentifier> r_dest )                              
+                                string r_dest )                              
 {
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
@@ -191,7 +191,7 @@ LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicFunction> s_dynamic,
     auto event_expr = MakePatternNode< Expression >(); 
                     
     s_dynamic->event = event_expr;       
-    r_call->callee = r_dest;       
+    r_call->callee = MakePatternNode<SpecificString>(r_dest);       
     r_call->argumentation = r_args;
     r_args->arguments = (event_expr);
       
@@ -200,12 +200,12 @@ LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicFunction> s_dynamic,
 
 
 LowerSCStatic::LowerSCStatic( TreePtr<SCFunction> s_static,
-                              TreePtr<ResourceIdentifier> r_dest )
+                              string r_dest )
 {
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
                         
-    r_call->callee = r_dest;       
+    r_call->callee = MakePatternNode<SpecificString>(r_dest);       
     r_call->argumentation = r_args;
       
     Configure( SEARCH_REPLACE, s_static, r_call );
@@ -213,13 +213,13 @@ LowerSCStatic::LowerSCStatic( TreePtr<SCFunction> s_static,
 
 
 LowerSCDelta::LowerSCDelta( TreePtr<SCFunction> s_delta,
-                            TreePtr<ResourceIdentifier> r_dest,
+                            string r_dest,
                             TreePtr<CPPTree::ResourceIdentifier> zero_time_id )
 {
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
                     
-    r_call->callee = r_dest;       
+    r_call->callee = MakePatternNode<SpecificString>(r_dest);       
     r_call->argumentation = r_args;
     r_args->arguments = (zero_time_id);
           
@@ -231,7 +231,7 @@ LowerTerminationFunction::LowerTerminationFunction( TreePtr<SCTree::TerminationF
 {
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
-    auto r_token = MakePatternNode< SpecificResourceIdentifier >( s_tf->GetLoweredIdOrMacroName() ); 
+    auto r_token = MakePatternNode< SpecificString >( s_tf->GetLoweredIdOrMacroName() ); 
     // TODO IdValuePair args can't render without a function decl. Maybe add OperandSequence as an alternative? 
     auto exit_expr = MakePatternNode< Expression >(); 
                     
@@ -361,7 +361,7 @@ LowerSCDeltaCount::LowerSCDeltaCount()
  
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
-    auto r_token = MakePatternNode< SpecificResourceIdentifier >( s_delta_count->GetLoweredIdOrMacroName() );                
+    auto r_token = MakePatternNode< SpecificString >( s_delta_count->GetLoweredIdOrMacroName() );                
     //MakePatternNode< Expression > eexpr; 
             
     r_call->callee = r_token;
@@ -441,15 +441,13 @@ void SystemCLowering::Build( vector< shared_ptr<VNStep> > *sequence )
 
 	// #819-style identifiers must be fully unique. In a sense, this line is the one and only
 	// declaration of this system function, for the purposes of rendering.
-	auto next_trigger_id = MakePatternNode< SpecificResourceIdentifier >( "next_trigger" ); 
-    sequence->push_back( make_shared<LowerSCDelta>( MakePatternNode<NextTriggerDelta>(), next_trigger_id, zero_time_id ) );
-    sequence->push_back( make_shared<LowerSCStatic>( MakePatternNode<NextTriggerStatic>(), next_trigger_id ) );		
-    sequence->push_back( make_shared<LowerSCDynamic>( MakePatternNode<NextTriggerDynamic>(), next_trigger_id ) );
+    sequence->push_back( make_shared<LowerSCDelta>( MakePatternNode<NextTriggerDelta>(), "next_trigger", zero_time_id ) );
+    sequence->push_back( make_shared<LowerSCStatic>( MakePatternNode<NextTriggerStatic>(), "next_trigger" ) );		
+    sequence->push_back( make_shared<LowerSCDynamic>( MakePatternNode<NextTriggerDynamic>(), "next_trigger" ) );
 
-	auto wait_id = MakePatternNode< SpecificResourceIdentifier >( "wait" ); 
-    sequence->push_back( make_shared<LowerSCDelta>( MakePatternNode<WaitDelta>(), wait_id, zero_time_id ) );
-    sequence->push_back( make_shared<LowerSCStatic>( MakePatternNode<WaitStatic>(), wait_id ) );		
-    sequence->push_back( make_shared<LowerSCDynamic>( MakePatternNode<WaitDynamic>(), wait_id ) );	
+    sequence->push_back( make_shared<LowerSCDelta>( MakePatternNode<WaitDelta>(), "wait", zero_time_id ) );
+    sequence->push_back( make_shared<LowerSCStatic>( MakePatternNode<WaitStatic>(), "wait" ) );		
+    sequence->push_back( make_shared<LowerSCDynamic>( MakePatternNode<WaitDynamic>(), "wait" ) );	
 
 	// Precondition for LowerSCHierarchicalClass
     sequence->push_back( make_shared<EnsureConstructorsInSCRecordUsers>() );

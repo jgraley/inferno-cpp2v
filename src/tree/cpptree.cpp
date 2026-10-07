@@ -2776,13 +2776,16 @@ Syntax::Production Call::GetMyProduction(const VN::RendererInterface *renderer, 
 		{
 			try
 			{
-				FTRACE("TIME TO GET DECLARATION\n");
 				TreePtr<Node> n = DeclarationOf().TryApplyTransformation(*renderer->GetTransKit(), callee).GetTreePtr();
 				ASSERT(n);
-				hide_callee = TreePtr<XStructor>::DynamicCast(n) || TreePtr<MacroConstructor>::DynamicCast(n); // TODO 
+				// TODO ask the declarer via new vcall
+				hide_callee = TreePtr<XStructor>::DynamicCast(n) || TreePtr<MacroConstructor>::DynamicCast(n); 
 			}
 			catch( BaseDeclarationOf::DeclarationNotFound &dnf )
 			{
+				auto sri = TreePtr<SpecificResourceIdentifier>::DynamicCast(callee);
+				ASSERT(sri);
+				ASSERT(false)(sri)(sri->GetIdentifierName());
 				// Could be an undeclared library function eg cease() TODO fix by having the #include node declare them
 			}
 		}	
@@ -2796,28 +2799,22 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 	ASSERT( argumentation )("Call always requires an arumentation, for wild put a star in it");
 	
 	string s;
-	bool hide_callee = false; // TODO just call GetMyProduction() instead of duplicating
-	if( policy.hide_xstructor_identifiers )
+	switch( GetMyProduction(renderer, policy) )
 	{
-		if( auto id = TreePtr<SpecificResourceIdentifier>::DynamicCast(callee) ) // called on an id, not some expression
-		{
-			try
-			{
-				TreePtr<Node> n = DeclarationOf().TryApplyTransformation(*renderer->GetTransKit(), callee).GetTreePtr();
-				ASSERT(n);
-				hide_callee = TreePtr<XStructor>::DynamicCast(n) || TreePtr<MacroConstructor>::DynamicCast(n); // TODO 
-				s += "/* decl "+Trace(n)+" */";
-			}
-			catch( BaseDeclarationOf::DeclarationNotFound &dnf )
-			{
-				s += "/* no decl */";
-				// Could be an undeclared library function eg cease() TODO fix by having the #include node declare them
-			}
-		}	
+		case Production::DIRECT_INIT:
+		// hide the callee
+		break;
+		
+		case Production::POSTFIX:
+		if( policy.conformalise_irregular_callees && TreePtr<SpecificString>::DynamicCast(callee) )
+			s += TreePtr<SpecificString>::DynamicCast(callee)->GetString(); // Quotes wouldn't be conformant C++ but the string itself might be a library function name 
+		else
+			s += renderer->DoRender( &callee, Production::POSTFIX, policy );
+		break;
+		
+		default:
+		ASSERTFAIL();
 	}
-	
-	if( !hide_callee )
-		s += renderer->DoRender( &callee, Production::POSTFIX, policy );
 
 	// We may need to convert the argumentation into a suitable form depending on policy.
 	// If a conversion occurs, the callee is needed in order to transform the arguments.
@@ -2830,51 +2827,6 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 
 
 TreePtr<Node> Call::OnArgumentation( TreePtr<Node> argumentation_, Location )
-{
-	argumentation = argumentation_;
-	return (TreePtr<Node>)shared_from_this();
-}
-
-//////////////////////////// ConstructInitialiser ///////////////////////////////
-
-Syntax::Production ConstructInitialiser::GetMyProductionTerminal() const
-{
-	// Suppress the = when used with an Instance eg GlobalScope globals( "GlobalScope" )
-	return Production::DIRECT_INIT; 
-}
-
-
-string ConstructInitialiser::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
-{		
-	// TODO find a way of disambiguating from a Call in VN lang, see MemberInitialiser for ideas	
-	// Prefactors: put a Star in an Argumentation for the ConstructInitialiser in 019-RemoveEmptyModuleConstructors 
-	// and maybe other steps. We *should* be able to parse ConstructInitialiser when 
-	// parens are present because there's no = although it's going to be harder under VN 
-	// nodes. So maybe only render in DIRECT_INIT production. The new grammar might live near Compound.
-	//if( !policy.detect_and_render_constructor )
-	//	throw RefusedByPolicy(); 			
-
-	ASSERT( argumentation )("ConstructInitialiser always requires an argumentation, for wild put a star in it");
-
-	string s;
-	
-	if( !policy.hide_xstructor_identifiers ) 
-		s += renderer->DoRender(&constructor_id, Production::PURE_IDENTIFIER, policy);
-
-	//if( !argumentation )
-	//	throw RefuseDifficultSyntax(); // Nothing would be rendered to disambiguate the ☆ into ConstructInitialiser
-
-	// We may need to convert the argumentation into a suitable form depending on policy.
-	// If a conversion occurs, the callee is needed in order to transform the arguments.
-	TreePtr<Argumentation> arg = argumentation->ConvertToSeqIfPolicyAllows(constructor_id, renderer, policy);
-			
-	// We never render the identifier for constructors - they are "invisible" and represent
-	// the choice of which overload we are bound to.		
-	return s + arg->DirectRenderArgumentation(renderer, policy);	
-}
-
-
-TreePtr<Node> ConstructInitialiser::OnArgumentation( TreePtr<Node> argumentation_, Location )
 {
 	argumentation = argumentation_;
 	return (TreePtr<Node>)shared_from_this();
@@ -3554,7 +3506,6 @@ Syntax::Production PreprocessorIdentifier::GetMyProductionTerminal() const
 
 set<const TreePtrInterface *> MacroConstructor::GetDeclared()
 {
-	FTRACE("I declare ")(identifier)("\n");
 	return { &identifier };
 }
 
