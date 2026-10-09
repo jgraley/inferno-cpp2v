@@ -48,6 +48,7 @@ struct TreePtrInterface : virtual Itemiser::Element
 
     virtual explicit operator bool() const = 0; // for testing against nullptr
     virtual const SatelliteSerial &GetSS() const = 0;
+	virtual inline TreePtr<Node> Whatever() = 0;
     virtual Node *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
     virtual Node &operator *() const = 0; 
     virtual TreePtrInterface &operator=( const TreePtrInterface &o );
@@ -169,6 +170,12 @@ struct TreePtr : virtual TreePtrCommon,
         return TreePtr<Node>( p1 );
     }
 
+	inline TreePtr<Node> Whatever() override
+    {        
+        const shared_ptr<Node> p1 = *(const shared_ptr<Node> *)this;
+        return TreePtr<Node>( p1 );
+    }
+		
 	inline VALUE_TYPE *GetValueTypePointer() const
 	{
 		auto pt = shared_ptr<Node>::get();

@@ -1069,9 +1069,8 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Instance - an entity and an instantiation of a type. Many of the details will be found in/under the type node.
 
 // TODO 
-// MainToThread doesn't match if width of main's return value is set to TypeDb::int_bits - fix
 // Could SC lowerings be merged using a wildcard identifier and Stringize?
-// vcall RenderAsCallee()
+// vcall RenderAsImmediateCallee()
 // - on SpecificString
 // - and SpecificResourceIdentifier for the case of an Xstructor id 
 // Tidy away the catch...ASSERT(false) in Call::x()

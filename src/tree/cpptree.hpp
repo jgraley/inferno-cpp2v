@@ -382,6 +382,8 @@ struct SpecificString : String
     string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
 	Production GetMyProductionTerminal() const override;
 	string GetString() final { return value; }
+	string RenderAsImmediateCallee( VN::RendererInterface *renderer, Policy policy ) override;
+
 private:
     string value; ///< The string itself
 };

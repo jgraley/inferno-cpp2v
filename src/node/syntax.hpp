@@ -178,7 +178,7 @@ public:
 	
 	virtual string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy );
 	
-	virtual Production GetMyProduction(const VN::RendererInterface *renderer, Policy policy ) const;
+	virtual Production GetMyProduction( const VN::RendererInterface *renderer, Policy policy ) const;
 	virtual Production GetMyProductionTerminal() const;
 	virtual Production GetOperandInDeclaratorProduction() const;
     static Production BoostPrecedence( Production prec );
@@ -188,6 +188,7 @@ public:
 	string RenderNodeTypeName() const; 
 	virtual	bool IsType() const; 
 	virtual	bool IsSpecificIdentifier() const; 
+	virtual string RenderAsImmediateCallee( VN::RendererInterface *renderer, Policy policy );
 	
 	// Use std::any for dep breaking at the include level
 	typedef any Token;

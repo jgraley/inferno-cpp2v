@@ -892,6 +892,16 @@ Syntax::Production SpecificString::GetMyProductionTerminal() const
 	return Production::PRIMARY_EXPR; 
 }
 
+
+string SpecificString::RenderAsImmediateCallee( VN::RendererInterface *renderer, Policy policy )
+{
+	// Useful for functions that don't have declarations
+	if( policy.conformalise_irregular_callees )
+		return value;
+	else
+		return renderer->DoRenderPreserve( TreePtrThis(), Production::POSTFIX, policy );
+}
+
 //////////////////////////// SpecificInteger ///////////////////////////////
 
 SpecificInteger::SpecificInteger()  : 
@@ -2806,10 +2816,7 @@ string Call::GetRender( VN::RendererInterface *renderer, Production, Policy poli
 		break;
 		
 		case Production::POSTFIX:
-		if( policy.conformalise_irregular_callees && TreePtr<SpecificString>::DynamicCast(callee) )
-			s += TreePtr<SpecificString>::DynamicCast(callee)->GetString(); // Quotes wouldn't be conformant C++ but the string itself might be a library function name 
-		else
-			s += renderer->DoRender( &callee, Production::POSTFIX, policy );
+		s += callee ? callee.Whatever()->RenderAsImmediateCallee( renderer, policy ) : renderer->DoRender(&callee, Production::POSTFIX, policy);
 		break;
 		
 		default:

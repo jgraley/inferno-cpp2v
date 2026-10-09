@@ -113,6 +113,12 @@ bool Syntax::IsSpecificIdentifier() const
 }
 
 
+string Syntax::RenderAsImmediateCallee( VN::RendererInterface *renderer, Policy policy )
+{
+	return renderer->DoRenderPreserve( TreePtrThis(), Production::POSTFIX, policy );
+}
+
+
 Syntax::Token Syntax::GetSignifierToken() const
 {
 	throw UnimplementedToken();
