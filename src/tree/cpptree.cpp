@@ -983,8 +983,8 @@ string SpecificInteger::GetRender( VN::RendererInterface *, Production, Policy )
 #if EXPLICIT_BASE
            ("b"+to_string(value.getBitWidth()));
 #else            
-           (value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
-           (value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : "");
+           ((int)(value.getBitWidth())>TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
+           ((int)(value.getBitWidth())>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : "");
 #endif
            // note, assuming longlong bigger than long, so second L appends first to get LL
 }

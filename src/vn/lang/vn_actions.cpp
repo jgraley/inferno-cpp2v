@@ -1069,6 +1069,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Instance - an entity and an instantiation of a type. Many of the details will be found in/under the type node.
 
 // TODO 
+// MainToThread doesn't match if width of main's return value is set to TypeDb::int_bits - fix
 // Could SC lowerings be merged using a wildcard identifier and Stringize?
 // vcall RenderAsCallee()
 // - on SpecificString
@@ -1076,5 +1077,8 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Tidy away the catch...ASSERT(false) in Call::x()
 // And then for Lookup case: Lookup forwards to member
 // - Start by putting in declared-checks here too
+// Consider whenter (during lowering) we can use strings for eg types
+// BUT... don't change raising: we need an unambiguous parse of input program, so leave it as it is
 // Don't forget querying declarers via vcall for are they constructorey
 // Also moving MacroConstructor into SC tree and renaming eg MacroSC_CTOR and building in the SC_CTOR
+// sc_thread etc to be resources not types

@@ -107,7 +107,6 @@ MainToThread::MainToThread()
 	e_delta->overlay = er_cease;
 	er_cease->code = es_return->return_value;
 	
-#if 1
 	auto gmodule = MakePatternNode< LocalTree::GlobalsModule >();
     auto delta = MakePatternNode<DeltaAgent, Instance>();
     auto s_body = MakePatternNode<Compound>();
@@ -122,16 +121,16 @@ MainToThread::MainToThread()
 	gmodule->bases = ( MakePatternNode<StarAgent, Base>() );
 	gmodule->members = ( delta, MakePatternNode<StarAgent, Declaration>() );	
 	delta->through = s_member;
-	//s_member->access = MakePatternNode<Private>();
-	//s_member->dispatch = MakePatternNode<NonVirtual>();
-	//s_member->permission = MakePatternNode<NonConst>();
+	s_member->access = MakePatternNode<Private>();
+	s_member->dispatch = MakePatternNode<NonVirtual>();
+	s_member->permission = MakePatternNode<NonConst>();
 	s_member->type = s_func;
 	s_member->identifier = s_identifier;
 	s_member->initialiser = s_body;
 	s_body->statements = ( statements );
 	//s_func->members = ()        require no parameters
 	s_func->return_type = my_int;
-	//my_int->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits); // just an int TODO this is preventing matches, try again
+	my_int->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
 	auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Declaration>( r_member, e_stuff );
 	delta->overlay = r_embedded;
 	r_member->access = MakePatternNode<Private>();
@@ -141,39 +140,6 @@ MainToThread::MainToThread()
 	r_member->identifier = s_identifier;
 	r_member->initialiser = r_body;
 	r_body->statements = ( statements );
-
-#else
-	auto gmodule = MakePatternNode< LocalTree::GlobalsModule >();
-    auto delta = MakePatternNode<DeltaAgent, Instance>();
-    auto body = MakePatternNode<Compound>();
-	auto s_member = MakePatternNode< Member >();
-    auto s_func = MakePatternNode<Function>();
-    auto s_identifier = MakePatternNode<SpecificResourceIdentifierByNameAgent>("main");
-	auto r_member = MakePatternNode< Member >();
-	auto my_int = MakePatternNode<Signed>();
-	
-	gmodule->bases = ( MakePatternNode<StarAgent, Base>() );
-	gmodule->members = ( delta, MakePatternNode<StarAgent, Declaration>() );	
-	delta->through = s_member;
-	s_member->access = MakePatternNode<Private>();
-	s_member->dispatch = MakePatternNode<NonVirtual>();
-	s_member->permission = MakePatternNode<NonConst>();
-	s_member->type = s_func;
-	s_member->identifier = s_identifier;
-	s_member->initialiser = body;
-	body->statements = ( MakePatternNode<StarAgent, Statement>() );
-	//s_func->members = ()        require no parameters
-	s_func->return_type = my_int;
-	my_int->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits); // just an int
-	delta->overlay = r_member;
-	r_member->access = MakePatternNode<Private>();
-	r_member->dispatch = MakePatternNode<NonVirtual>();
-	r_member->permission = MakePatternNode<NonConst>();
-	r_member->type = MakePatternNode<Thread>();
-	r_member->identifier = s_identifier;
-	auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( body, e_stuff );
-	r_member->initialiser = r_embedded;
-#endif
 
     Configure( SEARCH_REPLACE, gmodule );
 }

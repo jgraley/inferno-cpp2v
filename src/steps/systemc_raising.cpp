@@ -475,7 +475,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_exit_type->params = (s_exit_param);
 	s_exit_param->permission = MakePatternNode<NonConst>();        
     s_exit_param->type = s_int;
-    s_int->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
+    s_int->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
     s_exit_param->identifier = MakePatternNode<SpecificResourceIdentifierByNameAgent>( "exit_code" );   
     s_exit_param->initialiser = MakePatternNode<Uninitialised>();   
     s_exit_param->permission = MakePatternNode<NonConst>();
@@ -488,7 +488,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_wait_type->params = (s_wait_param);
 	s_wait_param->permission = MakePatternNode<NonConst>();        
     s_wait_param->type = s_int2;
-    s_int2->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
+    s_int2->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
     s_wait_param->identifier = MakePatternNode<SpecificResourceIdentifierByNameAgent>( "p1" );   
     s_wait_param->initialiser = MakePatternNode<Uninitialised>();   
     s_wait_param->permission = MakePatternNode<NonConst>();
@@ -501,7 +501,7 @@ RemoveSCPrototypes::RemoveSCPrototypes()
     s_next_trigger_type->params = (s_next_trigger_param);
 	s_next_trigger_param->permission = MakePatternNode<NonConst>();        
     s_next_trigger_param->type = s_int3;
-    s_int3->width = MakePatternNode<SpecificInteger>((int)TypeDb::int_bits);
+    s_int3->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
     s_next_trigger_param->identifier = MakePatternNode<SpecificResourceIdentifierByNameAgent>( "p1" );   
     s_next_trigger_param->initialiser = MakePatternNode<Uninitialised>();   
     s_next_trigger_param->permission = MakePatternNode<NonConst>();
