@@ -215,6 +215,7 @@ struct SpecificIdentifier : virtual Property
     virtual bool IsLocalMatchCovariant( const Matcher &candidate ) const; /// Overloaded comparison for search&replace
     virtual Orderable::Diff OrderCompare3WayCovariant( const Orderable &right, 
                                                  OrderProperty order_property ) const; /// Overloaded comparison for SimpleCompare
+	TreePtr<Node> TryGetDeclarer(const VN::RendererInterface *renderer) override;
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
     string GetIdentifierName() const override; /// This is relied upon to just return the identifier name 
     string GetDesignationNameHint() const override;
@@ -730,6 +731,7 @@ struct XStructor : Resource, CPPQuals
 	NODE_FUNCTIONS
 	TreePtr<TypeIdentifier> record_id;
 
+	bool IsDeclaredAsXstructor(TreePtr<Node>) const override;
 	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
    	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 	virtual string RenderParams(VN::RendererInterface *renderer, Policy policy) const;
@@ -1808,6 +1810,7 @@ struct MacroConstructor : AdvanceDeclaration,
     // TODO access, also see #877
     
     set<const TreePtrInterface *> GetDeclared() override;
+	bool IsDeclaredAsXstructor(TreePtr<Node>) const override;
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;        
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy );
 	Token GetSignifierToken() const override;

@@ -168,7 +168,8 @@ public:
 	struct RefuseDifficultSyntax : Refusal {}; // Eg, might cause conflicts
 	struct RefuseInItemisation : Refusal {};
 	struct TemporarilyDisabled : Refusal {};
-	struct TypeOfFailSyntax : Refusal {}; // Eg, might cause conflicts
+	struct TypeOfFailSyntax : Refusal {}; 
+	struct NotAnIdentifier : Refusal {}; 
 		
 	/// Produce the source-code-name of the corresponding SystemC construct
     virtual string GetLoweredIdOrMacroName() const;
@@ -188,8 +189,10 @@ public:
 	string RenderNodeTypeName() const; 
 	virtual	bool IsType() const; 
 	virtual	bool IsSpecificIdentifier() const; 
+    virtual TreePtr<Node> TryGetDeclarer(const VN::RendererInterface *renderer);
 	virtual	bool IsXstructorIdentifier(const VN::RendererInterface *renderer); 
-	
+    virtual bool IsDeclaredAsXstructor(TreePtr<Node>) const;
+
 	// Use std::any for dep breaking at the include level
 	typedef any Token;
 	typedef any Location;

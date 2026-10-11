@@ -113,9 +113,20 @@ bool Syntax::IsSpecificIdentifier() const
 }
 
 
+TreePtr<Node> Syntax::TryGetDeclarer(const VN::RendererInterface *)
+{
+	throw NotAnIdentifier();
+}
+
+
 bool Syntax::IsXstructorIdentifier(const VN::RendererInterface *)
 {
 	return false;
+}
+
+bool Syntax::IsDeclaredAsXstructor(TreePtr<Node>) const 
+{ 
+	return false; 
 }
 
 

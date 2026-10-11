@@ -489,6 +489,19 @@ Orderable::Diff SpecificIdentifier::OrderCompare3WayCovariant( const Orderable &
 }
 
 
+TreePtr<Node> SpecificIdentifier::TryGetDeclarer(const VN::RendererInterface *renderer) try
+{
+	TreePtr<Node> declarer = DeclarationOf().TryApplyTransformation(*renderer->GetTransKit(), TreePtrThis()).GetTreePtr();
+	ASSERT(declarer);
+	return declarer;
+}
+catch( BaseDeclarationOf::DeclarationNotFound &dnf )
+{			
+	// Could be an undeclared library function eg cease() TODO fix by having the #include node declare them
+	return nullptr; // ASSUME undeclared callee is not an xstructor
+}
+
+
 string SpecificIdentifier::GetRender( VN::RendererInterface *renderer, Production, Policy policy) 
 {		
 	if( policy.refuse_identifiers )
@@ -597,17 +610,13 @@ string SpecificResourceIdentifier::GetRender( VN::RendererInterface *renderer, P
 }
 
 
-bool SpecificResourceIdentifier::IsXstructorIdentifier(const VN::RendererInterface *renderer) try
+bool SpecificResourceIdentifier::IsXstructorIdentifier(const VN::RendererInterface *renderer)
 {
-	TreePtr<Node> n = DeclarationOf().TryApplyTransformation(*renderer->GetTransKit(), TreePtrThis()).GetTreePtr();
-	ASSERT(n);
-	// TODO ask the declarer via new vcall
-	return TreePtr<XStructor>::DynamicCast(n) || TreePtr<MacroConstructor>::DynamicCast(n); 
-}
-catch( BaseDeclarationOf::DeclarationNotFound &dnf )
-{			
-	// Could be an undeclared library function eg cease() TODO fix by having the #include node declare them
-	return false; // ASSUME undeclared callee is not an xstructor
+	TreePtr<Node> declarer = TryGetDeclarer(renderer);
+	if(declarer)
+		return declarer->IsDeclaredAsXstructor(TreePtrThis());
+	else
+		return false;
 }
 
 
@@ -1500,6 +1509,12 @@ TreePtr<Node> Member::OnAccess( TreePtr<Node> access_, Location )
 }
 
 //////////////////////////// XStructor //////////////////////////////
+
+bool XStructor::IsDeclaredAsXstructor(TreePtr<Node>) const
+{
+	return true;
+}
+
 
 list<string> XStructor::RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const
 {		
@@ -3489,6 +3504,12 @@ Syntax::Production PreprocessorIdentifier::GetMyProductionTerminal() const
 set<const TreePtrInterface *> MacroConstructor::GetDeclared()
 {
 	return { &identifier };
+}
+
+
+bool MacroConstructor::IsDeclaredAsXstructor(TreePtr<Node>) const
+{ 
+	return true; 
 }
 
 
