@@ -130,7 +130,9 @@ struct Type : virtual Node
 struct Declaration : virtual Statement 
 { 
     NODE_FUNCTIONS 
-    
+        
+   	struct NoAccessInstanceInAccessRecord : Unimplemented {};
+
     virtual string GetColour() const { return "/set28/1"; }
 	virtual bool ShouldSplitInstance( Policy policy ) const;
 	// TODO move into CPPQuals
@@ -144,6 +146,7 @@ struct Declaration : virtual Statement
 struct AdvanceDeclaration : virtual Declaration 
 {
 	NODE_FUNCTIONS
+	virtual list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const;
 };
 
 
@@ -626,11 +629,9 @@ struct View : virtual Node
  identifier so that the resource can be used (i.e. usages refer to the resource by identifier).
  There may not be a type - in some cases, we don't want to use a type to make pointers, 
  aggregates etc the declaration node itself is sufficient as a recipe for how to use the resource. */
-struct Resource : AdvanceDeclaration
+struct Resource : virtual AdvanceDeclaration
 {
 	NODE_FUNCTIONS
-
-	struct NoAccessInstanceInAccessRecord : Unimplemented {};
 	
     TreePtr<ResourceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
     TreePtr<Initialiser> initialiser; ///< init value for data, body for Callable type
@@ -640,8 +641,6 @@ struct Resource : AdvanceDeclaration
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
 	string GetRenderImpl( VN::RendererInterface *renderer, Policy policy );
-	// Optional access spec - only called if in a Record scope
-	virtual list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const;
 	// Extras like static, virtual, const come before the type (techically among them, but we don't support that)
 	virtual list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const;
 	// Extras like override, final, const come after declarator
@@ -701,10 +700,13 @@ struct Global : Instance
 };
 
 
-struct CPPQuals : virtual Node // TODO #918 to drop this
+struct CPPQuals : virtual AdvanceDeclaration 
 {
     TreePtr<Dispatch> dispatch; ///< Is the member virtual?
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
+
+	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
+	TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc ) override;
 };
 
 
@@ -718,11 +720,9 @@ struct Member : Instance, CPPQuals
 {
     NODE_FUNCTIONS_FINAL
         
-	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
    	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 
 	TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc ) override;
-	TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc ) override;
 };
 
 
@@ -732,7 +732,6 @@ struct XStructor : Resource, CPPQuals
 	TreePtr<TypeIdentifier> record_id;
 
 	bool IsDeclaredAsXstructor(TreePtr<Node>) const override;
-	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
    	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 	virtual string RenderParams(VN::RendererInterface *renderer, Policy policy) const;
 	bool ShouldSplitInstance( Policy ) const override;
@@ -741,7 +740,6 @@ struct XStructor : Resource, CPPQuals
 	virtual string GetLeadingText(Policy policy) const;
 
 	TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc ) override;
-	TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc ) override;
 	TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc ) override;
 };
 

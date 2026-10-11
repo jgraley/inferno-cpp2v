@@ -320,6 +320,18 @@ Syntax::Token Declaration::GetPrerestrictToken() const
 	return YY::VNLangParser::token::TOK_PRERESTRICT_DECL;
 }
 
+//////////////////////////// AdvanceDeclaration ///////////////////////////////
+
+list<string> AdvanceDeclaration::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
+{
+	ASSERT(policy.context);
+	if( policy.context->has_value() ) // are we in a record scope that maintains access spec, and yet are not a member
+		throw NoAccessInstanceInAccessRecord(); 
+		
+	// Patterns managed to get an Instance that isn't a Member into a Record body.
+	return {};
+}
+
 //////////////////////////// DeclScope ///////////////////////////////
 
 TreePtr<Node> DeclScope::OnMembers( list<TreePtr<Node>> members_, Location ) 
@@ -1347,17 +1359,6 @@ string Resource::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 }
 
 
-list<string> Resource::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
-{
-	ASSERT(policy.context);
-	if( policy.context->has_value() ) // are we in a record scope that maintains access spec, and yet are not a member
-		throw NoAccessInstanceInAccessRecord(); 
-		
-	// Patterns managed to get an Instance that isn't a Member into a Record body.
-	return {};
-}
-
-
 list<string> Resource::RenderDeclSpecPre( VN::RendererInterface *, Policy ) const 
 { 
 	return {}; 
@@ -1478,15 +1479,23 @@ bool Global::ShouldSplitInstance( Policy policy ) const
 	return false;
 }
 
-//////////////////////////// Member //////////////////////////////
+//////////////////////////// CPPQuals //////////////////////////////
 
-list<string> Member::RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const
+list<string> CPPQuals::RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const
 {		
 	// If we don't have a current access, the fact that this is a member 
 	// over-rides, so force an access spec to be rendered.
 	return ApplyAndRenderAccessSpec( access, true, renderer, policy );
 }
 
+
+TreePtr<Node> CPPQuals::OnAccess( TreePtr<Node> access_, Location )
+{
+	access = access_;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+//////////////////////////// Member //////////////////////////////
 
 list<string> Member::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy) const 
 { 
@@ -1500,26 +1509,11 @@ TreePtr<Node> Member::OnDispatch( TreePtr<Node> d, Location )
 	return (TreePtr<Node>)shared_from_this();	
 }
 
-
-TreePtr<Node> Member::OnAccess( TreePtr<Node> access_, Location )
-{
-	access = access_;
-	return (TreePtr<Node>)shared_from_this();	
-}
-
 //////////////////////////// XStructor //////////////////////////////
 
 bool XStructor::IsDeclaredAsXstructor(TreePtr<Node>) const
 {
 	return true;
-}
-
-
-list<string> XStructor::RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const
-{		
-	// If we don't have a current access, the fact that this is a member 
-	// over-rides, so force an access spec to be rendered.
-	return ApplyAndRenderAccessSpec( access, true, renderer, policy );
 }
 
 
@@ -1580,13 +1574,6 @@ string XStructor::GetLeadingText(Policy) const
 TreePtr<Node> XStructor::OnDispatch( TreePtr<Node> d, Location ) 
 {
 	dispatch = d;
-	return (TreePtr<Node>)shared_from_this();	
-}
-
-
-TreePtr<Node> XStructor::OnAccess( TreePtr<Node> access_, Location )
-{
-	access = access_;
 	return (TreePtr<Node>)shared_from_this();	
 }
 
