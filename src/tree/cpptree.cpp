@@ -497,8 +497,7 @@ TreePtr<Node> SpecificIdentifier::TryGetDeclarer(const VN::RendererInterface *re
 }
 catch( BaseDeclarationOf::DeclarationNotFound &dnf )
 {			
-	// Could be an undeclared library function eg cease() TODO fix by having the #include node declare them
-	return nullptr; // ASSUME undeclared callee is not an xstructor
+	return nullptr; // TODO #929 cannot tell if not declared
 }
 
 
@@ -616,7 +615,7 @@ bool SpecificResourceIdentifier::IsXstructorIdentifier(const VN::RendererInterfa
 	if(declarer)
 		return declarer->IsDeclaredAsXstructor(TreePtrThis());
 	else
-		return false;
+		return false; // ASSUME undeclared callee is not an xstructor TODO #929 cannot tell if not declared
 }
 
 
@@ -1298,7 +1297,7 @@ string Resource::GetRender( VN::RendererInterface *renderer, Production surround
 string Resource::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 {
 	list<string> ls;
-	
+
 	Policy sub_policy = policy;
     sub_policy.rendering_definitions = false; // stop at one level
 	Policy id_policy = sub_policy;
@@ -1351,8 +1350,8 @@ string Resource::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 list<string> Resource::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
 {
 	ASSERT(policy.context);
-	if( policy.context->has_value() ) // are we in a record scope that maintains access spec, and yet are not a member
-		throw NoAccessInstanceInAccessRecord(); 
+	//if( policy.context->has_value() ) // are we in a record scope that maintains access spec, and yet are not a member
+	//	throw NoAccessInstanceInAccessRecord(); 
 		
 	// Patterns managed to get an Instance that isn't a Member into a Record body.
 	return {};

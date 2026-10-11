@@ -172,10 +172,11 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto ls_pargs = MakePatternNode<MapArgumentation>();
     auto ls_arg = MakePatternNode< IdValuePair >();
     auto l_overcons = MakePatternNode<DeltaAgent, Instance>();
-    auto l_overtype = MakePatternNode<DeltaAgent, Type>();
+    auto l_overproc = MakePatternNode<DeltaAgent, Resource>();
     auto ls_cons = MakePatternNode< Constructor >();
     auto lr_cons = MakePatternNode< Constructor >();
-    auto l_process = MakePatternNode< Member >();
+    auto ls_process = MakePatternNode< Member >();
+    auto lr_process = MakePatternNode< Member >();
     auto l_pre = MakePatternNode<StarAgent, Statement>();
     auto l_post = MakePatternNode<StarAgent, Statement>();
     auto ls_id = MakePatternNode< ResourceIdentifier >();
@@ -196,7 +197,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     r_program->members = (decls);   
             
     l_module->identifier = l_module_id;
-    l_module->members = (l_overcons, l_process, l_decls);
+    l_module->members = (l_overcons, l_overproc, l_decls);
     l_module->bases = (l_bases);
     l_overcons->through = ls_cons;   
     ls_cons->record_id = l_module_id;
@@ -225,13 +226,18 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     lr_cons->params = (l_ctype_param); // one parameter
     
     // Rule #910: SC processes to be Member, with NonVirtual and Private
-    l_process->dispatch = MakePatternNode<NonVirtual>();
-    l_process->access = MakePatternNode<Private>();
-    l_process->permission = MakePatternNode<NonConst>();
-    l_process->identifier = ls_id;
-    l_process->type = l_overtype;
-    l_overtype->through = MakePatternNode<Callable>();
-    l_overtype->overlay = lr_scprocess;
+    l_overproc->through = ls_process;
+    l_overproc->overlay = lr_process;
+    ls_process->dispatch = MakePatternNode<NonVirtual>();
+    ls_process->access = MakePatternNode<Private>();
+    ls_process->permission = MakePatternNode<NonConst>();
+    ls_process->identifier = ls_id;
+    ls_process->type = MakePatternNode<Callable>();
+    lr_process->dispatch = MakePatternNode<NonVirtual>();
+    lr_process->access = MakePatternNode<Private>();
+    lr_process->permission = MakePatternNode<NonConst>();
+    lr_process->identifier = ls_id;
+    lr_process->type = lr_scprocess;
     
     Configure( COMPARE_REPLACE, delta, r_embedded );
 }
