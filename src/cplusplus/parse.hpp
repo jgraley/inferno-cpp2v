@@ -512,7 +512,8 @@ private:
 				ASSERT(record);
 				ASSERT(record->identifier);
 
-				TreePtr<CPPQuals> cppqo;
+				TreePtr<AccessDecl> accesso;
+				TreePtr<DispatchDecl> dispatcho;
 				switch( D.getKind() )
 				{
 					case clang::Declarator::DK_Constructor:
@@ -524,7 +525,8 @@ private:
 						ASSERT( fchunk );
 						FillParameters( xo, fchunk );
 						o = xo;
-						cppqo = xo;
+						accesso = xo;
+						dispatcho = xo; // TODO drop
 						break;
 					}
 						
@@ -534,21 +536,23 @@ private:
 						xo->record_id = record->identifier;
 						TRACE("Made destructor ")(xo)(" id ")(xo->record_id)("\n");
 						o = xo;
-						cppqo = xo;
+						accesso = xo;
+						dispatcho = xo;
 						break;
 					}
 						
 					default:
 						auto mo = MakeTreeNode<Member>();
 						o = mo;
-						cppqo = mo;
+						accesso = mo;
+						dispatcho = mo;
 						break;
 				}
 				if (DS.isVirtualSpecified())
-					cppqo->dispatch = MakeTreeNode<Virtual> ();
+					dispatcho->dispatch = MakeTreeNode<Virtual> ();
 				else
-					cppqo->dispatch = MakeTreeNode<NonVirtual> ();
-				cppqo->access = access;
+					dispatcho->dispatch = MakeTreeNode<NonVirtual> ();
+				accesso->access = access;
 			}
 			else if (S->getFnParent()) // in code
 			{

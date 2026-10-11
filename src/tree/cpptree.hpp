@@ -135,7 +135,7 @@ struct Declaration : virtual Statement
 
     virtual string GetColour() const { return "/set28/1"; }
 	virtual bool ShouldSplitInstance( Policy policy ) const;
-	// TODO move into CPPQuals
+	// TODO move into AccessDecl
 	virtual list<string> ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bool force, VN::RendererInterface *renderer, Policy policy ) const;
 	Token GetExplicitToken() const;
 	Token GetPrerestrictToken() const override;
@@ -143,10 +143,11 @@ struct Declaration : virtual Statement
 
 
 // A declaration that maust appear before usages - i.e. not a label
-struct AdvanceDeclaration : virtual Declaration 
+struct AdvanceDecl : virtual Declaration 
 {
 	NODE_FUNCTIONS
 	virtual list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const;
+	virtual list<string> RenderDispatch( VN::RendererInterface *renderer, Policy policy ) const;
 };
 
 
@@ -629,7 +630,7 @@ struct View : virtual Node
  identifier so that the resource can be used (i.e. usages refer to the resource by identifier).
  There may not be a type - in some cases, we don't want to use a type to make pointers, 
  aggregates etc the declaration node itself is sufficient as a recipe for how to use the resource. */
-struct Resource : virtual AdvanceDeclaration
+struct Resource : virtual AdvanceDecl
 {
 	NODE_FUNCTIONS
 	
@@ -700,13 +701,23 @@ struct Global : Instance
 };
 
 
-struct CPPQuals : virtual AdvanceDeclaration 
+struct AccessDecl : virtual AdvanceDecl 
 {
-    TreePtr<Dispatch> dispatch; ///< Is the member virtual?
+	NODE_FUNCTIONS
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
 
 	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
 	TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc ) override;
+};
+
+
+struct DispatchDecl : virtual AdvanceDecl 
+{
+    NODE_FUNCTIONS
+    TreePtr<Dispatch> dispatch; ///< Is the member virtual?
+
+	list<string> RenderDispatch( VN::RendererInterface *renderer, Policy policy ) const override;
+	TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc ) override;
 };
 
 
@@ -716,30 +727,25 @@ struct CPPQuals : virtual AdvanceDeclaration
  are intended to control the generation of read/write lines for modules. This usage of
  Permission differs from that in Global, so we do not try to introduce a common intermediate.
  Note that static members are Global, not Member */
-struct Member : Instance, CPPQuals
+struct Member : Instance, AccessDecl, DispatchDecl
 {
-    NODE_FUNCTIONS_FINAL
-        
+    NODE_FUNCTIONS_FINAL       
    	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
-
-	TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc ) override;
 };
 
 
-struct XStructor : Resource, CPPQuals
+struct XStructor : Resource, AccessDecl, DispatchDecl
 {
 	NODE_FUNCTIONS
 	TreePtr<TypeIdentifier> record_id;
 
 	bool IsDeclaredAsXstructor(TreePtr<Node>) const override;
-   	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;
 	virtual string RenderParams(VN::RendererInterface *renderer, Policy policy) const;
 	bool ShouldSplitInstance( Policy ) const override;
 	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
 
 	virtual string GetLeadingText(Policy policy) const;
 
-	TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc ) override;
 	TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc ) override;
 };
 
@@ -1121,7 +1127,7 @@ struct Labeley : Type
 /* The user type node is a declaration and goes into a declaration scope. It points
  to a TypeIdentifier, and all usages of the type actually point to the
  TypeIdentifier. TODO rename to TypeDecl or similar */
-struct TypeDeclaration : AdvanceDeclaration 
+struct TypeDeclaration : AdvanceDecl 
 { 
     NODE_FUNCTIONS
     TreePtr<TypeIdentifier> identifier; ///< The handle to the type that has been declared
@@ -1797,7 +1803,7 @@ struct SpecificPreprocessorIdentifier : PreprocessorIdentifier,
 
 /// A proprocessor macro usage that may be used as a field, and takes 
 /// arbitrary operands.
-struct MacroConstructor : AdvanceDeclaration,
+struct MacroConstructor : AdvanceDecl,
 						  MembInitSeq
 {
     NODE_FUNCTIONS_FINAL
@@ -1830,7 +1836,7 @@ struct MacroStatement : Statement
 
 
 /// Preprocessor decl-like stuff: includes, defines
-struct PreProcDecl : virtual AdvanceDeclaration 
+struct PreProcDecl : virtual AdvanceDecl 
 {
     NODE_FUNCTIONS
    	Production GetMyProductionTerminal() const override;   	
