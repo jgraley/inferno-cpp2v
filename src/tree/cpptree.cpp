@@ -1350,8 +1350,8 @@ string Resource::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 list<string> Resource::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
 {
 	ASSERT(policy.context);
-	//if( policy.context->has_value() ) // are we in a record scope that maintains access spec, and yet are not a member
-	//	throw NoAccessInstanceInAccessRecord(); 
+	if( policy.context->has_value() ) // are we in a record scope that maintains access spec, and yet are not a member
+		throw NoAccessInstanceInAccessRecord(); 
 		
 	// Patterns managed to get an Instance that isn't a Member into a Record body.
 	return {};
