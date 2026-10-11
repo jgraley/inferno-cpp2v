@@ -191,7 +191,7 @@ LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicFunction> s_dynamic,
     auto event_expr = MakePatternNode< Expression >(); 
                     
     s_dynamic->event = event_expr;       
-    r_call->callee = MakePatternNode<SpecificString>(r_dest);       
+    r_call->callee = MakePatternNode<SpecificResourceIdentifier>(r_dest);       
     r_call->argumentation = r_args;
     r_args->arguments = (event_expr);
       
@@ -205,7 +205,7 @@ LowerSCStatic::LowerSCStatic( TreePtr<SCFunction> s_static,
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
                         
-    r_call->callee = MakePatternNode<SpecificString>(r_dest);       
+    r_call->callee = MakePatternNode<SpecificResourceIdentifier>(r_dest);       
     r_call->argumentation = r_args;
       
     Configure( SEARCH_REPLACE, s_static, r_call );
@@ -219,7 +219,7 @@ LowerSCDelta::LowerSCDelta( TreePtr<SCFunction> s_delta,
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
                     
-    r_call->callee = MakePatternNode<SpecificString>(r_dest);       
+    r_call->callee = MakePatternNode<SpecificResourceIdentifier>(r_dest);       
     r_call->argumentation = r_args;
     r_args->arguments = (zero_time_id);
           
@@ -231,7 +231,7 @@ LowerTerminationFunction::LowerTerminationFunction( TreePtr<SCTree::TerminationF
 {
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
-    auto r_token = MakePatternNode< SpecificString >( s_tf->GetLoweredIdOrMacroName() ); 
+    auto r_token = MakePatternNode< SpecificResourceIdentifier >( s_tf->GetLoweredIdOrMacroName() ); 
     // TODO IdValuePair args can't render without a function decl. Maybe add OperandSequence as an alternative? 
     auto exit_expr = MakePatternNode< Expression >(); 
                     
@@ -361,7 +361,7 @@ LowerSCDeltaCount::LowerSCDeltaCount()
  
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
-    auto r_token = MakePatternNode< SpecificString >( s_delta_count->GetLoweredIdOrMacroName() );                
+    auto r_token = MakePatternNode< SpecificResourceIdentifier >( s_delta_count->GetLoweredIdOrMacroName() );                
     //MakePatternNode< Expression > eexpr; 
             
     r_call->callee = r_token;

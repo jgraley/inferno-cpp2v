@@ -188,7 +188,7 @@ public:
 	string RenderNodeTypeName() const; 
 	virtual	bool IsType() const; 
 	virtual	bool IsSpecificIdentifier() const; 
-	virtual string RenderAsImmediateCallee( VN::RendererInterface *renderer, Policy policy );
+	virtual	bool IsXstructorIdentifier(const VN::RendererInterface *renderer); 
 	
 	// Use std::any for dep breaking at the include level
 	typedef any Token;

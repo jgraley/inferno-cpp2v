@@ -597,6 +597,20 @@ string SpecificResourceIdentifier::GetRender( VN::RendererInterface *renderer, P
 }
 
 
+bool SpecificResourceIdentifier::IsXstructorIdentifier(const VN::RendererInterface *renderer) try
+{
+	TreePtr<Node> n = DeclarationOf().TryApplyTransformation(*renderer->GetTransKit(), TreePtrThis()).GetTreePtr();
+	ASSERT(n);
+	// TODO ask the declarer via new vcall
+	return TreePtr<XStructor>::DynamicCast(n) || TreePtr<MacroConstructor>::DynamicCast(n); 
+}
+catch( BaseDeclarationOf::DeclarationNotFound &dnf )
+{			
+	// Could be an undeclared library function eg cease() TODO fix by having the #include node declare them
+	return false; // ASSUME undeclared callee is not an xstructor
+}
+
+
 Syntax::Token SpecificResourceIdentifier::GetSignifierToken() const
 {
 	// Disable by calling to default impl
@@ -892,15 +906,6 @@ Syntax::Production SpecificString::GetMyProductionTerminal() const
 	return Production::PRIMARY_EXPR; 
 }
 
-
-string SpecificString::RenderAsImmediateCallee( VN::RendererInterface *renderer, Policy policy )
-{
-	// Useful for functions that don't have declarations
-	if( policy.conformalise_irregular_callees )
-		return value;
-	else
-		return renderer->DoRenderPreserve( TreePtrThis(), Production::POSTFIX, policy );
-}
 
 //////////////////////////// SpecificInteger ///////////////////////////////
 
@@ -2779,49 +2784,19 @@ TreePtr<Node> GoSub::OnObject( TreePtr<Node> object_, Location )
 
 Syntax::Production Call::GetMyProduction(const VN::RendererInterface *renderer, Policy policy ) const
 {
-	bool hide_callee = false;
-	if( policy.hide_xstructor_identifiers )
-	{
-		if( auto id = TreePtr<SpecificResourceIdentifier>::DynamicCast(callee) ) // called on an id, not some expression
-		{
-			try
-			{
-				TreePtr<Node> n = DeclarationOf().TryApplyTransformation(*renderer->GetTransKit(), callee).GetTreePtr();
-				ASSERT(n);
-				// TODO ask the declarer via new vcall
-				hide_callee = TreePtr<XStructor>::DynamicCast(n) || TreePtr<MacroConstructor>::DynamicCast(n); 
-			}
-			catch( BaseDeclarationOf::DeclarationNotFound &dnf )
-			{
-				auto sri = TreePtr<SpecificResourceIdentifier>::DynamicCast(callee);
-				ASSERT(sri);
-				ASSERT(false)(sri)(sri->GetIdentifierName());
-				// Could be an undeclared library function eg cease() TODO fix by having the #include node declare them
-			}
-		}	
-	}
+	bool hide_callee = policy.hide_xstructor_identifiers && callee->IsXstructorIdentifier(renderer);
 	return hide_callee ? Production::DIRECT_INIT : Production::POSTFIX; 	
 }
 
 
 string Call::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {				
-	ASSERT( argumentation )("Call always requires an arumentation, for wild put a star in it");
-	
+	ASSERT( argumentation )("Call always requires an argumentation, for wild put a star in it");
 	string s;
-	switch( GetMyProduction(renderer, policy) )
-	{
-		case Production::DIRECT_INIT:
-		// hide the callee
-		break;
-		
-		case Production::POSTFIX:
-		s += callee ? callee.Whatever()->RenderAsImmediateCallee( renderer, policy ) : renderer->DoRender(&callee, Production::POSTFIX, policy);
-		break;
-		
-		default:
-		ASSERTFAIL();
-	}
+	
+	bool hide_callee = policy.hide_xstructor_identifiers && callee->IsXstructorIdentifier(renderer);
+	if( !hide_callee )
+		s += renderer->DoRender(&callee, Production::POSTFIX, policy);
 
 	// We may need to convert the argumentation into a suitable form depending on policy.
 	// If a conversion occurs, the callee is needed in order to transform the arguments.

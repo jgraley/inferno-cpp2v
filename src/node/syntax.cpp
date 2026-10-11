@@ -113,9 +113,9 @@ bool Syntax::IsSpecificIdentifier() const
 }
 
 
-string Syntax::RenderAsImmediateCallee( VN::RendererInterface *renderer, Policy policy )
+bool Syntax::IsXstructorIdentifier(const VN::RendererInterface *)
 {
-	return renderer->DoRenderPreserve( TreePtrThis(), Production::POSTFIX, policy );
+	return false;
 }
 
 

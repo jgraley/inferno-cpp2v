@@ -251,6 +251,7 @@ struct SpecificResourceIdentifier : ResourceIdentifier,
     NODE_FUNCTIONS_FINAL    
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+	bool IsXstructorIdentifier(const VN::RendererInterface *renderer) override;
    	Token GetSignifierToken() const override;
 };
                                                    
@@ -382,7 +383,6 @@ struct SpecificString : String
     string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
 	Production GetMyProductionTerminal() const override;
 	string GetString() final { return value; }
-	string RenderAsImmediateCallee( VN::RendererInterface *renderer, Policy policy ) override;
 
 private:
     string value; ///< The string itself
@@ -1844,7 +1844,9 @@ struct Include : virtual PreProcDecl
 {
     NODE_FUNCTIONS
     TreePtr<String> filename;     
-
+	
+	shared_ptr<map<TreePtr<Identifier>, bool>> content;
+	
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy );
 	virtual string CustomiseFilenameForInclude(TreePtr<String>, VN::RendererInterface *, Policy) { ASSERTFAIL() };
 	Token GetSignifierToken() const override;

@@ -1069,14 +1069,6 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Instance - an entity and an instantiation of a type. Many of the details will be found in/under the type node.
 
 // TODO 
-// Could SC lowerings be merged using a wildcard identifier and Stringize?
-// vcall RenderAsImmediateCallee()
-// - on SpecificString
-// - and SpecificResourceIdentifier for the case of an Xstructor id 
-// Tidy away the catch...ASSERT(false) in Call::x()
-// And then for Lookup case: Lookup forwards to member
-// - Start by putting in declared-checks here too
-// Consider whenter (during lowering) we can use strings for eg types
 // BUT... don't change raising: we need an unambiguous parse of input program, so leave it as it is
 // Don't forget querying declarers via vcall for are they constructorey
 // Also moving MacroConstructor into SC tree and renaming eg MacroSC_CTOR and building in the SC_CTOR
