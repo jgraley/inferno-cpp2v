@@ -45,10 +45,10 @@ public:
 /// Detect return statements and arrange for the function to fall down
 /// to the bottom without doing anything more. only for void functions and
 /// loops not supported.
-class ExplicitiseReturns : public VNStep
+class AddEnableFlag : public VNStep
 {
 public:
-    ExplicitiseReturns();
+    AddEnableFlag();
 };
 
 }; // end namespace

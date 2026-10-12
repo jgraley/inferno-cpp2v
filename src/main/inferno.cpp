@@ -194,7 +194,7 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
         sequence->push_back( make_shared<TempsAndStaticsToModule>() );
         sequence->push_back( make_shared<DeclsToModule>() );
         sequence->push_back( make_shared<ThreadToMethod>() );
-        sequence->push_back( make_shared<ExplicitiseReturns>() );
+        sequence->push_back( make_shared<AddEnableFlag>() );
         sequence->push_back( make_shared<CleanupNestedIf>() );
     }
     

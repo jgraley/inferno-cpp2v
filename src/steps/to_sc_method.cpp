@@ -215,7 +215,7 @@ ThreadToMethod::ThreadToMethod()
 }
 
 
-ExplicitiseReturns::ExplicitiseReturns()
+AddEnableFlag::AddEnableFlag()
 {
     auto method = MakePatternNode<Method>();
     auto s_comp = MakePatternNode<Compound>();
