@@ -18,8 +18,6 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto s_module = MakePatternNode<Record>();
     auto r_module = MakePatternNode<Record>();
     auto gg = MakePatternNode<GreenGrassAgent, Type>();
-    auto func = MakePatternNode<Member>();
-    auto m_func = MakePatternNode<Member>();
     auto func_id = MakePatternNode<ResourceIdentifier>();
     auto thread = MakePatternNode<Thread>();
     auto func_decls = MakePatternNode<StarAgent, Declaration>();
@@ -71,7 +69,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto l_not = MakePatternNode<NegationAgent, Statement>();
     auto m_stuff_func = MakePatternNode<StuffAgent, Scope>();
     auto l_module = MakePatternNode<Record>();
-    auto l_func = MakePatternNode<Member>();
+    auto l_func = MakePatternNode<Thread>();
     auto r_lmap = MakePatternNode<Global>();
     auto l_lmap = MakePatternNode<Global>();
     auto r_lmap_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("lmap");
@@ -153,21 +151,19 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     
     //s_module->bases = (bases);
     //s_module->identifier = module_id;
-    func->permission = MakePatternNode<NonConst>();
-    func->dispatch = MakePatternNode<NonVirtual>();
-    func->access = MakePatternNode<Private>();
-    func->type = gg;
     gg->through = thread;
-    func->identifier = func_id;
-    func->initialiser = l_delta_comp;
+    thread->permission = MakePatternNode<NonConst>();
+    thread->access = MakePatternNode<Private>();
+    thread->identifier = func_id;
+    thread->initialiser = l_delta_comp;
     l_delta_comp->through = s_comp;
     l_delta_comp->overlay = r_comp;
     s_comp->members = (comp_membs);
     r_comp->members = (comp_membs);
     s_comp->statements = (comp_stmts);
     r_comp->statements = (r_lmap, comp_stmts);
-    s_module->members = (module_decls, func);
-    r_module->members = (module_decls, func, r_module_enum);
+    s_module->members = (module_decls, gg);
+    r_module->members = (module_decls, gg, r_module_enum);
     //r_module->bases = (bases);
     //r_module->identifier = module_id;
     r_module_enum->identifier = r_enum_id;
@@ -574,7 +570,7 @@ EnsureResetYield::EnsureResetYield()
 
 DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
 {
-    auto inst = MakePatternNode<Instance>();
+    auto inst = MakePatternNode<Resource>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto r_body_comp = MakePatternNode<Compound>();
@@ -590,7 +586,6 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     
     auto embedded_ll = MakePatternNode<EmbeddedSearchReplaceAgent, Statement>( r_body_comp, MakePatternNode<Goto>(), MakePatternNode<Continue>() );    
     
-    inst->type = MakePatternNode<Callable>();
     inst->initialiser = delta;
     delta->through = s_comp;
     // Keep the decls before the label out of the loop, in case they have inits
@@ -618,7 +613,6 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
 
 InsertInferredYield::InsertInferredYield()
 {
-    auto fn = MakePatternNode<Member>();
     auto fn_id = MakePatternNode<ResourceIdentifier>();
     auto thread = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
     auto func_comp = MakePatternNode<Compound>();
@@ -641,12 +635,10 @@ InsertInferredYield::InsertInferredYield()
     auto sx_not = MakePatternNode< LogicalNot >();
     auto assign = MakePatternNode< Assign >();
           
-    fn->permission = MakePatternNode<NonConst>();
-    fn->dispatch = MakePatternNode<NonVirtual>();
-    fn->access = MakePatternNode<Private>();
-    fn->type = thread;
-    fn->initialiser = func_comp;
-    fn->identifier = fn_id;  
+    thread->permission = MakePatternNode<NonConst>();
+    thread->access = MakePatternNode<Private>();
+    thread->initialiser = func_comp;
+    thread->identifier = fn_id;  
     func_comp->members = (func_decls);
     func_comp->statements = (loop);
     loop->body = delta;
@@ -659,7 +651,7 @@ InsertInferredYield::InsertInferredYield()
     r_comp->members = (loop_decls);
     r_comp->statements = (stmts, r_yield);
     
-    Configure( SEARCH_REPLACE, fn );            
+    Configure( SEARCH_REPLACE, thread );            
 }
 
 

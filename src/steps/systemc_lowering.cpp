@@ -110,6 +110,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l2r_cons_init = MakePatternNode<Call>();
     auto l2r_args = MakePatternNode<SeqArgumentation>();
 	auto l2r_arg = MakePatternNode< StringizeAgent >();
+	
     
     // Module to a class 
     stuff->terminus = delta;
@@ -253,22 +254,23 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto module = MakePatternNode< Module >();
     auto r_process_macro = MakePatternNode< MacroStatement >();
     auto overcons = MakePatternNode<DeltaAgent, Declaration>();
-    auto overtype = MakePatternNode<DeltaAgent, Type>();
+    auto overres = MakePatternNode<DeltaAgent, Resource>();
     auto s_cons_macro = MakePatternNode< MacroConstructor >();
     auto r_cons_macro = MakePatternNode< MacroConstructor >();
     auto macro_cons_name = MakePatternNode<PreprocessorIdentifier>();
     auto macro_cons_id = MakePatternNode<ResourceIdentifier>();
     auto macro_args = MakePatternNode<StarAgent, Node>();
-    auto process = MakePatternNode< Member >();
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto statements_negation = MakePatternNode<NegationAgent, Statement>();    
     auto sx_process_macro = MakePatternNode< MacroStatement >();
     auto id = MakePatternNode< ResourceIdentifier >(); 
     auto bases = MakePatternNode<StarAgent, Base>();
     auto token = MakePatternNode< SpecificPreprocessorIdentifier >( s_scprocess->GetLoweredIdOrMacroName() ); // #819 style
-    auto r_func = MakePatternNode<Function>();
+    auto r_func = MakePatternNode<Member>();
+    auto r_func_type = MakePatternNode<Function>();
+    auto body = MakePatternNode<Initialiser>();  
                 
-    module->members = (overcons, process, decls);
+    module->members = (overcons, overres, decls);
     module->bases = (bases);
     overcons->through = s_cons_macro;       
     s_cons_macro->macro_name = macro_cons_name;
@@ -293,14 +295,19 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     r_process_macro->arguments = (id);
     
     // Rule #910: SC processes to be Member, with NonVirtual and Private
-    process->dispatch = MakePatternNode<NonVirtual>();
-    process->access = MakePatternNode<Private>();
-    process->permission = MakePatternNode<NonConst>();    
-    process->type = overtype;
-    process->identifier = id;
-    overtype->through = s_scprocess;
-    overtype->overlay = r_func;
-    r_func->return_type = MakePatternNode<Void>();
+    overres->through = s_scprocess;
+    overres->overlay = r_func;
+    s_scprocess->access = MakePatternNode<Private>();
+    s_scprocess->permission = MakePatternNode<NonConst>();    
+    s_scprocess->identifier = id;
+    s_scprocess->initialiser = body;
+    r_func->dispatch = MakePatternNode<NonVirtual>();
+    r_func->access = MakePatternNode<Private>();
+    r_func->permission = MakePatternNode<NonConst>();    
+    r_func->type = r_func_type;
+    r_func->identifier = id;
+    r_func->initialiser = body;
+    r_func_type->return_type = MakePatternNode<Void>();
     
     Configure( SEARCH_REPLACE, module, module );
 }

@@ -176,10 +176,10 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto ls_cons = MakePatternNode< Constructor >();
     auto lr_cons = MakePatternNode< Constructor >();
     auto ls_process = MakePatternNode< Member >();
-    auto lr_process = MakePatternNode< Member >();
     auto l_pre = MakePatternNode<StarAgent, Statement>();
     auto l_post = MakePatternNode<StarAgent, Statement>();
-    auto ls_id = MakePatternNode< ResourceIdentifier >();
+    auto l_id = MakePatternNode< ResourceIdentifier >();
+    auto l_body = MakePatternNode< Initialiser >();
     auto l_bases = MakePatternNode<StarAgent, Base>();
     auto l_ident = MakePatternNode<ResourceIdentifier>();
     auto s_token = MakePatternNode< SpecificResourceIdentifierByNameAgent >( lr_scprocess->GetLoweredIdOrMacroName() ); 
@@ -214,7 +214,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_pcall->argumentation = ls_pargs;
     ls_pargs->arguments = (ls_arg);
     ls_arg->key = s_arg_id;
-    ls_arg->value = ls_id;
+    ls_arg->value = l_id;
     l_overcons->overlay = lr_cons;
     lr_cons->record_id = l_module_id;
     lr_cons->dispatch = MakePatternNode<NonVirtual>();
@@ -227,17 +227,17 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     
     // Rule #910: SC processes to be Member, with NonVirtual and Private
     l_overproc->through = ls_process;
-    l_overproc->overlay = lr_process;
+    l_overproc->overlay = lr_scprocess;
     ls_process->dispatch = MakePatternNode<NonVirtual>();
     ls_process->access = MakePatternNode<Private>();
     ls_process->permission = MakePatternNode<NonConst>();
-    ls_process->identifier = ls_id;
+    ls_process->identifier = l_id;
+    ls_process->initialiser = l_body;
     ls_process->type = MakePatternNode<Callable>();
-    lr_process->dispatch = MakePatternNode<NonVirtual>();
-    lr_process->access = MakePatternNode<Private>();
-    lr_process->permission = MakePatternNode<NonConst>();
-    lr_process->identifier = ls_id;
-    lr_process->type = lr_scprocess;
+    lr_scprocess->access = MakePatternNode<Private>();
+    lr_scprocess->permission = MakePatternNode<NonConst>();
+    lr_scprocess->identifier = l_id;
+    lr_scprocess->initialiser = l_body;
     
     Configure( COMPARE_REPLACE, delta, r_embedded );
 }

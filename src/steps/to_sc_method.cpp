@@ -19,9 +19,8 @@ AutosToModule::AutosToModule()
     auto vstmts_pre = MakePatternNode<StarAgent, Statement>();
     auto vstmts_post = MakePatternNode<StarAgent, Statement>();
     auto s_var = MakePatternNode<Local>();
-    auto fn = MakePatternNode<Member>();
+    auto thread = MakePatternNode<Thread>();
     auto r_var = MakePatternNode<Member>();
-    auto ft = MakePatternNode<Callable>();
     auto stuff = MakePatternNode<StuffAgent, Initialiser>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
@@ -36,10 +35,10 @@ AutosToModule::AutosToModule()
     auto sx_call = MakePatternNode<Call>();
     auto sx_args = MakePatternNode<MapArgumentation>();
         
-    s_rec->members = (decls, fn);
-    r_rec->members = (decls, fn, r_var);
-    fn->type = ft;
-    fn->initialiser = stuff;
+    // Only act on a thread: normal member funcs are fine if combable, and anything already an sc_method is also fine
+    s_rec->members = (decls, thread);
+    r_rec->members = (decls, thread, r_var);
+    thread->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
     stuff->terminus = delta;
     delta->through = s_all;
@@ -80,8 +79,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     auto s_tempvar = MakePatternNode<Temporary>();
     auto s_staticvar = MakePatternNode<Global>();
     auto r_var = MakePatternNode<Member>();
-    auto fn = MakePatternNode<Member>();
-    auto ft = MakePatternNode<Thread>();
+    auto thread = MakePatternNode<Thread>();
     auto stuff = MakePatternNode<StuffAgent, Initialiser>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
@@ -93,14 +91,13 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     auto var_identifier = MakePatternNode<ResourceIdentifier>();
     auto var_initialiser = MakePatternNode<Initialiser>();
 
-    s_rec->members = (decls, fn);
-    r_rec->members = (decls, fn, r_var);
-    fn->permission = MakePatternNode<NonConst>();    
-    // Rule #910: SC processes to be Memeber, with NonVirtual and Private
-    fn->dispatch = MakePatternNode<NonVirtual>();
-    fn->access = MakePatternNode<Private>();
-    fn->type = ft;
-    fn->initialiser = stuff;
+    // Only act on a thread: normal member funcs are fine if combable, and anything already an sc_method is also fine
+    s_rec->members = (decls, thread);
+    r_rec->members = (decls, thread, r_var);
+    thread->permission = MakePatternNode<NonConst>();    
+    // Rule #910: SC processes to be Private
+    thread->access = MakePatternNode<Private>();
+    thread->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
     stuff->terminus = delta;
     delta->through = s_comp;
@@ -139,7 +136,6 @@ DeclsToModule::DeclsToModule()
     auto vdecls = MakePatternNode<StarAgent, Declaration>();
     auto vstmts_pre = MakePatternNode<StarAgent, Statement>();
     auto vstmts_post = MakePatternNode<StarAgent, Statement>();
-    auto fn = MakePatternNode<Member>();
     auto ut = MakePatternNode<TypeDeclaration>();
     auto ft = MakePatternNode<Thread>();
     auto stuff = MakePatternNode<StuffAgent, Initialiser>();
@@ -148,13 +144,11 @@ DeclsToModule::DeclsToModule()
     auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto bases = MakePatternNode<StarAgent, Base>();
     
-    s_rec->members = (decls, fn);
-    r_rec->members = (decls, fn, ut);
-    fn->permission = MakePatternNode<NonConst>();    
-    fn->type = ft;
-    fn->initialiser = stuff;
-    fn->dispatch = MakePatternNode<NonVirtual>();
-    fn->access = MakePatternNode<Private>();
+    s_rec->members = (decls, ft);
+    r_rec->members = (decls, ft, ut);
+    ft->permission = MakePatternNode<NonConst>();    
+    ft->initialiser = stuff;
+    ft->access = MakePatternNode<Private>();
     // TODO recurse restriction for locally declared classes
     stuff->terminus = delta;
     delta->through = s_comp;
@@ -171,10 +165,8 @@ DeclsToModule::DeclsToModule()
 
 ThreadToMethod::ThreadToMethod()
 {
-    auto s_thread = MakePatternNode<Member>();
-    auto r_method = MakePatternNode<Member>();
-    auto s_thread_type = MakePatternNode<Thread>();
-    auto r_method_type = MakePatternNode<Method>();
+    auto s_thread = MakePatternNode<Thread>();
+    auto r_method = MakePatternNode<Method>();
     auto s_comp = MakePatternNode<Compound>();
     auto s_loop_comp = MakePatternNode<Compound>();
     auto r_loop_comp = MakePatternNode<Compound>();
@@ -202,21 +194,17 @@ ThreadToMethod::ThreadToMethod()
     auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_m, ls_wait_dynamic, lr_nt_dynamic);
 
     s_thread->permission = MakePatternNode<NonConst>();    
-    s_thread->dispatch = MakePatternNode<NonVirtual>();
     s_thread->access = MakePatternNode<Private>();
-    s_thread->type = s_thread_type;
     s_thread->initialiser = s_comp;
     s_thread->identifier = id;
-//    s_comp->members = (); important - locals in the body scope not allowed, they would lose their values every itheration in SC_METHOD
+//    s_comp->members = (); important - locals in the body scope not allowed, they would lose their values every iteration in SC_METHOD
     s_comp->statements = s_loop;
     s_loop->condition = s_loop_cond; 
     s_loop->body = s_loop_comp;
     s_loop_comp->statements = (loop_stmts);
     r_loop_comp->statements = (loop_stmts, MakePatternNode<NextTriggerDelta>()); // ... or whatever re-triggers when we fall out of the fall through machine
     r_method->permission = MakePatternNode<NonConst>();        
-    r_method->dispatch = MakePatternNode<NonVirtual>();
     r_method->access = MakePatternNode<Private>();
-    r_method->type = r_method_type;
     r_method->initialiser = embedded_l;
     r_method->identifier = id;
     
@@ -229,14 +217,13 @@ ThreadToMethod::ThreadToMethod()
 
 ExplicitiseReturns::ExplicitiseReturns()
 {
-    auto inst = MakePatternNode<Instance>();
-    auto s_callable = MakePatternNode<Callable>();
+    auto method = MakePatternNode<Method>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
     auto m_comp = MakePatternNode<Compound>();
     auto l_delta_comp = MakePatternNode<DeltaAgent, Compound>();
-    auto s_all = MakePatternNode<ConjunctionAgent, Instance>();
-    auto s_stuff = MakePatternNode<StuffAgent, Instance>();
+    auto s_all = MakePatternNode<ConjunctionAgent, Method>();
+    auto s_stuff = MakePatternNode<StuffAgent, Method>();
     auto s_return = MakePatternNode<Return>();
     auto ls_return = MakePatternNode<Return>();
     auto m_return = MakePatternNode<Return>();
@@ -280,9 +267,8 @@ ExplicitiseReturns::ExplicitiseReturns()
     
     auto embedded_l = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( embedded_m, ls_return, lr_assign);
     
-    s_all->conjuncts = (inst, s_stuff);
-    inst->type = s_callable; // TODO when functions are sorted out, set return type to void
-    inst->initialiser = embedded_l;
+    s_all->conjuncts = (method, s_stuff);
+    method->initialiser = embedded_l;
     s_stuff->terminus = s_return;
     s_return->return_value = s_uninit;
     l_delta_comp->through = s_comp;
@@ -296,5 +282,5 @@ ExplicitiseReturns::ExplicitiseReturns()
     r_flag->initialiser = r_true;
     r_flag->permission = MakePatternNode<NonConst>();        
 
-    Configure( SEARCH_REPLACE, s_all, inst );
+    Configure( SEARCH_REPLACE, s_all, method );
 }

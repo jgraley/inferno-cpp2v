@@ -22,7 +22,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     auto module = MakePatternNode<Module>();
     auto other_decls = MakePatternNode<StarAgent, Declaration>();
     
-    auto fi = MakePatternNode< Member >();
+    auto fi = MakePatternNode< Resource >();
     auto s_comp = MakePatternNode<Compound>();
     auto sx_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
@@ -41,11 +41,11 @@ ExplicitiseReturn::ExplicitiseReturn()
         
     module->members = (fi, other_decls);
     
-    fi->type = s_any;
-    s_any->disjuncts = (s_func, s_proc, MakePatternNode<Subroutine>() );
-    s_proc->params = MakePatternNode<StarAgent, Parameter>();
-    s_func->params = MakePatternNode<StarAgent, Parameter>();
-    s_func->return_type = MakePatternNode< Void >();
+    //fi->type = s_any;
+    //s_any->disjuncts = (s_func, s_proc, MakePatternNode<Subroutine>() );
+    //s_proc->params = MakePatternNode<StarAgent, Parameter>();
+    //s_func->params = MakePatternNode<StarAgent, Parameter>();
+    //s_func->return_type = MakePatternNode< Void >();
     fi->initialiser = delta;
     s_comp->members = decls;
     s_comp->statements = (pre);
@@ -404,8 +404,6 @@ GenerateStacks::GenerateStacks()
     auto l_fi = MakePatternNode<Member>();
     auto sx_thread = MakePatternNode<Thread>();
     auto sx_method = MakePatternNode<Method>();
-    auto sx_any = MakePatternNode<DisjunctionAgent, Type>();
-    auto s_not = MakePatternNode<NegationAgent, Type>();
     auto s_and = MakePatternNode<ConjunctionAgent, Compound>();
     auto s_top_comp = MakePatternNode<Compound>();
     auto r_top_comp = MakePatternNode<Compound>();
@@ -504,13 +502,12 @@ GenerateStacks::GenerateStacks()
     r_module->members = (delta, members, r_index);
     delta->through = s_fi;
     delta->overlay = r_fi;    
+	// Only provide stacks for Member functions because SC processes do not recurse
     s_fi->identifier = r_fi->identifier = fi_id;
-    s_fi->type = r_fi->type = s_not;
+    s_fi->type = r_fi->type;
     s_fi->dispatch = MakePatternNode<NonVirtual>();
     s_fi->access = MakePatternNode<Private>();
 
-    s_not->negand = sx_any;
-    sx_any->disjuncts = (sx_thread, sx_method); // Do not provide stacks for these because they do not recurse TODO and cthread? or SCProcess wildcard?
     s_fi->initialiser = s_and;   
     r_fi->initialiser = temp;   
     r_fi->dispatch = MakePatternNode<NonVirtual>();
@@ -549,9 +546,8 @@ MergeFunctions::MergeFunctions()
 {
     auto s_module = MakePatternNode<Record>();
     auto r_module = MakePatternNode<Record>();
-    auto thread = MakePatternNode<Member>();
+    auto thread = MakePatternNode<Thread>();
     auto s_func = MakePatternNode<Member>();
-    auto thread_type = MakePatternNode<Thread>();
     auto func_type = MakePatternNode<Callable>();
     auto members = MakePatternNode<StarAgent, Declaration>();
     auto thread_decls = MakePatternNode<StarAgent, Declaration>();
@@ -590,9 +586,7 @@ MergeFunctions::MergeFunctions()
     s_module->members = (members, thread, s_func);
     r_module->members = (members, thread);
     thread->permission = MakePatternNode<NonConst>();    
-    thread->dispatch = MakePatternNode<NonVirtual>();
     thread->access = MakePatternNode<Private>();    
-    thread->type = thread_type;
     thread->initialiser = thread_over;
     thread_over->through = s_all;
     s_all->conjuncts = (s_thread_comp, s_stuff);

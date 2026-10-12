@@ -114,7 +114,7 @@ MainToThread::MainToThread()
 	auto s_member = MakePatternNode< Member >();
     auto s_func = MakePatternNode<Function>();
     auto s_identifier = MakePatternNode<SpecificResourceIdentifierByNameAgent>("main");
-	auto r_member = MakePatternNode< Member >();
+	auto r_member = MakePatternNode< Thread >();
 	auto my_int = MakePatternNode<Signed>();
 	auto statements = MakePatternNode<StarAgent, Statement>();
 
@@ -134,9 +134,7 @@ MainToThread::MainToThread()
 	auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Declaration>( r_member, e_stuff );
 	delta->overlay = r_embedded;
 	r_member->access = MakePatternNode<Private>();
-	r_member->dispatch = MakePatternNode<NonVirtual>();
 	r_member->permission = MakePatternNode<NonConst>();
-	r_member->type = MakePatternNode<Thread>();
 	r_member->identifier = s_identifier;
 	r_member->initialiser = r_body;
 	r_body->statements = ( statements );

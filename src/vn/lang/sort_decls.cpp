@@ -20,9 +20,10 @@ protected:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
     {
         INDENT("G");
-        // We need to create a container of elements of the child.
+        // We need to create a container of elements of the child. TODO just stop on Compound, much simpler
         if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>( n ) ) // an instance...
-            if( dynamic_pointer_cast<Callable>( i->type ) ) // ...of a function
+        {
+			if( dynamic_pointer_cast<Callable>( i->type ) ) // ...of a function
             {
                 //TRACE("special behaviour for ")(*n)("\n");
                 // it's an instance, so set up a container containing type and identifier only, 
@@ -33,6 +34,18 @@ protected:
                 seq->push_back( i->identifier );
                 return seq;
             }
+		}
+        else if( shared_ptr<Resource> i = dynamic_pointer_cast<Resource>( n ) ) // an instance...
+        {
+            if( dynamic_pointer_cast<Compound>( i->initialiser ) ) // ...of a function
+            {
+                // it's a resource initialised with a Compound, so set up a container containing identifier only, 
+                // not initialiser (others don't matter for deps purposes). 
+                auto seq = make_shared< Sequence<Node> >();
+                seq->push_back( i->identifier );
+                return seq;
+            }
+		}
         //TRACE("defaulting ")(*n)("\n");
         return UniqueWalk::iterator::GetChildContainer(n);
     }
@@ -96,19 +109,6 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     ContainerInterface::iterator wa=w->begin();
     while(!(wa == w->end()))
     {
-        //TRACE("Seen node ")(**wa)("\n");
-    /*    if( ignore_indirection ) // are we to ignore pointers/refs?
-        {
-            if( TreePtr<Indirection> inda = TreePtr<Indirection>::DynamicCast(*wa) ) // is a a pointer or ref?
-            {
-                if( dynamic_pointer_cast<Identifier>(inda->destination) == ib ) // does it depend on b?
-                {
-                    wa.AdvanceOver(); // Then skip it
-                    continue;
-                }
-            }
-        }
-        */
         if( TreePtr<Node>(*wa) == TreePtr<Node>(ib) ) // If we see b in *any* other context under a's type, there's dep.
         {
             //TRACE("Found dependency\n");
@@ -182,18 +182,29 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
     // If no non-dependent decl may be found in cc then it's irredemably circular and
     // we fail. This looks like O(N^3).
     TRACE("Adding decls in dep order: ");
+    list<string> ls_deps;
     while( !pre_sorted.empty() )
     {
         bool found = false; // just for ASSERT check
+        ls_deps.clear();
         for( const TreePtr<Declaration> &a : pre_sorted )
         {
+            TreePtr<Declaration> aid = dynamic_cast< const TreePtr<Declaration> & >(a);
             bool a_has_deps=false;
+            list<string> s_deps;
             for( const TreePtr<Declaration> &b : pre_sorted )
             {
-                TreePtr<Declaration> aid = dynamic_cast< const TreePtr<Declaration> & >(a);
-                a_has_deps |= IsDependOn( aid, b, ignore_indirection_to_record );
+                if( IsDependOn( aid, b, ignore_indirection_to_record ) )
+                {
+					a_has_deps = true;
+					s_deps.push_back(Trace(b));
+				}
             }
-            if( !a_has_deps )
+            if( a_has_deps )
+			{
+				ls_deps.push_back( Trace(aid)+" depends on "+Trace(s_deps) );
+			}
+            else
             {
                 TRACE(*a)(" ");
                 ASSERT(a);
@@ -206,9 +217,11 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
 
         if( !found )
         {   
-            TRACE("\nRemaining unsequenceable decls: ");
+            FTRACE("\nRemaining unsequenceable decls: ");
             for( const TreePtr<Declaration> &a : pre_sorted )
-                   TRACE(*a)(" ");
+                   FTRACE(*a)(" ");
+            FTRACE("\nDependencies: ")(ls_deps)("\n");
+            FTRACE("ignore_indirection_to_record=")(ignore_indirection_to_record)("\n");
         }
         ASSERT( found )("\nfailed to find a decl to add without dependencies, maybe circular\n");
         //TRACE("%d %d\n", s.size(), c.size() );

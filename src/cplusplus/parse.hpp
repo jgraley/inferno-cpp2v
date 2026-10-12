@@ -1717,12 +1717,13 @@ private:
 
         // Find the specified member in the record implied by the expression on the left of .
         TreePtr<Node> tbase = TypeOf::instance( a->object, all_decls ).GetTreePtr();
+        ASSERT( tbase )(a->object)(" on left of ./-> is NULL");
         TreePtr<TypeIdentifier> tibase = DynamicTreePtrCast<TypeIdentifier>(tbase);
-        ASSERT( tibase );
+        ASSERT( tibase )(tbase)(" on left of ./-> is not a TypeIdentifier");
         DefaultTransUtils utils(all_decls);
         TransKit kit { &utils };
         TreePtr<Record> rbase = TryGetRecordDeclaration(kit, tibase).GetTreePtr();
-        ASSERT( rbase )( "thing on left of ./-> is not a record/record ptr" );
+        ASSERT( rbase )(rbase)(" on left of ./-> is not declared as a record/record ptr" );
         TreePtr<Instance> m = FindMemberByName( kit, rbase, string(Member.getName()) ).GetTreePtr();
         ASSERT(m)("in r.m or (&r)->m, could not find m in r\n"
                   "m is %s, r is ", 

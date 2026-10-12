@@ -1073,3 +1073,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Don't forget querying declarers via vcall for are they constructorey
 // Also moving MacroConstructor into SC tree and renaming eg MacroSC_CTOR and building in the SC_CTOR
 // sc_thread etc to be resources not types
+
+
+
+

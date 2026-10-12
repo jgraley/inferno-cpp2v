@@ -207,7 +207,7 @@ struct NotifyTimed : Notify
 /** Intermediate class for processes, which are the places in SystemC where we 
     put code. Different final nodes have different invocation and execution models.
     Processes look like functions that have no params or return value. */
-struct Process : CPPTree::Subroutine,
+struct Process : CPPTree::Resource, CPPTree::AccessDecl,
                  virtual SCNode 
 {
     NODE_FUNCTIONS

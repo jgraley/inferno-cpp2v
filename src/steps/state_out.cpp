@@ -206,8 +206,7 @@ static TreePtr<Statement> MakeResetAssignmentPattern()
 
 EnsureBootstrap::EnsureBootstrap()
 {
-    auto fn = MakePatternNode<Member>();
-    auto thread = MakePatternNode<Thread>();
+    auto fn = MakePatternNode<Thread>();
     auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto s_not = MakePatternNode<NegationAgent, Compound>();
@@ -225,9 +224,7 @@ EnsureBootstrap::EnsureBootstrap()
     auto sx_goto = MakePatternNode<Goto>();
         
     fn->permission = MakePatternNode<NonConst>();    
-    fn->dispatch = MakePatternNode<NonVirtual>();
     fn->access = MakePatternNode<Private>();
-    fn->type = thread;
     fn->initialiser = delta;
     delta->through = s_all;
     s_all->conjuncts = (s_not, s_body);
@@ -296,8 +293,7 @@ AddStateLabelVar::AddStateLabelVar()
 
 EnsureSuperLoop::EnsureSuperLoop()
 {   
-    auto fn = MakePatternNode<Member>();
-    auto thread = MakePatternNode<Thread>();
+    auto fn = MakePatternNode<Thread>();
     auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto sx_not = MakePatternNode<NegationAgent, Statement>();
@@ -314,9 +310,7 @@ EnsureSuperLoop::EnsureSuperLoop()
     auto r_loop = MakePatternNode<Do>();
         
     fn->permission = MakePatternNode<NonConst>();    
-    fn->dispatch = MakePatternNode<NonVirtual>();
     fn->access = MakePatternNode<Private>();
-    fn->type = thread;
     fn->initialiser = delta;
     delta->through = s_all;
     s_all->conjuncts = (sx_stuff, s_body);
@@ -463,9 +457,8 @@ FixFallthrough::FixFallthrough()
 
 AddYieldFlag::AddYieldFlag()
 {
-    auto fn = MakePatternNode<Instance>();
+    auto fn = MakePatternNode<Resource>();
     auto fn_id = MakePatternNode<ResourceIdentifier>();
-    auto sub = MakePatternNode<Callable>();
     auto s_func_comp = MakePatternNode<Compound>();
     auto r_func_comp = MakePatternNode<Compound>();
     auto s_comp = MakePatternNode<Compound>();
@@ -511,7 +504,6 @@ AddYieldFlag::AddYieldFlag()
     auto embedded_m = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( r_func_comp, ms_all, mr_comp );
     auto embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( r_comp, ls_if, lr_if );  
       
-    fn->type = sub;
     fn->initialiser = func_over;
     fn->identifier = fn_id;  
     func_over->through = s_func_comp;    
@@ -558,9 +550,8 @@ AddYieldFlag::AddYieldFlag()
 
 AddInferredYield::AddInferredYield()
 {
-    auto fn = MakePatternNode<Member>();
+    auto fn = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
     auto fn_id = MakePatternNode<ResourceIdentifier>();
-    auto thread = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
     auto func_comp = MakePatternNode<Compound>();
     auto s_comp = MakePatternNode<Compound>();
     auto sx_comp = MakePatternNode<Compound>();
@@ -583,9 +574,7 @@ AddInferredYield::AddInferredYield()
     auto assign = MakePatternNode< Assign >();
           
     fn->permission = MakePatternNode<NonConst>();    
-    fn->dispatch = MakePatternNode<NonVirtual>();
     fn->access = MakePatternNode<Private>();
-    fn->type = thread;
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  
     func_comp->members = (func_decls);
@@ -618,9 +607,8 @@ AddInferredYield::AddInferredYield()
 
 MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
 {
-    auto fn = MakePatternNode<Member>();
+    auto fn = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce SC stuff
     auto fn_id = MakePatternNode<ResourceIdentifier>();
-    auto thread = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce SC stuff
     auto func_decls = MakePatternNode<StarAgent, Declaration>();
     auto inits = MakePatternNode<StarAgent, Statement>();
     auto stmts = MakePatternNode<StarAgent, Statement>();
@@ -637,9 +625,7 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     auto first_init = MakePatternNode<Statement>();
                     
     fn->permission = MakePatternNode<NonConst>();    
-    fn->dispatch = MakePatternNode<NonVirtual>();
     fn->access = MakePatternNode<Private>();
-    fn->type = thread;
     fn->initialiser = func_over;
     fn->identifier = fn_id;  
     func_over->through = s_func_comp;
@@ -670,7 +656,6 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
 // rotate loops to avoid inferred yields when an explicit yield already exists
 LoopRotation::LoopRotation()
 {
-    auto fn = MakePatternNode<Member>();
     auto s_var_decl = MakePatternNode<Instance>();
     auto fn_id = MakePatternNode<ResourceIdentifier>();
     auto s_var_id = MakePatternNode<ResourceIdentifier>();
@@ -732,12 +717,10 @@ LoopRotation::LoopRotation()
     auto s_notmatch = MakePatternNode<NegationAgent, Compound>();
     auto inner_state = MakePatternNode<DisjunctionAgent, If>();
     
-    fn->permission = MakePatternNode<NonConst>();    
-    fn->dispatch = MakePatternNode<NonVirtual>();
-    fn->access = MakePatternNode<Private>();
-    fn->type = thread;
-    fn->initialiser = func_comp;
-    fn->identifier = fn_id;  
+    thread->permission = MakePatternNode<NonConst>();    
+    thread->access = MakePatternNode<Private>();
+    thread->initialiser = func_comp;
+    thread->identifier = fn_id;  
     func_comp->members = (func_decls); 
     s_enum->identifier = s_enum_id;
 	s_enum->members = (s_enums, s_cur_enum);
@@ -791,7 +774,7 @@ LoopRotation::LoopRotation()
     r_comp->members = (comp_loop_decls);
     r_comp->statements = (comp_loop_pre, loop_bottom, loop_top, loop_body, comp_loop_post);    // rotated version of s_comp_loop
         
-    Configure( SEARCH_REPLACE, fn );            
+    Configure( SEARCH_REPLACE, thread );            
 }
 
 

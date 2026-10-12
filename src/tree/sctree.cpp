@@ -329,7 +329,7 @@ Syntax::Production Process::GetMyProductionTerminal() const
 
 Syntax::Token Process::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_TYPE_SIGN;
+	return YY::VNLangParser::token::TOK_RESOURCE_SIGN;
 }
 
 //////////////////////////// Method ///////////////////////////////

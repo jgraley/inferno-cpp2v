@@ -204,8 +204,8 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     // GCCs goto-a-variable extension in which case a label could be 
     // on the right of an assignment.
     
-    auto s_instance = MakePatternNode<Instance>();
-    auto r_instance = MakePatternNode<Instance>();
+    auto s_instance = MakePatternNode<Resource>();
+    auto r_instance = MakePatternNode<Resource>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
     auto s_comp = MakePatternNode<Compound>();
@@ -221,7 +221,6 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
     auto l_s_orrule = MakePatternNode<DisjunctionAgent, LabelIdentifier>();
     auto identifier = MakePatternNode<ResourceIdentifier>();
-    auto type = MakePatternNode<Callable>();
     
     l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
     
@@ -229,7 +228,6 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;
-    s_instance->type = type;
     s_comp->members = decls;
     s_comp->statements = ( pre, s_label1, s_label2, post );
     s_label1->identifier = s_labelid1;
@@ -237,7 +235,6 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     
     r_instance->initialiser = r_embedded;
     r_instance->identifier = identifier;
-    r_instance->type = type;
     stuff->terminus = overlay;           
     overlay->through = s_comp;
     overlay->overlay = r_comp;
@@ -265,8 +262,8 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     // GCCs goto-a-variable extension in which case a label could be 
     // on the right of an assignment.
     
-    auto s_instance = MakePatternNode<Instance>();
-    auto r_instance = MakePatternNode<Instance>();
+    auto s_instance = MakePatternNode<Resource>();
+    auto r_instance = MakePatternNode<Resource>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
     auto s_comp = MakePatternNode<Compound>();
@@ -280,7 +277,6 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
     auto l_s_orrule = MakePatternNode<DisjunctionAgent, LabelIdentifier>();
     auto identifier = MakePatternNode<ResourceIdentifier>();
-    auto type = MakePatternNode<Callable>();
     auto s_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
     
@@ -290,7 +286,6 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;
-    s_instance->type = type;
     s_comp->members = decls;
     s_comp->statements = (pre, s_label, s_goto, post);
     s_label->identifier = s_labelid1;
@@ -298,7 +293,6 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     
     r_instance->initialiser = r_embedded;
     r_instance->identifier = identifier;
-    r_instance->type = type;
     stuff->terminus = overlay;           
     overlay->through = s_comp;
     overlay->overlay = r_comp;
@@ -348,8 +342,8 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     // using a recurse restriction that prevents recusing through
     // the LabelDeclaration node, thus excluding the declaration which we want
     // to ignore.
-    auto s_instance = MakePatternNode<Instance>();
-    auto r_instance = MakePatternNode<Instance>();
+    auto s_instance = MakePatternNode<Resource>();
+    auto r_instance = MakePatternNode<Resource>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto sx_stuff = MakePatternNode<StuffAgent, Compound>();
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
@@ -366,11 +360,9 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     auto sxx_notrule = MakePatternNode<NegationAgent, Node>();
     auto sxx_label = MakePatternNode< LabelDeclaration >();
     auto identifier = MakePatternNode<ResourceIdentifier>();
-    auto type = MakePatternNode<Callable>();
 
     s_instance->initialiser = s_andrule;
     s_instance->identifier = identifier;
-    s_instance->type = type;
     s_andrule->conjuncts = (stuff, sx_notrule);
     s_comp->members = decls;
     s_comp->statements = (pre, s_label, post);
@@ -383,7 +375,6 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     
     r_instance->initialiser = stuff;
     r_instance->identifier = identifier;
-    r_instance->type = type;
     stuff->terminus = overlay;
     overlay->through = s_comp;
     overlay->overlay = r_comp;
