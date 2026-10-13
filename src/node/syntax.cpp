@@ -170,10 +170,10 @@ catch( Unimplemented & )
 }
 
 
-TreePtr<Node> Syntax::OnDeclaration( shared_ptr<VN::ScopeGnomon>, Location loc )
+TreePtr<Node> Syntax::OnInScope( shared_ptr<VN::ScopeGnomon>, Location loc )
 {
 	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
-		MyBestErrName() + " does not expect to be in a declaration (implement OnDeclaration()).");	
+		MyBestErrName() + " does not expect to be in a declaration (implement OnInScope()).");	
 }
 
 

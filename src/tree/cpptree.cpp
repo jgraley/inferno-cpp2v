@@ -1392,7 +1392,7 @@ list<string> Resource::RenderMiddlePart( VN::RendererInterface *renderer, Policy
 }
 
 
-TreePtr<Node> Resource::OnDeclaration( shared_ptr<VN::ScopeGnomon> spg, Location loc )
+TreePtr<Node> Resource::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc )
 {
 	// TODO accept quals
 
