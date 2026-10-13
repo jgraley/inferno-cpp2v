@@ -56,7 +56,7 @@ string RegularScopeGnomon::GetMessageText() const
 
 TreePtr<Node> RegularScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) 
 {	
-	return scope_node->CreateDeclNode( static_keyword_specified, context, any_cast<YY::VNLangParser::location_type>(loc) );
+	return scope_node->CreateDeclNode( static_keyword_specified, any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 

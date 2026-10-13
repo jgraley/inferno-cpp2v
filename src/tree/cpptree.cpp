@@ -442,7 +442,7 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 }
 
 
-TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, any &, Location loc) const
+TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, Location loc) const
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -1824,7 +1824,7 @@ string CallableParams::GetRenderTypeSpec( VN::RendererInterface *renderer, Polic
 }
 
 
-TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, any &, Location loc) const
+TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, Location loc) const
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -2346,7 +2346,7 @@ void Record::UpdateContext( TreePtr<Node> node, any &context, Location loc )
 }	
 	
 	
-TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &, Location) const
+TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, Location) const
 {	
 	TreePtr<Instance> instance;
 	if( static_keyword_specified )
@@ -2410,7 +2410,7 @@ Syntax::Token Enumeration::GetSignifierToken() const
 
 
 
-TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, any &, Location loc) const
+TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, Location loc) const
 {
 	if( static_keyword_specified )
 		throw YY::VNLangParser::syntax_error(
@@ -2904,7 +2904,7 @@ TreePtr<Node> SequentialScope::OnStatements( list<TreePtr<Node>> statements_, Lo
 }
 
 
-TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, any &, Location) const
+TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, Location) const
 {
 	TreePtr<Instance> instance;
 	if( static_keyword_specified )

@@ -179,7 +179,7 @@ struct CodeUnit : DeclScope
 	NODE_FUNCTIONS_FINAL
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, Location loc) const override; 
 };
 
 
@@ -918,7 +918,7 @@ struct CallableParams : Callable, Scope
 
 	string GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy ) override;
     virtual string GetColour() const { return Callable::GetColour(); } // Callable wins
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, Location loc) const override; 
     string GetRenderParameterisation(VN::RendererInterface *renderer, Policy policy) override;
 	Token GetSignifierToken() const override;
 	TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc ) override;
@@ -1170,7 +1170,7 @@ struct Record : TypeDeclaration,
 	Token GetSignifierToken() const override;
 
 	virtual void UpdateContext( TreePtr<Node> node, any &context, Location loc );	
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, Location loc) const override; 
 };
 
 
@@ -1194,7 +1194,7 @@ struct Enumeration : Record
     string GetKeyword( Policy ) const override;
 	string RenderBody( VN::RendererInterface *renderer, Policy policy ) override;	
 	Token GetSignifierToken() const override;	
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, Location loc) const override; 
 };
 
 
@@ -1524,7 +1524,7 @@ struct SequentialScope : virtual Statement
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
    	Token GetSignifierToken() const override;
 	TreePtr<Node> OnStatements( list<TreePtr<Node>> statements, Location loc ) override;
-	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, any &context, Location loc) const override; 
+	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, Location loc) const override; 
 };
 
 

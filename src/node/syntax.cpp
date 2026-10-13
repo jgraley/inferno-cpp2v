@@ -328,7 +328,7 @@ void Syntax::UpdateContext( TreePtr<Node>, any &context, Location )
 }	
 
 
-TreePtr<Node> Syntax::CreateDeclNode(bool, any &, Location loc) const
+TreePtr<Node> Syntax::CreateDeclNode(bool, Location loc) const
 {
 	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
 		MyBestErrName() + " cannot act as a scope for declarations (implement CreateDeclNode()).");	
