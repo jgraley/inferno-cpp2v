@@ -323,7 +323,7 @@ TreePtr<Node> NotifyTimed::OnSoloArg( TreePtr<Node> arg, Location )
 
 Syntax::Production Process::GetMyProductionTerminal() const
 { 
-	return Production::PRIMARY_TYPE; 
+	return Production::PRIMARY_TYPE; // TODO not a type any more
 }
 
 

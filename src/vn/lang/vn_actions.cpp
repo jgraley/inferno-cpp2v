@@ -465,7 +465,11 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	
 	// Get whichever kind of declaration is allowed in the current scope. This can throw
 	// for a range of reasons!
-	TreePtr<CPPTree::Instance> instance = spg->GetDeclarationNode(middle_loc, !!q_static); 
+	TreePtr<CPPTree::Instance> instance = spg->GetDeclarationNode(middle_loc, !!q_static);
+	auto rspg = dynamic_pointer_cast<RegularScopeGnomon>(spg);
+	if( rspg && rspg->context.has_value() )
+		instance->OnAccess( any_cast<TreePtr<CPPTree::AccessSpec>>(rspg->context), middle_loc );
+
 	instance->OnPermission( declarator_result.cv_quals_view.permission, any_cast<YY::VNLangParser::location_type>(middle_loc) ); 
 		
 	// Now fill in subclass-specific fields

@@ -46,6 +46,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     //s_proc->params = MakePatternNode<StarAgent, Parameter>();
     //s_func->params = MakePatternNode<StarAgent, Parameter>();
     //s_func->return_type = MakePatternNode< Void >();
+    // TODO bring back constraint that only void functions need return added and see #932
     fi->initialiser = delta;
     s_comp->members = decls;
     s_comp->statements = (pre);

@@ -204,6 +204,7 @@ public:
 	virtual Token GetIdBuilderToken() const;
 
 	string MyBestErrName() const;
+	virtual TreePtr<Node> OnDeclaration( shared_ptr<VN::ScopeGnomon> spg, Location loc );
 	virtual TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc );
 	virtual TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc );
 	virtual TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc );

@@ -386,7 +386,7 @@ prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({},
 				| DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$, {})->OnParams($2, @2)->OnIdentifier($3, @3); }
 				| '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$, {})->OnParams($3, @3)->OnIdentifier($4, @4); }
 				| qualifiers '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary		{ $$ = vn->OnXStructorDecl(true, @$, $1)->OnParams($4, @4)->OnIdentifier($5, @5); }
-				| RESOURCE_SIGN id_parens								{ $$ = $1->OnIdentifier($2, @2); }
+				| RESOURCE_SIGN id_parens								{ $$ = $1->OnDeclaration(vn->TryGetTopScopeGnomon(), @1)->OnIdentifier($2, @2); }
 				
 assign_init		: expr_entry
 				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser()->OnArgsList({}, @1+@2); } 

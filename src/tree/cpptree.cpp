@@ -322,13 +322,8 @@ Syntax::Token Declaration::GetPrerestrictToken() const
 
 //////////////////////////// AdvanceDecl ///////////////////////////////
 
-list<string> AdvanceDecl::RenderAccessSpec( VN::RendererInterface *, Policy policy ) const
+list<string> AdvanceDecl::RenderAccessSpec( VN::RendererInterface *, Policy ) const
 {
-	ASSERT(policy.context);
-	if( policy.context->has_value() ) // are we in a record scope that maintains access spec, and yet are not a member
-		throw NoAccessInstanceInAccessRecord(); 
-		
-	// Patterns managed to get an Instance that isn't a Member into a Record body.
 	return {};
 }
 
@@ -1397,6 +1392,20 @@ list<string> Resource::RenderMiddlePart( VN::RendererInterface *renderer, Policy
 }
 
 
+TreePtr<Node> Resource::OnDeclaration( shared_ptr<VN::ScopeGnomon> spg, Location loc )
+{
+	// TODO accept quals
+
+	permission = MakeTreeNode<CPPTree::NonConst>();
+
+	auto rspg = dynamic_pointer_cast<VN::RegularScopeGnomon>(spg);
+	if( rspg && rspg->context.has_value() )
+		OnAccess( any_cast<TreePtr<CPPTree::AccessSpec>>(rspg->context), loc ); // TODO gnomon should hold location, probably last access specifier or record signifier
+
+	return (TreePtr<Node>)shared_from_this();
+}
+
+
 TreePtr<Node> Resource::OnIdentifier( TreePtr<Node> id, Location )
 {
 	identifier = id;
@@ -2337,7 +2346,7 @@ void Record::UpdateContext( TreePtr<Node> node, any &context, Location loc )
 }	
 	
 	
-TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context, Location) const
+TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &, Location) const
 {	
 	TreePtr<Instance> instance;
 	if( static_keyword_specified )
@@ -2349,7 +2358,7 @@ TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, any &context
 		auto memb = MakeTreeNode<CPPTree::Member>();
 		// Use the currently stored access spec
 		// Note: the access spec set here can be overridden by UpdateCurrentAccess()
-		memb->access = any_cast<TreePtr<AccessSpec>>(context); // Don't duplicate the subtree - we want coupling behaviour		
+		//memb->access = any_cast<TreePtr<AccessSpec>>(context); // Don't duplicate the subtree - we want coupling behaviour		
 		memb->dispatch = MakeTreeNode<CPPTree::NonVirtual>();	
 		instance = memb;
 	}

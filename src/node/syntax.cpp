@@ -170,10 +170,17 @@ catch( Unimplemented & )
 }
 
 
-TreePtr<Node> Syntax::OnAccess( TreePtr<Node>, Location loc )
+TreePtr<Node> Syntax::OnDeclaration( shared_ptr<VN::ScopeGnomon>, Location loc )
 {
 	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
-		MyBestErrName() + " does not expect an access specifier (implement OnAccess()).");	
+		MyBestErrName() + " does not expect to be in a declaration (implement OnDeclaration()).");	
+}
+
+
+TreePtr<Node> Syntax::OnAccess( TreePtr<Node>, Location )
+{
+	// Quietly drop the access so patterns can put ⯁Resource inside a record
+	return TreePtrThis();	
 }
 
 

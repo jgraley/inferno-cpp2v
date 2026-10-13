@@ -654,6 +654,7 @@ struct Resource : virtual AdvanceDecl
 	// representation of the type and identifier that also disambiguates the declaration node.
 	virtual list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;
 
+	TreePtr<Node> OnDeclaration( shared_ptr<VN::ScopeGnomon> spg, Location loc ) override;
 	TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc ) override;
 	TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc ) override;
 	TreePtr<Node> OnInitialiser( TreePtr<Node> init, Location loc ) override;
