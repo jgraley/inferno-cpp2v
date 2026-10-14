@@ -40,9 +40,27 @@ void ScopeGnomon::UpdateContext(Syntax::Location loc, TreePtr<Node> update_node)
 }
 
 
+ContextScopeGnomon::ContextScopeGnomon(any context_) :
+	context(context_)
+{
+}
+
+
+string ContextScopeGnomon::GetMessageText() const 
+{
+	return "context scope";
+}
+
+
+void ContextScopeGnomon::UpdateContext(Syntax::Location loc, TreePtr<Node> update_node)
+{
+	context = TreePtr<CPPTree::AccessSpec>::DynamicCast(update_node);
+}
+
+
 RegularScopeGnomon::RegularScopeGnomon( TreePtr<Node> scope_node_ ) :
-	scope_node( scope_node_ ),
-	context( scope_node->GetStartingScopeContext() )
+	ContextScopeGnomon( scope_node_->GetStartingScopeContext() ),
+	scope_node( scope_node_ )
 {
 	ASSERT(scope_node);
 }

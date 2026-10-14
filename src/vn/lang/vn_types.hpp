@@ -47,7 +47,19 @@ public:
 };
 
 
-class RegularScopeGnomon : public ScopeGnomon
+class ContextScopeGnomon : public ScopeGnomon
+{
+public:	
+	ContextScopeGnomon() = default;
+	ContextScopeGnomon(any context_);
+	string GetMessageText() const override;
+	void UpdateContext(Syntax::Location loc, TreePtr<Node> update_node) override;
+
+	any context; // changes as we parse the scope
+};
+
+
+class RegularScopeGnomon : public ContextScopeGnomon
 {
 public:	
 	RegularScopeGnomon( TreePtr<Node> scope_node_ );
@@ -57,7 +69,6 @@ public:
 	TreePtr<Node> GetNode() const;
 
 	TreePtr<Node> scope_node;
-	any context; // changes as we parse the scope
 };
 
 
@@ -80,7 +91,7 @@ public:
 };
 
 
-class PrerestrictScopeGnomon : public ScopeGnomon
+class PrerestrictScopeGnomon : public ContextScopeGnomon
 {
 public:	
 	PrerestrictScopeGnomon( TreePtr<Node> node_ );

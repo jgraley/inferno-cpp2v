@@ -466,9 +466,15 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	// Get whichever kind of declaration is allowed in the current scope. This can throw
 	// for a range of reasons!
 	TreePtr<CPPTree::Instance> instance = spg->GetDeclarationNode(middle_loc, !!q_static);
-	auto rspg = dynamic_pointer_cast<RegularScopeGnomon>(spg);
-	if( rspg && rspg->context.has_value() )
-		instance->OnAccess( any_cast<TreePtr<CPPTree::AccessSpec>>(rspg->context), middle_loc );
+	auto cspg = dynamic_pointer_cast<ContextScopeGnomon>(spg);
+	if( cspg && cspg->context.has_value() )
+	{
+		FTRACE(cspg)(" ")(cspg->context)("\n");
+		if( Trace(cspg->context)=="any@TreePtr<Node>" )
+			FTRACE(any_cast<TreePtr<Node>>(cspg->context))("\n");
+		FTRACE(any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context))("\n");	
+		instance->OnAccess( any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context), middle_loc );
+	}
 
 	instance->OnPermission( declarator_result.cv_quals_view.permission, any_cast<YY::VNLangParser::location_type>(middle_loc) ); 
 		
@@ -519,7 +525,7 @@ TreePtr<Node> VNLangActions::OnXStructorDecl( bool con, Syntax::Location loc, co
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
 			name + " not in record (no scope).");
-	auto rspg = dynamic_pointer_cast<RegularScopeGnomon>(spg);
+	auto rspg = dynamic_pointer_cast<RegularScopeGnomon>(spg); 
 	if( !rspg ) 
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
@@ -571,8 +577,13 @@ void VNLangActions::UpdateCurrentAccess( Syntax::Location loc, TreePtr<Node> acc
 	// OnInstance() will still try to program the current access. But this fn will try to update it.
 
 	// If we're in a record scope, update the stored access spec for future fields to use
-	ASSERT( shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon() )(spg);	
+	if( shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon() )	
+	{
+		stringstream ss;
+		ss << any_cast<YY::VNLangParser::location_type>(loc);
+		FTRACE(ss.str())(" ")(spg)(" updates to ")(access)("\n");
 		spg->UpdateContext(loc, access);
+	}
 }
 
 

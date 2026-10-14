@@ -526,9 +526,9 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 				| DESIGNATED_NORMAL       				  					// To match a designated Star
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2, @$); }
                                                                                                                                                          
-members			: acc_memb_colon											{ $$ = {}; vn->UpdateCurrentAccess(@1, $1); }
+members			: acc_memb_colon											{ $$ = {}; }
 				| member													{ $$.push_back($1); }
-				| members acc_memb_colon									{ $$ = $1; vn->UpdateCurrentAccess(@2, $2); }
+				| members acc_memb_colon									
 				| members member 											{ $$ = $1; $$.push_back($2); }
      
 member			: bare_decl_nvn ';'			
@@ -553,17 +553,14 @@ acc_memb_commands   : acc_memb_entry COMMAND_TERM commands					{ $$ = $3; $$.pus
 // OnInstance() will have set the current access from the scope. But these rules 
 // will override it with the parsed acess, and then try to update the scope.
 acc_memb_entry	: bare_decl_nvn
-				| acc_memb_colon bare_decl_nvn								{ $$ = $2->OnAccess($1, @1);
-				                                                              vn->UpdateCurrentAccess(@1, $1); }	
+				| acc_memb_colon bare_decl_nvn								{ $$ = $2->OnAccess($1, @1); }	// TODO make these a checking variant, access should be correctly set by now via gnomon
 				| bare_decl_nvn ';'
-				| acc_memb_colon bare_decl_nvn ';' 							{ $$ = $2->OnAccess($1, @1);
-				                                                              vn->UpdateCurrentAccess(@1, $1); }					
+				| acc_memb_colon bare_decl_nvn ';' 							{ $$ = $2->OnAccess($1, @1); }					
 				| comp_decl_nvn		
-				| acc_memb_colon comp_decl_nvn								{ $$ = $2->OnAccess($1, @1);
-				                                                              vn->UpdateCurrentAccess(@1, $1); }							
+				| acc_memb_colon comp_decl_nvn								{ $$ = $2->OnAccess($1, @1); }							
 				| acc_memb_prefix
 
-acc_memb_colon	: acc_memb_prefix ':'									
+acc_memb_colon	: acc_memb_prefix ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
 
 acc_memb_prefix	: acc_memb_postfix
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
