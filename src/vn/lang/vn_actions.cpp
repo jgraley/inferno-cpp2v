@@ -571,7 +571,7 @@ void VNLangActions::UpdateCurrentAccess( Syntax::Location loc, TreePtr<Node> acc
 	// OnInstance() will still try to program the current access. But this fn will try to update it.
 
 	// If we're in a record scope, update the stored access spec for future fields to use
-	if( shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon() )	
+	ASSERT( shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon() )(spg);	
 		spg->UpdateContext(loc, access);
 }
 

@@ -196,7 +196,7 @@ stmt_high
 %type <TreePtr<Node>> 				st_declarator st_declarator_prefix st_declarator_postfix st_declarator_primary
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
-%type <TreePtr<Node>> 				record base_spec access_spec full_acc_memb qualifier_node
+%type <TreePtr<Node>> 				record base_spec access_spec acc_memb_colon qualifier_node
 %type <TreePtr<Node>> 				enum_node enum
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					vn_name
@@ -526,43 +526,44 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 				| DESIGNATED_NORMAL       				  					// To match a designated Star
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2, @$); }
                                                                                                                                                          
-// full_acc_memb: OnInstance() will still try to program the current access. But the 
-// new fn will override it with the parsed acess, and then try to update the current access
-members			: full_acc_memb												{ $$ = {}; vn->UpdateCurrentAccess(@1, $1); }
+members			: acc_memb_colon											{ $$ = {}; vn->UpdateCurrentAccess(@1, $1); }
 				| member													{ $$.push_back($1); }
-				| members full_acc_memb										{ $$ = $1; vn->UpdateCurrentAccess(@2, $2); }
+				| members acc_memb_colon									{ $$ = $1; vn->UpdateCurrentAccess(@2, $2); }
 				| members member 											{ $$ = $1; $$.push_back($2); }
      
 member			: bare_decl_nvn ';'			
 				| comp_decl_nvn
 				| acc_memb_prefix ';'			
+				                        
+//////////////////////////////// ACCESS/MEMBER ////////////////////////////////////                                  
 				                                 
-
-
 // Acc Memb column includes access specifiers and full member declarations. We combine both because
 // a member can start with both, and the parser has limited lookahead. By being explicit, we avoid the 
 // brittleness of symmetrical columns. This will make eg (int a) : char b; syntactical (i.e. if 
 // legitimised by a VN or paren, a declaration could be used as an access specifier). TODO prevent in Actions.
 
-// Note: booting into full_acc_memb permits an access spec before a decl eg public: int a;
+// Note: booting into here permits an access spec before a decl eg public: int a;
 // This is done to allow a "localised" access spec in booted contexts eg delta.
+
 acc_memb_boot	: acc_memb_entry								
 				| acc_memb_commands											{ $$ = vn->OnEmbeddedCommands($1); }
      
 acc_memb_commands   : acc_memb_entry COMMAND_TERM commands					{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 
+// OnInstance() will have set the current access from the scope. But these rules 
+// will override it with the parsed acess, and then try to update the scope.
 acc_memb_entry	: bare_decl_nvn
-				| full_acc_memb bare_decl_nvn								{ $$ = $2->OnAccess($1, @1);
+				| acc_memb_colon bare_decl_nvn								{ $$ = $2->OnAccess($1, @1);
 				                                                              vn->UpdateCurrentAccess(@1, $1); }	
 				| bare_decl_nvn ';'
-				| full_acc_memb bare_decl_nvn ';' 							{ $$ = $2->OnAccess($1, @1);
+				| acc_memb_colon bare_decl_nvn ';' 							{ $$ = $2->OnAccess($1, @1);
 				                                                              vn->UpdateCurrentAccess(@1, $1); }					
 				| comp_decl_nvn		
-				| full_acc_memb comp_decl_nvn								{ $$ = $2->OnAccess($1, @1);
+				| acc_memb_colon comp_decl_nvn								{ $$ = $2->OnAccess($1, @1);
 				                                                              vn->UpdateCurrentAccess(@1, $1); }							
 				| acc_memb_prefix
 
-full_acc_memb	: acc_memb_prefix ':'									
+acc_memb_colon	: acc_memb_prefix ':'									
 
 acc_memb_prefix	: acc_memb_postfix
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
