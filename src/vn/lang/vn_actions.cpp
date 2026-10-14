@@ -1073,11 +1073,19 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Instance - an entity and an instantiation of a type. Many of the details will be found in/under the type node.
 
 // TODO 
-// BUT... don't change raising: we need an unambiguous parse of input program, so leave it as it is
-// Don't forget querying declarers via vcall for are they constructorey
 // Also moving MacroConstructor into SC tree and renaming eg MacroSC_CTOR and building in the SC_CTOR
-// sc_thread etc to be resources not types
 
+// PP for Resource, Instance, Xstructor:
+// Drop OnAccess() from decls - OnInScope should set the access
+// Use constructor to set default eg NonConst etc 
+// "Linearise" qualifiers and provide OnQualifiers that can be called more than once
+// Consider "OnTypeAndDeclarator"
+
+// Grammatical merge of acc_memb and statement/declaration
+// Labels got simpler and are now just complete (non-bare) statements - similar to access specs
+// Decls already co-exist with statements
+// New name for label or access where we don't know what it is - "badge" - to be resolved by looking at the scope
+// - or calling thoguh the scope as with CreateDeclNode
 
 
 
