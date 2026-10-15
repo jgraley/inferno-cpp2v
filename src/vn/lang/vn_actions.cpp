@@ -467,7 +467,15 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	// for a range of reasons!
 	TreePtr<CPPTree::Instance> instance = spg->GetDeclarationNode(middle_loc, !!q_static);
 	auto cspg = dynamic_pointer_cast<ContextScopeGnomon>(spg);
-	if( cspg && cspg->context.has_value() )
+	if( !cspg )
+	{
+		FTRACE(spg)(" isn't contextey\n");	
+	}
+	else if( !cspg->context.has_value() )
+	{
+		FTRACE(cspg)(" has no value\n");	
+	}	
+	else
 	{
 		FTRACE(cspg)(" ")(cspg->context)("\n");
 		if( Trace(cspg->context)=="any@TreePtr<Node>" )

@@ -1398,9 +1398,9 @@ TreePtr<Node> Resource::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc
 
 	permission = MakeTreeNode<CPPTree::NonConst>();
 
-	auto rspg = dynamic_pointer_cast<VN::RegularScopeGnomon>(spg);
-	if( rspg && rspg->context.has_value() )
-		OnAccess( any_cast<TreePtr<CPPTree::AccessSpec>>(rspg->context), loc ); // TODO gnomon should hold location, probably last access specifier or record signifier
+	auto cspg = dynamic_pointer_cast<VN::ContextScopeGnomon>(spg);
+	if( cspg && cspg->context.has_value() )
+		OnAccess( any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context), loc ); // TODO gnomon should hold location, probably last access specifier or record signifier
 
 	return (TreePtr<Node>)shared_from_this();
 }
@@ -1510,6 +1510,15 @@ TreePtr<Node> AccessDecl::OnAccess( TreePtr<Node> access_, Location )
 	access = access_;
 	return (TreePtr<Node>)shared_from_this();	
 }
+
+
+TreePtr<Node> AccessDecl::OnDebug( TreePtr<Node> node, Location loc )
+{
+	if( access != node )
+		throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " received OnDebug(" + Trace(node) + ") but current access is " + Trace(access));
+	return (TreePtr<Node>)shared_from_this();	
+}	
 
 //////////////////////////// DispatchDecl //////////////////////////////
 

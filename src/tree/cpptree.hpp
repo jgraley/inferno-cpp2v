@@ -709,6 +709,7 @@ struct AccessDecl : virtual AdvanceDecl
 
 	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
 	TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc ) override;
+	TreePtr<Node> OnDebug( TreePtr<Node> access, Location loc ) override;
 };
 
 

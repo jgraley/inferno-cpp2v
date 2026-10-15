@@ -144,12 +144,6 @@ string PrerestrictScopeGnomon::GetMessageText() const
 }
 
 
-void PrerestrictScopeGnomon::UpdateContext(any, TreePtr<Node>)
-{
-	// There is no context so discard the update
-}
-
-
 TreePtr<Node> PrerestrictScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) 
 {
 	string note = 

@@ -170,6 +170,13 @@ catch( Unimplemented & )
 }
 
 
+TreePtr<Node> Syntax::OnDebug( TreePtr<Node> node, Location loc )
+{
+	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
+		MyBestErrName() + " received OnDebug(" + (node ? node->MyBestErrName() : string("NULL")) + ") but doesn't override it.");
+}
+
+
 TreePtr<Node> Syntax::OnInScope( shared_ptr<VN::ScopeGnomon>, Location loc )
 {
 	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),

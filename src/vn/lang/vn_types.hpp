@@ -96,7 +96,6 @@ class PrerestrictScopeGnomon : public ContextScopeGnomon
 public:	
 	PrerestrictScopeGnomon( TreePtr<Node> node_ );
 	string GetMessageText() const override;
-	void UpdateContext(Syntax::Location loc, TreePtr<Node> update_node) override;
 	TreePtr<Node> GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) override;
 
 	TreePtr<Node> node;

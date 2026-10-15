@@ -204,6 +204,7 @@ public:
 	virtual Token GetIdBuilderToken() const;
 
 	string MyBestErrName() const;
+	virtual TreePtr<Node> OnDebug( TreePtr<Node> node, Location loc ); // For debugging experiments
 	virtual TreePtr<Node> OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc );
 	virtual TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc );
 	virtual TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc );
