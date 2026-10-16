@@ -638,6 +638,7 @@ struct Resource : virtual AdvanceDecl
     TreePtr<Initialiser> initialiser; ///< init value for data, body for Callable type
     TreePtr<Permission> permission; ///< is the instance constant (ie compile time value)?
     
+	Resource();
     set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
@@ -654,7 +655,6 @@ struct Resource : virtual AdvanceDecl
 	// representation of the type and identifier that also disambiguates the declaration node.
 	virtual list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;
 
-	TreePtr<Node> OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc ) override;
 	TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc ) override;
 	TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc ) override;
 	TreePtr<Node> OnInitialiser( TreePtr<Node> init, Location loc ) override;
@@ -708,7 +708,7 @@ struct AccessDecl : virtual AdvanceDecl
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
 
 	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
-	TreePtr<Node> OnAccess( TreePtr<Node> access, Location loc ) override;
+	TreePtr<Node> OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc ) override;
 	TreePtr<Node> OnDebug( TreePtr<Node> access, Location loc ) override;
 };
 

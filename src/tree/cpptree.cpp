@@ -1270,6 +1270,13 @@ TreePtr<Node> View::OnPermission( TreePtr<Node> c, Location )
 
 //////////////////////////// Resource //////////////////////////////
 
+Resource::Resource() :
+   	permission( MakeTreeNode<CPPTree::NonConst>() )
+{
+	FTRACE(permission)("\n");
+}   	
+
+
 Syntax::Production Resource::GetMyProduction(const VN::RendererInterface *, Policy policy) const
 { 
 	bool will_split = policy.can_split_instances && 
@@ -1392,20 +1399,6 @@ list<string> Resource::RenderMiddlePart( VN::RendererInterface *renderer, Policy
 }
 
 
-TreePtr<Node> Resource::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc )
-{
-	// TODO accept quals
-
-	permission = MakeTreeNode<CPPTree::NonConst>();
-
-	auto cspg = dynamic_pointer_cast<VN::ContextScopeGnomon>(spg);
-	if( cspg && cspg->context.has_value() )
-		OnAccess( any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context), loc ); // TODO gnomon should hold location, probably last access specifier or record signifier
-
-	return (TreePtr<Node>)shared_from_this();
-}
-
-
 TreePtr<Node> Resource::OnIdentifier( TreePtr<Node> id, Location )
 {
 	identifier = id;
@@ -1505,10 +1498,13 @@ list<string> AccessDecl::RenderAccessSpec( VN::RendererInterface *renderer, Poli
 }
 
 
-TreePtr<Node> AccessDecl::OnAccess( TreePtr<Node> access_, Location )
+TreePtr<Node> AccessDecl::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location )
 {
-	access = access_;
-	return (TreePtr<Node>)shared_from_this();	
+	auto cspg = dynamic_pointer_cast<VN::ContextScopeGnomon>(spg);
+	if( cspg && cspg->context.has_value() )
+		access = any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context);
+		
+	return (TreePtr<Node>)shared_from_this();
 }
 
 

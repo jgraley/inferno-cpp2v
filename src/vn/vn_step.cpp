@@ -48,8 +48,8 @@ void VNStep::PatternTransformations()
 {
     ASSERTTHIS();
     ASSERT( root_engine )("VNStep needs to be configured before use");
-    PatternTransformationVector ptv = GetAllPatternTrans();
-    
+        
+    PatternTransformationVector ptv = GetAllPatternTrans();    
     ptv(*this);
 }
 

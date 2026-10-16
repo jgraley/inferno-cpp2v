@@ -177,10 +177,10 @@ TreePtr<Node> Syntax::OnDebug( TreePtr<Node> node, Location loc )
 }
 
 
-TreePtr<Node> Syntax::OnInScope( shared_ptr<VN::ScopeGnomon>, Location loc )
+TreePtr<Node> Syntax::OnInScope( shared_ptr<VN::ScopeGnomon>, Location )
 {
-	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
-		MyBestErrName() + " does not expect to be in a declaration (implement OnInScope()).");	
+	// Quietly drop the access so patterns can put ⯁Resource inside a record
+	return TreePtrThis();	
 }
 
 

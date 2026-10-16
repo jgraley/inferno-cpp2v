@@ -8,6 +8,21 @@
 
 namespace Steps {
 
+// We need to wipe away the effects of any constructor initialisation because
+// hand-coded steps assume everything starts off NULL/empty
+template< typename NODE_TYPE >
+void Wipe(TreePtr<NODE_TYPE> x)
+{
+    vector< Itemiser::Element * > items = x->Itemise();
+	for( Itemiser::Element *item : items )
+	{
+		if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(item) )
+			con->clear();
+		else if( TreePtrInterface *singular = dynamic_cast<TreePtrInterface *>(item) )
+			*singular = nullptr;
+	}
+}
+
 
 /// Helper that does the constructing of pattern nodes when they are not already agents
 template< bool IS_AGENT, typename NODE_TYPE >
@@ -18,6 +33,7 @@ public:
     static inline TreePtr<NODE_TYPE> MakeNode(const CP &...cp)
     {
         auto agent_node = MakeTreeNode< StandardAgentWrapper<NODE_TYPE> >(cp...);
+        Wipe(agent_node);
         return agent_node;        
     }    
 };
@@ -37,6 +53,7 @@ public:
         // These members are introduced by Special
         agent_node->pre_restriction_archetype_node = shared_ptr<Node>( new PreRestrictionType );
         agent_node->pre_restriction_archetype_ptr = make_shared<TreePtr<PreRestrictionType>>();
+        Wipe(agent_node);
         return agent_node;
     }    
 };

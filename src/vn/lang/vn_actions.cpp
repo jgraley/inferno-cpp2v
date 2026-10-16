@@ -466,24 +466,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	// Get whichever kind of declaration is allowed in the current scope. This can throw
 	// for a range of reasons!
 	TreePtr<CPPTree::Instance> instance = spg->GetDeclarationNode(middle_loc, !!q_static);
-	auto cspg = dynamic_pointer_cast<ContextScopeGnomon>(spg);
-	if( !cspg )
-	{
-		FTRACE(spg)(" isn't contextey\n");	
-	}
-	else if( !cspg->context.has_value() )
-	{
-		FTRACE(cspg)(" has no value\n");	
-	}	
-	else
-	{
-		FTRACE(cspg)(" ")(cspg->context)("\n");
-		if( Trace(cspg->context)=="any@TreePtr<Node>" )
-			FTRACE(any_cast<TreePtr<Node>>(cspg->context))("\n");
-		FTRACE(any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context))("\n");	
-		instance->OnAccess( any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context), middle_loc );
-	}
-
+	instance->OnInScope(spg, middle_loc);
 	instance->OnPermission( declarator_result.cv_quals_view.permission, any_cast<YY::VNLangParser::location_type>(middle_loc) ); 
 		
 	// Now fill in subclass-specific fields
@@ -586,12 +569,7 @@ void VNLangActions::UpdateCurrentAccess( Syntax::Location loc, TreePtr<Node> acc
 
 	// If we're in a record scope, update the stored access spec for future fields to use
 	if( shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon() )	
-	{
-		stringstream ss;
-		ss << any_cast<YY::VNLangParser::location_type>(loc);
-		FTRACE(ss.str())(" ")(spg)(" updates to ")(access)("\n");
 		spg->UpdateContext(loc, access);
-	}
 }
 
 
@@ -1095,7 +1073,6 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Also moving MacroConstructor into SC tree and renaming eg MacroSC_CTOR and building in the SC_CTOR
 
 // PP for Resource, Instance, Xstructor:
-// Drop OnAccess() from decls - OnInScope should set the access
 // Use constructor to set default eg NonConst etc 
 // "Linearise" qualifiers and provide OnQualifiers that can be called more than once
 // Consider "OnTypeAndDeclarator"
