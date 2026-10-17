@@ -18,6 +18,7 @@ namespace Declarators {
 
 struct CVQuals
 {
+	CVQuals();
 	TreePtr<Node> permission;
 	// TODO volatility
 };

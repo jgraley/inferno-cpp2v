@@ -202,7 +202,10 @@ ThreadToMethod::ThreadToMethod()
     s_loop->condition = s_loop_cond; 
     s_loop->body = s_loop_comp;
     s_loop_comp->statements = (loop_stmts);
-    r_loop_comp->statements = (loop_stmts, MakePatternNode<NextTriggerDelta>()); // ... or whatever re-triggers when we fall out of the fall through machine
+    // Put a NextTriggerDelta at the top as a default. It can be overridden by other 
+    // NextTrigger statements already in the code to get alternative behaviour.
+    // ...but if done, sctest15.cpp spins, #935
+    r_loop_comp->statements = (loop_stmts, MakePatternNode<NextTriggerDelta>()); 
     r_method->permission = MakePatternNode<NonConst>();        
     r_method->access = MakePatternNode<Private>();
     r_method->initialiser = embedded_l;

@@ -1,4 +1,4 @@
-void f()
+int main()
 {
     int i=0;
     A:
@@ -9,7 +9,7 @@ void f()
     i++;
     D:
     i++;
-/*    E:
+    E:
     i++;
     F:
     i++;
@@ -32,5 +32,6 @@ void f()
     O:
     i++;
     P:
-    i++;*/
+    i++;
+    return i;
 }

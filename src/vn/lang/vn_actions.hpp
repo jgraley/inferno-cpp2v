@@ -56,17 +56,18 @@ public:
 			
 	TreePtr<Node> OnFunction( TreePtr<Node> return_type, list<TreePtr<Node>> params );	
 	NodeAndGnomon MakeScopeGnomonForNode( TreePtr<Node> node ) const;
-	TreePtr<Node> OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, Syntax::Location type_loc, TreePtr<Node> declarator, Syntax::Location decl_loc );
-	TreePtr<Node> OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, Syntax::Location middle_loc );	
+	TreePtr<Node> OnDeclaratorDecl( list<QualifierData> quals, TreePtr<Node> type, Syntax::Location type_loc, TreePtr<Node> declarator, Syntax::Location decl_loc );
+	TreePtr<Node> ApplyQualifiers( TreePtr<Node> node, const list<QualifierData> &quals, Syntax::Location loc );
+	TreePtr<Node> OnInstance( const list<QualifierData> &quals, Syntax::Location middle_loc );	
 	TreePtr<Node> OnEnumerator( Syntax::Location loc );
-	TreePtr<Node> OnXStructorDecl( bool con, Syntax::Location loc, const list<QualifierData> &quals );	
+	TreePtr<Node> OnXStructorDecl( bool con, Syntax::Location loc );	
 	void UpdateCurrentAccess( Syntax::Location loc, TreePtr<Node> access );	
 	TreePtr<Node> OnMemberInitialiser( TreePtr<Node> member_id, Syntax::Location member_loc, TreePtr<Node> initialiser, Syntax::Location initialiser_loc );
-	TreePtr<Node> OnAbDeclType( Syntax::Location loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator );	
+	TreePtr<Node> OnAbDeclType( Syntax::Location loc, list<QualifierData> quals, TreePtr<Node> type, TreePtr<Node> declarator );	
 	shared_ptr<Gnomon> MakeRecordScopeGnomon( TreePtr<Node> record );
 	TreePtr<Node> OnBase( TreePtr<Node> access, TreePtr<Node> type, Syntax::Location loc );	
 	TreePtr<Node> OnBase( TreePtr<Node> type );	// Access not specified
-	Declarators::CVQuals OnCVQuals( const list<QualifierData> &quals, bool nice=false );
+	Declarators::CVQuals ExtractCVQuals( list<QualifierData> &quals, bool nice=false );
 	
 	TreePtr<Node> OnIdValuePair();
 	TreePtr<Node> OnMapArgs();

@@ -43,3 +43,8 @@ void fb()
     ;
 } 
 
+int main()
+{
+	fb();
+	return 99;
+}

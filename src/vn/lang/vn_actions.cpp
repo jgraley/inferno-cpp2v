@@ -403,13 +403,13 @@ NodeAndGnomon VNLangActions::MakeScopeGnomonForNode( TreePtr<Node> node ) const
 }
 
 
-TreePtr<Node> VNLangActions::OnDeclaratorDecl( const list<QualifierData> &quals, TreePtr<Node> type, Syntax::Location type_loc, TreePtr<Node> declarator, Syntax::Location decl_loc )
+TreePtr<Node> VNLangActions::OnDeclaratorDecl( list<QualifierData> quals, TreePtr<Node> type, Syntax::Location type_loc, TreePtr<Node> declarator, Syntax::Location decl_loc )
 {
 	Syntax::Location middle_loc = any_cast<YY::VNLangParser::location_type>(type_loc) +
 												 any_cast<YY::VNLangParser::location_type>(decl_loc);
 				
 	// Get the CV-qualifiers for declarator reduction
-	Declarators::CVQuals cv_quals = OnCVQuals(quals, true);
+	Declarators::CVQuals cv_quals = ExtractCVQuals(quals, true);
 	
 	// Now fill in fields derived from the declarator
 	Declarators::Result declarator_result = Declarators::Declarator::DoReduce(declarator, type, cv_quals);
@@ -434,23 +434,39 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( const list<QualifierData> &quals,
 	if( q_typedef )
 		node = q_typedef->node;
 	else	
-		node = OnInstance(quals, declarator_result, middle_loc);
+		node = OnInstance(quals, middle_loc);
 
+	if( shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon() )
+		node->OnInScope(spg, middle_loc);
 	node = node->OnIdentifier(declarator_result.leaf, any_cast<YY::VNLangParser::location_type>(decl_loc));
 	node = node->OnType(declarator_result.type_view, any_cast<YY::VNLangParser::location_type>(middle_loc));
+	node = node->OnPermission(declarator_result.cv_quals_view.permission, any_cast<YY::VNLangParser::location_type>(middle_loc)); 
+	node = ApplyQualifiers(node, quals, middle_loc); // must do this here since declarator reduce ate up some quals
+
 	return node;
 }
 
 
-TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Declarators::Result declarator_result, Syntax::Location middle_loc )
+TreePtr<Node> VNLangActions::ApplyQualifiers( TreePtr<Node> node, const list<QualifierData> &quals, Syntax::Location loc )
+{
+	for( const QualifierData &q : quals )
+	{
+		if( q.cat == QualCat::NODE )
+		{
+			if( auto vq = TreePtr<CPPTree::Dispatch>::DynamicCast(q.node) )
+				node = node->OnDispatch(vq, any_cast<YY::VNLangParser::location_type>(loc));
+		}						
+	}
+	return node;
+}
+
+
+TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Syntax::Location middle_loc )
 {		
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
 		"\nparams list, explicit scope node or pre-restriction to a declaration node type";			
 	
-	// TODO process the qualifiers in one loop at the top, with lots of checking. Check for:
-	// - wrong qualifier eg an access spec
-	// - duplication/conflict of qualifiers (<=1 in each category)
 	const QualifierData *q_static = nullptr;
 	for( const QualifierData &q : quals )
 		if( q.cat == QualCat::STATIC )
@@ -466,27 +482,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Decla
 	// Get whichever kind of declaration is allowed in the current scope. This can throw
 	// for a range of reasons!
 	TreePtr<CPPTree::Instance> instance = spg->GetDeclarationNode(middle_loc, !!q_static);
-	instance->OnInScope(spg, middle_loc);
-	instance->OnPermission( declarator_result.cv_quals_view.permission, any_cast<YY::VNLangParser::location_type>(middle_loc) ); 
 		
-	// Now fill in subclass-specific fields
-	if( auto member = TreePtr<CPPTree::Member>::DynamicCast(instance) )
-	{
-		for( const QualifierData &q : quals )
-		{
-			if( q.cat == QualCat::NODE )
-			{
-				if( auto vq = TreePtr<CPPTree::Dispatch>::DynamicCast(q.node) )
-					member->OnDispatch(vq, any_cast<YY::VNLangParser::location_type>(middle_loc));
-					
-				if( auto aq = TreePtr<CPPTree::AccessSpec>::DynamicCast(q.node) )
-					throw YY::VNLangParser::syntax_error(
-						any_cast<YY::VNLangParser::location_type>(q.loc),
-						"Java-like access spec detected: " + DiagQuote(Traceable::TypeIdName( *aq )) );
-			}
-		}							
-	}
-
 	return instance;
 }
 
@@ -499,65 +495,23 @@ TreePtr<Node> VNLangActions::OnEnumerator( Syntax::Location loc )
 }
 
 
-TreePtr<Node> VNLangActions::OnXStructorDecl( bool con, Syntax::Location loc, const list<QualifierData> &quals )
+TreePtr<Node> VNLangActions::OnXStructorDecl( bool con, Syntax::Location loc )
 {
-	// TODO process the qualifiers in one loop at the top, with lots of checking. Check for:
-	// - wrong qualifier eg an access spec
-	// - duplication/conflict of qualifiers (<=1 in each category)
-	const QualifierData *q_static = nullptr;
-	for( const QualifierData &q : quals )
-		if( q.cat == QualCat::STATIC )
-			q_static = &q;
-
 	string name = con ? "Constructor" : "Destructor";
+
+	TreePtr<CPPTree::Constructor> xstructor;
+	if( con )
+		xstructor = MakeTreeNode<CPPTree::Constructor>(); 
+	else
+		xstructor = MakeTreeNode<CPPTree::Destructor>(); 
 
 	shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon();	
 	if( !spg ) 
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
 			name + " not in record (no scope).");
-	auto rspg = dynamic_pointer_cast<RegularScopeGnomon>(spg); 
-	if( !rspg ) 
-		throw YY::VNLangParser::syntax_error(
-			any_cast<YY::VNLangParser::location_type>(loc),
-			name + " not in record (scope is not regular).");
-	
-	TreePtr<CPPTree::Constructor> xstructor;
-	if( con )
-		xstructor = MakeTreeNode<CPPTree::Constructor>(); 
-	else
-		xstructor = MakeTreeNode<CPPTree::Destructor>(); 
-	
-	xstructor->OnPermission( MakeTreeNode<CPPTree::NonConst>(), any_cast<YY::VNLangParser::location_type>(loc) );
-	xstructor->OnDispatch( MakeTreeNode<CPPTree::NonVirtual>(), any_cast<YY::VNLangParser::location_type>(loc) );
-	
-	auto record = TreePtr<CPPTree::Record>::DynamicCast(rspg->GetNode());
-	if( !record ) 
-		throw YY::VNLangParser::syntax_error(
-			any_cast<YY::VNLangParser::location_type>(loc),
-			"Constructor not in record (scope is not Record).");
-	xstructor->record_id = record->identifier;
-	ASSERT( xstructor->record_id ); // check assumption
-	ASSERT( TreePtr<CPPTree::TypeIdentifier>::DynamicCast(xstructor->record_id) ); // check assumption
-	
-	// Now fill in fields derived from the qualifiers	
-	for( const QualifierData &q : quals )
-	{
-		switch( q.cat )
-		{
-		case QualCat::NODE:
-			if( TreePtr<CPPTree::Permission>::DynamicCast(q.node) )				
-				throw YY::VNLangParser::syntax_error(
-						any_cast<YY::VNLangParser::location_type>(loc),
-						"Xstructor does not support permission: " + DiagQuote(q.GetDiagnostic()) );
-			if( TreePtr<CPPTree::Dispatch>::DynamicCast(q.node) ) // TODO allow dispatch for destructors
-				throw YY::VNLangParser::syntax_error(
-						any_cast<YY::VNLangParser::location_type>(loc),
-						"Constructor does not support dispatch: " + DiagQuote(q.GetDiagnostic()) );
-		case QualCat::STATIC:
-				break;
-		}
-	}
+			
+	xstructor->OnInScope(spg, loc);
 	
 	return xstructor;
 }
@@ -584,9 +538,9 @@ TreePtr<Node> VNLangActions::OnMemberInitialiser( TreePtr<Node> member_id, Synta
 }
 
 
-TreePtr<Node> VNLangActions::OnAbDeclType( Syntax::Location loc, const list<QualifierData> &quals, TreePtr<Node> type, TreePtr<Node> declarator )
+TreePtr<Node> VNLangActions::OnAbDeclType( Syntax::Location loc, list<QualifierData> quals, TreePtr<Node> type, TreePtr<Node> declarator )
 {
-	Declarators::CVQuals cv_quals = OnCVQuals(quals, true); 
+	Declarators::CVQuals cv_quals = ExtractCVQuals(quals, true); 
 	Declarators::Result result = Declarators::Declarator::DoReduce(declarator, type, cv_quals);
 	switch( result.outcome )
 	{
@@ -639,16 +593,15 @@ TreePtr<Node> VNLangActions::OnBase( TreePtr<Node> type )
 }
 
 
-Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals, bool nice )
+Declarators::CVQuals VNLangActions::ExtractCVQuals( list<QualifierData> &quals, bool nice )
 {
-	Declarators::CVQuals cv_quals
-	{
-		MakeTreeNode<CPPTree::NonConst>()
-	};
+	Declarators::CVQuals cv_quals;
 		
 	bool got_const = false;
-	for( const QualifierData &q : quals )
+	list<QualifierData>::iterator it = quals.begin();
+	while( it != quals.end() )
 	{
+		const QualifierData &q = *it;
 		switch( q.cat )
 		{
 		case QualCat::NODE:
@@ -660,6 +613,7 @@ Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals,
 						"Excess " + DiagQuote(q.GetDiagnostic()) );
 				cv_quals.permission = q.node;
 				got_const = true;
+				it = quals.erase(it);
 				continue;
 			}
 			break;
@@ -670,6 +624,7 @@ Declarators::CVQuals VNLangActions::OnCVQuals( const list<QualifierData> &quals,
 			throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(q.loc),
 				"Expected CV qualifier, got: " + DiagQuote(q.GetDiagnostic()) );
+		it++;
 	}
 	return cv_quals;
 }

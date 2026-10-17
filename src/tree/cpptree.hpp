@@ -708,7 +708,7 @@ struct AccessDecl : virtual AdvanceDecl
     TreePtr<AccessSpec> access; ///< Is it accessible outside the current Scope?
 
 	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
-	TreePtr<Node> OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc ) override;
+	void OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc ) override;
 	TreePtr<Node> OnDebug( TreePtr<Node> access, Location loc ) override;
 };
 
@@ -718,6 +718,7 @@ struct DispatchDecl : virtual AdvanceDecl
     NODE_FUNCTIONS
     TreePtr<Dispatch> dispatch; ///< Is the member virtual?
 
+	DispatchDecl();
 	list<string> RenderDispatch( VN::RendererInterface *renderer, Policy policy ) const override;
 	TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc ) override;
 };
@@ -748,6 +749,7 @@ struct XStructor : Resource, AccessDecl, DispatchDecl
 
 	virtual string GetLeadingText(Policy policy) const;
 
+	void OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc );
 	TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc ) override;
 };
 

@@ -6,6 +6,12 @@
 
 using namespace Declarators;
 
+CVQuals::CVQuals() :
+	permission( MakeTreeNode<CPPTree::NonConst>() ) // default settings
+{
+}
+
+
 // See how this function is used for an example of how it should be used.
 Result Declarator::DoReduce( TreePtr<Node> child, TreePtr<Node> type_view, CVQuals cv_quals_view )
 {

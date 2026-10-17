@@ -1,5 +1,5 @@
 // Test the ExplicitiseReturn step, with different categories of function
-class C
+struct C
 {
     ~C() // Subroutine, need return
     {
@@ -25,7 +25,7 @@ class C
     
     int h() // int Function already has return, no action
     {
-        return 0;
+        return 10;
     }
 
     int i() // int Function with hard-to-find return, no action
@@ -37,3 +37,8 @@ class C
     }
 };
 
+int main()
+{
+	C c;
+	return c.h();
+}

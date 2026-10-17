@@ -12,6 +12,12 @@ void afunc()
 void bfunc()
 {
     if( false )
-		afunc(); 
+		;//afunc(); 
 }    
 
+
+int main()
+{
+	afunc();
+	return 12;
+}

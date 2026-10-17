@@ -1273,7 +1273,6 @@ TreePtr<Node> View::OnPermission( TreePtr<Node> c, Location )
 Resource::Resource() :
    	permission( MakeTreeNode<CPPTree::NonConst>() )
 {
-	FTRACE(permission)("\n");
 }   	
 
 
@@ -1498,13 +1497,11 @@ list<string> AccessDecl::RenderAccessSpec( VN::RendererInterface *renderer, Poli
 }
 
 
-TreePtr<Node> AccessDecl::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location )
+void AccessDecl::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location )
 {
 	auto cspg = dynamic_pointer_cast<VN::ContextScopeGnomon>(spg);
 	if( cspg && cspg->context.has_value() )
 		access = any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context);
-		
-	return (TreePtr<Node>)shared_from_this();
 }
 
 
@@ -1517,6 +1514,12 @@ TreePtr<Node> AccessDecl::OnDebug( TreePtr<Node> node, Location loc )
 }	
 
 //////////////////////////// DispatchDecl //////////////////////////////
+
+DispatchDecl::DispatchDecl() :
+	dispatch( MakeTreeNode<CPPTree::NonVirtual>() )
+{
+}
+
 
 list<string> DispatchDecl::RenderDispatch( VN::RendererInterface *renderer, Policy policy ) const
 { 
@@ -1590,6 +1593,26 @@ bool XStructor::ShouldSplitInstance( Policy ) const
 string XStructor::GetLeadingText(Policy) const
 {
 	return "X"; // TODO choose better
+}
+
+
+void XStructor::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc )
+{
+	DispatchDecl::OnInScope(spg, loc); 
+	
+	auto rspg = dynamic_pointer_cast<VN::RegularScopeGnomon>(spg); 
+	if( !rspg ) 
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " is not inside a record (scope is not regular).");
+	auto record = TreePtr<Record>::DynamicCast(rspg->GetNode());
+	if( !record ) 
+		throw YY::VNLangParser::syntax_error(
+			any_cast<YY::VNLangParser::location_type>(loc),
+			MyBestErrName() + " is not inside a record (scope is not Record).");			
+	record_id = record->identifier;
+	ASSERT( record_id ); // check assumption
+	ASSERT( TreePtr<TypeIdentifier>::DynamicCast(record_id) ); // check assumption
 }
 
 

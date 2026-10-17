@@ -177,17 +177,9 @@ TreePtr<Node> Syntax::OnDebug( TreePtr<Node> node, Location loc )
 }
 
 
-TreePtr<Node> Syntax::OnInScope( shared_ptr<VN::ScopeGnomon>, Location )
+void Syntax::OnInScope( shared_ptr<VN::ScopeGnomon>, Location )
 {
 	// Quietly drop the access so patterns can put ⯁Resource inside a record
-	return TreePtrThis();	
-}
-
-
-TreePtr<Node> Syntax::OnAccess( TreePtr<Node>, Location )
-{
-	// Quietly drop the access so patterns can put ⯁Resource inside a record
-	return TreePtrThis();	
 }
 
 
