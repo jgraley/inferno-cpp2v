@@ -716,7 +716,7 @@ const TransKit *Render::GetTransKit() const
 }
 
 
-string Render::GetSignifier( const Node *node, 
+string Render::DoRenderSignifier( const Node *node, 
 					   	     Syntax::Policy policy )
 {
 	// Signifier can be keyword, operator text, or short-form explicit

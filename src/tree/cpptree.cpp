@@ -42,7 +42,7 @@ string Property::RenderScopeResolvingPrefix( VN::RendererInterface *renderer, Sy
 
 string Qualifier::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy);
+	return renderer->DoRenderSignifier(this, policy);
 }
 
 
@@ -73,7 +73,7 @@ Syntax::Production Initialiser::GetMyProductionTerminal() const
 
 string Initialiser::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {	
-	return renderer->GetSignifier(this, policy);
+	return renderer->DoRenderSignifier(this, policy);
 }
 
 
@@ -98,7 +98,7 @@ Syntax::Production Statement::GetMyProductionTerminal() const
 
 string Statement::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy);
+	return renderer->DoRenderSignifier(this, policy);
 }
 
 
@@ -188,7 +188,7 @@ string Type::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy )
 	// Try GetKeyword() for simple keyword types eg bool, void. Otherwise 
 	// this method should be overloaded, otherwise Type::GetRender() will do
 	// something ugly with ⍑
-	return renderer->GetSignifier(this, policy);
+	return renderer->DoRenderSignifier(this, policy);
 }
 
 
@@ -608,7 +608,7 @@ Syntax::Production ResourceIdentifier::GetMyProductionTerminal() const
 
 string ResourceIdentifier::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy);
+	return renderer->DoRenderSignifier(this, policy);
 }
 	
 
@@ -645,8 +645,7 @@ bool SpecificResourceIdentifier::IsXstructorIdentifier(const VN::RendererInterfa
 
 Syntax::Token SpecificResourceIdentifier::GetSignifierToken() const
 {
-	// Disable by calling to default impl
-	return Syntax::GetSignifierToken();
+	throw UnimplementedToken();
 }
 
 //////////////////////////// TypeIdentifier //////////////////////////////
@@ -1403,7 +1402,7 @@ bool Resource::ShouldSplitInstance( Policy ) const
 
 list<string> Resource::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
 {
-	return { renderer->GetSignifier(this, policy), 
+	return { renderer->DoRenderSignifier(this, policy), 
 		     renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) };
 }
 
@@ -1771,7 +1770,7 @@ string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production,
 	//    and the latter are tightly bound to declarations so that we can for example
 	//    change the access in a delta pattern. The ; gets around this by making the 
 	//    label a complete statement.
-	string s = renderer->GetSignifier(this, policy);
+	string s = renderer->DoRenderSignifier(this, policy);
 	if( !s.empty() )
 		s += " ";
 	s += renderer->DoRender( &identifier, Production::PURE_IDENTIFIER, id_policy);
@@ -1857,7 +1856,7 @@ TreePtr<Node> Callable::OnParams( list<TreePtr<Node>> params, Location loc )
 
 string CallableParams::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy )
 {
-	return renderer->GetSignifier( this, policy ) + 
+	return renderer->DoRenderSignifier( this, policy ) + 
 		   GetRenderParameterisation( renderer, policy );
 }
 
@@ -2332,7 +2331,7 @@ string Record::GetRender( VN::RendererInterface *renderer, Production, Policy po
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false; // Don't want scope resolution when declaring
 		
-	ls.push_back( renderer->GetSignifier(this, policy) ); // class, struct etc
+	ls.push_back( renderer->DoRenderSignifier(this, policy) ); // class, struct etc
 	ls.push_back( renderer->DoRender(&identifier, Production::PRIMARY_EXPR, id_policy) ); 
 	string s = Join(ls);
 	if( policy.force_incomplete_records )
@@ -2922,7 +2921,7 @@ string SequentialScope::GetRender( VN::RendererInterface *renderer, Production, 
 	INDENT("C");
 	// The most general form has a signifier just before { which can signify 
 	// alternatives to Compound eg this class or StatementExpression
-    string s = renderer->GetSignifier(this, policy);
+    string s = renderer->DoRenderSignifier(this, policy);
     s += "{\n";
  	policy.permit_static_keyword = true; // In a compound, static means global
 	policy.context = make_shared<any>(); // No access specs here
@@ -3020,7 +3019,7 @@ Syntax::Production Return::GetMyProductionTerminal() const
 
 string Return::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	string s = renderer->GetSignifier(this, policy);
+	string s = renderer->DoRenderSignifier(this, policy);
 	if( !(return_value && TreePtr<Uninitialised>::DynamicCast(return_value)) )
 		s += " " + renderer->DoRender( &return_value, Production::SPACE_SEP_STMT_DECL, policy );
 	return s;
@@ -3059,7 +3058,7 @@ Syntax::Production Goto::GetMyProductionTerminal() const
 
 string Goto::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	string s = renderer->GetSignifier(this, policy) + " ";
+	string s = renderer->DoRenderSignifier(this, policy) + " ";
 	bool star = false;
 	bool remove_double_deref = false;
 	Production prod = Production::SPACE_SEP_STMT_DECL;
@@ -3122,7 +3121,7 @@ Syntax::Production If::GetMyProductionTerminal() const
 string If::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	bool has_else_clause = !DynamicTreePtrCast<Nop>(body_else); // Nop means no else clause
-	string s = renderer->GetSignifier(this, policy) +
+	string s = renderer->DoRenderSignifier(this, policy) +
 			   "( " +
 		       renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
 		       " )\n" +
@@ -3182,7 +3181,7 @@ Syntax::Production Breakable::GetMyProductionTerminal() const
 
 string Breakable::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy) + 
+	return renderer->DoRenderSignifier(this, policy) + 
 	       "()\n" +
 		   renderer->DoRender( &body, Production::STMT_DECL, policy );		   
 }
@@ -3210,7 +3209,7 @@ Syntax::Production While::GetMyProductionTerminal() const
 
 string While::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy) + 
+	return renderer->DoRenderSignifier(this, policy) + 
 	       "( " +
 		   renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
@@ -3250,7 +3249,7 @@ Syntax::Production Do::GetMyProductionTerminal() const
 
 string Do::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy) + "\n" +
+	return renderer->DoRenderSignifier(this, policy) + "\n" +
 		   renderer->DoRender( &body, Production::STMT_DECL_LOW, policy ) +
 		   "while( " +
 		   renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
@@ -3290,7 +3289,7 @@ Syntax::Production For::GetMyProductionTerminal() const
 
 string For::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy) + 
+	return renderer->DoRenderSignifier(this, policy) + 
 	       "( " +
 		   renderer->DoRender( &initialisation, Production::BOTTOM_EXPR, policy ) +
 		   "; " +
@@ -3337,7 +3336,7 @@ Syntax::Production Switch::GetMyProductionTerminal() const
 
 string Switch::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy) + 
+	return renderer->DoRenderSignifier(this, policy) + 
 	       "( " +
 		   renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
@@ -3372,7 +3371,7 @@ TreePtr<Node> Switch::OnArgsList( list<TreePtr<Node>> args, Location loc )
 string SwitchTarget::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	// See LabelDeclaration::GetRender() about the ;
-	return renderer->GetSignifier(this, policy) + ": ";	
+	return renderer->DoRenderSignifier(this, policy) + ": ";	
 }
 
 
@@ -3392,7 +3391,7 @@ Syntax::Token SwitchTarget::GetSignifierToken() const
 string RangeCase::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	// See LabelDeclaration::GetRender() about the ;
-	return renderer->GetSignifier(this, policy) + 
+	return renderer->DoRenderSignifier(this, policy) + 
 	       " " + 
 	       renderer->DoRender( &value_lo, Production::EXPR_CONST, policy) + 
 	       ".." +
@@ -3420,7 +3419,7 @@ Syntax::Token RangeCase::GetSignifierToken() const
 string Case::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	// See LabelDeclaration::GetRender() about the ;
-	return renderer->GetSignifier(this, policy) + " " + renderer->DoRender( &value, Production::EXPR_CONST, policy) + ": ";	
+	return renderer->DoRenderSignifier(this, policy) + " " + renderer->DoRender( &value, Production::EXPR_CONST, policy) + ": ";	
 }
 
 
@@ -3482,7 +3481,7 @@ Syntax::Production Continue::GetMyProductionTerminal() const
 
 string Continue::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy);
+	return renderer->DoRenderSignifier(this, policy);
 }
 
 
@@ -3507,7 +3506,7 @@ Syntax::Production Break::GetMyProductionTerminal() const
 
 string Break::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy);
+	return renderer->DoRenderSignifier(this, policy);
 }
 
 
@@ -3532,7 +3531,7 @@ Syntax::Production Nop::GetMyProductionTerminal() const
 
 string Nop::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy);
+	return renderer->DoRenderSignifier(this, policy);
 }
 
 
@@ -3546,6 +3545,39 @@ string Nop::GetKeyword( Policy ) const
 Syntax::Production PreprocessorIdentifier::GetMyProductionTerminal() const
 { 
 	return Production::PRIMARY_EXPR; 
+}
+
+
+string PreprocessorIdentifier::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{
+	return renderer->DoRenderSignifier(this, policy);
+}
+	
+
+Syntax::Token PreprocessorIdentifier::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_PREPROCESSOR_ID_SIGN;
+}
+
+//////////////////////////// SpecificPreprocessorIdentifier //////////////////////////////
+
+Syntax::Production SpecificPreprocessorIdentifier::GetMyProductionTerminal() const
+{
+	// ResourceIdentifier wins
+	return PreprocessorIdentifier::GetMyProductionTerminal();	
+}
+
+
+string SpecificPreprocessorIdentifier::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
+{
+	// SpecificIdentifier wins
+	return SpecificIdentifier::GetRender( renderer, production, policy );
+}
+
+
+Syntax::Token SpecificPreprocessorIdentifier::GetSignifierToken() const
+{
+	throw UnimplementedToken();
 }
 
 //////////////////////////// MacroConstructor ///////////////////////////////

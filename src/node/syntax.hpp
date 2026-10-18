@@ -185,6 +185,8 @@ public:
     static Production BoostPrecedence( Production prec );
     static int GetPrecedence( Production prec );
     static string::size_type GetLineBreakThreshold();
+    // Why is this GetKeyword() and not GetSignifier()? BEcause a signifier can be a keyword or a 
+    // short-form explicit, and the render already knows how to produce short-form explicit.
     virtual string GetKeyword( Policy policy ) const;    
 	string RenderNodeTypeName() const; 
 	virtual	bool IsType() const; 

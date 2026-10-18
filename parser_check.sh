@@ -11,9 +11,8 @@ GP2=gp2${I_NO_SPACES}
 rm -rf ${P1} ${GP1} ${P2} ${GP2}
 
 # Render the built-in patterns 
-mkdir -p ${GP1} 
+mkdir -p ${GP1} &&
 ./inferno.exe ${I} -gp ${GP1}/
-./convert_all_dot.sh -d ${GP1}
 mkdir -p ${P1} 
 ./inferno.exe ${I} -p ${P1}/
 

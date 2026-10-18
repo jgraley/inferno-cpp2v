@@ -96,7 +96,7 @@ Syntax::Production Wait::GetMyProductionTerminal() const
 
 string Wait::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy) + "()";
+	return renderer->DoRenderSignifier(this, policy) + "()";
 }
 
 
@@ -115,7 +115,7 @@ Syntax::Token Wait::GetSignifierToken() const
 
 string WaitDynamic::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy) + 
+	return renderer->DoRenderSignifier(this, policy) + 
 	       "( " + 
 	       renderer->DoRender(&event, Production::COMMA_SEP, policy) +
 	       " )";
@@ -172,7 +172,7 @@ Syntax::Production NextTrigger::GetMyProductionTerminal() const
 
 string NextTrigger::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy) + "()";
+	return renderer->DoRenderSignifier(this, policy) + "()";
 }
 
 
@@ -191,7 +191,7 @@ Syntax::Token NextTrigger::GetSignifierToken() const
 
 string NextTriggerDynamic::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy) + 
+	return renderer->DoRenderSignifier(this, policy) + 
 	       "( " + 
 	       renderer->DoRender(&event, Production::COMMA_SEP, policy) +
 	       " )";
@@ -250,7 +250,7 @@ string Notify::GetRender( VN::RendererInterface *renderer, Production, Policy po
 {
 	return renderer->DoRender(&event, Production::POSTFIX, policy) +
 		   "." +
-		   renderer->GetSignifier(this, policy) + 
+		   renderer->DoRenderSignifier(this, policy) + 
 	       "()";
 }
 
@@ -294,7 +294,7 @@ string NotifyTimed::GetRender( VN::RendererInterface *renderer, Production, Poli
 {
 	return renderer->DoRender(&event, Production::POSTFIX, policy) +
 	       "." + 
-	       renderer->GetSignifier(this, policy) + 
+	       renderer->DoRenderSignifier(this, policy) + 
 	       "( " + // TODO factor out a render for the args
 	       renderer->DoRender(&time, Production::COMMA_SEP, policy) +
 	       " )";
@@ -386,7 +386,7 @@ Syntax::Production DeltaCount::GetMyProductionTerminal() const
 
 string DeltaCount::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {				
-	return renderer->GetSignifier(this, policy) + "()";
+	return renderer->DoRenderSignifier(this, policy) + "()";
 }
 
 
@@ -411,7 +411,7 @@ Syntax::Production TerminationFunction::GetMyProductionTerminal() const
 
 string TerminationFunction::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {				
-	return renderer->GetSignifier(this, policy) + 
+	return renderer->DoRenderSignifier(this, policy) + 
 	       "( " +
 	       renderer->DoRender(&code, Production::COMMA_SEP, policy) +
 	       " )";

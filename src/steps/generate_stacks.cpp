@@ -89,7 +89,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     auto r_newvar = MakeTreeNode< Temporary >();
     r_newvar->type = type;
     r_newvar->permission = MakePatternNode<NonConst>();    
-    auto id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("temp_retval");
+    auto id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("temp_ret_value");
     r_newvar->identifier = id;
     r_newvar->initialiser = MakePatternNode<Uninitialised>();
     // r_sub_comp->members = ();
@@ -131,7 +131,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto r_retval = MakePatternNode<Member>();
     auto mr_assign = MakePatternNode<Assign>();
     auto lr_assign = MakePatternNode<Assign>();
-    auto r_temp_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("%s_return");
+    auto r_temp_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("%s_ret_value");
     auto ls_return = MakePatternNode<Return>();
     auto lr_return = MakePatternNode<Return>();
     auto l_return_value = MakePatternNode<Expression>();
@@ -193,11 +193,11 @@ AddLinkAddress::AddLinkAddress()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_retaddr = MakePatternNode<Member>();
-    auto r_retaddr_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("%s_link");
+    auto r_retaddr_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("%s_ret_addr");
     auto lr_retaddr = MakePatternNode<Parameter>();
-    auto lr_retaddr_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("link");
+    auto lr_retaddr_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("ret_addr");
     auto lr_temp_retaddr = MakePatternNode<LocalTree::TempReturnAddress>();
-    auto lr_temp_retaddr_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("temp_link");
+    auto lr_temp_retaddr_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("temp_ret_addr");
     auto s_nm = MakePatternNode<NegationAgent, Declaration>();
     auto ls_nm = MakePatternNode<NegationAgent, Declaration>();
     auto gg = MakePatternNode<GreenGrassAgent, Declaration>();
@@ -216,7 +216,7 @@ AddLinkAddress::AddLinkAddress()
     auto mr_comp = MakePatternNode<Compound>();
     auto msx_comp = MakePatternNode<Compound>();
     auto mr_label = MakePatternNode<LabelDeclaration>();
-    auto mr_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("LINK");
+    auto mr_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("RETURN");
     auto m_all = MakePatternNode<ConjunctionAgent, Statement>();
     auto ms_not = MakePatternNode<NegationAgent, Statement>();
     auto m_over = MakePatternNode<DeltaAgent, Statement>();
@@ -563,7 +563,7 @@ MergeFunctions::MergeFunctions()
     auto ls_args = MakePatternNode<MapArgumentation>();
     auto func_id = MakePatternNode<ResourceIdentifier>();
     auto r_label = MakePatternNode<LabelDeclaration>();
-    auto r_label_id = MakePatternNode< BuildSpecificLabelIdentifierAgent >("ENTER_%s");
+    auto r_label_id = MakePatternNode< BuildSpecificLabelIdentifierAgent >("%s_ENTRY");
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto s_stuff = MakePatternNode<StuffAgent, Compound>();
     auto func_stuff = MakePatternNode<StuffAgent, Compound>();

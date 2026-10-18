@@ -1808,6 +1808,8 @@ struct PreprocessorIdentifier : Identifier
 { 
     NODE_FUNCTIONS 
 	Production GetMyProductionTerminal() const override;    
+	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 };
 
 
@@ -1819,6 +1821,10 @@ struct SpecificPreprocessorIdentifier : PreprocessorIdentifier,
     SpecificPreprocessorIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< construct with initial name
     NODE_FUNCTIONS_FINAL    
+
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+	Token GetSignifierToken() const override;
 };
 
 

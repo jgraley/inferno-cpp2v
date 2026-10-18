@@ -1002,7 +1002,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // syntax.
 
 // NODE: implementing GetSignifierToken gives the node syntax in the parser, so for render to match, GetRender()
-// must be implemented. The impl should call renderer->GetSignifier() for the element that will parse with the 
+// must be implemented. The impl should call renderer->DoRenderSignifier() for the element that will parse with the 
 // signifier token.
 
 // NOTE on sub-hierarchies of add-on nodes:
@@ -1024,7 +1024,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // (i.e. not a type) and would tend to consume RAM/ROM/silicon resources.
 // Instance - an entity and an instantiation of a type. Many of the details will be found in/under the type node.
 
-// TODO 
+// TODO
 // Also moving MacroConstructor into SC tree and renaming eg MacroSC_CTOR and building in the SC_CTOR
 
 // PP for Resource, Instance, Xstructor:
@@ -1035,8 +1035,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Grammatical merge of acc_memb and statement/declaration
 // Labels got simpler and are now just complete (non-bare) statements - similar to access specs
 // Decls already co-exist with statements
-// New name for label or access where we don't know what it is - "badge" - to be resolved by looking at the scope
-// - or calling thoguh the scope as with CreateDeclNode
+
 
 
 

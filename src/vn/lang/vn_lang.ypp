@@ -165,7 +165,8 @@
 <TreePtr<Node>> TYPE_W_PARAMS_SIGN		_("type with arguments signifier")
 <TreePtr<Node>> COMPOUND_SIGN			_("compound signifier") // not really C/C++
 <TreePtr<Node>> RESOURCE_SIGN			_("resource signifier") // unifies functions and cons/destructors
-<TreePtr<Node>> NORMAL_ID_SIGN			_("resource identifier signifier") 
+<TreePtr<Node>> NORMAL_ID_SIGN			_("identifier signifier") 
+<TreePtr<Node>> PREPROCESSOR_ID_SIGN	_("preprocessor identifier signifier") 
 <TreePtr<Node>> INIT_SIGN				_("initialiser signifier") 
 
 stmt_low 
@@ -252,11 +253,12 @@ script_command	: ENGINE_COMMAND unified_entry   		 	{ $$ = make_shared<VN::Engin
 				| ATTRIBUTE_COMMAND		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
-designation_command	: vn_name DESIGNATE_COMMAND stmt_entry_nc		{ $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
-					| vn_name DESIGNATE_COMMAND type_entry			{ $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
-					| vn_name DESIGNATE_COMMAND decl_entry			{ $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_DECL); }
-					| vn_name DESIGNATE_COMMAND qualifier_node		{ $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
-					| vn_name DESIGNATE_COMMAND compound_entry    	{ $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_COMPOUND); }
+designation_command	: vn_name DESIGNATE_COMMAND stmt_entry_nc		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
+					| vn_name DESIGNATE_COMMAND type_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
+					| vn_name DESIGNATE_COMMAND decl_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_DECL); }
+					| vn_name DESIGNATE_COMMAND qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
+					| vn_name DESIGNATE_COMMAND compound_entry    	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_COMPOUND); }
+					| vn_name DESIGNATE_COMMAND PREPROCESSOR_ID_SIGN { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
 					
 //////////////////////////////////// ITEMISATION ///////////////////////////////////////////
 // For explicit/built-in nodes mostly
@@ -281,7 +283,8 @@ item		: item VN_SUB_SEP unified_entry			{ $$ = $1; $$.nodes.push_back($3); $$.lo
 unified_entry	: stmt_entry
 				| type_entry
 				| decl_entry
-				| qualifier_node			
+				| qualifier_node		
+				| PREPROCESSOR_ID_SIGN	
 
 unified_prefix	: expr_prefix
 				| type_prefix
