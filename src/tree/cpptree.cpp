@@ -463,6 +463,25 @@ TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, Location l
 	return instance;
 }
 
+//////////////////////////// Uncombable ///////////////////////////////
+
+Syntax::Production Uncombable::GetMyProductionTerminal() const
+{
+	return Production::BARE_STMT_DECL;
+}
+
+
+string Uncombable::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{	
+	return renderer->DoRenderSignifier(this, policy);
+}
+
+
+Syntax::Token Uncombable::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+}
+
 //////////////////////////// SpecificIdentifier ///////////////////////////////
 
 SpecificIdentifier::SpecificIdentifier() :

@@ -197,7 +197,14 @@ struct CodeUnit : DeclScope
 
 
 /// Indicates that the node cannot be combinationalised
-struct Uncombable : virtual Node { NODE_FUNCTIONS };
+struct Uncombable : virtual Node 
+{ 
+	NODE_FUNCTIONS 
+
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *, Production, Policy ) override;
+   	Token GetSignifierToken() const override;
+};
 
 //////////////////////////// Identifiers etc ///////////////////////////////
 
@@ -895,6 +902,7 @@ struct LabelDeclaration : Declaration, //TODO commonize with Case and Default
 
 	TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location ) override;
 
+	Token GetSignifierToken() const { return Declaration::GetSignifierToken(); }
 	Token GetExplicitToken() const override;
 	Token GetPrerestrictToken() const override;
 };
@@ -1471,12 +1479,12 @@ struct Cast : Operator
 };
 
 
-struct GoSub : virtual Node, Uncombable
+struct GoSub : Uncombable
 {
     NODE_FUNCTIONS
-	TreePtr<Node> OnObject( TreePtr<Node> object, Location loc ) override;    
     
     TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call	
+	TreePtr<Node> OnObject( TreePtr<Node> object, Location loc ) override;    
 };
 
 
@@ -1485,9 +1493,13 @@ struct Call : GoSub, Expression
     NODE_FUNCTIONS_FINAL
     TreePtr<Argumentation> argumentation; 
 	
+	Production GetMyProductionTerminal() const override { ASSERTFAIL(); } // we implement GetMyProduction()
+	// TODO drop GetMyProductionTerminal() because of this confusion
+
 	Production GetMyProduction(const VN::RendererInterface *renderer, Policy policy ) const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 	TreePtr<Node> OnArgumentation( TreePtr<Node> argumentation_, Location loc ) override;
+	Token GetSignifierToken() const override { throw UnimplementedToken(); }
 };  
 
 

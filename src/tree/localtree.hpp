@@ -25,6 +25,14 @@
 
 // See #899 about using this macro
 #define KEYWORD_AS_BASE_IN_CPP_ONLY(BASE, TOKEN) \
+    Syntax::Production GetMyProductionTerminal() const override \
+    { \
+		return BASE::GetMyProductionTerminal(); \
+	} \
+	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override \
+    { \
+		return BASE::GetRender(renderer, surround_prod, policy); \
+	} \
     string GetKeyword(Policy policy) const override \
     { \
 		if( policy.permit_inherited_keyword ) \
