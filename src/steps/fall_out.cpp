@@ -613,6 +613,8 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
 
 InsertInferredYield::InsertInferredYield()
 {
+	// This is the yield that stops the sc_thread from running busy and keeps
+	// sc_method being called. 
     auto fn_id = MakePatternNode<ResourceIdentifier>();
     auto thread = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
     auto func_comp = MakePatternNode<Compound>();
@@ -639,17 +641,13 @@ InsertInferredYield::InsertInferredYield()
     thread->access = MakePatternNode<Private>();
     thread->initialiser = func_comp;
     thread->identifier = fn_id;  
-    func_comp->members = (func_decls);
-    func_comp->statements = (loop);
+    func_comp->statements = (func_decls, loop);
     loop->body = delta;
     delta->through = s_comp;
-    s_comp->members = (loop_decls);
-    s_comp->statements = (stmts);
+    s_comp->statements = (loop_decls, stmts);
     stmts->restriction = MakePatternNode<If>();
-    
     delta->overlay = r_comp;
-    r_comp->members = (loop_decls);
-    r_comp->statements = (stmts, r_yield);
+    r_comp->statements = (loop_decls, stmts, r_yield);
     
     Configure( SEARCH_REPLACE, thread );            
 }
