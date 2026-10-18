@@ -64,6 +64,7 @@ struct Uninitialised : Initialiser
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *, Production, Policy ) override;
+   	Token GetSignifierToken() const override;
 }; 
 
 

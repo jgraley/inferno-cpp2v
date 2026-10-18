@@ -71,12 +71,18 @@ Syntax::Production Uninitialised::GetMyProductionTerminal() const
 }
 
 
-string Uninitialised::GetRender( VN::RendererInterface *, Production, Policy policy )
+string Uninitialised::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {	
 	if( policy.refuse_invisibles )
-		throw RefusedByPolicy();
+		return renderer->GetSignifier(this, policy);
 		
 	return "";
+}
+
+
+Syntax::Token Uninitialised::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_INIT_SIGN;
 }
 
 //////////////////////////// Statement ///////////////////////////////

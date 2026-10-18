@@ -165,7 +165,8 @@
 <TreePtr<Node>> TYPE_W_PARAMS_SIGN		_("type with arguments signifier")
 <TreePtr<Node>> COMPOUND_SIGN			_("compound signifier") // not really C/C++
 <TreePtr<Node>> RESOURCE_SIGN			_("resource signifier") // unifies functions and cons/destructors
-<TreePtr<Node>> NORMAL_ID_SIGN		_("resource identifier signifier") 
+<TreePtr<Node>> NORMAL_ID_SIGN			_("resource identifier signifier") 
+<TreePtr<Node>> INIT_SIGN				_("initialiser signifier") 
 
 stmt_low 
 stmt_high
@@ -369,7 +370,8 @@ bare_decl_nvn	: prototype
 			
 bare_initialiser: C_ASSIGN assign_init									{ $$ = $2; } 
 				| DESIGNATED_COMPOUND								
-				| DESIGNATED_NORMAL									
+				| DESIGNATED_NORMAL		
+				| INIT_SIGN							
 			
 
 // Note: C++ grammar allwos to go directly into declarator, but we don't since we want to resolve "real" declarators 
@@ -771,7 +773,8 @@ expr_primary: id_primary
 			| BOOL_LITERAL									
 			| KEYWORD_PRIMARY_OP							
 			| DESIGNATED_COMPOUND      				  			// TODO move up into the statement rules once we don't need to support eg int main() = my_compound
-
+			| INIT_SIGN
+			
 //////////////////////////////// IDENTIFIERS ////////////////////////////////////         
 
 id_boot			: id_disjunction
