@@ -73,10 +73,7 @@ Syntax::Production Uninitialised::GetMyProductionTerminal() const
 
 string Uninitialised::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {	
-	if( policy.refuse_invisibles )
-		return renderer->GetSignifier(this, policy);
-		
-	return "";
+	return renderer->GetSignifier(this, policy);
 }
 
 
@@ -1951,10 +1948,10 @@ string Array::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, strin
 										  Production, Production surround_prod, Policy policy,
 										  TreePtr<Node> constant )
 {
-	string d2 = declarator + 
-	            "[" + 
-	            renderer->DoRender( &size, Production::BOTTOM_EXPR, policy) + 
-	            "]";
+	string d2 = declarator + "[";
+	if( !(size && TreePtr<Uninitialised>::DynamicCast(size)) )
+	    d2 += renderer->DoRender( &size, Production::BOTTOM_EXPR, policy);
+	d2 += "]";
     return renderer->DoRenderTypeAndDeclarator( &element, 
 												d2, 
 												Production::POSTFIX,
@@ -2996,6 +2993,12 @@ Syntax::Token StatementExpression::GetSignifierToken() const
 
 //////////////////////////// Return ///////////////////////////////
 
+Return::Return() :
+	return_value( MakeTreeNode<Uninitialised>() )
+{
+}
+
+
 Syntax::Production Return::GetMyProductionTerminal() const
 { 
 	return Production::BARE_STMT_DECL; 	
@@ -3004,7 +3007,10 @@ Syntax::Production Return::GetMyProductionTerminal() const
 
 string Return::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->GetSignifier(this, policy) + " " + renderer->DoRender( &return_value, Production::SPACE_SEP_STMT_DECL, policy );
+	string s = renderer->GetSignifier(this, policy);
+	if( !(return_value && TreePtr<Uninitialised>::DynamicCast(return_value)) )
+		s += " " + renderer->DoRender( &return_value, Production::SPACE_SEP_STMT_DECL, policy );
+	return s;
 }
 
 
@@ -3025,7 +3031,7 @@ TreePtr<Node> Return::OnArgsList( list<TreePtr<Node>> args, Location loc )
 	if( args.size() != 1 )
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
-			MyBestErrName() + " requires one argument.");
+			MyBestErrName() + " requires zero or one argument.");
 	return_value = SoloElementOf(args);
 	return (TreePtr<Node>)shared_from_this();
 }

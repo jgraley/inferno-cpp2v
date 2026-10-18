@@ -1564,6 +1564,7 @@ struct Return : Statement
     NODE_FUNCTIONS_FINAL
     TreePtr<Initialiser> return_value; ///< return value or Uninitialised
 
+	Return();
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
     string GetKeyword( Policy ) const override;	
