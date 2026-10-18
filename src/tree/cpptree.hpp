@@ -7,6 +7,16 @@
 
 #include <string>
 
+#define TIE_PP(TO) \
+	Production GetMyProductionTerminal() const override { return TO::GetMyProductionTerminal(); } \
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override { return TO::GetRender(renderer, production, policy); } \
+   	Token GetSignifierToken() const override { return TO::GetSignifierToken(); }
+
+
+#define TIE_OFF_PP() TIE_PP(Syntax)
+
+
+
 /// CPPTree namespace contains node definitions that represent elements of the C++ language
 namespace CPPTree {
 
@@ -54,6 +64,10 @@ struct Qualifier : Property
 struct Initialiser : virtual Node 
 { 
     NODE_FUNCTIONS 
+
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *, Production, Policy ) override;
+   	Token GetSignifierToken() const override;
 };
 
 
@@ -63,8 +77,6 @@ struct Uninitialised : Initialiser
 	NODE_FUNCTIONS_FINAL 
 	
 	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *, Production, Policy ) override;
-   	Token GetSignifierToken() const override;
 }; 
 
 
@@ -89,8 +101,8 @@ struct Expression : virtual Statement,
     NODE_FUNCTIONS 
     virtual string GetColour() const { return "/set28/6"; }    
 	//Production GetMyProductionTerminal() const override;
-	//string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
-   	//Token GetSignifierToken() const override;
+	
+	TIE_PP(Statement)
 };
 
 
@@ -1358,6 +1370,7 @@ struct ArrayInitialiser : Initialiser
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;
 	TreePtr<Node> OnArgsList( list<TreePtr<Node>> args, Location ) override;
+   	Token GetSignifierToken() const override;
 };
 
 
@@ -1538,6 +1551,8 @@ struct Compound : SequentialScope,  ///< Local declarations go in here (preferab
 {
     NODE_FUNCTIONS_FINAL
 	string GetKeyword( Policy ) const;
+
+	TIE_PP(SequentialScope)
 };                   
 
 

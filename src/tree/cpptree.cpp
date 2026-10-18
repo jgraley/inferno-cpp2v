@@ -63,23 +63,30 @@ Syntax::Token Qualifier::GetPrerestrictToken() const
 	return YY::VNLangParser::token::TOK_PRERESTRICT_QUAL;
 }
 
-//////////////////////////// Uninitialised ///////////////////////////////
+//////////////////////////// Initialiser ///////////////////////////////
 
-Syntax::Production Uninitialised::GetMyProductionTerminal() const
+Syntax::Production Initialiser::GetMyProductionTerminal() const
 {
-	return Production::ANONYMOUS;
+	return Production::KEYWORD;
 }
 
 
-string Uninitialised::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string Initialiser::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {	
 	return renderer->GetSignifier(this, policy);
 }
 
 
-Syntax::Token Uninitialised::GetSignifierToken() const
+Syntax::Token Initialiser::GetSignifierToken() const
 {
 	return YY::VNLangParser::token::TOK_INIT_SIGN;
+}
+
+//////////////////////////// Uninitialised ///////////////////////////////
+
+Syntax::Production Uninitialised::GetMyProductionTerminal() const
+{
+	return Production::ANONYMOUS;
 }
 
 //////////////////////////// Statement ///////////////////////////////
@@ -2709,6 +2716,12 @@ TreePtr<Node> ArrayInitialiser::OnArgsList( list<TreePtr<Node>> args, Location )
 	for( TreePtr<Node> value : args )
 		elements.insert( value );
 	return (TreePtr<Node>)shared_from_this();
+}
+
+
+Syntax::Token ArrayInitialiser::GetSignifierToken() const
+{
+	throw UnimplementedToken();
 }
 
 
