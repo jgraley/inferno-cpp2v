@@ -378,7 +378,7 @@ TreePtr<Node> VNLangActions::OnArrayInitialiser()
 TreePtr<Node> VNLangActions::OnLabel( TreePtr<Node> identifier, Syntax::Location loc )
 {
 	auto node = MakeTreeNode<CPPTree::LabelDeclaration>();
-	node->identifier = identifier;
+	node->OnIdentifier(identifier, loc);
 	return node;
 }
 
@@ -424,7 +424,7 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( list<QualifierData> quals, TreePt
 				any_cast<YY::VNLangParser::location_type>(middle_loc),
 				"Expected concrete declarator but got abstract.");
 	}
-	
+			
 	const QualifierData *q_typedef = nullptr;
 	for( const QualifierData &q : quals )
 		if( q.cat == QualCat::TYPEDEF )

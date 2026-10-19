@@ -7,6 +7,7 @@
 #include "vn/lang/vn_lang.location.hpp"
 #include "helpers/simple_duplicate.hpp"
 #include "typeof.hpp"
+#include "vn/agents/agent.hpp"
 
 #define EXPLICIT_BASE 0
 
@@ -1426,8 +1427,13 @@ list<string> Resource::RenderMiddlePart( VN::RendererInterface *renderer, Policy
 }
 
 
-TreePtr<Node> Resource::OnIdentifier( TreePtr<Node> id, Location )
+TreePtr<Node> Resource::OnIdentifier( TreePtr<Node> id, Location loc)
 {
+	if( id && !VN::Agent::TryAsAgentConst(id) && !TreePtr<ResourceIdentifier>::DynamicCast(id) )
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"Resource declaration expected resource identifier but got " +
+				DiagQuote(Traceable::TypeIdName( *id )) );
 	identifier = id;
 	return (TreePtr<Node>)shared_from_this();	
 }
@@ -1803,8 +1809,13 @@ string LabelDeclaration::GetKeyword( Policy ) const
 }
 
 
-TreePtr<Node> LabelDeclaration::OnIdentifier( TreePtr<Node> id, Location )
+TreePtr<Node> LabelDeclaration::OnIdentifier( TreePtr<Node> id, Location loc )
 {
+	if( id && !VN::Agent::TryAsAgentConst(id) && !TreePtr<LabelIdentifier>::DynamicCast(id) )
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"Label declaration expected label identifier but got " +
+				DiagQuote(Traceable::TypeIdName( *id )) );
 	identifier = id;
 	return (TreePtr<Node>)shared_from_this();	
 }
@@ -2278,8 +2289,13 @@ Syntax::Token Labeley::GetSignifierToken() const
 
 //////////////////////////// TypeDeclaration ///////////////////////////////
 
-TreePtr<Node> TypeDeclaration::OnIdentifier( TreePtr<Node> id, Location )
+TreePtr<Node> TypeDeclaration::OnIdentifier( TreePtr<Node> id, Location loc )
 {
+	if( id && !VN::Agent::TryAsAgentConst(id) && !TreePtr<TypeIdentifier>::DynamicCast(id) )
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"Type declaration expected type identifier but got " +
+				DiagQuote(Traceable::TypeIdName( *id )) );
 	identifier = id;
 	return (TreePtr<Node>)shared_from_this();	
 }
