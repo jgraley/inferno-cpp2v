@@ -124,8 +124,8 @@
 <string>	TYPE_SPECIFIER					_("C simple type specifier")
 <string>    TRANSFORM_NAME_TYPE				_("type transform name")
 <string>    TRANSFORM_NAME_NORMAL			_("open_statement transform name")
-<string>    ASCII_NAME 						_("ASCII name")
-<wstring>   UNICODE_NAME 					_("Unicode name")
+<string>    NEW_ASCII_NAME 						_("ASCII name")
+<wstring>   NEW_UNICODE_NAME 					_("Unicode name")
 <const ANDBlock *>	NODE_NAMESPACE			_("scope resolving name")
 <TreePtr<Node>>	DESIGNATED_NORMAL		_("designated statement/expression name")
 <TreePtr<Node>>	DESIGNATED_TYPE			_("designated type name")
@@ -201,7 +201,7 @@ stmt_high
 %type <TreePtr<Node>> 				record base_spec access_spec acc_memb_colon qualifier_node
 %type <TreePtr<Node>> 				enum_node enum
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
-%type <wstring> 					vn_name
+%type <wstring> 					new_vn_name
 %type <list<shared_ptr<VN::Command>>>			commands sep_commands stmt_commands decl_commands acc_memb_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
@@ -223,6 +223,7 @@ stmt_high
 %type <VN::QualifierData> 			qualifier qualifier_nw
 %type <list<VN::QualifierData>>		qualifiers 
 %type <multiset<string>>			type_specifier_seq
+%type <TreePtr<Node>> 				declaring_type_id declaring_res_id declaring_st_res_id declaring_label_id
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>         prerestrict_decl_start
 
 // Solve the dangling-else amiguity by giving the "else" token a higher priority than the "if" token
@@ -253,12 +254,12 @@ script_command	: ENGINE_COMMAND unified_entry   		 	{ $$ = make_shared<VN::Engin
 				| ATTRIBUTE_COMMAND		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
-designation_command	: vn_name DESIGNATE_COMMAND stmt_entry_nc		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
-					| vn_name DESIGNATE_COMMAND type_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
-					| vn_name DESIGNATE_COMMAND decl_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_DECL); }
-					| vn_name DESIGNATE_COMMAND qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
-					| vn_name DESIGNATE_COMMAND compound_entry    	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_COMPOUND); }
-					| vn_name DESIGNATE_COMMAND PREPROCESSOR_ID_SIGN { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
+designation_command	: new_vn_name DESIGNATE_COMMAND stmt_entry_nc		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
+					| new_vn_name DESIGNATE_COMMAND type_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
+					| new_vn_name DESIGNATE_COMMAND decl_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_DECL); }
+					| new_vn_name DESIGNATE_COMMAND qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
+					| new_vn_name DESIGNATE_COMMAND compound_entry    	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_COMPOUND); }
+					| new_vn_name DESIGNATE_COMMAND PREPROCESSOR_ID_SIGN { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
 					
 //////////////////////////////////// ITEMISATION ///////////////////////////////////////////
 // For explicit/built-in nodes mostly
@@ -377,7 +378,7 @@ bare_initialiser: C_ASSIGN assign_init									{ $$ = $2; }
 				| INIT_SIGN							
 			
 
-// Note: C++ grammar allwos to go directly into declarator, but we don't since we want to resolve "real" declarators 
+// Note: C++ grammar allows to go directly into declarator, but we don't since we want to resolve "real" declarators 
 // immediately, and don't want to invoke that mechanism for things that turn out to be something other than a prototype.
 // Use of strict declarators with DESIGNATED_CURRENT_RECORD_ID is for constructors. See See #919.
 prototype		: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({}, $1, @1, $2, @2); }	
@@ -461,7 +462,7 @@ declarator_postfix	: declarator_primary
 					| declarator_postfix '[' stmt_entry ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
 					| declarator_postfix '[' ']'					{ $$ = make_shared<Declarators::Array>($1, MakeTreeNode<CPPTree::Uninitialised>()); } 
                 
-declarator_primary	: id_parens  									{ $$ = make_shared<Declarators::Concrete>($1); } 
+declarator_primary	: declaring_res_id									{ $$ = make_shared<Declarators::Concrete>($1); } 
                      
 //////////////////////////////// STRICT CONCRETE DECLARATORS /////////////////////////////////////         
 // Strict means no parens around the central identifier
@@ -479,7 +480,7 @@ st_declarator_postfix	: st_declarator_primary
 						| st_declarator_postfix '[' stmt_entry ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
 						| st_declarator_postfix '[' ']'						{ $$ = make_shared<Declarators::Array>($1, MakeTreeNode<CPPTree::Uninitialised>()); } 
                 
-st_declarator_primary	: id_primary  										{ $$ = make_shared<Declarators::Concrete>($1); } 
+st_declarator_primary	: declaring_st_res_id  								{ $$ = make_shared<Declarators::Concrete>($1); } 
                      
 //////////////////////////////// ABSTRACT DECLARATORS /////////////////////////////////////         
                           		
@@ -521,7 +522,7 @@ record			: record_scope '{' members '}'			 				{ $$ = $1.node->OnMembers($3, @3)
 				| record_scope '{' '}'			 						{ $$ = $1.node; }
 				| record_scope ':' bases '{' '}'						{ $$ = $1.node->OnBases($3, @3); }
              
-record_scope    : RECORD_KEYWORD type_specified        						{ $$ = { $1->OnIdentifier($2, @2),  
+record_scope    : RECORD_KEYWORD declaring_type_id        						{ $$ = { $1->OnIdentifier($2, @2),  
 																		             vn->MakeRecordScopeGnomon($1) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			                                                  
@@ -604,7 +605,7 @@ access_spec		: qualifier_node
 enum			: enum_scope '{' enumerators '}'		 					{ $$ = $1.node->OnMembers( $3, @3 ); }
 				| enum_scope '{' '}'		 								{ $$ = $1.node; }
              
-enum_scope      : enum_node type_specified       							{ $$ = { $1->OnIdentifier($2, @2), 
+enum_scope      : enum_node declaring_type_id       							{ $$ = { $1->OnIdentifier($2, @2), 
 																		             vn->MakeRecordScopeGnomon($1) }; 
 																			  vn->AddGnomon($$.gnomon); } 
 																			  
@@ -666,7 +667,7 @@ statement   : statement_na
 arrival		: ARRIVAL_KEYWORD ':'										
 			| ARRIVAL_KEYWORD expr_entry ':'								{ $$ = $1->OnArgsList({$2}, @2); } 
 			| ARRIVAL_KEYWORD expr_entry RANGE_OP expr_entry ':' 			{ $$ = $1->OnArgsList({$2, $4}, @2+@4); }
-			| id_primary ':' 			 									{ $$ = vn->OnLabel($1, @1); } 
+			| declaring_label_id ':' 			 								{ $$ = vn->OnLabel($1, @1); } 
 
 statement_na: bare_statement ';'										
 			| expr_entry ';'												// TODO Should come in under bare_statement but conflicts #905
@@ -780,6 +781,33 @@ expr_primary: id_primary
 			| DESIGNATED_COMPOUND      				  			// TODO move up into the statement rules once we don't need to support eg int main() = my_compound
 			| INIT_SIGN
 			
+//////////////////////////////// DECLARING IDS ////////////////////////////////////                 
+// Identifiers to use in C declaring constructs. We can designate here.
+
+declaring_type_id	: type_specified		
+                    | new_vn_name			{ recogniser->AddGnomon(
+                                              make_shared<VN::DesignationGnomon>($1, 
+                                                                                 MakeTreeNode<CPPTree::TypeIdentifier>(), 
+                                                                                 YY::VNLangParser::token::TOK_DESIGNATED_NORMAL)); }
+
+declaring_res_id	: id_parens
+                    | new_vn_name			{ recogniser->AddGnomon(
+                                              make_shared<VN::DesignationGnomon>($1, 
+                                                                                 MakeTreeNode<CPPTree::ResourceIdentifier>(), 
+                                                                                 YY::VNLangParser::token::TOK_DESIGNATED_NORMAL)); }
+
+declaring_st_res_id	: id_primary
+                    | new_vn_name			{ recogniser->AddGnomon(
+                                              make_shared<VN::DesignationGnomon>($1, 
+                                                                                 MakeTreeNode<CPPTree::ResourceIdentifier>(), 
+                                                                                 YY::VNLangParser::token::TOK_DESIGNATED_NORMAL)); }
+
+declaring_label_id	: id_primary
+                    | new_vn_name			{ recogniser->AddGnomon(
+                                              make_shared<VN::DesignationGnomon>($1, 
+                                                                                 MakeTreeNode<CPPTree::LabelIdentifier>(), 
+                                                                                 YY::VNLangParser::token::TOK_DESIGNATED_NORMAL)); }
+
 //////////////////////////////// IDENTIFIERS ////////////////////////////////////         
 
 id_boot			: id_disjunction
@@ -806,7 +834,7 @@ id_primary  : vn_primary
 vn_primary	: pure_wildcard
 			| DESIGNATED_NORMAL       			
 			| NORMAL_ID_SIGN	  			
-			| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+			| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } 
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| ID_BUILDER_NORMAL OPEN_VN VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
@@ -876,7 +904,7 @@ type_primary: type_vn_prim
 type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DELTA_COMPARE_OP type_boot DELTA_REPLACE_OP type_boot DELTA_END_OP { $$ = vn->OnDelta($2, $4); }
 			| DESIGNATED_TYPE     						
-			| ID_BY_NAME_TYPE OPEN_VN STRING_LITERAL CLOSE_VN					 { $$ = vn->OnIdByName($1, @1, $3, @3); } // ASCII_NAME could be format
+			| ID_BY_NAME_TYPE OPEN_VN STRING_LITERAL CLOSE_VN					 { $$ = vn->OnIdByName($1, @1, $3, @3); } 
 			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 			 { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN 		 { $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| ID_BUILDER_TYPE OPEN_VN VN_SEP item CLOSE_VN 						 { $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
@@ -912,8 +940,8 @@ qual_full_explicit_start : EXPLICIT_QUAL									{ $$ = vn->MakeScopeGnomonForNo
 
 //////////////////////////////////////// RECOGNISER GLUE /////////////////////////////////////////////
 
-vn_name		: UNICODE_NAME    						
-			| ASCII_NAME								{ $$ = ToUnicode($1); }     										      
+new_vn_name		: NEW_UNICODE_NAME    						
+				| NEW_ASCII_NAME								{ $$ = ToUnicode($1); }     										      
 
 stuff_op_scope			: STUFF_OP			{ $$ = make_shared<VN::UnknownScopeGnomon>("stuff pattern"); 
 											  vn->AddGnomon($$); }

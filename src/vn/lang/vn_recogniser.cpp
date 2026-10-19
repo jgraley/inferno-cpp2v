@@ -58,6 +58,7 @@ VNLangRecogniser::VNLangRecogniser( VNLangActions *actions_ ) :
 void VNLangRecogniser::AddGnomon( shared_ptr<Gnomon> gnomon )
 {
 	ASSERT( gnomon );
+	// TODO check if adding a name already there, that the gnomon matches and then don't do anything
 	if( auto designation_gnomon = dynamic_pointer_cast<const DesignationGnomon>(gnomon) )
 		designation_gnomons.insert( make_pair( designation_gnomon->name, designation_gnomon ) );
 	else 
@@ -200,10 +201,11 @@ YY::VNLangParser::symbol_type VNLangRecogniser::Recognise(wstring text, bool asc
 		return RecogniseDesignation( text, loc );
 	} catch( Unrecognised& ) {}
 		
+	// We don't recognise it, so it must be new
 	if( ascii )
-         return YY::VNLangParser::make_ASCII_NAME(ToASCII(text), any_cast<YY::VNLangParser::location_type>(loc));
+         return YY::VNLangParser::make_NEW_ASCII_NAME(ToASCII(text), any_cast<YY::VNLangParser::location_type>(loc));
     else
-         return YY::VNLangParser::make_UNICODE_NAME(text, any_cast<YY::VNLangParser::location_type>(loc));
+         return YY::VNLangParser::make_NEW_UNICODE_NAME(text, any_cast<YY::VNLangParser::location_type>(loc));
 }
 
 
