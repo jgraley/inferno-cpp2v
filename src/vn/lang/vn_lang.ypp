@@ -172,18 +172,18 @@
 stmt_low 
 stmt_high
 	
-%type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational 
-%type <TreePtr<Node>> 				stmt_entry stmt_disjunction stmt_conjunction open_statement 
+%type <TreePtr<Node>> 				stmt_boot stmt_entry stmt_disjunction stmt_conjunction open_statement 
 %type <TreePtr<Node>> 				stmt_entry_nc stmt_disjunction_nc stmt_conjunction_nc open_statement_nc 
+%type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational 
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
-%type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expr_entry expr_id_value stmt_boot
+%type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expr_entry expr_id_value expr_boot 
 %type <TreePtr<Node>> 				id_primary id_boot id_disjunction id_conjunction id_prefix id_parens
 %type <TreePtr<Node>> 				vn_primary
 %type <TreePtr<Node>> 				argumentation
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_vn_prim 
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
-%type <TreePtr<Node>> 				unified_entry unified_prefix pure_wildcard
+%type <TreePtr<Node>> 				unified_boot unified_entry unified_prefix pure_wildcard
 %type <TreePtr<Node>> 				arrival
 %type <TreePtr<Node>> 				stmt_decl bare_statement statement_na stmt_comp control_stmt_sign       
 %type <TreePtr<Node>>   			statement 
@@ -202,7 +202,8 @@ stmt_high
 %type <TreePtr<Node>> 				enum_node enum
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					new_vn_name
-%type <list<shared_ptr<VN::Command>>>			commands sep_commands stmt_commands decl_commands acc_memb_commands
+%type <list<shared_ptr<VN::Command>>>	commands sep_commands 
+%type <list<shared_ptr<VN::Command>>>	stmt_commands decl_commands acc_memb_commands expr_commands unified_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
 %type <VN::Itemisation>				itemisation items_bare items_sep
@@ -280,6 +281,11 @@ item		: item VN_SUB_SEP unified_entry			{ $$ = $1; $$.nodes.push_back($3); $$.lo
 
 //////////////////////////////// UNIFIED ////////////////////////////////////         
 
+unified_boot	: unified_entry								
+				| unified_commands									{ $$ = vn->OnEmbeddedCommands($1); }
+
+unified_commands: unified_entry COMMAND_TERM commands				{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
+
 // Entry is like boot but without commands
 unified_entry	: stmt_entry
 				| type_entry
@@ -306,7 +312,7 @@ compound_prefix : compound_primary
 				| 								NEGATION_OP compound_prefix	{ $$ = vn->OnNegation($2); }
 				|       				 TRANSFORM_NAME_NORMAL compound_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
 				|  								   stuff_op_scope compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-				|    stuff_op_scope OPEN_VN unified_entry CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
+				|    stuff_op_scope OPEN_VN unified_boot CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|     stuff_op_scope OPEN_VN stuff_depth CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
 				|                              PRERESTRICT_NORMAL compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 
@@ -459,7 +465,7 @@ declarator_prefix	: declarator_postfix
 declarator_postfix	: declarator_primary
 					| declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2, Declarators::CVQuals()); }               
 					| declarator_postfix parameterisation qualifiers{ $$ = make_shared<Declarators::Function>($1, $2, vn->ExtractCVQuals($3)); } 
-					| declarator_postfix '[' stmt_entry ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
+					| declarator_postfix '[' expr_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
 					| declarator_postfix '[' ']'					{ $$ = make_shared<Declarators::Array>($1, MakeTreeNode<CPPTree::Uninitialised>()); } 
                 
 declarator_primary	: declaring_res_id									{ $$ = make_shared<Declarators::Concrete>($1); } 
@@ -477,7 +483,7 @@ st_declarator_prefix	: st_declarator_postfix
 st_declarator_postfix	: st_declarator_primary
 						| st_declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2, Declarators::CVQuals()); }               
 						| st_declarator_postfix parameterisation qualifiers { $$ = make_shared<Declarators::Function>($1, $2, vn->ExtractCVQuals($3)); } 
-						| st_declarator_postfix '[' stmt_entry ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
+						| st_declarator_postfix '[' expr_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
 						| st_declarator_postfix '[' ']'						{ $$ = make_shared<Declarators::Array>($1, MakeTreeNode<CPPTree::Uninitialised>()); } 
                 
 st_declarator_primary	: declaring_st_res_id  								{ $$ = make_shared<Declarators::Concrete>($1); } 
@@ -496,10 +502,10 @@ ab_declarator_prefix	: ab_declarator_postfix
 
 ab_declarator_postfix	: ab_declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2, Declarators::CVQuals()); }          
 ab_declarator_postfix	: ab_declarator_postfix parameterisation qualifiers	{ $$ = make_shared<Declarators::Function>($1, $2, vn->ExtractCVQuals($3)); }        
-						| ab_declarator_postfix '[' stmt_entry ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
+						| ab_declarator_postfix '[' expr_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
 						| parameterisation									{ $$ = make_shared<Declarators::Function>(nullptr, $1, Declarators::CVQuals()); }   
 						| parameterisation qualifiers						{ $$ = make_shared<Declarators::Function>(nullptr, $1, vn->ExtractCVQuals($2)); }   
-						| '[' stmt_entry ']'								{ $$ = make_shared<Declarators::Array>(nullptr, $2); }                 		
+						| '[' expr_boot ']'									{ $$ = make_shared<Declarators::Array>(nullptr, $2); }                 		
 						| '[' ']'											{ $$ = make_shared<Declarators::Array>(nullptr, MakeTreeNode<CPPTree::Uninitialised>()); } 
 
 //////////////////////////////////////// PARAMETERS /////////////////////////////////////////////
@@ -576,7 +582,7 @@ acc_memb_prefix	: acc_memb_postfix
 				| 					         	NEGATION_OP	acc_memb_prefix	{ $$ = vn->OnNegation($2); }
 				|         	      	 prerestrict_decl_start acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
 				|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-				| stuff_op_scope OPEN_VN unified_entry CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
+				| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
 				|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
 				|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
@@ -593,7 +599,7 @@ acc_memb_primary: access_spec
 				| DESIGNATED_DECL       				  				
 				| DESIGNATED_NORMAL       				  		
 				| DESIGNATED_COMPOUND      				  			    // TODO want declarations and access specs
-				| TRANSFORM_NAME_NORMAL OPEN_VN unified_entry CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
+				| TRANSFORM_NAME_NORMAL OPEN_VN unified_boot CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 				| STAR_OP												{ $$ = vn->OnStar(nullptr); }
 				| STAR_OP OPEN_VN acc_memb_boot CLOSE_VN				{ $$ = vn->OnStar($3); }
 				| ANY_NODE_OP											{ $$ = nullptr; }
@@ -691,6 +697,11 @@ semicolon_args	: expr_entry												{ $$.push_back($1); }
 
 //////////////////////////////// EXPRESSIONS ////////////////////////////////////         
 
+expr_boot		: expr_entry 
+				| expr_commands										{ $$ = vn->OnEmbeddedCommands($1); }
+
+expr_commands   : expr_entry COMMAND_TERM commands					{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
+     
 expr_entry			: expr_comma_op
                                    
 expr_comma_op       : expr_no_comma_op
@@ -752,7 +763,7 @@ expr_prefix : expr_postfix
 			|                        PRERESTRICT_NORMAL expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			| stuff_op_scope OPEN_VN unified_entry CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
+			| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
 			|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
 			|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
@@ -763,7 +774,7 @@ stuff_depth		: C_ASSIGN INTEGRAL_LITERAL							{ $$ = VN::Limit{ $1, @1, $2, @2 
 // Postfix operators are treated like method calls, operand is regarded as object
 expr_postfix: expr_primary     
 			| expr_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2)->OnObject($1, @1); }
-			| expr_postfix '[' stmt_entry ']'	 					{ $$ = vn->OnSubscript()->OnObject($1, @1)->OnArgsList({$3}, @3); }
+			| expr_postfix '[' expr_boot ']'	 					{ $$ = vn->OnSubscript()->OnObject($1, @1)->OnArgsList({$3}, @3); }
 			| expr_postfix argumentation							{ $$ = vn->OnCall()->OnObject($1, @1)->OnArgumentation($2, @2); } 
 			| expr_postfix '.' id_parens							{ $$ = vn->OnLookup()->OnObject($1, @1)->OnArgsList({$3}, @3); }
 			| LIBRARY_FUNC '(' comma_sep_exprs ')'   				{ $$ = $1->OnArgsList($3, @3); }	
@@ -838,8 +849,8 @@ vn_primary	: pure_wildcard
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| ID_BUILDER_NORMAL OPEN_VN VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
-			| TRANSFORM_NAME_NORMAL OPEN_VN unified_entry CLOSE_VN			{ $$ = vn->OnTransform($1, @1, $3, @3); }
-			| STAR_OP OPEN_VN stmt_entry CLOSE_VN							{ $$ = vn->OnStar($3); }
+			| TRANSFORM_NAME_NORMAL OPEN_VN unified_boot CLOSE_VN			{ $$ = vn->OnTransform($1, @1, $3, @3); }
+			| STAR_OP OPEN_VN stmt_boot CLOSE_VN							{ $$ = vn->OnStar($3); }
 
 pure_wildcard 	: STAR_OP													{ $$ = vn->OnStar(nullptr); }
 				| ANY_NODE_OP												{ $$ = nullptr; }
@@ -908,7 +919,7 @@ type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExpl
 			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 			 { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN 		 { $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| ID_BUILDER_TYPE OPEN_VN VN_SEP item CLOSE_VN 						 { $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
-			| TRANSFORM_NAME_TYPE OPEN_VN unified_entry CLOSE_VN 				 { $$ = vn->OnTransform($1, @1, $3, @3); }
+			| TRANSFORM_NAME_TYPE OPEN_VN unified_boot CLOSE_VN 				 { $$ = vn->OnTransform($1, @1, $3, @3); }
 			| STAR_OP OPEN_VN type_boot CLOSE_VN								 { $$ = vn->OnStar($3); }
 		 	
 type_full_explicit_start 	: EXPLICIT_TYPE										{ $$ = vn->MakeScopeGnomonForNode($1); 
