@@ -631,6 +631,7 @@ prototype_enumerator 		: id_parens 									{ $$ = vn->OnEnumerator(@1)->OnIdent
 
 stmt_expr_boot	: stmt_expr_entry 
 				| stmt_expr_commands								{ $$ = vn->OnEmbeddedCommands($1); }
+				| expr_clause
 
 stmt_expr_commands	: stmt_expr_entry COMMAND_TERM commands			{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
      
@@ -645,7 +646,6 @@ stmt_expr_conj 	: stmt_expr
 				| stmt_expr_conj CONJUNCTION_OP open_declaration 	{ $$ = vn->OnConjunction($1, $3); }
 		
 stmt_expr    	: statement		
-				| expr_clause
 										
 stmt_expr_entry_nc	: stmt_expr_disj_nc
 
