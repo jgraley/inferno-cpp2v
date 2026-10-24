@@ -86,7 +86,8 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 			
 		commands.push_back( unique_coupling_names.at(node) + 
 							" ⪮ " + 
-							RenderNoDesignation( node, Syntax::Production::VN_DESIGNATE_RHS, designation_policy ) );
+							RenderNoDesignation( node, Syntax::Production::VN_DESIGNATE_RHS, designation_policy ) +
+							" /* "+Trace(node)+" */");
 		// Alternative for declarator desaignators
 		//commands.push_back( " ⪮ " + 
 		//					AccomodateBootTypeAndDeclarator( node, 
