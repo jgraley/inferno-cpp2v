@@ -69,7 +69,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     root_stuff->terminus = root_overlay;
     root_stuff->recurse_restriction = root_not;
     root_not->negand = root_ce;
-    root_ce->members = ( MakePatternNode<StarAgent, Declaration>() );
+
     root_ce->statements = ( MakePatternNode<StarAgent, Statement>() );
     root_overlay->through = s_all;
     root_overlay->overlay = r_comp;
@@ -79,15 +79,15 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     sx_not->negand = sx_expr;
     stuff->recurse_restriction = sr_not;
     sr_not->negand = sr_comp;
-    sr_comp->members = sr_cdecls;
+
     sr_comp->statements = sr_cstmts;
     
     stuff->terminus = overlay;
     overlay->through = s_ce;
-    s_ce->members = ( decls );
+
     s_ce->statements = ( body, last );
     
-    r_comp->members = ( decls );
+
     r_comp->statements = ( r_temp, body, r_assign, stuff );
     r_temp->identifier = r_temp_id;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
@@ -113,15 +113,11 @@ CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not all
     auto s_pre = MakePatternNode<StarAgent, Statement>();
     auto s_post = MakePatternNode<StarAgent, Statement>();
     auto s_body = MakePatternNode<StarAgent, Statement>();
-    auto s_inner_decls = MakePatternNode<StarAgent, Declaration>();
-    auto s_outer_decls = MakePatternNode<StarAgent, Declaration>();
 
     s_inner->statements = ( s_body );
-    s_inner->members = ( s_inner_decls );
     s_outer->statements = ( s_pre, s_inner, s_post );
-    s_outer->members = ( s_outer_decls );
     r_comp->statements = ( s_pre, s_body, s_post );
-    //r_comp->members = ( s_inner_decls, s_outer_decls );
+
 
     Configure( SEARCH_REPLACE, s_outer, r_comp );
 }
@@ -178,10 +174,10 @@ CleanupNop::CleanupNop()
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
 
-    s_comp->members = decls;
+
     s_comp->statements = (pre, s_nop, post);
     
-    r_comp->members = decls;
+
     r_comp->statements = (pre, post);
 
     Configure( SEARCH_REPLACE, s_comp, r_comp );
@@ -228,7 +224,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;
-    s_comp->members = decls;
+
     s_comp->statements = ( pre, s_label1, s_label2, post );
     s_label1->identifier = s_labelid1;
     s_label2->identifier = s_labelid2;
@@ -238,7 +234,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     stuff->terminus = overlay;           
     overlay->through = s_comp;
     overlay->overlay = r_comp;
-    r_comp->members = decls;
+
     r_comp->statements = (pre, r_label1, post);
     r_label1->identifier = r_labelid;
     r_labelid->sources = (s_labelid1, s_labelid2);
@@ -286,7 +282,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;
-    s_comp->members = decls;
+
     s_comp->statements = (pre, s_label, s_goto, post);
     s_label->identifier = s_labelid1;
     s_goto->destination = s_labelid2;
@@ -296,7 +292,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     stuff->terminus = overlay;           
     overlay->through = s_comp;
     overlay->overlay = r_comp;
-    r_comp->members = decls;
+
     r_comp->statements = (pre, r_goto, post);
     r_goto->destination = r_labelid;
     r_labelid->sources = (s_labelid1, s_labelid2);
@@ -319,12 +315,12 @@ CleanupIneffectualGoto::CleanupIneffectualGoto()
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
 
-    s_comp->members = decls;
+
     s_comp->statements = (pre, s_goto, s_label, post);
     s_goto->destination = labelid;
     s_label->identifier = labelid;
     
-    r_comp->members = decls;
+
     r_comp->statements = (pre, r_label, post);
     r_label->identifier = labelid;
 
@@ -364,7 +360,7 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     s_instance->initialiser = s_andrule;
     s_instance->identifier = identifier;
     s_andrule->conjuncts = (stuff, sx_notrule);
-    s_comp->members = decls;
+
     s_comp->statements = (pre, s_label, post);
     s_label->identifier = labelid;
                     
@@ -378,7 +374,7 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     stuff->terminus = overlay;
     overlay->through = s_comp;
     overlay->overlay = r_comp;
-    r_comp->members = decls;
+
     r_comp->statements = (pre, post);
     
     Configure( SEARCH_REPLACE, s_instance, r_instance );
@@ -398,12 +394,12 @@ CleanUpDeadCode::CleanUpDeadCode()
     auto casee = MakePatternNode<Case>();
     auto breakk = MakePatternNode<Break>();
      
-    s_comp->members = decls;
+
     s_comp->statements = ( pre, s_exit_any, s_dead_not, post );
     s_exit_any->disjuncts = (MakePatternNode<Break>(), MakePatternNode<Continue>(), MakePatternNode<Return>(), MakePatternNode<Goto>());
     s_dead_not->negand = s_dead_any;
     s_dead_any->disjuncts = (MakePatternNode<Case>(), MakePatternNode<Default>(), MakePatternNode<LabelDeclaration>());
-    r_comp->members = decls;
+
     r_comp->statements = ( pre, s_exit_any, post );
     
     Configure( SEARCH_REPLACE, s_comp, r_comp );            
@@ -421,12 +417,12 @@ CleanupVoidStatementExpression::CleanupVoidStatementExpression()
     auto sx_void = MakePatternNode<Void>();
     auto r_comp = MakePatternNode<Compound>();
     
-    s_ce->members = (decls);
+
     s_ce->statements = (stmts, last);
     last->negand = sx_expr;
     sx_expr->pattern = sx_type_not;
     sx_type_not->negand = sx_void;
-    r_comp->members = (decls);
+
     r_comp->statements = (stmts, last);
     
     Configure( SEARCH_REPLACE, s_ce, r_comp );      

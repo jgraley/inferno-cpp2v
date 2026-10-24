@@ -33,7 +33,7 @@ DetectUncombableSwitch::DetectUncombableSwitch()
     sx_not->negand = sx_uswitch;
     s_switch->body = comp;
     s_switch->condition = expr;
-    comp->members = decls;
+
     comp->statements = (pre, x_not, target, post);
     x_not->negand = x_break;
     
@@ -182,7 +182,7 @@ DetectCombableBreak::DetectCombableBreak()
     x_not->negand = uswitch;
     swtch->condition = expr;
     swtch->body = comp;
-    comp->members = decls;
+
     comp->statements = (pre, delta, post);
     delta->through = s_ubreak;
     delta->overlay = r_break;
@@ -353,10 +353,10 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l1_r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("DEFAULT");
     auto l1_r_goto = MakePatternNode<Goto>();
     
-    l1_s_body->members = l1_decls;
+
     l1_s_body->statements = (l1_pre, l1_s_default, l1_post);
     
-    l1_r_body->members = l1_decls;
+
     l1_r_body->statements = (l1_r_goto, l1_pre, l1_r_label, l1_post);
     l1_r_goto->destination = l1_r_labelid;
     l1_r_label->identifier = l1_r_labelid;
@@ -378,11 +378,11 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l2_r_equal = MakePatternNode<Equal>();
     auto l2_exp = MakePatternNode<Expression>();
     
-    l2_s_body->members = l2_decls;
+
     l2_s_body->statements = (l2_pre, l2_s_case, l2_post);
     l2_s_case->value = l2_exp;
     
-    l2_r_body->members = l2_decls;
+
     l2_r_body->statements = (l2_r_if, l2_pre, l2_r_label, l2_post);
     l2_r_if->condition = l2_r_equal;
     l2_r_if->body = l2_r_goto;
@@ -411,12 +411,12 @@ SwitchToIfGoto::SwitchToIfGoto()
     auto l3_exp_lo = MakePatternNode<Expression>();
     auto l3_exp_hi = MakePatternNode<Expression>();
     
-    l3_s_body->members = l3_decls;
+
     l3_s_body->statements = (l3_pre, l3_s_case, l3_post);
     l3_s_case->value_lo = l3_exp_lo;
     l3_s_case->value_hi = l3_exp_hi;
     
-    l3_r_body->members = l3_decls;
+
     l3_r_body->statements = (l3_r_if, l3_pre, l3_r_label, l3_post);
     l3_r_if->condition = l3_r_and;
     l3_r_if->body = l3_r_goto;
@@ -543,7 +543,7 @@ LogicalAndToIf::LogicalAndToIf()
     
     s_and->operands = (op1, op2);
     
-    //r_comp->members = ();
+
     r_temp->identifier = r_temp_id;
     r_temp->type= r_boolean;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
@@ -574,7 +574,7 @@ LogicalOrToIf::LogicalOrToIf()
     
     s_or->operands = (op1, op2);
     
-    //r_comp->members = ();
+
     r_temp->identifier = r_temp_id;
     r_temp->type= r_boolean;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
@@ -609,7 +609,7 @@ ConditionalOperatorToIf::ConditionalOperatorToIf()
     s_mux->expr_else = op3;
     op2->pattern = type;
     
-    //r_comp->members = ();
+
     r_temp->identifier = r_temp_id;
     r_temp->type= type;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
@@ -670,7 +670,7 @@ ExtractCallParams::ExtractCallParams()
     s_call->callee = func_id;
     x_not->negand = x_id; // this restriction to become light-touch restriction
     
-    //r_ce->members = ();
+
     r_temp->identifier = r_temp_id;
     r_temp_id->sources = (id);
     r_temp->initialiser = MakePatternNode<Uninitialised>();

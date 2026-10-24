@@ -111,7 +111,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     
     l_func->identifier = func_id;
     l_func->initialiser = l_comp;
-    l_comp->members = (MakePatternNode<StarAgent, Declaration>());
+
     l_comp->statements = (MakePatternNode<StarAgent, Statement>(), l_lmap, MakePatternNode<StarAgent, Statement>(), l_stuff, MakePatternNode<StarAgent, Statement>());
     ls_goto->destination = var_id;
     ls_label->identifier = ls_label_id;
@@ -158,8 +158,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     thread->initialiser = l_delta_comp;
     l_delta_comp->through = s_comp;
     l_delta_comp->overlay = r_comp;
-    s_comp->members = (comp_membs);
-    r_comp->members = (comp_membs);
+
+
     s_comp->statements = (comp_stmts);
     r_comp->statements = (r_lmap, comp_stmts);
     s_module->members = (module_decls, gg);
@@ -294,14 +294,14 @@ AddStateEnumVar::AddStateEnumVar()
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Statement>( r_comp, ls_goto, lr_compound );
      
     s_gg->through = s_comp;
-    s_comp->members = (decls);
+
     s_comp->statements = (pre, s_goto, post); 
     s_goto->destination = s_sub;
     s_sub->destination = array;
     s_sub->index = s_index;
     s_index->pattern = type;
         
-    r_comp->members = (decls);
+
     r_comp->statements = (state_var, pre, s_goto, post); 
     state_var->identifier = state_var_id;
     state_var->type = type;    
@@ -333,7 +333,7 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     auto r_if = MakePatternNode<If>();
     auto r_equal = MakePatternNode<Equal>();
     
-    r_comp->members = s_comp->members = (decls);
+
     // Note: we can use the coupling gotooo twice here, without introducing
     // a requirement for two pointers to the same Goto node (which itself 
     // would imply multi-parenting). Couplings work by equality (and so a 
@@ -356,7 +356,7 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     r_if->body = r_body_comp;
     r_if->body_else = MakePatternNode<Nop>();
     r_equal->operands = (state_var_id, state_id);
-    //r_body_comp->members = ();
+
     r_body_comp->statements = body;
     
     Configure( SEARCH_REPLACE, s_comp, r_comp );
@@ -389,7 +389,7 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     auto sx_uncombable1 = MakePatternNode<Uncombable>();
     auto sx_uncombable2 = MakePatternNode<Uncombable>();
     
-    s_comp->members = r_comp->members = (decls);
+
     s_comp->statements = (pre, gotooo, label, body1, wait, body2, gotooo, post);
     r_comp->statements = (pre, label, r_if, gotooo, post);
     pre->restriction = sx_pre,
@@ -407,7 +407,7 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     r_if->body = r_body_comp;
     r_if->body_else = MakePatternNode<Nop>();
     r_equal->operands = (state_var_id, state_id);
-    //r_body_comp->members = ();
+
     r_body_comp->statements = (body1, wait, body2, gotooo);
     
     Configure( SEARCH_REPLACE, s_comp, r_comp );
@@ -437,7 +437,7 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     auto r_not_equal = MakePatternNode<NotEqual>();
     auto sx_uncombable = MakePatternNode<Uncombable>();
     
-    s_comp->members = r_comp->members = (decls);
+
     s_comp->statements = (pre, goto1, label, body);
     r_comp->statements = (pre, label, r_if, goto1);
     pre->restriction = sx_pre,
@@ -453,7 +453,7 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     r_if->body = r_body_comp;
     r_if->body_else = MakePatternNode<Nop>();
     r_equal->operands = (state_var_id, state_id);
-    //r_body_comp->members = ();
+
     r_body_comp->statements = body;
     // TODO: with the condition, superloop is exiting before the last state block has run
     r_if2->condition = r_not_equal;
@@ -483,7 +483,7 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     auto state_id = MakePatternNode<ResourceIdentifier>();
     auto label_star = MakePatternNode<StarAgent, LabelDeclaration>();
         
-    s_comp->members = r_comp->members = (decls);
+
     s_comp->statements = (pre, item_name, iif, item_extra, label_star, post);
     r_comp->statements = (pre, item_extra, label_star, item_name, iif, post);
     item_name->state = state_id;
@@ -524,7 +524,7 @@ ApplyTopPolicy::ApplyTopPolicy()
     auto sx_decl1 = MakePatternNode<Declaration>();
        
     s_all->conjuncts = (s_comp, s_stuff);
-    s_comp->members = r_comp->members = (decls);
+
     s_comp->statements = (decls2, stmts1, wait, body2, label, post);
     r_comp->statements = (decls2, label, r_if, post);
     s_stuff->terminus = gotoo;
@@ -537,7 +537,7 @@ ApplyTopPolicy::ApplyTopPolicy()
     r_if->condition = r_equal;
     r_equal->operands = (r_delta_count, r_zero);
     r_if->body = r_body_comp;
-    //r_body_comp->members = ();
+
     r_body_comp->statements = (stmts1, wait, body2, gotoo);
     r_if->body_else = MakePatternNode<Nop>();
     
@@ -557,7 +557,7 @@ EnsureResetYield::EnsureResetYield()
     auto gotoo = MakePatternNode<Goto>();
     auto r_yield = MakePatternNode<WaitDelta>();
     
-    s_comp->members = r_comp->members = (decls);
+
     s_comp->statements = (pre, gotoo, post);
     r_comp->statements = (pre, r_yield, gotoo, post);
     pre->restriction = sx_not;
@@ -604,7 +604,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
                       ? cond 
                       : TreePtr<Expression>(MakePatternNode<True>());
     r_do->body = embedded_ll;
-    //r_body_comp->members = ();
+
     r_body_comp->statements = (body);
     
     Configure( SEARCH_REPLACE, inst );

@@ -1543,11 +1543,6 @@ struct SequentialScope : virtual Statement
 {
     NODE_FUNCTIONS
 
-	// NOTE: NOW UNUSED
-	// Manual steps fill this in, but have been modified so that it has no effect.
-	// This is checked by having them not appear in VN renders
-    Collection<Declaration> members; 
-
     Sequence<Statement> statements; ///< Can contain local declarations and code
 	Production GetMyProductionTerminal() const override;	
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;

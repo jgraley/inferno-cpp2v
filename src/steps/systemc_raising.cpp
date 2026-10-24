@@ -205,7 +205,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_cons->permission = MakePatternNode<NonConst>();
     ls_cons->identifier = l_ident;
     ls_cons->initialiser = ls_comp;
-    ls_comp->members = l_cdecls;
+
     ls_comp->statements = (l_pre, ls_pcall, l_post);
     ls_cons->params = (l_ctype_param); // one parameter
     l_ctype_param->permission = MakePatternNode<NonConst>();
@@ -221,7 +221,7 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     lr_cons->permission = MakePatternNode<NonConst>();    
     lr_cons->identifier = l_ident;
     lr_cons->initialiser = lr_comp;
-    lr_comp->members = l_cdecls;
+
     lr_comp->statements = (l_pre, l_post);
     lr_cons->params = (l_ctype_param); // one parameter
     

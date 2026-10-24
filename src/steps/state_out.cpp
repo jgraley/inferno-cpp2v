@@ -46,11 +46,11 @@ GotoAfterWait::GotoAfterWait()
     anynode->terminus = delta;
     delta->through = wait;
     notmatch->negand = sx_comp;
-    sx_comp->members = sx_decls;
+
     sx_comp->statements = (sx_pre, wait, sx_goto, sx_post);    
     
     delta->overlay = r_comp;
-    //r_comp->members = ();
+
     r_comp->statements = (wait, r_goto, r_label);
     r_goto->destination = r_labelid;
     r_label->identifier = r_labelid;
@@ -73,11 +73,11 @@ GotoAfterWait::GotoAfterWait()
     auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("YIELD");
         
-    s_comp->members = (decls);
+
     s_comp->statements = (pre, wait, notmatch, post);
     notmatch->negand = sx_goto;
     
-    r_comp->members = (decls);
+
     r_comp->statements = (pre, wait, r_goto, r_label, notmatch, post);
     r_goto->destination = r_labelid;
     r_label->identifier = r_labelid;
@@ -112,14 +112,14 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     iif->condition = cond;
     iif->body = then_goto;
     iif->body_else = MakePatternNode<Nop>(); 
-    s_comp->members = ( decls );    
+
     s_comp->statements = ( pre, iif, post );    
-    sx_comp->members = ( decls );    
+
     sx_comp->statements = ( sx_pre, iif, sx_goto, sx_post );    
 
     label->identifier = label_id;
     r_goto->destination = label_id;
-    r_comp->members = ( decls );
+
     r_comp->statements = ( pre, iif, r_goto, label, post );
     
     Configure( SEARCH_REPLACE, s_all, r_comp );
@@ -145,7 +145,7 @@ CompactGotos::CompactGotos()
     s_if->condition = cond;
     s_if->body = s_then_goto;
     s_if->body_else = MakePatternNode<Nop>(); // standed conditional branch has no else clause - our "else" is the next statement
-    s_comp->members = ( decls );    
+
     s_comp->statements = ( pre, s_if, s_else_goto, post );    
 
     multiplexer->condition = cond;
@@ -153,7 +153,7 @@ CompactGotos::CompactGotos()
     multiplexer->expr_else = s_else_goto->destination;
     r_goto->destination = multiplexer;
     r_comp->statements = ( pre, r_goto, post );
-    r_comp->members = ( decls );    
+
         
     Configure( SEARCH_REPLACE, s_comp, r_comp );
 }
@@ -180,13 +180,13 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
         
     s_all->conjuncts = (s_comp, s_not);
     s_not->negand = sx_comp;
-    s_comp->members = ( decls );    
+
     s_comp->statements = ( pre, label, post );    
     label->identifier = label_id;
-    sx_comp->members = ( sx_decls );    
+
     sx_comp->statements = ( sx_pre, MakePatternNode<Goto>(), label, sx_post );
 
-    r_comp->members = ( decls );    
+
     r_comp->statements = ( pre, r_goto, label, post );
     r_goto->destination = label_id;
 
@@ -230,19 +230,19 @@ EnsureBootstrap::EnsureBootstrap()
     s_all->conjuncts = (s_not, s_body);
     s_not->negand = sx_body;
     // only exclude if there is a goto; a goto to anywhere will suffice to stmt_boot the state machine
-    sx_body->members = (MakePatternNode<StarAgent, Declaration>());
+
     sx_body->statements = (sx_pre, sx_goto, MakePatternNode<StarAgent, Statement>());     
     sx_pre->restriction = MakeResetAssignmentPattern();
     sx_goto->destination = MakePatternNode<LabelIdentifier>(); // must be a hard goto to exclude - otherwise might 
                                                            // have calculations in it which is no good for bootstrapping
     delta->overlay = r_body;
-    s_body->members = decls;
+
     s_body->statements = (pre, stop, post);
     pre->restriction = MakeResetAssignmentPattern();    
     stop->negand = MakeResetAssignmentPattern();
     r_label->identifier = r_labelid;
     r_goto->destination = r_labelid;
-    r_body->members = decls;
+
     r_body->statements = (pre, r_goto, r_label, stop, post);    
 
     Configure( SEARCH_REPLACE, fn );
@@ -275,12 +275,12 @@ AddStateLabelVar::AddStateLabelVar()
             
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Statement>( r_comp, ls_goto, lr_compound );
      
-    s_comp->members = (decls);
+
     s_comp->statements = (pre, sx_goto, post); 
     sx_goto->destination = sx_not;
     sx_not->negand = MakePatternNode<ResourceIdentifier>();
         
-    r_comp->members = (decls);
+
     r_comp->statements = (state_var, pre, sx_goto, post); 
     state_var->identifier = state_var_id;
     state_var->type = MakePatternNode<Labeley>();    
@@ -317,13 +317,13 @@ EnsureSuperLoop::EnsureSuperLoop()
     sx_stuff->terminus = sx_goto;
     sx_stuff->recurse_restriction = sx_not;
     sx_not->negand = MakePatternNode<Do>();
-    s_body->members = (decls);
+
     s_body->statements = (pre, first_goto, post);
     pre->restriction = s_limit;
     s_limit->negand = MakePatternNode<Goto>();
     
     delta->overlay = r_body;
-    r_body->members = (decls);
+
     r_body->statements = (pre, r_loop);
     r_loop->body = r_loop_body;
     r_loop_body->statements = (first_goto, post);
@@ -349,11 +349,11 @@ ShareGotos::ShareGotos()
     loop->body = delta;
     loop->condition = MakePatternNode<SpecificInteger>(1);
     delta->through = s_body;
-    s_body->members = (decls);
+
     s_body->statements = (first_goto, pre, first_goto, post);    
 
     delta->overlay = r_body;
-    r_body->members = (decls);
+
     r_body->statements = (first_goto, pre, r_goto, post, r_label);    
     r_label->identifier = r_labelid;
     r_goto->destination = r_labelid;
@@ -380,7 +380,7 @@ SwitchCleanUp::SwitchCleanUp()
 
     s_switch->condition = cond;
     s_switch->body = s_body;
-    s_body->members = decls;
+
     s_body->statements = (main, label, tail);
     main->restriction = sx_not_main;
     sx_not_main->negand = MakePatternNode<Break>();
@@ -391,7 +391,7 @@ SwitchCleanUp::SwitchCleanUp()
     r_comp->statements = (r_switch, label, tail);
     r_switch->condition = cond;
     r_switch->body = r_body;
-    r_body->members = decls;
+
     r_body->statements = (main);    
     
     Configure( SEARCH_REPLACE, s_switch, r_comp );        
@@ -415,11 +415,11 @@ InferBreak::InferBreak()
 
     auto embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Breakable>( breakable, ls_goto, lr_break ); // todo restrict to not go through more breakables
 
-    s_comp->members = decls;
+
     s_comp->statements = (pre, breakable, label, post);
     label->identifier = label_id;
     
-    r_comp->members = decls;
+
     r_comp->statements = (pre, embedded, post); 
     
     Configure( SEARCH_REPLACE, s_comp, r_comp );        
@@ -442,9 +442,9 @@ FixFallthrough::FixFallthrough()
     auto s_not1 = MakePatternNode<NegationAgent, Statement>();
     auto s_not2 = MakePatternNode<NegationAgent, Statement>();
     
-    s_comp->members = (decls);
+
     s_comp->statements = (pre, case1, cb1,              case2, cb2, breakk, post);
-    r_comp->members = (decls);
+
     r_comp->statements = (pre, case1, cb1, cb2, breakk, case2, cb2, breakk, post);
     cb1->restriction = s_not1;
     s_not1->negand = MakePatternNode<Break>();
@@ -507,15 +507,15 @@ AddYieldFlag::AddYieldFlag()
     fn->initialiser = func_over;
     fn->identifier = fn_id;  
     func_over->through = s_func_comp;    
-    s_func_comp->members = (func_decls);
+
     s_func_comp->statements = (func_pre, loop);
     loop->body = delta;
     delta->through = s_comp;
-    s_comp->members = decls;
+
     s_comp->statements = (stmts);
     stmts->restriction = MakePatternNode<If>(); // anti-spin
     func_over->overlay = embedded_m; 
-    r_func_comp->members = (func_decls);
+
     r_flag_init->operands = (r_flag_id, MakePatternNode<False>());
     r_func_comp->statements = (func_pre, loop);
     r_flag_decl->identifier = r_flag_id;
@@ -523,7 +523,7 @@ AddYieldFlag::AddYieldFlag()
     r_flag_decl->initialiser = MakePatternNode<Uninitialised>();
     r_flag_decl->permission = MakePatternNode<NonConst>();        
     delta->overlay = embedded;
-    r_comp->members = (decls, r_flag_decl);
+
     r_comp->statements = (r_flag_init, stmts);
 
     ls_if->condition = l_equal;
@@ -534,14 +534,14 @@ AddYieldFlag::AddYieldFlag()
     lr_not->operands = (r_flag_id);
 
     ms_all->conjuncts = (ms_comp, ms_not);
-    ms_comp->members = (m_decls);
+
     ms_comp->statements = (m_pre, m_wait, m_post);
     ms_not->negand = msx_comp;
-    msx_comp->members = msx_decls;
+
     msx_comp->statements = (msx_pre, msx_assign, msx_post);
     msx_assign->operands = (r_flag_id, MakePatternNode<BoolLiteral>());
 
-    mr_comp->members = (m_decls);
+
     mr_comp->statements = (m_pre, m_wait, mr_assign, m_post);
     mr_assign->operands = (r_flag_id, MakePatternNode<True>());
 
@@ -577,7 +577,7 @@ AddInferredYield::AddInferredYield()
     fn->access = MakePatternNode<Private>();
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  
-    func_comp->members = (func_decls);
+
     flag_decl->type = MakePatternNode<Boolean>();
     flag_decl->initialiser = MakePatternNode<Uninitialised>();
     flag_decl->identifier = flag_id;
@@ -585,16 +585,16 @@ AddInferredYield::AddInferredYield()
     loop->body = delta;
     delta->through = s_all;
     s_all->conjuncts = (s_comp, s_notmatch);
-    s_comp->members = (flag_decl);
+
     s_comp->statements = (stmts);
     s_notmatch->negand = sx_comp;
-    sx_comp->members = (flag_decl);
+
     sx_comp->statements = (sx_pre, sx_if);
     sx_if->condition = sx_not;
     sx_not->operands = (flag_id);
     
     delta->overlay = r_comp;
-    r_comp->members = (flag_decl);
+
     r_comp->statements = (stmts, r_if);
     r_if->condition = r_not;
     r_not->operands = (flag_id);
@@ -629,23 +629,23 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     fn->initialiser = func_over;
     fn->identifier = fn_id;  
     func_over->through = s_func_comp;
-    s_func_comp->members = (func_decls);
+
     s_func_comp->statements = (first_init, inits, loop);
     loop->body = delta;
     delta->through = s_comp;
-//    s_comp->members = ();
+
     s_comp->statements = (stmts);    
     
     func_over->overlay = r_func_comp;
-    r_func_comp->members = (func_decls);
+
     r_func_comp->statements = (loop);
     delta->overlay = r_comp;
-//    r_comp->members = ();
+
     r_comp->statements = (r_if, stmts);
     r_if->condition = r_equal;
     r_equal->operands = ( MakePatternNode<DeltaCount>(), MakePatternNode<SpecificInteger>(0) );    
     r_if->body = r_if_comp;
-//    r_if_comp->members = ();
+
     r_if_comp->statements = (first_init, inits);//, MakePatternNode<WaitDelta>());
     r_if->body_else = MakePatternNode<Nop>();
     
@@ -664,8 +664,6 @@ LoopRotation::LoopRotation()
     auto thread = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce SC stuff
     auto func_decls = MakePatternNode<StarAgent, Declaration>();
     auto s_enums = MakePatternNode<StarAgent, Declaration>();
-    auto comp_loop_decls = MakePatternNode<StarAgent, Declaration>();
-    auto comp_yield_decls = MakePatternNode<StarAgent, Declaration>();
     auto x_comp_decls = MakePatternNode<StarAgent, Declaration>();
     auto s_cur_enum = MakePatternNode<Enumerator>();
     auto s_outer_enum = MakePatternNode<Global>();
@@ -721,7 +719,7 @@ LoopRotation::LoopRotation()
     thread->access = MakePatternNode<Private>();
     thread->initialiser = func_comp;
     thread->identifier = fn_id;  
-    func_comp->members = (func_decls); 
+
     s_enum->identifier = s_enum_id;
 	s_enum->members = (s_enums, s_cur_enum);
     s_cur_enum->identifier = s_cur_enum_id;
@@ -733,7 +731,6 @@ LoopRotation::LoopRotation()
     loop->body = delta;
     delta->through = s_all;
     s_all->conjuncts = (s_comp_loop, s_comp_yield, s_notmatch);
-    s_comp_loop->members = (comp_loop_decls);
     // Search for a loop. Assume that a state enum value in a body means "could transition to the state" and one in
     // the condition means "acts on the state". If we see the latter with the former blow it somewhere, we call
     // it a loop and assume the upward branch is normally takner as with C compilers.    
@@ -746,7 +743,6 @@ LoopRotation::LoopRotation()
     loop_bottom_stuff_enum->terminus = s_cur_enum_id;
     loop_bottom_notmatch->negand = loop_bottom_stuff_noyield;
     loop_bottom_stuff_noyield->terminus = MakePatternNode<Wait>();    
-    s_comp_yield->members = (comp_yield_decls);
     
     // We need to restruct to loops that contain a yield anywhere but the bottom - these are the ones
     // that would benefit from loop rotation.
@@ -758,7 +754,7 @@ LoopRotation::LoopRotation()
     // the current one, if it does not end in a yield, then do not transform. This way the outer loop will
     // keep getting hits until the yield is at the bottom, then inner loops can have a go.
     s_notmatch->negand = sx_comp;
-    sx_comp->members = (x_comp_decls);
+
     sx_comp->statements = (prepre, outer_top, postpre, inner_state, prepost, outer_bottom, postpost);
     outer_top->condition = outer_top_stuff;
     outer_top_stuff->terminus = outer_top_equal;
@@ -771,7 +767,7 @@ LoopRotation::LoopRotation()
     inner_state->disjuncts = (loop_top, loop_bottom); // outer loop can share top or bottom state with inner loop; but not both, so at least one must be here
    
     delta->overlay = r_comp;
-    r_comp->members = (comp_loop_decls);
+
     r_comp->statements = (comp_loop_pre, loop_bottom, loop_top, loop_body, comp_loop_post);    // rotated version of s_comp_loop
         
     Configure( SEARCH_REPLACE, thread );            

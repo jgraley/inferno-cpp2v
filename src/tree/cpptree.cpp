@@ -3024,8 +3024,6 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 	policy.context = make_shared<any>(); // No access specs here
       
     string s = "({ ";
-	for( TreePtr<Declaration> m : members )    
-		s += renderer->DoRender( &m, Syntax::Production::STMT_DECL, policy );       
 	for( TreePtr<Statement> st : statements )    
 		s += renderer->DoRender( &st, Syntax::Production::STMT_DECL_LOW, policy );    
 	return s + " })";
