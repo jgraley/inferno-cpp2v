@@ -1427,9 +1427,17 @@ list<string> Resource::RenderMiddlePart( VN::RendererInterface *renderer, Policy
 		     renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) };
 }
 
-
+#include "vn/agents/star_agent.hpp"
 TreePtr<Node> Resource::OnIdentifier( TreePtr<Node> id, Location loc)
 {
+	// Apply a bit of "Star zipping" for the case where we parsed Enumeration(★) (which is illegal)
+	// when we wanted just ★. Star zipping is discussed in #883 (see comment), and after doing that 
+	// we hopefully won't need this. TODO remove, and the #include "vn/agents/star_agent.hpp"
+	if( id )
+		if( auto agent = VN::Agent::TryAsAgentConst(id) )
+			if( dynamic_cast<const VN::StarAgent *>(agent) )
+				return id;	
+				
 	if( id && !VN::Agent::TryAsAgentConst(id) && !TreePtr<ResourceIdentifier>::DynamicCast(id) )
 		throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(loc),

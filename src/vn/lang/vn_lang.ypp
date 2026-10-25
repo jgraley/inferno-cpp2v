@@ -612,8 +612,8 @@ enum			: enum_scope '{' enumerators '}'		 					{ $$ = $1.node->OnMembers( $3, @3
 				| enum_scope '{' '}'		 								{ $$ = $1.node; }
              
 enum_scope      : enum_node declaring_type_id       							{ $$ = { $1->OnIdentifier($2, @2), 
-																		             vn->MakeRecordScopeGnomon($1) }; 
-																			  vn->AddGnomon($$.gnomon); } 
+																		                 vn->MakeRecordScopeGnomon($1) }; 
+																				  vn->AddGnomon($$.gnomon); } 
 																			  
 enum_node		: ENUM_KEYWORD												
                                                                                                                                                        
