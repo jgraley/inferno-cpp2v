@@ -171,7 +171,7 @@
 stmt_low 
 stmt_high
 	
-%type <TreePtr<Node>> 				sed_boot stmt_expr_boot sed_entry stmt_expr_entry stmt_expr_disj stmt_expr_conj stmt_expr 
+%type <TreePtr<Node>> 				sed_boot sed_entry stmt_expr_entry stmt_expr_disj stmt_expr_conj stmt_expr 
 %type <TreePtr<Node>> 				stmt_expr_entry_nc stmt_expr_disj_nc stmt_expr_conj_nc stmt_expr_nc 
 %type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational 
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
@@ -187,7 +187,7 @@ stmt_high
 %type <TreePtr<Node>> 				arrival
 %type <TreePtr<Node>> 				stmt_decl bare_statement statement_nca statement control_stmt_sign       
 %type <TreePtr<Node>>   			statement_nc 
-%type <TreePtr<Node>> 				open_declaration decl_boot decl_entry decl_disjunction decl_conjunction declaration 
+%type <TreePtr<Node>> 				open_declaration decl_entry decl_disjunction decl_conjunction declaration 
 %type <TreePtr<Node>> 				prototype bare_decl_nvn comp_decl_nvn bare_declaration bare_initialiser
 %type <TreePtr<Node>> 				assign_init
 %type <TreePtr<Node>> 				decl_prefix decl_postfix decl_primary decl_vn_prim
@@ -203,7 +203,7 @@ stmt_high
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					new_vn_name
 %type <list<shared_ptr<VN::Command>>>	commands sep_commands  
-%type <list<shared_ptr<VN::Command>>>	stmt_expr_commands decl_commands acc_memb_commands expr_commands unified_commands sed_commands
+%type <list<shared_ptr<VN::Command>>>	acc_memb_commands expr_commands unified_commands sed_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth
 %type <VN::Itemisation>				itemisation items_bare items_sep
@@ -331,16 +331,15 @@ code_unit_decls	: code_unit_decl
 				| code_unit_decl code_unit_decls								{ $$ = $1 + $2; }
 
 code_unit_decl	: declaration													{ $$ = {$1}; }
-				| DESIGNATED_NORMAL	';'											{ $$ = {$1}; }
-				| pure_wildcard ';'												{ $$ = {$1}; }
+				| statement														{ $$ = {$1}; }
 
 //////////////////////////////// DECLARATIONS ////////////////////////////////////         
 
-decl_boot		: decl_entry								
+/*decl_boot		: decl_entry								
 				| decl_commands										{ $$ = vn->OnEmbeddedCommands($1); }
 
 decl_commands	: decl_entry COMMAND_TERM commands					{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
-
+*/
 decl_entry		: decl_disjunction
 
 decl_disjunction	: decl_conjunction
@@ -395,26 +394,16 @@ assign_init		: expression
 				| '{' comma_sep_exprs '}'      							{ $$ = vn->OnArrayInitialiser()->OnArgsList($2, @2); }               
 
 decl_prefix : decl_postfix
-			| 						         GREEN_GRASS_OP decl_prefix	{ $$ = vn->OnGrass($2); }
-			| 							      POINTER_IS_OP decl_prefix	{ $$ = vn->OnPointerIs($2); }
-			| 							        NEGATION_OP decl_prefix	{ $$ = vn->OnNegation($2); }			
-			// Allows ‽Member to actually get us into access/member column so can have access spec
-			|        			 prerestrict_decl_start acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
 			   			 
 decl_postfix: decl_primary		   
 	                                       
 decl_primary: decl_vn_prim
-			| '(' decl_boot ')'														{ $$ = $2; } 
 						
 decl_vn_prim: decl_full_explicit_start itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
-			| DELTA_COMPARE_OP decl_boot DELTA_REPLACE_OP decl_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 			
 decl_full_explicit_start 	: EXPLICIT_DECL								{ $$ = vn->MakeScopeGnomonForNode($1); 
 																		  vn->AddGnomon($$.gnomon); }                                                                                  
-                                         
-prerestrict_decl_start : PRERESTRICT_DECL     						    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
-                                                                          vn->AddGnomon($$); }
-                                                                          
+                                                                                                                   
 memb_inits	: memb_inits ',' memb_init_entry							{ $$ = $1; $$.push_back($3); }
 			| memb_init_entry											{ $$ = {$1}; }
 
@@ -431,7 +420,7 @@ memb_init_prefix: memb_init_postfix
 				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN memb_init_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
         
 memb_init_postfix	: memb_init_primary
-					| memb_init_primary '(' stmt_expr_boot ')'						{ $$ = vn->OnMemberInitialiser($1, @2, $3, @3); }
+					| memb_init_primary '(' sed_boot ')'						{ $$ = vn->OnMemberInitialiser($1, @2, $3, @3); }
 
 memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2; }
 					| DELTA_COMPARE_OP memb_init_boot DELTA_REPLACE_OP memb_init_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
@@ -624,11 +613,11 @@ sed_entry		: stmt_expr_entry
 				| decl_entry
 
 
-stmt_expr_boot	: stmt_expr_entry 
+/*stmt_expr_boot	: stmt_expr_entry 
 				| stmt_expr_commands								{ $$ = vn->OnEmbeddedCommands($1); }
 
 stmt_expr_commands	: stmt_expr_entry COMMAND_TERM commands			{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
-          
+  */        
 stmt_expr_entry	: stmt_expr_disj
 
 stmt_expr_disj	: stmt_expr_conj
@@ -694,7 +683,7 @@ statement_nca	: bare_statement ';'
 
 bare_statement	: KEYWORD_SIMPLE_STMT										
 				| KEYWORD_SIMPLE_STMT expression							{ $$ = $1->OnArgsList({$2}, @2); }
-				| DO_KEYWORD statement WHILE_KEYWORD '(' stmt_expr_boot ')'	{ $$ = $1->OnBody($2, @2)->OnArgsList({$5}, @5); } // TODO a While node is gobbled up here
+				| DO_KEYWORD statement WHILE_KEYWORD '(' sed_boot ')'	{ $$ = $1->OnBody($2, @2)->OnArgsList({$5}, @5); } // TODO a While node is gobbled up here
 				| expression 											// TODO Should come in under bare_statement but conflicts #905
 
 control_stmt_sign 	: KEYWORD_CONTROL_STMT
@@ -778,6 +767,7 @@ expr_prefix : expr_postfix
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
 			|                        PRERESTRICT_NORMAL expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|        			 prerestrict_decl_start acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
 			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 			| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
@@ -800,13 +790,16 @@ expr_postfix: expr_primary
 			| FUNC_ON_TYPE '(' type_boot ')'       						{ $$ = $1->OnType($3, @3); }			
 		
 expr_primary: id_primary  
-			| '(' stmt_expr_boot ')'                       		{ $$ = $2; }
+			| '(' sed_boot ')'                       			{ $$ = $2; }
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL									
 			| KEYWORD_PRIMARY_OP							
 			| DESIGNATED_COMPOUND      				  			// TODO move up into the statement rules once we don't need to support eg int main() = my_compound
 			| INIT_SIGN
+			
+prerestrict_decl_start : PRERESTRICT_DECL     				    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
+                                                                  vn->AddGnomon($$); }		
 			
 //////////////////////////////// DECLARING IDS ////////////////////////////////////                 
 // Identifiers to use in C declaring constructs. We can designate here.
@@ -855,7 +848,7 @@ id_parens	: id_primary
 			| '(' id_boot ')'										{ $$ = $2; }
 
 id_primary  : vn_primary
-			| DELTA_COMPARE_OP stmt_expr_boot DELTA_REPLACE_OP stmt_expr_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
+			| DELTA_COMPARE_OP sed_boot DELTA_REPLACE_OP sed_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 			| norm_full_explicit_start itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 
 vn_primary	: pure_wildcard
@@ -926,7 +919,7 @@ type_primary: type_vn_prim
             | TYPE_SIGN														
             | TYPE_W_PARAMS_SIGN parameterisation								{ $$ = $1->OnParams($2, @2); }		
 			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }				
-			| TYPE_INDICATOR '(' type_id ')'									{ $$ = $3; } // See #909
+			| TYPE_INDICATOR TYPE_INDICATOR '(' type_id ')'						{ $$ = $4; } // See #909
 			
 type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DELTA_COMPARE_OP type_boot DELTA_REPLACE_OP type_boot DELTA_END_OP { $$ = vn->OnDelta($2, $4); }

@@ -157,12 +157,12 @@ string Type::UseAnonymousDeclarator(VN::RendererInterface *renderer, Production 
 	// Declarator may be needed so enter declarator vcall but ask for anonymous by
 	// setting declarator string to "". This corresponds to a type-id in https://alx71hub.github.io/hcb/ 
 	// type-id is hard for the parser to differentiate from a declarator, potentially needing 
-	// lots of look-ahead. So clarify using ⍑ symbol. See #888
+	// lots of look-ahead. So clarify using ⍑⍑ symbol. See #888
 	if( policy.disambiguate_type_id )
 		surround_prod = Production::BOOT_TYPE;
 	string s = GetRenderTypeAndDeclarator( renderer, "", Production::ANONYMOUS, surround_prod, policy, MakeTreeNode<NonConst>() );
 	if( policy.disambiguate_type_id )
-		s = "⍑ (" + s + ")"; 
+		s = "⍑⍑(" + s + ")"; 
 	return s;
 }
 
