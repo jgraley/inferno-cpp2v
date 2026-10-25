@@ -37,7 +37,6 @@ GlobalScopeToModule::GlobalScopeToModule()
 	auto er_scope = MakePatternNode< CodeUnit >();
 	auto er_member = MakePatternNode<Member>();
 	auto es_id = MakePatternNode<ResourceIdentifier>();
-	auto es_constancy = MakePatternNode<Permission>();
 #ifdef ALSO_MOVE_VARS
 	auto es_id_all = MakePatternNode<ConjunctionAgent, ResourceIdentifier>();
 	auto es_id_not = MakePatternNode<NegationAgent, ResourceIdentifier>();
@@ -61,7 +60,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 	es_scope->members = ( es_gmodule, es_instance, es_decls );
 	// Act on all Instance types, which includes functions, variable and 
 	// constants but excludes user types (incl classes) and labels
-	es_instance->permission = es_constancy;
+	es_instance->permission = MakePatternNode<NonConst>();
 #ifdef ALSO_MOVE_VARS
 	es_instance->type = MakePatternNode<Type>(); 
 #else
@@ -80,7 +79,7 @@ GlobalScopeToModule::GlobalScopeToModule()
 	er_scope->members = ( er_gmodule, es_decls );
 	er_gmodule->identifier = es_gmodule_name;
 	er_gmodule->members = ( es_gmodule_decls, er_member );
-	er_member->permission = es_constancy;
+	er_member->permission = MakePatternNode<NonConst>();
 	er_member->type = es_instance->type;
 	er_member->identifier = es_id;
 	er_member->initialiser = es_instance->initialiser;

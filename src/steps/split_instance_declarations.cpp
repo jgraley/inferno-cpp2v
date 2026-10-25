@@ -18,8 +18,6 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     si->permission = MakePatternNode<NonConst>();  // Cannot split const
     si->identifier = MakePatternNode<ResourceIdentifier>();  // Only acting on initialised Instances
     si->initialiser = MakePatternNode<Expression>();  // Only acting on initialised Instances
-    auto decls = MakePatternNode<StarAgent, Declaration>();
-    sc->members = { decls };
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
     sc->statements = ( pre, delta, post );
@@ -30,7 +28,6 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     delta->overlay = ri;
     ri->permission = MakePatternNode<NonConst>();  
     ri->initialiser = MakePatternNode<Uninitialised>();
-    rc->members = ( decls );
     auto ra = MakePatternNode<Assign>();
     ra->operands = ( si->identifier, si->initialiser );
     rc->statements = ( pre, delta, ra, post );
@@ -45,7 +42,6 @@ MoveDeclarationsToTheTop::MoveDeclarationsToTheTop()
     // so we move Instance and TypeDeclaration but not LabelDeclaration, which maybe 
     // shouldn't be a Declaration at all.
     auto sc = MakePatternNode<Compound>();
-    auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre_decls = MakePatternNode<StarAgent, AdvanceDecl>();
     auto first_non_decl = MakePatternNode<NegationAgent, Statement>();
     auto post_any = MakePatternNode<StarAgent, Statement>();
@@ -54,14 +50,12 @@ MoveDeclarationsToTheTop::MoveDeclarationsToTheTop()
     auto x_post = MakePatternNode<NegationAgent, Statement>();
 
 	// Carefully preserve the relative order of the decls, as well as the statements.
-    sc->members = ( decls );
     sc->statements = ( pre_decls, first_non_decl, mid_not_decls, mid_decl, post_any );
     first_non_decl->negand = MakePatternNode<AdvanceDecl>();
     mid_not_decls->restriction = x_post;
     x_post->negand = MakePatternNode<AdvanceDecl>();
 	
     auto rc = MakePatternNode<Compound>();
-    rc->members = ( decls ); // Instance now in unordered decls part
     rc->statements = ( pre_decls, mid_decl, first_non_decl, mid_not_decls, post_any );
 
     Configure( SEARCH_REPLACE,sc, rc);

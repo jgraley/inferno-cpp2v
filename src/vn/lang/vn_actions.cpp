@@ -520,10 +520,20 @@ TreePtr<Node> VNLangActions::OnXStructorDecl( bool con, Syntax::Location loc )
 void VNLangActions::UpdateCurrentAccess( Syntax::Location loc, TreePtr<Node> access )
 {
 	// OnInstance() will still try to program the current access. But this fn will try to update it.
+ 		stringstream ss;
+		ss << any_cast<YY::VNLangParser::location_type>(loc);
+//     ... ss.str() ...
 
 	// If we're in a record scope, update the stored access spec for future fields to use
 	if( shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon() )	
+	{
 		spg->UpdateContext(loc, access);
+		FTRACE("Setting ")(access)(" at ")(ss.str())("\n");
+	}
+	else
+	{
+		FTRACE("DISCARDING ")(access)(" at ")(ss.str())("\n");
+	}
 }
 
 

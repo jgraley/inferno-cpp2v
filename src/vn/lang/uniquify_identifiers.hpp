@@ -99,11 +99,13 @@ public:
     NodeToNameMap UniquifyAll( const TransKit &kit, TreePtr<Node> context );
     const LinkSetByNode &GetIncomingLinksMap() const;
     const NodeOrdering &GetNodesInDepthFirstPostOrder() const;
+    const string &GetMapAsString() const { return map_as_string; }
                                
 private:
 	const Policy policy;
 	Fingerprinter fingerprinter;
 	NodeOrdering nodes_in_dfpo;
+    string map_as_string; // for debug	
 };
 
 

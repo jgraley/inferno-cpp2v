@@ -46,14 +46,14 @@ AutosToModule::AutosToModule()
     sx_not->negand = sx_stuff;
     sx_stuff->terminus = sx_call;
     sx_call->argumentation = sx_args;
-    s_comp->members = (vdecls);
+
     s_comp->statements = (vstmts_pre, s_var, vstmts_post);
     s_var->type = type;
     s_var->identifier = var_id;
     s_var->initialiser = var_init;
      
     delta->overlay = r_comp;
-    r_comp->members = (vdecls);
+
     r_comp->statements = (vstmts_pre, vstmts_post);
     r_var->type = type;
     r_var->identifier = var_id;
@@ -101,7 +101,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     // TODO recurse restriction for locally declared classes
     stuff->terminus = delta;
     delta->through = s_comp;
-    s_comp->members = (vdecls);
+
     s_comp->statements = (vstmts_pre, s_tempvar, vstmts_post);
     var->disjuncts = (s_tempvar, s_staticvar);
      
@@ -121,7 +121,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     r_var->initialiser = var_initialiser;
      
     delta->overlay = r_comp;
-    r_comp->members = (vdecls);
+
     r_comp->statements = (vstmts_pre, vstmts_post);
     
     Configure( SEARCH_REPLACE, s_rec, r_rec );
@@ -152,11 +152,11 @@ DeclsToModule::DeclsToModule()
     // TODO recurse restriction for locally declared classes
     stuff->terminus = delta;
     delta->through = s_comp;
-    s_comp->members = (vdecls);
+
     s_comp->statements = (vstmts_pre, ut, vstmts_post);
      
     delta->overlay = r_comp;
-    r_comp->members = (vdecls);
+
     r_comp->statements = (vstmts_pre, vstmts_post);
     
     Configure( SEARCH_REPLACE, s_rec, r_rec );
@@ -197,7 +197,7 @@ ThreadToMethod::ThreadToMethod()
     s_thread->access = MakePatternNode<Private>();
     s_thread->initialiser = s_comp;
     s_thread->identifier = id;
-//    s_comp->members = (); important - locals in the body scope not allowed, they would lose their values every iteration in SC_METHOD
+
     s_comp->statements = s_loop;
     s_loop->condition = s_loop_cond; 
     s_loop->body = s_loop_comp;
@@ -249,7 +249,7 @@ AddEnableFlag::AddEnableFlag()
     auto mr_if = MakePatternNode<If>();
     auto m_over = MakePatternNode<DeltaAgent, Statement>();
     
-    m_comp->members = (m_decls);
+
     m_comp->statements = (m_pre, m_stuff, m_mid, m_over, m_post);
     m_stuff->terminus = m_return;
     m_return->return_value = m_uninit;
@@ -274,8 +274,8 @@ AddEnableFlag::AddEnableFlag()
     s_return->return_value = s_uninit;
     l_delta_comp->through = s_comp;
     l_delta_comp->overlay = r_comp;
-    s_comp->members = (decls);
-    r_comp->members = (decls);
+
+
     s_comp->statements = (stmts);
     r_comp->statements = (r_flag, stmts);
     r_flag->type = r_boolean;

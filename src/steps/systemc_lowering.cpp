@@ -277,7 +277,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     s_cons_macro->identifier = macro_cons_id;
     s_cons_macro->arguments = (macro_args);
     s_cons_macro->initialiser = s_comp;
-    s_comp->members = cdecls;
+
     s_comp->statements = (pre);
     pre->restriction = statements_negation;
     statements_negation->negand = sx_process_macro;
@@ -289,7 +289,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     r_cons_macro->identifier = macro_cons_id;
     r_cons_macro->arguments = macro_args;
     r_cons_macro->initialiser = r_comp;
-    r_comp->members = cdecls;
+
     r_comp->statements = (pre, r_process_macro);
     r_process_macro->identifier = token;
     r_process_macro->arguments = (id);

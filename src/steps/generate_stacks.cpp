@@ -48,16 +48,16 @@ ExplicitiseReturn::ExplicitiseReturn()
     //s_func->return_type = MakePatternNode< Void >();
     // TODO bring back constraint that only void functions need return added and see #932
     fi->initialiser = delta;
-    s_comp->members = decls;
+
     s_comp->statements = (pre);
     delta->through = s_all;
     s_all->conjuncts = (s_comp, s_not);
     s_not->negand = sx_comp;
-    sx_comp->members = sx_decls;
+
     sx_comp->statements = (sx_pre, sx_return);
     
     delta->overlay = r_comp;
-    r_comp->members = decls;
+
     r_comp->statements = (pre, r_return);
     r_return->return_value = MakePatternNode<Uninitialised>();
     
@@ -92,7 +92,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     auto id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("temp_ret_value");
     r_newvar->identifier = id;
     r_newvar->initialiser = MakePatternNode<Uninitialised>();
-    // r_sub_comp->members = ();
+
     auto r_assign = MakeTreeNode<Assign>();
     r_assign->operands.push_back( id );
     r_assign->operands.push_back( retval );
@@ -164,14 +164,14 @@ ReturnViaTemp::ReturnViaTemp()
 	func->access = func_access;        
     l_delta_comp->through = s_body;
     func->identifier = func_id;
-    s_body->members = (locals);
+
     s_body->statements = (statements);
     cp->params = (params);  
     cp->return_type = overcp;
     overcp->through = return_type;
     return_type->negand = sx_void;
     l_delta_comp->overlay = embedded_l;
-    r_body->members = (locals);
+
     r_body->statements = (statements);
     overcp->overlay = MakePatternNode<Void>();
     r_retval->initialiser = MakePatternNode<Uninitialised>();
@@ -240,7 +240,7 @@ AddLinkAddress::AddLinkAddress()
 
     ll_gg->through = ll_return;
     ll_over->overlay = llr_comp;        
-    //llr_comp->members = ();
+
     llr_comp->statements = (llr_assign, ll_return);
     llr_assign->operands = (lr_temp_retaddr_id, lr_retaddr_id);
    
@@ -271,10 +271,10 @@ AddLinkAddress::AddLinkAddress()
     func->identifier = l_inst_id;
     func->access = func_access;    
     l_over->through = ls_comp;
-    ls_comp->members = (l_decls);
+
     ls_comp->statements = (l_stmts);
     l_over->overlay = embedded_ll;
-    lr_comp->members = (l_decls);
+
     lr_comp->statements = (lr_temp_retaddr, l_stmts);
     lr_retaddr->identifier = lr_retaddr_id;
     lr_retaddr->type = MakePatternNode<Labeley>();
@@ -359,8 +359,8 @@ ParamsViaTemps::ParamsViaTemps()
     r_func->identifier = func_id;
     s_func->access = func_access;
     r_func->access = func_access;
-    s_body->members = (locals);
-    r_body->members = (locals);
+
+
     s_body->statements = (statements);
     r_body->statements = (r_param, statements);
     s_cp->params = (params, s_param);  
@@ -458,7 +458,7 @@ GenerateStacks::GenerateStacks()
     // EmbeddedSearchReplace search to find automatic variables within the function
     stuff->terminus = overlay;
     overlay->through = s_vcomp;
-    s_vcomp->members = (vdecls);
+
     s_vcomp->statements = (vstmts_pre, s_instance, vstmts_post);
     s_instance->identifier = s_identifier;
     s_instance->initialiser = MakePatternNode<Uninitialised>(); 
@@ -468,7 +468,7 @@ GenerateStacks::GenerateStacks()
     r_instance->permission = MakePatternNode<NonConst>();
     r_instance->initialiser = MakePatternNode<Uninitialised>();
     overlay->overlay = r_embedded;
-    r_vcomp->members = (vdecls);
+
     r_vcomp->statements = (vstmts_pre, vstmts_post);
     r_identifier->sources = (s_identifier);
     r_instance->identifier = r_identifier;
@@ -482,7 +482,7 @@ GenerateStacks::GenerateStacks()
     s_gg->through = ret;
 
     // EmbeddedSearchReplace replace with a decrement of the stack index coming before the return
-    //r_ret_comp->members = ( r_ret_decls );
+
     r_ret_dec->operands = ( r_index_identifier );
     r_ret_comp->statements = ( r_ret_dec, ret );
 
@@ -514,7 +514,7 @@ GenerateStacks::GenerateStacks()
     r_fi->dispatch = MakePatternNode<NonVirtual>();
     r_fi->access = MakePatternNode<Private>();
 
-    s_top_comp->members = ( top_decls );
+
     s_top_comp->statements = ( top_pre );
 
     // Construct limitation - restrict top-level search to functions that contain an automatic variable
@@ -523,7 +523,7 @@ GenerateStacks::GenerateStacks()
 
     // Master replace - insert index variable, inc and dec into function at top level
     // top-level decls
-    r_top_comp->members = (top_decls);
+
     r_index->type = r_index_type;
     r_index_type->width = MakePatternNode<SpecificInteger>(TypeDb::int_bits);
     r_index_identifier->sources = (fi_id);
@@ -592,7 +592,7 @@ MergeFunctions::MergeFunctions()
     thread_over->through = s_all;
     s_all->conjuncts = (s_thread_comp, s_stuff);
     s_stuff->terminus = s_call;
-    s_thread_comp->members = (thread_decls);
+
     s_thread_comp->statements = (thread_stmts);
     s_call->callee = func_id;    
     s_call->argumentation = s_args;
@@ -602,7 +602,7 @@ MergeFunctions::MergeFunctions()
     func_stuff->terminus = retaddr;
     retaddr->identifier = retaddr_id;
     thread_over->overlay = embedded_l;
-    r_thread_comp->members = (thread_decls);
+
     r_thread_comp->statements = (thread_stmts, r_label, embedded_m);
     r_label->identifier = r_label_id;
     r_label_id->sources = (func_id);

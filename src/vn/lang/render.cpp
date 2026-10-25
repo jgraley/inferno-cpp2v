@@ -64,7 +64,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 	Syntax::Policy designation_policy = default_policy;
 	string s;
 	if( ReadArgs::use.contains("c") )
-		s += "/* Unique coupling names: " + Trace(unique_coupling_names) + " */\n\n";
+		s += "/* " + Trace(coupling_names_uniqifier.GetMapAsString()) + " */\n\n";
 
 	list<string> commands;
 
@@ -84,18 +84,21 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 				designation_policy.pointer_archetype = arch;
 		}		
 			
-		commands.push_back( unique_coupling_names.at(node) + 
-							" ⪮ " + 
-							RenderNoDesignation( node, Syntax::Production::VN_DESIGNATE_RHS, designation_policy ) +
-							" /* "+Trace(node)+" */");
+		string sc = unique_coupling_names.at(node) + 
+					" ⪮ " + 
+					RenderNoDesignation( node, Syntax::Production::VN_DESIGNATE_RHS, designation_policy );
 		// Alternative for declarator desaignators
-		//commands.push_back( " ⪮ " + 
-		//					AccomodateBootTypeAndDeclarator( node, 
+		//string sc = " ⪮ " + 
+		//			  AccomodateBootTypeAndDeclarator( node, 
 		//					                           unique_coupling_names.at(node), 
 		//					                           Syntax::Production::PURE_IDENTIFIER, 
 		//					                           Syntax::Production::VN_DESIGNATE_RHS, 
 		//					                           designation_policy,
 		//					                           false ) );
+
+		if( ReadArgs::use.contains("c") )
+			sc += " /* "+Trace(node)+" */";
+		commands.push_back( sc );
 	}
 
 	ASSERT( pattern->GetSearchComparePattern() == pattern->GetReplacePattern() || !pattern->GetReplacePattern() )

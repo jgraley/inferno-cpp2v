@@ -33,7 +33,8 @@ void SplitDisjunctions::Split( DisjunctionAgent *da )
     CollectionInterface &patterns = da->GetDisjuncts();
     int size = patterns.size();
     //FTRACE("Would split ")(*da)(" with %d children", patterns.size())("\n");
-    int split_point = (size+1)/2; // round up
+    int split_point = size-1; // simulate the left-associativity of the VN parser
+    // (size+1)/2; // round up
     
     Collection<Node> l_patterns;
     Collection<Node> r_patterns;

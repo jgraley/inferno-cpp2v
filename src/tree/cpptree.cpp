@@ -260,7 +260,6 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 		TreePtr<Node> current_access_no_sa;
 		if( current_access )
 			current_access_no_sa = SimpleDuplicate::DuplicateSubtree(current_access);	
-		SimpleCompare sc;
 		
 #ifdef EXPLAIN_ACCESS_SPEC
 		ls.push_back( "/* "+
@@ -270,8 +269,7 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 		              (!current_access ? "(NULL)" : current_access->IsFinal()?"(final)":"(inter)") +
 		              " -> " +
 		              Trace(new_access) +
-		              (!new_access ? "NULL" : new_access->IsFinal()?"(final)":"(inter)") +
-		              SSPrintf(" C3W=%d", sc.Compare3Way(new_access_no_sa, current_access_no_sa)) );	
+		              (!new_access ? "NULL" : new_access->IsFinal()?"(final)":"(inter)") );	
 #endif
 
 		// Must elide when coupled to indicate the coupling
@@ -282,15 +280,18 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 #endif
 			render_it = false; 
 		}
-		// We prefer to elide when both final and the same type. Parse should duplicate the nodes in this case TODO 
-		else if( new_access && current_access && new_access->IsFinal() && current_access->IsFinal() && sc.Compare3Way(new_access_no_sa, current_access_no_sa)==0 )
-		{
-#ifdef EXPLAIN_ACCESS_SPEC
-			ls.push_back( "equal and final so elide" );
-#endif
-			render_it = false; 
-		}
-		else
+/*		// We prefer to elide when both final and the same type. Parse should duplicate the nodes in this case. 
+		// NO!! It is not for renderer to decide such things, but simply to render what is there in the pattern.
+		// Parse should not try to compensate for this error by duplicating. If the USER wants coupled they write eg
+		//		▲private: ⯁Callable my_resourceidentifier_1 = my_initialiser;
+		//		⯈sc_thread my_resourceidentifier_1 = my_initialiser;
+		// Or use a designation to get a coupling. If they want separate nodes they write
+		// 		▲private: ⯁Callable my_resourceidentifier_1 = my_initialiser;
+		//		⯈private: sc_thread my_resourceidentifier_1 = my_initialiser;
+		// I.e. the user decides, not the renderer!!
+		// Imagine the confusion if we subclassed Private!!!
+		// Use of SimpleCompare is now BANNED in the renderer.
+*/		else
 		{
 #ifdef EXPLAIN_ACCESS_SPEC
 			ls.push_back( "render it" );
@@ -1535,7 +1536,10 @@ void AccessDecl::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location )
 {
 	auto cspg = dynamic_pointer_cast<VN::ContextScopeGnomon>(spg);
 	if( cspg && cspg->context.has_value() )
+	{
 		access = any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context);
+		FTRACE("Picked up ")(access)("\n");
+	}
 }
 
 
@@ -2550,6 +2554,35 @@ string Class::GetKeyword( Policy ) const
 	return "class";
 }
 
+
+//////////////////////////// NonCommutativeOperator ///////////////////////////////
+ 
+string NonCommutativeOperator::GetRender( VN::RendererInterface *, Production, Policy )
+{
+	// we have operands and no way to render them until we get to the concrete impls
+	throw Unimplemented();
+}
+
+
+Syntax::Token NonCommutativeOperator::GetSignifierToken() const
+{
+	throw UnimplementedToken(); // because we can't render
+}
+
+//////////////////////////// CommutativeOperator ///////////////////////////////
+
+string CommutativeOperator::GetRender( VN::RendererInterface *, Production, Policy )
+{
+	// we have operands and no way to render them until we get to the concrete impls
+	throw Unimplemented();
+}
+
+
+Syntax::Token CommutativeOperator::GetSignifierToken() const
+{
+	throw UnimplementedToken(); // because we can't render
+}
+
 //////////////////////////// Unop ///////////////////////////////
 
 TreePtr<Node> Unop::OnSoloArg( TreePtr<Node> arg, Location )
@@ -3024,8 +3057,6 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 	policy.context = make_shared<any>(); // No access specs here
       
     string s = "({ ";
-	for( TreePtr<Declaration> m : members )    
-		s += renderer->DoRender( &m, Syntax::Production::STMT_DECL, policy );       
 	for( TreePtr<Statement> st : statements )    
 		s += renderer->DoRender( &st, Syntax::Production::STMT_DECL_LOW, policy );    
 	return s + " })";
