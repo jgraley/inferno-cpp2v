@@ -187,7 +187,7 @@ stmt_high
 %type <TreePtr<Node>> 				stmt_decl bare_statement statement_nca statement control_stmt_sign       
 %type <TreePtr<Node>>   			statement_nc 
 %type <TreePtr<Node>> 				open_declaration declaration 
-%type <TreePtr<Node>> 				prototype comp_decl_nvn bare_declaration bare_initialiser
+%type <TreePtr<Node>> 				prototype bare_declaration bare_initialiser
 %type <TreePtr<Node>> 				assign_init
 %type <TreePtr<Node>> 				compound_primary parameter type_boot type_entry compound_prefix compound 
 //%type <TreePtr<Node>> 			compound_commands compound_boot
@@ -329,12 +329,8 @@ open_declaration	: declaration
 					| bare_declaration
 
 declaration	: bare_declaration ';'									{ $$ = $1; }      
-			| comp_decl_nvn		
-
-// OnInstance() will still try to program the current access. But the new fn will override it with the parsed acess, and then try to update the current access
+			| prototype compound									{ $$ = $1->OnInitialiser($2, @2); }			
 				
-comp_decl_nvn	: prototype compound									{ $$ = $1->OnInitialiser($2, @2); }	
-
 bare_declaration: prototype
 				| prototype bare_initialiser							{ $$ = $1->OnInitialiser($2, @2); } 
 				| prototype ':' memb_inits bare_initialiser				{ $$ = $1->OnMemberInits($3, @3); 
@@ -487,9 +483,10 @@ members			: acc_memb_colon											{ $$ = {}; }
 				| members acc_memb_colon									
 				| members member 											{ $$ = $1; $$.push_back($2); }
      
-member			: bare_declaration ';'			
-				| comp_decl_nvn
+member			: declaration
 				| acc_memb_prefix ';'			
+				                      
+acc_memb_colon	: acc_memb_prefix ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
 				                        
 //////////////////////////////// ACCESS/MEMBER ////////////////////////////////////                                  
 				                                 
@@ -508,15 +505,9 @@ acc_memb_commands   : acc_memb_entry COMMAND_TERM commands					{ $$ = $3; $$.pus
 
 // OnInstance() will have set the current access from the scope. But these rules 
 // will override it with the parsed acess, and then try to update the scope.
-acc_memb_entry	: bare_declaration
-				| acc_memb_colon bare_declaration							{ $$ = $2; }
-				| bare_declaration ';'
-				| acc_memb_colon bare_declaration ';' 						{ $$ = $2; }					
-				| comp_decl_nvn		
-				| acc_memb_colon comp_decl_nvn								{ $$ = $2; }							
+acc_memb_entry	: open_declaration		
+				| acc_memb_colon open_declaration							{ $$ = $2; }							
 				| acc_memb_prefix
-
-acc_memb_colon	: acc_memb_prefix ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
 
 acc_memb_prefix	: acc_memb_postfix
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
