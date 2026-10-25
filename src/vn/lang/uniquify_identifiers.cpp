@@ -162,7 +162,7 @@ Fingerprinter::NodeSetByFingerprint Fingerprinter::GetNodesInTreeByFingerprint( 
 	incoming_links_map.clear();
     int index=0;
     incoming_links_map[context]; // get the root in there, even though it has no parents
-    ProcessNode( context, index );	
+    ProcessNode( context, index );		
 	
     Fingerprinter::NodeSetByFingerprint rfp;
     for( pair< TreePtr<Node>, Fingerprint > p : fingerprints )
@@ -201,7 +201,7 @@ void Fingerprinter::ProcessNode( TreePtr<Node> x, int &index )
 	    ProcessChildren( x, index );
 	    
 	// Insert+increment index in post-order so that the indexes we store for the
-	// child subtree is strictly less than the indices we store for x, even if x
+	// child subtree are strictly less than the indices we store for x, even if x
 	// is reached multiple times. This is so that the designations for the child 
 	// subtree can render before ours, which we need because we can reference 
 	// child's designations.
@@ -314,9 +314,10 @@ UniquifyNames::UniquifyNames( Policy policy_ ) :
 UniquifyNames::NodeToNameMap UniquifyNames::UniquifyAll( const TransKit &kit, TreePtr<Node> context )
 {
 	Fingerprinter::NodeSetByFingerprint node_sets_by_fp = fingerprinter.GetNodesInTreeByFingerprint(context);    
-	
+    map_as_string = Trace(node_sets_by_fp);
+
 	// For repeatability of renders, get a list of identifiers in the tree, ordered:
-	// - mainly depth-first, wind-in
+	// - mainly depth-first, wind-out
 	// - collections disambiguated using SimpleCompare
 	nodes_in_dfpo.clear();
 	for( auto p : node_sets_by_fp ) // Finger prints are in depth-first post-order

@@ -1268,6 +1268,9 @@ struct NonCommutativeOperator : Operator
 {
     NODE_FUNCTIONS
     Sequence<Expression> operands; ///< the operands are here, order preserved
+    
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;    
+	Token GetSignifierToken() const override;	
 };
 
 /// An operator with operands whose order does not matter
@@ -1275,6 +1278,9 @@ struct CommutativeOperator : Operator
 {
     NODE_FUNCTIONS
     Collection<Expression> operands; ///< the operands are here, order not preserved
+
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+	Token GetSignifierToken() const override;	
 };
 
 // Intermediate categories of operators. We categorise based on

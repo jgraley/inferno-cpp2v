@@ -1946,7 +1946,6 @@ string CallableParamsReturn::GetRenderTypeAndDeclarator( VN::RendererInterface *
 											 Production, Production surround_prod, Policy policy,
 											 TreePtr<Node> constant )
 {
-	auto dc = TreePtr<Permission>::DynamicCast(constant);
 	string d2 = UpdateDeclarator( renderer, declarator, policy, constant);
     return renderer->DoRenderTypeAndDeclarator( &return_type, 
                                                 d2,
@@ -2553,6 +2552,35 @@ any Class::GetStartingScopeContext() const
 string Class::GetKeyword( Policy ) const
 {
 	return "class";
+}
+
+
+//////////////////////////// NonCommutativeOperator ///////////////////////////////
+ 
+string NonCommutativeOperator::GetRender( VN::RendererInterface *, Production, Policy )
+{
+	// we have operands and no way to render them until we get to the concrete impls
+	throw Unimplemented();
+}
+
+
+Syntax::Token NonCommutativeOperator::GetSignifierToken() const
+{
+	throw UnimplementedToken(); // because we can't render
+}
+
+//////////////////////////// CommutativeOperator ///////////////////////////////
+
+string CommutativeOperator::GetRender( VN::RendererInterface *, Production, Policy )
+{
+	// we have operands and no way to render them until we get to the concrete impls
+	throw Unimplemented();
+}
+
+
+Syntax::Token CommutativeOperator::GetSignifierToken() const
+{
+	throw UnimplementedToken(); // because we can't render
 }
 
 //////////////////////////// Unop ///////////////////////////////

@@ -697,6 +697,7 @@ LoopRotation::LoopRotation()
     auto func_over = MakePatternNode<DeltaAgent, Compound>();
     auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
+    auto s_all2 = MakePatternNode<ConjunctionAgent, Compound>();
     auto s_enum = MakePatternNode<Enumeration>();
     auto s_enum_id = MakePatternNode<TypeIdentifier>();
     auto loop_top_stuff = MakePatternNode<StuffAgent, Expression>();
@@ -730,7 +731,8 @@ LoopRotation::LoopRotation()
     func_comp->statements = ( func_pre, s_var_decl, inits, loop);
     loop->body = delta;
     delta->through = s_all;
-    s_all->conjuncts = (s_comp_loop, s_comp_yield, s_notmatch);
+    s_all2->conjuncts = (s_comp_loop, s_comp_yield); // left-associating to match VN parse
+    s_all->conjuncts = (s_all2, s_notmatch);
     // Search for a loop. Assume that a state enum value in a body means "could transition to the state" and one in
     // the condition means "acts on the state". If we see the latter with the former blow it somewhere, we call
     // it a loop and assume the upward branch is normally takner as with C compilers.    
