@@ -131,7 +131,7 @@
 <TreePtr<Node>>	DESIGNATED_TYPE			_("designated type name")
 <TreePtr<Node>>	DESIGNATED_CURRENT_RECORD_ID _("designated current record name")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier name")
-<TreePtr<Node>>	DESIGNATED_COMPOUND		_("designated compound name")
+<TreePtr<Node>>	DESIGNATED_COMPOUND		_("designated compound name") // DELETE ME
 <TreePtr<Node>>	EXPLICIT_NORMAL			_("explicit statement/expression node name")
 <TreePtr<Node>>	EXPLICIT_TYPE			_("explicit type node name")
 <TreePtr<Node>>	EXPLICIT_DECL			_("explicit declaration node name")
@@ -172,7 +172,6 @@ stmt_low
 stmt_high
 	
 %type <TreePtr<Node>> 				sed_boot sed_entry stmt_expr_disj stmt_expr_conj stmt_expr 
-%type <TreePtr<Node>> 				stmt_expr_entry_nc stmt_expr_disj_nc stmt_expr_conj_nc stmt_expr_nc 
 %type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational 
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
@@ -216,7 +215,7 @@ stmt_high
 %type <TreePtr<Node>> 				acc_memb_boot acc_memb_entry member  
 %type <TreePtr<Node>> 				acc_memb_prefix acc_memb_postfix acc_memb_paren acc_memb_primary
 %type <TreePtr<Node>> 				stmt_decl_entry stmt_decl_disj stmt_decl_conj
-%type <list<TreePtr<Node>>>			stmt_decls code_unit_decl code_unit_decls 
+%type <list<TreePtr<Node>>>			stmt_decls  
 %type <list<TreePtr<Node>>>			members enumerators
 %type <TreePtr<Node>> 				enumerator prototype_enumerator
 %type <list<TreePtr<Node>>>			comma_sep_exprs semicolon_args parameters parameterisation
@@ -255,10 +254,9 @@ script_command	: ENGINE_COMMAND unified_entry   		 	{ $$ = make_shared<VN::Engin
 				| ATTRIBUTE_COMMAND		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
-designation_command	: new_vn_name DESIGNATE_COMMAND stmt_expr_entry_nc		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
+designation_command	: new_vn_name DESIGNATE_COMMAND sed_entry		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
 					| new_vn_name DESIGNATE_COMMAND type_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
 					| new_vn_name DESIGNATE_COMMAND qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
-					| new_vn_name DESIGNATE_COMMAND compound    	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_COMPOUND); }
 					| new_vn_name DESIGNATE_COMMAND PREPROCESSOR_ID_SIGN { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
 					
 //////////////////////////////////// ITEMISATION ///////////////////////////////////////////
@@ -315,7 +313,7 @@ compound_prefix : compound_primary
 
 compound_primary	: compound_scope '}'                					{ $$ = $1->scope_node; } 
 					| compound_scope stmt_decls '}'    		 				{ $$ = $1->scope_node->OnStatements($2, @2); }
-					| code_unit_scope code_unit_decls '}' 							{ $$ = $1->scope_node->OnMembers($2, @2); }
+					| code_unit_scope stmt_decls '}' 						{ $$ = $1->scope_node->OnMembers($2, @2); }
 
 compound_scope	: '{'														{ $$ = make_shared<VN::RegularScopeGnomon>(MakeTreeNode<CPPTree::Compound>()); 
 																			  vn->AddGnomon($$); }
@@ -324,12 +322,6 @@ compound_scope	: '{'														{ $$ = make_shared<VN::RegularScopeGnomon>(Mak
 																			  
 code_unit_scope	: CODE_UNIT '{'												{ $$ = make_shared<VN::RegularScopeGnomon>(MakeTreeNode<CPPTree::CodeUnit>()); 
 																			  vn->AddGnomon($$); }
-																			  
-code_unit_decls	: code_unit_decl												
-				| code_unit_decl code_unit_decls								{ $$ = $1 + $2; }
-
-code_unit_decl	: declaration													{ $$ = {$1}; }
-				| statement														{ $$ = {$1}; }
 
 //////////////////////////////// DECLARATIONS ////////////////////////////////////         
 
@@ -352,7 +344,6 @@ bare_decl_nvn	: prototype
 				| enum				
 			
 bare_initialiser: C_ASSIGN assign_init									{ $$ = $2; } 
-				| DESIGNATED_COMPOUND								
 				| DESIGNATED_NORMAL		
 				| INIT_SIGN							
 			
@@ -490,7 +481,6 @@ bases			: base_spec                                                 { $$.push_ba
 base_spec		: type_specified											{ $$ = vn->OnBase($1); } 
 				| pure_wildcard												{ $$ = $1; }
 				| DESIGNATED_NORMAL       				  					// To match a designated Star
-				| DESIGNATED_COMPOUND      				  			
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2, @$); }
                                                                                                                                                          
 members			: acc_memb_colon											{ $$ = {}; }
@@ -550,7 +540,6 @@ acc_memb_primary: access_spec
 				| DELTA_COMPARE_OP acc_memb_boot DELTA_REPLACE_OP acc_memb_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); } 
 				| DESIGNATED_NORMAL       				  		
-				| DESIGNATED_COMPOUND      				  			    // TODO want declarations and access specs
 				| TRANSFORM_NAME_NORMAL OPEN_VN unified_boot CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 				| STAR_OP												{ $$ = vn->OnStar(nullptr); }
 				| STAR_OP OPEN_VN acc_memb_boot CLOSE_VN				{ $$ = vn->OnStar($3); }
@@ -596,19 +585,7 @@ stmt_expr_conj 	: stmt_expr
 stmt_expr    	: statement		
 				| expression
 				| open_declaration
-										
-stmt_expr_entry_nc	: stmt_expr_disj_nc
-
-stmt_expr_disj_nc	: stmt_expr_conj_nc
-					| stmt_expr_disj_nc DISJUNCTION_OP stmt_expr_conj_nc	{ $$ = vn->OnDisjunction($1, $3); }
-
-stmt_expr_conj_nc	: stmt_expr_nc       
-					| stmt_expr_conj_nc CONJUNCTION_OP stmt_expr_nc  		{ $$ = vn->OnConjunction($1, $3); }
-		
-stmt_expr_nc 	: statement_nc	
-				| expression	
-				| open_declaration			
-					
+							
 stmt_decls		: stmt_decl_entry											            { $$ = {$1}; } 
 				| stmt_decl_entry stmt_decls											{ $$ = $2; $$.push_front($1); }
 
@@ -819,7 +796,6 @@ id_primary  : vn_primary
 			
 vn_primary	: pure_wildcard
 			| DESIGNATED_NORMAL       			
-			| DESIGNATED_COMPOUND      				  			
 			| NORMAL_ID_SIGN	  			
 			| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } 
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
