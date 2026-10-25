@@ -6,6 +6,7 @@
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 #include "tree/localtree.hpp"
+#include "agents/star_agent.hpp"
 
 using namespace CPPTree;
 using namespace VN;
@@ -121,7 +122,13 @@ void PostPass::ProcessChildren( TreePtr<Node> x, DData dd )
 void PostPass::ProcessSingularItem( TreePtr<Node> x, TreePtrInterface *p_x_sing, DData dd )
 {	
 	if( *p_x_sing ) // Permitting NULL because patterns
+	{
+		// Check for Star in a singular context, see #883
+		if( auto agent = Agent::TryAsAgentConst(TreePtr<Node>(*p_x_sing)) )
+			ASSERT( !dynamic_cast<const StarAgent *>(agent) )("Star in singular context: ")(x);
+
 		ProcessMutator( Mutator::CreateTreeSingular( x, p_x_sing ), dd );
+	}
 }
 
 

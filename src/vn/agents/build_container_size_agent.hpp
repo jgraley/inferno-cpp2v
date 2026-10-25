@@ -27,7 +27,7 @@ struct BuildContainerSizeAgent : public virtual BuilderAgent, // TODO rename to 
         return shared_from_this();
     }
     
-    TreePtr<Node> container;
+    Collection<Node> container;
 private:
     virtual TreePtr<Node> BuildNewSubtree(const SCREngine *acting_engine) override;
     
