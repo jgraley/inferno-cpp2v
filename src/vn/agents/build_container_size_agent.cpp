@@ -33,6 +33,7 @@ Syntax::Production BuildContainerSizeAgent::GetAgentProduction( const VN::Render
 
 string BuildContainerSizeAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
+    ASSERT( container.size()==1 ); // TODO could have bigger, but would need to change VN syntax which is currently prefix
 	const TreePtr<Node> &cont_node = const_cast<Collection<Node> &>(container).front();
 	(void)surround_prod;
 	string s = "🄽" + renderer->DoRenderPreserve( cont_node, Syntax::Production::PREFIX, policy );
@@ -54,24 +55,24 @@ bool BuildContainerSizeAgent::IsFixedType() const
 
 Graphable::NodeBlock BuildContainerSizeAgent::GetGraphBlockInfo() const
 {
-	const TreePtr<Node> &cont_node = const_cast<Collection<Node> &>(container).front();
     NodeBlock block;
     block.bold = false;
     block.title = GetName();
     block.shape = "egg";
     block.block_type = Graphable::NODE_SHAPED;
     block.node = GetPatternPtr();
-    if( cont_node )
+    block.item_blocks = { { "container", 
+                           "", 
+                           false,
+                           {} } };
+    for( const TreePtrInterface &p : const_cast<Collection<Node> &>(container) )
     {
-        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(cont_node.get()),
+        auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(p.get()),
                   list<string>{},
                   list<string>{},
                   phase,
-                  &cont_node );
-        block.item_blocks.push_back( { "container", 
-                                      "", 
-                                      false,
-                                      { link } } );
+                  &p );
+        block.item_blocks.front().links.push_back( link );
     }
     return block;
 }
