@@ -214,7 +214,7 @@ stmt_high
 %type <VN::NodeAndGnomon>			norm_full_explicit_start type_full_explicit_start decl_full_explicit_start qual_full_explicit_start mi_full_explicit_start
 %type <VN::NodeAndGnomon>			record_scope enum_scope
 %type <TreePtr<Node>> 				acc_memb_boot acc_memb_entry member  
-%type <TreePtr<Node>> 				acc_memb_prefix acc_memb_postfix acc_memb_paren acc_memb_primary
+%type <TreePtr<Node>> 				acc_memb_prefix acc_memb_primary
 %type <TreePtr<Node>> 				stmt_decl_entry stmt_decl_disj stmt_decl_conj
 %type <list<TreePtr<Node>>>			stmt_decls  
 %type <list<TreePtr<Node>>>			members enumerators
@@ -507,7 +507,7 @@ acc_memb_entry	: open_declaration
 
 acc_memb_colon	: acc_memb_prefix ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
 
-acc_memb_prefix	: acc_memb_postfix
+acc_memb_prefix	: acc_memb_primary
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
 				| 						      POINTER_IS_OP acc_memb_prefix	{ $$ = vn->OnPointerIs($2); }
 				| 					         	NEGATION_OP	acc_memb_prefix	{ $$ = vn->OnNegation($2); }
@@ -517,14 +517,9 @@ acc_memb_prefix	: acc_memb_postfix
 				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
 				|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
 				|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
-
-
-acc_memb_postfix: acc_memb_paren     
 		
-acc_memb_paren	: acc_memb_primary
-				| '(' acc_memb_boot ')'                          			{ $$ = $2; } 
-
 acc_memb_primary: norm_vn_primary
+				| '(' acc_memb_boot ')'                          			{ $$ = $2; } 
 				| access_spec 
 				| DELTA_COMPARE_OP acc_memb_boot DELTA_REPLACE_OP acc_memb_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 
