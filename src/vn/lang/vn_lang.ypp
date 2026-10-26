@@ -483,9 +483,7 @@ members			: acc_memb_colon											{ $$ = {}; }
      
 member			: declaration
 				| acc_memb_prefix ';'			
-				                      
-acc_memb_colon	: acc_memb_prefix ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
-				                        
+				                      				                        
 //////////////////////////////// ACCESS/MEMBER ////////////////////////////////////                                  
 				                                 
 // Acc Memb column includes access specifiers and full member declarations. We combine both because
@@ -506,6 +504,8 @@ acc_memb_commands   : acc_memb_entry COMMAND_TERM commands					{ $$ = $3; $$.pus
 acc_memb_entry	: open_declaration		
 				| acc_memb_colon open_declaration							{ $$ = $2; }							
 				| acc_memb_prefix
+
+acc_memb_colon	: acc_memb_prefix ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
 
 acc_memb_prefix	: acc_memb_postfix
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
@@ -693,7 +693,7 @@ expr_prefix : expr_postfix
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
 			|                        PRERESTRICT_NORMAL expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|        			 prerestrict_decl_start acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
+			|        		 prerestrict_decl_start acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
 			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 			| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
