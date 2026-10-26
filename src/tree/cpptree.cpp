@@ -1546,7 +1546,7 @@ void AccessDecl::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location )
 	if( cspg && cspg->context.has_value() )
 	{
 		access = any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context);
-		FTRACE("Picked up ")(access)("\n");
+		//FTRACE("Picked up ")(access)("\n");
 	}
 }
 

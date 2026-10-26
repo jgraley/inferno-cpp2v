@@ -528,11 +528,11 @@ void VNLangActions::UpdateCurrentAccess( Syntax::Location loc, TreePtr<Node> acc
 	if( shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon() )	
 	{
 		spg->UpdateContext(loc, access);
-		FTRACE("Setting ")(access)(" at ")(ss.str())("\n");
+		//FTRACE("Setting ")(access)(" at ")(ss.str())("\n");
 	}
 	else
 	{
-		FTRACE("DISCARDING ")(access)(" at ")(ss.str())("\n");
+		//FTRACE("DISCARDING ")(access)(" at ")(ss.str())("\n");
 	}
 }
 
