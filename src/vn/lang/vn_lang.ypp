@@ -197,7 +197,7 @@ stmt_high
 %type <TreePtr<Node>> 				st_declarator st_declarator_prefix st_declarator_postfix st_declarator_primary
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
-%type <TreePtr<Node>> 				record base_spec access_spec acc_memb_colon qualifier_node
+%type <TreePtr<Node>> 				record base_spec access_spec qualifier_node
 %type <TreePtr<Node>> 				enum_node enum
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					new_vn_name
@@ -213,7 +213,7 @@ stmt_high
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
 %type <VN::NodeAndGnomon>			norm_full_explicit_start type_full_explicit_start decl_full_explicit_start qual_full_explicit_start mi_full_explicit_start
 %type <VN::NodeAndGnomon>			record_scope enum_scope
-%type <TreePtr<Node>> 				acc_memb_boot acc_memb_entry member  
+%type <TreePtr<Node>> 				acc_memb_boot acc_memb_unitary  
 %type <TreePtr<Node>> 				acc_memb_prefix acc_memb_primary
 %type <TreePtr<Node>> 				stmt_decl_entry stmt_decl_disj stmt_decl_conj
 %type <list<TreePtr<Node>>>			stmt_decls  
@@ -475,15 +475,7 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 				| norm_wildcard												{ $$ = $1; }
 				| DESIGNATED_NORMAL       				  					// To match a designated Star
 				| access_spec type_specified								{ $$ = vn->OnBase($1, $2, @$); }
-                                                                                                                                                         
-members			: acc_memb_colon											{ $$ = {}; }
-				| member													{ $$.push_back($1); }
-				| members acc_memb_colon									
-				| members member 											{ $$ = $1; $$.push_back($2); }
-     
-member			: declaration
-				| acc_memb_prefix ';'			
-				                      				                        
+                                                                                                                                                         				                      				                        
 //////////////////////////////// ACCESS/MEMBER ////////////////////////////////////                                  
 				                                 
 // Acc Memb column includes access specifiers and full member declarations. We combine both because
@@ -494,19 +486,25 @@ member			: declaration
 // Note: booting into here permits an access spec before a decl eg public: int a;
 // This is done to allow a "localised" access spec in booted contexts eg delta.
 
-acc_memb_boot	: acc_memb_entry								
+acc_memb_boot	: acc_memb_unitary								
 				| acc_memb_commands											{ $$ = vn->OnEmbeddedCommands($1); }
      
-acc_memb_commands   : acc_memb_entry COMMAND_TERM commands					{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
+acc_memb_commands   : acc_memb_unitary COMMAND_TERM commands					{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 
-// OnInstance() will have set the current access from the scope. But these rules 
-// will override it with the parsed acess, and then try to update the scope.
-acc_memb_entry	: open_declaration		
-				| acc_memb_colon open_declaration							{ $$ = $2; }							
+acc_memb_unitary: open_declaration		
+				| acc_memb_prefix ':' 						{ vn->UpdateCurrentAccess(@1, $1); } // mid-rule action 
+				  open_declaration							{ $$ = $4; }							
 				| acc_memb_prefix
 
-acc_memb_colon	: acc_memb_prefix ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
+// Above, loopbacks. Below, entry from record
 
+members			: acc_memb_prefix ':'						{ $$ = {}; vn->UpdateCurrentAccess(@1, $1); }
+				| acc_memb_prefix ';'						{ $$.push_back($1); }
+				| declaration								{ $$.push_back($1); }
+				| members acc_memb_prefix ':'				{ $$ = $1; vn->UpdateCurrentAccess(@2, $2); }				
+				| members acc_memb_prefix ';'				{ $$ = $1; $$.push_back($2); }
+				| members declaration 						{ $$ = $1; $$.push_back($2); }
+     
 acc_memb_prefix	: acc_memb_primary
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
 				| 						      POINTER_IS_OP acc_memb_prefix	{ $$ = vn->OnPointerIs($2); }
