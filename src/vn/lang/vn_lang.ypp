@@ -197,7 +197,7 @@ stmt_high
 %type <TreePtr<Node>> 				st_declarator st_declarator_prefix st_declarator_postfix st_declarator_primary
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
-%type <TreePtr<Node>> 				record base_spec access_spec qualifier_node
+%type <TreePtr<Node>> 				record base_spec bare_access access qualifier_node
 %type <TreePtr<Node>> 				enum_node enum
 %type <TreePtr<Node>>				memb_init_boot memb_init_entry memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					new_vn_name
@@ -474,7 +474,7 @@ bases			: base_spec                                                 { $$.push_ba
 base_spec		: type_specified											{ $$ = vn->OnBase($1); } 
 				| norm_wildcard												{ $$ = $1; }
 				| DESIGNATED_NORMAL       				  					// To match a designated Star
-				| access_spec type_specified								{ $$ = vn->OnBase($1, $2, @$); }
+				| bare_access type_specified								{ $$ = vn->OnBase($1, $2, @$); }
                                                                                                                                                          				                      				                        
 //////////////////////////////// ACCESS/MEMBER ////////////////////////////////////                                  
 				                                 
@@ -492,19 +492,20 @@ acc_memb_boot	: acc_memb_unitary
 acc_memb_commands   : acc_memb_unitary COMMAND_TERM commands					{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 
 acc_memb_unitary: open_declaration		
-				| acc_memb_prefix ':' 						{ vn->UpdateCurrentAccess(@1, $1); } // mid-rule action 
-				  open_declaration							{ $$ = $4; }							
+				| access open_declaration									{ $$ = $2; }							
 				| acc_memb_prefix
 
 // Above, loopbacks. Below, entry from record
 
-members			: acc_memb_prefix ':'						{ $$ = {}; vn->UpdateCurrentAccess(@1, $1); }
-				| acc_memb_prefix ';'						{ $$.push_back($1); }
-				| declaration								{ $$.push_back($1); }
-				| members acc_memb_prefix ':'				{ $$ = $1; vn->UpdateCurrentAccess(@2, $2); }				
-				| members acc_memb_prefix ';'				{ $$ = $1; $$.push_back($2); }
-				| members declaration 						{ $$ = $1; $$.push_back($2); }
+members			: declaration												{ $$.push_back($1); }
+				| access													{ $$ = {}; }
+				| acc_memb_prefix ';'										{ $$.push_back($1); }
+				| members declaration 										{ $$ = $1; $$.push_back($2); }
+				| members access									
+				| members acc_memb_prefix ';'								{ $$ = $1; $$.push_back($2); }
      
+access			: acc_memb_prefix ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
+
 acc_memb_prefix	: acc_memb_primary
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
 				| 						      POINTER_IS_OP acc_memb_prefix	{ $$ = vn->OnPointerIs($2); }
@@ -518,10 +519,10 @@ acc_memb_prefix	: acc_memb_primary
 		
 acc_memb_primary: norm_vn_primary
 				| '(' acc_memb_boot ')'                          			{ $$ = $2; } 
-				| access_spec 
+				| bare_access 
 				| DELTA_COMPARE_OP acc_memb_boot DELTA_REPLACE_OP acc_memb_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 
-access_spec		: qualifier_node 
+bare_access		: qualifier_node 
 
 //////////////////////////////// ENUMERATIONS ////////////////////////////////////                                  
                          
@@ -794,7 +795,7 @@ norm_vn_primary : norm_wildcard
 				| TRANSFORM_NAME_NORMAL OPEN_VN unified_boot CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 				| STAR_OP OPEN_VN norm_boot CLOSE_VN					{ $$ = vn->OnStar($3); }
-				| STAR_OP OPEN_VN access_spec CLOSE_VN					{ $$ = vn->OnStar($3); } // TODO add the VNs around access_spec
+				| STAR_OP OPEN_VN bare_access CLOSE_VN					{ $$ = vn->OnStar($3); } // TODO add the VNs around bare_access
 
 norm_wildcard 	: STAR_OP													{ $$ = vn->OnStar(nullptr); }
 				| ANY_NODE_OP												{ $$ = nullptr; }
