@@ -222,7 +222,6 @@ stmt_high
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
 %type <VN::NodeAndGnomon>			norm_full_explicit_start type_full_explicit_start decl_full_explicit_start qual_full_explicit_start mi_full_explicit_start
 %type <VN::NodeAndGnomon>			record_scope enum_scope
-%type <TreePtr<Node>> 				acc_memb_prefix 
 %type <TreePtr<Node>> 				stmt_decl_clause stmt_decl_disj stmt_decl_conj
 %type <list<TreePtr<Node>>>			stmt_decls  
 %type <list<TreePtr<Node>>>			members enumerators
@@ -343,6 +342,7 @@ code_unit_scope	: CODE_UNIT '{'												{ $$ = make_shared<VN::RegularScopeGn
 
 declaration	: bare_declaration ';'									{ $$ = $1; }      
 			| prototype compound									{ $$ = $1->OnInitialiser($2, @2); }			
+			| access prototype compound									{ $$ = $2->OnInitialiser($3, @3); }			
 				
 bare_declaration: prototype
 				| prototype bare_initialiser							{ $$ = $1->OnInitialiser($2, @2); } 
@@ -350,7 +350,8 @@ bare_declaration: prototype
 																		  $$ = $1->OnInitialiser($4, @4); } 
 				| record
 				| enum				
-			
+				| access bare_declaration								{ $$ = $2; }
+				
 bare_initialiser: C_ASSIGN assign_init									{ $$ = $2; } 
 				| DESIGNATED_NORMAL		
 				| INIT_SIGN							
@@ -502,24 +503,13 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
 // Above, loopbacks. Below, entry from record
 
 members			: declaration												{ $$.push_back($1); }
-				| access													{ $$ = {}; }
-				| acc_memb_prefix ';'										{ $$.push_back($1); }
+//				| access													{ $$ = {}; }
+				| expr_prefix ';'											{ $$.push_back($1); }
 				| members declaration 										{ $$ = $1; $$.push_back($2); }
-				| members access									
-				| members acc_memb_prefix ';'								{ $$ = $1; $$.push_back($2); }
+//				| members access									
+				| members expr_prefix ';'									{ $$ = $1; $$.push_back($2); }
 				
 access			: access_primary ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
-
-acc_memb_prefix	: norm_primary
-				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
-				| 						      POINTER_IS_OP acc_memb_prefix	{ $$ = vn->OnPointerIs($2); }
-				| 					         	NEGATION_OP	acc_memb_prefix	{ $$ = vn->OnNegation($2); }
-				|         	      	 prerestrict_decl_start acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
-				|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-				| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
-				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
-				|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
-				|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 				
 access_primary	: bare_access
 				| access_wildcard
@@ -571,8 +561,8 @@ normal    		: statement
 				| declaration			
 				| bare_declaration			// TODO don't like this, add the semicolons during render
 				| other_wildcard ':'               			{ $$ = vn->OnLabel($1, @1); } // treat as label because an access spec on its own doesn't produce a node
-				| access declaration             			{ $$ = $2; }
-				| access bare_declaration             			{ $$ = $2; } 	// TODO don't like this, add the semicolons during render
+//				| access declaration             			{ $$ = $2; }
+//				| access bare_declaration             			{ $$ = $2; } 	// TODO don't like this, add the semicolons during render
 							
 stmt_decls		: stmt_decl_clause											            { $$ = {$1}; } 
 				| stmt_decl_clause stmt_decls											{ $$ = $2; $$.push_front($1); }
@@ -587,7 +577,7 @@ stmt_decl_conj	: stmt_decl
 
 stmt_decl		: statement										
 				| declaration			
-				| access declaration		             			{ $$ = $2; }												
+//				| access declaration		             			{ $$ = $2; }												
 					
 statement		: statement_nc												
 				| compound	
@@ -704,7 +694,7 @@ expr_prefix : expr_postfix
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
 			|                        PRERESTRICT_NORMAL expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|        		 prerestrict_decl_start acc_memb_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
+			|        		     prerestrict_decl_start expr_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); }
 			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 			| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
