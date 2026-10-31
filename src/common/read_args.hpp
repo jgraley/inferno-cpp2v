@@ -38,6 +38,7 @@ public:
     static bool trace_hits;    
     static bool trace_quiet;   
     static bool trace_no_stack; 
+    static bool trace_bison; 
     static string hits_format;
     static bool quitafter;
     static Progress quitafter_progress;

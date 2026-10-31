@@ -24,6 +24,7 @@ bool ReadArgs::trace = false;
 bool ReadArgs::trace_hits = false;
 bool ReadArgs::trace_quiet = false;
 bool ReadArgs::trace_no_stack = false;
+bool ReadArgs::trace_bison = false;
 string ReadArgs::hits_format;
 bool ReadArgs::test_units = false;
 bool ReadArgs::test_csp = false;
@@ -54,6 +55,7 @@ void ReadArgs::Usage(string msg)
                     "            Note: use -th? for help on <fmt>.\n"
                     "-tq         No output to console.\n"
                     "-ts         Trace but don't show mini-stacks (for when re-architecting).\n"
+                    "-tb         Enable bison parser tracing.\n"
                     "-su         Run unit tests and quit.\n"
                     "-sc         Enable CSP solver self-test.\n"
                     "-sd         Enable DB self-checks: relation integrity and compare with new build.\n"
@@ -141,6 +143,10 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             {
                 trace = true;
                 trace_no_stack = true;
+			}
+            else if( trace_option=='b' )
+            {
+                trace_bison = true;
             }
             else
             {

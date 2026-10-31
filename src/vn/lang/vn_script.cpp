@@ -132,7 +132,7 @@ Command::List VNScript::ParseFile(string spath)
     scanner.filename = spath;    
     
     // Do the parse
-    //parser->set_debug_level(1);
+    parser.set_debug_level( ReadArgs::trace_bison ? 1 : 0 );
     int pr = parser.parse();        
     if( pr != EXIT_SUCCESS ) 
 		exit(pr); // An error was already reported so an assert fail here would look like a knock-on error
