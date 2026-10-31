@@ -184,7 +184,9 @@ stmt_high
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expression expr_id_value 
 %type <TreePtr<Node>> 				expr_clause expr_conjunction expr_disjunction expr_boot 
 %type <TreePtr<Node>> 				id_primary id_boot id_disjunction id_conjunction id_prefix id_parens
-%type <TreePtr<Node>> 				vn_primary access_wildcard access_primary label_wildcard other_wildcard
+%type <TreePtr<Node>> 				vn_primary 
+%type <TreePtr<Node>> 			    access_wildcard access_primary 
+%type <TreePtr<Node>> 				label_wildcard other_wildcard star_arg
 %type <TreePtr<Node>> 				argumentation
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_vn_prim 
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
@@ -556,8 +558,7 @@ access_primary	: bare_access
 				| access_wildcard
 
 access_wildcard 	: STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
-					| STAR_IN_RECORD OPEN_VN norm_boot CLOSE_VN			{ $$ = vn->OnStar($3); }
-					| STAR_IN_RECORD OPEN_VN bare_access CLOSE_VN		{ $$ = vn->OnStar($3); } // TODO add the VNs around bare_access
+					| STAR_IN_RECORD OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
 					| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
 
 bare_access		: qualifier_node 
@@ -633,8 +634,7 @@ arrival		: ARRIVAL_KEYWORD ':'
 			| label_wildcard ':' 			 								{ $$ = vn->OnLabel($1, @1); } 
 
 label_wildcard 	: STAR_IN_COMPOUND									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_COMPOUND OPEN_VN norm_boot CLOSE_VN		{ $$ = vn->OnStar($3); }
-				| STAR_IN_COMPOUND OPEN_VN bare_access CLOSE_VN		{ $$ = vn->OnStar($3); } // TODO add the VNs around bare_access
+				| STAR_IN_COMPOUND OPEN_VN star_arg CLOSE_VN		{ $$ = vn->OnStar($3); }
 				| ANY_NODE_IN_COMPOUND								{ $$ = nullptr; }
 
 statement_nca	: bare_statement ';'										
@@ -844,23 +844,22 @@ norm_vn_primary : DESIGNATED_NORMAL
 
 // Keep this long-hand for symmetry with versions that only allow eg ..._IN_RECORD
 vn_wildcard 	: STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_RECORD OPEN_VN norm_boot CLOSE_VN			{ $$ = vn->OnStar($3); }
-				| STAR_IN_RECORD OPEN_VN bare_access CLOSE_VN		{ $$ = vn->OnStar($3); } 
+				| STAR_IN_RECORD OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
 				| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
 				| STAR_IN_COMPOUND									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_COMPOUND OPEN_VN norm_boot CLOSE_VN		{ $$ = vn->OnStar($3); }
-				| STAR_IN_COMPOUND OPEN_VN bare_access CLOSE_VN		{ $$ = vn->OnStar($3); } 
+				| STAR_IN_COMPOUND OPEN_VN star_arg CLOSE_VN		{ $$ = vn->OnStar($3); }
 				| ANY_NODE_IN_COMPOUND								{ $$ = nullptr; }
 				| STAR_IN_OTHER										{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_OTHER OPEN_VN norm_boot CLOSE_VN			{ $$ = vn->OnStar($3); }
-				| STAR_IN_OTHER OPEN_VN bare_access CLOSE_VN		{ $$ = vn->OnStar($3); } 
+				| STAR_IN_OTHER OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
 				| ANY_NODE_IN_OTHER									{ $$ = nullptr; }				
 												
 other_wildcard 	: STAR_IN_OTHER									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_OTHER OPEN_VN norm_boot CLOSE_VN		{ $$ = vn->OnStar($3); }
-				| STAR_IN_OTHER OPEN_VN bare_access CLOSE_VN	{ $$ = vn->OnStar($3); } 
+				| STAR_IN_OTHER OPEN_VN star_arg CLOSE_VN		{ $$ = vn->OnStar($3); }
 				| ANY_NODE_IN_OTHER								{ $$ = nullptr; }
 												
+star_arg		: norm_boot
+				| bare_access
+	
 															
 decl_full_explicit_start 	: EXPLICIT_DECL								{ $$ = vn->MakeScopeGnomonForNode($1); 
 																		  vn->AddGnomon($$.gnomon); }                                                                                  
