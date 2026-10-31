@@ -185,7 +185,7 @@ stmt_high
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expression expr_id_value 
 %type <TreePtr<Node>> 				expr_clause expr_conjunction expr_disjunction expr_boot 
-%type <TreePtr<Node>> 				id_primary id_boot id_disjunction id_conjunction id_prefix id_parens
+%type <TreePtr<Node>> 				id_primary id_boot id_disjunction id_conjunction id_prefix id_parens id_extras
 %type <TreePtr<Node>> 				norm_primary 
 %type <TreePtr<Node>> 			    access_wildcard access_primary 
 %type <TreePtr<Node>> 				label_wildcard other_wildcard star_arg
@@ -222,7 +222,7 @@ stmt_high
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
 %type <VN::NodeAndGnomon>			norm_full_explicit_start type_full_explicit_start decl_full_explicit_start qual_full_explicit_start mi_full_explicit_start
 %type <VN::NodeAndGnomon>			record_scope enum_scope
-%type <TreePtr<Node>> 				acc_memb_prefix acc_memb_primary
+%type <TreePtr<Node>> 				acc_memb_prefix 
 %type <TreePtr<Node>> 				stmt_decl_clause stmt_decl_disj stmt_decl_conj
 %type <list<TreePtr<Node>>>			stmt_decls  
 %type <list<TreePtr<Node>>>			members enumerators
@@ -510,7 +510,7 @@ members			: declaration												{ $$.push_back($1); }
 				
 access			: access_primary ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
 
-acc_memb_prefix	: acc_memb_primary
+acc_memb_prefix	: norm_primary
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
 				| 						      POINTER_IS_OP acc_memb_prefix	{ $$ = vn->OnPointerIs($2); }
 				| 					         	NEGATION_OP	acc_memb_prefix	{ $$ = vn->OnNegation($2); }
@@ -520,11 +520,7 @@ acc_memb_prefix	: acc_memb_primary
 				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
 				|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
 				|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
-		
-acc_memb_primary: '(' norm_boot ')'                          			{ $$ = $2; } 
-				| vn_wildcard
-				| vn_primary
-		
+				
 access_primary	: bare_access
 				| access_wildcard
 
@@ -730,7 +726,7 @@ expr_postfix: expr_primary
 			| expr_postfix '.' LIBRARY_METHOD '(' ')'   				{ $$ = $3->OnObject($1, @1); }			
 			| FUNC_ON_TYPE '(' type_boot ')'       						{ $$ = $1->OnType($3, @3); }			
 		
-expr_primary: id_primary
+expr_primary: id_extras
 			| norm_primary  
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
@@ -738,7 +734,8 @@ expr_primary: id_primary
 			| KEYWORD_PRIMARY_OP							
 			| INIT_SIGN
 			
-norm_primary	: '(' norm_boot ')'                       			{ $$ = $2; }
+norm_primary	: vn_primary
+				| '(' norm_boot ')'                       			{ $$ = $2; }
 				| vn_wildcard
 			
 prerestrict_decl_start : PRERESTRICT_DECL     				    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
@@ -792,8 +789,10 @@ id_parens	: id_primary
 			| vn_wildcard
 			| '(' id_boot ')'										{ $$ = $2; }
 
-id_primary  : vn_primary
-			| norm_full_explicit_start itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
+id_primary  : id_extras
+			| vn_primary
+
+id_extras	: norm_full_explicit_start itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| NORMAL_ID_SIGN	  			
 			| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } 
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
