@@ -574,6 +574,7 @@ struct AccessSpec : Qualifier
 
 	Production GetMyProductionTerminal() const override;
 	TreePtr<Node> GetDefaultNode(TreePtr<Node> type) const final;     
+	Token GetSignifierToken() const override;
 };
 
 
