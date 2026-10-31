@@ -179,14 +179,14 @@ stmt_high
 	
 //%type <int>		 					star any_node 
 %type <TreePtr<Node>> 				norm_boot norm_clause normal_disj normal_conj normal 
-%type <TreePtr<Node>> 				norm_vn_primary vn_wildcard
+%type <TreePtr<Node>> 				vn_primary vn_wildcard
 %type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational 
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expression expr_id_value 
 %type <TreePtr<Node>> 				expr_clause expr_conjunction expr_disjunction expr_boot 
 %type <TreePtr<Node>> 				id_primary id_boot id_disjunction id_conjunction id_prefix id_parens
-%type <TreePtr<Node>> 				vn_primary 
+%type <TreePtr<Node>> 				norm_primary 
 %type <TreePtr<Node>> 			    access_wildcard access_primary 
 %type <TreePtr<Node>> 				label_wildcard other_wildcard star_arg
 %type <TreePtr<Node>> 				argumentation
@@ -522,11 +522,8 @@ acc_memb_prefix	: acc_memb_primary
 				|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 		
 acc_memb_primary: '(' norm_boot ')'                          			{ $$ = $2; } 
-				| bare_access 
-				| DELTA_COMPARE_OP norm_boot DELTA_REPLACE_OP norm_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 				| vn_wildcard
-				| DESIGNATED_NORMAL
-				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
+				| vn_primary
 		
 access_primary	: bare_access
 				| access_wildcard
@@ -733,14 +730,16 @@ expr_postfix: expr_primary
 			| expr_postfix '.' LIBRARY_METHOD '(' ')'   				{ $$ = $3->OnObject($1, @1); }			
 			| FUNC_ON_TYPE '(' type_boot ')'       						{ $$ = $1->OnType($3, @3); }			
 		
-expr_primary: id_primary  
-			| '(' norm_boot ')'                       			{ $$ = $2; }
+expr_primary: norm_primary  
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL									
 			| KEYWORD_PRIMARY_OP							
 			| INIT_SIGN
 			| vn_wildcard
+			
+norm_primary	: id_primary
+				| '(' norm_boot ')'                       			{ $$ = $2; }
 			
 prerestrict_decl_start : PRERESTRICT_DECL     				    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
                                                                   vn->AddGnomon($$); }		
@@ -801,9 +800,6 @@ id_primary  : vn_primary
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| ID_BUILDER_NORMAL OPEN_VN VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			
-vn_primary	: norm_vn_primary
-			| DELTA_COMPARE_OP norm_boot DELTA_REPLACE_OP norm_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
-
 argumentation	: OPEN_MAP_CALL comma_sep_exprs CLOSE_MAP_CALL	{ $$ = vn->OnMapArgs()->OnArgsList($2, @2); }
 				| OPEN_MAP_CALL CLOSE_MAP_CALL					{ $$ = vn->OnMapArgs(); }
 				| '(' comma_sep_exprs ')'						{ $$ = vn->OnSeqArgs()->OnArgsList($2, @2); }
@@ -817,7 +813,8 @@ norm_full_explicit_start : EXPLICIT_NORMAL							{ $$ = vn->MakeScopeGnomonForNo
 																	  
 //////////////////////////////// NORMAL ////////////////////////////////////         
 
-norm_vn_primary : DESIGNATED_NORMAL
+vn_primary 		: DESIGNATED_NORMAL
+				| DELTA_COMPARE_OP norm_boot DELTA_REPLACE_OP norm_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
 				| TRANSFORM_NAME_NORMAL OPEN_VN unified_boot CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 
