@@ -206,7 +206,7 @@ stmt_high
 %type <TreePtr<Node>> 				st_declarator st_declarator_prefix st_declarator_postfix st_declarator_primary
 %type <TreePtr<Node>> 				type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
-%type <TreePtr<Node>> 				record base_spec bare_access access qualifier_node
+%type <TreePtr<Node>> 				record base_spec access_extras access qualifier_node
 %type <TreePtr<Node>> 				enum_node enum
 %type <TreePtr<Node>>				memb_init_boot memb_init memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					new_vn_name
@@ -224,7 +224,7 @@ stmt_high
 %type <VN::NodeAndGnomon>			record_scope enum_scope
 %type <TreePtr<Node>> 				stmt_decl_clause stmt_decl_disj stmt_decl_conj
 %type <list<TreePtr<Node>>>			stmt_decls  
-%type <list<TreePtr<Node>>>			members enumerators
+%type <list<TreePtr<Node>>>			enumerators
 %type <TreePtr<Node>> 				enumerator prototype_enumerator
 %type <list<TreePtr<Node>>>			comma_sep_exprs semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases memb_inits
@@ -246,8 +246,10 @@ stmt_high
 // Terminology
 // x_boot is lowest prec for x, typically allowing VN commands
 // x_clause is between VN commands and con/disjunction
-// x is between con/disjunction and infix/space-sep syntaxes
-// x_prefix x_postfix and x_primary are the expressional C and VN forms as indicated
+// x is between con/disjunction and infix/space-sep syntaxes, typically including terminator
+// bare_x is x without terminator
+// x_prefix x_postfix and x_primary are the expressional C and VN forms as indicated inside the column
+// x_extras are primary syntax elements outside of the column
 
 //////////////////////////////////// COMMANDS ///////////////////////////////////////////
 
@@ -475,8 +477,8 @@ parameter   : norm_clause
                          
 //////////////////////////////// RECORDS ////////////////////////////////////                                  
                          
-record			: record_scope '{' members '}'			 				{ $$ = $1.node->OnMembers($3, @3); }
-				| record_scope ':' bases '{' members '}'				{ $$ = $1.node->OnBases($3, @3)->OnMembers($5, @5); }
+record			: record_scope '{' stmt_decls '}'						{ $$ = $1.node->OnMembers($3, @3); }
+				| record_scope ':' bases '{' stmt_decls '}'				{ $$ = $1.node->OnBases($3, @3)->OnMembers($5, @5); }
 				| record_scope '{' '}'			 						{ $$ = $1.node; }
 				| record_scope ':' bases '{' '}'						{ $$ = $1.node->OnBases($3, @3); }
              
@@ -490,35 +492,20 @@ bases			: base_spec                                                 { $$.push_ba
 base_spec		: type_specified											{ $$ = vn->OnBase($1); } 
 				| vn_wildcard												{ $$ = $1; }
 				| DESIGNATED_NORMAL       				  					// To match a designated Star
-				| bare_access type_specified								{ $$ = vn->OnBase($1, $2, @$); }
+				| access_extras type_specified								{ $$ = vn->OnBase($1, $2, @$); }
                                                                                                                                                          				                      				                        
-//////////////////////////////// ACCESS/MEMBER ////////////////////////////////////                                  
-				                                 
-// Acc Memb column includes access specifiers and full member declarations. We combine both because
-// a member can start with both, and the parser has limited lookahead. By being explicit, we avoid the 
-// brittleness of symmetrical columns. This will make eg (int a) : char b; syntactical (i.e. if 
-// legitimised by a VN or paren, a declaration could be used as an access specifier). TODO prevent in Actions.
-
-// Note: booting into here permits an access spec before a decl eg public: int a;
-// This is done to allow a "localised" access spec in booted contexts eg delta.
-
-// Above, loopbacks. Below, entry from record
-
-members			: declaration												{ $$.push_back($1); }
-				| statement													{ $$.push_back($1); }
-				| members declaration 										{ $$ = $1; $$.push_back($2); }
-				| members statement											{ $$ = $1; $$.push_back($2); }
+//////////////////////////////// ACCESS ////////////////////////////////////                                  
 				
 access			: access_primary ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
 				
-access_primary	: bare_access
+access_primary	: access_extras
 				| access_wildcard
 
-access_wildcard 	: STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
-					| STAR_IN_RECORD OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
-					| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
+access_wildcard : STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
+				| STAR_IN_RECORD OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
+				| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
 
-bare_access		: ACC_NODE_KEYWORD 
+access_extras	: ACC_NODE_KEYWORD 
                 | DESIGNATED_ACCESS
 					
 //////////////////////////////// ENUMERATIONS ////////////////////////////////////                                  
@@ -561,8 +548,6 @@ normal    		: statement
 				| declaration			
 				| bare_declaration			// TODO don't like this, add the semicolons during render
 				| other_wildcard ':'               			{ $$ = vn->OnLabel($1, @1); } // treat as label because an access spec on its own doesn't produce a node
-//				| access declaration             			{ $$ = $2; }
-//				| access bare_declaration             			{ $$ = $2; } 	// TODO don't like this, add the semicolons during render
 							
 stmt_decls		: stmt_decl_clause											            { $$ = {$1}; } 
 				| stmt_decl_clause stmt_decls											{ $$ = $2; $$.push_front($1); }
@@ -577,7 +562,6 @@ stmt_decl_conj	: stmt_decl
 
 stmt_decl		: statement										
 				| declaration			
-//				| access declaration		             			{ $$ = $2; }												
 					
 statement		: statement_nc												
 				| compound	
@@ -823,9 +807,8 @@ other_wildcard 	: STAR_IN_OTHER									{ $$ = vn->OnStar(nullptr); }
 				| ANY_NODE_IN_OTHER								{ $$ = nullptr; }
 												
 star_arg		: norm_boot
-				| bare_access
-	
-															
+				| access_extras
+								
 decl_full_explicit_start 	: EXPLICIT_DECL								{ $$ = vn->MakeScopeGnomonForNode($1); 
 																		  vn->AddGnomon($$.gnomon); }                                                                                  
 										
