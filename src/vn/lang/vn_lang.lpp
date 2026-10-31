@@ -48,7 +48,7 @@ unicode_name			\p{UnicodeIdentifierStart} \p{UnicodeIdentifierPart}*
 float_exp_suffix		[Ee] [-+]? \d+
 float_num				\d* (\d | \.\d | \d\.) \d* {float_exp_suffix}?
 integral_num			\d*[lLuU]*
-comp_assign				\|=|\^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
+assignment_op			\|=|\^=|&=|<<=|>>=|\+=|-=|\*=|\/=|%=
 node_name               ({ascii_name}|::)*
 
 %%
@@ -88,7 +88,7 @@ node_name               ({ascii_name}|::)*
 
 ==|!=			{ return YY::VNLangParser::make_C_EQUALITY_OP(str(), location()); }
 <|<=|>|>=		{ return YY::VNLangParser::make_C_RELATIONAL_OP(str(), location()); }
-{comp_assign} 	{ return YY::VNLangParser::make_C_COMPOUND_ASSIGN(str(), location()); }
+{assignment_op}	{ return YY::VNLangParser::make_C_ASSIGNMENT_OP(str(), location()); }
 \|\|		  	{ return YY::VNLangParser::make_C_LOGICAL_OR_OP(str(), location()); }
 &&			  	{ return YY::VNLangParser::make_C_LOGICAL_AND_OP(str(), location()); }
 <<|>>		  	{ return YY::VNLangParser::make_C_SHIFT_OP(str(), location()); }
