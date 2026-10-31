@@ -97,6 +97,7 @@ public:
 	PrerestrictScopeGnomon( TreePtr<Node> node_ );
 	string GetMessageText() const override;
 	TreePtr<Node> GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) override;
+	TreePtr<Node> GetNode() const;
 
 	TreePtr<Node> node;
 };

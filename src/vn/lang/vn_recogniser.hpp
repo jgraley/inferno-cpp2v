@@ -61,6 +61,8 @@ public:
 	YY::VNLangParser::symbol_type OnIdByNameLexeme(wstring text, Syntax::Location loc) const;
 	YY::VNLangParser::symbol_type OnIdBuilderLexeme(wstring text, Syntax::Location loc) const;
 	YY::VNLangParser::symbol_type OnTransformLexeme(wstring text, Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type OnAnyNodeLexeme(Syntax::Location loc) const;
+	YY::VNLangParser::symbol_type OnStarLexeme(Syntax::Location loc) const;
 	
 private:
 	TreePtr<Node> CreateNodeFromName(string text, Syntax::Location loc) const;

@@ -152,6 +152,63 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnTransformLexeme(wstring text, 
 }
 
 
+YY::VNLangParser::symbol_type VNLangRecogniser::OnAnyNodeLexeme(Syntax::Location loc) const
+{
+	shared_ptr<const ScopeGnomon> spg = actions->TryGetTopScopeGnomon();
+	FTRACE(spg)("\n");
+	if( auto rspg = dynamic_pointer_cast<const RegularScopeGnomon>(spg) )
+	{
+		if( TreePtr<Record>::DynamicCast( rspg->GetNode() ) )
+			return YY::VNLangParser::make_ANY_NODE_IN_RECORD(any_cast<YY::VNLangParser::location_type>(loc));
+		else if( TreePtr<Compound>::DynamicCast( rspg->GetNode() ) )
+			return YY::VNLangParser::make_ANY_NODE_IN_COMPOUND(any_cast<YY::VNLangParser::location_type>(loc));
+		else
+			return YY::VNLangParser::make_ANY_NODE_IN_OTHER(any_cast<YY::VNLangParser::location_type>(loc));
+	}
+	else if( auto pspg = dynamic_pointer_cast<const PrerestrictScopeGnomon>(spg) )
+	{		
+		if( TreePtr<LabelDeclaration>::DynamicCast( pspg->GetNode() ) ) // Must restrict to LabelDeclaration for a label 
+			return YY::VNLangParser::make_ANY_NODE_IN_COMPOUND(any_cast<YY::VNLangParser::location_type>(loc));
+		else if( TreePtr<Declaration>::DynamicCast( pspg->GetNode() ) ) // Other decls are taken to allow access specs
+			{ return YY::VNLangParser::make_ANY_NODE_IN_RECORD(any_cast<YY::VNLangParser::location_type>(loc)); }
+		else 
+			return YY::VNLangParser::make_ANY_NODE_IN_OTHER(any_cast<YY::VNLangParser::location_type>(loc));
+	}		
+	else
+	{
+		return YY::VNLangParser::make_ANY_NODE_IN_OTHER(any_cast<YY::VNLangParser::location_type>(loc));
+	}
+}
+
+
+YY::VNLangParser::symbol_type VNLangRecogniser::OnStarLexeme(Syntax::Location loc) const
+{
+	shared_ptr<const ScopeGnomon> spg = actions->TryGetTopScopeGnomon();
+	if( auto rspg = dynamic_pointer_cast<const RegularScopeGnomon>(spg) )
+	{
+		if( TreePtr<Record>::DynamicCast( rspg->GetNode() ) )
+			return YY::VNLangParser::make_STAR_IN_RECORD(any_cast<YY::VNLangParser::location_type>(loc));
+		else if( TreePtr<Declaration>::DynamicCast( rspg->GetNode() ) )
+			return YY::VNLangParser::make_STAR_IN_COMPOUND(any_cast<YY::VNLangParser::location_type>(loc));
+		else
+			return YY::VNLangParser::make_STAR_IN_OTHER(any_cast<YY::VNLangParser::location_type>(loc));
+	}
+	else if( auto pspg = dynamic_pointer_cast<const PrerestrictScopeGnomon>(spg) )
+	{
+		if( TreePtr<LabelDeclaration>::DynamicCast( pspg->GetNode() ) ) // Must restrict to LabelDeclaration for a label 
+			return YY::VNLangParser::make_STAR_IN_COMPOUND(any_cast<YY::VNLangParser::location_type>(loc));
+		else if( TreePtr<AdvanceDecl>::DynamicCast( pspg->GetNode() ) ) // Other decls are taken to allow access specs
+			return YY::VNLangParser::make_STAR_IN_RECORD(any_cast<YY::VNLangParser::location_type>(loc));
+		else 
+			return YY::VNLangParser::make_STAR_IN_OTHER(any_cast<YY::VNLangParser::location_type>(loc));
+	}		
+	else
+	{
+		return YY::VNLangParser::make_STAR_IN_OTHER(any_cast<YY::VNLangParser::location_type>(loc));
+	}
+}
+
+
 TreePtr<Node> VNLangRecogniser::CreateNodeFromName(string text, Syntax::Location loc) const
 {
 	list<string> parts = Split(text, "::");

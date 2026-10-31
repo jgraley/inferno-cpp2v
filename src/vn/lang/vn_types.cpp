@@ -161,3 +161,10 @@ TreePtr<Node> PrerestrictScopeGnomon::GetDeclarationNode(Syntax::Location loc, b
 	instance->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
 	return instance;
 }
+
+
+TreePtr<Node> PrerestrictScopeGnomon::GetNode() const
+{
+	return node;
+}
+

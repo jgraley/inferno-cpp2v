@@ -85,8 +85,12 @@
 	DELTA_COMPARE_OP 					        _("▲")
 	DELTA_REPLACE_OP 					        _("⯈")
 	DELTA_END_OP 					 	        _("⯇")
-	ANY_NODE_OP 						        _("☆")
-	STAR_OP 							        _("★")
+	ANY_NODE_IN_RECORD 					        _("☆ in record") // allowed to be an access spec
+	ANY_NODE_IN_COMPOUND				        _("☆ in compound") // allowed to be a label
+	ANY_NODE_IN_OTHER					        _("☆ in other")
+	STAR_IN_RECORD 						        _("★ in record") 
+	STAR_IN_COMPOUND					        _("★ in compound")
+	STAR_IN_OTHER 							    _("★ in other")
 	TRANSFORM_OP						        _("⤨")
 	NEGATION_OP							        _("¬")
 	CONJUNCTION_OP						        _("∧")
@@ -171,6 +175,7 @@
 stmt_low 
 stmt_high
 	
+//%type <int>		 					star any_node 
 %type <TreePtr<Node>> 				norm_boot norm_clause normal_disj normal_conj normal 
 %type <TreePtr<Node>> 				norm_vn_primary vn_wildcard
 %type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational 
@@ -179,7 +184,7 @@ stmt_high
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expression expr_id_value 
 %type <TreePtr<Node>> 				expr_clause expr_conjunction expr_disjunction expr_boot 
 %type <TreePtr<Node>> 				id_primary id_boot id_disjunction id_conjunction id_prefix id_parens
-%type <TreePtr<Node>> 				vn_primary
+%type <TreePtr<Node>> 				vn_primary access_wildcard access_primary label_wildcard other_wildcard
 %type <TreePtr<Node>> 				argumentation
 %type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_vn_prim 
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
@@ -502,7 +507,7 @@ members			: declaration												{ $$.push_back($1); }
 				| members access									
 				| members acc_memb_prefix ';'								{ $$ = $1; $$.push_back($2); }
      
-access			: acc_memb_prefix ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
+access			: access_primary ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
 
 acc_memb_prefix	: acc_memb_primary
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
@@ -515,7 +520,8 @@ acc_memb_prefix	: acc_memb_primary
 				|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
 				|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 		
-acc_memb_primary: norm_vn_primary
+acc_memb_primary: vn_wildcard
+				| norm_vn_primary
 				| '(' acc_memb_boot2 ')'                          			{ $$ = $2; } 
 				| bare_access 
 				| DELTA_COMPARE_OP acc_memb_boot2 DELTA_REPLACE_OP acc_memb_boot2 DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
@@ -529,7 +535,7 @@ acc_memb_unitary2	: open_declaration
 					| access2 open_declaration									{ $$ = $2; }							
 					| acc_memb_prefix2
 
-access2			: acc_memb_prefix2 ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
+access2			: access_primary ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
 
 acc_memb_prefix2: acc_memb_primary2
 				| 						     GREEN_GRASS_OP acc_memb_prefix	{ $$ = vn->OnGrass($2); }
@@ -542,11 +548,20 @@ acc_memb_prefix2: acc_memb_primary2
 				|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
 				|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 		
-acc_memb_primary2: norm_vn_primary
+acc_memb_primary2: vn_wildcard
+				| norm_vn_primary
 				| bare_access 
 
-bare_access		: qualifier_node 
+access_primary	: bare_access
+				| access_wildcard
 
+access_wildcard 	: STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
+					| STAR_IN_RECORD OPEN_VN norm_boot CLOSE_VN			{ $$ = vn->OnStar($3); }
+					| STAR_IN_RECORD OPEN_VN bare_access CLOSE_VN		{ $$ = vn->OnStar($3); } // TODO add the VNs around bare_access
+					| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
+
+bare_access		: qualifier_node 
+					
 //////////////////////////////// ENUMERATIONS ////////////////////////////////////                                  
                          
 enum			: enum_scope '{' enumerators '}'		 					{ $$ = $1.node->OnMembers( $3, @3 ); }
@@ -585,6 +600,7 @@ normal_conj 	: normal
 normal    		: statement		
 				| expression
 				| open_declaration
+				| other_wildcard ':'               			{ $$ = vn->OnLabel($1, @1); } // treat as label because an access spec on its own doesn't produce a node
 							
 stmt_decls		: stmt_decl_clause											            { $$ = {$1}; } 
 				| stmt_decl_clause stmt_decls											{ $$ = $2; $$.push_front($1); }
@@ -614,6 +630,12 @@ arrival		: ARRIVAL_KEYWORD ':'
 			| ARRIVAL_KEYWORD expression ':'								{ $$ = $1->OnArgsList({$2}, @2); } 
 			| ARRIVAL_KEYWORD expression RANGE_OP expression ':' 			{ $$ = $1->OnArgsList({$2, $4}, @2+@4); }
 			| declaring_label_id ':' 			 							{ $$ = vn->OnLabel($1, @1); } 
+			| label_wildcard ':' 			 								{ $$ = vn->OnLabel($1, @1); } 
+
+label_wildcard 	: STAR_IN_COMPOUND									{ $$ = vn->OnStar(nullptr); }
+				| STAR_IN_COMPOUND OPEN_VN norm_boot CLOSE_VN		{ $$ = vn->OnStar($3); }
+				| STAR_IN_COMPOUND OPEN_VN bare_access CLOSE_VN		{ $$ = vn->OnStar($3); } // TODO add the VNs around bare_access
+				| ANY_NODE_IN_COMPOUND								{ $$ = nullptr; }
 
 statement_nca	: bare_statement ';'										
 				| control_stmt_sign '(' ')' statement	
@@ -739,6 +761,7 @@ expr_primary: id_primary
 			| BOOL_LITERAL									
 			| KEYWORD_PRIMARY_OP							
 			| INIT_SIGN
+			| vn_wildcard
 			
 prerestrict_decl_start : PRERESTRICT_DECL     				    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
                                                                   vn->AddGnomon($$); }		
@@ -759,6 +782,7 @@ declaring_res_id	: id_parens
                                                                                  YY::VNLangParser::token::TOK_DESIGNATED_NORMAL)); }
 
 declaring_st_res_id	: id_primary
+					| vn_wildcard
                     | new_vn_name			{ recogniser->AddGnomon(
                                               make_shared<VN::DesignationGnomon>($1, 
                                                                                  MakeTreeNode<CPPTree::ResourceIdentifier>(), 
@@ -787,6 +811,7 @@ id_prefix	: id_parens
 			|                        PRERESTRICT_NORMAL id_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); } // Note: we could recognise PRERESTRICT_ID if this casues conflicts
 
 id_parens	: id_primary
+			| vn_wildcard
 			| '(' id_boot ')'										{ $$ = $2; }
 
 id_primary  : vn_primary
@@ -813,19 +838,33 @@ norm_full_explicit_start : EXPLICIT_NORMAL							{ $$ = vn->MakeScopeGnomonForNo
 																	  
 //////////////////////////////// NORMAL ////////////////////////////////////         
 
-norm_vn_primary : vn_wildcard
-				| DESIGNATED_NORMAL
+norm_vn_primary : DESIGNATED_NORMAL
 				| TRANSFORM_NAME_NORMAL OPEN_VN unified_boot CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
-				| STAR_OP OPEN_VN norm_boot CLOSE_VN					{ $$ = vn->OnStar($3); }
-				| STAR_OP OPEN_VN bare_access CLOSE_VN					{ $$ = vn->OnStar($3); } // TODO add the VNs around bare_access
 
-vn_wildcard 	: STAR_OP													{ $$ = vn->OnStar(nullptr); }
-				| ANY_NODE_OP												{ $$ = nullptr; }
-											
+// Keep this long-hand for symmetry with versions that only allow eg ..._IN_RECORD
+vn_wildcard 	: STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
+				| STAR_IN_RECORD OPEN_VN norm_boot CLOSE_VN			{ $$ = vn->OnStar($3); }
+				| STAR_IN_RECORD OPEN_VN bare_access CLOSE_VN		{ $$ = vn->OnStar($3); } 
+				| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
+				| STAR_IN_COMPOUND									{ $$ = vn->OnStar(nullptr); }
+				| STAR_IN_COMPOUND OPEN_VN norm_boot CLOSE_VN		{ $$ = vn->OnStar($3); }
+				| STAR_IN_COMPOUND OPEN_VN bare_access CLOSE_VN		{ $$ = vn->OnStar($3); } 
+				| ANY_NODE_IN_COMPOUND								{ $$ = nullptr; }
+				| STAR_IN_OTHER										{ $$ = vn->OnStar(nullptr); }
+				| STAR_IN_OTHER OPEN_VN norm_boot CLOSE_VN			{ $$ = vn->OnStar($3); }
+				| STAR_IN_OTHER OPEN_VN bare_access CLOSE_VN		{ $$ = vn->OnStar($3); } 
+				| ANY_NODE_IN_OTHER									{ $$ = nullptr; }				
+												
+other_wildcard 	: STAR_IN_OTHER									{ $$ = vn->OnStar(nullptr); }
+				| STAR_IN_OTHER OPEN_VN norm_boot CLOSE_VN		{ $$ = vn->OnStar($3); }
+				| STAR_IN_OTHER OPEN_VN bare_access CLOSE_VN	{ $$ = vn->OnStar($3); } 
+				| ANY_NODE_IN_OTHER								{ $$ = nullptr; }
+												
+															
 decl_full_explicit_start 	: EXPLICIT_DECL								{ $$ = vn->MakeScopeGnomonForNode($1); 
 																		  vn->AddGnomon($$.gnomon); }                                                                                  
-															
+										
 //////////////////////////////// TYPE-ID ////////////////////////////////////         
 // type-id as seen in https://alx71hub.github.io/hcb/#type-id can be troublesome grammatically. Care advised.
 
@@ -880,7 +919,7 @@ type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExpl
 			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN 		 { $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| ID_BUILDER_TYPE OPEN_VN VN_SEP item CLOSE_VN 						 { $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			| TRANSFORM_NAME_TYPE OPEN_VN unified_boot CLOSE_VN 				 { $$ = vn->OnTransform($1, @1, $3, @3); }
-			| STAR_OP OPEN_VN type_boot CLOSE_VN								 { $$ = vn->OnStar($3); }
+//			| star OPEN_VN type_boot CLOSE_VN									 { $$ = vn->OnStar($3); } // probably needs to be typalised to avoid conflict with wildcarded access spec
 		 	
 type_full_explicit_start 	: EXPLICIT_TYPE										{ $$ = vn->MakeScopeGnomonForNode($1); 
                                                                                   vn->AddGnomon($$.gnomon); }
