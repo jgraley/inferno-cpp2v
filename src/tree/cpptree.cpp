@@ -1248,6 +1248,12 @@ Syntax::Production AccessSpec::GetMyProductionTerminal() const
 	return Production::KEYWORD; 
 }
 
+
+Syntax::Token AccessSpec::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_ACC_NODE_KEYWORD;
+}
+
 //////////////////////////// Public //////////////////////////////
 
 string Public::GetKeyword( Policy ) const

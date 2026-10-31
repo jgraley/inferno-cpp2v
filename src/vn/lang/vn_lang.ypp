@@ -135,6 +135,7 @@
 <TreePtr<Node>>	DESIGNATED_TYPE			_("designated type")
 <TreePtr<Node>>	DESIGNATED_CURRENT_RECORD_ID _("current record")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier")
+<TreePtr<Node>>	DESIGNATED_ACCESS		_("designated access spec")
 <TreePtr<Node>>	DESIGNATED_COMPOUND		_("designated compound") // DELETE ME
 <TreePtr<Node>>	EXPLICIT_NORMAL			_("explicit statement/expression node name")
 <TreePtr<Node>>	EXPLICIT_TYPE			_("explicit type node")
@@ -163,6 +164,7 @@
 <TreePtr<Node>> RECORD_KEYWORD			_("record")
 <TreePtr<Node>> ENUM_KEYWORD			_("enum")
 <TreePtr<Node>> QUAL_NODE_KEYWORD		_("qualifier")
+<TreePtr<Node>> ACC_NODE_KEYWORD		_("access spec")
 <TreePtr<Node>> TYPEDEF_KEYWORD			_("typedef")
 <TreePtr<Node>> TYPE_SIGN				_("type signifier")
 <TreePtr<Node>> TYPE_W_PARAMS_SIGN		_("type with arguments")
@@ -271,6 +273,7 @@ script_command	: ENGINE_COMMAND unified_clause   		 	{ $$ = make_shared<VN::Engi
 designation_command	: new_vn_name DESIGNATE_COMMAND norm_clause		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
 					| new_vn_name DESIGNATE_COMMAND type_clause			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
 					| new_vn_name DESIGNATE_COMMAND qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
+					| new_vn_name DESIGNATE_COMMAND ACC_NODE_KEYWORD	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_ACCESS); }
 					| new_vn_name DESIGNATE_COMMAND PREPROCESSOR_ID_SIGN { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
 					
 //////////////////////////////////// ITEMISATION ///////////////////////////////////////////
@@ -561,7 +564,8 @@ access_wildcard 	: STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
 					| STAR_IN_RECORD OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
 					| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
 
-bare_access		: qualifier_node 
+bare_access		: ACC_NODE_KEYWORD 
+                | DESIGNATED_ACCESS
 					
 //////////////////////////////// ENUMERATIONS ////////////////////////////////////                                  
                          
