@@ -730,16 +730,16 @@ expr_postfix: expr_primary
 			| expr_postfix '.' LIBRARY_METHOD '(' ')'   				{ $$ = $3->OnObject($1, @1); }			
 			| FUNC_ON_TYPE '(' type_boot ')'       						{ $$ = $1->OnType($3, @3); }			
 		
-expr_primary: norm_primary  
+expr_primary: id_primary
+			| norm_primary  
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL									
 			| KEYWORD_PRIMARY_OP							
 			| INIT_SIGN
-			| vn_wildcard
 			
-norm_primary	: id_primary
-				| '(' norm_boot ')'                       			{ $$ = $2; }
+norm_primary	: '(' norm_boot ')'                       			{ $$ = $2; }
+				| vn_wildcard
 			
 prerestrict_decl_start : PRERESTRICT_DECL     				    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
                                                                   vn->AddGnomon($$); }		
