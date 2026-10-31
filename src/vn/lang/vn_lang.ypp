@@ -197,7 +197,7 @@ stmt_high
 %type <TreePtr<Node>> 				stmt_decl bare_statement statement_nca statement control_stmt_sign       
 %type <TreePtr<Node>>   			statement_nc 
 %type <TreePtr<Node>> 				declaration 
-%type <TreePtr<Node>> 				prototype bare_declaration bare_initialiser
+%type <TreePtr<Node>> 				prototype bare_declaration bare_initialiser comp_declaration
 %type <TreePtr<Node>> 				assign_init
 %type <TreePtr<Node>> 				compound_primary parameter type_boot type_clause compound_prefix compound 
 //%type <TreePtr<Node>> 			compound_commands compound_boot
@@ -340,9 +340,11 @@ code_unit_scope	: CODE_UNIT '{'												{ $$ = make_shared<VN::RegularScopeGn
 
 //////////////////////////////// DECLARATIONS ////////////////////////////////////         
 
-declaration	: bare_declaration ';'									{ $$ = $1; }      
-			| prototype compound									{ $$ = $1->OnInitialiser($2, @2); }			
-			| access prototype compound									{ $$ = $2->OnInitialiser($3, @3); }			
+declaration	: bare_declaration ';'								
+			| comp_declaration									
+			
+comp_declaration: prototype compound									{ $$ = $1->OnInitialiser($2, @2); }			
+				| access comp_declaration								{ $$ = $2; }
 				
 bare_declaration: prototype
 				| prototype bare_initialiser							{ $$ = $1->OnInitialiser($2, @2); } 
