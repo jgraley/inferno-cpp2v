@@ -155,7 +155,6 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnTransformLexeme(wstring text, 
 YY::VNLangParser::symbol_type VNLangRecogniser::OnAnyNodeLexeme(Syntax::Location loc) const
 {
 	shared_ptr<const ScopeGnomon> spg = actions->TryGetTopScopeGnomon();
-	FTRACE(spg)("\n");
 	if( auto rspg = dynamic_pointer_cast<const RegularScopeGnomon>(spg) )
 	{
 		if( TreePtr<Record>::DynamicCast( rspg->GetNode() ) )
