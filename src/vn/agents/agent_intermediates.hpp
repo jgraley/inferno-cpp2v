@@ -33,7 +33,7 @@ public:
 
 
 /**
- * Commits agent to having no children
+ * Commits agent to having no children relevent to compare/matching (may still have a child for builder analysis)
  */ 
 class NonlocatingAgent : public PreRestrictedAgent, // names finalised in rule #729
                          public virtual SpecialBase 

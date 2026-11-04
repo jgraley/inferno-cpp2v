@@ -179,7 +179,7 @@ stmt_high
 	
 //%type <int>		 					star any_node 
 %type <TreePtr<Node>> 				normal_boot normal_clause normal_disj normal_conj normal 
-%type <TreePtr<Node>> 				vn_primary vn_wildcard
+%type <TreePtr<Node>> 				vn_prefix vn_primary vn_wildcard
 %type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational 
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
@@ -321,6 +321,10 @@ unified_prefix	: expr_prefix
 // so we'll need to complete a branch of the syntax for compounds with a copy of the unary VN operators (none are postfix).
 compound	: compound_prefix
 
+// Very sensitive to conflicts here because no semicolon before next statement begins. Consider prefix_op primary ++ primary;
+// Is  the ++ a postfix for us nor a prefix for next statement? We're coping by only acting on compounds, which is right for
+// AutolocatingAgents but not so good for RelocatingAgents which shouldn't be so restricted. TODO support a syntax with a ; and 
+// parenteses for these i.e. the precedence for RelocatingAgents is very high.
 compound_prefix : compound_primary 
 				| 								NEGATION_OP compound_prefix	{ $$ = vn->OnNegation($2); }
 				|       				 TRANSFORM_NAME_NORMAL compound_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
@@ -399,10 +403,7 @@ memb_init	: memb_init_prefix
 memb_init_prefix: memb_init_postfix
 				| 						        GREEN_GRASS_OP memb_init_prefix	{ $$ = vn->OnGrass($2); }
 				| 					               NEGATION_OP memb_init_prefix	{ $$ = vn->OnNegation($2); }
-				|                        PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-				|  						        stuff_op_scope memb_init_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-				|    stuff_op_scope OPEN_VN memb_init_boot CLOSE_VN memb_init_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN memb_init_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
+				| vn_prefix
         
 memb_init_postfix	: memb_init_primary
 					| memb_init_primary '(' expr_boot ')'						{ $$ = vn->OnMemberInitialiser($1, @2, $3, @3); } 
@@ -491,13 +492,7 @@ param_prefix: param_primary
 			| 						      POINTER_IS_OP param_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	param_prefix	{ $$ = vn->OnNegation($2); }
 			|                        PRERESTRICT_NORMAL param_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|                PRERESTRICT_MEMB_INIT memb_init_prefix		{ $$ = vn->OnRestrict($1, @1, $2, @2); } // TODO this and all below to go in VN section
-			|        		     prerestrict_decl_start expr_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax?
-			|  						        stuff_op_scope unified_prefix { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
-			|                          BUILD_SIZE_OP unified_prefix 	{ $$ = vn->OnBuildSize($2); }
-			|                           STRINGIZE_OP unified_prefix 	{ $$ = vn->OnStringize($2); }
+			| vn_prefix
                          
 param_primary	: vn_primary              
 				| '(' parameter ')' { $$ = $2; }
@@ -709,13 +704,7 @@ expr_prefix : expr_postfix
 			| 						      POINTER_IS_OP expr_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
 			|                        PRERESTRICT_NORMAL expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|        		     prerestrict_decl_start expr_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax?
-			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
-			|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
-			|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
+			| vn_prefix
 
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
 stuff_depth		: C_ASSIGN INTEGRAL_LITERAL							{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
@@ -817,6 +806,17 @@ norm_full_explicit_start : EXPLICIT_NORMAL							{ $$ = vn->MakeScopeGnomonForNo
 																	  vn->AddGnomon($$.gnomon); }
 																	  
 //////////////////////////////// VIDA NOVA ////////////////////////////////////         
+
+// Common prefix operators for relocating agents and non-locating incl. builders. These can go from anywhere to anywhere
+// so they generally end at unified.
+// Also pre-restrictions although unsure about these, maybe they should be in specific places plus unified but not here? TODO
+vn_prefix	:                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|        		     prerestrict_decl_start expr_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax?
+			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+			| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
+			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
+			|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
+			|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 
 vn_primary 		: DESIGNATED_NORMAL
 				| DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
