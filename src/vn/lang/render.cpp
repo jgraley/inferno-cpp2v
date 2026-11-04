@@ -317,7 +317,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod,
         case Syntax::Production::BOOT...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
 			if( policy.boot_statements_using_braces )
 			{
-				// Braces can actually work in expressions, eg in {}. The nodes are STATEMENT_SEQ and we stmt_boot to BOTTOM_STMT_DECL
+				// Braces can actually work in expressions, eg in {}. The nodes are STATEMENT_SEQ and we boot to BOTTOM_STMT_DECL
 				ASSERT( Syntax::GetPrecedence(surround_prod) <= Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) ||			
 						Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) )
 					  ("Braces won't achieve high enough precedence for surrounding statement production\n")

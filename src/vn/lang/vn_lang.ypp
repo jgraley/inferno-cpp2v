@@ -249,7 +249,9 @@ stmt_high
 // x_clause is between VN commands and con/disjunction
 // x is between con/disjunction and infix/space-sep syntaxes, typically including terminator
 // bare_x is x without terminator
-// x_prefix x_postfix and x_primary are the expressional C and VN forms as indicated inside the column
+// x_prefix/x_postfix expressional C and VN forms
+// x_parens is x_primary plus optional parentheses which boot
+// x_primary a unitary syntax
 // x_extras are primary syntax elements outside of the column
 
 //////////////////////////////////// COMMANDS ///////////////////////////////////////////
@@ -383,7 +385,7 @@ prototype_np	: DESIGNATED_CURRENT_RECORD_ID st_declarator						{ $$ = vn->OnDecl
 				| DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$)->OnParams($2, @2)->OnIdentifier($3, @3); }
 				| '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$)->OnParams($3, @3)->OnIdentifier($4, @4); }
 				| qualifiers '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary		{ $$ = vn->OnXStructorDecl(true, @$)->OnParams($4, @4)->OnIdentifier($5, @5); $$ = vn->ApplyQualifiers($$, $1, @1); }
-				| RESOURCE_SIGN id_parens								{ $1->OnInScope(vn->TryGetTopScopeGnomon(), @1); $$ = $1->OnIdentifier($2, @2); }
+				| RESOURCE_SIGN declaring_res_id								{ $1->OnInScope(vn->TryGetTopScopeGnomon(), @1); $$ = $1->OnIdentifier($2, @2); }
 
 assign_init		: expression
 				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser()->OnArgsList({}, @1+@2); } 
@@ -545,7 +547,7 @@ enumerators		: enumerator												{ $$.push_back($1); }
 enumerator		: prototype_enumerator
 				| prototype_enumerator C_ASSIGN assign_init					{ $$ = $1->OnInitialiser($3, @3); } 
 
-prototype_enumerator 		: id_parens 									{ $$ = vn->OnEnumerator(@1)->OnIdentifier( $1, @1 ); }
+prototype_enumerator 	: declaring_res_id 									{ $$ = vn->OnEnumerator(@1)->OnIdentifier( $1, @1 ); }
 
 //////////////////////////////// NORMALS ////////////////////////////////////                 
 // Expression () boots to here so () can contain statement, delcaration or expression.
