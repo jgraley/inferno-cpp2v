@@ -1042,10 +1042,14 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // "Linearise" qualifiers and provide OnQualifiers that can be called more than once
 // Consider "OnTypeAndDeclarator"
 
-// Grammatical merge of acc_memb and statement/declaration
-// Labels got simpler and are now just complete (non-bare) statements - similar to access specs
-// Decls already co-exist with statements
-
-
+// C allows type-id in casts i.e. (type *)expr = 3; is a legit expr/statement, so type-id is NOT
+// a niche syntax. It will conflict with VN-usages of () so switch to ⦅⦆ for VN cases (the ones the 
+// render wants to do using {} but that would imply Compound). To resolve conflicts with
+// stuff that has optional ⦅⦆ instead use eg ⧥⯁MyRestriction⧥. Star grammar is primary so we don't
+// get the conflict, but still consider ⯁MyRestriction★ as resembles regex more.
+// Try to leave id_parens using () since declarators use () (except the strict ones) 
+// and object.(member) feels safe...
+// Review strict declarators/ids
+// Review statement expressions, maybe can use the gcc syntax ({...}) now?
 
 

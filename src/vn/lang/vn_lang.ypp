@@ -763,6 +763,7 @@ declaring_label_id	: id_primary
                                                                                  YY::VNLangParser::token::TOK_DESIGNATED_NORMAL)); }
 
 //////////////////////////////// IDENTIFIERS ////////////////////////////////////         
+// For declaring ids as well as the member id after . or ->
 
 id_boot			: id_disjunction
 
@@ -824,6 +825,7 @@ vn_primary 		: DESIGNATED_NORMAL
 // Keep this long-hand for symmetry with versions that only allow eg ..._IN_RECORD
 vn_wildcard 	: STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
 				| STAR_IN_RECORD OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
+				| norm_full_explicit_start STAR_IN_RECORD			{ $$ = vn->OnStar($1.node); }
 				| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
 				| STAR_IN_COMPOUND									{ $$ = vn->OnStar(nullptr); }
 				| STAR_IN_COMPOUND OPEN_VN star_arg CLOSE_VN		{ $$ = vn->OnStar($3); }
