@@ -180,7 +180,7 @@ string StuffAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Prod
 	if( recurse_restriction )
 		s += "⦅" + renderer->DoRender( &recurse_restriction, Syntax::Production::BOTTOM_EXPR, policy) + "⦆";
 	s += renderer->DoRender( &terminus, Syntax::Production::PREFIX, policy ); 
-	if( policy.pointer_archetype && policy.pointer_archetype->IsType() )		 
+	if( policy.pointer_archetype && policy.pointer_archetype->IsType() )	// TODO what about ChildAgent	 
 		s = "⍑(" + s + ")";	// Typaliser only operates on primary expressions, see parser
 	return s;
 }    

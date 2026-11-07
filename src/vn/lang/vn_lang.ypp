@@ -491,12 +491,13 @@ param_prefix: param_primary
 			| 						      POINTER_IS_OP param_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	param_prefix	{ $$ = vn->OnNegation($2); }
 			|                        PRERESTRICT_NORMAL param_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+		    |        		     prerestrict_decl_start vn_wildcard		{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO unneccesary prerestriction
 			| vn_prefix
                          
 param_primary	: vn_primary              
 				| '(' parameter ')' { $$ = $2; }
                 | vn_wildcard
-                
+
 //////////////////////////////// RECORDS ////////////////////////////////////                                  
                          
 record			: record_scope '{' statements '}'						{ $$ = $1.node->OnMembers($3, @3); }
@@ -703,6 +704,10 @@ expr_prefix : expr_postfix
 			| 						      POINTER_IS_OP expr_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
 			|                        PRERESTRICT_NORMAL expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
+			|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
+			|                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+			|        		     prerestrict_decl_start expr_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax?
 			| vn_prefix
 
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
@@ -810,13 +815,9 @@ norm_full_explicit_start : EXPLICIT_NORMAL							{ $$ = vn->MakeScopeGnomonForNo
 // Common prefix operators for relocating agents and non-locating incl. builders. These can go from anywhere to anywhere
 // so they generally end at unified.
 // Also pre-restrictions although unsure about these, maybe they should be in specific places plus unified but not here? TODO
-vn_prefix	:                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|        		     prerestrict_decl_start expr_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax?
-			|  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+vn_prefix	:  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 			| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
 			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
-			|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
-			|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 
 vn_primary 		: DESIGNATED_NORMAL
 				| DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
@@ -874,8 +875,6 @@ type_conjunction 	: type_specified
 type_specified		: type_prefix     // TODO slot type_id in here - needs different parens for booting
           			| DESIGNATED_CURRENT_RECORD_ID // must be distinct from type_for_declarator so we can spot valid constructors syntactically  			
 
-type_for_declarator : type_prefix						 			                			      
-
 type_entry 	: type_prefix				
 
 type_prefix : type_postfix
@@ -883,16 +882,19 @@ type_prefix : type_postfix
 			| 							      POINTER_IS_OP type_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP type_prefix	{ $$ = vn->OnNegation($2); }
 			|                     		   PRERESTRICT_TYPE type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|								TYPE_INDICATOR expr_primary { $$ = $2; } // primary because ⍑⩨x[5]; could parse as ⍑(⩨x[5]) or (⍑⩨x) [5]
+			|                                  TYPE_INDICATOR vn_prefix	{ $$ = $2; }
+			|                                TYPE_INDICATOR vn_wildcard { $$ = $2; }
+			|                            TYPE_INDICATOR '(' type_id ')'	{ $$ = $3; } // See #909
+			|                          TYPE_INDICATOR '(' vn_prefix ')' { $$ = $3; }
 
 type_postfix: type_primary		   
+type_for_declarator : type_primary						 			                			      
 			      			                                       
 type_primary: type_vn_prim
 			| '(' type_boot ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
             | TYPE_SIGN														
             | TYPE_W_PARAMS_SIGN parameterisation								{ $$ = $1->OnParams($2, @2); }		
 			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }				
-			| TYPE_INDICATOR TYPE_INDICATOR '(' type_id ')'						{ $$ = $4; } // See #909
 			
 type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DELTA_COMPARE_OP type_boot DELTA_REPLACE_OP type_boot DELTA_END_OP { $$ = vn->OnDelta($2, $4); }
