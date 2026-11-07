@@ -138,7 +138,7 @@ void PostPass::ProcessSequence( TreePtr<Node> x, SequenceInterface *x_seq, DData
 		 it != x_seq->end();
 		 ++it )
     {
-		ASSERT((TreePtr<Node>)*it)("Got NULL in a Sequence, which isn't allowed even for patterns");
+		ASSERT((TreePtr<Node>)*it)("Got NULL in a Sequence, which isn't allowed even for patterns\n")(*x_seq);
 		ProcessMutator( Mutator::CreateTreeContainer( x, x_seq, it ), dd );
     }
 }
@@ -150,7 +150,7 @@ void PostPass::ProcessCollection( TreePtr<Node> x, CollectionInterface *x_col, D
 		 it != x_col->end();
 		 ++it )
     {
-		ASSERT((TreePtr<Node>)*it)("Got NULL in a Collection, which isn't allowed even for patterns");		
+		ASSERT((TreePtr<Node>)*it)("Got NULL in a Collection, which isn't allowed even for patterns\n")(*x_col);	
 		ProcessMutator( Mutator::CreateTreeContainer( x, x_col, it ), dd );
 	} 
 }

@@ -51,10 +51,12 @@ MoveDeclarationsToTheTop::MoveDeclarationsToTheTop()
 
 	// Carefully preserve the relative order of the decls, as well as the statements.
     sc->statements = ( pre_decls, first_non_decl, mid_not_decls, mid_decl, post_any );
+    pre_decls->restriction = MakePatternNode<AdvanceDecl>();
     first_non_decl->negand = MakePatternNode<AdvanceDecl>();
     mid_not_decls->restriction = x_post;
     x_post->negand = MakePatternNode<AdvanceDecl>();
-	
+	post_any->restriction = MakePatternNode<Statement>();
+
     auto rc = MakePatternNode<Compound>();
     rc->statements = ( pre_decls, mid_decl, first_non_decl, mid_not_decls, post_any );
 

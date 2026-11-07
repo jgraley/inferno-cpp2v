@@ -642,9 +642,11 @@ InsertInferredYield::InsertInferredYield()
     thread->initialiser = func_comp;
     thread->identifier = fn_id;  
     func_comp->statements = (func_decls, loop);
+    func_decls->restriction = MakePatternNode<Declaration>();
     loop->body = delta;
     delta->through = s_comp;
     s_comp->statements = (loop_decls, stmts);
+    loop_decls->restriction = MakePatternNode<Declaration>();
     stmts->restriction = MakePatternNode<If>();
     delta->overlay = r_comp;
     r_comp->statements = (loop_decls, stmts, r_yield);

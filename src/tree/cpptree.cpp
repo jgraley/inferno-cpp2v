@@ -1165,8 +1165,8 @@ Syntax::Production MemberInitialiser::GetMyProductionTerminal() const
 string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {
 	string s;
-	if( surround_prod == Syntax::Production::VN_SEP_ITEMS )
-		s += "‽" + RenderNodeTypeName() + " ";  // As an item, this conflicts with a function call so disambiguate using pre-restriction
+	if( surround_prod != Production::COMMA_SEP )
+		s += "‽" + RenderNodeTypeName() + " ";  // As an item or designation, this conflicts with a function call so disambiguate using pre-restriction
 
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;

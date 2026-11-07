@@ -367,7 +367,6 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod,
 							
 string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy )
 {
-	string s;
 	string explain;
 
     // Production surround_prod relates to the surrounding grammar production and can be 
@@ -399,54 +398,25 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_
     if( !semicolon )
 		explain += SSPrintf("\n//%s Not adding semicolon, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));	
 	
-	if( !ReadArgs::use.contains("c") )
-		explain = ""; // shush!
-	
     if( semicolon )
-		return s + AccomodatePreRestriction( node, node_prod, Syntax::Production::BARE_STMT_DECL, policy ) + explain + ";\n";            
-	else
-        return s + AccomodatePreRestriction( node, node_prod, surround_prod, policy ) + explain;		                      
-}
-
-
-string Render::AccomodatePreRestriction( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy )
-{   
-	(void)node_prod;
-    if( !node )
-		return RenderNullPointer(node_prod, surround_prod, policy);	
-			
-	const Agent *agent = Agent::TryAsAgentConst(node);
-	if( !agent )
-		return Dispatch( node, node_prod, surround_prod, policy );
-		
-	auto pspecial = dynamic_cast<const SpecialBase *>(agent);
-	if( !pspecial )
-		return Dispatch( node, node_prod, surround_prod, policy );
+		surround_prod = Syntax::Production::BARE_STMT_DECL;
 	
-	bool prerestricted = false;
-	ASSERT( incoming_links_map.contains(node) )(incoming_links_map)("\nNode: ")(node);
-	for( const TreePtrInterface *tpi : incoming_links_map.at(node) )
-		prerestricted |= agent->IsNonTrivialPreRestriction(tpi);
-		
-	if(!prerestricted)
-		return Dispatch( node, node_prod, surround_prod, policy );
-		
-	// We need the archetype because otherwise we'll just get the name 
-	// of the special agent. We might be able to extract node name out
-	// of the template args, but using an archetype like this has precedent
-	// in the graph plotter.
-	TreePtr<Node> archetype_node = agent->GetArchetypeNode();
-
-	// This assumes no action is required in order to render a prefix operation
-	return "‽" + 
-	       archetype_node->RenderNodeTypeName() + 
-	       " " +
-	       Dispatch( node, node_prod, Syntax::Production::PREFIX, policy );	
+	string s = AccomodateNULL( node, node_prod, surround_prod, policy );	    
+	
+	if( ReadArgs::use.contains("c") )
+		s += explain;	    
+    if( semicolon )
+		s += ";\n";
+	return s;             
 }
 
 
-string Render::RenderNullPointer(Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy) // TODO turn NULL into wildcard before sending to centralised stuff. This function should just be an ASSERTFAIL()
-{	
+string Render::AccomodateNULL( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy )
+{   
+    if( node )
+		return Dispatch( node, node_prod, surround_prod, policy );	
+			
+	// TODO turn NULL into wildcard before sending to centralised stuff. This part should just be an ASSERTFAIL()
 	if( auto arch = dynamic_pointer_cast<Qualifier>( policy.pointer_archetype ) )
 		return Dispatch( (TreePtr<Node>)arch, node_prod, surround_prod, policy );
 	else if( dynamic_pointer_cast<Type>( policy.pointer_archetype ) )

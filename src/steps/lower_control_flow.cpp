@@ -144,6 +144,7 @@ DetectCombableFor::DetectCombableFor()
 // way, and can avoid a top-level NOT
 MakeAllBreakUncombable::MakeAllBreakUncombable()
 {
+    auto s_all = MakePatternNode<ConjunctionAgent, Break>();
     auto s_not = MakePatternNode<NegationAgent, Break>();
     auto sx_ubreak = MakePatternNode<UncombableBreak>();
     auto s_break = MakePatternNode<Break>();
@@ -153,9 +154,10 @@ MakeAllBreakUncombable::MakeAllBreakUncombable()
     auto body = MakePatternNode<Statement>();
     auto r_ubreak = MakePatternNode<UncombableBreak>();
     
+    s_all->conjuncts = (s_not, s_break);
     s_not->negand = sx_ubreak;
         
-    Configure( SEARCH_REPLACE, s_not, r_ubreak );
+    Configure( SEARCH_REPLACE, s_all, r_ubreak );
 }
 
 
