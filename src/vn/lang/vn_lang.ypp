@@ -850,20 +850,19 @@ decl_full_explicit_start 	: EXPLICIT_DECL								{ $$ = vn->MakeScopeGnomonForNo
 // type-id as seen in https://alx71hub.github.io/hcb/#type-id can be troublesome grammatically. Care advised.
 					
 type_id 			: ab_type
-					| vn_prefix
                       
 ab_type				: exp_type_prefix ab_declarator 				 		{ $$ = vn->OnAbDeclType(@$, {}, $1, $2); }
 					| qualifiers exp_type_prefix ab_declarator 		 		{ $$ = vn->OnAbDeclType(@$, $1, $2, $3); }  
 					| exp_type_prefix qualifiers ab_declarator 		 		{ $$ = vn->OnAbDeclType(@$, $2, $1, $3); } 
 					| qualifiers exp_type_prefix qualifiers ab_declarator	{ $$ = vn->OnAbDeclType(@$, $1+$3, $2, $4); } 
-//					| exp_type_prefix 	// abstract declarators can be "invisible" 
+					| exp_type_prefix 	// abstract declarators can be "invisible" 
+					| vn_prefix
 
 exp_type_prefix		: exp_type_primary
 					| type_primary
 
 exp_type_primary	: vn_wildcard
 					| '(' type_id ')'											{ $$ = $2; }
-//					| '(' vn_prefix ')' 										{ $$ = $2; }
 
 //////////////////////////////// TYPES ////////////////////////////////////         
        
