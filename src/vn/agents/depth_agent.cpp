@@ -176,12 +176,13 @@ string StuffAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Prod
 	policy.context = make_shared<any>(); // No access specs here
 
 	string s;
-	if( policy.pointer_archetype && policy.pointer_archetype->IsType() )		 
-		s += "⍑";			
 	s += "⩨";
 	if( recurse_restriction )
 		s += "⦅" + renderer->DoRender( &recurse_restriction, Syntax::Production::BOTTOM_EXPR, policy) + "⦆";
-	return s + renderer->DoRender( &terminus, Syntax::Production::PREFIX, policy ); 
+	s += renderer->DoRender( &terminus, Syntax::Production::PREFIX, policy ); 
+	if( policy.pointer_archetype && policy.pointer_archetype->IsType() )		 
+		s = "⍑(" + s + ")";	// Typaliser only operates on primary expressions, see parser
+	return s;
 }    
     
     

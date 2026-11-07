@@ -190,7 +190,7 @@ stmt_high
 %type <TreePtr<Node>> 			    access_wildcard access_primary 
 %type <TreePtr<Node>> 				label_wildcard other_wildcard star_arg
 %type <TreePtr<Node>> 				argumentation
-%type <TreePtr<Node>> 				type_specified type_primary type_postfix type_prefix type_vn_prim 
+%type <TreePtr<Node>> 				type_entry type_specified type_primary type_postfix type_prefix type_vn_prim 
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
 %type <TreePtr<Node>> 				unified_boot unified_clause unified_prefix 
 %type <TreePtr<Node>> 				arrival
@@ -253,6 +253,7 @@ stmt_high
 // x_parens is x_primary plus optional parentheses which boot
 // x_primary a unitary syntax
 // x_extras are primary syntax elements outside of the column
+// x_entry is a suggested entry point to the column, and can be anywhere
 
 //////////////////////////////////// COMMANDS ///////////////////////////////////////////
 
@@ -274,7 +275,7 @@ script_command	: ENGINE_COMMAND unified_clause   		 	{ $$ = make_shared<VN::Engi
 
 // or here
 designation_command	: new_vn_name DESIGNATE_COMMAND normal_clause		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
-					| new_vn_name DESIGNATE_COMMAND type_clause			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
+					| new_vn_name DESIGNATE_COMMAND type_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
 					| new_vn_name DESIGNATE_COMMAND qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
 					| new_vn_name DESIGNATE_COMMAND ACC_NODE_KEYWORD	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_ACCESS); }
 					| new_vn_name DESIGNATE_COMMAND PREPROCESSOR_ID_SIGN { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
@@ -305,7 +306,7 @@ unified_commands: unified_clause COMMAND_TERM commands				{ $$ = $3; $$.push_fro
 
 // Entry is like boot but without commands
 unified_clause	: normal_clause
-				| type_clause
+				| type_entry
 				| qualifier_node		
 				| PREPROCESSOR_ID_SIGN	
 
@@ -853,11 +854,13 @@ ab_type				: type_for_declarator ab_declarator 				 		{ $$ = vn->OnAbDeclType(@$
 					| qualifiers type_for_declarator ab_declarator 		 		{ $$ = vn->OnAbDeclType(@$, $1, $2, $3); }  
 					| type_for_declarator qualifiers ab_declarator 		 		{ $$ = vn->OnAbDeclType(@$, $2, $1, $3); } 
 					| qualifiers type_for_declarator qualifiers ab_declarator	{ $$ = vn->OnAbDeclType(@$, $1+$3, $2, $4); } 
-					| type_for_declarator 				 						// abstract declarators can be "invisible"
+					| type_for_declarator 	// abstract declarators can be "invisible" 
 
 //////////////////////////////// TYPES ////////////////////////////////////         
        
 type_boot 			: type_clause
+
+// TODO commands here?
 
 type_clause			: type_disjunction
 
@@ -867,22 +870,23 @@ type_disjunction	: type_conjunction
 type_conjunction 	: type_specified
 					| type_conjunction CONJUNCTION_OP type_specified		{ $$ = vn->OnConjunction($1, $3); }
                     										 								 			               
-// Not including types that require declarators (except via built-in, designation etc)          
-type_specified		: type_prefix          
-          
+
+type_specified		: type_prefix     // TODO slot type_id in here - needs different parens for booting
+          			| DESIGNATED_CURRENT_RECORD_ID // must be distinct from type_for_declarator so we can spot valid constructors syntactically  			
+
+type_for_declarator : type_prefix						 			                			      
+
+type_entry 	: type_prefix				
+
 type_prefix : type_postfix
 			| 						         GREEN_GRASS_OP type_prefix	{ $$ = vn->OnGrass($2); }
 			| 							      POINTER_IS_OP type_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP type_prefix	{ $$ = vn->OnNegation($2); }
 			|                     		   PRERESTRICT_TYPE type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|								 TYPE_INDICATOR expr_prefix { $$ = $2; }
+			|								TYPE_INDICATOR expr_primary { $$ = $2; } // primary because ⍑⩨x[5]; could parse as ⍑(⩨x[5]) or (⍑⩨x) [5]
 
 type_postfix: type_primary		   
-			| DESIGNATED_CURRENT_RECORD_ID			  			
-			      
-// prevent typeised postfix expressions looking like declarators eg ⍑x[2] typeizes x[2] and you need (⍑x) [2] for an abstract type
-type_for_declarator : type_primary						 			                			      
-			                                       
+			      			                                       
 type_primary: type_vn_prim
 			| '(' type_boot ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
             | TYPE_SIGN														
