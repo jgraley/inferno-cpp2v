@@ -346,8 +346,8 @@ code_unit_scope	: CODE_UNIT '{'												{ $$ = make_shared<VN::RegularScopeGn
 
 //////////////////////////////// DECLARATIONS ////////////////////////////////////         
 
-declaration	: declaration_na 								
-			| access declaration_na 									{ $$ = $2->OnAccess($1, @1); }
+declaration		: declaration_na 								
+				| access declaration_na 								{ $$ = $2->OnAccess($1, @1); }
 
 declaration_na	: declaration_param ';'								
 				| declaration_np									
@@ -357,17 +357,15 @@ declaration_np	: prototype_param compound								{ $$ = $1->OnInitialiser($2, @2
 				| prototype_np compound									{ $$ = $1->OnInitialiser($2, @2); }			
 				| prototype_np ':' memb_inits compound					{ $$ = $1->OnMemberInits($3, @3); 
 																		  $$ = $1->OnInitialiser($4, @4); } 
-
-// TODO add semicolons in the VN scripts for all uses other then parameters, and move everything 
-// that can't be a parameter into declaration_np (everything not starting with prototype_param).
-declaration_param	: prototype_param
-					| prototype_param bare_initialiser					{ $$ = $1->OnInitialiser($2, @2); } 
-					| prototype_np
-					| prototype_np bare_initialiser						{ $$ = $1->OnInitialiser($2, @2); } 
-					| prototype_np ':' memb_inits bare_initialiser		{ $$ = $1->OnMemberInits($3, @3); 
+				| prototype_np ';'
+				| prototype_np bare_initialiser	';'						{ $$ = $1->OnInitialiser($2, @2); } 
+				| prototype_np ':' memb_inits bare_initialiser ';'  	{ $$ = $1->OnMemberInits($3, @3); 
 																		  $$ = $1->OnInitialiser($4, @4); } 
-					| record
-					| enum				
+				| record ';'
+				| enum ';'			
+
+declaration_param	: prototype_param
+					| prototype_param bare_initialiser					{ $$ = $1->OnInitialiser($2, @2); } // init would be a default on a parameter
 					
 bare_initialiser: C_ASSIGN assign_init									{ $$ = $2; } 
 				| DESIGNATED_NORMAL		
