@@ -32,11 +32,9 @@ TreePtr<Node> ScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_
 
 void ScopeGnomon::UpdateContext(Syntax::Location loc, TreePtr<Node> update_node)
 {
-/*	throw YY::VNLangParser::syntax_error(
-			any_cast<YY::VNLangParser::location_type>(loc),
-			"Context update not allowed inside " +
-			GetMessageText() + 
-			" (update node is " + update_node->MyBestErrName() + ")");*/
+	// Allow this to slide. Outside of contextual scopes we can still have normal
+	// path to access, which only allows one closely bound declaration. This
+	// decl will be updated via OnAccess()
 }
 
 

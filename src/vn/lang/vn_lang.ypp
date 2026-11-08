@@ -354,7 +354,7 @@ declaration_na	: declaration_pna ';'
 				| declaration_npa									
 
 declaration_np	: declaration_npa
-				| access declaration_np									{ $$ = $2->OnAccess($1, @1); }
+				| access declaration_npa								{ $$ = $2->OnAccess($1, @1); }
 
 // Declarations go straight to compound because statement is much too ambiguous.			
 declaration_npa	: prototype_param compound								{ $$ = $1->OnInitialiser($2, @2); }			
@@ -362,7 +362,7 @@ declaration_npa	: prototype_param compound								{ $$ = $1->OnInitialiser($2, @
 				| prototype_np ':' memb_inits compound					{ $$ = $1->OnMemberInits($3, @3); 
 																		  $$ = $1->OnInitialiser($4, @4); } 
 declaration_param	: declaration_pna
-					| access declaration_param							{ $$ = $2->OnAccess($1, @1); }
+					| access declaration_pna							{ $$ = $2->OnAccess($1, @1); }
 
 // TODO add semicolons in the VN scripts for all uses other then parameters, and move everything 
 // that can't be a parameter into declaration_np (everything not starting with prototype_param).
@@ -491,7 +491,7 @@ params_scope	: '(' 											{ $$ = make_shared<VN::ParameterisationScopeGnomon
 parameters	: parameter												{ $$.push_back($1); }
 			| parameters ',' parameter								{ $$ = $1; $$.push_back($3); }			
 				
-parameter   : declaration_param   
+parameter   : declaration_pna   
 			| param_prefix
                          
 param_prefix: param_primary
