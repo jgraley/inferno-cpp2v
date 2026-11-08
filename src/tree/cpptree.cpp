@@ -1313,11 +1313,6 @@ Resource::Resource() :
 
 Syntax::Production Resource::GetMyProduction(const VN::RendererInterface *, Policy policy) const
 { 	
-	bool got_keyword;
-	try { GetKeyword(policy); got_keyword = true; } catch( UnimplementedKeyword	& ) { got_keyword = false; }
-	if( !got_keyword && !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
-		return Production::PREFIX;	
-	
 	bool will_split = policy.can_split_instances && 
 					  !policy.rendering_definitions && 
 					  ShouldSplitInstance(policy);
@@ -1329,36 +1324,14 @@ Syntax::Production Resource::GetMyProduction(const VN::RendererInterface *, Poli
 }
 
 
-string Resource::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
+string Resource::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {        
-	(void)surround_prod;
-	string s;
-	
-	s += GetRenderImpl( renderer, policy );
-		
-	bool got_keyword;
-	try { GetKeyword(policy); got_keyword = true; } catch( UnimplementedKeyword	& ) { got_keyword = false; }
-		
-	// Pre-restrict if the incoming pointer is not some kind of Declaration. This catches cases
-	// like Stuff terminus, where the parser won't have enough information to determine whether
-	// we have Local, Global, Member etc. TODO reduce these by keeping a scope stack just like the parser.
-	// Don't worry about this if we have a keyword which disambiguates.
-	if( !got_keyword && !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
-	{
-		s = "‽" + 
-		    RenderNodeTypeName() + 
-		    "(" +
-		    s;
-		// Technically the ; is not requried if we mean a parameter, but will always be OK because a param 
-		// is an acceptable decl. But not after a compound.
-		if( !initialiser || !TreePtr<Compound>::DynamicCast(initialiser) )
-			s += ";";
-		s += ")"; 
-	}
-		
-	return s;
+	// Resources have a signifier (keyword or short-form explicit) in the middle part
+	// (see Resource::RenderMiddlePart()) so won't need a pre-restriction to establish 
+	// exact node type.
+	return GetRenderImpl( renderer, policy );
 }
-
+		
 			
 string Resource::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 {
@@ -1484,6 +1457,47 @@ Syntax::Token Resource::GetSignifierToken() const
 }
 
 //////////////////////////// Instance //////////////////////////////
+
+Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *renderer, Policy policy) const
+{ 	
+	bool got_keyword;
+	try { GetKeyword(policy); got_keyword = true; } catch( UnimplementedKeyword	& ) { got_keyword = false; }
+	if( !got_keyword && !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
+		return Production::PREFIX;	
+
+	return Resource::GetMyProduction(renderer, policy);
+}
+
+
+string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+{        
+	// Instances have no signifier and must rely on context to determine exact node type. If no suitable
+	// context exists, create one by wrapping in a pre-restriction. Node prod also changes, see	
+	// Instance::GetMyProduction()
+	string s = GetRenderImpl( renderer, policy );
+		
+	bool got_keyword;
+	try { GetKeyword(policy); got_keyword = true; } catch( UnimplementedKeyword	& ) { got_keyword = false; }
+		
+	// Pre-restrict if the incoming pointer is not some kind of Declaration. This catches cases
+	// like Stuff terminus, where the parser won't have enough information to determine whether
+	// we have Local, Global, Member etc. TODO reduce these by keeping a scope stack just like the parser.
+	// Don't worry about this if we have a keyword which disambiguates.
+	if( !got_keyword && !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
+	{
+		s = "‽" + 
+		    RenderNodeTypeName() + 
+		    "(" +
+		    s;
+		// Technically the ; is not requried if we mean a parameter, but will always be OK because a param 
+		// is an acceptable decl. But not after a compound.
+		if( !initialiser || !TreePtr<Compound>::DynamicCast(initialiser) )
+			s += ";";
+		s += ")"; 
+	}
+		
+	return s;
+}
 
 // Decide what gets split into a part that goes into the record (main line of rendering) and
 // a part that goes separately (definitions get appended at end of code unit).
