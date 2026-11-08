@@ -1460,9 +1460,7 @@ Syntax::Token Resource::GetSignifierToken() const
 
 Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *renderer, Policy policy) const
 { 	
-	bool got_keyword;
-	try { GetKeyword(policy); got_keyword = true; } catch( UnimplementedKeyword	& ) { got_keyword = false; }
-	if( !got_keyword && !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
+	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
 		return Production::PREFIX;	
 
 	return Resource::GetMyProduction(renderer, policy);
@@ -1476,14 +1474,10 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 	// Instance::GetMyProduction()
 	string s = GetRenderImpl( renderer, policy );
 		
-	bool got_keyword;
-	try { GetKeyword(policy); got_keyword = true; } catch( UnimplementedKeyword	& ) { got_keyword = false; }
-		
 	// Pre-restrict if the incoming pointer is not some kind of Declaration. This catches cases
 	// like Stuff terminus, where the parser won't have enough information to determine whether
 	// we have Local, Global, Member etc. TODO reduce these by keeping a scope stack just like the parser.
-	// Don't worry about this if we have a keyword which disambiguates.
-	if( !got_keyword && !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
+	if( !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
 	{
 		s = "‽" + 
 		    RenderNodeTypeName() + 
