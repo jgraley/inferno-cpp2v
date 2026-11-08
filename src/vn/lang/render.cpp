@@ -396,7 +396,7 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_
 		}			
           
     if( !semicolon )
-		explain += SSPrintf("\n//%s Not adding semicolon, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));	
+		explain += SSPrintf("\n//%s Not adding semicolon to %s, %d %d\n", Tracer::GetPrefix().c_str(), Trace(node).c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));	
 	
     if( semicolon )
 		surround_prod = Syntax::Production::BARE_STMT_DECL;

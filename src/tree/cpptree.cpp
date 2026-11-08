@@ -1348,8 +1348,12 @@ string Resource::GetRender( VN::RendererInterface *renderer, Production surround
 		s = "‽" + 
 		    RenderNodeTypeName() + 
 		    "(" +
-		    s + 
-		    ")";
+		    s;
+		// Technically the ; is not requried if we mean a parameter, but will always be OK because a param 
+		// is an acceptable decl. But not after a compound.
+		if( !initialiser || !TreePtr<Compound>::DynamicCast(initialiser) )
+			s += ";";
+		s += ")"; 
 	}
 		
 	return s;

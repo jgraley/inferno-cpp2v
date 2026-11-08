@@ -196,7 +196,7 @@ stmt_high
 %type <TreePtr<Node>> 				arrival
 %type <TreePtr<Node>> 				statement bare_statement statement_nca control_stmt_sign       
 %type <TreePtr<Node>> 				declaration declaration_na
-%type <TreePtr<Node>> 				declaration_npa declaration_pna
+%type <TreePtr<Node>> 				declaration_npa
 %type <TreePtr<Node>> 				declaration_param bare_initialiser declaration_np
 %type <TreePtr<Node>> 				prototype_param prototype_np
 %type <TreePtr<Node>> 				assign_init
@@ -347,10 +347,11 @@ code_unit_scope	: CODE_UNIT '{'												{ $$ = make_shared<VN::RegularScopeGn
 //////////////////////////////// DECLARATIONS ////////////////////////////////////         
 
 declaration	: declaration_param ';'								
+			| access declaration_param ';'								{ $$ = $2->OnAccess($1, @1); }
 			| declaration_np									
 			| ':' memb_init_boot ';'									{ $$ = $2; } // Sneak memb inits into the general grammar using a leading : and trailing semicolon
 
-declaration_na	: declaration_pna ';'								
+declaration_na	: declaration_param ';'								
 				| declaration_npa									
 
 declaration_np	: declaration_npa
@@ -361,12 +362,9 @@ declaration_npa	: prototype_param compound								{ $$ = $1->OnInitialiser($2, @
 				| prototype_np compound									{ $$ = $1->OnInitialiser($2, @2); }			
 				| prototype_np ':' memb_inits compound					{ $$ = $1->OnMemberInits($3, @3); 
 																		  $$ = $1->OnInitialiser($4, @4); } 
-declaration_param	: declaration_pna
-					| access declaration_pna							{ $$ = $2->OnAccess($1, @1); }
-
 // TODO add semicolons in the VN scripts for all uses other then parameters, and move everything 
 // that can't be a parameter into declaration_np (everything not starting with prototype_param).
-declaration_pna		: prototype_param
+declaration_param	: prototype_param
 					| prototype_param bare_initialiser					{ $$ = $1->OnInitialiser($2, @2); } 
 					| prototype_np
 					| prototype_np bare_initialiser						{ $$ = $1->OnInitialiser($2, @2); } 
@@ -491,7 +489,7 @@ params_scope	: '(' 											{ $$ = make_shared<VN::ParameterisationScopeGnomon
 parameters	: parameter												{ $$.push_back($1); }
 			| parameters ',' parameter								{ $$ = $1; $$.push_back($3); }			
 				
-parameter   : declaration_pna   
+parameter   : declaration_param   
 			| param_prefix
                          
 param_prefix: param_primary
@@ -583,7 +581,7 @@ normal    		: statement
 				| declaration_param					// Allow a parameter-stlye decl without ;				
 				| other_wildcard ':'             	{ $$ = vn->OnLabel($1, @1); }   // treat as label because an access spec on its own doesn't produce a node
 				| other_wildcard ':' declaration_na { $$ = $3->OnAccess($1, @1); }  // treat as access because a label with another node would be two nodes
-// Disambiguatint "wildcard:" when not in a record or compound scope: if on own, assume label; if preceding decl, assume access
+// Disambiguating "wildcard:" when not in a record or compound scope: if on own, assume label; if preceding decl, assume access
 				
 //////////////////////////////// STATEMENTS ////////////////////////////////////                 
 // Statement is taken to include expressions and declarations. But an expression
