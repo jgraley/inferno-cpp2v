@@ -208,6 +208,7 @@ public:
 	string MyBestErrName() const;
 	virtual TreePtr<Node> OnDebug( TreePtr<Node> node, Location loc ); // For debugging experiments
 	virtual void OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc );
+	virtual TreePtr<Node> OnAccess( TreePtr<Node> as, Location loc );
 	virtual TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc );
 	virtual TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc );
 	virtual TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc );

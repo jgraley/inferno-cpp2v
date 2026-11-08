@@ -730,7 +730,8 @@ struct AccessDecl : virtual AdvanceDecl
 
 	list<string> RenderAccessSpec( VN::RendererInterface *renderer, Policy policy ) const override;
 	void OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc ) override;
-	TreePtr<Node> OnDebug( TreePtr<Node> access, Location loc ) override;
+	TreePtr<Node> OnAccess( TreePtr<Node> as, Location loc ) override;
+	TreePtr<Node> OnDebug( TreePtr<Node> as, Location loc ) override;
 };
 
 

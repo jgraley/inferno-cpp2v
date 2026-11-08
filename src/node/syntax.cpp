@@ -183,6 +183,13 @@ void Syntax::OnInScope( shared_ptr<VN::ScopeGnomon>, Location )
 }
 
 
+TreePtr<Node> Syntax::OnAccess( TreePtr<Node>, Location loc )
+{
+	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
+		MyBestErrName() + " does not expect an access spec (implement OnAccess()).");	
+}
+
+
 TreePtr<Node> Syntax::OnIdentifier( TreePtr<Node>, Location loc )
 {
 	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),

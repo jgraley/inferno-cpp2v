@@ -1164,17 +1164,18 @@ Syntax::Production MemberInitialiser::GetMyProductionTerminal() const
 
 string MemberInitialiser::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {
-	string s;
-	if( surround_prod != Production::COMMA_SEP )
-		s += "‽" + RenderNodeTypeName() + " ";  // As an item or designation, this conflicts with a function call so disambiguate using pre-restriction
-
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
 
-	return s + renderer->DoRender( &member_id, Production::PRIMARY_EXPR, id_policy ) +
-		   "(" + 
-		   renderer->DoRender( &initialiser, Production::BOOT, policy ) + 
-		   ")";
+	string s = renderer->DoRender( &member_id, Production::PRIMARY_EXPR, id_policy ) +
+	    	   "(" + 
+		       renderer->DoRender( &initialiser, Production::BOOT, policy ) + 
+		       ")";
+	
+	if( surround_prod != Production::COMMA_SEP )
+		s = ": " + s + ";\n";  // As an item or designation, this conflicts with a function call so disambiguate using : and ;
+
+	return s;
 }
 
 
@@ -1311,14 +1312,17 @@ Resource::Resource() :
 
 
 Syntax::Production Resource::GetMyProduction(const VN::RendererInterface *, Policy policy) const
-{ 
+{ 	
+	bool got_keyword;
+	try { GetKeyword(policy); got_keyword = true; } catch( UnimplementedKeyword	& ) { got_keyword = false; }
+	if( !got_keyword && !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
+		return Production::PREFIX;	
+	
 	bool will_split = policy.can_split_instances && 
 					  !policy.rendering_definitions && 
 					  ShouldSplitInstance(policy);
 	
-	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
-		return Production::PREFIX;
-	else if( initialiser && DynamicTreePtrCast<Compound>(initialiser) && !will_split ) 
+	if( initialiser && DynamicTreePtrCast<Compound>(initialiser) && !will_split ) 
 		return Production::STMT_DECL; // won't get ; added
 	else
 		return Production::BARE_STMT_DECL; // will get ; added
@@ -1332,10 +1336,14 @@ string Resource::GetRender( VN::RendererInterface *renderer, Production surround
 	
 	s += GetRenderImpl( renderer, policy );
 		
+	bool got_keyword;
+	try { GetKeyword(policy); got_keyword = true; } catch( UnimplementedKeyword	& ) { got_keyword = false; }
+		
 	// Pre-restrict if the incoming pointer is not some kind of Declaration. This catches cases
 	// like Stuff terminus, where the parser won't have enough information to determine whether
-	// we have Local, Global, Member etc. TODO reduce these by keeping a scope stack just like the parser
-	if( !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
+	// we have Local, Global, Member etc. TODO reduce these by keeping a scope stack just like the parser.
+	// Don't worry about this if we have a keyword which disambiguates.
+	if( !got_keyword && !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
 	{
 		s = "‽" + 
 		    RenderNodeTypeName() + 
@@ -1387,7 +1395,7 @@ string Resource::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
  	if( ReadArgs::use.contains("c") )
 		ls.push_back( "/* Instance initialiser */" );
 		
-	// Check for things we can't render (won't act if there's an agent but still cateches some problems).
+	// Check for things we can't render (won't act if there's an agent but still catches some problems).
 	// A regular statement like Return won't render correctly because the accomodations get it wrong and
 	// insert both = and {}
 	if( auto st = TreePtr<Statement>::DynamicCast(initialiser) )
@@ -1544,22 +1552,32 @@ list<string> AccessDecl::RenderAccessSpec( VN::RendererInterface *renderer, Poli
 }
 
 
-void AccessDecl::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location )
+void AccessDecl::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc )
 {
 	auto cspg = dynamic_pointer_cast<VN::ContextScopeGnomon>(spg);
 	if( cspg && cspg->context.has_value() )
 	{
-		access = any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context);
+		access = any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context); // TODO call OnAccess
+		(void)loc;
+		//OnAccess( any_cast<TreePtr<CPPTree::AccessSpec>>(cspg->context), loc );
 		//FTRACE("Picked up ")(access)("\n");
 	}
 }
 
 
-TreePtr<Node> AccessDecl::OnDebug( TreePtr<Node> node, Location loc )
+TreePtr<Node> AccessDecl::OnAccess( TreePtr<Node> as, Location )
 {
-	if( access != node )
+	FTRACE("Access explicitly set to ")(as)("\n");
+	access = as;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+TreePtr<Node> AccessDecl::OnDebug( TreePtr<Node> as, Location loc )
+{
+	if( access != as )
 		throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
-			MyBestErrName() + " received OnDebug(" + Trace(node) + ") but current access is " + Trace(access));
+			MyBestErrName() + " received OnDebug(" + Trace(as) + ") but current access is " + Trace(access));
 	return (TreePtr<Node>)shared_from_this();	
 }	
 

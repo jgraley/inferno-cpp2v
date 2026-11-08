@@ -187,7 +187,7 @@ stmt_high
 %type <TreePtr<Node>> 				expr_clause expr_conjunction expr_disjunction expr_boot 
 %type <TreePtr<Node>> 				id_primary id_boot id_disjunction id_conjunction id_prefix id_parens id_extras
 %type <TreePtr<Node>> 				norm_primary 
-%type <TreePtr<Node>> 			    access_wildcard access_primary 
+%type <TreePtr<Node>> 			    access_wildcard access_primary other_wild_acc
 %type <TreePtr<Node>> 				label_wildcard other_wildcard star_arg
 %type <TreePtr<Node>> 				argumentation
 %type <TreePtr<Node>> 				type_entry type_specified type_primary type_postfix type_prefix type_vn_prim 
@@ -195,7 +195,8 @@ stmt_high
 %type <TreePtr<Node>> 				unified_boot unified_clause unified_prefix 
 %type <TreePtr<Node>> 				arrival
 %type <TreePtr<Node>> 				statement bare_statement statement_nca control_stmt_sign       
-%type <TreePtr<Node>> 				declaration 
+%type <TreePtr<Node>> 				declaration declaration_na
+%type <TreePtr<Node>> 				declaration_npa declaration_pna
 %type <TreePtr<Node>> 				declaration_param bare_initialiser declaration_np
 %type <TreePtr<Node>> 				prototype_param prototype_np
 %type <TreePtr<Node>> 				assign_init
@@ -279,7 +280,7 @@ designation_command	: new_vn_name DESIGNATE_COMMAND normal_clause		 { $$ = make_
 					| new_vn_name DESIGNATE_COMMAND qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
 					| new_vn_name DESIGNATE_COMMAND ACC_NODE_KEYWORD	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_ACCESS); }
 					| new_vn_name DESIGNATE_COMMAND PREPROCESSOR_ID_SIGN { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
-					
+
 //////////////////////////////////// ITEMISATION ///////////////////////////////////////////
 // For explicit/built-in nodes mostly
 
@@ -304,7 +305,7 @@ unified_boot	: unified_clause
 
 unified_commands: unified_clause COMMAND_TERM commands				{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 
-// Entry is like boot but without commands
+// Clause is like boot but without commands
 unified_clause	: normal_clause
 				| type_entry
 				| qualifier_node		
@@ -347,17 +348,25 @@ code_unit_scope	: CODE_UNIT '{'												{ $$ = make_shared<VN::RegularScopeGn
 
 declaration	: declaration_param ';'								
 			| declaration_np									
+			| ':' memb_init_boot ';'									{ $$ = $2; } // Sneak memb inits into the general grammar using a leading : and trailing semicolon
+
+declaration_na	: declaration_pna ';'								
+				| declaration_npa									
+
+declaration_np	: declaration_npa
+				| access declaration_np									{ $$ = $2->OnAccess($1, @1); }
 
 // Declarations go straight to compound because statement is much too ambiguous.			
-declaration_np	: prototype_param compound								{ $$ = $1->OnInitialiser($2, @2); }			
+declaration_npa	: prototype_param compound								{ $$ = $1->OnInitialiser($2, @2); }			
 				| prototype_np compound									{ $$ = $1->OnInitialiser($2, @2); }			
 				| prototype_np ':' memb_inits compound					{ $$ = $1->OnMemberInits($3, @3); 
 																		  $$ = $1->OnInitialiser($4, @4); } 
-				| access declaration_np									{ $$ = $2; }
-				
+declaration_param	: declaration_pna
+					| access declaration_param							{ $$ = $2->OnAccess($1, @1); }
+
 // TODO add semicolons in the VN scripts for all uses other then parameters, and move everything 
 // that can't be a parameter into declaration_np (everything not starting with prototype_param).
-declaration_param	: prototype_param
+declaration_pna		: prototype_param
 					| prototype_param bare_initialiser					{ $$ = $1->OnInitialiser($2, @2); } 
 					| prototype_np
 					| prototype_np bare_initialiser						{ $$ = $1->OnInitialiser($2, @2); } 
@@ -365,7 +374,6 @@ declaration_param	: prototype_param
 																		  $$ = $1->OnInitialiser($4, @4); } 
 					| record
 					| enum				
-					| access declaration_param							{ $$ = $2; }
 					
 bare_initialiser: C_ASSIGN assign_init									{ $$ = $2; } 
 				| DESIGNATED_NORMAL		
@@ -519,7 +527,7 @@ base_spec		: type_specified											{ $$ = vn->OnBase($1); }
                                                                                                                                                          				                      				                        
 //////////////////////////////// ACCESS ////////////////////////////////////                                  
 				
-access			: access_primary ':'										{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
+access			: access_primary ':'								{ $$ = $1; vn->UpdateCurrentAccess(@1, $1); }				
 				
 access_primary	: access_extras
 				| access_wildcard
@@ -527,6 +535,8 @@ access_primary	: access_extras
 access_wildcard : STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
 				| STAR_IN_RECORD OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
 				| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
+
+other_wild_acc	: other_wildcard ':'    							{ $$ = $1; }					
 
 access_extras	: ACC_NODE_KEYWORD 
                 | DESIGNATED_ACCESS
@@ -573,8 +583,10 @@ normal_conj 	: normal
 normal    		: statement		
 				| expression					// Allow an expression without ;
 				| declaration_param				// Allow a parameter-stlye decl without ;				
-				| other_wildcard ':'           	{ $$ = vn->OnLabel($1, @1); } // treat as label because an access spec on its own doesn't produce a node
-					
+				| other_wildcard ':'         	{ $$ = vn->OnLabel($1, @1); }   // treat as label because an access spec on its own doesn't produce a node
+				| other_wild_acc declaration_na { $$ = $2->OnAccess($1, @1); }  // treat as access because a label with another node would be two nodes
+//				| access_extras declaration_na  { $$ = $2->OnAccess($1, @1); }  // treat as access because a label with another node would be two nodes
+				
 //////////////////////////////// STATEMENTS ////////////////////////////////////                 
 // Statement is taken to include expressions and declarations. But an expression
 // here would need a terminating semicolon.
@@ -815,9 +827,9 @@ norm_full_explicit_start : EXPLICIT_NORMAL							{ $$ = vn->MakeScopeGnomonForNo
 // Common prefix operators for relocating agents and non-locating incl. builders. These can go from anywhere to anywhere
 // so they generally end at unified.
 // Also pre-restrictions although unsure about these, maybe they should be in specific places plus unified but not here? TODO
-vn_prefix	:  						        stuff_op_scope unified_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-			| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
-			|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
+vn_prefix		:  						        stuff_op_scope unified_prefix { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+				| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
+				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
 
 vn_primary 		: DESIGNATED_NORMAL
 				| DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }

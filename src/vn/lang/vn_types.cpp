@@ -32,11 +32,11 @@ TreePtr<Node> ScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_
 
 void ScopeGnomon::UpdateContext(Syntax::Location loc, TreePtr<Node> update_node)
 {
-	throw YY::VNLangParser::syntax_error(
+/*	throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
 			"Context update not allowed inside " +
 			GetMessageText() + 
-			" (update node is " + update_node->MyBestErrName() + ")");
+			" (update node is " + update_node->MyBestErrName() + ")");*/
 }
 
 
@@ -117,7 +117,7 @@ UnknownScopeGnomon::UnknownScopeGnomon(string reason_) :
 
 string UnknownScopeGnomon::GetMessageText() const 
 {
-	return "local scope";
+	return "unknown scope";
 }
 
 
