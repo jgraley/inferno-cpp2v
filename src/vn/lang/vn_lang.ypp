@@ -187,7 +187,7 @@ stmt_high
 %type <TreePtr<Node>> 				expr_clause expr_conjunction expr_disjunction expr_boot 
 %type <TreePtr<Node>> 				id_primary id_boot id_disjunction id_conjunction id_prefix id_parens id_extras
 %type <TreePtr<Node>> 				norm_primary 
-%type <TreePtr<Node>> 			    access_wildcard access_primary other_wild_acc
+%type <TreePtr<Node>> 			    access_wildcard access_primary
 %type <TreePtr<Node>> 				label_wildcard other_wildcard star_arg
 %type <TreePtr<Node>> 				argumentation
 %type <TreePtr<Node>> 				type_entry type_specified type_primary type_postfix type_prefix type_vn_prim 
@@ -536,8 +536,6 @@ access_wildcard : STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
 				| STAR_IN_RECORD OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
 				| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
 
-other_wild_acc	: other_wildcard ':'    							{ $$ = $1; }					
-
 access_extras	: ACC_NODE_KEYWORD 
                 | DESIGNATED_ACCESS
 					
@@ -581,11 +579,11 @@ normal_conj 	: normal
 				| normal_conj CONJUNCTION_OP normal   			{ $$ = vn->OnConjunction($1, $3); }
 		
 normal    		: statement		
-				| expression					// Allow an expression without ;
-				| declaration_param				// Allow a parameter-stlye decl without ;				
-				| other_wildcard ':'         	{ $$ = vn->OnLabel($1, @1); }   // treat as label because an access spec on its own doesn't produce a node
-				| other_wild_acc declaration_na { $$ = $2->OnAccess($1, @1); }  // treat as access because a label with another node would be two nodes
-//				| access_extras declaration_na  { $$ = $2->OnAccess($1, @1); }  // treat as access because a label with another node would be two nodes
+				| expression						// Allow an expression without ;
+				| declaration_param					// Allow a parameter-stlye decl without ;				
+				| other_wildcard ':'             	{ $$ = vn->OnLabel($1, @1); }   // treat as label because an access spec on its own doesn't produce a node
+				| other_wildcard ':' declaration_na { $$ = $3->OnAccess($1, @1); }  // treat as access because a label with another node would be two nodes
+// Disambiguatint "wildcard:" when not in a record or compound scope: if on own, assume label; if preceding decl, assume access
 				
 //////////////////////////////// STATEMENTS ////////////////////////////////////                 
 // Statement is taken to include expressions and declarations. But an expression
