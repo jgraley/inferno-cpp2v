@@ -429,11 +429,11 @@ CleanupVoidStatementExpression::CleanupVoidStatementExpression()
 }
 
 
-CleanupUnusedMembersAndTopLevelVars::CleanupUnusedMembersAndTopLevelVars()
+CleanupUnusedMembers::CleanupUnusedMembers()
 {
     auto s_all = MakePatternNode<ConjunctionAgent, Scope>();
-    auto s_scope = MakePatternNode<DeclScope>();
-    auto r_scope = MakePatternNode<DeclScope>();
+    auto s_scope = MakePatternNode<Record>();
+    auto r_scope = MakePatternNode<Record>();
     auto delta_scope = MakePatternNode<DeltaAgent, Scope>();
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto inst = MakePatternNode<Instance>();
@@ -449,7 +449,8 @@ CleanupUnusedMembersAndTopLevelVars::CleanupUnusedMembersAndTopLevelVars()
     auto s_nm = MakePatternNode<NegationAgent, Node>();
     auto sx_ir = MakePatternNode<InheritanceRecord>();
     auto s_nscope = MakePatternNode<NegationAgent, Scope>();
-    
+	auto sx_resource = MakePatternNode<Resource>();
+	
     s_all->conjuncts = (stuff1, s_nscope);
     stuff1->terminus = delta_scope;
     delta_scope->through = s_scope;
@@ -471,7 +472,58 @@ CleanupUnusedMembersAndTopLevelVars::CleanupUnusedMembersAndTopLevelVars()
     s_stuff2->terminus = s_antip;
     s_antip->conjuncts = (s_anynode, s_nm);
     s_anynode->terminus = id;
-    s_nm->negand = inst;
+    s_nm->negand = sx_resource;
+    sx_resource->identifier = id;
+                        
+    Configure( COMPARE_REPLACE, s_all, stuff1 );
+}
+
+
+CleanupUnusedGlobals::CleanupUnusedGlobals()
+{
+    auto s_all = MakePatternNode<ConjunctionAgent, Scope>();
+    auto s_scope = MakePatternNode<CodeUnit>();
+    auto r_scope = MakePatternNode<CodeUnit>();
+    auto delta_scope = MakePatternNode<DeltaAgent, Scope>();
+    auto decls = MakePatternNode<StarAgent, Declaration>();
+    auto inst = MakePatternNode<Instance>();
+    auto nested_array = MakePatternNode<StuffAgent, Type>();
+    auto sx_not = MakePatternNode<NegationAgent, Type>();
+    auto sx_any = MakePatternNode<DisjunctionAgent, Type>();
+    auto getdecl = MakePatternNode<TransformOfAgent, TypeIdentifier>( &TypeDeclarationOf::instance ); // TODO should be modulo typedefs
+    auto id = MakePatternNode<ResourceIdentifier>();
+    auto stuff1 = MakePatternNode<StuffAgent, Scope>();
+    auto s_stuff2 = MakePatternNode<StuffAgent, Scope>();
+    auto s_antip = MakePatternNode<ConjunctionAgent, Node>();
+    auto s_anynode = MakePatternNode<ChildAgent, Node>();
+    auto s_nm = MakePatternNode<NegationAgent, Node>();
+    auto sx_ir = MakePatternNode<InheritanceRecord>();
+    auto s_nscope = MakePatternNode<NegationAgent, Scope>();
+	auto sx_resource = MakePatternNode<Resource>();
+	
+    s_all->conjuncts = (stuff1, s_nscope);
+    stuff1->terminus = delta_scope;
+    delta_scope->through = s_scope;
+    delta_scope->overlay = r_scope;
+    s_scope->members = (inst, decls);
+    r_scope->members = (decls);
+    inst->type = nested_array;
+    inst->identifier = id;
+    nested_array->recurse_restriction = MakePatternNode<Array>();
+    nested_array->terminus = sx_not;
+    sx_not->negand = sx_any;
+    sx_any->disjuncts = ( MakePatternNode<Array>(), // ensure we recursed out of arrays
+                          MakePatternNode<Callable>(),
+                          getdecl );
+    getdecl->pattern = sx_ir;
+    sx_ir->members = MakePatternNode<StarAgent, Declaration>();
+    sx_ir->bases = MakePatternNode<StarAgent, Base>();
+    s_nscope->negand = s_stuff2;
+    s_stuff2->terminus = s_antip;
+    s_antip->conjuncts = (s_anynode, s_nm);
+    s_anynode->terminus = id;
+    s_nm->negand = sx_resource;
+    sx_resource->identifier = id;
                         
     Configure( COMPARE_REPLACE, s_all, stuff1 );
 }

@@ -185,7 +185,10 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     auto s_token = MakePatternNode< SpecificResourceIdentifierByNameAgent >( lr_scprocess->GetLoweredIdOrMacroName() ); 
     auto s_arg_id = MakePatternNode< SpecificResourceIdentifierByNameAgent >( "func" );
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Node>( delta, l_module, l_module );            
-    auto l_ctype_param = MakePatternNode<Parameter>();
+    auto ls_ctype_param = MakePatternNode<Parameter>();
+    auto lr_ctype_param = MakePatternNode<Parameter>();
+    auto l_ctype_type = MakePatternNode<Type>();
+    auto l_ctype_id = MakePatternNode<ResourceIdentifier>();
     
     // Eliminate the declaration that came from isystemc.h
     delta->through = s_program;
@@ -207,9 +210,11 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_cons->initialiser = ls_comp;
 
     ls_comp->statements = (l_pre, ls_pcall, l_post);
-    ls_cons->params = (l_ctype_param); // one parameter
-    l_ctype_param->permission = MakePatternNode<NonConst>();
-    l_ctype_param->initialiser = MakePatternNode<Uninitialised>();
+    ls_cons->params = (ls_ctype_param); // one parameter
+    ls_ctype_param->type = l_ctype_type;
+    ls_ctype_param->identifier = l_ctype_id;
+    ls_ctype_param->permission = MakePatternNode<NonConst>();
+    ls_ctype_param->initialiser = MakePatternNode<Uninitialised>();
     ls_pcall->callee = s_token;
     ls_pcall->argumentation = ls_pargs;
     ls_pargs->arguments = (ls_arg);
@@ -223,8 +228,12 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     lr_cons->initialiser = lr_comp;
 
     lr_comp->statements = (l_pre, l_post);
-    lr_cons->params = (l_ctype_param); // one parameter
-    
+    lr_cons->params = (lr_ctype_param); // one parameter
+    lr_ctype_param->type = l_ctype_type;
+    lr_ctype_param->identifier = l_ctype_id;
+    lr_ctype_param->permission = MakePatternNode<NonConst>();
+    lr_ctype_param->initialiser = MakePatternNode<Uninitialised>();
+
     // Rule #910: SC processes to be Member, with NonVirtual and Private
     l_overproc->through = ls_process;
     l_overproc->overlay = lr_scprocess;
@@ -547,6 +556,7 @@ void SystemCRaising::Build( vector< shared_ptr<VNStep> > *sequence )
     sequence->push_back( make_shared<RemoveEmptyModuleConstructors>() );
     sequence->push_back( make_shared<RemoveVoidInstances>() );
     sequence->push_back( make_shared<RemoveSCPrototypes>() );
-    sequence->push_back( make_shared<CleanupUnusedMembersAndTopLevelVars>() );    // for SC_ZERO_TIME
+    sequence->push_back( make_shared<CleanupUnusedMembers>() );    // for SC_ZERO_TIME
+    sequence->push_back( make_shared<CleanupUnusedGlobals>() );    // for SC_ZERO_TIME
 }
 

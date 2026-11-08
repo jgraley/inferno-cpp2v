@@ -179,7 +179,8 @@ void BuildDefaultSequence( vector< shared_ptr<VNStep> > *sequence )
         sequence->push_back( make_shared<DetectSuperLoop>(true) );
     }
 
-    sequence->push_back( make_shared<CleanupUnusedMembersAndTopLevelVars>() );
+    sequence->push_back( make_shared<CleanupUnusedMembers>() );
+    sequence->push_back( make_shared<CleanupUnusedGlobals>() );
     sequence->push_back( make_shared<CleanupUnusedLocals>() );
     
     { 

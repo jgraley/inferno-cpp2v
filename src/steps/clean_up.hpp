@@ -89,10 +89,18 @@ public:
 
 /** Remove members not used anywhere - except Callables and instances of InheritanceRecord since
     these might do something useful even when not referenced.*/
-class CleanupUnusedMembersAndTopLevelVars : public VNStep
+class CleanupUnusedMembers : public VNStep
 {
 public:
-    CleanupUnusedMembersAndTopLevelVars();
+    CleanupUnusedMembers();
+};
+
+/** Remove globals not used anywhere - except Callables and instances of InheritanceRecord since
+    these might do something useful even when not referenced.*/
+class CleanupUnusedGlobals : public VNStep
+{
+public:
+    CleanupUnusedGlobals();
 };
 
 /** Remove local vars not used anywhere - except Callables and instances of InheritanceRecord since
