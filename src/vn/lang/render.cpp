@@ -422,10 +422,10 @@ string Render::AccomodateNULL( TreePtr<Node> node, Syntax::Production node_prod,
 	else if( dynamic_pointer_cast<Type>( policy.pointer_archetype ) )
 	{
 		static int i=0; 		
-		return SSPrintf("⍑☆", i++);		
+		return SSPrintf("⍑‽", i++);		
 	}
 	else 
-		return "☆";
+		return "‽";
 }
 
 
@@ -542,7 +542,7 @@ string Render::DoRenderTypeAndDeclaratorPreserve( TreePtr<Node> type, string dec
 {
 	if( !type )
 	{
-		// ☆ would be way too ambiguous, a wild declaration would just be ☆ ☆ for example. So don't render NULL.
+		// ‽ would be way too ambiguous, a wild declaration would just be ‽ ‽ for example. So don't render NULL.
 		type = MakeTreeNode<Type>();
 	}
 	

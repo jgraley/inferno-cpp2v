@@ -69,7 +69,9 @@ node_name               ({ascii_name}|::)*
 ⦆				{ return YY::VNLangParser::make_CLOSE_VN(location()); };
 ⚬				{ return YY::VNLangParser::make_VN_SEP(location()); };
 🞄				{ return YY::VNLangParser::make_VN_SUB_SEP(location()); };
-⩨				{ return YY::VNLangParser::make_STUFF_OP(location()); };
+⩩				{ return YY::VNLangParser::make_STUFF_OP(location()); };
+⧥				{ return YY::VNLangParser::make_RESTRICTED_STUFF(location()); };
+⩨				{ return YY::VNLangParser::make_STUFF_END(location()); };
 ▲				{ return YY::VNLangParser::make_DELTA_COMPARE_OP(location()); };
 ⯈				{ return YY::VNLangParser::make_DELTA_REPLACE_OP(location()); };
 ⯇				{ return YY::VNLangParser::make_DELTA_END_OP(location()); };
@@ -114,12 +116,13 @@ char|short|int|long|signed|unsigned|float|double { return YY::VNLangParser::make
 {unicode_name}	{ return recogniser->OnUnquotedLexeme(wstr(), location()); }
 
 ⯁{node_name} 	{ return recogniser->OnExplicitLexeme(wstr(), location()); }
-‽{node_name} 	{ return recogniser->OnPrerestrictLexeme(wstr(), location()); }
+⨶{node_name} 	{ return recogniser->OnPrerestrictLexeme(wstr(), location()); }
 ⊛{node_name} 	{ return recogniser->OnIdByNameLexeme(wstr(), location()); }
 ⧇{node_name} 	{ return recogniser->OnIdBuilderLexeme(wstr(), location()); }
 
 ⤨{ascii_name}	{ return recogniser->OnTransformLexeme(wstr(), location()); }
 
-☆				{ return recogniser->OnAnyNodeLexeme(location()); } 
+‽				{ return recogniser->OnAnyNodeLexeme(location()); } 
 ★				{ return recogniser->OnStarLexeme(location()); } 
+☆				{ return recogniser->OnRestrictedStarLexeme(location()); } 
 %%

@@ -32,7 +32,7 @@ UniDeclarator::UniDeclarator(TreePtr<Node> child_) :
 
 Result Concrete::DeclaratorReduce( TreePtr<Node> type_view, CVQuals cv_quals_view ) const
 {
-	// child can be NULL, in the case of ☆ and yet still not abstract	
+	// child can be NULL, in the case of ‽ and yet still not abstract	
 	// No need for Next(), we're done and it's concrete
 	if( child )
 		return { Result::CONCRETE, type_view, cv_quals_view, child }; 

@@ -90,7 +90,7 @@ Syntax::Production ChildAgent::GetAgentProduction( const VN::RendererInterface *
 string ChildAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	(void)surround_prod;
-	string s = "⩨⦅=1⦆";
+	string s = "⧥=1⩨";
 	return s + renderer->DoRender( &terminus, Syntax::Production::PREFIX, policy ); 
 }    
     
@@ -101,7 +101,7 @@ Graphable::NodeBlock ChildAgent::GetGraphBlockInfo() const
     // right of the circle. 1 implies the tendancy to match exactly one level. See #256.
     NodeBlock block = DepthAgent::GetGraphBlockInfo();
     block.title = "Child";
-    block.symbol = "⩨=1"; // TODO this can be generated when Stuff nodes are generalised, see #256
+    block.symbol = "⧥=1⩨"; // TODO this can be generated when Stuff nodes are generalised, see #256
     return block;
 }
 
@@ -176,10 +176,12 @@ string StuffAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Prod
 	policy.context = make_shared<any>(); // No access specs here
 
 	string s;
-	s += "⩨";
 	if( recurse_restriction )
-		s += "⦅" + renderer->DoRender( &recurse_restriction, Syntax::Production::BOTTOM_EXPR, policy) + "⦆";
+		s += "⧥" + renderer->DoRender( &recurse_restriction, Syntax::Production::BOOT, policy) + "⩨";
+	else
+		s += "⩩";
 	s += renderer->DoRender( &terminus, Syntax::Production::PREFIX, policy ); 
+	
 	if( policy.pointer_archetype && policy.pointer_archetype->IsType() )	// TODO what about ChildAgent	 
 		s = "⍑" + s;	// Typaliser only operates on primary expressions, see parser
 	return s;
@@ -193,9 +195,10 @@ Graphable::NodeBlock StuffAgent::GetGraphBlockInfo() const
     // the nodes are both able to wildcard multiple nodes in the input tree.
     NodeBlock block = DepthAgent::GetGraphBlockInfo();
     block.title = "Stuff"; 
-    block.symbol = "⩨"; 
+    block.symbol = "⩩"; 
     if( recurse_restriction )
     {
+		block.symbol = "⧥"; 
         auto link = make_shared<Graphable::Link>( dynamic_cast<Graphable *>(recurse_restriction.get()), 
                   list<string>{},
                   list<string>{},

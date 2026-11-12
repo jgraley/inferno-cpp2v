@@ -1479,7 +1479,7 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 	// we have Local, Global, Member etc. TODO reduce these by keeping a scope stack just like the parser.
 	if( !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
 	{
-		s = "‽" + 
+		s = "⨶" + 
 		    RenderNodeTypeName() + 
 		    "(" +
 		    s;
@@ -1876,7 +1876,7 @@ Syntax::Token LabelDeclaration::GetExplicitToken() const
 
 Syntax::Token LabelDeclaration::GetPrerestrictToken() const
 {
-	// LabelDeclaration parses more like a statemant etc so override Declaration::GetExplicitToken()
+	// LabelDeclaration parses more like a statement etc so override Declaration::GetExplicitToken()
 	return YY::VNLangParser::token::TOK_PRERESTRICT_NORMAL;
 }
 

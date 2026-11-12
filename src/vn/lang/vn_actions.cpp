@@ -925,7 +925,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 
 // Node::GetRender() could implement the explicit render.
 
-// Check 093-DetectSuperLoop, we have a label definition ☆:; and then goto ☆ even though a coupling would seem to be needed, but we didn't get a designation.
+// Check 093-DetectSuperLoop, we have a label definition ‽:; and then goto ‽ even though a coupling would seem to be needed, but we didn't get a designation.
 
 // C fold-in: 
 // things like OnPrefixOperator() should take an actual parser token not a string
@@ -934,7 +934,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Keep the () on types for disambiguation unless you can prove away or just rely on designations TODO.
 
 // Semantics of optional keywords: if absent, this is taken to be the default (eg, private for a base of a class, non-const for 
-// a declaration etc). ☆ should be accepted to mean "Syntax::Location". Thus a fully wild base is ☆ ☆.
+// a declaration etc). ‽ should be accepted to mean "Syntax::Location". Thus a fully wild base is ‽ ‽.
 
 // Note: there are no explicit forms for agents. Thus, no ⯁Star⦅⦆ for example. This could have been handy for a greedy
 // alternative to ★. But see zipping syntax #883 for an alternative that uses a post-pass to move ★ toward root.
@@ -945,7 +945,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 
 
 // Constructors etc:
-// - Fix parse of my_type ( my_instanceidentifier ∧ ‽ResourceIdentifier ¬globals ) my_initialiser;
+// - Fix parse of my_type ( my_instanceidentifier ∧ ⨶ResourceIdentifier ¬globals ) my_initialiser;
 //   - Good example of VN stuff in a decl: ∧ has caused () but parser don't like ( when expecting identifier here
 // - Fix remaining mis-parses with Instance::GetRender() enabled
 // - Fill in OnInstance() properly and pass parser test

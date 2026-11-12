@@ -81,16 +81,21 @@
 	OPEN_MAP_CALL						        _("〔")
 	CLOSE_MAP_CALL						        _("〕")	
 	MAP_ARG_OP 							        _("⦂")
-	STUFF_OP		 					        _("⩨")
+	STUFF_OP		 					        _("⩩")
+	RESTRICTED_STUFF		 					_("⧥")
+	STUFF_END									_("⩨")
 	DELTA_COMPARE_OP 					        _("▲")
 	DELTA_REPLACE_OP 					        _("⯈")
 	DELTA_END_OP 					 	        _("⯇")
-	ANY_NODE_IN_RECORD 					        _("☆ in record") // allowed to be an access spec
-	ANY_NODE_IN_COMPOUND				        _("☆ in compound") // allowed to be a label
-	ANY_NODE_IN_OTHER					        _("☆ in other")
+	ANY_NODE_IN_RECORD 					        _("‽ in record") // allowed to be an access spec
+	ANY_NODE_IN_COMPOUND				        _("‽ in compound") // allowed to be a label
+	ANY_NODE_IN_OTHER					        _("‽ in other")
 	STAR_IN_RECORD 						        _("★ in record") 
 	STAR_IN_COMPOUND					        _("★ in compound")
 	STAR_IN_OTHER 							    _("★ in other")
+	RES_STAR_IN_RECORD 						    _("☆ in record") 
+	RES_STAR_IN_COMPOUND					    _("☆ in compound")
+	RES_STAR_IN_OTHER 							_("☆ in other")
 	TRANSFORM_OP						        _("⤨")
 	NEGATION_OP							        _("¬")
 	CONJUNCTION_OP						        _("∧")
@@ -99,7 +104,7 @@
 	POINTER_IS_OP							    _("⮎")
 	BUILD_SIZE_OP							    _("🄽")
 	STRINGIZE_OP							    _("§")
-	PRERESTRICT_OP						        _("‽")
+	PRERESTRICT_OP						        _("⨶")
 	TYPE_INDICATOR						        _("⍑")
 	CODE_UNIT 							        _("∞")
 	RESOLUTION_OP 						        _("::")
@@ -209,13 +214,13 @@ stmt_high
 %type <TreePtr<Node>> 				typalised type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
 %type <TreePtr<Node>> 				record base_spec access_extras access qualifier_node
-%type <TreePtr<Node>> 				enum_node enum
+%type <TreePtr<Node>> 				enum_node enum restricted_stuff_scope
 %type <TreePtr<Node>>				memb_init_boot memb_init memb_init_prefix memb_init_postfix memb_init_primary
 %type <wstring> 					new_vn_name
 %type <list<shared_ptr<VN::Command>>>	commands sep_commands  
 %type <list<shared_ptr<VN::Command>>>	expr_commands unified_commands normal_commands
 %type <shared_ptr<VN::Command>>		script_command 
-%type <VN::Limit>					stuff_depth
+%type <VN::Limit>					stuff_depth depth_stuff_scope
 %type <VN::Itemisation>				itemisation items_bare items_sep
 %type <VN::Item>					item
 %type <shared_ptr<VN::Gnomon>>		designation_command 
@@ -241,7 +246,7 @@ stmt_high
 // for "else" will be compared with the RULE for no-else case and highest precidence will win.
 // It's all rather brittle.
 %precedence KEYWORD_CONTROL_STMT // basically "then"
-%precedence ELSE_KEYWORD  		   // basically "else"
+%precedence ELSE_KEYWORD  		 // basically "else"
 
 %%
 
@@ -326,11 +331,11 @@ compound	: compound_prefix
 // sugar for now.
 compound_prefix : compound_primary 
 				| 								NEGATION_OP compound_prefix	{ $$ = vn->OnNegation($2); }
-				|       				 TRANSFORM_NAME_NORMAL compound_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
-				|  								   stuff_op_scope compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-				|    stuff_op_scope OPEN_VN unified_boot CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, $3, VN::Limit()); }
-				|     stuff_op_scope OPEN_VN stuff_depth CLOSE_VN compound_prefix	{ $$ = vn->OnStuff($5, nullptr, $3); }
-				|                              PRERESTRICT_NORMAL compound_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+				|       			  TRANSFORM_NAME_NORMAL compound_prefix	{ $$ = vn->OnTransform($1, @1, $2, @2); }
+				|  						     stuff_op_scope compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+				|                    restricted_stuff_scope compound_prefix { $$ = vn->OnStuff($2, $1, VN::Limit()); }
+				|                         depth_stuff_scope compound_prefix { $$ = vn->OnStuff($2, nullptr, $1); }
+				|                        PRERESTRICT_NORMAL compound_prefix { $$ = vn->OnRestrict($1, @1, $2, @2); }
 
 compound_primary	: compound_scope '}'                					{ $$ = $1->scope_node; } 
 					| compound_scope statements '}'    		 				{ $$ = $1->scope_node->OnStatements($2, @2); }
@@ -715,9 +720,6 @@ expr_prefix : expr_postfix
 			|        		     prerestrict_decl_start expr_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax?
 			| vn_prefix
 
-// This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
-stuff_depth		: C_ASSIGN INTEGRAL_LITERAL							{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
-
 // Postfix operators are treated like method calls, operand is regarded as object
 expr_postfix: expr_primary     
 			| expr_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2)->OnObject($1, @1); }
@@ -815,42 +817,6 @@ comma_sep_exprs	: expr_no_comma_op								{ $$.push_back($1); }
 norm_full_explicit_start : EXPLICIT_NORMAL							{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
 																	  
-//////////////////////////////// VIDA NOVA ////////////////////////////////////         
-
-// Common prefix operators for relocating agents and non-locating incl. builders. These can go from anywhere to anywhere
-// so they generally end at unified.
-// Also pre-restrictions although unsure about these, maybe they should be in specific places plus unified but not here? TODO
-vn_prefix		:  						        stuff_op_scope unified_prefix { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
-				| stuff_op_scope OPEN_VN unified_boot CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, $3, VN::Limit()); }
-				|  stuff_op_scope OPEN_VN stuff_depth CLOSE_VN unified_prefix { $$ = vn->OnStuff($5, nullptr, $3); }
-
-vn_primary 		: DESIGNATED_NORMAL
-				| DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
-				| TRANSFORM_NAME_NORMAL OPEN_VN unified_boot CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
-				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
-
-// Keep this long-hand for symmetry with versions that only allow eg ..._IN_RECORD
-vn_wildcard 	: STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_RECORD OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
-				| norm_full_explicit_start STAR_IN_RECORD			{ $$ = vn->OnStar($1.node); }
-				| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
-				| STAR_IN_COMPOUND									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_COMPOUND OPEN_VN star_arg CLOSE_VN		{ $$ = vn->OnStar($3); }
-				| ANY_NODE_IN_COMPOUND								{ $$ = nullptr; }
-				| STAR_IN_OTHER										{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_OTHER OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
-				| ANY_NODE_IN_OTHER									{ $$ = nullptr; }				
-												
-other_wildcard 	: STAR_IN_OTHER									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_OTHER OPEN_VN star_arg CLOSE_VN		{ $$ = vn->OnStar($3); }
-				| ANY_NODE_IN_OTHER								{ $$ = nullptr; }
-												
-star_arg		: normal_boot
-				| access_extras // why not try adding to normal column?
-								
-decl_full_explicit_start 	: EXPLICIT_DECL								{ $$ = vn->MakeScopeGnomonForNode($1); 
-																		  vn->AddGnomon($$.gnomon); }                                                                                  
-										
 //////////////////////////////// TYPE-ID ////////////////////////////////////         
 // type-id as seen in https://alx71hub.github.io/hcb/#type-id can be troublesome grammatically. Care advised.
 					
@@ -921,6 +887,42 @@ type_full_explicit_start 	: EXPLICIT_TYPE										{ $$ = vn->MakeScopeGnomonFor
 type_specifier_seq	: TYPE_SPECIFIER											{ $$.insert($1); }
 					| TYPE_SPECIFIER type_specifier_seq							{ $$ = $2; $$.insert($1); }
                                                                               
+//////////////////////////////// VIDA NOVA ////////////////////////////////////         
+
+// Common prefix operators for relocating agents and non-locating incl. builders. These can go from anywhere to anywhere
+// so they generally end at unified.
+// Also pre-restrictions although unsure about these, maybe they should be in specific places plus unified but not here? TODO
+vn_prefix		:  						        stuff_op_scope unified_prefix { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+				|                       restricted_stuff_scope unified_prefix { $$ = vn->OnStuff($2, $1, VN::Limit()); }
+				|                            depth_stuff_scope unified_prefix { $$ = vn->OnStuff($2, nullptr, $1); }
+
+vn_primary 		: DESIGNATED_NORMAL
+				| DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
+				| TRANSFORM_NAME_NORMAL OPEN_VN unified_boot CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
+				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
+
+// Keep this long-hand for symmetry with versions that only allow eg ..._IN_RECORD
+vn_wildcard 	: STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
+				| STAR_IN_RECORD OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
+				| norm_full_explicit_start STAR_IN_RECORD			{ $$ = vn->OnStar($1.node); }
+				| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
+				| STAR_IN_COMPOUND									{ $$ = vn->OnStar(nullptr); }
+				| STAR_IN_COMPOUND OPEN_VN star_arg CLOSE_VN		{ $$ = vn->OnStar($3); }
+				| ANY_NODE_IN_COMPOUND								{ $$ = nullptr; }
+				| STAR_IN_OTHER										{ $$ = vn->OnStar(nullptr); }
+				| STAR_IN_OTHER OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
+				| ANY_NODE_IN_OTHER									{ $$ = nullptr; }				
+												
+other_wildcard 	: STAR_IN_OTHER									{ $$ = vn->OnStar(nullptr); }
+				| STAR_IN_OTHER OPEN_VN star_arg CLOSE_VN		{ $$ = vn->OnStar($3); }
+				| ANY_NODE_IN_OTHER								{ $$ = nullptr; }
+												
+star_arg		: normal_boot
+				| access_extras // why not try adding to normal column?
+								
+decl_full_explicit_start 	: EXPLICIT_DECL								{ $$ = vn->MakeScopeGnomonForNode($1); 
+																		  vn->AddGnomon($$.gnomon); }                                                                                  
+										
 //////////////////////////////// QUALIFIERS ////////////////////////////////////         
 
 qualifiers		: qualifier													{ $$.push_back($1); }
@@ -945,7 +947,13 @@ qual_full_explicit_start : EXPLICIT_QUAL									{ $$ = vn->MakeScopeGnomonForNo
 new_vn_name		: NEW_UNICODE_NAME    						
 				| NEW_ASCII_NAME								{ $$ = ToUnicode($1); }     										      
 
-stuff_op_scope			: STUFF_OP			{ $$ = make_shared<VN::UnknownScopeGnomon>("stuff pattern"); 
-											  vn->AddGnomon($$); }
+stuff_op_scope			: STUFF_OP									{ $$ = nullptr; vn->AddGnomon(make_shared<VN::UnknownScopeGnomon>("stuff pattern")); } 											  
+
+restricted_stuff_scope	: RESTRICTED_STUFF unified_boot STUFF_END 	{ $$ = $2; vn->AddGnomon(make_shared<VN::UnknownScopeGnomon>("stuff pattern")); }
+
+depth_stuff_scope		: RESTRICTED_STUFF stuff_depth STUFF_END  	{ $$ = $2; vn->AddGnomon(make_shared<VN::UnknownScopeGnomon>("stuff pattern")); }
+
+// This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
+stuff_depth				: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
 
 %%
