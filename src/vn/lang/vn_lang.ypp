@@ -193,7 +193,7 @@ stmt_high
 %type <TreePtr<Node>> 				id_primary id_boot id_disjunction id_conjunction id_prefix id_parens id_extras
 %type <TreePtr<Node>> 				norm_primary 
 %type <TreePtr<Node>> 			    access_wildcard access_primary
-%type <TreePtr<Node>> 				label_wildcard other_wildcard star_arg
+%type <TreePtr<Node>> 				label_wildcard other_wildcard
 %type <TreePtr<Node>> 				argumentation
 %type <TreePtr<Node>> 				type_entry type_specified type_primary type_postfix type_prefix type_vn_prim 
 %type <TreePtr<Node>> 				type_disjunction type_conjunction
@@ -408,7 +408,10 @@ memb_init_prefix: memb_init_postfix
 				| 						        GREEN_GRASS_OP memb_init_prefix	{ $$ = vn->OnGrass($2); }
 				| 					               NEGATION_OP memb_init_prefix	{ $$ = vn->OnNegation($2); }
 				| vn_prefix
-        
+				| 					     RES_STAR_IN_RECORD memb_init_prefix { $$ = vn->OnStar($2); }
+				| 					   RES_STAR_IN_COMPOUND memb_init_prefix { $$ = vn->OnStar($2); }
+				| 					      RES_STAR_IN_OTHER memb_init_prefix { $$ = vn->OnStar($2); }
+			
 memb_init_postfix	: memb_init_primary
 					| memb_init_primary '(' expr_boot ')'						{ $$ = vn->OnMemberInitialiser($1, @2, $3, @3); } 
 					// TODO shouldn't need normal in C syntax, try expr_clause
@@ -496,8 +499,10 @@ param_prefix: param_primary
 			| 						      POINTER_IS_OP param_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	param_prefix	{ $$ = vn->OnNegation($2); }
 			|                        PRERESTRICT_NORMAL param_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-		    |        		     prerestrict_decl_start vn_wildcard		{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO unneccesary prerestriction
 			| vn_prefix
+			| 					     RES_STAR_IN_RECORD param_prefix { $$ = vn->OnStar($2); }
+			| 					   RES_STAR_IN_COMPOUND param_prefix { $$ = vn->OnStar($2); }
+			| 					      RES_STAR_IN_OTHER param_prefix { $$ = vn->OnStar($2); }
                          
 param_primary	: vn_primary              
 				| '(' parameter ')' { $$ = $2; }
@@ -529,8 +534,9 @@ access			: access_primary ':'								{ $$ = $1; vn->UpdateCurrentAccess(@1, $1);
 access_primary	: access_extras
 				| access_wildcard
 
+// Keeping the star here for Star zipping syntax #883
 access_wildcard : STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_RECORD OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
+				| STAR_IN_RECORD OPEN_VN access_extras CLOSE_VN		{ $$ = vn->OnStar($3); }
 				| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
 
 access_extras	: ACC_NODE_KEYWORD 
@@ -575,6 +581,7 @@ normal_disj		: normal_conj
 normal_conj 	: normal       
 				| normal_conj CONJUNCTION_OP normal   			{ $$ = vn->OnConjunction($1, $3); }
 		
+// Keeping the star here for Star zipping syntax #883
 normal    		: statement		
 				| expression						// Allow an expression without ;
 				| declaration_param					// Allow a parameter-stlye decl without ;				
@@ -602,21 +609,22 @@ statement_conj	: statement
 
 statement		: statement_nca												
 				| compound	
-				| arrival											
+				| arrival ':'											
 				| declaration			
 			
 // Note: as of C++23, a compound statement CAN and in a label. So, we take the fully general 
 // approach here and parse a label (up to and including the :) as a full statement. No need
 // to try and absorb extra semicolons introduced by render: they've gone too. 
 // #903 generalise to comma separated args
-arrival		: ARRIVAL_KEYWORD ':'										
-			| ARRIVAL_KEYWORD expression ':'								{ $$ = $1->OnArgsList({$2}, @2); } 
-			| ARRIVAL_KEYWORD expression RANGE_OP expression ':' 			{ $$ = $1->OnArgsList({$2, $4}, @2+@4); }
-			| declaring_label_id ':' 			 							{ $$ = vn->OnLabel($1, @1); } 
-			| label_wildcard ':' 			 								{ $$ = vn->OnLabel($1, @1); } 
+arrival		: ARRIVAL_KEYWORD 										
+			| ARRIVAL_KEYWORD expression								{ $$ = $1->OnArgsList({$2}, @2); } 
+			| ARRIVAL_KEYWORD expression RANGE_OP expression  			{ $$ = $1->OnArgsList({$2, $4}, @2+@4); }
+			| declaring_label_id  			 							{ $$ = vn->OnLabel($1, @1); } 
+			| label_wildcard  			 								{ $$ = vn->OnLabel($1, @1); } 
 
+// Keeping the star here for Star zipping syntax #883
 label_wildcard 	: STAR_IN_COMPOUND									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_COMPOUND OPEN_VN star_arg CLOSE_VN		{ $$ = vn->OnStar($3); }
+				| STAR_IN_COMPOUND OPEN_VN normal_boot CLOSE_VN		{ $$ = vn->OnStar($3); }
 				| ANY_NODE_IN_COMPOUND								{ $$ = nullptr; }
 
 statement_nca	: bare_statement ';'										
@@ -718,8 +726,11 @@ expr_prefix : expr_postfix
 			|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 			|                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|        		     prerestrict_decl_start expr_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax?
-			| vn_prefix
-
+			| vn_prefix // TODO rename to eg dislocating_prefix
+			| 					     RES_STAR_IN_RECORD expr_prefix { $$ = vn->OnStar($2); }
+			| 					   RES_STAR_IN_COMPOUND expr_prefix { $$ = vn->OnStar($2); }
+			| 					      RES_STAR_IN_OTHER expr_prefix { $$ = vn->OnStar($2); }
+			
 // Postfix operators are treated like method calls, operand is regarded as object
 expr_postfix: expr_primary     
 			| expr_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2)->OnObject($1, @1); }
@@ -786,11 +797,15 @@ id_disjunction	: id_conjunction
 id_conjunction 	: id_prefix       
 				| id_conjunction CONJUNCTION_OP id_prefix   		{ $$ = vn->OnConjunction($1, $3); }
 
+// Keeping the star here for Star zipping syntax #883
 id_prefix	: id_parens
  			| 						     GREEN_GRASS_OP id_prefix	{ $$ = vn->OnGrass($2); }
 			| 						      POINTER_IS_OP id_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	id_prefix	{ $$ = vn->OnNegation($2); }
 			|                        PRERESTRICT_NORMAL id_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); } // Note: we could recognise PRERESTRICT_ID if this casues conflicts
+			| 					     RES_STAR_IN_RECORD id_prefix   { $$ = vn->OnStar($2); }
+			| 					   RES_STAR_IN_COMPOUND id_prefix   { $$ = vn->OnStar($2); }
+			| 					      RES_STAR_IN_OTHER id_prefix   { $$ = vn->OnStar($2); }
 
 id_parens	: id_primary
 			| vn_wildcard
@@ -854,6 +869,9 @@ type_prefix : type_postfix
 			| 							        NEGATION_OP type_prefix	{ $$ = vn->OnNegation($2); }
 			|                     		   PRERESTRICT_TYPE type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|                          		   TYPE_INDICATOR typalised { $$ = $2; }
+			| 						     RES_STAR_IN_RECORD type_prefix { $$ = vn->OnStar($2); }
+			| 						   RES_STAR_IN_COMPOUND type_prefix { $$ = vn->OnStar($2); }
+			| 						      RES_STAR_IN_OTHER type_prefix { $$ = vn->OnStar($2); }
 
 typalised	: vn_wildcard
 			| '(' type_id ')'											{ $$ = $2; }
@@ -903,22 +921,18 @@ vn_primary 		: DESIGNATED_NORMAL
 
 // Keep this long-hand for symmetry with versions that only allow eg ..._IN_RECORD
 vn_wildcard 	: STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_RECORD OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
-				| norm_full_explicit_start STAR_IN_RECORD			{ $$ = vn->OnStar($1.node); }
+				| STAR_IN_RECORD OPEN_VN normal_boot CLOSE_VN			{ $$ = vn->OnStar($3); }
 				| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
 				| STAR_IN_COMPOUND									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_COMPOUND OPEN_VN star_arg CLOSE_VN		{ $$ = vn->OnStar($3); }
+				| STAR_IN_COMPOUND OPEN_VN normal_boot CLOSE_VN		{ $$ = vn->OnStar($3); }
 				| ANY_NODE_IN_COMPOUND								{ $$ = nullptr; }
 				| STAR_IN_OTHER										{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_OTHER OPEN_VN star_arg CLOSE_VN			{ $$ = vn->OnStar($3); }
+				| STAR_IN_OTHER OPEN_VN normal_boot CLOSE_VN			{ $$ = vn->OnStar($3); }
 				| ANY_NODE_IN_OTHER									{ $$ = nullptr; }				
 												
 other_wildcard 	: STAR_IN_OTHER									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_OTHER OPEN_VN star_arg CLOSE_VN		{ $$ = vn->OnStar($3); }
-				| ANY_NODE_IN_OTHER								{ $$ = nullptr; }
-												
-star_arg		: normal_boot
-				| access_extras // why not try adding to normal column?
+				| STAR_IN_OTHER OPEN_VN normal_boot CLOSE_VN		{ $$ = vn->OnStar($3); }
+				| ANY_NODE_IN_OTHER								{ $$ = nullptr; }						
 								
 decl_full_explicit_start 	: EXPLICIT_DECL								{ $$ = vn->MakeScopeGnomonForNode($1); 
 																		  vn->AddGnomon($$.gnomon); }                                                                                  

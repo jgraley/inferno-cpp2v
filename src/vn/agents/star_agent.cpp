@@ -115,10 +115,16 @@ Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
     return make_shared<FreePatch>( dest_zone, move(child_commands) );    
 }
 
+#define NEWS
 
 Syntax::Production StarAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
-	return Syntax::Production::PRIMARY_EXPR; 
+#ifdef NEWS
+	if( restriction )
+		return Syntax::Production::PREFIX; 
+	else
+#endif	
+		return Syntax::Production::PRIMARY_EXPR; 
 }
 
 
@@ -130,13 +136,17 @@ string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Produ
 	{			
 		if( policy.pointer_archetype && policy.pointer_archetype->IsType() )		 
 			s += "⍑";				
-	}
-		
-	s += "★";
+	}		
 	
 	if( restriction )
-		s += "⦅" + renderer->DoRenderPreserve( restriction, Syntax::Production::BOTTOM_EXPR, policy) + "⦆";
-	
+#ifdef NEWS
+		s += "☆" + renderer->DoRenderPreserve(restriction, Syntax::Production::PREFIX, policy);
+#else
+		s += "★⦅" + renderer->DoRenderPreserve( restriction, Syntax::Production::BOTTOM_EXPR, policy) + "⦆";
+#endif		
+	else
+		s += "★";
+
 	return s;
 }  
 
