@@ -401,11 +401,11 @@ memb_init_boot	: memb_init_clause
 
 memb_init_clause: memb_init_prefix
 				| STAR													{ $$ = vn->OnStar(nullptr); }	
+				| 					   RESTRICTED_STAR memb_init_prefix { $$ = vn->OnStar($2); }
 
 memb_init_prefix: memb_init_postfix
 				| 						        GREEN_GRASS_OP memb_init_prefix	{ $$ = vn->OnGrass($2); }
 				| 					               NEGATION_OP memb_init_prefix	{ $$ = vn->OnNegation($2); }
-				| 					    	   RESTRICTED_STAR memb_init_prefix { $$ = vn->OnStar($2); }
 				| vn_disloc_prefix
 			
 memb_init_postfix	: memb_init_primary
@@ -488,7 +488,8 @@ parameters	: param_clause										{ $$.push_back($1); }
 			| parameters ',' param_clause						{ $$ = $1; $$.push_back($3); }			
 		
 param_clause: parameter
-			| STAR												{ $$ = vn->OnStar(nullptr); }	
+			| STAR											  	{ $$ = vn->OnStar(nullptr); }	
+			| 					   	  RESTRICTED_STAR parameter { $$ = vn->OnStar($2); }
 
 parameter   : declaration_param   
 			| param_prefix
@@ -498,7 +499,6 @@ param_prefix: param_primary
 			| 						      POINTER_IS_OP param_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	param_prefix	{ $$ = vn->OnNegation($2); }
 			|                        PRERESTRICT_NORMAL param_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			| 					        RESTRICTED_STAR param_prefix	{ $$ = vn->OnStar($2); }
 			| vn_disloc_prefix
                          
 param_primary	: vn_primary              
@@ -820,6 +820,7 @@ map_args		: map_arg_clause								{ $$.push_back($1); }
 		
 map_arg_clause	: map_arg		
 				| STAR											{ $$ = vn->OnStar(nullptr); }	
+				|                       RESTRICTED_STAR map_arg { $$ = vn->OnStar($2); }
 							
 map_arg			: id_prefix MAP_ARG_OP expr_no_comma_op			{ $$ = vn->OnIdValuePair()->OnArgsList({$1, $3}, @$); }
 				| vn_any_node
