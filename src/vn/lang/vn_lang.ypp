@@ -846,7 +846,7 @@ type_prefix : type_postfix
 			|                          		   TYPE_INDICATOR typalised { $$ = $2; }
 
 // Things that are not obviously types, and have to be indicated as such using ⍑
-typalised	: vn_wildcard
+typalised	: vn_any_node
 			| '(' type_id ')'											{ $$ = $2; }
 			| vn_disloc_prefix
 
