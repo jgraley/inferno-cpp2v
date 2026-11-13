@@ -177,7 +177,6 @@
 stmt_low 
 stmt_high
 	
-//%type <int>		 					star any_node 
 %type <TreePtr<Node>> 				normal_boot normal_clause normal_disj normal_conj normal 
 %type <TreePtr<Node>> 				vn_disloc_prefix vn_primary vn_wildcard vn_any_node
 %type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational 
@@ -200,16 +199,19 @@ stmt_high
 %type <TreePtr<Node>> 				prototype_param prototype_np
 %type <TreePtr<Node>> 				assign_init
 %type <TreePtr<Node>> 				compound_primary type_boot type_clause compound_prefix compound 
-%type <TreePtr<Node>> 				parameter param_prefix param_primary
-//%type <TreePtr<Node>> 			compound_commands compound_boot
+%type <TreePtr<Node>> 				param_clause parameter param_prefix param_primary
 %type <TreePtr<Node>> 				type_for_declarator 
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				st_declarator st_declarator_prefix st_declarator_postfix st_declarator_primary
 %type <TreePtr<Node>> 				typalised type_id 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
-%type <TreePtr<Node>> 				record base_spec access_extras access qualifier_node
+%type <TreePtr<Node>> 				record access_extras access qualifier_node
+%type <TreePtr<Node>> 				base_clause base
 %type <TreePtr<Node>> 				enum_node enum restricted_stuff_scope
-%type <TreePtr<Node>>				memb_init_boot memb_init memb_init_prefix memb_init_postfix memb_init_primary
+%type <TreePtr<Node>>				memb_init_boot memb_init_clause memb_init_prefix memb_init_postfix memb_init_primary
+%type <TreePtr<Node>> 				enumerator prototype_enumerator
+%type <TreePtr<Node>> 				declaring_type_id declaring_res_id declaring_st_res_id declaring_label_id
+%type <TreePtr<Node>> 				statement_clause statement_disj statement_conj
 %type <wstring> 					new_vn_name
 %type <list<shared_ptr<VN::Command>>>	commands sep_commands  
 %type <list<shared_ptr<VN::Command>>>	expr_commands unified_commands normal_commands
@@ -223,16 +225,13 @@ stmt_high
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
 %type <VN::NodeAndGnomon>			norm_full_explicit_start type_full_explicit_start decl_full_explicit_start qual_full_explicit_start mi_full_explicit_start
 %type <VN::NodeAndGnomon>			record_scope enum_scope
-%type <TreePtr<Node>> 				statement_clause statement_disj statement_conj
 %type <list<TreePtr<Node>>>			statements  
 %type <list<TreePtr<Node>>>			enumerators
-%type <TreePtr<Node>> 				enumerator prototype_enumerator
 %type <list<TreePtr<Node>>>			comma_sep_exprs semicolon_args parameters parameterisation
 %type <list<TreePtr<Node>>>			bases memb_inits
 %type <VN::QualifierData> 			qualifier qualifier_nw
 %type <list<VN::QualifierData>>		qualifiers 
 %type <multiset<string>>			type_specifier_seq
-%type <TreePtr<Node>> 				declaring_type_id declaring_res_id declaring_st_res_id declaring_label_id
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>         prerestrict_decl_start
 
 // Solve the dangling-else amiguity by giving the "else" token a higher priority than the "if" token
@@ -244,14 +243,16 @@ stmt_high
 
 %%
 
-// Terminology
-// x_boot is lowest prec for x, typically allowing VN commands
-// x_clause is between VN commands and con/disjunction
-// x is between con/disjunction and infix/space-sep syntaxes, typically including terminator
+// Column naming
+// x_boot is lowest prec for x. If VN commands allowed they are below boot
+// x_clause is for stars and the entry point for multiplicity syntax
+// x_conj/disj is is for con/disjunction
+// x is the natural grammer for the construct, typically including terminator
 // bare_x is x without terminator
-// x_prefix/x_postfix expressional C and VN forms
+// x_prefix prefix unary operators C and VN forms
+// x_postfix unary operators C forms
 // x_parens is x_primary plus optional parentheses which boot
-// x_primary a unitary syntax
+// x_primary a unitary syntax eg literals, 0-op operators
 // x_extras are primary syntax elements outside of the column
 // x_entry is a suggested entry point to the column, and can be anywhere
 
@@ -391,12 +392,12 @@ assign_init		: expression
 				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser()->OnArgsList({}, @1+@2); } 
 				| '{' comma_sep_exprs '}'      							{ $$ = vn->OnArrayInitialiser()->OnArgsList($2, @2); }               
 			                                                                                                                   
-memb_inits	: memb_inits ',' memb_init							{ $$ = $1; $$.push_back($3); }
-			| memb_init											{ $$ = {$1}; }
+memb_inits	: memb_inits ',' memb_init_clause							{ $$ = $1; $$.push_back($3); }
+			| memb_init_clause											{ $$ = {$1}; }
 
-memb_init_boot	: memb_init
+memb_init_boot	: memb_init_clause
 
-memb_init	: memb_init_prefix
+memb_init_clause: memb_init_prefix
         
 memb_init_prefix: memb_init_postfix
 				| 						        GREEN_GRASS_OP memb_init_prefix	{ $$ = vn->OnGrass($2); }
@@ -480,9 +481,11 @@ parameterisation	: params_scope parameters ')'				{ $$ = $2; }
 params_scope	: '(' 											{ $$ = make_shared<VN::ParameterisationScopeGnomon>(); 
 																  vn->AddGnomon($$); } 
 
-parameters	: parameter												{ $$.push_back($1); }
-			| parameters ',' parameter								{ $$ = $1; $$.push_back($3); }			
-				
+parameters	: param_clause										{ $$.push_back($1); }
+			| parameters ',' param_clause						{ $$ = $1; $$.push_back($3); }			
+		
+param_clause: parameter
+			
 parameter   : declaration_param   
 			| param_prefix
                          
@@ -505,17 +508,19 @@ record			: record_scope '{' statements '}'						{ $$ = $1.node->OnMembers($3, @3
 				| record_scope '{' '}'			 						{ $$ = $1.node; }
 				| record_scope ':' bases '{' '}'						{ $$ = $1.node->OnBases($3, @3); }
              
-record_scope    : RECORD_KEYWORD declaring_type_id        						{ $$ = { $1->OnIdentifier($2, @2),  
-																		             vn->MakeRecordScopeGnomon($1) }; 
-																			  vn->AddGnomon($$.gnomon); } 
+record_scope    : RECORD_KEYWORD declaring_type_id        				{ $$ = { $1->OnIdentifier($2, @2),  
+																	             vn->MakeRecordScopeGnomon($1) }; 
+																		  vn->AddGnomon($$.gnomon); } 
 																			                                                  
-bases			: base_spec                                                 { $$.push_back($1); } 
-				| bases ',' base_spec										{ $$ = $1; $$.push_back($3); } 
+bases			: base_clause                                          	{ $$.push_back($1); } 
+				| bases ',' base_clause									{ $$ = $1; $$.push_back($3); } 
+      
+base_clause		: base      
                                        
-base_spec		: type_specified											{ $$ = vn->OnBase($1); } 
-				| vn_wildcard												{ $$ = $1; }
-				| DESIGNATED_NORMAL       				  					// To match a designated Star
-				| access_extras type_specified								{ $$ = vn->OnBase($1, $2, @$); }
+base			: type_specified										{ $$ = vn->OnBase($1); } 
+				| vn_wildcard											{ $$ = $1; }
+				| DESIGNATED_NORMAL       				  				// To match a designated Star
+				| access_extras type_specified							{ $$ = vn->OnBase($1, $2, @$); }
                                                                                                                                                          				                      				                        
 //////////////////////////////// ACCESS ////////////////////////////////////                                  
 				
@@ -585,7 +590,7 @@ normal    		: statement
 statements		: statement_clause											            { $$ = {$1}; } 
 				| statement_clause statements											{ $$ = $2; $$.push_front($1); }
 
-statement_clause	: statement_disj
+statement_clause: statement_disj
 
 statement_disj	: statement_conj
 				| statement_disj DISJUNCTION_OP statement_conj	{ $$ = vn->OnDisjunction($1, $3); }
