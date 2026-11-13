@@ -552,17 +552,21 @@ EnsureResetYield::EnsureResetYield()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();
-    auto sx_not = MakePatternNode<NegationAgent, Statement>();
-    auto sx_any = MakePatternNode<DisjunctionAgent, Statement>();
+    auto sx_not1 = MakePatternNode<NegationAgent, Statement>();
+    auto sx_not2 = MakePatternNode<NegationAgent, Statement>();
+    auto sx_not3 = MakePatternNode<NegationAgent, Statement>();
+    auto sx_all = MakePatternNode<ConjunctionAgent, Statement>();
     auto gotoo = MakePatternNode<Goto>();
     auto r_yield = MakePatternNode<WaitDelta>();
     
 
     s_comp->statements = (pre, gotoo, post);
     r_comp->statements = (pre, r_yield, gotoo, post);
-    pre->restriction = sx_not;
-    sx_not->negand = sx_any;
-    sx_any->disjuncts = (MakePatternNode<Goto>(), MakePatternNode<LabelDeclaration>(), MakePatternNode<Wait>() );
+    pre->restriction = sx_all;
+    sx_all->conjuncts = ( sx_not1, sx_not2, sx_not3 );
+    sx_not1->negand = MakePatternNode<Goto>();
+    sx_not2->negand = MakePatternNode<LabelDeclaration>();
+    sx_not3->negand = MakePatternNode<Wait>();
         
     Configure( SEARCH_REPLACE, s_comp, r_comp );
 }

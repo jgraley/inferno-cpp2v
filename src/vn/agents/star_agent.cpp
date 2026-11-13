@@ -118,6 +118,9 @@ Agent::ReplacePatchPtr StarAgent::GenReplaceLayoutImpl( const ReplaceKit &kit,
 
 Syntax::Production StarAgent::GetAgentProduction( const VN::RendererInterface *, Syntax::Policy ) const
 {
+	// None of this is really true, star operates at whatever production is between 
+	// the separators in a multiplicity, but never needs accomodations. 
+	// Maybe we can do better eg by pulling together those productions.
 	if( restriction )
 		return Syntax::Production::PREFIX; 
 	else
@@ -125,7 +128,7 @@ Syntax::Production StarAgent::GetAgentProduction( const VN::RendererInterface *,
 }
 
 
-string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production, Syntax::Policy policy ) const
+string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	string s;
 	TreePtr<Node> restriction{ *GetRestriction() };
@@ -136,7 +139,7 @@ string StarAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Produ
 	}		
 	
 	if( restriction )
-		s += "☆" + renderer->DoRenderPreserve(restriction, Syntax::Production::PREFIX, policy);	
+		s += "☆" + renderer->DoRenderPreserve(restriction, surround_prod, policy);	
 	else
 		s += "★";
 

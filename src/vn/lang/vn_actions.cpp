@@ -1053,4 +1053,4 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Review statement expressions, maybe can use the gcc syntax ({...}) now?
 // Trouble: explicit nodes ⯁MyNode have optional ⦅...itemisation...⦆ making long-form
 
-
+// DESIGNATED_NORMAL: split out DESIGNATED_STAR and give same prec as STAR, RESTRICTED_STAR
