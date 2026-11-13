@@ -68,7 +68,7 @@ Syntax::Token Qualifier::GetPrerestrictToken() const
 
 Syntax::Production Initialiser::GetMyProductionTerminal() const
 {
-	return Production::KEYWORD;
+	return Production::SIGNIFIER;
 }
 
 
@@ -1223,7 +1223,7 @@ TreePtr<Node> MembInitSeq::OnMemberInits( list<TreePtr<Node>> memb_inits_, Locat
 
 Syntax::Production Dispatch::GetMyProductionTerminal() const
 {
-	return Production::KEYWORD;
+	return Production::SIGNIFIER;
 }
 
 //////////////////////////// Virtual //////////////////////////////
@@ -1244,7 +1244,7 @@ string NonVirtual::GetRender( VN::RendererInterface *, Production, Policy )
 
 Syntax::Production AccessSpec::GetMyProductionTerminal() const
 { 
-	return Production::KEYWORD; 
+	return Production::SIGNIFIER; 
 }
 
 
@@ -1278,7 +1278,7 @@ string Protected::GetKeyword( Policy ) const
 
 Syntax::Production Permission::GetMyProductionTerminal() const
 { 
-	return Production::KEYWORD; 
+	return Production::SIGNIFIER; 
 }
 
 //////////////////////////// Const //////////////////////////////
@@ -1579,7 +1579,6 @@ void AccessDecl::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc )
 
 TreePtr<Node> AccessDecl::OnAccess( TreePtr<Node> as, Location )
 {
-	FTRACE("Access explicitly set to ")(as)("\n");
 	access = as;
 	return (TreePtr<Node>)shared_from_this();	
 }

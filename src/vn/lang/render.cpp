@@ -214,7 +214,7 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 		}
 		catch( Syntax::Refusal &ex ) 
 		{
-			node_prod = Syntax::Production::EXPLICIT_NODE; // Must have been designated as an explicit, see OnRefusalToRender()
+			node_prod = Syntax::Production::LONG_FORM_EXPLICIT; // Must have been designated as an explicit, see OnRefusalToRender()
 		}
 
 		s += unique_coupling_names.at(node);
@@ -268,9 +268,9 @@ string Render::OnRefusalToRender( Syntax::Refusal &ex, TreePtr<Node> node, Synta
 	catch(Syntax::Refusal &ex) {} // Good - not generating a parser token
 	
 	// If render was unsuccessful, TRY AGAIN but this time with node_prod set to 
-	// EXPLICIT_NODE which means the render will be explicit (i.e. with ⯁) and
+	// LONG_FORM_EXPLICIT which means the render will be explicit (i.e. with ⯁) and
 	// won't throw.	
-	return AccomodateInit(node, Syntax::Production::EXPLICIT_NODE, surround_prod, policy);
+	return AccomodateInit(node, Syntax::Production::LONG_FORM_EXPLICIT, surround_prod, policy);
 }
 
 
@@ -431,7 +431,7 @@ string Render::AccomodateNULL( TreePtr<Node> node, Syntax::Production node_prod,
 
 string Render::Dispatch( TreePtr<Node> node, Syntax::Production node_prod, Syntax::Production surround_prod, Syntax::Policy policy )
 {	
-	if( node_prod==Syntax::Production::EXPLICIT_NODE )
+	if( node_prod==Syntax::Production::LONG_FORM_EXPLICIT )
 		return RenderLongFormExplicit(node, surround_prod, policy);	
 	else if( const Agent *agent = Agent::TryAsAgentConst(node) )
 		return agent->GetAgentRender( this, surround_prod, policy );

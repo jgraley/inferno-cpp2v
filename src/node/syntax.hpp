@@ -88,9 +88,9 @@ public:
 		TOP_EXPR, // Highest expression precedence 
 		
 		// ----- Abstract, lexer-ish productions of no particuler kind
-		EXPLICIT_NODE = 100, // Eg ⯁MyNode⦅...⦆
+		LONG_FORM_EXPLICIT = 100, // Eg ⯁MyNode⦅...⦆
 		PURE_IDENTIFIER, // Now only for a label id without dereference (&&)
-		KEYWORD, // Lexer tokens of any kind (other than type or expression)
+		SIGNIFIER, // Lexer tokens of any kind (other than type or expression)
 		ANONYMOUS,
 		NULLPTR // NULL in a pattern as a singluar wildcard
 	};

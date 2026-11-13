@@ -96,10 +96,10 @@ Syntax::Policy CppRender::GetDefaultPolicy()
 string CppRender::OnRefusalToRender( Syntax::Refusal &ex, TreePtr<Node> node, Syntax::Production surround_prod, Syntax::Policy policy )
 {
 	// If render was unsuccessful, TRY AGAIN but this time with node_prod set to 
-	// EXPLICIT_NODE which means the render will be explicit (i.e. with ⯁) and
+	// LONG_FORM_EXPLICIT which means the render will be explicit (i.e. with ⯁) and
 	// won't throw.
 	nodes_not_rendered_to_c++;
-	return AccomodateInit(node, Syntax::Production::EXPLICIT_NODE, surround_prod, policy) + " // " + ex.What() + "\n"; 
+	return AccomodateInit(node, Syntax::Production::LONG_FORM_EXPLICIT, surround_prod, policy) + " // " + ex.What() + "\n"; 
 }
 
 
