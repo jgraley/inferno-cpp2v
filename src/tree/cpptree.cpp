@@ -118,6 +118,8 @@ Syntax::Production Expression::GetMyProductionTerminal() const
 
 string Expression::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
+	if( !renderer )
+		return "⯁"+Traceable::TypeIdName( *this ); // hack due to Literal::GetName() for graphing TODO fix
 	return renderer->DoRenderSignifier(this, policy);
 }
 
