@@ -178,7 +178,7 @@ stmt_low
 stmt_high
 	
 %type <TreePtr<Node>> 				normal_boot normal_clause normal_disj normal_conj normal 
-%type <TreePtr<Node>> 				vn_disloc_prefix vn_primary vn_wildcard vn_any_node
+%type <TreePtr<Node>> 				vn_disloc_prefix vn_primary vn_any_node
 %type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational 
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
@@ -400,7 +400,8 @@ memb_inits	: memb_inits ',' memb_init_clause							{ $$ = $1; $$.push_back($3); 
 memb_init_boot	: memb_init_clause
 
 memb_init_clause: memb_init_prefix
-        
+				| STAR													{ $$ = vn->OnStar(nullptr); }	
+
 memb_init_prefix: memb_init_postfix
 				| 						        GREEN_GRASS_OP memb_init_prefix	{ $$ = vn->OnGrass($2); }
 				| 					               NEGATION_OP memb_init_prefix	{ $$ = vn->OnNegation($2); }
@@ -415,7 +416,7 @@ memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2
 					| DELTA_COMPARE_OP memb_init_boot DELTA_REPLACE_OP memb_init_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
 					| mi_full_explicit_start itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 					| DESIGNATED_NORMAL
-					| vn_wildcard
+					| vn_any_node
                      
 mi_full_explicit_start 	: EXPLICIT_MEMB_INIT						{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
@@ -487,7 +488,8 @@ parameters	: param_clause										{ $$.push_back($1); }
 			| parameters ',' param_clause						{ $$ = $1; $$.push_back($3); }			
 		
 param_clause: parameter
-			
+			| STAR												{ $$ = vn->OnStar(nullptr); }	
+
 parameter   : declaration_param   
 			| param_prefix
                          
@@ -501,7 +503,7 @@ param_prefix: param_primary
                          
 param_primary	: vn_primary              
 				| '(' parameter ')' { $$ = $2; }
-                | vn_wildcard
+                | vn_any_node
 
 //////////////////////////////// RECORDS ////////////////////////////////////                                  
                          
@@ -518,9 +520,10 @@ bases			: base_clause                                          	{ $$.push_back($
 				| bases ',' base_clause									{ $$ = $1; $$.push_back($3); } 
       
 base_clause		: base      
-                                       
+				| STAR													{ $$ = vn->OnStar(nullptr); }	
+
 base			: type_specified										{ $$ = vn->OnBase($1); } 
-				| vn_wildcard											{ $$ = $1; }
+				| vn_any_node											{ $$ = $1; }
 				| DESIGNATED_NORMAL       				  				// To match a designated Star
 				| access_extras type_specified							{ $$ = vn->OnBase($1, $2, @$); }
                                                                                                                                                          				                      				                        
@@ -816,9 +819,10 @@ map_args		: map_arg_clause								{ $$.push_back($1); }
 				| map_args ',' map_arg_clause					{ $$ = $1; $$.push_back($3); }			
 		
 map_arg_clause	: map_arg		
-				
+				| STAR											{ $$ = vn->OnStar(nullptr); }	
+							
 map_arg			: id_prefix MAP_ARG_OP expr_no_comma_op			{ $$ = vn->OnIdValuePair()->OnArgsList({$1, $3}, @$); }
-				| vn_wildcard
+				| vn_any_node
 				| DESIGNATED_NORMAL
 								
 arguments		: argument_clause								{ $$.push_back($1); }
@@ -913,9 +917,6 @@ vn_primary 		: DESIGNATED_NORMAL
 				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 
 // Keep this long-hand for symmetry with versions that only allow eg ..._IN_RECORD
-vn_wildcard 	: vn_any_node
-				| STAR												{ $$ = vn->OnStar(nullptr); }				
-		
 vn_any_node		: ANY_NODE_IN_RECORD								{ $$ = nullptr; }
 				| ANY_NODE_IN_COMPOUND								{ $$ = nullptr; }
 				| ANY_NODE_IN_OTHER									{ $$ = nullptr; }				
