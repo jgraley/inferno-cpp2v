@@ -62,35 +62,35 @@ struct GlobalsModule : SCTree::Module
 struct UncombableSwitch : CPPTree::Switch, CPPTree::Uncombable 
 { 
 	NODE_FUNCTIONS_FINAL 
-	KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Switch, YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT) 
+	KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Switch, YY::VNLangParser::token::TOK_CONTROL_STMT_SIGN) 
 };
 
 
 struct UncombableFor : CPPTree::For, CPPTree::Uncombable 
 { 
 	NODE_FUNCTIONS_FINAL 
-	KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::For, YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT) 
+	KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::For, YY::VNLangParser::token::TOK_CONTROL_STMT_SIGN) 
 };
 
 
 struct CombableFor : CPPTree::For 
 { 
 	NODE_FUNCTIONS_FINAL 
-	KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::For, YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT) 
+	KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::For, YY::VNLangParser::token::TOK_CONTROL_STMT_SIGN) 
 };
 
 
 struct UncombableBreak : CPPTree::Break, CPPTree::Uncombable 
 { 
 	NODE_FUNCTIONS_FINAL 
-	KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Break, YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT) 
+	KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Break, YY::VNLangParser::token::TOK_SIMPLE_STMT_SIGN) 
 };
 
 
 struct CombableBreak : CPPTree::Break 
 { 
 	NODE_FUNCTIONS_FINAL 
-	KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Break, YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT) 
+	KEYWORD_AS_BASE_IN_CPP_ONLY(CPPTree::Break, YY::VNLangParser::token::TOK_SIMPLE_STMT_SIGN) 
 };
 
 

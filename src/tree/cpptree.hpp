@@ -100,9 +100,9 @@ struct Expression : virtual Statement,
 { 
     NODE_FUNCTIONS 
     virtual string GetColour() const { return "/set28/6"; }    
-	//Production GetMyProductionTerminal() const override;
-	
-	TIE_PP(Statement)
+	Production GetMyProductionTerminal() const override;
+	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
+   	Token GetSignifierToken() const override;
 };
 
 
@@ -380,9 +380,6 @@ struct Literal : Expression,
 {
     NODE_FUNCTIONS
     virtual string GetColour() const { return Expression::GetColour(); } // Expression wins
-	Production GetMyProductionTerminal() const override;
-	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
-   	Token GetSignifierToken() const override;
     virtual string GetName() const;
 };
 

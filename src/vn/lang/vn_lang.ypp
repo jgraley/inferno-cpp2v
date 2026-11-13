@@ -141,7 +141,6 @@
 <TreePtr<Node>>	DESIGNATED_CURRENT_RECORD_ID _("current record")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier")
 <TreePtr<Node>>	DESIGNATED_ACCESS		_("designated access spec")
-<TreePtr<Node>>	DESIGNATED_COMPOUND		_("designated compound") // DELETE ME
 <TreePtr<Node>>	EXPLICIT_NORMAL			_("explicit statement/expression node name")
 <TreePtr<Node>>	EXPLICIT_TYPE			_("explicit type node")
 <TreePtr<Node>>	EXPLICIT_DECL			_("explicit declaration node")
@@ -157,9 +156,6 @@
 <TreePtr<Node>>	ID_BUILDER_NORMAL		_("instance identifier builder")
 <TreePtr<Node>>	ID_BUILDER_TYPE			_("type identifier builder")
 <TreePtr<Node>>	BOOL_LITERAL			_("boolean literal")
-<TreePtr<Node>> KEYWORD_PRIMARY_OP		_("normal operator")
-<TreePtr<Node>> KEYWORD_SIMPLE_STMT     _("simple statement") // eg break;
-<TreePtr<Node>> KEYWORD_CONTROL_STMT 	_("args-and-body statement") // eg switch(args) body
 <TreePtr<Node>> DO_KEYWORD				_("do")
 <TreePtr<Node>> WHILE_KEYWORD			_("while")
 <TreePtr<Node>> ARRIVAL_KEYWORD			_("arrival")
@@ -171,13 +167,16 @@
 <TreePtr<Node>> QUAL_NODE_KEYWORD		_("qualifier")
 <TreePtr<Node>> ACC_NODE_KEYWORD		_("access spec")
 <TreePtr<Node>> TYPEDEF_KEYWORD			_("typedef")
+<TreePtr<Node>> PRIMARY_EXPR_SIGN		_("primary expression signifier")
+<TreePtr<Node>> SIMPLE_STMT_SIGN   	    _("simple statement signifier") // eg break;
+<TreePtr<Node>> CONTROL_STMT_SIGN	 	_("control statement signifier") // eg switch(args) body
 <TreePtr<Node>> TYPE_SIGN				_("type signifier")
-<TreePtr<Node>> TYPE_W_PARAMS_SIGN		_("type with arguments")
-<TreePtr<Node>> COMPOUND_SIGN			_("compound") // not really C/C++
-<TreePtr<Node>> RESOURCE_SIGN			_("resource") // unifies functions and cons/destructors
-<TreePtr<Node>> NORMAL_ID_SIGN			_("identifier") 
-<TreePtr<Node>> PREPROCESSOR_ID_SIGN	_("preprocessor identifier") 
-<TreePtr<Node>> INIT_SIGN				_("initialiser") 
+<TreePtr<Node>> TYPE_W_ARGS_SIGN		_("type with arguments signifier")
+<TreePtr<Node>> COMPOUND_SIGN			_("compound signifier") // not really C/C++
+<TreePtr<Node>> RESOURCE_SIGN			_("resource signifier") // unifies functions and cons/destructors
+<TreePtr<Node>> NORMAL_ID_SIGN			_("identifier signifier") 
+<TreePtr<Node>> PREPROCESSOR_ID_SIGN	_("preprocessor identifier signifier") 
+<TreePtr<Node>> INIT_SIGN				_("initialiser signifier") 
 
 stmt_low 
 stmt_high
@@ -244,7 +243,7 @@ stmt_high
 // In the rule, we must set the no-else rule to the "if" priority using %prec. Then, the TOKEN
 // for "else" will be compared with the RULE for no-else case and highest precidence will win.
 // It's all rather brittle.
-%precedence KEYWORD_CONTROL_STMT // basically "then"
+%precedence CONTROL_STMT_SIGN // basically "then"
 %precedence ELSE_KEYWORD  		 // basically "else"
 
 %%
@@ -619,20 +618,20 @@ arrival		: ARRIVAL_KEYWORD
 
 statement_nca	: bare_statement ';'										
 				| control_stmt_sign '(' ')' statement	
-			  	  %prec KEYWORD_CONTROL_STMT								{ $$ = $1->OnArgsList({}, @2+@3)->OnBody($4, @4); }
+			  	  %prec CONTROL_STMT_SIGN								{ $$ = $1->OnArgsList({}, @2+@3)->OnBody($4, @4); }
 				| control_stmt_sign '(' semicolon_args ')' statement	
-				  %prec KEYWORD_CONTROL_STMT								{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
+				  %prec CONTROL_STMT_SIGN								{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 				| control_stmt_sign '(' semicolon_args ')' statement
 				  ELSE_KEYWORD statement									{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5)->OnElseBody($7, @6); }
 				| ';'														{ $$ = vn->OnNop(@1); }      
 
-bare_statement	: KEYWORD_SIMPLE_STMT										
-				| KEYWORD_SIMPLE_STMT expression							{ $$ = $1->OnArgsList({$2}, @2); }
+bare_statement	: SIMPLE_STMT_SIGN										
+				| SIMPLE_STMT_SIGN expression							{ $$ = $1->OnArgsList({$2}, @2); }
 				| DO_KEYWORD statement WHILE_KEYWORD '(' expr_boot ')'	{ $$ = $1->OnBody($2, @2)->OnArgsList({$5}, @5); } // TODO a While node is gobbled up here
 				// TODO shouldn't need normal in C syntax, try expr_clause
 				| expression 											
 
-control_stmt_sign 	: KEYWORD_CONTROL_STMT
+control_stmt_sign 	: CONTROL_STMT_SIGN
 					| WHILE_KEYWORD
 						
 semicolon_args	: expression												{ $$.push_back($1); }
@@ -738,7 +737,7 @@ expr_primary: id_extras
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL									
-			| KEYWORD_PRIMARY_OP							
+			| PRIMARY_EXPR_SIGN							
 			| INIT_SIGN
 			
 norm_primary	: vn_primary
@@ -867,7 +866,7 @@ type_for_declarator : type_primary
 type_primary: type_vn_prim
 			| '(' type_boot ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
             | TYPE_SIGN														
-            | TYPE_W_PARAMS_SIGN parameterisation								{ $$ = $1->OnParams($2, @2); }		
+            | TYPE_W_ARGS_SIGN parameterisation								{ $$ = $1->OnParams($2, @2); }		
 			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }				
 			
 type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExplicitNode($1.node, @1, $2); }

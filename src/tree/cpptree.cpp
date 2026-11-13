@@ -105,27 +105,27 @@ string Statement::GetRender( VN::RendererInterface *renderer, Production, Policy
 
 Syntax::Token Statement::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+	return YY::VNLangParser::token::TOK_SIMPLE_STMT_SIGN;
 }
 
 //////////////////////////// Expression ///////////////////////////////
 
-/*Syntax::Production Expression::GetMyProductionTerminal() const
+Syntax::Production Expression::GetMyProductionTerminal() const
 {
-	throw Unimplemented();
+	return Production::PRIMARY_EXPR;
 }
 
 
-string Expression::GetRender( VN::RendererInterface *, Production, Policy )
+string Expression::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	throw Unimplemented();
+	return renderer->DoRenderSignifier(this, policy);
 }
 
 
 Syntax::Token Expression::GetSignifierToken() const
 {
-	throw UnimplementedToken();
-}*/
+	return YY::VNLangParser::token::TOK_PRIMARY_EXPR_SIGN;
+}
 
 //////////////////////////// Type ///////////////////////////////
 
@@ -479,7 +479,7 @@ string Uncombable::GetRender( VN::RendererInterface *renderer, Production, Polic
 
 Syntax::Token Uncombable::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+	return YY::VNLangParser::token::TOK_SIMPLE_STMT_SIGN;
 }
 
 //////////////////////////// SpecificIdentifier ///////////////////////////////
@@ -875,24 +875,6 @@ TreePtr<Node> SeqArgumentation::OnArgsList( list<TreePtr<Node>> args, Location )
 }
 
 //////////////////////////// Literal ///////////////////////////////
-
-Syntax::Production Literal::GetMyProductionTerminal() const
-{
-	throw Unimplemented();
-}
-
-
-string Literal::GetRender( VN::RendererInterface *, Production, Policy )
-{
-	throw Unimplemented();
-}
-
-
-Syntax::Token Literal::GetSignifierToken() const
-{
-	throw UnimplementedToken();
-}
-
 
 string Literal::GetName() const
 {
@@ -1963,7 +1945,7 @@ string CallableParams::GetRenderParameterisation(VN::RendererInterface *renderer
 
 Syntax::Token CallableParams::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_TYPE_W_PARAMS_SIGN;
+	return YY::VNLangParser::token::TOK_TYPE_W_ARGS_SIGN;
 }
 
 
@@ -2849,7 +2831,7 @@ string This::GetRender( VN::RendererInterface *, Production, Policy )
 
 Syntax::Token This::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_PRIMARY_OP;
+	return YY::VNLangParser::token::TOK_PRIMARY_EXPR_SIGN;
 }
 
 //////////////////////////// New ///////////////////////////////
@@ -3141,7 +3123,7 @@ string Return::GetKeyword( Policy ) const
 
 Syntax::Token Return::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+	return YY::VNLangParser::token::TOK_SIMPLE_STMT_SIGN;
 }
 
 
@@ -3200,7 +3182,7 @@ string Goto::GetKeyword( Policy ) const
 
 Syntax::Token Goto::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+	return YY::VNLangParser::token::TOK_SIMPLE_STMT_SIGN;
 }
 
 
@@ -3249,7 +3231,7 @@ string If::GetKeyword( Policy ) const
 
 Syntax::Token If::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT;
+	return YY::VNLangParser::token::TOK_CONTROL_STMT_SIGN;
 }
 
 
@@ -3303,7 +3285,7 @@ TreePtr<Node> Breakable::OnBody( TreePtr<Node> body_, Location )
 
 Syntax::Token Breakable::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT;
+	return YY::VNLangParser::token::TOK_CONTROL_STMT_SIGN;
 }
 
 //////////////////////////// While ///////////////////////////////
@@ -3416,7 +3398,7 @@ string For::GetKeyword( Policy ) const
 
 Syntax::Token For::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT;
+	return YY::VNLangParser::token::TOK_CONTROL_STMT_SIGN;
 }
 
 
@@ -3459,7 +3441,7 @@ string Switch::GetKeyword( Policy ) const
 
 Syntax::Token Switch::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_CONTROL_STMT;
+	return YY::VNLangParser::token::TOK_CONTROL_STMT_SIGN;
 }
 
 
@@ -3600,7 +3582,7 @@ string Continue::GetKeyword( Policy ) const
 
 Syntax::Token Continue::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+	return YY::VNLangParser::token::TOK_SIMPLE_STMT_SIGN;
 }
 
 //////////////////////////// Break ///////////////////////////////
@@ -3625,7 +3607,7 @@ string Break::GetKeyword( Policy ) const
 
 Syntax::Token Break::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_KEYWORD_SIMPLE_STMT;
+	return YY::VNLangParser::token::TOK_SIMPLE_STMT_SIGN;
 }
 
 //////////////////////////// Nop ///////////////////////////////
