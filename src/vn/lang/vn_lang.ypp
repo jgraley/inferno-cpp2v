@@ -892,10 +892,8 @@ vn_primary 		: DESIGNATED_NORMAL
 				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 
 // Keep this long-hand for symmetry with versions that only allow eg ..._IN_RECORD
-vn_wildcard 	: STAR												{ $$ = vn->OnStar(nullptr); }
-				| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
-				| ANY_NODE_IN_COMPOUND								{ $$ = nullptr; }
-				| ANY_NODE_IN_OTHER									{ $$ = nullptr; }				
+vn_wildcard 	: vn_any_node
+				| STAR												{ $$ = vn->OnStar(nullptr); }				
 		
 vn_any_node		: ANY_NODE_IN_RECORD								{ $$ = nullptr; }
 				| ANY_NODE_IN_COMPOUND								{ $$ = nullptr; }
