@@ -571,21 +571,21 @@ LogicalOrToIf::LogicalOrToIf()
     auto r_temp = MakePatternNode<Temporary>();
     auto r_boolean = MakePatternNode<Boolean>();
     auto r_if = MakePatternNode<If>();
+    auto r_not = MakePatternNode<LogicalNot>();
     auto r_assign1 = MakePatternNode<Assign>();
     auto r_assign2 = MakePatternNode<Assign>();
     
-    s_or->operands = (op1, op2);
-    
-
+    s_or->operands = (op1, op2);   
     r_temp->identifier = r_temp_id;
     r_temp->type= r_boolean;
     r_temp->initialiser = MakePatternNode<Uninitialised>();
     r_temp->permission = MakePatternNode<NonConst>();    
     r_comp->statements = (r_temp, r_assign1, r_if, r_temp_id);
     r_assign1->operands = (r_temp_id, op1);
-    r_if->condition = r_temp_id;
-    r_if->body = MakePatternNode<Nop>();
-    r_if->body_else = r_assign2;
+    r_if->condition = r_not;
+    r_not->operands = (r_temp_id);
+    r_if->body = r_assign2;
+    r_if->body_else = MakePatternNode<Nop>();
     r_assign2->operands = (r_temp_id, op2);    
     
     Configure( SEARCH_REPLACE, MakeCheckUncombable(s_or), r_comp );
