@@ -85,6 +85,8 @@ node_name               ({ascii_name}|::)*
 §				{ return YY::VNLangParser::make_STRINGIZE_OP(location()); };
 ⍑ 				{ return YY::VNLangParser::make_TYPE_INDICATOR(location()); };
 ∞ 				{ return YY::VNLangParser::make_CODE_UNIT(location()); };
+★				{ return YY::VNLangParser::make_STAR(location()); } 
+☆				{ return YY::VNLangParser::make_RESTRICTED_STAR(location()); } 
 
 ==|!=			{ return YY::VNLangParser::make_C_EQUALITY_OP(str(), location()); }
 <|<=|>|>=		{ return YY::VNLangParser::make_C_RELATIONAL_OP(str(), location()); }
@@ -123,6 +125,5 @@ char|short|int|long|signed|unsigned|float|double { return YY::VNLangParser::make
 ⤨{ascii_name}	{ return recogniser->OnTransformLexeme(wstr(), location()); }
 
 ‽				{ return recogniser->OnAnyNodeLexeme(location()); } 
-★				{ return recogniser->OnStarLexeme(location()); } 
-☆				{ return recogniser->OnRestrictedStarLexeme(location()); } 
+
 %%

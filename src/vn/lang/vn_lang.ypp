@@ -87,15 +87,11 @@
 	DELTA_COMPARE_OP 					        _("▲")
 	DELTA_REPLACE_OP 					        _("⯈")
 	DELTA_END_OP 					 	        _("⯇")
-	ANY_NODE_IN_RECORD 					        _("‽ in record") // allowed to be an access spec
-	ANY_NODE_IN_COMPOUND				        _("‽ in compound") // allowed to be a label
-	ANY_NODE_IN_OTHER					        _("‽ in other")
-	STAR_IN_RECORD 						        _("★ in record") 
-	STAR_IN_COMPOUND					        _("★ in compound")
-	STAR_IN_OTHER 							    _("★ in other")
-	RES_STAR_IN_RECORD 						    _("☆ in record") 
-	RES_STAR_IN_COMPOUND					    _("☆ in compound")
-	RES_STAR_IN_OTHER 							_("☆ in other")
+	ANY_NODE_IN_RECORD 					        _("‽ (in record)") // allowed to be an access spec
+	ANY_NODE_IN_COMPOUND				        _("‽ (in compound)") // allowed to be a label
+	ANY_NODE_IN_OTHER					        _("‽ (in other)")
+	STAR 									    _("★")
+	RESTRICTED_STAR 							_("☆")
 	TRANSFORM_OP						        _("⤨")
 	NEGATION_OP							        _("¬")
 	CONJUNCTION_OP						        _("∧")
@@ -183,7 +179,7 @@ stmt_high
 	
 //%type <int>		 					star any_node 
 %type <TreePtr<Node>> 				normal_boot normal_clause normal_disj normal_conj normal 
-%type <TreePtr<Node>> 				vn_prefix vn_primary vn_wildcard vn_any_node
+%type <TreePtr<Node>> 				vn_disloc_prefix vn_primary vn_wildcard vn_any_node
 %type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational 
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
@@ -405,10 +401,8 @@ memb_init	: memb_init_prefix
 memb_init_prefix: memb_init_postfix
 				| 						        GREEN_GRASS_OP memb_init_prefix	{ $$ = vn->OnGrass($2); }
 				| 					               NEGATION_OP memb_init_prefix	{ $$ = vn->OnNegation($2); }
-				| vn_prefix
-				| 					     RES_STAR_IN_RECORD memb_init_prefix { $$ = vn->OnStar($2); }
-				| 					   RES_STAR_IN_COMPOUND memb_init_prefix { $$ = vn->OnStar($2); }
-				| 					      RES_STAR_IN_OTHER memb_init_prefix { $$ = vn->OnStar($2); }
+				| 					    	   RESTRICTED_STAR memb_init_prefix { $$ = vn->OnStar($2); }
+				| vn_disloc_prefix
 			
 memb_init_postfix	: memb_init_primary
 					| memb_init_primary '(' expr_boot ')'						{ $$ = vn->OnMemberInitialiser($1, @2, $3, @3); } 
@@ -497,10 +491,8 @@ param_prefix: param_primary
 			| 						      POINTER_IS_OP param_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	param_prefix	{ $$ = vn->OnNegation($2); }
 			|                        PRERESTRICT_NORMAL param_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			| vn_prefix
-			| 					     RES_STAR_IN_RECORD param_prefix { $$ = vn->OnStar($2); }
-			| 					   RES_STAR_IN_COMPOUND param_prefix { $$ = vn->OnStar($2); }
-			| 					      RES_STAR_IN_OTHER param_prefix { $$ = vn->OnStar($2); }
+			| 					        RESTRICTED_STAR param_prefix	{ $$ = vn->OnStar($2); }
+			| vn_disloc_prefix
                          
 param_primary	: vn_primary              
 				| '(' parameter ')' { $$ = $2; }
@@ -715,10 +707,8 @@ expr_prefix : expr_postfix
 			|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 			|                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|        		     prerestrict_decl_start expr_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax?
-			| vn_prefix // TODO rename to eg dislocating_prefix
-			| 					     RES_STAR_IN_RECORD expr_prefix { $$ = vn->OnStar($2); }
-			| 					   RES_STAR_IN_COMPOUND expr_prefix { $$ = vn->OnStar($2); }
-			| 					      RES_STAR_IN_OTHER expr_prefix { $$ = vn->OnStar($2); }
+			| 					        RESTRICTED_STAR expr_prefix { $$ = vn->OnStar($2); }
+			| vn_disloc_prefix 
 			
 // Postfix operators are treated like method calls, operand is regarded as object
 expr_postfix: expr_primary     
@@ -855,9 +845,10 @@ type_prefix : type_postfix
 			|                     		   PRERESTRICT_TYPE type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|                          		   TYPE_INDICATOR typalised { $$ = $2; }
 
+// Things that are not obviously types, and have to be indicated as such using ⍑
 typalised	: vn_wildcard
 			| '(' type_id ')'											{ $$ = $2; }
-			| vn_prefix
+			| vn_disloc_prefix
 
 type_postfix: type_for_declarator
 		   
@@ -889,10 +880,9 @@ type_specifier_seq	: TYPE_SPECIFIER											{ $$.insert($1); }
                                                                               
 //////////////////////////////// VIDA NOVA ////////////////////////////////////         
 
-// Common prefix operators for relocating agents and non-locating incl. builders. These can go from anywhere to anywhere
-// so they generally end at unified.
-// Also pre-restrictions although unsure about these, maybe they should be in specific places plus unified but not here? TODO
-vn_prefix		:  						        stuff_op_scope unified_prefix { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
+// General dislocating prefix. Takes us out of the current column, so doesn't need to refer back
+// directly, instead will go through unified.
+vn_disloc_prefix:  						        stuff_op_scope unified_prefix { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				|                       restricted_stuff_scope unified_prefix { $$ = vn->OnStuff($2, $1, VN::Limit()); }
 				|                            depth_stuff_scope unified_prefix { $$ = vn->OnStuff($2, nullptr, $1); }
 
@@ -902,9 +892,7 @@ vn_primary 		: DESIGNATED_NORMAL
 				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 
 // Keep this long-hand for symmetry with versions that only allow eg ..._IN_RECORD
-vn_wildcard 	: STAR_IN_RECORD									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_COMPOUND									{ $$ = vn->OnStar(nullptr); }
-				| STAR_IN_OTHER										{ $$ = vn->OnStar(nullptr); }
+vn_wildcard 	: STAR												{ $$ = vn->OnStar(nullptr); }
 				| ANY_NODE_IN_RECORD								{ $$ = nullptr; }
 				| ANY_NODE_IN_COMPOUND								{ $$ = nullptr; }
 				| ANY_NODE_IN_OTHER									{ $$ = nullptr; }				
