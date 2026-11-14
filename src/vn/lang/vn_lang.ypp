@@ -277,8 +277,8 @@ script_command	: ENGINE_COMMAND unified_element   		 	{ $$ = make_shared<VN::Eng
 				| ATTRIBUTE_COMMAND		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
-designation_command	: new_vn_name DESIGNATE_COMMAND normal_element		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
-					| new_vn_name DESIGNATE_COMMAND normal_star		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
+designation_command	: new_vn_name DESIGNATE_COMMAND normal_clause		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
+					| new_vn_name DESIGNATE_COMMAND normal_star			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
 					| new_vn_name DESIGNATE_COMMAND type_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
 					| new_vn_name DESIGNATE_COMMAND qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
 					| new_vn_name DESIGNATE_COMMAND ACC_NODE_KEYWORD	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_ACCESS); }
@@ -312,12 +312,6 @@ unified_element	: normal_element
 				| type_entry
 				| qualifier_node		
 				| PREPROCESSOR_ID_SIGN	
-				| normal_star
-
-normal_star		: STAR											{ $$ = vn->OnStar(nullptr); } // expressional intention			
-				| STAR ';'										{ $$ = vn->OnStar(nullptr); } // statemental intention
-				| 					RESTRICTED_STAR normal_clause { $$ = vn->OnStar($2); }
-
 
 unified_prefix	: expr_prefix
 				| type_prefix
@@ -578,8 +572,13 @@ normal_boot		: normal_element
 normal_commands	: normal_element COMMAND_TERM commands			{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 
 normal_element	: normal_clause
+				| normal_star
 
-normal_clause		: normal_conj
+normal_star		: STAR											  { $$ = vn->OnStar(nullptr); } // expressional intention			
+				| STAR ';'										  { $$ = vn->OnStar(nullptr); } // statemental intention
+				| 					RESTRICTED_STAR normal_clause { $$ = vn->OnStar($2); }
+
+normal_clause	: normal_conj
 				| normal_clause DISJUNCTION_OP normal_conj		{ $$ = vn->OnDisjunction($1, $3); }
 
 normal_conj 	: normal       
