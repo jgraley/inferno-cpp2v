@@ -78,10 +78,14 @@ string DisjunctionAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax
 {
 	(void)surround_prod;
 
+	Syntax::Production elt_prod = IsStatemental() ? 
+	                              Syntax::Production::VN_DISJUNCTION_SEMICOLON : 
+	                              Syntax::Production::VN_DISJUNCTION;
+
 	// Commutative and associative so don't boost productions
 	list<string> ls;
 	for( const TreePtrInterface &p : GetDisjuncts() )                 
-		ls.push_back( renderer->DoRenderPreserve( (TreePtr<Node>)p, Syntax::Production::VN_DISJUNCTION, policy ) );
+		ls.push_back( renderer->DoRenderPreserve( (TreePtr<Node>)p, elt_prod, policy ) );
 
 	return Join(ls, " ∨ ");
 }    

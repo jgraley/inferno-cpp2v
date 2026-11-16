@@ -67,6 +67,18 @@ list<PatternLink> AgentCommon::GetVisibleChildren( Path v ) const
 }
 
 
+list<PatternLink> AgentCommon::GetAutolocatedChildren() const 
+{
+	return {};
+}
+
+
+bool AgentCommon::IsStatemental() const
+{
+	return false;
+}
+
+
 shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
 {    
     return make_shared<DecidedQuery>( GetPatternQuery() );

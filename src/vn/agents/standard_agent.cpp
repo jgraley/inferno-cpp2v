@@ -190,6 +190,14 @@ string StandardAgent::Plan::GetTrace() const
     return algo->GetName() + ".plan" + algo->GetSerialString();
 }
 
+bool StandardAgent::IsStatemental() const
+{
+	TreePtr<Node> this_node = GetArchetypeNode();
+	return (TreePtr<CPPTree::Statement>::DynamicCast(this_node) && !TreePtr<CPPTree::Expression>::DynamicCast(this_node)) ||
+	       TreePtr<CPPTree::CodeUnit>::DynamicCast(this_node); // TODO duplicates Render::IsStatemental()
+}
+
+
 // ---------------------------- Pattern Query ----------------------------------                                               
 
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const

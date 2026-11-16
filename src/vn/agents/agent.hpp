@@ -90,6 +90,9 @@ public:
     
     virtual list<PatternLink> GetChildren() const = 0;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const = 0;                        
+    virtual list<PatternLink> GetAutolocatedChildren() const = 0;                        
+    virtual bool IsStatemental() const = 0;
+
     virtual bool ShouldGenerateCategoryClause(const TreePtrInterface *tpi) const = 0;                                
 
 	virtual Syntax::Production GetAgentProduction( const VN::RendererInterface *renderer, Syntax::Policy policy ) const = 0;

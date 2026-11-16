@@ -97,6 +97,7 @@ Syntax::Production Statement::GetMyProductionTerminal() const
 	return Production::BARE_STMT_DECL;
 }
 
+
 string Statement::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return renderer->DoRenderSignifier(this, policy);
@@ -469,7 +470,7 @@ TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, Location l
 
 Syntax::Production Uncombable::GetMyProductionTerminal() const
 {
-	return Production::BARE_STMT_DECL;
+	return Production::PRIMARY_EXPR;
 }
 
 
@@ -481,7 +482,7 @@ string Uncombable::GetRender( VN::RendererInterface *renderer, Production, Polic
 
 Syntax::Token Uncombable::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_SIMPLE_STMT_SIGN;
+	return YY::VNLangParser::token::TOK_PRIMARY_EXPR_SIGN;
 }
 
 //////////////////////////// SpecificIdentifier ///////////////////////////////
@@ -1444,7 +1445,7 @@ Syntax::Token Resource::GetSignifierToken() const
 
 Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *renderer, Policy policy) const
 { 	
-	if( !dynamic_pointer_cast<Declaration>(policy.pointer_archetype) )
+	if( !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
 		return Production::PREFIX;	
 
 	return Resource::GetMyProduction(renderer, policy);
@@ -1853,7 +1854,7 @@ TreePtr<Node> LabelDeclaration::OnIdentifier( TreePtr<Node> id, Location loc )
 Syntax::Token LabelDeclaration::GetExplicitToken() const
 {
 	// LabelDeclaration parses more like a statemant etc so override Declaration::GetExplicitToken()
-	return YY::VNLangParser::token::TOK_EXPLICIT_NORMAL;
+	return YY::VNLangParser::token::TOK_EXPLICIT_STMT;
 }
 
 
@@ -3382,10 +3383,8 @@ string For::GetRender( VN::RendererInterface *renderer, Production, Policy polic
 {
 	return renderer->DoRenderSignifier(this, policy) + 
 	       "( " +
-		   renderer->DoRender( &initialisation, Production::BOTTOM_EXPR, policy ) +
-		   "; " +
-		   renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
-		   "; " +
+		   renderer->DoRender( &initialisation, Production::STMT_DECL_LOW, policy ) +
+		   renderer->DoRender( &condition, Production::STMT_DECL_LOW, policy ) +
 		   renderer->DoRender( &increment, Production::BOTTOM_EXPR, policy ) +
 		   " )\n" +
 		   renderer->DoRender( &body, Production::STMT_DECL, policy );
@@ -3751,6 +3750,11 @@ string MacroStatement::GetRender( VN::RendererInterface *renderer, Production, P
 Syntax::Token MacroStatement::GetSignifierToken() const
 {
 	throw UnimplementedToken();
+}
+
+Syntax::Token MacroStatement::GetExplicitToken() const
+{
+	return YY::VNLangParser::token::TOK_EXPLICIT_NORMAL;
 }
 
 //////////////////////////// PreProcDecl ///////////////////////////////

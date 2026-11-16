@@ -47,10 +47,14 @@ string ConjunctionAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax
 {
 	(void)surround_prod;
 
+	Syntax::Production elt_prod = IsStatemental() ? 
+	                              Syntax::Production::VN_CONJUNCTION_SEMICOLON : 
+	                              Syntax::Production::VN_CONJUNCTION;
+	
 	// Commutative and associative so don't boost productions
 	list<string> ls;
 	for( const TreePtrInterface &p : GetConjuncts() )                 
-		ls.push_back( renderer->DoRenderPreserve( (TreePtr<Node>)p, Syntax::Production::VN_CONJUNCTION, policy ) );
+		ls.push_back( renderer->DoRenderPreserve( (TreePtr<Node>)p, elt_prod, policy ) );
 	return Join(ls, " ∧ ");
 }    
     

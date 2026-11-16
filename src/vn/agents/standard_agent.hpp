@@ -101,6 +101,7 @@ public:
         list<Singular> singulars;
     };
     
+    bool IsStatemental() const override;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     void IncrPatternQuerySequence( const Plan::Sequence &plan_seq, 
                                    shared_ptr<PatternQuery> &pattern_query ) const;

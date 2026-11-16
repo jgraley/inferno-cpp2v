@@ -90,6 +90,10 @@ string EmbeddedSCRAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax
 	if( search_pattern!=replace_pattern || is_search )	
 		return "😦"; // Should have done pattern transformations to get rid of this
 
+	Syntax::Production through_prod = IsStatemental() ? 
+	                                  Syntax::Production::VN_SEP_SCRIPTY_SEMICOLON : 
+	                                  Syntax::Production::VN_SEP_SCRIPTY;
+
 	// We must render the through pattern, but it isn't part of the embedded C&R operation,
 	// so we want it to look like it isn't part of this node. So, we add a separator and 
 	// render the ꩜ as if a prefix operator. When parsing, the ꩜ needs to have PREFIX
@@ -101,7 +105,7 @@ string EmbeddedSCRAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax
 	// Functional nesting i.e. chaining via stem should look like x⨟꩜(y⨟꩜z) which will 
 	// indent as required. If the ꩜<pattern> aere a production it would be at 
 	// Boost(VN_SEP_SCRIPTY) to get left-association.
-	return renderer->DoRenderPreserve( (TreePtr<Node>)(*GetThrough()), Syntax::Production::VN_SEP_SCRIPTY, policy ) + 
+	return renderer->DoRenderPreserve( (TreePtr<Node>)(*GetThrough()), through_prod, policy ) + 
 		   "⨟\n" +
 		   "꩜" + 
 		   renderer->DoRenderPreserve( search_pattern, Syntax::Production::PREFIX, policy ); // Left-associative 

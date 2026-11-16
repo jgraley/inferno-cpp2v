@@ -36,6 +36,46 @@ Render::Render( Syntax::Policy default_policy_, string output_x_path_ ) :
 }
 
 
+TreePtr<Node> Render::GetExampleAutolocatedNode(TreePtr<Node> node) const
+{
+	if( auto agent = Agent::TryAsAgentConst(node) )
+	{
+		if( dynamic_cast<const StandardAgent *>(agent) )
+			return node; // found a node 
+			
+		list<PatternLink> plinks = agent->GetAutolocatedChildren();
+		if( plinks.empty() )
+		{
+			// Nonlocating: there's nothing else to look at.
+			// Dislocating: could go anywhere, have to use the node
+			// Colocating: children will be wrong type
+			return node; 
+		}
+		// We really should check they're all matching, but by 
+		// picking the first we constain the problem by ensuring
+		// we only need to tolerate eg (right, wrong, wrong...)
+		// when tolerating misrenders
+		return GetExampleAutolocatedNode( plinks.front().GetPatternTreePtr() );
+	}
+	else
+	{
+		return node; // found a node 
+	}
+		
+}
+
+
+bool Render::IsStatemental(TreePtr<Node> node) const
+{
+	if( !node )
+		return false;
+	if( auto agent = Agent::TryAsAgentConst(node) )
+		return agent->IsStatemental();
+	return (TreePtr<CPPTree::Statement>::DynamicCast(node) && !TreePtr<CPPTree::Expression>::DynamicCast(node)) ||
+	       TreePtr<CPPTree::CodeUnit>::DynamicCast(node); // TODO duplicates StandardAgent::IsStatemental() 
+}
+
+
 string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering_for_render )
 {
     // Context is used for various lookups but does not need
@@ -207,6 +247,7 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 	
 	if( unique_coupling_names.contains(node) )			
 	{
+		// ------------- render a designation usage --------------
 		Syntax::Production node_prod;
 		try
 		{
@@ -217,7 +258,16 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 			node_prod = Syntax::Production::LONG_FORM_EXPLICIT; // Must have been designated as an explicit, see OnRefusalToRender()
 		}
 
+		if( ReadArgs::use.contains("c") )
+			s += SSPrintf("\n//%s Designation usage: node %s (%sstatemental), surround prod: %d, node prod: %d\n", 
+						  Tracer::GetPrefix().c_str(), 
+						  node ? Traceable::TypeIdName(*node).c_str() : "NULL", // No serial numbers because we diff these
+						  IsStatemental(node) ? "" : "not ",
+						  Syntax::GetPrecedence(surround_prod), 
+						  Syntax::GetPrecedence(node_prod) );		
+
 		s += unique_coupling_names.at(node);
+		
 		// These duplicate the accomodations partially: they depend on surround_prod but not the node. To 
 		// push them through the same functions, we should not provide the node as it's now irrelevent
 		// syntactially. Maybe pass node_prod in separately - this can be chosen to get the right accomodations
@@ -230,11 +280,31 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 				s = "\n" + s; // more readable with newline before initialiser when initialiser is compound
 		}
 			
+		bool semicolon=false;
+		bool newline=false;
 		// See Instance::GetMyProduction()
-		if( (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
-             Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON)) ||
-             (surround_prod == Syntax::Production::DIRECT_INIT && node_prod == Syntax::Production::COMPOUND) )
-            s += ";\n";
+	    if( ( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
+			  Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) ) ||
+			surround_prod == Syntax::Production::VN_CONJUNCTION_SEMICOLON ||
+			surround_prod == Syntax::Production::VN_DISJUNCTION_SEMICOLON ||
+			surround_prod == Syntax::Production::BOOT_SEMICOLON ||
+			surround_prod == Syntax::Production::VN_SEP_SCRIPTY_SEMICOLON )
+        {
+			newline = true;
+            if( !IsStatemental(node) )
+				semicolon = true;
+		}
+			
+        // Syntax::GetPrecedence(node_prod) >= Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) &&
+        // node_prod != Syntax::Production::COMPOUND ) 
+             
+        if( surround_prod == Syntax::Production::DIRECT_INIT && node_prod == Syntax::Production::COMPOUND ) // TODO suspect
+            semicolon = true;
+            
+        if( semicolon )
+			s += ";\n";
+		if( newline )
+			s += "\n";
 		return s;
 	}
 	else
@@ -279,9 +349,10 @@ string Render::AccomodateInit( TreePtr<Node> node, Syntax::Production node_prod,
 	string s;
 
 	if( ReadArgs::use.contains("c") )
-		s += SSPrintf("\n//%s Node %s, surround prod: %d, node prod: %d\n", 
+		s += SSPrintf("\n//%s Node %s (%sstatemental), surround prod: %d, node prod: %d\n", 
 					  Tracer::GetPrefix().c_str(), 
-					  node ? Traceable::TypeIdName(*node).c_str() : "NULL", // No serial numbers because we diff these
+					  node ? Trace(node).c_str() : "NULL", // No serial numbers because we diff these
+					  IsStatemental(node) ? "" : "not ",					  
 					  Syntax::GetPrecedence(surround_prod), 
 					  Syntax::GetPrecedence(node_prod) );		
 
@@ -311,7 +382,32 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod,
 		
     if( !(Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod)) )
 		return s + AccomodateSemicolon( node, node_prod, surround_prod, policy );
-
+        
+	Syntax::Production inner_surround_prod = Syntax::Production::BOOT;
+	string newname = "BOOT";
+	bool outer_semicolon = false;
+	if( ( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
+		  Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) ) ||
+		surround_prod == Syntax::Production::VN_CONJUNCTION_SEMICOLON ||
+		surround_prod == Syntax::Production::VN_DISJUNCTION_SEMICOLON ||
+		surround_prod == Syntax::Production::BOOT_SEMICOLON ||
+		surround_prod == Syntax::Production::VN_SEP_SCRIPTY_SEMICOLON)
+	{
+		if( node_prod == Syntax::Production::VN_SEP_SCRIPTY ||
+			node_prod == Syntax::Production::VN_CONJUNCTION ||
+			node_prod == Syntax::Production::VN_DISJUNCTION ||
+			node_prod == Syntax::Production::BOOT )  // do these outside parens
+		{
+			// Adding ; inside the parens would only affect the last of the commands.
+			outer_semicolon = !IsStatemental(node);
+		}
+		else
+		{
+			inner_surround_prod = Syntax::Production::BOOT_SEMICOLON;
+			newname="BOOT_SEMICOLON";
+		}	
+	}
+    
     switch(node_prod)
     {
         case Syntax::Production::BOOT...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
@@ -329,7 +425,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod,
 					  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 					  
 				if( ReadArgs::use.contains("c") )
-					s += SSPrintf("\n//%s Booting statement, surround prod to BOTTOM_STMT_DECL\n", Tracer::GetPrefix().c_str());
+					s += SSPrintf("\n//%s Booting statement, surround prod to BOOT\n", Tracer::GetPrefix().c_str());
 					
 				return s + "{\n " + 
 					   AccomodateSemicolon( node, node_prod, Syntax::Production::BOOT, policy ) +	
@@ -345,17 +441,16 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod,
 				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 					  
 			if( ReadArgs::use.contains("c") )
-				s += SSPrintf("\n//%s Booting expression, surround prod to BOTTOM_EXPR\n",
-							  Tracer::GetPrefix().c_str());
-
+				s += SSPrintf("\n//%s Booting expression, surround prod to %s\n",
+							  Tracer::GetPrefix().c_str(),
+							  newname.c_str());
+				
             s += "( " +
-				   AccomodateSemicolon( node, node_prod, Syntax::Production::BOOT, policy ) +
-				   " )";            
-				   
-			// Node prod is now effectively PARENTHESISED... do we now need a semicolon?
-			if( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
-				Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) )
-				s += ";\n";		
+				   AccomodateSemicolon( node, node_prod, inner_surround_prod, policy ) +
+				   " )";            				  
+
+			if( outer_semicolon )
+				s += ";";
 			
 			return s;
         
@@ -373,25 +468,39 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_
     // used to change the render of a certain subtree. It represents all the ancestor nodes of
     // the one supplied.
 		
-	bool semicolon = false;					 		    
-    if( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
-        Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) &&
-        Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) &&
-        node_prod != Syntax::Production::COMPOUND )
-    {
-		explain += SSPrintf("\n//%s Adding semicolon, reason 1, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
-		semicolon = true;		
-    }
+	bool semicolon = false;				
+	bool newline=false;
+	 		    
+	// Reason 1: something not statemental in a statemental surrounding
+    if( ( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
+          Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) ) ||
+        surround_prod == Syntax::Production::VN_CONJUNCTION_SEMICOLON ||
+        surround_prod == Syntax::Production::VN_DISJUNCTION_SEMICOLON ||
+        surround_prod == Syntax::Production::BOOT_SEMICOLON ||
+        surround_prod == Syntax::Production::VN_SEP_SCRIPTY_SEMICOLON)
+    {        
+		newline = true;
+		if( node_prod != Syntax::Production::COMPOUND && // TODO drop this; nodes that say COMPOUND should be statemental
+			!IsStatemental(node) )
+		{
+			explain += SSPrintf("\n//%s Adding semicolon, reason 1, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
+			semicolon = true;		
+		}
+	}
         
+    // Reason 2: something statemental but too lazy to render its own ;
+    // TODO the outer if may be redundant
     if( (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) &&
          Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_EXPR)) ||
+        (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
+         Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON)) ||
         (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::BOTTOM_VN) &&
          Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_VN)) )
         if( Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) &&
 			Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) &&
 			node_prod != Syntax::Production::COMPOUND )
 		{
-			explain += SSPrintf("\n\\%s Adding semicolon, reason 2, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
+			explain += SSPrintf("\n//%s Adding semicolon, reason 2, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
 			semicolon = true;
 		}			
           
@@ -406,7 +515,9 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_
 	if( ReadArgs::use.contains("c") )
 		s += explain;	    
     if( semicolon )
-		s += ";\n";
+		s += ";";
+    if( newline )
+		s += "\n";
 	return s;             
 }
 

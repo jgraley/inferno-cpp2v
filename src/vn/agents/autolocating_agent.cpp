@@ -11,6 +11,25 @@ using namespace SYM;
 
 //---------------------------------- AutolocatingAgent ------------------------------------    
 
+list<PatternLink> AutolocatingAgent::GetAutolocatedChildren() const
+{
+	return GetChildren();
+}
+
+
+bool AutolocatingAgent::IsStatemental() const
+{
+	list<PatternLink> plinks = GetAutolocatedChildren();
+	list<bool> sml;
+	for( PatternLink plink : plinks )
+		sml.push_back( plink.GetChildAgent()->IsStatemental() );	
+	bool statemental = false;
+	for( bool sm : sml )
+		statemental |= sm;
+	return statemental;
+}
+
+
 Lazy<BooleanExpression> AutolocatingAgent::SymbolicNormalLinkedQuery(PatternLink keyer_plink) const
 {
     Lazy<BooleanExpression> my_expr = SYM::MakeLazy<SYM::BooleanConstant>(true);

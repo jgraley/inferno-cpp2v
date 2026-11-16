@@ -23,6 +23,9 @@ class AutolocatingAgent : public virtual AgentCommon, // names finalised in rule
 public:
     class PreRestrictionMismatch : public Mismatch {};
     class AutolocationMismatch : public Mismatch {};
+    
+    virtual list<PatternLink> GetAutolocatedChildren() const override;                        
+    bool IsStatemental() const override;
                                                  
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const override; 
     

@@ -38,6 +38,7 @@ public:
     class PreRestrictionMismatch : public Mismatch {};
     class NotASubcontainerMismatch : public Mismatch {};
 
+    bool IsStatemental() const override;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;                
     SYM::Lazy<SYM::BooleanExpression> SymbolicNormalLinkedQuery(PatternLink keyer_plink) const override;                                       
     virtual void RunRegenerationQueryImpl( DecidedQueryAgentInterface &query,

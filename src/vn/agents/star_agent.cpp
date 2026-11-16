@@ -2,6 +2,7 @@
 #include "../subcontainers.hpp" 
 #include "../search_replace.hpp" 
 #include "../scr_engine.hpp" 
+#include "../tree/cpptree.hpp"
 #include "link.hpp"
 #include "sym/symbol_operators.hpp"
 #include "sym/boolean_operators.hpp"
@@ -10,6 +11,18 @@
 
 using namespace VN;
 using namespace SYM;
+
+bool StarAgent::IsStatemental() const
+{
+	if( !restriction )
+		return false;
+	auto agent = TryAsAgentConst(restriction);
+	if( agent )
+		return agent->IsStatemental();
+	return (TreePtr<CPPTree::Statement>::DynamicCast(restriction) && !TreePtr<CPPTree::Expression>::DynamicCast(restriction)) ||
+	       TreePtr<CPPTree::CodeUnit>::DynamicCast(restriction); // TODO duplicates Render::IsStatemental() etc
+}
+
 
 shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 {

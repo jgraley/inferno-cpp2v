@@ -66,13 +66,18 @@ Syntax::Production DeltaAgent::GetAgentProduction( const VN::RendererInterface *
 string DeltaAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax::Production surround_prod, Syntax::Policy policy ) const
 {
 	(void)surround_prod;
+	
+	Syntax::Production elt_prod = IsStatemental() ? 
+	                              Syntax::Production::BOOT_SEMICOLON : 
+	                              Syntax::Production::BOOT;
+	
 	// We can use PREFIX for this because there's nothing in front of the ▲ unlike
 	// with c's ?: operator. The segment ▲...⯈ is a prefix to the overlay argument.
 	// As with ?: we can use BOOT for the through argument (it boots the parser).
 	// And we do, despite the asymmetry, because search and replace are different anyway
 	// with search much more likely to begin with ∧ or ∨.
-	string st = renderer->DoRenderPreserve( (TreePtr<Node>)(*GetThrough()), Syntax::Production::BOOT, policy );
-	string so = renderer->DoRenderPreserve( (TreePtr<Node>)(*GetOverlay()), Syntax::Production::BOOT, policy );
+	string st = renderer->DoRenderPreserve( (TreePtr<Node>)(*GetThrough()), elt_prod, policy );
+	string so = renderer->DoRenderPreserve( (TreePtr<Node>)(*GetOverlay()), elt_prod, policy );
 	//if( max(st.size(), so.size()) > Syntax::GetLineBreakThreshold() )
 		return "▲" + st + "\n⯈" + so + "\n⯇";
 	//else

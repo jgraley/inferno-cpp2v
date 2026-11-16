@@ -138,7 +138,7 @@ Syntax::Token Syntax::GetSignifierToken() const
 
 Syntax::Token Syntax::GetExplicitToken() const
 {
-	return YY::VNLangParser::token::TOK_EXPLICIT_NORMAL;
+	return YY::VNLangParser::token::TOK_EXPLICIT_NORMAL2;
 }
 
 

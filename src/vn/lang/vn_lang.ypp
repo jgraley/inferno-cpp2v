@@ -61,6 +61,13 @@
 	// See https://www.gnu.org/software/gettext/manual/gettext.html
 	#define _(String) (String)
 	#define N_(String) String 	
+	
+	string ToString(YY::VNLangParser::location_type loc)
+	{
+		stringstream ss;
+		ss << loc;
+		return ss.str();
+	}
 }
 
 %parse-param { YY::VNLangScanner& lexer }
@@ -133,13 +140,16 @@
 <wstring>   NEW_UNICODE_NAME 				_("Unicode name")
 <const ANDBlock *>	NODE_NAMESPACE			_("scope resolving name")
 <TreePtr<Node>>	DESIGNATED_NORMAL		_("designated statement")
+<TreePtr<Node>>	DESIGNATED_NORMAL2		_("designated expression")
 <TreePtr<Node>>	DESIGNATED_TYPE			_("designated type")
 <TreePtr<Node>>	DESIGNATED_CURRENT_RECORD_ID _("current record")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier")
 <TreePtr<Node>>	DESIGNATED_ACCESS		_("designated access spec")
-<TreePtr<Node>>	EXPLICIT_NORMAL			_("explicit statement/expression node name")
+<TreePtr<Node>>	EXPLICIT_NORMAL 		_("explicit statement node 2")
+<TreePtr<Node>>	EXPLICIT_NORMAL2		_("explicit expression node")
 <TreePtr<Node>>	EXPLICIT_TYPE			_("explicit type node")
 <TreePtr<Node>>	EXPLICIT_DECL			_("explicit declaration node")
+<TreePtr<Node>>	EXPLICIT_STMT			_("explicit statement node")
 <TreePtr<Node>>	EXPLICIT_QUAL			_("explicit qualifier node")
 <TreePtr<Node>>	EXPLICIT_MEMB_INIT		_("explicit member initialiser node name")
 <TreePtr<Node>>	PRERESTRICT_NORMAL		_("statement/expression pre-restriction")
@@ -192,13 +202,13 @@ stmt_high
 %type <TreePtr<Node>> 				type_clause type_conjunction
 %type <TreePtr<Node>> 				unified_boot unified_element unified_prefix 
 %type <TreePtr<Node>> 				arrival
-%type <TreePtr<Node>> 				statement bare_statement statement_nca control_stmt_sign       
+%type <TreePtr<Node>> 				stmt_primary stmt_parens stmt_prefix statement bare_statement statement_nca control_stmt_sign       
 %type <TreePtr<Node>> 				declaration declaration_na
 %type <TreePtr<Node>> 				declaration_np
-%type <TreePtr<Node>> 				bare_decl_param bare_initialiser
+%type <TreePtr<Node>> 				bare_decl_param bare_initialiser initialiser
 %type <TreePtr<Node>> 				prototype_param prototype_np
 %type <TreePtr<Node>> 				assign_init
-%type <TreePtr<Node>> 				compound_primary type_boot compound_prefix compound 
+%type <TreePtr<Node>> 				compound compound_prefix compound_primary type_boot 
 %type <TreePtr<Node>> 				param_element parameter param_prefix param_primary
 %type <TreePtr<Node>> 				type_for_declarator 
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
@@ -209,14 +219,15 @@ stmt_high
 %type <TreePtr<Node>> 				base_element base
 %type <TreePtr<Node>> 				enum_node enum restricted_stuff_scope
 %type <TreePtr<Node>>				memb_init_boot memb_init_element memb_init_prefix memb_init_postfix memb_init_primary
-%type <TreePtr<Node>> 				enumerator prototype_enumerator
+%type <TreePtr<Node>> 				enumerator enum_element prototype_enumerator
 %type <TreePtr<Node>> 				declaring_type_id declaring_res_id declaring_st_res_id declaring_label_id
 %type <TreePtr<Node>> 				statement_element statement_clause statement_conj
 %type <TreePtr<Node>> 				map_arg_element map_arg 
 %type <TreePtr<Node>> 				argument_element argument
+%type <TreePtr<Node>> 				normal_boot2 normal_element2 normal_star2 normal_clause2 normal_conj2 normal2
 %type <wstring> 					new_vn_name
 %type <list<shared_ptr<VN::Command>>>	commands sep_commands  
-%type <list<shared_ptr<VN::Command>>>	expr_commands unified_commands normal_commands
+%type <list<shared_ptr<VN::Command>>>	expr_commands unified_commands normal_commands normal_commands2
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth depth_stuff_scope
 %type <VN::Itemisation>				itemisation items_bare items_sep
@@ -225,7 +236,7 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		stuff_op_scope
 %type <shared_ptr<VN::Gnomon>>		params_scope 
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
-%type <VN::NodeAndGnomon>			norm_full_explicit_start type_full_explicit_start decl_full_explicit_start qual_full_explicit_start mi_full_explicit_start
+%type <VN::NodeAndGnomon>			norm_full_explicit_start norm_full_explicit_start2 type_full_explicit_start decl_full_explicit_start stmt_full_explicit_start qual_full_explicit_start mi_full_explicit_start
 %type <VN::NodeAndGnomon>			record_scope enum_scope
 %type <list<TreePtr<Node>>>			statements  
 %type <list<TreePtr<Node>>>			enumerators
@@ -278,11 +289,13 @@ script_command	: ENGINE_COMMAND unified_element   		 	{ $$ = make_shared<VN::Eng
 
 // or here
 designation_command	: new_vn_name DESIGNATE_COMMAND normal_clause		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
+					| new_vn_name DESIGNATE_COMMAND normal_clause2		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL2); }
 					| new_vn_name DESIGNATE_COMMAND normal_star			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
+					| new_vn_name DESIGNATE_COMMAND normal_star2		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL2); }
 					| new_vn_name DESIGNATE_COMMAND type_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
 					| new_vn_name DESIGNATE_COMMAND qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
 					| new_vn_name DESIGNATE_COMMAND ACC_NODE_KEYWORD	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_ACCESS); }
-					| new_vn_name DESIGNATE_COMMAND PREPROCESSOR_ID_SIGN { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
+					| new_vn_name DESIGNATE_COMMAND PREPROCESSOR_ID_SIGN { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL2); }
 
 //////////////////////////////////// ITEMISATION ///////////////////////////////////////////
 // For explicit/built-in nodes mostly
@@ -309,11 +322,13 @@ unified_boot	: unified_element
 unified_commands: unified_element COMMAND_TERM commands				{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 
 unified_element	: normal_element
+				| normal_element2
 				| type_entry
 				| qualifier_node		
 				| PREPROCESSOR_ID_SIGN	
 
 unified_prefix	: expr_prefix
+				| stmt_prefix
 				| type_prefix
   
 //////////////////////////////// COMPOUND ////////////////////////////////////         
@@ -355,9 +370,9 @@ declaration_na	: bare_decl_param ';'
 				| declaration_np									
 
 // Declarations go straight to compound because statement is much too ambiguous.			
-declaration_np	: prototype_param compound								{ $$ = $1->OnInitialiser($2, @2); }			
-				| prototype_np compound									{ $$ = $1->OnInitialiser($2, @2); }			
-				| prototype_np ':' memb_inits compound					{ $$ = $1->OnMemberInits($3, @3); 
+declaration_np	: prototype_param initialiser							{ $$ = $1->OnInitialiser($2, @2); }			
+				| prototype_np initialiser								{ $$ = $1->OnInitialiser($2, @2); }			
+				| prototype_np ':' memb_inits initialiser				{ $$ = $1->OnMemberInits($3, @3); 
 																		  $$ = $1->OnInitialiser($4, @4); } 
 				| prototype_np ';'
 				| prototype_np bare_initialiser	';'						{ $$ = $1->OnInitialiser($2, @2); } 
@@ -368,9 +383,11 @@ declaration_np	: prototype_param compound								{ $$ = $1->OnInitialiser($2, @2
 
 bare_decl_param	: prototype_param
 				| prototype_param bare_initialiser					{ $$ = $1->OnInitialiser($2, @2); } // init would be a default on a parameter
+				
+initialiser		: compound
 					
 bare_initialiser: C_ASSIGN assign_init									{ $$ = $2; } 
-				| DESIGNATED_NORMAL		
+				| DESIGNATED_NORMAL2		
 				| INIT_SIGN							
 			
 // Note: C++ grammar allows to go directly into declarator, but we don't since we want to resolve "real" declarators 
@@ -392,8 +409,9 @@ prototype_np	: DESIGNATED_CURRENT_RECORD_ID st_declarator						{ $$ = vn->OnDecl
 
 assign_init		: expression
 				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser()->OnArgsList({}, @1+@2); } 
-				| '{' arguments '}'      							{ $$ = vn->OnArrayInitialiser()->OnArgsList($2, @2); }               
-			                                                                                                                   
+				| '{' arguments '}'      								{ $$ = vn->OnArrayInitialiser()->OnArgsList($2, @2); }               
+				| stmt_parens
+
 memb_inits	: memb_inits ',' memb_init_element							{ $$ = $1; $$.push_back($3); }
 			| memb_init_element											{ $$ = {$1}; }
 
@@ -415,7 +433,7 @@ memb_init_postfix	: memb_init_primary
 memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2; }
 					| DELTA_COMPARE_OP memb_init_boot DELTA_REPLACE_OP memb_init_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
 					| mi_full_explicit_start itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
-					| DESIGNATED_NORMAL
+					| DESIGNATED_NORMAL2
 					| vn_any_node
                      
 mi_full_explicit_start 	: EXPLICIT_MEMB_INIT						{ $$ = vn->MakeScopeGnomonForNode($1); 
@@ -519,13 +537,13 @@ record_scope    : RECORD_KEYWORD declaring_type_id        				{ $$ = { $1->OnIde
 bases			: base_element                                          	{ $$.push_back($1); } 
 				| bases ',' base_element									{ $$ = $1; $$.push_back($3); } 
       
-base_element		: base      
+base_element	: base      
 				| STAR													{ $$ = vn->OnStar(nullptr); }	
 				| 					               RESTRICTED_STAR base { $$ = vn->OnStar($2); }
 
 base			: type_specified										{ $$ = vn->OnBase($1); } 
 				| vn_any_node											{ $$ = $1; }
-				| DESIGNATED_NORMAL       				  				// To match a designated Star
+				| DESIGNATED_NORMAL2       				  				// To match a designated Star
 				| access_extras type_specified							{ $$ = vn->OnBase($1, $2, @$); }
                                                                                                                                                          				                      				                        
 //////////////////////////////// ACCESS ////////////////////////////////////                                  
@@ -551,10 +569,13 @@ enum_scope      : enum_node declaring_type_id       							{ $$ = { $1->OnIdenti
 																			  
 enum_node		: ENUM_KEYWORD												
                                                                                                                                                        
-enumerators		: enumerator												{ $$.push_back($1); }
-				| enumerators ',' enumerator 								{ $$ = $1; $$.push_back($3); }
+enumerators		: enum_element												{ $$.push_back($1); }
+				| enumerators ',' enum_element 								{ $$ = $1; $$.push_back($3); }
 
-// TODO Eventually to resemble the cyclic structure of declarations
+enum_element	: enumerator
+				| STAR										  	   			{ $$ = vn->OnStar(nullptr); }	
+				|              	         RESTRICTED_STAR enumerator 		{ $$ = vn->OnStar($2); }
+
 enumerator		: prototype_enumerator
 				| prototype_enumerator C_ASSIGN assign_init					{ $$ = $1->OnInitialiser($3, @3); } 
 
@@ -574,8 +595,7 @@ normal_commands	: normal_element COMMAND_TERM commands			{ $$ = $3; $$.push_fron
 normal_element	: normal_clause
 				| normal_star
 
-normal_star		: STAR											  { $$ = vn->OnStar(nullptr); } // expressional intention			
-				| STAR ';'										  { $$ = vn->OnStar(nullptr); } // statemental intention
+normal_star		: STAR ';'										  { $$ = vn->OnStar(nullptr); } // statemental intention
 				| 					RESTRICTED_STAR normal_clause { $$ = vn->OnStar($2); }
 
 normal_clause	: normal_conj
@@ -585,11 +605,30 @@ normal_conj 	: normal
 				| normal_conj CONJUNCTION_OP normal   			{ $$ = vn->OnConjunction($1, $3); }
 		
 normal    		: statement		
-				| expression						// Allow an expression without ;
-				| bare_decl_param					// Allow a parameter-stlye decl without ;				
 				| ANY_NODE_IN_OTHER ':'             	{ $$ = vn->OnLabel(nullptr, @1); }   // treat as label because an access spec on its own doesn't produce a node
 				| ANY_NODE_IN_OTHER ':' declaration_na 	{ $$ = $3->OnAccess(nullptr, @1); }  // treat as access because a label with another node would be two nodes
-				| ':' memb_init_boot ';'				{ $$ = $2; } // Sneak memb inits into the general grammar using a leading : and trailing semicolon
+				| ':' memb_init_element ';'				{ $$ = $2; } // Sneak memb inits into the general grammar using a leading : and trailing semicolon
+
+normal_boot2	: normal_element2 
+				| normal_commands2								{ $$ = vn->OnEmbeddedCommands($1); }
+
+normal_commands2: normal_element2 COMMAND_TERM commands			{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
+
+normal_element2	: normal_clause2
+				| normal_star2
+				
+normal_star2	: STAR											   { $$ = vn->OnStar(nullptr); } // expressional intention			
+				| 					RESTRICTED_STAR normal_clause2 { $$ = vn->OnStar($2); }
+
+normal_clause2	: normal_conj2
+				| normal_clause2 DISJUNCTION_OP normal_conj2		{ $$ = vn->OnDisjunction($1, $3); }
+
+normal_conj2 	: normal2       
+				| normal_conj2 CONJUNCTION_OP normal2   			{ $$ = vn->OnConjunction($1, $3); }
+				| normal_conj2 CONJUNCTION_OP normal   			{ $$ = vn->OnConjunction($1, $3); } // crossover TOLERATES MISRENDER
+		
+normal2    		: expression						// Allow an expression without ;
+				| bare_decl_param					// Allow a parameter-stlye decl without ;				
 
 
 // Disambiguating "wildcard:" when not in a record or compound scope: if on own, assume label; if preceding decl, assume access
@@ -612,9 +651,33 @@ statement_conj	: statement
 				| statement_conj CONJUNCTION_OP statement  		{ $$ = vn->OnConjunction($1, $3); }
 
 statement		: statement_nca												
-				| compound	
 				| arrival ':'											
-				| declaration			
+				| declaration		
+				| stmt_prefix	
+				| compound
+				
+stmt_prefix		: stmt_parens
+				| 						     GREEN_GRASS_OP stmt_prefix	{ $$ = vn->OnGrass($2); }
+				| 						      POINTER_IS_OP stmt_prefix	{ $$ = vn->OnPointerIs($2); }
+				| 					         	NEGATION_OP	stmt_prefix	{ $$ = vn->OnNegation($2); }
+				|                        PRERESTRICT_NORMAL stmt_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
+				|        		     prerestrict_decl_start stmt_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax?
+//				|        		     prerestrict_decl_start expr_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax? TOLERATES MISRENDER
+//				| vn_disloc_prefix
+						
+stmt_parens		: '(' normal_boot ')'					{ $$ = $2; }
+				| stmt_primary
+
+stmt_primary	: DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
+				| DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot2 DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } // crossover TOLERATES MISRENDER
+				| DELTA_COMPARE_OP normal_boot2 DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } // crossover TOLERATES MISRENDER
+				| DESIGNATED_NORMAL
+				| stmt_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
+				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
+				| norm_full_explicit_start itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
+			
+				
+
 			
 // Note: as of C++23, a compound statement CAN and in a label. So, we take the fully general 
 // approach here and parse a label (up to and including the :) as a full statement. No need
@@ -633,7 +696,7 @@ statement_nca	: bare_statement ';'
 				  %prec CONTROL_STMT_SIGN								{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5); }
 				| control_stmt_sign '(' semicolon_args ')' statement
 				  ELSE_KEYWORD statement									{ $$ = $1->OnArgsList($3, @3)->OnBody($5, @5)->OnElseBody($7, @6); }
-				| ';'														{ $$ = vn->OnNop(@1); }      
+				| ';'														{ $$ = vn->OnNop(@1); FTRACE("Warning nops!!!!\n")(ToString(@1))("\n"); }      
 // ';' producing Nop is too confusing when debugging. Nops change behaviour, for example causing patterns to not match.
 // Nops to be rendered and parsed as short-form explicit
 
@@ -646,8 +709,10 @@ bare_statement	: SIMPLE_STMT_SIGN
 control_stmt_sign 	: CONTROL_STMT_SIGN
 					| WHILE_KEYWORD
 						
+// Generalised to: 0 or more statements followed by an expression. TODO tighten up eg disallow compound? 	
+// TODO designates statements will have to appear without trailing ; which is slightly distressing. Maybe allow deignation of bare_statement/bare_declaration?					
 semicolon_args	: expression												{ $$.push_back($1); }
-				| semicolon_args ';' expression								{ $$ = $1; $$.push_back($3); }
+				| statement semicolon_args									{ $$ = $2; $$.push_front($1); }
 
 //////////////////////////////// EXPRESSIONS ////////////////////////////////////         
 
@@ -720,10 +785,7 @@ expr_prefix : expr_postfix
 			| 						      POINTER_IS_OP expr_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
 			|                        PRERESTRICT_NORMAL expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|                          BUILD_SIZE_OP unified_prefix { $$ = vn->OnBuildSize($2); }
-			|                           STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 			|                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|        		     prerestrict_decl_start expr_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax?
 			| vn_disloc_prefix 
 			
 // Postfix operators are treated like method calls, operand is regarded as object
@@ -747,7 +809,7 @@ expr_primary: id_extras
 			| INIT_SIGN
 			
 norm_primary	: vn_primary
-				| '(' normal_boot ')'                       			{ $$ = $2; }
+				| '(' normal_boot2 ')'                       			{ $$ = $2; }
 				| vn_any_node
 			
 prerestrict_decl_start : PRERESTRICT_DECL     				    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
@@ -805,7 +867,7 @@ id_parens	: id_primary
 id_primary  : id_extras
 			| vn_primary
 
-id_extras	: norm_full_explicit_start itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
+id_extras	: norm_full_explicit_start2 itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| NORMAL_ID_SIGN	  			
 			| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } 
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
@@ -828,7 +890,7 @@ map_arg_element	: map_arg
 							
 map_arg			: id_prefix MAP_ARG_OP expr_no_comma_op			{ $$ = vn->OnIdValuePair()->OnArgsList({$1, $3}, @$); }
 				| vn_any_node
-				| DESIGNATED_NORMAL
+				| DESIGNATED_NORMAL2
 								
 arguments		: argument_element								{ $$.push_back($1); }
 				| arguments ',' argument_element				{ $$ = $1; $$.push_back($3); }			
@@ -913,11 +975,13 @@ type_specifier_seq	: TYPE_SPECIFIER											{ $$.insert($1); }
 vn_disloc_prefix:  						        stuff_op_scope unified_prefix { $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				|                       restricted_stuff_scope unified_prefix { $$ = vn->OnStuff($2, $1, VN::Limit()); }
 				|                            depth_stuff_scope unified_prefix { $$ = vn->OnStuff($2, nullptr, $1); }
+				|                  			  BUILD_SIZE_OP DESIGNATED_NORMAL { $$ = vn->OnBuildSize($2); }
+				|                  		     BUILD_SIZE_OP DESIGNATED_NORMAL2 { $$ = vn->OnBuildSize($2); }
+				|                                 STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 
-vn_primary 		: DESIGNATED_NORMAL
-				| DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); }
+vn_primary 		: DESIGNATED_NORMAL2
+				| DELTA_COMPARE_OP normal_boot2 DELTA_REPLACE_OP normal_boot2 DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
 				| TRANSFORM_NAME_NORMAL OPEN_VN unified_boot CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
-				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 
 // Keep this long-hand for symmetry with versions that only allow eg ..._IN_RECORD
 vn_any_node		: ANY_NODE_IN_RECORD								{ $$ = nullptr; }
@@ -925,6 +989,9 @@ vn_any_node		: ANY_NODE_IN_RECORD								{ $$ = nullptr; }
 				| ANY_NODE_IN_OTHER									{ $$ = nullptr; }				
 																				
 decl_full_explicit_start 	: EXPLICIT_DECL								{ $$ = vn->MakeScopeGnomonForNode($1); 
+																		  vn->AddGnomon($$.gnomon); }                                                                                  
+										
+stmt_full_explicit_start 	: EXPLICIT_STMT								{ $$ = vn->MakeScopeGnomonForNode($1); 
 																		  vn->AddGnomon($$.gnomon); }                                                                                  
 										
 //////////////////////////////// QUALIFIERS ////////////////////////////////////         
@@ -948,8 +1015,13 @@ qual_full_explicit_start : EXPLICIT_QUAL									{ $$ = vn->MakeScopeGnomonForNo
 
 //////////////////////////////////////// RECOGNISER GLUE /////////////////////////////////////////////
 
+norm_full_explicit_start2 : EXPLICIT_NORMAL2							{ $$ = vn->MakeScopeGnomonForNode($1); 
+																	  vn->AddGnomon($$.gnomon); }
+
 norm_full_explicit_start : EXPLICIT_NORMAL							{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
+
+
 
 new_vn_name		: NEW_UNICODE_NAME    						
 				| NEW_ASCII_NAME								{ $$ = ToUnicode($1); }     										      

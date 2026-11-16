@@ -19,6 +19,8 @@ public:
     virtual void SCRConfigure( Phase phase );
     virtual list<PatternLink> GetChildren() const override;
     virtual list<PatternLink> GetVisibleChildren( Path v ) const override;
+    virtual list<PatternLink> GetAutolocatedChildren() const override;                        
+    bool IsStatemental() const override;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;                                    
                                   
     SYM::Lazy<SYM::BooleanExpression> SymbolicQuery( PatternLink keyer, const set<PatternLink> &residuals, bool coupling_only ) const override;                                       

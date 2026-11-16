@@ -1873,6 +1873,7 @@ struct MacroStatement : Statement
    	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy );
 	Token GetSignifierToken() const override;
+	Token GetExplicitToken() const override;
 };
 
 
