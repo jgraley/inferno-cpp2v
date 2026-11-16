@@ -28,7 +28,6 @@ public:
     Render( string output_x_path_ = string() );
     Render( Syntax::Policy default_policy_, string output_x_path_ = string() );
 	
-	TreePtr<Node> GetExampleAutolocatedNode(TreePtr<Node> node) const;
 	bool IsStatemental(TreePtr<Node> node) const;
     
     string RenderToString( shared_ptr<VN::CompareReplace> pattern, bool lowering_for_render );

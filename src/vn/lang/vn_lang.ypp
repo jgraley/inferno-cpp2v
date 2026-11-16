@@ -179,6 +179,7 @@
 <TreePtr<Node>> TYPE_SIGN				_("type signifier")
 <TreePtr<Node>> TYPE_W_ARGS_SIGN		_("type with arguments signifier")
 <TreePtr<Node>> COMPOUND_SIGN			_("compound signifier") // not really C/C++
+<TreePtr<Node>> STMT_EXPR_SIGN			_("statement expression") // not really C/C++
 <TreePtr<Node>> RESOURCE_SIGN			_("resource signifier") // unifies functions and cons/destructors
 <TreePtr<Node>> NORMAL_ID_SIGN			_("identifier signifier") 
 <TreePtr<Node>> PREPROCESSOR_ID_SIGN	_("preprocessor identifier signifier") 
@@ -201,7 +202,7 @@ stmt_high
 %type <TreePtr<Node>> 				type_entry type_specified type_primary type_postfix type_prefix type_vn_prim 
 %type <TreePtr<Node>> 				type_clause type_conjunction
 %type <TreePtr<Node>> 				unified_boot unified_element unified_prefix 
-%type <TreePtr<Node>> 				arrival
+%type <TreePtr<Node>> 				arrival 
 %type <TreePtr<Node>> 				stmt_primary stmt_parens stmt_prefix statement bare_statement statement_nca control_stmt_sign       
 %type <TreePtr<Node>> 				declaration declaration_na
 %type <TreePtr<Node>> 				declaration_np
@@ -235,7 +236,7 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		designation_command 
 %type <shared_ptr<VN::Gnomon>>		stuff_op_scope
 %type <shared_ptr<VN::Gnomon>>		params_scope 
-%type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  
+%type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  stmt_expr_scope
 %type <VN::NodeAndGnomon>			norm_full_explicit_start norm_full_explicit_start2 type_full_explicit_start decl_full_explicit_start stmt_full_explicit_start qual_full_explicit_start mi_full_explicit_start
 %type <VN::NodeAndGnomon>			record_scope enum_scope
 %type <list<TreePtr<Node>>>			statements  
@@ -807,6 +808,8 @@ expr_primary: id_extras
 			| BOOL_LITERAL									
 			| PRIMARY_EXPR_SIGN							
 			| INIT_SIGN
+			| stmt_expr_scope '}'                					{ $$ = $1->scope_node; } 
+			| stmt_expr_scope statements '}'    		 			{ $$ = $1->scope_node->OnStatements($2, @2); }
 			
 norm_primary	: vn_primary
 				| '(' normal_boot2 ')'                       			{ $$ = $2; }
@@ -814,6 +817,8 @@ norm_primary	: vn_primary
 			
 prerestrict_decl_start : PRERESTRICT_DECL     				    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
                                                                   vn->AddGnomon($$); }		
+stmt_expr_scope	: STMT_EXPR_SIGN '{'							{ $$ = make_shared<VN::RegularScopeGnomon>($1); 
+																  vn->AddGnomon($$); }
 			
 //////////////////////////////// DECLARING IDS ////////////////////////////////////                 
 // Identifiers to use in C declaring constructs. We can designate here.

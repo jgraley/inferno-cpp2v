@@ -3075,8 +3075,8 @@ string Compound::GetKeyword( Policy ) const
 
 Syntax::Production StatementExpression::GetMyProductionTerminal() const
 { 
-	// SequentialScope wins
-	return SequentialScope::GetMyProductionTerminal();
+	// Expression wins
+	return Expression::GetMyProductionTerminal();
 }
 
 
@@ -3102,8 +3102,8 @@ string StatementExpression::GetRender( VN::RendererInterface *renderer, Producti
 
 Syntax::Token StatementExpression::GetSignifierToken() const
 {
-	// SequentialScope wins
-	return SequentialScope::GetSignifierToken();
+	// Expression wins
+	return YY::VNLangParser::token::TOK_STMT_EXPR_SIGN;
 }
 
 //////////////////////////// Return ///////////////////////////////

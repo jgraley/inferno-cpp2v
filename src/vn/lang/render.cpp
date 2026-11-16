@@ -36,35 +36,6 @@ Render::Render( Syntax::Policy default_policy_, string output_x_path_ ) :
 }
 
 
-TreePtr<Node> Render::GetExampleAutolocatedNode(TreePtr<Node> node) const
-{
-	if( auto agent = Agent::TryAsAgentConst(node) )
-	{
-		if( dynamic_cast<const StandardAgent *>(agent) )
-			return node; // found a node 
-			
-		list<PatternLink> plinks = agent->GetAutolocatedChildren();
-		if( plinks.empty() )
-		{
-			// Nonlocating: there's nothing else to look at.
-			// Dislocating: could go anywhere, have to use the node
-			// Colocating: children will be wrong type
-			return node; 
-		}
-		// We really should check they're all matching, but by 
-		// picking the first we constain the problem by ensuring
-		// we only need to tolerate eg (right, wrong, wrong...)
-		// when tolerating misrenders
-		return GetExampleAutolocatedNode( plinks.front().GetPatternTreePtr() );
-	}
-	else
-	{
-		return node; // found a node 
-	}
-		
-}
-
-
 bool Render::IsStatemental(TreePtr<Node> node) const
 {
 	if( !node )
@@ -400,7 +371,7 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod,
 					  
 				if( ReadArgs::use.contains("c") )
 					s += SSPrintf("\n//%s Booting statement, surround prod to BOOT\n", Tracer::GetPrefix().c_str());
-					
+				
 				return s + "{\n " + 
 					   AccomodateSemicolon( node, node_prod, Syntax::Production::BOOT, policy ) +	
 					   "}\n";         
@@ -465,8 +436,7 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_
         surround_prod == Syntax::Production::VN_SEP_SCRIPTY_SEMICOLON)
     {        
 		newline = true;
-		if( node_prod != Syntax::Production::COMPOUND && // TODO drop this; nodes that say COMPOUND should be statemental
-			!IsStatemental(node) )
+		if( !IsStatemental(node) )
 		{
 			explain += SSPrintf("\n//%s Adding semicolon, reason 1, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
 			semicolon = true;		
@@ -475,12 +445,12 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_
         
     // Reason 2: something statemental but too lazy to render its own ;
     // TODO the outer if may be redundant
-    if( (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) &&
-         Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_EXPR)) ||
+    if( (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::BOTTOM_VN) &&
+         Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_VN)) ||
         (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
          Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON)) ||
-        (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::BOTTOM_VN) &&
-         Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_VN)) )
+        (Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::BOTTOM_EXPR) &&
+         Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_EXPR)) )
         if( Syntax::GetPrecedence(node_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_NODE_SEMICOLON) &&
 			Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(Syntax::Production::TOP_STMT_DECL) &&
 			node_prod != Syntax::Production::COMPOUND )
