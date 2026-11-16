@@ -124,9 +124,16 @@ bool Syntax::IsXstructorIdentifier(const VN::RendererInterface *)
 	return false;
 }
 
+
 bool Syntax::IsDeclaredAsXstructor(TreePtr<Node>) const 
 { 
 	return false; 
+}
+
+
+bool Syntax::IsStatementalSyntax() const
+{
+	return false;
 }
 
 

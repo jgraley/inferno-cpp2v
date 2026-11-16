@@ -71,8 +71,7 @@ bool Render::IsStatemental(TreePtr<Node> node) const
 		return false;
 	if( auto agent = Agent::TryAsAgentConst(node) )
 		return agent->IsStatemental();
-	return (TreePtr<CPPTree::Statement>::DynamicCast(node) && !TreePtr<CPPTree::Expression>::DynamicCast(node)) ||
-	       TreePtr<CPPTree::CodeUnit>::DynamicCast(node); // TODO duplicates StandardAgent::IsStatemental() 
+	return node->IsStatementalSyntax(); 
 }
 
 

@@ -92,6 +92,11 @@ Syntax::Production Uninitialised::GetMyProductionTerminal() const
 
 //////////////////////////// Statement ///////////////////////////////
 
+bool Statement::IsStatementalSyntax() const
+{
+	return true;
+}
+
 Syntax::Production Statement::GetMyProductionTerminal() const
 {
 	return Production::BARE_STMT_DECL;
@@ -110,6 +115,12 @@ Syntax::Token Statement::GetSignifierToken() const
 }
 
 //////////////////////////// Expression ///////////////////////////////
+
+bool Expression::IsStatementalSyntax() const
+{
+	return false;
+}
+
 
 Syntax::Production Expression::GetMyProductionTerminal() const
 {
@@ -358,10 +369,17 @@ TreePtr<Node> DeclScope::OnMembers( list<TreePtr<Node>> members_, Location )
 
 //////////////////////////// CodeUnit ///////////////////////////////
 
+bool CodeUnit::IsStatementalSyntax() const
+{
+	return true;
+}
+
+
 Syntax::Production CodeUnit::GetMyProductionTerminal() const
 {
 	return Production::PROGRAM;
 }
+
 
 string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy )
 {
@@ -1818,13 +1836,6 @@ string LabelDeclaration::GetRender( VN::RendererInterface *renderer, Production,
 {
 	Policy id_policy = policy;
 	id_policy.resolve_identifier_scope = false;
-	// Two reasons to add the semicolon at the end:
-	// 1. C syntax: a label at the end of a compound would otherwise render as a label 
-	//    without a statement which is not allowed, see https://alx71hub.github.io/hcb/#labeled-statement 
-	// 2. The parser rules for labels must be symmetrical to those for access specs
-	//    and the latter are tightly bound to declarations so that we can for example
-	//    change the access in a delta pattern. The ; gets around this by making the 
-	//    label a complete statement.
 	string s = renderer->DoRenderSignifier(this, policy);
 	if( !s.empty() )
 		s += " ";
@@ -1860,7 +1871,7 @@ Syntax::Token LabelDeclaration::GetExplicitToken() const
 
 Syntax::Token LabelDeclaration::GetPrerestrictToken() const
 {
-	// LabelDeclaration parses more like a statement etc so override Declaration::GetExplicitToken()
+	// LabelDeclaration parses more like a statement etc so override Declaration::GetPrerestrictToken()
 	return YY::VNLangParser::token::TOK_PRERESTRICT_NORMAL;
 }
 

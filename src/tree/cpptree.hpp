@@ -87,6 +87,7 @@ struct Statement : virtual Node
 {
 	NODE_FUNCTIONS
     virtual string GetColour() const { return "/set28/2"; }    
+    bool IsStatementalSyntax() const override;
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
    	Token GetSignifierToken() const override;
@@ -100,6 +101,7 @@ struct Expression : virtual Statement,
 { 
     NODE_FUNCTIONS 
     virtual string GetColour() const { return "/set28/6"; }    
+    bool IsStatementalSyntax() const override;
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
    	Token GetSignifierToken() const override;
@@ -190,6 +192,7 @@ struct DeclScope : virtual Scope
 struct CodeUnit : DeclScope 
 { 
 	NODE_FUNCTIONS_FINAL
+    bool IsStatementalSyntax() const override;
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
 	TreePtr<Node> CreateDeclNode(bool static_keyword_specified, Location loc) const override; 

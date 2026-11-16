@@ -198,6 +198,7 @@ public:
     virtual TreePtr<Node> TryGetDeclarer(const VN::RendererInterface *renderer);
 	virtual	bool IsXstructorIdentifier(const VN::RendererInterface *renderer); 
     virtual bool IsDeclaredAsXstructor(TreePtr<Node>) const;
+    virtual bool IsStatementalSyntax() const;
 
 	// Use std::any for dep breaking at the include level
 	typedef any Token;
