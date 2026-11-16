@@ -193,7 +193,6 @@ stmt_high
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expression 
-%type <TreePtr<Node>> 				expr_element expr_conjunction expr_clause expr_boot 
 %type <TreePtr<Node>> 				id_primary id_boot id_clause id_conjunction id_prefix id_parens id_extras
 %type <TreePtr<Node>> 				alt_stmt_star
 %type <TreePtr<Node>> 			    access_wildcard access_primary
@@ -224,10 +223,10 @@ stmt_high
 %type <TreePtr<Node>> 				statement_element statement_clause statement_conj
 %type <TreePtr<Node>> 				map_arg_element map_arg 
 %type <TreePtr<Node>> 				argument_element argument
-%type <TreePtr<Node>> 				alt_expr_boot alt_expr_element alt_expr_star alt_expr_clause alt_expr_conj alt_expr
+%type <TreePtr<Node>> 				expression_boot expression_element expression_star expression_clause expression_conj generalised_expr
 %type <wstring> 					new_vn_name
 %type <list<shared_ptr<VN::Command>>>	commands sep_commands  
-%type <list<shared_ptr<VN::Command>>>	expr_commands unified_commands alt_stmt_commands alt_expr_commands
+%type <list<shared_ptr<VN::Command>>>	unified_commands alt_stmt_commands expression_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth depth_stuff_scope
 %type <VN::Itemisation>				itemisation items_bare items_sep
@@ -289,9 +288,9 @@ script_command	: ENGINE_COMMAND unified_element   		 	{ $$ = make_shared<VN::Eng
 
 // or here
 designation_command	: new_vn_name DESIGNATE_COMMAND alt_stmt_clause		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
-					| new_vn_name DESIGNATE_COMMAND alt_expr_clause		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL2); }
+					| new_vn_name DESIGNATE_COMMAND expression_clause		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL2); }
 					| new_vn_name DESIGNATE_COMMAND alt_stmt_star			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL); }
-					| new_vn_name DESIGNATE_COMMAND alt_expr_star		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL2); }
+					| new_vn_name DESIGNATE_COMMAND expression_star		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_NORMAL2); }
 					| new_vn_name DESIGNATE_COMMAND type_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
 					| new_vn_name DESIGNATE_COMMAND qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
 					| new_vn_name DESIGNATE_COMMAND ACC_NODE_KEYWORD	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_ACCESS); }
@@ -322,7 +321,7 @@ unified_boot	: unified_element
 unified_commands: unified_element COMMAND_TERM commands				{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 
 unified_element	: alt_stmt_element
-				| alt_expr_element
+				| expression_element
 				| type_entry
 				| qualifier_node		
 				| PREPROCESSOR_ID_SIGN	
@@ -427,7 +426,7 @@ memb_init_prefix: memb_init_postfix
 				| vn_disloc_prefix
 			
 memb_init_postfix	: memb_init_primary
-					| memb_init_primary '(' expr_boot ')'						{ $$ = vn->OnMemberInitialiser($1, @2, $3, @3); } 
+					| memb_init_primary '(' expression_boot ')'						{ $$ = vn->OnMemberInitialiser($1, @2, $3, @3); } 
 					// TODO shouldn't need alt_stmt in C syntax, try expr_element
 					
 memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2; }
@@ -451,7 +450,7 @@ declarator_prefix	: declarator_postfix
 declarator_postfix	: declarator_primary
 					| declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2, Declarators::CVQuals()); }               
 					| declarator_postfix parameterisation qualifiers{ $$ = make_shared<Declarators::Function>($1, $2, vn->ExtractCVQuals($3)); } 
-					| declarator_postfix '[' expr_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
+					| declarator_postfix '[' expression_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
 					| declarator_postfix '[' ']'					{ $$ = make_shared<Declarators::Array>($1, MakeTreeNode<CPPTree::Uninitialised>()); } 
                 
 declarator_primary	: declaring_res_id									{ $$ = make_shared<Declarators::Concrete>($1); } 
@@ -469,7 +468,7 @@ st_declarator_prefix	: st_declarator_postfix
 st_declarator_postfix	: st_declarator_primary
 						| st_declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2, Declarators::CVQuals()); }               
 						| st_declarator_postfix parameterisation qualifiers { $$ = make_shared<Declarators::Function>($1, $2, vn->ExtractCVQuals($3)); } 
-						| st_declarator_postfix '[' expr_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
+						| st_declarator_postfix '[' expression_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
 						| st_declarator_postfix '[' ']'						{ $$ = make_shared<Declarators::Array>($1, MakeTreeNode<CPPTree::Uninitialised>()); } 
                 
 st_declarator_primary	: declaring_st_res_id  								{ $$ = make_shared<Declarators::Concrete>($1); } 
@@ -488,10 +487,10 @@ ab_declarator_prefix	: ab_declarator_postfix
 
 ab_declarator_postfix	: ab_declarator_postfix parameterisation			{ $$ = make_shared<Declarators::Function>($1, $2, Declarators::CVQuals()); }          
 ab_declarator_postfix	: ab_declarator_postfix parameterisation qualifiers	{ $$ = make_shared<Declarators::Function>($1, $2, vn->ExtractCVQuals($3)); }        
-						| ab_declarator_postfix '[' expr_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
+						| ab_declarator_postfix '[' expression_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
 						| parameterisation									{ $$ = make_shared<Declarators::Function>(nullptr, $1, Declarators::CVQuals()); }   
 						| parameterisation qualifiers						{ $$ = make_shared<Declarators::Function>(nullptr, $1, vn->ExtractCVQuals($2)); }   
-						| '[' expr_boot ']'									{ $$ = make_shared<Declarators::Array>(nullptr, $2); }                 		
+						| '[' expression_boot ']'									{ $$ = make_shared<Declarators::Array>(nullptr, $2); }                 		
 						| '[' ']'											{ $$ = make_shared<Declarators::Array>(nullptr, MakeTreeNode<CPPTree::Uninitialised>()); } 
 
 //////////////////////////////////////// PARAMETERS /////////////////////////////////////////////
@@ -589,7 +588,7 @@ alt_stmt_boot	: alt_stmt_element
 alt_stmt_commands	: alt_stmt_element COMMAND_TERM commands			{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 
 alt_stmt_element: alt_stmt_clause
-				//| alt_stmt_star
+				| alt_stmt_star
 
 alt_stmt_star	: STAR ';'										  { $$ = vn->OnStar(nullptr); } // statemental intention
 				| 					RESTRICTED_STAR alt_stmt_clause { $$ = vn->OnStar($2); }
@@ -606,28 +605,6 @@ alt_stmt    	: statement
 				| ANY_NODE_IN_OTHER ':' declaration_na 	{ $$ = $3->OnAccess(nullptr, @1); }  // treat as access because a label with another node would be two nodes
 				| ':' memb_init_element ';'				{ $$ = $2; } // Sneak memb inits into the general grammar using a leading : and trailing semicolon
 
-//////////////////////////////// ALT EXPRESSIONS ////////////////////////////////////                 
-
-alt_expr_boot	: alt_expr_element 
-				| alt_expr_commands								{ $$ = vn->OnEmbeddedCommands($1); }
-
-alt_expr_commands: alt_expr_element COMMAND_TERM commands			{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
-
-alt_expr_element: alt_expr_clause
-				| alt_expr_star
-				
-alt_expr_star	: STAR											   { $$ = vn->OnStar(nullptr); } // expressional intention			
-				| 					RESTRICTED_STAR alt_expr_clause { $$ = vn->OnStar($2); }
-
-alt_expr_clause	: alt_expr_conj
-				| alt_expr_clause DISJUNCTION_OP alt_expr_conj		{ $$ = vn->OnDisjunction($1, $3); }
-
-alt_expr_conj 	: alt_expr       
-				| alt_expr_conj CONJUNCTION_OP alt_expr   			{ $$ = vn->OnConjunction($1, $3); }
-		
-alt_expr    	: expression						// Allow an expression without ;
-				| bare_decl_param					// Allow a parameter-stlye decl without ;				
-				
 //////////////////////////////// STATEMENTS ////////////////////////////////////                 
 // Statement is taken to include expressions and declarations. But an expression
 // here would need a terminating semicolon.
@@ -693,7 +670,7 @@ statement_nca	: bare_statement ';'
 
 bare_statement	: SIMPLE_STMT_SIGN										
 				| SIMPLE_STMT_SIGN expression							{ $$ = $1->OnArgsList({$2}, @2); }
-				| DO_KEYWORD statement WHILE_KEYWORD '(' expr_boot ')'	{ $$ = $1->OnBody($2, @2)->OnArgsList({$5}, @5); } // TODO a While node is gobbled up here
+				| DO_KEYWORD statement WHILE_KEYWORD '(' expression_boot ')'	{ $$ = $1->OnBody($2, @2)->OnArgsList({$5}, @5); } // TODO a While node is gobbled up here
 				// TODO shouldn't need alt_stmt in C syntax, try expr_element
 				| expression 											
 
@@ -707,19 +684,27 @@ semicolon_args	: expression												{ $$.push_back($1); }
 
 //////////////////////////////// EXPRESSIONS ////////////////////////////////////         
 
-expr_boot		: expr_element 
-				| expr_commands										{ $$ = vn->OnEmbeddedCommands($1); }
+expression_boot	: expression_element 
+				| expression_commands								{ $$ = vn->OnEmbeddedCommands($1); }
 
-expr_commands   : expr_element COMMAND_TERM commands					{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
-     
-expr_element		: expr_clause
+expression_commands: expression_element COMMAND_TERM commands			{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 
-expr_clause			: expr_conjunction
-					| expr_clause DISJUNCTION_OP expr_conjunction		{ $$ = vn->OnDisjunction($1, $3); }
+expression_element: expression_clause
+				| expression_star
+				
+expression_star	: STAR											   { $$ = vn->OnStar(nullptr); } // expressional intention			
+				| 					RESTRICTED_STAR expression_clause { $$ = vn->OnStar($2); }
 
-expr_conjunction 	: expression       
-					| expr_conjunction CONJUNCTION_OP expression		  	{ $$ = vn->OnConjunction($1, $3); }
-     
+expression_clause	: expression_conj
+				| expression_clause DISJUNCTION_OP expression_conj		{ $$ = vn->OnDisjunction($1, $3); }
+
+expression_conj 	: generalised_expr       
+				| expression_conj CONJUNCTION_OP generalised_expr   			{ $$ = vn->OnConjunction($1, $3); }
+		
+generalised_expr    	: expression						// Allow an expression without ;
+				| bare_decl_param					// Allow a parameter-stlye decl without ;				
+				
+
 expression			: expr_comma_op
                                    
 expr_comma_op       : expr_no_comma_op
@@ -782,7 +767,7 @@ expr_prefix : expr_postfix
 // Postfix operators are treated like method calls, operand is regarded as object
 expr_postfix: expr_primary     
 			| expr_postfix C_PRE_OR_POSTFIX_OP 				 		{ $$ = vn->OnPostfixOperator($2)->OnObject($1, @1); }
-			| expr_postfix '[' expr_boot ']'	 					{ $$ = vn->OnSubscript()->OnObject($1, @1)->OnArgsList({$3}, @3); }
+			| expr_postfix '[' expression_boot ']'	 					{ $$ = vn->OnSubscript()->OnObject($1, @1)->OnArgsList({$3}, @3); }
 			| expr_postfix argumentation							{ $$ = vn->OnCall()->OnObject($1, @1)->OnArgumentation($2, @2); } 
 			| expr_postfix '.' id_parens							{ $$ = vn->OnLookup()->OnObject($1, @1)->OnArgsList({$3}, @3); }
 			| LIBRARY_FUNC '(' arguments ')'   						{ $$ = $1->OnArgsList($3, @3); }	
@@ -800,7 +785,7 @@ expr_primary: id_extras
 			| stmt_expr_scope '}'                					{ $$ = $1->scope_node; } 
 			| stmt_expr_scope statements '}'    		 			{ $$ = $1->scope_node->OnStatements($2, @2); }		
 			| vn_primary
-			| '(' expr_boot ')'                       			{ $$ = $2; }
+			| '(' expression_boot ')'                       			{ $$ = $2; }
 			| vn_any_node
 			
 prerestrict_decl_start : PRERESTRICT_DECL     				    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
@@ -973,7 +958,7 @@ vn_disloc_prefix:  						        stuff_op_scope unified_prefix { $$ = vn->OnStuf
 				|                                 STRINGIZE_OP unified_prefix { $$ = vn->OnStringize($2); }
 
 vn_primary 		: DESIGNATED_NORMAL2
-				| DELTA_COMPARE_OP alt_expr_boot DELTA_REPLACE_OP alt_expr_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
+				| DELTA_COMPARE_OP expression_boot DELTA_REPLACE_OP expression_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
 				| TRANSFORM_NAME_NORMAL OPEN_VN unified_boot CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 
 // Keep this long-hand for symmetry with versions that only allow eg ..._IN_RECORD

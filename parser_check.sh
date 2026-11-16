@@ -3,7 +3,10 @@
 I=$*
 I_NO_SPACES=`echo ${I} | tr -d '[:space:]'`
 
+# Why oh why?
 make -j 32
+make -j 32
+
 P1=p1${I_NO_SPACES}
 P2=p2${I_NO_SPACES}
 rm -rf ${P1} ${GP1} ${P2} ${GP2}
