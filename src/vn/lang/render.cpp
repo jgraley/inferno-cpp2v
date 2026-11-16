@@ -427,8 +427,8 @@ string Render::AccomodateSemicolon( TreePtr<Node> node, Syntax::Production node_
     {        
 		newline = true;
 		if( !IsStatemental(node) && 
-		    node_prod != Syntax::Production::VN_CONJUNCTION && // can't just put a semicolon on these
-		    node_prod != Syntax::Production::VN_DISJUNCTION)
+		    node_prod != Syntax::Production::VN_CONJUNCTION && // can't just put a semicolon on these but they know what to do on a semicolon-requiring surround prod
+		    node_prod != Syntax::Production::VN_DISJUNCTION)   // TODO add a virtual, eg IsAdaptive()
 		{
 			explain += SSPrintf("\n//%s Adding semicolon, reason 1, %d %d\n", Tracer::GetPrefix().c_str(), Syntax::GetPrecedence(surround_prod), Syntax::GetPrecedence(node_prod));
 			semicolon = true;		
