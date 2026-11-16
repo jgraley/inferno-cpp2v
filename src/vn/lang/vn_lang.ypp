@@ -195,7 +195,7 @@ stmt_high
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expression 
 %type <TreePtr<Node>> 				expr_element expr_conjunction expr_clause expr_boot 
 %type <TreePtr<Node>> 				id_primary id_boot id_clause id_conjunction id_prefix id_parens id_extras
-%type <TreePtr<Node>> 				norm_primary normal_star
+%type <TreePtr<Node>> 				normal_star
 %type <TreePtr<Node>> 			    access_wildcard access_primary
 %type <TreePtr<Node>> 				argumentation
 %type <TreePtr<Node>> 				type_entry type_specified type_primary type_postfix type_prefix type_vn_prim 
@@ -669,8 +669,8 @@ stmt_parens		: '(' normal_boot ')'					{ $$ = $2; }
 				| stmt_primary
 
 stmt_primary	: DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
-				| DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot2 DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } // crossover TOLERATES MISRENDER
-				| DELTA_COMPARE_OP normal_boot2 DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } // crossover TOLERATES MISRENDER
+//				| DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot2 DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } // crossover TOLERATES MISRENDER
+//				| DELTA_COMPARE_OP normal_boot2 DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } // crossover TOLERATES MISRENDER
 				| DESIGNATED_NORMAL
 				| stmt_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
@@ -800,18 +800,16 @@ expr_postfix: expr_primary
 			| FUNC_ON_TYPE '(' type_boot ')'       					{ $$ = $1->OnType($3, @3); }			
 		
 expr_primary: id_extras
-			| norm_primary  
 			| INTEGRAL_LITERAL					      			{ $$ = vn->OnIntegralLiteral($1, @1); }
 			| STRING_LITERAL					      			{ $$ = vn->OnStringLiteral($1); }
 			| BOOL_LITERAL									
 			| PRIMARY_EXPR_SIGN							
 			| INIT_SIGN
 			| stmt_expr_scope '}'                					{ $$ = $1->scope_node; } 
-			| stmt_expr_scope statements '}'    		 			{ $$ = $1->scope_node->OnStatements($2, @2); }
-			
-norm_primary	: vn_primary
-				| '(' normal_boot2 ')'                       			{ $$ = $2; }
-				| vn_any_node
+			| stmt_expr_scope statements '}'    		 			{ $$ = $1->scope_node->OnStatements($2, @2); }		
+			| vn_primary
+			| '(' expr_boot ')'                       			{ $$ = $2; }
+			| vn_any_node
 			
 prerestrict_decl_start : PRERESTRICT_DECL     				    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
                                                                   vn->AddGnomon($$); }		

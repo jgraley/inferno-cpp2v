@@ -4,6 +4,36 @@
 #include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
 
+
+int Syntax::GetPrecedence( Production prec )
+{
+	return (int)prec;
+}
+
+   
+Syntax::Production Syntax::BoostPrecedence( Production prec )
+{
+	return (Production)((int)prec + 1);
+}
+
+
+string::size_type Syntax::GetLineBreakThreshold()
+{
+	return 80;
+}
+
+
+bool Syntax::IsRequireSemicolon(Production prod)
+{
+	return ( GetPrecedence(prod) > GetPrecedence(Production::MIN_SURR_SEMICOLON) &&
+			 GetPrecedence(prod) < GetPrecedence(Production::MAX_SURR_SEMICOLON) ) ||
+			prod == Production::VN_CONJUNCTION_SEMICOLON ||
+			prod == Production::VN_DISJUNCTION_SEMICOLON ||
+			prod == Production::BOOT_SEMICOLON ||
+			prod == Production::VN_SEP_SCRIPTY_SEMICOLON;
+}
+
+
 string Syntax::GetLoweredIdOrMacroName() const
 {
 	throw Unimplemented();
@@ -64,24 +94,6 @@ Syntax::Production Syntax::GetOperandInDeclaratorProduction() const
 {
 	throw Unimplemented();
 } 
-
-
-Syntax::Production Syntax::BoostPrecedence( Production prec )
-{
-	return (Production)((int)prec + 1);
-}
-
-
-int Syntax::GetPrecedence( Production prec )
-{
-	return (int)prec;
-}
-   
-
-string::size_type Syntax::GetLineBreakThreshold()
-{
-	return 80;
-}
 
 
 string Syntax::GetKeyword(Policy) const

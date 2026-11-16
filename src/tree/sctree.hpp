@@ -273,7 +273,7 @@ struct DeltaCount : CPPTree::Operator,
 /** These are used to stop the program and produce an exit code because 
     SystemC does not allow control of the return value from its main 
     function. */
-struct TerminationFunction : CPPTree::Statement,
+struct TerminationFunction : CPPTree::Expression,
                              virtual SCFunction
 {
     NODE_FUNCTIONS

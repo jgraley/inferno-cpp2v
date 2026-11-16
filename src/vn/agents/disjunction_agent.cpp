@@ -78,7 +78,7 @@ string DisjunctionAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax
 {
 	(void)surround_prod;
 
-	Syntax::Production elt_prod = IsStatemental() ? 
+	Syntax::Production elt_prod = (IsStatemental() || Syntax::IsRequireSemicolon(surround_prod)) ? 
 	                              Syntax::Production::VN_DISJUNCTION_SEMICOLON : 
 	                              Syntax::Production::VN_DISJUNCTION;
 

@@ -99,6 +99,11 @@ public:
 		NULLPTR // NULL in a pattern as a singluar wildcard
 	};
 		
+    static Production BoostPrecedence( Production prec );
+    static int GetPrecedence( Production prec );
+    static string::size_type GetLineBreakThreshold();
+	static bool IsRequireSemicolon(Production prod);
+		
 	struct Policy
 	{
 		Policy() : 
@@ -174,7 +179,7 @@ public:
 	struct TemporarilyDisabled : Refusal {};
 	struct TypeOfFailSyntax : Refusal {}; 
 	struct NotAnIdentifier : Refusal {}; 
-		
+				
 	/// Produce the source-code-name of the corresponding SystemC construct
     virtual string GetLoweredIdOrMacroName() const;
     virtual string GetIdentifierName() const;
@@ -186,9 +191,6 @@ public:
 	virtual Production GetMyProduction( const VN::RendererInterface *renderer, Policy policy ) const;
 	virtual Production GetMyProductionTerminal() const;
 	virtual Production GetOperandInDeclaratorProduction() const;
-    static Production BoostPrecedence( Production prec );
-    static int GetPrecedence( Production prec );
-    static string::size_type GetLineBreakThreshold();
     // Why is this GetKeyword() and not GetSignifier()? BEcause a signifier can be a keyword or a 
     // short-form explicit, and the render already knows how to produce short-form explicit.
     virtual string GetKeyword( Policy policy ) const;    
