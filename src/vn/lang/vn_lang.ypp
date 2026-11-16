@@ -625,7 +625,6 @@ normal_clause2	: normal_conj2
 
 normal_conj2 	: normal2       
 				| normal_conj2 CONJUNCTION_OP normal2   			{ $$ = vn->OnConjunction($1, $3); }
-				| normal_conj2 CONJUNCTION_OP normal   			{ $$ = vn->OnConjunction($1, $3); } // crossover TOLERATES MISRENDER
 		
 normal2    		: expression						// Allow an expression without ;
 				| bare_decl_param					// Allow a parameter-stlye decl without ;				
@@ -662,15 +661,12 @@ stmt_prefix		: stmt_parens
 				| 					         	NEGATION_OP	stmt_prefix	{ $$ = vn->OnNegation($2); }
 				|                        PRERESTRICT_NORMAL stmt_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 				|        		     prerestrict_decl_start stmt_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax?
-//				|        		     prerestrict_decl_start expr_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax? TOLERATES MISRENDER
 //				| vn_disloc_prefix
 						
 stmt_parens		: '(' normal_boot ')'					{ $$ = $2; }
 				| stmt_primary
 
 stmt_primary	: DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
-//				| DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot2 DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } // crossover TOLERATES MISRENDER
-//				| DELTA_COMPARE_OP normal_boot2 DELTA_REPLACE_OP normal_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } // crossover TOLERATES MISRENDER
 				| DESIGNATED_NORMAL
 				| stmt_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
