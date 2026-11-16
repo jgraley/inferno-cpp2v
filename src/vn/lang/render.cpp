@@ -382,31 +382,6 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod,
     if( !(Syntax::GetPrecedence(node_prod) < Syntax::GetPrecedence(surround_prod)) )
 		return s + AccomodateSemicolon( node, node_prod, surround_prod, policy );
         
-	Syntax::Production inner_surround_prod = Syntax::Production::BOOT;
-	string newname = "BOOT";
-	bool outer_semicolon = false;
-	if( ( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
-		  Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) ) ||
-		surround_prod == Syntax::Production::VN_CONJUNCTION_SEMICOLON ||
-		surround_prod == Syntax::Production::VN_DISJUNCTION_SEMICOLON ||
-		surround_prod == Syntax::Production::BOOT_SEMICOLON ||
-		surround_prod == Syntax::Production::VN_SEP_SCRIPTY_SEMICOLON)
-	{
-		if( node_prod == Syntax::Production::VN_SEP_SCRIPTY ||
-			node_prod == Syntax::Production::VN_CONJUNCTION ||
-			node_prod == Syntax::Production::VN_DISJUNCTION ||
-			node_prod == Syntax::Production::BOOT )  // do these outside parens
-		{
-			// Adding ; inside the parens would only affect the last of the commands.
-			outer_semicolon = !IsStatemental(node);
-		}
-		else
-		{
-			inner_surround_prod = Syntax::Production::BOOT_SEMICOLON;
-			newname="BOOT_SEMICOLON";
-		}	
-	}
-    
     switch(node_prod)
     {
         case Syntax::Production::BOOT...Syntax::Production::TOP_STMT_DECL: // Statement productions at different precedences
@@ -440,16 +415,27 @@ string Render::AccomodateBoot( TreePtr<Node> node, Syntax::Production node_prod,
 				  ("Surr prod: %d node prod: %d", (int)surround_prod, (int)node_prod); 
 					  
 			if( ReadArgs::use.contains("c") )
-				s += SSPrintf("\n//%s Booting expression, surround prod to %s\n",
-							  Tracer::GetPrefix().c_str(),
-							  newname.c_str());
+				s += SSPrintf("\n//%s Booting expression, surround prod to BOOT\n",
+							  Tracer::GetPrefix().c_str());
 				
+			// Booting never asks for BOOT_SEMICOLON because AccomodateSemicolon() will mess up and apply
+			// it only to the last of multiple elements in the production. So, instead we add it after the
+			// closing paren, if required.
             s += "( " +
-				   AccomodateSemicolon( node, node_prod, inner_surround_prod, policy ) +
+				   AccomodateSemicolon( node, node_prod, Syntax::Production::BOOT, policy ) +
 				   " )";            				  
 
-			if( outer_semicolon )
-				s += ";";
+			if( ( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
+				  Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) ) ||
+				surround_prod == Syntax::Production::VN_CONJUNCTION_SEMICOLON ||
+				surround_prod == Syntax::Production::VN_DISJUNCTION_SEMICOLON ||
+				surround_prod == Syntax::Production::BOOT_SEMICOLON ||
+				surround_prod == Syntax::Production::VN_SEP_SCRIPTY_SEMICOLON)
+			{
+				// Adding ; inside the parens would only affect the last of multiple elements.
+				if( !IsStatemental(node) )
+					s += ";";
+			}				
 			
 			return s;
         
