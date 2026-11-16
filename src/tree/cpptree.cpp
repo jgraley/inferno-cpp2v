@@ -3765,7 +3765,7 @@ Syntax::Token MacroStatement::GetSignifierToken() const
 
 Syntax::Token MacroStatement::GetExplicitToken() const
 {
-	return YY::VNLangParser::token::TOK_EXPLICIT_NORMAL;
+	return YY::VNLangParser::token::TOK_EXPLICIT_STMT;
 }
 
 //////////////////////////// PreProcDecl ///////////////////////////////

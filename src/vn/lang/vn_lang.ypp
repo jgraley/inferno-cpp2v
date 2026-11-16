@@ -145,8 +145,7 @@
 <TreePtr<Node>>	DESIGNATED_CURRENT_RECORD_ID _("current record")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier")
 <TreePtr<Node>>	DESIGNATED_ACCESS		_("designated access spec")
-<TreePtr<Node>>	EXPLICIT_NORMAL 		_("explicit statement node 2")
-<TreePtr<Node>>	EXPLICIT_NORMAL2		_("explicit expression node")
+<TreePtr<Node>>	EXPLICIT_EXPR		_("explicit expression node")
 <TreePtr<Node>>	EXPLICIT_TYPE			_("explicit type node")
 <TreePtr<Node>>	EXPLICIT_DECL			_("explicit declaration node")
 <TreePtr<Node>>	EXPLICIT_STMT			_("explicit statement node")
@@ -237,7 +236,7 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		stuff_op_scope
 %type <shared_ptr<VN::Gnomon>>		params_scope 
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  stmt_expr_scope
-%type <VN::NodeAndGnomon>			norm_full_explicit_start norm_full_explicit_start2 type_full_explicit_start decl_full_explicit_start stmt_full_explicit_start qual_full_explicit_start mi_full_explicit_start
+%type <VN::NodeAndGnomon>			expr_full_explicit_start type_full_explicit_start decl_full_explicit_start stmt_full_explicit_start qual_full_explicit_start mi_full_explicit_start
 %type <VN::NodeAndGnomon>			record_scope enum_scope
 %type <list<TreePtr<Node>>>			statements  
 %type <list<TreePtr<Node>>>			enumerators
@@ -675,7 +674,6 @@ stmt_primary	: DELTA_COMPARE_OP normal_boot DELTA_REPLACE_OP normal_boot DELTA_E
 				| DESIGNATED_NORMAL
 				| stmt_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 				| decl_full_explicit_start itemisation					{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
-				| norm_full_explicit_start itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			
 				
 
@@ -872,7 +870,7 @@ id_parens	: id_primary
 id_primary  : id_extras
 			| vn_primary
 
-id_extras	: norm_full_explicit_start2 itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
+id_extras	: expr_full_explicit_start itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| NORMAL_ID_SIGN	  			
 			| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } 
 			| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
@@ -1020,13 +1018,8 @@ qual_full_explicit_start : EXPLICIT_QUAL									{ $$ = vn->MakeScopeGnomonForNo
 
 //////////////////////////////////////// RECOGNISER GLUE /////////////////////////////////////////////
 
-norm_full_explicit_start2 : EXPLICIT_NORMAL2							{ $$ = vn->MakeScopeGnomonForNode($1); 
+expr_full_explicit_start : EXPLICIT_EXPR							{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
-
-norm_full_explicit_start : EXPLICIT_NORMAL							{ $$ = vn->MakeScopeGnomonForNode($1); 
-																	  vn->AddGnomon($$.gnomon); }
-
-
 
 new_vn_name		: NEW_UNICODE_NAME    						
 				| NEW_ASCII_NAME								{ $$ = ToUnicode($1); }     										      
