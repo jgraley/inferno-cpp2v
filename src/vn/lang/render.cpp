@@ -253,12 +253,7 @@ string Render::DoRenderPreserve( TreePtr<Node> node,
 		bool semicolon=false;
 		bool newline=false;
 		// See Instance::GetMyProduction()
-	    if( ( Syntax::GetPrecedence(surround_prod) > Syntax::GetPrecedence(Syntax::Production::MIN_SURR_SEMICOLON) &&
-			  Syntax::GetPrecedence(surround_prod) < Syntax::GetPrecedence(Syntax::Production::MAX_SURR_SEMICOLON) ) ||
-			surround_prod == Syntax::Production::VN_CONJUNCTION_SEMICOLON ||
-			surround_prod == Syntax::Production::VN_DISJUNCTION_SEMICOLON ||
-			surround_prod == Syntax::Production::BOOT_SEMICOLON ||
-			surround_prod == Syntax::Production::VN_SEP_SCRIPTY_SEMICOLON )
+	    if( Syntax::IsRequireSemicolon(surround_prod) )
         {
 			newline = true;
             if( !IsStatemental(node) )

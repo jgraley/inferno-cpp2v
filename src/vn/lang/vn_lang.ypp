@@ -188,7 +188,7 @@
 stmt_low 
 stmt_high
 	
-%type <TreePtr<Node>> 				sing_stmt_boot free_stmt_element sing_stmt_clause sing_stmt_conj sing_stmt 
+%type <TreePtr<Node>> 				sing_stmt_boot sing_stmt_element sing_stmt_clause sing_stmt_conj sing_stmt 
 %type <TreePtr<Node>> 				vn_disloc_prefix vn_primary vn_any_node
 %type <TreePtr<Node>> 				expr_primary expr_postfix expr_prefix expr_relational 
 %type <TreePtr<Node>> 				expr_assignment expr_equality expr_add_etc expr_logical_or expr_logical_and 
@@ -199,7 +199,7 @@ stmt_high
 %type <TreePtr<Node>> 				argumentation
 %type <TreePtr<Node>> 				type_entry type_specified type_primary type_postfix type_prefix type_vn_prim 
 %type <TreePtr<Node>> 				type_clause type_conjunction
-%type <TreePtr<Node>> 				unified_boot unified_element unified_prefix 
+%type <TreePtr<Node>> 				unified_element unified_clause unified_prefix 
 %type <TreePtr<Node>> 				arrival 
 %type <TreePtr<Node>> 				stmt_primary stmt_parens stmt_prefix statement bare_statement statement_nca control_stmt_sign       
 %type <TreePtr<Node>> 				declaration declaration_na
@@ -223,10 +223,10 @@ stmt_high
 %type <TreePtr<Node>> 				statement_element statement_clause statement_conj
 %type <TreePtr<Node>> 				map_arg_element map_arg 
 %type <TreePtr<Node>> 				argument_element argument
-%type <TreePtr<Node>> 				expression_boot free_expr_element expression_clause expression_conj generalised_expr
+%type <TreePtr<Node>> 				expression_boot expression_element expression_clause expression_conj generalised_expr
 %type <wstring> 					new_vn_name
 %type <list<shared_ptr<VN::Command>>>	commands sep_commands  
-%type <list<shared_ptr<VN::Command>>>	unified_commands sing_stmt_commands expression_commands
+%type <list<shared_ptr<VN::Command>>>	sing_stmt_commands expression_commands
 %type <shared_ptr<VN::Command>>		script_command 
 %type <VN::Limit>					stuff_depth depth_stuff_scope
 %type <VN::Itemisation>				itemisation items_bare items_sep
@@ -286,12 +286,12 @@ sep_commands 	: sep_commands COMMAND_TERM script_command		{ $$ = $1; $$.push_bac
 				| designation_command							{ recogniser->AddGnomon($1); }
 			
 // Add more commands here
-script_command	: ENGINE_COMMAND unified_element   		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
+script_command	: ENGINE_COMMAND unified_clause   		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
 				| ATTRIBUTE_COMMAND		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
-designation_command	: new_vn_name DESIGNATE_COMMAND free_stmt_element	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_STMT); }
-					| new_vn_name DESIGNATE_COMMAND free_expr_element	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_EXPR); }
+designation_command	: new_vn_name DESIGNATE_COMMAND sing_stmt_element	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_STMT); }
+					| new_vn_name DESIGNATE_COMMAND expression_element	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_EXPR); }
 					| new_vn_name DESIGNATE_COMMAND type_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
 					| new_vn_name DESIGNATE_COMMAND qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
 					| new_vn_name DESIGNATE_COMMAND ACC_NODE_KEYWORD	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_ACCESS); }
@@ -311,18 +311,19 @@ items_sep 	: items_bare VN_SEP		   				{ $$ = $1; }
 			| items_sep VN_SEP		 				{ $$ = $1; $$.items.push_back({{}, @2}); }
 			| VN_SEP	 							{ $$.items.push_front({{}, @1}); }
 
-item		: item VN_SUB_SEP unified_element			{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$; }
-			| unified_element							{ $$.nodes.push_back($1); $$.loc = @$; }
+item		: item VN_SUB_SEP unified_element		{ $$ = $1; $$.nodes.push_back($3); $$.loc = @$; }
+			| unified_element						{ $$.nodes.push_back($1); $$.loc = @$; }
 
 //////////////////////////////// UNIFIED ////////////////////////////////////         
 
-unified_boot	: unified_element								
-				| unified_commands									{ $$ = vn->OnEmbeddedCommands($1); }
+unified_element	: sing_stmt_element
+				| expression_element
+				| type_entry
+				| qualifier_node		
+				| PREPROCESSOR_ID_SIGN	
 
-unified_commands: unified_element COMMAND_TERM commands				{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
-
-unified_element	: free_stmt_element
-				| free_expr_element
+unified_clause	: sing_stmt_clause
+				| expression_clause
 				| type_entry
 				| qualifier_node		
 				| PREPROCESSOR_ID_SIGN	
@@ -330,17 +331,6 @@ unified_element	: free_stmt_element
 unified_prefix	: expr_prefix
 				| stmt_prefix
 				| type_prefix
-
-//////////////////////////////// FREE ////////////////////////////////////         
-
-
-free_stmt_element: sing_stmt_clause
-				 | STAR ';'										     { $$ = vn->OnStar(nullptr); } // statemental intention
-				 | 					RESTRICTED_STAR sing_stmt_clause { $$ = vn->OnStar($2); }
-
-free_expr_element: expression_clause
-				 | STAR											      { $$ = vn->OnStar(nullptr); } // expressional intention			
-				 | 					RESTRICTED_STAR expression_clause { $$ = vn->OnStar($2); }
   
 //////////////////////////////// COMPOUND ////////////////////////////////////         
 
@@ -595,6 +585,11 @@ prototype_enumerator 	: declaring_res_id 									{ $$ = vn->OnEnumerator(@1)->O
 //////////////////////////////// SINGULAR STATEMENTS ////////////////////////////////////                 
 // Syntax for statements in a production that only accomodates exactly one statement node.
 
+// Not a contradiction in terms. This is for syntactiacally singular but dislocated productions.
+sing_stmt_element: sing_stmt_clause
+				 | STAR ';'										     { $$ = vn->OnStar(nullptr); } // statemental intention
+				 | 					RESTRICTED_STAR sing_stmt_clause { $$ = vn->OnStar($2); }
+
 sing_stmt_boot	: sing_stmt_clause 
 				| sing_stmt_commands								{ $$ = vn->OnEmbeddedCommands($1); }
 
@@ -687,6 +682,12 @@ semicolon_args	: expression												{ $$.push_back($1); }
 				| statement semicolon_args									{ $$ = $2; $$.push_front($1); }
 
 //////////////////////////////// EXPRESSIONS ////////////////////////////////////         
+
+// Wouldn't need Star/_element here if designated star<Statemental> had a ; and usages of the
+// designation in statemental productions didn't. TODO
+expression_element: expression_clause
+				 | STAR											      { $$ = vn->OnStar(nullptr); } // expressional intention			
+				 | 					RESTRICTED_STAR expression_clause { $$ = vn->OnStar($2); }
 
 expression_boot	: expression_clause 
 				| expression_commands								{ $$ = vn->OnEmbeddedCommands($1); }
@@ -932,7 +933,7 @@ type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExpl
 			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 			 { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN 		 { $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 			| ID_BUILDER_TYPE OPEN_VN VN_SEP item CLOSE_VN 						 { $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
-			| TRANSFORM_NAME_TYPE OPEN_VN unified_boot CLOSE_VN 				 { $$ = vn->OnTransform($1, @1, $3, @3); }
+			| TRANSFORM_NAME_TYPE OPEN_VN unified_clause CLOSE_VN 				 { $$ = vn->OnTransform($1, @1, $3, @3); }
 //			| star OPEN_VN type_boot CLOSE_VN									 { $$ = vn->OnStar($3); } // probably needs to be typalised to avoid conflict with wildcarded access spec
 		 	
 type_full_explicit_start 	: EXPLICIT_TYPE										{ $$ = vn->MakeScopeGnomonForNode($1); 
@@ -956,7 +957,7 @@ vn_disloc_prefix:  						        stuff_op_scope unified_prefix { $$ = vn->OnStuf
 
 vn_primary 		: DESIGNATED_EXPR
 				| DELTA_COMPARE_OP expression_boot DELTA_REPLACE_OP expression_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
-				| TRANSFORM_NAME_NORMAL OPEN_VN unified_boot CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
+				| TRANSFORM_NAME_NORMAL OPEN_VN unified_clause CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 
 // Keep this long-hand for symmetry with versions that only allow eg ..._IN_RECORD
 vn_any_node		: ANY_NODE_IN_RECORD								{ $$ = nullptr; }
@@ -999,7 +1000,7 @@ new_vn_name		: NEW_UNICODE_NAME
 
 stuff_op_scope			: STUFF_OP									{ $$ = nullptr; vn->AddGnomon(make_shared<VN::UnknownScopeGnomon>("stuff pattern")); } 											  
 
-restricted_stuff_scope	: RESTRICTED_STUFF unified_boot STUFF_END 	{ $$ = $2; vn->AddGnomon(make_shared<VN::UnknownScopeGnomon>("stuff pattern")); }
+restricted_stuff_scope	: RESTRICTED_STUFF unified_clause STUFF_END 	{ $$ = $2; vn->AddGnomon(make_shared<VN::UnknownScopeGnomon>("stuff pattern")); }
 
 depth_stuff_scope		: RESTRICTED_STUFF stuff_depth STUFF_END  	{ $$ = $2; vn->AddGnomon(make_shared<VN::UnknownScopeGnomon>("stuff pattern")); }
 
