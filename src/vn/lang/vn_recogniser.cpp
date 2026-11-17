@@ -161,8 +161,12 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnAnyNodeLexeme(Syntax::Location
 			return YY::VNLangParser::make_ANY_NODE_IN_RECORD(any_cast<YY::VNLangParser::location_type>(loc));
 		else if( TreePtr<Compound>::DynamicCast( rspg->GetNode() ) )
 			return YY::VNLangParser::make_ANY_NODE_IN_COMPOUND(any_cast<YY::VNLangParser::location_type>(loc));
-		else
+		else 
 			return YY::VNLangParser::make_ANY_NODE_IN_OTHER(any_cast<YY::VNLangParser::location_type>(loc));
+	}
+	else if( auto rspg = dynamic_pointer_cast<const ParameterisationScopeGnomon>(spg) )
+	{
+		return YY::VNLangParser::make_ANY_NODE_IN_PARAMS(any_cast<YY::VNLangParser::location_type>(loc));		
 	}
 	else if( auto pspg = dynamic_pointer_cast<const PrerestrictScopeGnomon>(spg) )
 	{		
