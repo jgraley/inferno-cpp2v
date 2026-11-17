@@ -164,17 +164,17 @@ TreePtr<Node> BuildIdentifierAgent::TryMakeFromDestignatedType( string type_ns, 
 		return nullptr;
 }	
 
-//---------------------------------- BuildSpecificResourceIdentifierAgent ------------------------------------    
+//---------------------------------- BuildSpecificAssetIdentifierAgent ------------------------------------    
 
-TreePtr<CPPTree::SpecificIdentifier> BuildSpecificResourceIdentifierAgent::BuildSpecificIdentifier(string format) const
+TreePtr<CPPTree::SpecificIdentifier> BuildSpecificAssetIdentifierAgent::BuildSpecificIdentifier(string format) const
 {
-    return MakeTreeNode<CPPTree::SpecificResourceIdentifier>( format ); 
+    return MakeTreeNode<CPPTree::SpecificAssetIdentifier>( format ); 
 }
 
 
-string BuildSpecificResourceIdentifierAgent::GetIdentifierSubTypeName() const
+string BuildSpecificAssetIdentifierAgent::GetIdentifierSubTypeName() const
 {
-	return "Resource";
+	return "Asset";
 }    
 
 //---------------------------------- BuildSpecificTypeIdentifierAgent ------------------------------------    

@@ -79,7 +79,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     auto cs_stuff = MakePatternNode<StuffAgent, Expression>(); // TODO the exclusion Stuff<GetDec<Local>> is too strong;
                                                                     // use Not<GetDec<Temp>>
     s_and->conjuncts = ( retval, cs_stuff );
-    auto cs_id = MakePatternNode<TransformOfAgent, ResourceIdentifier>( &DeclarationOf::instance );
+    auto cs_id = MakePatternNode<TransformOfAgent, AssetIdentifier>( &DeclarationOf::instance );
     cs_stuff->terminus = cs_id;
     auto cs_instance = MakeTreeNode<Instance>();
     cs_id->pattern = cs_instance;
@@ -89,7 +89,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     auto r_newvar = MakeTreeNode< Temporary >();
     r_newvar->type = type;
     r_newvar->permission = MakePatternNode<NonConst>();    
-    auto id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("temp_ret_value");
+    auto id = MakePatternNode<BuildSpecificAssetIdentifierAgent>("temp_ret_value");
     r_newvar->identifier = id;
     r_newvar->initialiser = MakePatternNode<Uninitialised>();
 
@@ -120,7 +120,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto lr_comp = MakePatternNode<Compound>();
     auto statements = MakePatternNode<StarAgent, Statement>();
     auto locals = MakePatternNode<StarAgent, Declaration>();
-    auto func_id = MakePatternNode<ResourceIdentifier>();
+    auto func_id = MakePatternNode<AssetIdentifier>();
     auto module_id = MakePatternNode<TypeIdentifier>();
     auto params = MakePatternNode<StarAgent, Parameter>();
     auto m_call = MakePatternNode<Call>();
@@ -131,7 +131,7 @@ ReturnViaTemp::ReturnViaTemp()
     auto r_retval = MakePatternNode<Member>();
     auto mr_assign = MakePatternNode<Assign>();
     auto lr_assign = MakePatternNode<Assign>();
-    auto r_temp_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("%s_ret_value");
+    auto r_temp_id = MakePatternNode<BuildSpecificAssetIdentifierAgent>("%s_ret_value");
     auto ls_return = MakePatternNode<Return>();
     auto lr_return = MakePatternNode<Return>();
     auto l_return_value = MakePatternNode<Expression>();
@@ -193,11 +193,11 @@ AddLinkAddress::AddLinkAddress()
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_retaddr = MakePatternNode<Member>();
-    auto r_retaddr_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("%s_ret_addr");
+    auto r_retaddr_id = MakePatternNode<BuildSpecificAssetIdentifierAgent>("%s_ret_addr");
     auto lr_retaddr = MakePatternNode<Parameter>();
-    auto lr_retaddr_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("ret_addr");
+    auto lr_retaddr_id = MakePatternNode<BuildSpecificAssetIdentifierAgent>("ret_addr");
     auto lr_temp_retaddr = MakePatternNode<LocalTree::TempReturnAddress>();
-    auto lr_temp_retaddr_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("temp_ret_addr");
+    auto lr_temp_retaddr_id = MakePatternNode<BuildSpecificAssetIdentifierAgent>("temp_ret_addr");
     auto s_nm = MakePatternNode<NegationAgent, Declaration>();
     auto ls_nm = MakePatternNode<NegationAgent, Declaration>();
     auto gg = MakePatternNode<GreenGrassAgent, Declaration>();
@@ -224,7 +224,7 @@ AddLinkAddress::AddLinkAddress()
     auto ls_func = MakePatternNode<Function>();
     auto lr_func = MakePatternNode<Function>();
     auto ident = MakePatternNode<TypeIdentifier>();
-    auto l_inst_id = MakePatternNode<ResourceIdentifier>();
+    auto l_inst_id = MakePatternNode<AssetIdentifier>();
     auto ll_return = MakePatternNode<Return>();
     auto llr_comp = MakePatternNode<Compound>();
     auto llsx_comp = MakePatternNode<Compound>();
@@ -315,8 +315,8 @@ ParamsViaTemps::ParamsViaTemps()
     auto mr_comp = MakePatternNode<Compound>();
     auto statements = MakePatternNode<StarAgent, Statement>();
     auto locals = MakePatternNode<StarAgent, Declaration>();
-    auto func_id = MakePatternNode<ResourceIdentifier>();
-    auto param_id = MakePatternNode<ResourceIdentifier>();
+    auto func_id = MakePatternNode<AssetIdentifier>();
+    auto param_id = MakePatternNode<AssetIdentifier>();
     auto module_id = MakePatternNode<TypeIdentifier>();
     auto s_param = MakePatternNode<Parameter>();
     auto params = MakePatternNode<StarAgent, Parameter>();
@@ -331,7 +331,7 @@ ParamsViaTemps::ParamsViaTemps()
     auto r_param_hold = MakePatternNode<Member>();
     auto mr_assign = MakePatternNode<Assign>();
     auto m_expr = MakePatternNode<Expression>();
-    auto r_temp_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("%s_%s");
+    auto r_temp_id = MakePatternNode<BuildSpecificAssetIdentifierAgent>("%s_%s");
     auto delta = MakePatternNode<DeltaAgent, Declaration>();
     auto func_access = MakePatternNode<AccessSpec>();
     
@@ -423,13 +423,13 @@ GenerateStacks::GenerateStacks()
     auto r_index_type = MakePatternNode<Unsigned>();
     auto r_inc = MakePatternNode<PostIncrement>();
     auto r_ret_dec = MakePatternNode<PostDecrement>();
-    auto s_identifier = MakePatternNode<ResourceIdentifier>();
+    auto s_identifier = MakePatternNode<AssetIdentifier>();
     auto r_array = MakePatternNode<Array>();
     auto ret = MakePatternNode<Return>();
     auto l_r_sub = MakePatternNode<Subscript>();
     auto s_and3 = MakePatternNode<ConjunctionAgent, Node>();
-    auto r_index_identifier = MakePatternNode<BuildSpecificResourceIdentifierAgent>("%s_stack_index");
-    auto r_identifier = MakePatternNode<BuildSpecificResourceIdentifierAgent>("%s_stack");
+    auto r_index_identifier = MakePatternNode<BuildSpecificAssetIdentifierAgent>("%s_stack_index");
+    auto r_identifier = MakePatternNode<BuildSpecificAssetIdentifierAgent>("%s_stack");
     auto s_gg = MakePatternNode<GreenGrassAgent, Statement>();
     auto r_index_init = MakePatternNode<Assign>();
     auto members = MakePatternNode<StarAgent, Declaration>();
@@ -447,7 +447,7 @@ GenerateStacks::GenerateStacks()
     auto l_members = MakePatternNode<StarAgent, Declaration>();
     auto vstmts_pre = MakePatternNode<StarAgent, Statement>();
     auto vstmts_post = MakePatternNode<StarAgent, Statement>();
-    auto fi_id = MakePatternNode<ResourceIdentifier>();
+    auto fi_id = MakePatternNode<AssetIdentifier>();
 
     // Sub-embedded pattern replace with a subscript into the array
     l_r_sub->destination = r_identifier;
@@ -561,7 +561,7 @@ MergeFunctions::MergeFunctions()
     auto s_args = MakePatternNode<MapArgumentation>();
     auto ls_call = MakePatternNode<Call>();
     auto ls_args = MakePatternNode<MapArgumentation>();
-    auto func_id = MakePatternNode<ResourceIdentifier>();
+    auto func_id = MakePatternNode<AssetIdentifier>();
     auto r_label = MakePatternNode<LabelDeclaration>();
     auto r_label_id = MakePatternNode< BuildSpecificLabelIdentifierAgent >("%s_ENTRY");
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
@@ -572,7 +572,7 @@ MergeFunctions::MergeFunctions()
     auto mr_goto = MakePatternNode<Goto>();
     auto ms_return = MakePatternNode<Return>();
     auto retaddr = MakePatternNode<LocalTree::TempReturnAddress>();
-    auto retaddr_id = MakePatternNode<ResourceIdentifier>();
+    auto retaddr_id = MakePatternNode<AssetIdentifier>();
     
     mr_goto->destination = retaddr_id;
      

@@ -16,7 +16,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     auto si = MakePatternNode<Local>();
     auto delta = MakePatternNode<DeltaAgent, Local>();
     si->permission = MakePatternNode<NonConst>();  // Cannot split const
-    si->identifier = MakePatternNode<ResourceIdentifier>();  // Only acting on initialised Instances
+    si->identifier = MakePatternNode<AssetIdentifier>();  // Only acting on initialised Instances
     si->initialiser = MakePatternNode<Expression>();  // Only acting on initialised Instances
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto post = MakePatternNode<StarAgent, Statement>();

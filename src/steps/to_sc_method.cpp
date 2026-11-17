@@ -27,7 +27,7 @@ AutosToModule::AutosToModule()
     auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto type = MakePatternNode<Type>();
-    auto var_id = MakePatternNode<ResourceIdentifier>();
+    auto var_id = MakePatternNode<AssetIdentifier>();
     auto var_init = MakePatternNode<Initialiser>();
     auto s_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto sx_not = MakePatternNode<NegationAgent, Compound>();
@@ -86,9 +86,9 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     auto delta = MakePatternNode<DeltaAgent, Compound>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto type = MakePatternNode<Type>();
-    auto var_id = MakePatternNode<ResourceIdentifier>();
+    auto var_id = MakePatternNode<AssetIdentifier>();
     auto var_type = MakePatternNode<Type>();
-    auto var_identifier = MakePatternNode<ResourceIdentifier>();
+    auto var_identifier = MakePatternNode<AssetIdentifier>();
     auto var_initialiser = MakePatternNode<Initialiser>();
 
     // Only act on a thread: normal member funcs are fine if combable, and anything already an sc_method is also fine
@@ -170,7 +170,7 @@ ThreadToMethod::ThreadToMethod()
     auto s_comp = MakePatternNode<Compound>();
     auto s_loop_comp = MakePatternNode<Compound>();
     auto r_loop_comp = MakePatternNode<Compound>();
-    auto id = MakePatternNode<ResourceIdentifier>();
+    auto id = MakePatternNode<AssetIdentifier>();
     auto s_loop = MakePatternNode<Do>();
     auto s_loop_cond = MakePatternNode<True>();
     auto loop_decls = MakePatternNode<StarAgent, Declaration>();
@@ -236,7 +236,7 @@ AddEnableFlag::AddEnableFlag()
     auto m_post = MakePatternNode<StarAgent, Statement>();
     auto r_flag = MakePatternNode<Temporary>();
     auto r_boolean = MakePatternNode<Boolean>();
-    auto r_flag_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("enabled");
+    auto r_flag_id = MakePatternNode<BuildSpecificAssetIdentifierAgent>("enabled");
     auto lr_false = MakePatternNode<False>();
     auto r_true = MakePatternNode<True>();
     auto s_uninit = MakePatternNode<Uninitialised>();

@@ -466,13 +466,13 @@ private:
             }
         }
 
-        TreePtr<ResourceIdentifier> CreateResourceIdentifier(
+        TreePtr<AssetIdentifier> CreateResourceIdentifier(
                 clang::IdentifierInfo *ID = 0)
         {
             if (ID)            
-                return MakeTreeNode<SpecificResourceIdentifier>( ID->getName() );            
+                return MakeTreeNode<SpecificAssetIdentifier>( ID->getName() );            
             else
-                return MakeTreeNode<SpecificResourceIdentifier>();            
+                return MakeTreeNode<SpecificAssetIdentifier>();            
         }
 
         TreePtr<TypeIdentifier> CreateTypeIdentifier(
@@ -505,7 +505,7 @@ private:
 			ASSERT( !inferno_scope_stack.empty() );
 			auto record = TreePtr<Record>::DynamicCast(inferno_scope_stack.top());
 
-            TreePtr<Resource> o;
+            TreePtr<Asset> o;
             TRACE("scope flags 0x%x\n", S->getFlags());
             if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
 			{
@@ -588,7 +588,7 @@ private:
             }
             else if( TreePtr<XStructor>::DynamicCast(o) )
             {
-				o->identifier = MakeTreeNode<SpecificResourceIdentifier>();
+				o->identifier = MakeTreeNode<SpecificAssetIdentifier>();
 			}
 			else
             {

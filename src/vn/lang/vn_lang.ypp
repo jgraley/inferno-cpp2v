@@ -181,6 +181,7 @@
 <TreePtr<Node>> COMPOUND_SIGN			_("compound signifier") // not really C/C++
 <TreePtr<Node>> STMT_EXPR_SIGN			_("statement expression") // not really C/C++
 <TreePtr<Node>> RESOURCE_SIGN			_("resource signifier") // unifies functions and cons/destructors
+<TreePtr<Node>> ASSET_SIGN				_("asset signifier") // unifies functions and cons/destructors
 <TreePtr<Node>> NORMAL_ID_SIGN			_("identifier signifier") 
 <TreePtr<Node>> PREPROCESSOR_ID_SIGN	_("preprocessor identifier signifier") 
 <TreePtr<Node>> INIT_SIGN				_("initialiser signifier") 
@@ -406,7 +407,8 @@ prototype_np	: DESIGNATED_CURRENT_RECORD_ID st_declarator						{ $$ = vn->OnDecl
 				| DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$)->OnParams($2, @2)->OnIdentifier($3, @3); }
 				| '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$)->OnParams($3, @3)->OnIdentifier($4, @4); }
 				| qualifiers '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary		{ $$ = vn->OnXStructorDecl(true, @$)->OnParams($4, @4)->OnIdentifier($5, @5); $$ = vn->ApplyQualifiers($$, $1, @1); }
-				| RESOURCE_SIGN declaring_res_id								{ $1->OnInScope(vn->TryGetTopScopeGnomon(), @1); $$ = $1->OnIdentifier($2, @2); }
+				| ASSET_SIGN declaring_res_id								{ $1->OnInScope(vn->TryGetTopScopeGnomon(), @1); $$ = $1->OnIdentifier($2, @2); } // TODO quals on RESOURCE/ASSET
+				| RESOURCE_SIGN 											{ $1->OnInScope(vn->TryGetTopScopeGnomon(), @1); $$ = $1; }
 
 assign_init		: expression
 				| '{' '}'             				  					{ $$ = vn->OnArrayInitialiser()->OnArgsList({}, @1+@2); } 
@@ -803,14 +805,14 @@ declaring_type_id	: type_specified
 declaring_res_id	: id_parens
                     | new_vn_name			{ recogniser->AddGnomon(
                                               make_shared<VN::DesignationGnomon>($1, 
-                                                                                 MakeTreeNode<CPPTree::ResourceIdentifier>(), 
+                                                                                 MakeTreeNode<CPPTree::AssetIdentifier>(), 
                                                                                  YY::VNLangParser::token::TOK_DESIGNATED_STMT)); }
 
 declaring_st_res_id	: id_primary
 					| vn_any_node
                     | new_vn_name			{ recogniser->AddGnomon(
                                               make_shared<VN::DesignationGnomon>($1, 
-                                                                                 MakeTreeNode<CPPTree::ResourceIdentifier>(), 
+                                                                                 MakeTreeNode<CPPTree::AssetIdentifier>(), 
                                                                                  YY::VNLangParser::token::TOK_DESIGNATED_STMT)); }
 
 declaring_label_id	: id_primary

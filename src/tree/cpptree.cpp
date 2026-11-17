@@ -638,42 +638,42 @@ string SpecificIdentifier::GetTrace() const
     return GetName() + "(" + GetGraphName() + ")" + GetSerialString();
 }
 
-//////////////////////////// ResourceIdentifier //////////////////////////////
+//////////////////////////// AssetIdentifier //////////////////////////////
 
-Syntax::Production ResourceIdentifier::GetMyProductionTerminal() const
+Syntax::Production AssetIdentifier::GetMyProductionTerminal() const
 { 
 	return Production::PRIMARY_EXPR; 
 }
 
 
-string ResourceIdentifier::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
+string AssetIdentifier::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
 	return renderer->DoRenderSignifier(this, policy);
 }
 	
 
-Syntax::Token ResourceIdentifier::GetSignifierToken() const
+Syntax::Token AssetIdentifier::GetSignifierToken() const
 {
 	return YY::VNLangParser::token::TOK_NORMAL_ID_SIGN;
 }
 
-//////////////////////////// SpecificResourceIdentifier //////////////////////////////
+//////////////////////////// SpecificAssetIdentifier //////////////////////////////
 
-Syntax::Production SpecificResourceIdentifier::GetMyProductionTerminal() const
+Syntax::Production SpecificAssetIdentifier::GetMyProductionTerminal() const
 {
-	// ResourceIdentifier wins
-	return ResourceIdentifier::GetMyProductionTerminal();	
+	// AssetIdentifier wins
+	return AssetIdentifier::GetMyProductionTerminal();	
 }
 
 
-string SpecificResourceIdentifier::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
+string SpecificAssetIdentifier::GetRender( VN::RendererInterface *renderer, Production production, Policy policy )
 {
 	// SpecificIdentifier wins
 	return SpecificIdentifier::GetRender( renderer, production, policy );
 }
 
 
-bool SpecificResourceIdentifier::IsXstructorIdentifier(const VN::RendererInterface *renderer)
+bool SpecificAssetIdentifier::IsXstructorIdentifier(const VN::RendererInterface *renderer)
 {
 	TreePtr<Node> declarer = TryGetDeclarer(renderer);
 	if(declarer)
@@ -683,7 +683,7 @@ bool SpecificResourceIdentifier::IsXstructorIdentifier(const VN::RendererInterfa
 }
 
 
-Syntax::Token SpecificResourceIdentifier::GetSignifierToken() const
+Syntax::Token SpecificAssetIdentifier::GetSignifierToken() const
 {
 	throw UnimplementedToken();
 }
@@ -1413,30 +1413,9 @@ bool Resource::ShouldSplitInstance( Policy ) const
 }
 
 
-list<string> Resource::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+list<string> Resource::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy ) const
 {
-	return { renderer->DoRenderSignifier(this, policy), 
-		     renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) };
-}
-
-#include "vn/agents/star_agent.hpp"
-TreePtr<Node> Resource::OnIdentifier( TreePtr<Node> id, Location loc)
-{
-	// Apply a bit of "Star zipping" for the case where we parsed Enumeration(★) (which is illegal)
-	// when we wanted just ★. Star zipping is discussed in #883 (see comment), and after doing that 
-	// we hopefully won't need this. TODO remove, and the #include "vn/agents/star_agent.hpp"
-	if( id )
-		if( auto agent = VN::Agent::TryAsAgentConst(id) )
-			if( dynamic_cast<const VN::StarAgent *>(agent) )
-				return id;	
-				
-	if( id && !VN::Agent::TryAsAgentConst(id) && !TreePtr<ResourceIdentifier>::DynamicCast(id) )
-		throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc),
-				"Resource declaration expected resource identifier but got " +
-				DiagQuote(Traceable::TypeIdName( *id )) );
-	identifier = id;
-	return (TreePtr<Node>)shared_from_this();	
+	return { renderer->DoRenderSignifier(this, policy) };
 }
 
 
@@ -1457,6 +1436,39 @@ TreePtr<Node> Resource::OnInitialiser( TreePtr<Node> init, Location )
 Syntax::Token Resource::GetSignifierToken() const
 {
 	return YY::VNLangParser::token::TOK_RESOURCE_SIGN;
+}
+
+//////////////////////////// Asset //////////////////////////////
+
+list<string> Asset::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+{
+	return { renderer->DoRenderSignifier(this, policy), 
+		     renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) };
+}
+
+
+#include "vn/agents/star_agent.hpp"
+TreePtr<Node> Asset::OnIdentifier( TreePtr<Node> id, Location loc)
+{
+	// Star zipping is now off the plan. TODO remove, and the #include "vn/agents/star_agent.hpp"
+	if( id )
+		if( auto agent = VN::Agent::TryAsAgentConst(id) )
+			if( dynamic_cast<const VN::StarAgent *>(agent) )
+				return id;	
+				
+	if( id && !VN::Agent::TryAsAgentConst(id) && !TreePtr<AssetIdentifier>::DynamicCast(id) )
+		throw YY::VNLangParser::syntax_error(
+				any_cast<YY::VNLangParser::location_type>(loc),
+				"Asset declaration expected asset identifier but got " +
+				DiagQuote(Traceable::TypeIdName( *id )) );
+	identifier = id;
+	return (TreePtr<Node>)shared_from_this();	
+}
+
+
+Syntax::Token Asset::GetSignifierToken() const
+{
+	return YY::VNLangParser::token::TOK_ASSET_SIGN; 
 }
 
 //////////////////////////// Instance //////////////////////////////
@@ -3664,7 +3676,7 @@ Syntax::Token PreprocessorIdentifier::GetSignifierToken() const
 
 Syntax::Production SpecificPreprocessorIdentifier::GetMyProductionTerminal() const
 {
-	// ResourceIdentifier wins
+	// AssetIdentifier wins
 	return PreprocessorIdentifier::GetMyProductionTerminal();	
 }
 

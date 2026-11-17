@@ -12,7 +12,7 @@ using namespace VN;
 namespace CPPTree
 {
 	class SpecificIdentifier;
-	class ResourceIdentifier;
+	class AssetIdentifier;
 	class TypeIdentifier;
 	class LabelIdentifier;
 	class PreprocessorIdentifier;
@@ -55,7 +55,7 @@ struct BuildIdentifierAgent : public virtual BuilderAgent
 };
 
 
-struct BuildSpecificResourceIdentifierAgent : Special<CPPTree::ResourceIdentifier>,                             
+struct BuildSpecificAssetIdentifierAgent : Special<CPPTree::AssetIdentifier>,                             
                                       BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
@@ -65,7 +65,7 @@ struct BuildSpecificResourceIdentifierAgent : Special<CPPTree::ResourceIdentifie
         return shared_from_this();
     }
     
-    BuildSpecificResourceIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
+    BuildSpecificAssetIdentifierAgent( string s="" ) : BuildIdentifierAgent(s) {}
 
 private:    
     TreePtr<CPPTree::SpecificIdentifier> BuildSpecificIdentifier( string name ) const final;

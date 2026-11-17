@@ -571,7 +571,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutImpl( const ReplaceKit &ki
                                                             const SCREngine *acting_engine ) 
 {
     INDENT("B");
-    //if( TreePtr<CPPTree::SpecificResourceIdentifier>::DynamicCast(me_plink.GetPatternTreePtr()) )
+    //if( TreePtr<CPPTree::SpecificAssetIdentifier>::DynamicCast(me_plink.GetPatternTreePtr()) )
     //    FTRACE("For me_plink=")(me_plink)(" overlay_under_plink=")(overlay_under_plink)(" key_xlink=")(key_xlink)("\n");
 	PatternLink bottom_layer_plink = acting_engine->TryGetOverlayBottomLayer(this);
     if( bottom_layer_plink )
@@ -902,7 +902,7 @@ Agent::ReplacePatchPtr StandardAgent::GenReplaceLayoutNormal( const ReplaceKit &
 {
     INDENT("N");
  
-    //if( TreePtr<CPPTree::SpecificResourceIdentifier>::DynamicCast(me_plink.GetPatternTreePtr()) )
+    //if( TreePtr<CPPTree::SpecificAssetIdentifier>::DynamicCast(me_plink.GetPatternTreePtr()) )
     //    FTRACE("For me_plink=")(me_plink)("\n");
 
     ASSERT( IsFinal() )("Trying to build non-final ")(*this); 

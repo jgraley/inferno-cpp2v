@@ -8,7 +8,7 @@
 namespace CPPTree
 {
 	class Type;
-	class ResourceIdentifier;
+	class AssetIdentifier;
 };
 
 namespace SCTree
@@ -73,7 +73,7 @@ class LowerSCDelta : public LoweringStep
 public:
     LowerSCDelta( TreePtr<SCTree::SCFunction> s_delta,
                   string r_dest,
-                  TreePtr<CPPTree::ResourceIdentifier> zero_time_id );
+                  TreePtr<CPPTree::AssetIdentifier> zero_time_id );
 };
 
 
@@ -101,7 +101,7 @@ public:
 class LowerSCNotifyDelta : public LoweringStep
 {
 public:
-    LowerSCNotifyDelta( TreePtr<CPPTree::ResourceIdentifier> zero_time_id );
+    LowerSCNotifyDelta( TreePtr<CPPTree::AssetIdentifier> zero_time_id );
 };
 
 

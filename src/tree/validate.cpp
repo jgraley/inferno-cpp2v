@@ -74,8 +74,8 @@ void Validate::operator()( TreePtr<Node> root,
                     (void)TypeOf::instance(AugTreePtr<Expression>(e), context);
 
                 // Check that every identifier has a declaration
-                if( TreePtr<ResourceIdentifier> ii = DynamicTreePtrCast<ResourceIdentifier>(x) )
-                    (void)DeclarationOf()(AugTreePtr<ResourceIdentifier>(ii), context);
+                if( TreePtr<AssetIdentifier> ii = DynamicTreePtrCast<AssetIdentifier>(x) )
+                    (void)DeclarationOf()(AugTreePtr<AssetIdentifier>(ii), context);
             }
 
             // if x is missing its NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone

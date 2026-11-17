@@ -258,7 +258,7 @@ struct SpecificIdentifier : virtual Property
 };
 
 /// Identifier for any Instance (variable or object or function)
-struct ResourceIdentifier : Identifier,
+struct AssetIdentifier : Identifier,
                             Expression 
 { 
     NODE_FUNCTIONS 
@@ -270,11 +270,11 @@ struct ResourceIdentifier : Identifier,
                                
 
 /// Identifier for a specific Instance, linked to by a particular Declaration                           
-struct SpecificResourceIdentifier : ResourceIdentifier,
+struct SpecificAssetIdentifier : AssetIdentifier,
                                     SpecificIdentifier
 {
-    SpecificResourceIdentifier() {} ///< Default constructor
-    SpecificResourceIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
+    SpecificAssetIdentifier() {} ///< Default constructor
+    SpecificAssetIdentifier( string s, BoundingRole addr_bounding_role = BoundingRole::NONE ) : 
         SpecificIdentifier(s, addr_bounding_role) {} ///< make identifier with the given name
     NODE_FUNCTIONS_FINAL    
 	Production GetMyProductionTerminal() const override;
@@ -310,12 +310,12 @@ struct SpecificTypeIdentifier : TypeIdentifier,
 };
 
 
-/// Associates an Expression with an ResourceIdentifier. 
+/// Associates an Expression with an AssetIdentifier. 
 /** Basically a key-value pair of identifier and value. Use in Maps. */
 struct IdValuePair : virtual Node 
 {
     NODE_FUNCTIONS_FINAL
-    TreePtr<ResourceIdentifier> key; ///< the handle for this particular operand
+    TreePtr<AssetIdentifier> key; ///< the handle for this particular operand
     TreePtr<Expression> value; ///< the Expression for this operand
    
     virtual string GetColour() const { return "/set28/8"; }    
@@ -510,7 +510,7 @@ struct MemberInitialiser : Statement // TODO not a Statement, just virtual Node 
 {
 	NODE_FUNCTIONS_FINAL
 
-	TreePtr<ResourceIdentifier> member_id;
+	TreePtr<AssetIdentifier> member_id;
 	TreePtr<Initialiser> initialiser;
 
 	Production GetMyProductionTerminal() const override;
@@ -646,21 +646,18 @@ struct View : virtual Node
 };
 
 
-/// Declares that some reource must be made available i.e. ROM/RAM, gates/flops etc. 
-/** These have an 
- identifier so that the resource can be used (i.e. usages refer to the resource by identifier).
- There may not be a type - in some cases, we don't want to use a type to make pointers, 
- aggregates etc the declaration node itself is sufficient as a recipe for how to use the resource. */
+/** Declares that some resource must be made available i.e. ROM/RAM, gates/flops etc. 
+ *  No identifier is provided and hence no type. It will be used/invoked by compiler-generated
+ *  code or a runtime eg SystemC runtime.
+ */
 struct Resource : virtual AdvanceDecl
 {
 	NODE_FUNCTIONS
 	
-    TreePtr<ResourceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
     TreePtr<Initialiser> initialiser; ///< init value for data, body for Callable type
-    TreePtr<Permission> permission; ///< is the instance constant (ie compile time value)?
+    TreePtr<Permission> permission; ///< is the instance constant (ie compile time value)? TODO move into Asset
     
 	Resource();
-    set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
 	virtual string GetRenderImpl( VN::RendererInterface *renderer, Policy policy );
@@ -676,9 +673,27 @@ struct Resource : virtual AdvanceDecl
 	// representation of the type and identifier that also disambiguates the declaration node.
 	virtual list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;
 
-	TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc ) override;
-	TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc ) override;
 	TreePtr<Node> OnInitialiser( TreePtr<Node> init, Location loc ) override;
+	TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc ) override;
+
+	Token GetSignifierToken() const override;
+};
+
+/** These have an identifier so that the asset can be used more generally (i.e. usages refer to the asset by identifier).
+ There may not be a type - in some cases, we don't want to use a type to make pointers, 
+ aggregates etc the declaration node itself is sufficient as a recipe for how to use the asset. 
+ One use for such identifiers comes from the fact that VN is a resolved language - the identifier
+ can be used to reflect the outcome of overload resolution etc. */
+struct Asset : Resource
+{
+	NODE_FUNCTIONS
+
+    TreePtr<AssetIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
+
+    set<const TreePtrInterface *> GetDeclared() override { return { &identifier }; };
+	virtual list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;
+
+	TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc ) override;
 
 	Token GetSignifierToken() const override;
 };
@@ -695,9 +710,9 @@ struct Resource : virtual AdvanceDecl
  - Fits in with single-static-assignment style
  The instance node can go into a Declaration Collection or a Statement Sequence.
  The latter case is used where initialisaiton/construction demands ordering. It points
- to an ResourceIdentifier, and all usages of the instance actually point to the
- ResourceIdentifier. */
-struct Instance : Resource
+ to an AssetIdentifier, and all usages of the instance actually point to the
+ AssetIdentifier. */
+struct Instance : Asset
 {
     NODE_FUNCTIONS
  
@@ -761,7 +776,7 @@ struct Member : Instance, AccessDecl, DispatchDecl
 };
 
 
-struct XStructor : Resource, AccessDecl, DispatchDecl
+struct XStructor : Asset, AccessDecl, DispatchDecl 
 {
 	NODE_FUNCTIONS
 	TreePtr<TypeIdentifier> record_id;
@@ -793,13 +808,12 @@ struct Constructor : XStructor,
 };
 
 
-struct Destructor : XStructor
+struct Destructor : XStructor // TODO should be a Resource, not Asset
 {
 	NODE_FUNCTIONS_FINAL
 
 	string GetLeadingText(Policy policy) const override;
 };
-
 
 
 /// A local variable with automatic allocation
@@ -1438,7 +1452,7 @@ struct New : Operator
     NODE_FUNCTIONS_FINAL
     TreePtr<Type> type; ///< Type of object to be constructed
     TreePtr<Argumentation> placement_argumentation; ///< arguments for placement usage
-	TreePtr<ResourceIdentifier> constructor_id; // We use resolved constructors, so it has an identifier
+	TreePtr<AssetIdentifier> constructor_id; // We use resolved constructors, so it has an identifier
     TreePtr<Argumentation> constructor_argumentation; ///< arguments to the constructor
     TreePtr<Globality> global; ///< whether placement is global
 
@@ -1467,7 +1481,7 @@ struct Lookup : Operator
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<Expression> object; ///< the Record instance we look in
-    TreePtr<ResourceIdentifier> member; ///< the member to find
+    TreePtr<AssetIdentifier> member; ///< the member to find
 	
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;
@@ -1852,7 +1866,7 @@ struct MacroConstructor : AdvanceDecl,
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<PreprocessorIdentifier> macro_name;
-    TreePtr<ResourceIdentifier> identifier;
+    TreePtr<AssetIdentifier> identifier;
     Sequence<Node> arguments; ///< Args taken in order, macro so can be anything
     TreePtr<Initialiser> initialiser;
     // TODO access, also see #877

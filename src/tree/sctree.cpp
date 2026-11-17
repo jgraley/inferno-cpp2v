@@ -329,7 +329,7 @@ Syntax::Production Process::GetMyProductionTerminal() const
 
 Syntax::Token Process::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_RESOURCE_SIGN;
+	return YY::VNLangParser::token::TOK_ASSET_SIGN; // TODO back to RESOURCE_SIGN, inherit from Resource and fix up render+parse and remove id from patterns
 }
 
 //////////////////////////// Method ///////////////////////////////

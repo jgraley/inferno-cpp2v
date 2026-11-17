@@ -197,7 +197,7 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
 static TreePtr<Statement> MakeResetAssignmentPattern()
 {
     auto ass = MakePatternNode<Assign>();
-    auto decl = MakePatternNode<TransformOfAgent, ResourceIdentifier>( &DeclarationOf::instance );
+    auto decl = MakePatternNode<TransformOfAgent, AssetIdentifier>( &DeclarationOf::instance );
     decl->pattern = MakePatternNode<Local>();
     ass->operands = (decl, MakePatternNode<Literal>());    
     return ass;
@@ -264,10 +264,10 @@ AddStateLabelVar::AddStateLabelVar()
     auto state_var = MakePatternNode<Local>();
     auto sx_not = MakePatternNode<NegationAgent, Expression>();
     auto lsx_not = MakePatternNode<NegationAgent, Expression>();
-    auto state_var_id = MakePatternNode< BuildSpecificResourceIdentifierAgent >("state");
+    auto state_var_id = MakePatternNode< BuildSpecificAssetIdentifierAgent >("state");
     
     ls_goto->destination = lsx_not;
-    lsx_not->negand = state_var_id; //  MakePatternNode<ResourceIdentifier>();
+    lsx_not->negand = state_var_id; //  MakePatternNode<AssetIdentifier>();
     
     lr_compound->statements = (lr_assign, lr_goto);
     lr_assign->operands = (state_var_id, lsx_not);
@@ -278,7 +278,7 @@ AddStateLabelVar::AddStateLabelVar()
 
     s_comp->statements = (pre, sx_goto, post); 
     sx_goto->destination = sx_not;
-    sx_not->negand = MakePatternNode<ResourceIdentifier>();
+    sx_not->negand = MakePatternNode<AssetIdentifier>();
         
 
     r_comp->statements = (state_var, pre, sx_goto, post); 
@@ -457,8 +457,8 @@ FixFallthrough::FixFallthrough()
 
 AddYieldFlag::AddYieldFlag()
 {
-    auto fn = MakePatternNode<Resource>();
-    auto fn_id = MakePatternNode<ResourceIdentifier>();
+    auto fn = MakePatternNode<Asset>();
+    auto fn_id = MakePatternNode<AssetIdentifier>();
     auto s_func_comp = MakePatternNode<Compound>();
     auto r_func_comp = MakePatternNode<Compound>();
     auto s_comp = MakePatternNode<Compound>();
@@ -472,7 +472,7 @@ AddYieldFlag::AddYieldFlag()
     auto m_decls = MakePatternNode<StarAgent, Declaration>();
     auto msx_decls = MakePatternNode<StarAgent, Declaration>();
     auto var_decl = MakePatternNode<Instance>();
-    auto var_id = MakePatternNode<ResourceIdentifier>();
+    auto var_id = MakePatternNode<AssetIdentifier>();
     auto enum_id = MakePatternNode<TypeIdentifier>();
     auto func_pre = MakePatternNode<StarAgent, Statement>();
     auto m_pre = MakePatternNode<StarAgent, Statement>();
@@ -497,7 +497,7 @@ AddYieldFlag::AddYieldFlag()
     auto r_flag_init = MakePatternNode<Assign>();
     auto mr_assign = MakePatternNode<Assign>();
     auto msx_assign = MakePatternNode<Assign>();
-    auto r_flag_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("yield_flag");
+    auto r_flag_id = MakePatternNode<BuildSpecificAssetIdentifierAgent>("yield_flag");
     auto ms_all = MakePatternNode<ConjunctionAgent, Compound>();
     auto ms_not = MakePatternNode<NegationAgent, Compound>();
     
@@ -527,7 +527,7 @@ AddYieldFlag::AddYieldFlag()
     r_comp->statements = (r_flag_init, stmts);
 
     ls_if->condition = l_equal;
-    l_equal->operands = (MakePatternNode<ResourceIdentifier>(), MakePatternNode<ResourceIdentifier>());
+    l_equal->operands = (MakePatternNode<AssetIdentifier>(), MakePatternNode<AssetIdentifier>());
     // TODO yield_id should be of type enum_id?                         
     lr_if->condition = lr_and;
     lr_and->operands = (l_equal, lr_not);
@@ -551,7 +551,7 @@ AddYieldFlag::AddYieldFlag()
 AddInferredYield::AddInferredYield()
 {
     auto fn = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
-    auto fn_id = MakePatternNode<ResourceIdentifier>();
+    auto fn_id = MakePatternNode<AssetIdentifier>();
     auto func_comp = MakePatternNode<Compound>();
     auto s_comp = MakePatternNode<Compound>();
     auto sx_comp = MakePatternNode<Compound>();
@@ -562,7 +562,7 @@ AddInferredYield::AddInferredYield()
     auto sx_pre = MakePatternNode<StarAgent, Statement>();
     auto delta = MakePatternNode<DeltaAgent, Statement>();
     auto flag_decl = MakePatternNode<Local>();
-    auto flag_id = MakePatternNode<ResourceIdentifier>();
+    auto flag_id = MakePatternNode<AssetIdentifier>();
     auto r_yield = MakePatternNode<WaitDelta>();
     auto loop = MakePatternNode<Loop>();
     auto r_if = MakePatternNode<If>();
@@ -608,7 +608,7 @@ AddInferredYield::AddInferredYield()
 MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
 {
     auto fn = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce SC stuff
-    auto fn_id = MakePatternNode<ResourceIdentifier>();
+    auto fn_id = MakePatternNode<AssetIdentifier>();
     auto func_decls = MakePatternNode<StarAgent, Declaration>();
     auto inits = MakePatternNode<StarAgent, Statement>();
     auto stmts = MakePatternNode<StarAgent, Statement>();
@@ -657,10 +657,10 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
 LoopRotation::LoopRotation()
 {
     auto s_var_decl = MakePatternNode<Instance>();
-    auto fn_id = MakePatternNode<ResourceIdentifier>();
-    auto s_var_id = MakePatternNode<ResourceIdentifier>();
-    auto s_cur_enum_id = MakePatternNode<ResourceIdentifier>();
-    auto s_outer_enum_id = MakePatternNode<ResourceIdentifier>();
+    auto fn_id = MakePatternNode<AssetIdentifier>();
+    auto s_var_id = MakePatternNode<AssetIdentifier>();
+    auto s_cur_enum_id = MakePatternNode<AssetIdentifier>();
+    auto s_outer_enum_id = MakePatternNode<AssetIdentifier>();
     auto thread = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce SC stuff
     auto func_decls = MakePatternNode<StarAgent, Declaration>();
     auto s_enums = MakePatternNode<StarAgent, Declaration>();

@@ -64,7 +64,7 @@ EnsureConstructorsInSCRecordUsers::EnsureConstructorsInSCRecordUsers()
     r_scclass->members = (decls, r_cons_macro); 
     r_scclass->bases = (bases);    
     r_cons_macro->macro_name = ctor_macro_name;
-    r_cons_macro->identifier = MakePatternNode< BuildSpecificResourceIdentifierAgent >("constructor_id_should_not_appear_in_code");
+    r_cons_macro->identifier = MakePatternNode< BuildSpecificAssetIdentifierAgent >("constructor_id_should_not_appear_in_code");
     r_cons_macro->initialiser = r_comp;
     r_cons_macro->arguments = (tid);
 
@@ -82,15 +82,15 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto tid = MakePatternNode< TypeIdentifier >();
     auto r_token = MakePatternNode< SpecificTypeIdentifier >( s_scclass->GetLoweredIdOrMacroName() ); 
     auto macro_cons = MakePatternNode< MacroConstructor >(); 
-    auto macro_cons_id = MakePatternNode<ResourceIdentifier>();
+    auto macro_cons_id = MakePatternNode<AssetIdentifier>();
     
     auto l1_class = MakePatternNode< InheritanceRecord >();
     auto l1_members = MakePatternNode<StarAgent, Declaration>();
     auto l1_bases = MakePatternNode<StarAgent, Base>();
     auto l1_macro_args = MakePatternNode<StarAgent, Node>();    
-    auto l1_macro_cons_id = MakePatternNode<ResourceIdentifier>();
+    auto l1_macro_cons_id = MakePatternNode<AssetIdentifier>();
     auto l1_member_inst_member = MakePatternNode< Member >();
-    auto l1_member_id = MakePatternNode< ResourceIdentifier >();
+    auto l1_member_id = MakePatternNode< AssetIdentifier >();
     auto l1_delta = MakePatternNode<DeltaAgent, MacroConstructor>();  
     auto l1s_macro_cons = MakePatternNode< MacroConstructor >(); 
     auto l1r_macro_cons = MakePatternNode< MacroConstructor >(); 
@@ -105,7 +105,7 @@ LowerSCHierarchicalClass::LowerSCHierarchicalClass( TreePtr< SCRecord > s_scclas
     auto l2_conjunction = MakePatternNode<ConjunctionAgent, Instance>();  
     auto l2_negation = MakePatternNode<NegationAgent, Instance>();  
     auto l2_instance = MakePatternNode<Instance>();  
-    auto l2_inst_id = MakePatternNode<ResourceIdentifier>();  
+    auto l2_inst_id = MakePatternNode<AssetIdentifier>();  
     auto l2_delta = MakePatternNode<DeltaAgent, Initialiser>();  
     auto l2r_cons_init = MakePatternNode<Call>();
     auto l2r_args = MakePatternNode<SeqArgumentation>();
@@ -192,7 +192,7 @@ LowerSCDynamic::LowerSCDynamic( TreePtr<SCDynamicFunction> s_dynamic,
     auto event_expr = MakePatternNode< Expression >(); 
                     
     s_dynamic->event = event_expr;       
-    r_call->callee = MakePatternNode<SpecificResourceIdentifier>(r_dest);       
+    r_call->callee = MakePatternNode<SpecificAssetIdentifier>(r_dest);       
     r_call->argumentation = r_args;
     r_args->arguments = (event_expr);
       
@@ -206,7 +206,7 @@ LowerSCStatic::LowerSCStatic( TreePtr<SCFunction> s_static,
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
                         
-    r_call->callee = MakePatternNode<SpecificResourceIdentifier>(r_dest);       
+    r_call->callee = MakePatternNode<SpecificAssetIdentifier>(r_dest);       
     r_call->argumentation = r_args;
       
     Configure( SEARCH_REPLACE, s_static, r_call );
@@ -215,12 +215,12 @@ LowerSCStatic::LowerSCStatic( TreePtr<SCFunction> s_static,
 
 LowerSCDelta::LowerSCDelta( TreePtr<SCFunction> s_delta,
                             string r_dest,
-                            TreePtr<CPPTree::ResourceIdentifier> zero_time_id )
+                            TreePtr<CPPTree::AssetIdentifier> zero_time_id )
 {
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
                     
-    r_call->callee = MakePatternNode<SpecificResourceIdentifier>(r_dest);       
+    r_call->callee = MakePatternNode<SpecificAssetIdentifier>(r_dest);       
     r_call->argumentation = r_args;
     r_args->arguments = (zero_time_id);
           
@@ -232,7 +232,7 @@ LowerTerminationFunction::LowerTerminationFunction( TreePtr<SCTree::TerminationF
 {
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
-    auto r_token = MakePatternNode< SpecificResourceIdentifier >( s_tf->GetLoweredIdOrMacroName() ); 
+    auto r_token = MakePatternNode< SpecificAssetIdentifier >( s_tf->GetLoweredIdOrMacroName() ); 
     // TODO IdValuePair args can't render without a function decl. Maybe add OperandSequence as an alternative? 
     auto exit_expr = MakePatternNode< Expression >(); 
                     
@@ -258,12 +258,12 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto s_cons_macro = MakePatternNode< MacroConstructor >();
     auto r_cons_macro = MakePatternNode< MacroConstructor >();
     auto macro_cons_name = MakePatternNode<PreprocessorIdentifier>();
-    auto macro_cons_id = MakePatternNode<ResourceIdentifier>();
+    auto macro_cons_id = MakePatternNode<AssetIdentifier>();
     auto macro_args = MakePatternNode<StarAgent, Node>();
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto statements_negation = MakePatternNode<NegationAgent, Statement>();    
     auto sx_process_macro = MakePatternNode< MacroStatement >();
-    auto id = MakePatternNode< ResourceIdentifier >(); 
+    auto id = MakePatternNode< AssetIdentifier >(); 
     auto bases = MakePatternNode<StarAgent, Base>();
     auto token = MakePatternNode< SpecificPreprocessorIdentifier >( s_scprocess->GetLoweredIdOrMacroName() ); // #819 style
     auto r_func = MakePatternNode<Member>();
@@ -320,7 +320,7 @@ LowerSCNotifyImmediate::LowerSCNotifyImmediate()
     auto r_args = MakePatternNode<SeqArgumentation>();
     auto r_lookup = MakePatternNode<Lookup>();
     auto r_event = MakePatternNode<Event>();
-    auto r_token = MakePatternNode< SpecificResourceIdentifier >( s_notify->GetLoweredIdOrMacroName() );                
+    auto r_token = MakePatternNode< SpecificAssetIdentifier >( s_notify->GetLoweredIdOrMacroName() );                
     auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
     //MakePatternNode< Expression > eexpr; 
             
@@ -337,7 +337,7 @@ LowerSCNotifyImmediate::LowerSCNotifyImmediate()
 }
 
 
-LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::ResourceIdentifier> zero_time_id)
+LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::AssetIdentifier> zero_time_id)
 {
     auto s_notify = MakePatternNode<NotifyDelta>();
     auto eexpr = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance ); 
@@ -346,7 +346,7 @@ LowerSCNotifyDelta::LowerSCNotifyDelta(TreePtr<CPPTree::ResourceIdentifier> zero
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
     auto r_lookup = MakePatternNode<Lookup>();
-    auto r_token = MakePatternNode< SpecificResourceIdentifier >( s_notify->GetLoweredIdOrMacroName() );                
+    auto r_token = MakePatternNode< SpecificAssetIdentifier >( s_notify->GetLoweredIdOrMacroName() );                
     //MakePatternNode< Expression > eexpr; 
             
     s_notify->event = eexpr;
@@ -368,7 +368,7 @@ LowerSCDeltaCount::LowerSCDeltaCount()
  
     auto r_call = MakePatternNode<Call>();
     auto r_args = MakePatternNode<SeqArgumentation>();
-    auto r_token = MakePatternNode< SpecificResourceIdentifier >( s_delta_count->GetLoweredIdOrMacroName() );                
+    auto r_token = MakePatternNode< SpecificAssetIdentifier >( s_delta_count->GetLoweredIdOrMacroName() );                
     //MakePatternNode< Expression > eexpr; 
             
     r_call->callee = r_token;
@@ -436,7 +436,7 @@ void SystemCLowering::Build( vector< shared_ptr<VNStep> > *sequence )
     sequence->push_back( make_shared<AddIncludeSystemC>() );
     sequence->push_back( make_shared<AddIncludeSCExtensions>() );
 
-	auto zero_time_id = MakePatternNode< SpecificResourceIdentifier >( "SC_ZERO_TIME" );
+	auto zero_time_id = MakePatternNode< SpecificAssetIdentifier >( "SC_ZERO_TIME" );
 	
 	// The reverse ordering of SystemCRaising::Build()
 	sequence->push_back( make_shared<LowerSCNotifyDelta>(zero_time_id) );

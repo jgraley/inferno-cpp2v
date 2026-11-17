@@ -61,7 +61,7 @@ CleanupStatementExpression::CleanupStatementExpression() // LIMITAION: decls in 
     auto decls = MakePatternNode<StarAgent, Declaration>();
     auto r_temp = MakePatternNode<Temporary>();
     auto last = MakePatternNode<TransformOfAgent, Expression>( &TypeOf::instance );
-    auto r_temp_id = MakePatternNode<BuildSpecificResourceIdentifierAgent>("result");
+    auto r_temp_id = MakePatternNode<BuildSpecificAssetIdentifierAgent>("result");
     auto r_assign = MakePatternNode<Assign>();
     auto overlay = MakePatternNode<DeltaAgent, Expression>();
     auto r_type = MakePatternNode<Type>();
@@ -200,8 +200,8 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     // GCCs goto-a-variable extension in which case a label could be 
     // on the right of an assignment.
     
-    auto s_instance = MakePatternNode<Resource>();
-    auto r_instance = MakePatternNode<Resource>();
+    auto s_instance = MakePatternNode<Asset>();
+    auto r_instance = MakePatternNode<Asset>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
     auto s_comp = MakePatternNode<Compound>();
@@ -216,7 +216,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
     auto l_s_orrule = MakePatternNode<DisjunctionAgent, LabelIdentifier>();
-    auto identifier = MakePatternNode<ResourceIdentifier>();
+    auto identifier = MakePatternNode<AssetIdentifier>();
     
     l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
     
@@ -258,8 +258,8 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     // GCCs goto-a-variable extension in which case a label could be 
     // on the right of an assignment.
     
-    auto s_instance = MakePatternNode<Resource>();
-    auto r_instance = MakePatternNode<Resource>();
+    auto s_instance = MakePatternNode<Asset>();
+    auto r_instance = MakePatternNode<Asset>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
     auto s_comp = MakePatternNode<Compound>();
@@ -272,7 +272,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
     auto l_s_orrule = MakePatternNode<DisjunctionAgent, LabelIdentifier>();
-    auto identifier = MakePatternNode<ResourceIdentifier>();
+    auto identifier = MakePatternNode<AssetIdentifier>();
     auto s_goto = MakePatternNode<Goto>();
     auto r_goto = MakePatternNode<Goto>();
     
@@ -338,8 +338,8 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     // using a recurse restriction that prevents recusing through
     // the LabelDeclaration node, thus excluding the declaration which we want
     // to ignore.
-    auto s_instance = MakePatternNode<Resource>();
-    auto r_instance = MakePatternNode<Resource>();
+    auto s_instance = MakePatternNode<Asset>();
+    auto r_instance = MakePatternNode<Asset>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto sx_stuff = MakePatternNode<StuffAgent, Compound>();
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
@@ -355,7 +355,7 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     auto sx_notrule = MakePatternNode<NegationAgent, Compound>();
     auto sxx_notrule = MakePatternNode<NegationAgent, Node>();
     auto sxx_label = MakePatternNode< LabelDeclaration >();
-    auto identifier = MakePatternNode<ResourceIdentifier>();
+    auto identifier = MakePatternNode<AssetIdentifier>();
 
     s_instance->initialiser = s_andrule;
     s_instance->identifier = identifier;
@@ -441,7 +441,7 @@ CleanupUnusedMembers::CleanupUnusedMembers()
     auto sx_not = MakePatternNode<NegationAgent, Type>();
     auto sx_any = MakePatternNode<DisjunctionAgent, Type>();
     auto getdecl = MakePatternNode<TransformOfAgent, TypeIdentifier>( &TypeDeclarationOf::instance ); // TODO should be modulo typedefs
-    auto id = MakePatternNode<ResourceIdentifier>();
+    auto id = MakePatternNode<AssetIdentifier>();
     auto stuff1 = MakePatternNode<StuffAgent, Scope>();
     auto s_stuff2 = MakePatternNode<StuffAgent, Scope>();
     auto s_antip = MakePatternNode<ConjunctionAgent, Node>();
@@ -449,7 +449,7 @@ CleanupUnusedMembers::CleanupUnusedMembers()
     auto s_nm = MakePatternNode<NegationAgent, Node>();
     auto sx_ir = MakePatternNode<InheritanceRecord>();
     auto s_nscope = MakePatternNode<NegationAgent, Scope>();
-	auto sx_resource = MakePatternNode<Resource>();
+	auto sx_resource = MakePatternNode<Asset>();
 	
     s_all->conjuncts = (stuff1, s_nscope);
     stuff1->terminus = delta_scope;
@@ -491,7 +491,7 @@ CleanupUnusedGlobals::CleanupUnusedGlobals()
     auto sx_not = MakePatternNode<NegationAgent, Type>();
     auto sx_any = MakePatternNode<DisjunctionAgent, Type>();
     auto getdecl = MakePatternNode<TransformOfAgent, TypeIdentifier>( &TypeDeclarationOf::instance ); // TODO should be modulo typedefs
-    auto id = MakePatternNode<ResourceIdentifier>();
+    auto id = MakePatternNode<AssetIdentifier>();
     auto stuff1 = MakePatternNode<StuffAgent, Scope>();
     auto s_stuff2 = MakePatternNode<StuffAgent, Scope>();
     auto s_antip = MakePatternNode<ConjunctionAgent, Node>();
@@ -499,7 +499,7 @@ CleanupUnusedGlobals::CleanupUnusedGlobals()
     auto s_nm = MakePatternNode<NegationAgent, Node>();
     auto sx_ir = MakePatternNode<InheritanceRecord>();
     auto s_nscope = MakePatternNode<NegationAgent, Scope>();
-	auto sx_resource = MakePatternNode<Resource>();
+	auto sx_resource = MakePatternNode<Asset>();
 	
     s_all->conjuncts = (stuff1, s_nscope);
     stuff1->terminus = delta_scope;
@@ -542,7 +542,7 @@ CleanupUnusedLocals::CleanupUnusedLocals()
     auto sx_not = MakePatternNode<NegationAgent, Type>();
     auto sx_any = MakePatternNode<DisjunctionAgent, Type>();
     auto getdecl = MakePatternNode<TransformOfAgent, TypeIdentifier>( &TypeDeclarationOf::instance ); // TODO should be modulo typedefs
-    auto id = MakePatternNode<ResourceIdentifier>();
+    auto id = MakePatternNode<AssetIdentifier>();
     auto stuff1 = MakePatternNode<StuffAgent, Scope>();
     auto s_stuff2 = MakePatternNode<StuffAgent, Scope>();
     auto s_antip = MakePatternNode<ConjunctionAgent, Node>();

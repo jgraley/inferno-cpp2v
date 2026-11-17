@@ -37,15 +37,23 @@ protected:
                 return seq;
             }
 		}
-        else if( shared_ptr<Resource> i = dynamic_pointer_cast<Resource>( n ) ) // an instance...
+        else if( shared_ptr<Asset> a = dynamic_pointer_cast<Asset>( n ) ) // an instance...
         {
-            if( dynamic_pointer_cast<Compound>( i->initialiser ) ) // ...of a function
+            if( dynamic_pointer_cast<Compound>( a->initialiser ) ) // ...of a function
             {
-                // it's a resource initialised with a Compound, so set up a container containing identifier only, 
+                // it's an asset initialised with a Compound, so set up a container containing identifier only, 
                 // not initialiser (others don't matter for deps purposes). 
                 auto seq = make_shared< Sequence<Node> >();
-                seq->push_back( i->identifier );
+                seq->push_back( a->identifier );
                 return seq;
+            }
+		}
+        else if( shared_ptr<Resource> r = dynamic_pointer_cast<Resource>( n ) ) // an instance...
+        {
+            if( dynamic_pointer_cast<Compound>( r->initialiser ) ) // ...of a function
+            {
+                // it's a resource initialised with a Compound, so set up a container containing nothing.
+                return make_shared< Sequence<Node> >();
             }
 		}
         //TRACE("defaulting ")(*n)("\n");

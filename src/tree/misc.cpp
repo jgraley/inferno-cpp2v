@@ -84,7 +84,7 @@ AugTreePtr<Instance> FindMemberByName( const TransKit &kit, AugTreePtr<Record> r
     {
 		i = AugTreePtr<Instance>::DynamicCast(d_atp);
         if( i )
-            if( auto sss = AugTreePtr<SpecificResourceIdentifier>::DynamicCast(GET_CHILD(i, identifier)) )
+            if( auto sss = AugTreePtr<SpecificAssetIdentifier>::DynamicCast(GET_CHILD(i, identifier)) )
                 if( sss->GetIdentifierName() == name )
                     LLBreak();
     } );

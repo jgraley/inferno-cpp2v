@@ -163,18 +163,18 @@ TreePtr<Node> IdentifierByNameAgent::TryMakeFromDestignatedType( string type_ns,
 		return nullptr;
 }	
 
-//---------------------------------- SpecificResourceIdentifierByNameAgent ------------------------------------    
+//---------------------------------- SpecificAssetIdentifierByNameAgent ------------------------------------    
 
-pair<TreePtr<Node>, TreePtr<Node>> SpecificResourceIdentifierByNameAgent::GetBounds( string name ) const
+pair<TreePtr<Node>, TreePtr<Node>> SpecificAssetIdentifierByNameAgent::GetBounds( string name ) const
 {
-    TreePtr<Node> minimus = MakeTreeNode<SpecificResourceIdentifier>( name, Orderable::BoundingRole::MINIMUS );
-    TreePtr<Node> maximus = MakeTreeNode<SpecificResourceIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
+    TreePtr<Node> minimus = MakeTreeNode<SpecificAssetIdentifier>( name, Orderable::BoundingRole::MINIMUS );
+    TreePtr<Node> maximus = MakeTreeNode<SpecificAssetIdentifier>( name, Orderable::BoundingRole::MAXIMUS );
     return make_pair( minimus, maximus );
 }
 
-string SpecificResourceIdentifierByNameAgent::GetIdentifierSubTypeName() const
+string SpecificAssetIdentifierByNameAgent::GetIdentifierSubTypeName() const
 {
-	return "Resource";
+	return "Asset";
 }  
 
 //---------------------------------- SpecificTypeIdentifierByNameAgent ------------------------------------    

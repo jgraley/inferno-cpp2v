@@ -111,7 +111,7 @@ struct StateLabel : CPPTree::LabelDeclaration
 {
     NODE_FUNCTIONS_FINAL 
     RENDER_AS_BASE_IN_CPP_ONLY(CPPTree::LabelDeclaration)
-    TreePtr<CPPTree::ResourceIdentifier> state;
+    TreePtr<CPPTree::AssetIdentifier> state;
 };
 
 
