@@ -94,11 +94,10 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 				designation_policy.pointer_archetype = arch;
 		}		
 			
-		string sc = unique_coupling_names.at(node) + 
-					" ⪮ " + 
+		string sc = "🏷 " + unique_coupling_names.at(node) + " " +					 
 					RenderNoDesignation( node, Syntax::Production::VN_DESIGNATE_RHS, designation_policy );
-		// Alternative for declarator desaignators
-		//string sc = " ⪮ " + 
+		// Alternative for declarator designators
+		//string sc = "🏷 " + 
 		//			  AccomodateBootTypeAndDeclarator( node, 
 		//					                           unique_coupling_names.at(node), 
 		//					                           Syntax::Production::PURE_IDENTIFIER, 
@@ -123,7 +122,7 @@ string Render::RenderToString( shared_ptr<CompareReplace> pattern, bool lowering
 	                                      Syntax::Production::PREFIX, 
 	                                      top_pattern_policy ) );
     
-    s += Join( commands, "⨟\n" );
+    s += Join( commands, "\n" );
     indenter.AddLinesFromString(s);
     indenter.DoIndent();
     return indenter.GetString();
@@ -566,9 +565,9 @@ string Render::RenderLongFormExplicit( shared_ptr<const Node> node, Syntax::Prod
 		
 	list<string> sitems = PopulateItemStrings( node, policy );    
 	if( GetTotalSize(sitems) > Syntax::GetLineBreakThreshold() )
-		s += Join( sitems, "⚬\n", "⦅\n", "\n⦆" );   
+		s += Join( sitems, "⨟	\n", "⦅\n", "\n⦆" );   
 	else 
-		s += Join( sitems, " ⚬ ", "⦅", "⦆" );    
+		s += Join( sitems, " ⨟	 ", "⦅", "⦆" );    
 		
 	return s;
 }

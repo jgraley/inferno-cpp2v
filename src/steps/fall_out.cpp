@@ -18,14 +18,13 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto s_module = MakePatternNode<Record>();
     auto r_module = MakePatternNode<Record>();
     auto gg = MakePatternNode<GreenGrassAgent, Type>();
-    auto func_id = MakePatternNode<AssetIdentifier>();
     auto thread = MakePatternNode<Thread>();
     auto func_decls = MakePatternNode<StarAgent, Declaration>();
     auto module_decls = MakePatternNode<StarAgent, Declaration>();
     auto func_stmts = MakePatternNode<StarAgent, Statement>();
     auto bases = MakePatternNode<StarAgent, Base>();
     auto r_module_enum = MakePatternNode<Enumeration>();
-    auto r_enum_id = MakePatternNode<BuildSpecificTypeIdentifierAgent>("%sStates");
+    auto r_enum_id = MakePatternNode<BuildSpecificTypeIdentifierAgent>("States");
     auto var_id = MakePatternNode<AssetIdentifier>();
     auto module_id = MakePatternNode<TypeIdentifier>();
     auto l_func_decls = MakePatternNode<StarAgent, Declaration>();
@@ -44,7 +43,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     auto ls_enum = MakePatternNode<Enumeration>();
     auto lr_enum = MakePatternNode<Enumeration>();
     auto lr_state_decl = MakePatternNode<Enumerator>();
-    auto lr_state_id = MakePatternNode<BuildSpecificAssetIdentifierAgent>("%s_STATE_%s");
+    auto lr_state_id = MakePatternNode<BuildSpecificAssetIdentifierAgent>("STATE_%s");
     auto lr_case = MakePatternNode<Case>();
     auto lr_int = MakePatternNode<Signed>();
     auto lr_count = MakePatternNode<BuildContainerSizeAgent>();
@@ -109,7 +108,6 @@ PlaceLabelsInArray::PlaceLabelsInArray()
 
     auto embedded_ll = MakePatternNode<EmbeddedSearchReplaceAgent, Scope>( l_module, ll_all_over );    
     
-    l_func->identifier = func_id;
     l_func->initialiser = l_comp;
 
     l_comp->statements = (MakePatternNode<StarAgent, Statement>(), l_lmap, MakePatternNode<StarAgent, Statement>(), l_stuff, MakePatternNode<StarAgent, Statement>());
@@ -130,7 +128,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     lr_state_decl->type = r_enum_id;
     lr_state_decl->initialiser = lr_count;
     lr_count->container = l_enum_vals;
-    lr_state_id->sources = (func_id, ls_label->identifier);
+    lr_state_id->sources = (ls_label->identifier);
     //l_lmap->permission = MakePatternNode<Const>(); // TODO if I skip this, I should get ⯁Permission⦅⦆ but I actually get nothing, which is wrong (means non-const)
     l_lmap->identifier = r_lmap_id;
     l_lmap->initialiser = l_mover;
@@ -154,11 +152,9 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     gg->through = thread;
     thread->permission = MakePatternNode<NonConst>();
     thread->access = MakePatternNode<Private>();
-    thread->identifier = func_id;
     thread->initialiser = l_delta_comp;
     l_delta_comp->through = s_comp;
     l_delta_comp->overlay = r_comp;
-
 
     s_comp->statements = (comp_stmts);
     r_comp->statements = (r_lmap, comp_stmts);
@@ -167,7 +163,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     //r_module->bases = (bases);
     //r_module->identifier = module_id;
     r_module_enum->identifier = r_enum_id;
-    r_enum_id->sources = (func_id);            
+    //r_enum_id->sources = ();            
     //r_module_enum->members = ();
     r_lmap->type = r_array;
     r_lmap->identifier = r_lmap_id;
@@ -574,6 +570,11 @@ EnsureResetYield::EnsureResetYield()
 
 DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
 {
+	// TODO be much tighter
+	// Firstly, tie the goto with the label that are consumed here
+	// Secondly, we don't want to do general loop raising. Tolerate only
+	// decls and no labels in the pre (so, AdvanceDecl only).
+	// Finally why the do loop not while(true) {...}?
     auto inst = MakePatternNode<Resource>();
     auto s_comp = MakePatternNode<Compound>();
     auto r_comp = MakePatternNode<Compound>();
@@ -619,7 +620,6 @@ InsertInferredYield::InsertInferredYield()
 {
 	// This is the yield that stops the sc_thread from running busy and keeps
 	// sc_method being called. 
-    auto fn_id = MakePatternNode<AssetIdentifier>();
     auto thread = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
     auto func_comp = MakePatternNode<Compound>();
     auto s_comp = MakePatternNode<Compound>();
@@ -644,7 +644,6 @@ InsertInferredYield::InsertInferredYield()
     thread->permission = MakePatternNode<NonConst>();
     thread->access = MakePatternNode<Private>();
     thread->initialiser = func_comp;
-    thread->identifier = fn_id;  
     func_comp->statements = (func_decls, loop);
     func_decls->restriction = MakePatternNode<Declaration>();
     loop->body = delta;

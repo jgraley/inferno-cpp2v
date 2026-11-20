@@ -170,7 +170,6 @@ ThreadToMethod::ThreadToMethod()
     auto s_comp = MakePatternNode<Compound>();
     auto s_loop_comp = MakePatternNode<Compound>();
     auto r_loop_comp = MakePatternNode<Compound>();
-    auto id = MakePatternNode<AssetIdentifier>();
     auto s_loop = MakePatternNode<Do>();
     auto s_loop_cond = MakePatternNode<True>();
     auto loop_decls = MakePatternNode<StarAgent, Declaration>();
@@ -196,7 +195,6 @@ ThreadToMethod::ThreadToMethod()
     s_thread->permission = MakePatternNode<NonConst>();    
     s_thread->access = MakePatternNode<Private>();
     s_thread->initialiser = s_comp;
-    s_thread->identifier = id;
 
     s_comp->statements = s_loop;
     s_loop->condition = s_loop_cond; 
@@ -207,7 +205,6 @@ ThreadToMethod::ThreadToMethod()
     r_method->permission = MakePatternNode<NonConst>();        
     r_method->access = MakePatternNode<Private>();
     r_method->initialiser = embedded_l;
-    r_method->identifier = id;
     
     ls_wait_dynamic->event = l_event;
     lr_nt_dynamic->event = l_event;

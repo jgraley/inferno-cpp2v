@@ -245,7 +245,6 @@ RaiseSCProcess::RaiseSCProcess( TreePtr< Process > lr_scprocess )
     ls_process->type = MakePatternNode<Callable>();
     lr_scprocess->access = MakePatternNode<Private>();
     lr_scprocess->permission = MakePatternNode<NonConst>();
-    lr_scprocess->identifier = l_id;
     lr_scprocess->initialiser = l_body;
     
     Configure( COMPARE_REPLACE, delta, r_embedded );

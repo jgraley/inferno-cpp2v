@@ -200,8 +200,8 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     // GCCs goto-a-variable extension in which case a label could be 
     // on the right of an assignment.
     
-    auto s_instance = MakePatternNode<Asset>();
-    auto r_instance = MakePatternNode<Asset>();
+    auto s_instance = MakePatternNode<Resource>();
+    auto r_instance = MakePatternNode<Resource>();
     auto stuff = MakePatternNode<StuffAgent, Compound>();
     auto overlay = MakePatternNode<DeltaAgent, Statement>();
     auto s_comp = MakePatternNode<Compound>();
@@ -216,21 +216,18 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
     auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
     auto l_s_orrule = MakePatternNode<DisjunctionAgent, LabelIdentifier>();
-    auto identifier = MakePatternNode<AssetIdentifier>();
     
     l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
     
     auto r_embedded = MakePatternNode<EmbeddedSearchReplaceAgent, Compound>( stuff, l_s_orrule, r_labelid );
     
     s_instance->initialiser = stuff;
-    s_instance->identifier = identifier;
 
     s_comp->statements = ( pre, s_label1, s_label2, post );
     s_label1->identifier = s_labelid1;
     s_label2->identifier = s_labelid2;
     
     r_instance->initialiser = r_embedded;
-    r_instance->identifier = identifier;
     stuff->terminus = overlay;           
     overlay->through = s_comp;
     overlay->overlay = r_comp;

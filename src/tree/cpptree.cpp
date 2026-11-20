@@ -186,9 +186,10 @@ string Type::GetRenderTypeAndDeclarator( VN::RendererInterface *renderer, string
                                          Production, Production, Policy policy,
                                          TreePtr<Node> constant)
 {
-	auto dc = TreePtr<Permission>::DynamicCast(constant);	
-	return GetRenderTypeSpec( renderer, policy ) + 
-		   renderer->DoRender(&dc, Production::SPACE_SEP_STMT_DECL, policy) + 
+	auto c2 = TreePtr<Permission>::DynamicCast(constant);	
+	string cs = renderer->DoRender(&c2, Production::SPACE_SEP_STMT_DECL, policy);	
+	return GetRenderTypeSpec( renderer, policy ) + " " +
+		   (cs != "" ? " "+cs : "") + 
 	       (declarator != "" ? " "+declarator : "");
 }                                           
 
@@ -559,6 +560,8 @@ TreePtr<Node> SpecificIdentifier::TryGetDeclarer(const VN::RendererInterface *re
 	ASSERT(declarer);
 	return declarer;
 }
+
+
 catch( BaseDeclarationOf::DeclarationNotFound &dnf )
 {			
 	return nullptr; // TODO #929 cannot tell if not declared
@@ -1642,54 +1645,6 @@ bool XStructor::IsDeclaredAsXstructor(TreePtr<Node>) const
 }
 
 
-list<string> XStructor::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
-{
-	ASSERT(record_id);
-	list<string> ls;
-	string s;
-
-	if( id_policy.resolve_identifier_scope )
-	{
-		// Use id_policy so we resolve any scopes outside the record
-		s += renderer->DoRender( &record_id, Production::PRIMARY_EXPR, policy );
-		s += "::";
-	}
-	s += GetLeadingText(policy);
-	Policy local_id_policy = id_policy;
-	local_id_policy.resolve_identifier_scope = false;
-	// Absolutely no scope resolving this time
-	s += renderer->DoRender( &record_id, Production::SPACE_SEP_STMT_DECL, local_id_policy );		
-	
-	// Params as per subclass
-	s += RenderParams(renderer, policy);
-	
-	// Required for resolved constructors - allows to tie directly to constructor usages
-	ls.push_back( s );
-	if( !policy.hide_xstructor_identifiers )
-		ls.push_back( renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) );   
-		
-	return ls;
-}
-
-
-string XStructor::RenderParams(VN::RendererInterface *, Policy ) const
-{
-	return "()";
-}
-
-
-bool XStructor::ShouldSplitInstance( Policy ) const
-{
-	return true;
-}
-
-
-string XStructor::GetLeadingText(Policy) const
-{
-	return "X"; // TODO choose better
-}
-
-
 void XStructor::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc )
 {
 	DispatchDecl::OnInScope(spg, loc); 
@@ -1709,19 +1664,26 @@ void XStructor::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc )
 	ASSERT( TreePtr<TypeIdentifier>::DynamicCast(record_id) ); // check assumption
 }
 
-
-TreePtr<Node> XStructor::OnParams( list<TreePtr<Node>> params, Location loc )
-{
-	if( !params.empty() )
-		throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
-				MyBestErrName() + " cannot accept parameters.");		
-	return (TreePtr<Node>)shared_from_this();	
-}
-
 //////////////////////////// Constructor //////////////////////////////
 
-string Constructor::RenderParams(VN::RendererInterface *renderer, Policy policy) const
+list<string> Constructor::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
 {
+	ASSERT(record_id);
+	list<string> ls;
+	string s;
+
+	if( id_policy.resolve_identifier_scope )
+	{
+		// Use id_policy so we resolve any scopes outside the record
+		s += renderer->DoRender( &record_id, Production::PRIMARY_EXPR, policy );
+		s += "::";
+	}
+	Policy local_id_policy = id_policy;
+	local_id_policy.resolve_identifier_scope = false;
+	
+	// Absolutely no scope resolving this time
+	s += renderer->DoRender( &record_id, Production::SPACE_SEP_STMT_DECL, local_id_policy );		
+	
 	// Gives us the parameterisation
 	policy.context = make_shared<any>(); // No access specs here
 		
@@ -1729,7 +1691,14 @@ string Constructor::RenderParams(VN::RendererInterface *renderer, Policy policy)
     for( auto &p : const_cast<Constructor *>(this)->params )	
 		lsp.push_back( renderer->DoRender( &p, Production::BARE_STMT_DECL, policy ) );       
 
-    return Join( lsp, ", ", "(", ")" );
+	s += Join( lsp, ", ", "(", ")" );
+	
+	// Required for resolved constructors - allows to tie directly to constructor usages
+	ls.push_back( s );
+	if( !policy.hide_xstructor_identifiers )
+		ls.push_back( renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) );   
+		
+	return ls;
 }
 
 
@@ -1739,9 +1708,9 @@ list<string> Constructor::RenderInitPre( VN::RendererInterface *renderer, Policy
 }
 
 
-string Constructor::GetLeadingText(Policy) const
+bool Constructor::ShouldSplitInstance( Policy ) const
 {
-	return "";
+	return true;
 }
 
 
@@ -1755,9 +1724,34 @@ TreePtr<Node> Constructor::OnParams( list<TreePtr<Node>> params_, Location )
 
 //////////////////////////// Destructor //////////////////////////////
 
-string Destructor::GetLeadingText(Policy) const
+list<string> Destructor::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
 {
-	return "~";
+	ASSERT(record_id);
+	string s;
+
+	if( id_policy.resolve_identifier_scope )
+	{
+		// Use id_policy so we resolve any scopes outside the record
+		s += renderer->DoRender( &record_id, Production::PRIMARY_EXPR, policy );
+		s += "::";
+	}
+	s += "~";
+	Policy local_id_policy = id_policy;
+	local_id_policy.resolve_identifier_scope = false;
+	
+	// Absolutely no scope resolving this time
+	s += renderer->DoRender( &record_id, Production::SPACE_SEP_STMT_DECL, local_id_policy );		
+	
+	// No params or identifier (this is a resource)
+	s += "()";
+
+	return { s };
+}
+
+
+bool Destructor::ShouldSplitInstance( Policy ) const
+{
+	return true;
 }
 
 //////////////////////////// Enumerator //////////////////////////////
@@ -2320,24 +2314,18 @@ Syntax::Production Labeley::GetMyProductionTerminal() const
 }
 
 
-string Labeley::GetRenderTypeSpec( VN::RendererInterface *, Policy policy )
+string Labeley::GetRenderTypeSpec( VN::RendererInterface *renderer, Policy policy )
 {
 	if( policy.permit_inherited_keyword ) 
 		return "void *"; // Effecively inherited, this is the underlying C type for a label
 
-	throw RefuseDueLocal(); 
+	return renderer->DoRenderSignifier(this, policy);
 		
 	// Note: all instances must be const
-	// TODO Labely should be a local node, maybe raised and definitely lowered 
+	// TODO Labeley should be a local node, maybe raised and definitely lowered 
 	// back to const void *.
 	// Raising requires usage analysis but only needed if goto-a-variable is 
 	// accepted as input.
-}
-
-
-Syntax::Token Labeley::GetSignifierToken() const
-{
-	throw UnimplementedToken(); 
 }
 
 //////////////////////////// TypeDeclaration ///////////////////////////////

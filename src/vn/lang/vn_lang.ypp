@@ -77,13 +77,12 @@
 %define api.token.prefix {TOK_}
 
 %token
-	DESIGNATE_COMMAND 					        _("⪮")
+	DESIGNATE_COMMAND 					        _("🏷")
 	ENGINE_COMMAND	 						    _("꩜")
 	ATTRIBUTE_COMMAND						    _("‡")
-	COMMAND_TERM 						        _("⨟")
 	OPEN_VN 							        _("⦅")
 	CLOSE_VN 							        _("⦆")
-	VN_SEP 								        _("⚬")
+	VN_SEP 								        _("⨟	")
 	VN_SUB_SEP							        _("🞄")
 	OPEN_MAP_CALL						        _("〔")
 	CLOSE_MAP_CALL						        _("〕")	
@@ -220,7 +219,7 @@ stmt_high
 %type <TreePtr<Node>> 				enum_node enum restricted_stuff_scope
 %type <TreePtr<Node>>				memb_init_boot memb_init_element memb_init_prefix memb_init_postfix memb_init_primary
 %type <TreePtr<Node>> 				enumerator enum_element prototype_enumerator
-%type <TreePtr<Node>> 				declaring_type_id declaring_res_id declaring_st_res_id declaring_label_id
+%type <TreePtr<Node>> 				declaring_type_id declaring_asset_id declaring_st_asset_id declaring_label_id
 %type <TreePtr<Node>> 				statement_element statement_clause statement_conj
 %type <TreePtr<Node>> 				map_arg_element map_arg 
 %type <TreePtr<Node>> 				argument_element argument
@@ -276,27 +275,27 @@ stmt_high
 
 vnscript 		: commands 								{ vn->OnVNScript($1); }
      
-// This is to make the ⨟ optional on last command
+// This is to make the ➜ optional on last command
 commands        : sep_commands								{ $$ = $1; }
-				| sep_commands COMMAND_TERM					{ $$ = $1; }
+//				| sep_commands COMPOSITION_OP					{ $$ = $1; }
 				
-// The ⨟ turns patterns into commands. 
-sep_commands 	: sep_commands COMMAND_TERM script_command		{ $$ = $1; $$.push_back($3); }	
+// The ➜ turns patterns into commands. 
+sep_commands 	: sep_commands script_command		{ $$ = $1; $$.push_back($2); }	
 				| script_command								{ $$.push_back($1); }
-				| sep_commands COMMAND_TERM designation_command	{ $$ = $1; recogniser->AddGnomon($3); }	
-				| designation_command							{ recogniser->AddGnomon($1); }
+				| sep_commands DESIGNATE_COMMAND designation_command	{ $$ = $1; recogniser->AddGnomon($3); }	
+				| DESIGNATE_COMMAND designation_command							{ recogniser->AddGnomon($2); }
 			
 // Add more commands here
 script_command	: ENGINE_COMMAND unified_clause   		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
 				| ATTRIBUTE_COMMAND		  					{ $$ = make_shared<VN::AttributeCommand>(@$); }
 
 // or here
-designation_command	: new_vn_name DESIGNATE_COMMAND sing_stmt_element	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_STMT); }
-					| new_vn_name DESIGNATE_COMMAND expression_element	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_EXPR); }
-					| new_vn_name DESIGNATE_COMMAND type_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
-					| new_vn_name DESIGNATE_COMMAND qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
-					| new_vn_name DESIGNATE_COMMAND ACC_NODE_KEYWORD	 { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_ACCESS); }
-					| new_vn_name DESIGNATE_COMMAND PREPROCESSOR_ID_SIGN { $$ = make_shared<VN::DesignationGnomon>($1, $3, YY::VNLangParser::token::TOK_DESIGNATED_EXPR); }
+designation_command	: new_vn_name sing_stmt_element	 { $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_STMT); }
+					| new_vn_name expression_element	 { $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_EXPR); }
+					| new_vn_name type_entry			 { $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
+					| new_vn_name qualifier_node		 { $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
+					| new_vn_name ACC_NODE_KEYWORD	 { $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_ACCESS); }
+					| new_vn_name PREPROCESSOR_ID_SIGN { $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_EXPR); }
 
 //////////////////////////////////// ITEMISATION ///////////////////////////////////////////
 // For explicit/built-in nodes mostly
@@ -405,9 +404,9 @@ prototype_np	: DESIGNATED_CURRENT_RECORD_ID st_declarator						{ $$ = vn->OnDecl
 				| DESIGNATED_CURRENT_RECORD_ID qualifiers st_declarator				{ $$ = vn->OnDeclaratorDecl($2, $1, @1, $3, @3); } // eg int const a 	
 				| qualifiers DESIGNATED_CURRENT_RECORD_ID qualifiers st_declarator	{ $$ = vn->OnDeclaratorDecl($1+$3, $2, @2, $4, @4); } 
 				| DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$)->OnParams($2, @2)->OnIdentifier($3, @3); }
-				| '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$)->OnParams($3, @3)->OnIdentifier($4, @4); }
-				| qualifiers '~' DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary		{ $$ = vn->OnXStructorDecl(true, @$)->OnParams($4, @4)->OnIdentifier($5, @5); $$ = vn->ApplyQualifiers($$, $1, @1); }
-				| ASSET_SIGN declaring_res_id								{ $1->OnInScope(vn->TryGetTopScopeGnomon(), @1); $$ = $1->OnIdentifier($2, @2); } // TODO quals on RESOURCE/ASSET
+				| '~' DESIGNATED_CURRENT_RECORD_ID '(' ')'				{ $$ = vn->OnXStructorDecl(true, @$); }
+				| qualifiers '~' DESIGNATED_CURRENT_RECORD_ID '(' ')'	{ $$ = vn->OnXStructorDecl(true, @$); $$ = vn->ApplyQualifiers($$, $1, @1); }
+				| ASSET_SIGN declaring_asset_id								{ $1->OnInScope(vn->TryGetTopScopeGnomon(), @1); $$ = $1->OnIdentifier($2, @2); } // TODO quals on RESOURCE/ASSET
 				| RESOURCE_SIGN 											{ $1->OnInScope(vn->TryGetTopScopeGnomon(), @1); $$ = $1; }
 
 assign_init		: expression
@@ -457,7 +456,7 @@ declarator_postfix	: declarator_primary
 					| declarator_postfix '[' expression_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
 					| declarator_postfix '[' ']'					{ $$ = make_shared<Declarators::Array>($1, MakeTreeNode<CPPTree::Uninitialised>()); } 
                 
-declarator_primary	: declaring_res_id									{ $$ = make_shared<Declarators::Concrete>($1); } 
+declarator_primary	: declaring_asset_id									{ $$ = make_shared<Declarators::Concrete>($1); } 
                      
 //////////////////////////////// STRICT CONCRETE DECLARATORS /////////////////////////////////////         
 // Strict means no parens around the central identifier
@@ -475,7 +474,7 @@ st_declarator_postfix	: st_declarator_primary
 						| st_declarator_postfix '[' expression_boot ']'			{ $$ = make_shared<Declarators::Array>($1, $3); } 
 						| st_declarator_postfix '[' ']'						{ $$ = make_shared<Declarators::Array>($1, MakeTreeNode<CPPTree::Uninitialised>()); } 
                 
-st_declarator_primary	: declaring_st_res_id  								{ $$ = make_shared<Declarators::Concrete>($1); } 
+st_declarator_primary	: declaring_st_asset_id  								{ $$ = make_shared<Declarators::Concrete>($1); } 
                      
 //////////////////////////////// ABSTRACT DECLARATORS /////////////////////////////////////         
                           		
@@ -582,7 +581,7 @@ enum_element	: enumerator
 enumerator		: prototype_enumerator
 				| prototype_enumerator C_ASSIGN assign_init					{ $$ = $1->OnInitialiser($3, @3); } 
 
-prototype_enumerator 	: declaring_res_id 									{ $$ = vn->OnEnumerator(@1)->OnIdentifier( $1, @1 ); }
+prototype_enumerator 	: declaring_asset_id 									{ $$ = vn->OnEnumerator(@1)->OnIdentifier( $1, @1 ); }
 
 //////////////////////////////// SINGULAR STATEMENTS ////////////////////////////////////                 
 // Syntax for statements in a production that only accomodates exactly one statement node.
@@ -595,7 +594,7 @@ sing_stmt_element: sing_stmt_clause
 sing_stmt_boot	: sing_stmt_clause 
 				| sing_stmt_commands								{ $$ = vn->OnEmbeddedCommands($1); }
 
-sing_stmt_commands	: sing_stmt_clause COMMAND_TERM commands			{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
+sing_stmt_commands	: sing_stmt_clause commands			{ $$ = $2; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 
 sing_stmt_clause	: sing_stmt_conj
 				| sing_stmt_clause DISJUNCTION_OP sing_stmt_conj		{ $$ = vn->OnDisjunction($1, $3); }
@@ -694,7 +693,7 @@ expression_element: expression_clause
 expression_boot	: expression_clause 
 				| expression_commands								{ $$ = vn->OnEmbeddedCommands($1); }
 
-expression_commands: expression_clause COMMAND_TERM commands			{ $$ = $3; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
+expression_commands: expression_clause commands			{ $$ = $2; $$.push_front( make_shared<VN::PatternCommand>($1, @1) ); } 
 				
 expression_clause	: expression_conj
 				| expression_clause DISJUNCTION_OP expression_conj		{ $$ = vn->OnDisjunction($1, $3); }
@@ -802,13 +801,13 @@ declaring_type_id	: type_specified
                                                                                  MakeTreeNode<CPPTree::TypeIdentifier>(), 
                                                                                  YY::VNLangParser::token::TOK_DESIGNATED_STMT)); }
 
-declaring_res_id	: id_parens
+declaring_asset_id	: id_parens
                     | new_vn_name			{ recogniser->AddGnomon(
                                               make_shared<VN::DesignationGnomon>($1, 
                                                                                  MakeTreeNode<CPPTree::AssetIdentifier>(), 
                                                                                  YY::VNLangParser::token::TOK_DESIGNATED_STMT)); }
 
-declaring_st_res_id	: id_primary
+declaring_st_asset_id	: id_primary
 					| vn_any_node
                     | new_vn_name			{ recogniser->AddGnomon(
                                               make_shared<VN::DesignationGnomon>($1, 
@@ -925,7 +924,7 @@ type_for_declarator : type_primary
 type_primary: type_vn_prim
 			| '(' type_boot ')'													{ $$ = $2; } // For disambiguation and introducing types using anonymous declarators
             | TYPE_SIGN														
-            | TYPE_W_ARGS_SIGN parameterisation								{ $$ = $1->OnParams($2, @2); }		
+            | TYPE_W_ARGS_SIGN parameterisation									{ $$ = $1->OnParams($2, @2); }		
 			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }				
 			
 type_vn_prim: type_full_explicit_start itemisation								 { $$ = vn->FinishExplicitNode($1.node, @1, $2); }

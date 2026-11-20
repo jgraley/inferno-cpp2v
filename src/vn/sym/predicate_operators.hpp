@@ -28,8 +28,8 @@ enum class Relationship
 enum class Transitivity
 {
     NONE,
-    FORWARD,      // S1 ✕ S2 ∧ S2 ⚬ S3 = S1 ✕ S3
-    REVERSE,      // S1 ✕ S2 ∧ S3 ⚬ S2 = S1 ✕ S3
+    FORWARD,      // S1 ✕ S2 ∧ S2 ⨟	 S3 = S1 ✕ S3
+    REVERSE,      // S1 ✕ S2 ∧ S3 ⨟	 S2 = S1 ✕ S3
     BIDIRECTIONAL // Either of the above is true
 };
 

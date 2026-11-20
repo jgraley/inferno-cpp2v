@@ -263,7 +263,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     auto pre = MakePatternNode<StarAgent, Statement>();
     auto statements_negation = MakePatternNode<NegationAgent, Statement>();    
     auto sx_process_macro = MakePatternNode< MacroStatement >();
-    auto id = MakePatternNode< AssetIdentifier >(); 
+    auto id = MakePatternNode< BuildSpecificAssetIdentifierAgent>(s_scprocess->GetLoweredIdOrMacroName() ); 
     auto bases = MakePatternNode<StarAgent, Base>();
     auto token = MakePatternNode< SpecificPreprocessorIdentifier >( s_scprocess->GetLoweredIdOrMacroName() ); // #819 style
     auto r_func = MakePatternNode<Member>();
@@ -279,7 +279,7 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     s_cons_macro->initialiser = s_comp;
 
     s_comp->statements = (pre);
-    pre->restriction = statements_negation;
+    //pre->restriction = statements_negation;
     statements_negation->negand = sx_process_macro;
     sx_process_macro->arguments = (id);
     
@@ -299,7 +299,6 @@ LowerSCProcess::LowerSCProcess( TreePtr< SCTree::Process > s_scprocess )
     overres->overlay = r_func;
     s_scprocess->access = MakePatternNode<Private>();
     s_scprocess->permission = MakePatternNode<NonConst>();    
-    s_scprocess->identifier = id;
     s_scprocess->initialiser = body;
     r_func->dispatch = MakePatternNode<NonVirtual>();
     r_func->access = MakePatternNode<Private>();

@@ -551,7 +551,6 @@ AddYieldFlag::AddYieldFlag()
 AddInferredYield::AddInferredYield()
 {
     auto fn = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
-    auto fn_id = MakePatternNode<AssetIdentifier>();
     auto func_comp = MakePatternNode<Compound>();
     auto s_comp = MakePatternNode<Compound>();
     auto sx_comp = MakePatternNode<Compound>();
@@ -576,7 +575,6 @@ AddInferredYield::AddInferredYield()
     fn->permission = MakePatternNode<NonConst>();    
     fn->access = MakePatternNode<Private>();
     fn->initialiser = func_comp;
-    fn->identifier = fn_id;  
 
     flag_decl->type = MakePatternNode<Boolean>();
     flag_decl->initialiser = MakePatternNode<Uninitialised>();
@@ -608,7 +606,6 @@ AddInferredYield::AddInferredYield()
 MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
 {
     auto fn = MakePatternNode<Thread>(); // Must be SC_THREAD since we introduce SC stuff
-    auto fn_id = MakePatternNode<AssetIdentifier>();
     auto func_decls = MakePatternNode<StarAgent, Declaration>();
     auto inits = MakePatternNode<StarAgent, Statement>();
     auto stmts = MakePatternNode<StarAgent, Statement>();
@@ -627,7 +624,6 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     fn->permission = MakePatternNode<NonConst>();    
     fn->access = MakePatternNode<Private>();
     fn->initialiser = func_over;
-    fn->identifier = fn_id;  
     func_over->through = s_func_comp;
 
     s_func_comp->statements = (first_init, inits, loop);
@@ -657,7 +653,6 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
 LoopRotation::LoopRotation()
 {
     auto s_var_decl = MakePatternNode<Instance>();
-    auto fn_id = MakePatternNode<AssetIdentifier>();
     auto s_var_id = MakePatternNode<AssetIdentifier>();
     auto s_cur_enum_id = MakePatternNode<AssetIdentifier>();
     auto s_outer_enum_id = MakePatternNode<AssetIdentifier>();
@@ -719,7 +714,6 @@ LoopRotation::LoopRotation()
     thread->permission = MakePatternNode<NonConst>();    
     thread->access = MakePatternNode<Private>();
     thread->initialiser = func_comp;
-    thread->identifier = fn_id;  
 
     s_enum->identifier = s_enum_id;
 	s_enum->members = (s_enums, s_cur_enum);

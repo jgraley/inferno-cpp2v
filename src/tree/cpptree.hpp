@@ -776,43 +776,38 @@ struct Member : Instance, AccessDecl, DispatchDecl
 };
 
 
-struct XStructor : Asset, AccessDecl, DispatchDecl 
+struct XStructor : AccessDecl, DispatchDecl 
 {
 	NODE_FUNCTIONS
 	TreePtr<TypeIdentifier> record_id;
 
 	bool IsDeclaredAsXstructor(TreePtr<Node>) const override;
-	virtual string RenderParams(VN::RendererInterface *renderer, Policy policy) const;
-	bool ShouldSplitInstance( Policy ) const override;
-	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
-
-	virtual string GetLeadingText(Policy policy) const;
 
 	void OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc );
-	TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc ) override;
 };
 
 
-struct Constructor : XStructor,
+struct Constructor : XStructor, Asset,
                      MembInitSeq
 {
 	NODE_FUNCTIONS_FINAL
 
     Collection<Declaration> params; // TODO be Parameter #803
 
-	string RenderParams(VN::RendererInterface *renderer, Policy policy) const override;
+	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
 	list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy ) override;
-	string GetLeadingText(Policy policy) const override;
+	bool ShouldSplitInstance( Policy ) const override;
 
 	TreePtr<Node> OnParams( list<TreePtr<Node>> params, Location loc ) override;
 };
 
 
-struct Destructor : XStructor // TODO should be a Resource, not Asset
+struct Destructor : XStructor, Resource // TODO should be a Resource, not Asset
 {
 	NODE_FUNCTIONS_FINAL
 
-	string GetLeadingText(Policy policy) const override;
+	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
+	bool ShouldSplitInstance( Policy ) const override;
 };
 
 
@@ -1161,7 +1156,6 @@ struct Labeley : Type
     
 	Production GetMyProductionTerminal() const override;	    
 	string GetRenderTypeSpec( VN::RendererInterface *, Policy ) final;
-	Token GetSignifierToken() const override;
 };
 
 //////////////////////////// User-defined Types ////////////////////////////

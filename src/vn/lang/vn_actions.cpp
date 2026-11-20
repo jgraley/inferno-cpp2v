@@ -998,10 +998,10 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // There is a fundamental conflict between
 // int a(args...);
 // and 
-// int a (compound initialiser⨟ other commands...);
+// int a (compound initialiser➜ other commands...);
 // It can be resolved with 
-// int a = (compound initialiser⨟ other commands...);
-// But the user can also use a designation to capture the (compound initialiser⨟ other commands...) and then apply the designation without =
+// int a = (compound initialiser➜ other commands...);
+// But the user can also use a designation to capture the (compound initialiser➜ other commands...) and then apply the designation without =
 // This is now rule #896 (sort of)
 
 // NOTE A "signifier" can be a keyword or an operator name or a short-form explicit. It generalises keywords to things we shouldn't call

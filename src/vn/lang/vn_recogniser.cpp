@@ -37,7 +37,7 @@ DesignationGnomon::DesignationGnomon( std::wstring name_, TreePtr<Node> node_, S
 
 string DesignationGnomon::GetTrace() const
 {
-	return ToASCII(name) + "⪮" + Trace(node) + "(" + Trace((unsigned)any_cast<YY::VNLangParser::token::token_kind_type>(token)) + ")";
+	return "🏷 " + ToASCII(name) + " " + Trace(node) + "(" + Trace((unsigned)any_cast<YY::VNLangParser::token::token_kind_type>(token)) + ")";
 }
 	
 

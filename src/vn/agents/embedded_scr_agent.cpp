@@ -106,7 +106,6 @@ string EmbeddedSCRAgent::GetAgentRender( VN::RendererInterface *renderer, Syntax
 	// indent as required. If the ꩜<pattern> aere a production it would be at 
 	// Boost(VN_SEP_SCRIPTY) to get left-association.
 	return renderer->DoRenderPreserve( (TreePtr<Node>)(*GetThrough()), through_prod, policy ) + 
-		   "⨟\n" +
 		   "꩜" + 
 		   renderer->DoRenderPreserve( search_pattern, Syntax::Production::PREFIX, policy ); // Left-associative 
 }    

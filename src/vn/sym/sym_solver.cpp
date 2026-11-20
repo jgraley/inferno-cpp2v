@@ -403,7 +403,7 @@ Relationship TruthTableSolver::TryDeriveRelationship( shared_ptr<PredicateOperat
         // Use this un-ordered version if either pred is commutative. Consider > and ==: they
         // contradict regardless of operand order to >.
         
-        // Note that taking sets of operands can contract on eg S1 ⚬ S1, but I think
+        // Note that taking sets of operands can contract on eg S1 ⨟	 S1, but I think
         // the relationship deduction is the same (but most predicates like that are effectively consts)
         auto set_ops_i = ToSet<list<shared_ptr<SymbolExpression>>, Expression::Relation>( ops_i );
         auto set_ops_j = ToSet<list<shared_ptr<SymbolExpression>>, Expression::Relation>( ops_j );

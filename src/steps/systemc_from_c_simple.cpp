@@ -112,7 +112,6 @@ MainToThread::MainToThread()
     auto r_body = MakePatternNode<Compound>();
 	auto s_member = MakePatternNode< Member >();
     auto s_func = MakePatternNode<Function>();
-    auto s_identifier = MakePatternNode<SpecificAssetIdentifierByNameAgent>("main");
 	auto r_member = MakePatternNode< Thread >();
 	auto my_int = MakePatternNode<Signed>();
 	auto statements = MakePatternNode<StarAgent, Statement>();
@@ -124,7 +123,6 @@ MainToThread::MainToThread()
 	s_member->dispatch = MakePatternNode<NonVirtual>();
 	s_member->permission = MakePatternNode<NonConst>();
 	s_member->type = s_func;
-	s_member->identifier = s_identifier;
 	s_member->initialiser = s_body;
 	s_body->statements = ( statements );
 	//s_func->members = ()        require no parameters
@@ -134,7 +132,6 @@ MainToThread::MainToThread()
 	delta->overlay = r_embedded;
 	r_member->access = MakePatternNode<Private>();
 	r_member->permission = MakePatternNode<NonConst>();
-	r_member->identifier = s_identifier;
 	r_member->initialiser = r_body;
 	r_body->statements = ( statements );
 

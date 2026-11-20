@@ -60,14 +60,13 @@ node_name               ({ascii_name}|::)*
 \s          	// ignore space
 ꩜				{ return YY::VNLangParser::make_ENGINE_COMMAND(location()); };
 ‡				{ return YY::VNLangParser::make_ATTRIBUTE_COMMAND(location()); };
-⪮				{ return YY::VNLangParser::make_DESIGNATE_COMMAND(location()); };
-⨟				{ return YY::VNLangParser::make_COMMAND_TERM(location()); };
+🏷				{ return YY::VNLangParser::make_DESIGNATE_COMMAND(location()); }; // ⪮ for global see #941
 〔				{ return YY::VNLangParser::make_OPEN_MAP_CALL(location()); };
  〕				{ return YY::VNLangParser::make_CLOSE_MAP_CALL(location()); };
 ⦂				{ return YY::VNLangParser::make_MAP_ARG_OP(location()); };
 ⦅				{ return YY::VNLangParser::make_OPEN_VN(location()); };
 ⦆				{ return YY::VNLangParser::make_CLOSE_VN(location()); };
-⚬				{ return YY::VNLangParser::make_VN_SEP(location()); };
+⨟				{ return YY::VNLangParser::make_VN_SEP(location()); };
 🞄				{ return YY::VNLangParser::make_VN_SUB_SEP(location()); };
 ⩩				{ return YY::VNLangParser::make_STUFF_OP(location()); };
 ⧥				{ return YY::VNLangParser::make_RESTRICTED_STUFF(location()); };

@@ -94,12 +94,12 @@ string BuildIdentifierAgent::GetAgentRender( VN::RendererInterface *renderer, Sy
 	// Add in the subtype name and format to make a pseudo-itemisation
 	list<string> ls_production;
 	if( format.empty() )
-		ls_production.push_back( "" ); // this is syntactically ok with ⚬
+		ls_production.push_back( "" ); // this is syntactically ok with ⨟	
 	else
 		ls_production.push_back( "\"" + format + "\"" ); // quotes to diambiguate from % as modulo
 	ls_production.push_back( sources );
 	
-	return s + Join( ls_production, "⚬", "⦅", "⦆");
+	return s + Join( ls_production, "⨟	", "⦅", "⦆");
 } 
   
     

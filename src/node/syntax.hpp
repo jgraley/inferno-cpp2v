@@ -25,9 +25,9 @@ public:
 		BOTTOM_VN,
 		BOOT,
 		BOOT_SEMICOLON, // Note: a surrounding can get ";" added.
-		VN_SEP_SCRIPTY, // Separated by ⨟ (in embedded engine renders)
-		VN_SEP_SCRIPTY_SEMICOLON, // Separated by ⨟ (in embedded engine renders). A surrounding can get ";" added.
-		VN_SEP_ITEMS, // Separated by ⚬ (in StandardAgent renders, which always have ())		
+		VN_SEP_SCRIPTY, // Separated by ➜ (in embedded engine renders)
+		VN_SEP_SCRIPTY_SEMICOLON, // Separated by ➜ (in embedded engine renders). A surrounding can get ";" added.
+		VN_SEP_ITEMS, // Separated by ⨟	 (in StandardAgent renders, which always have ())		
 		VN_DESIGNATE_RHS, // Designating using ⪮
 		VN_DISJUNCTION,
 		VN_DISJUNCTION_SEMICOLON, // Note: a surrounding can get ";" added.

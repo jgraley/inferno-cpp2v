@@ -466,7 +466,7 @@ private:
             }
         }
 
-        TreePtr<AssetIdentifier> CreateResourceIdentifier(
+        TreePtr<AssetIdentifier> CreateAssetIdentifier(
                 clang::IdentifierInfo *ID = 0)
         {
             if (ID)            
@@ -493,7 +493,7 @@ private:
             return MakeTreeNode<SpecificLabelIdentifier>( ID->getName() );
         }
 
-        TreePtr<Instance> CreateInstanceNode(clang::Scope *S,
+        TreePtr<Resource> CreateResourceNode(clang::Scope *S,
                 clang::Declarator &D, TreePtr<AccessSpec> access =
                         TreePtr<AccessSpec> ())
         {
@@ -505,7 +505,7 @@ private:
 			ASSERT( !inferno_scope_stack.empty() );
 			auto record = TreePtr<Record>::DynamicCast(inferno_scope_stack.top());
 
-            TreePtr<Asset> o;
+            TreePtr<Resource> r;
             TRACE("scope flags 0x%x\n", S->getFlags());
             if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
 			{
@@ -524,7 +524,7 @@ private:
 						auto fchunk = TryGetFChunk(D, 0);
 						ASSERT( fchunk );
 						FillParameters( xo, fchunk );
-						o = xo;
+						r = xo;
 						accesso = xo;
 						dispatcho = xo; // TODO drop
 						break;
@@ -535,7 +535,7 @@ private:
 						auto xo = MakeTreeNode<Destructor>();
 						xo->record_id = record->identifier;
 						TRACE("Made destructor ")(xo)(" id ")(xo->record_id)("\n");
-						o = xo;
+						r = xo;
 						accesso = xo;
 						dispatcho = xo;
 						break;
@@ -543,7 +543,7 @@ private:
 						
 					default:
 						auto mo = MakeTreeNode<Member>();
-						o = mo;
+						r = mo;
 						accesso = mo;
 						dispatcho = mo;
 						break;
@@ -556,11 +556,11 @@ private:
 			}
 			else if (S->getFnParent()) // in code
 			{
-				o = MakeTreeNode<Local> ();
+				r = MakeTreeNode<Local> ();
 			}
 			else // top level
 			{				
-				o = MakeTreeNode<Global> ();
+				r = MakeTreeNode<Global> ();
 			}
 
             clang::DeclSpec::SCS scs = DS.getStorageClassSpec();
@@ -578,35 +578,38 @@ private:
                     ASSERTFAIL("Unsupported storage class");
             }
 
-            all_decls->members.insert(o);
+            all_decls->members.insert(r);
 
-            clang::IdentifierInfo *ID = D.getIdentifier();
-            if (ID)
-            {
-                o->identifier = CreateResourceIdentifier(ID);
-                ident_track.Add(ID, o, S);
-            }
-            else if( TreePtr<XStructor>::DynamicCast(o) )
-            {
-				o->identifier = MakeTreeNode<SpecificAssetIdentifier>();
+            if( auto asset = TreePtr<Asset>::DynamicCast(r) )   
+            {         
+				clang::IdentifierInfo *ID = D.getIdentifier();
+				if (ID)
+				{
+					asset->identifier = CreateAssetIdentifier(ID);
+					ident_track.Add(ID, asset, S);
+				}
+				else if( TreePtr<Constructor>::DynamicCast(asset) )
+				{
+					asset->identifier = MakeTreeNode<SpecificAssetIdentifier>();
+				}
+				else
+				{
+					ASSERTFAIL();
+					asset->identifier = CreateAssetIdentifier();
+				}
 			}
-			else
-            {
-				ASSERTFAIL();
-                o->identifier = CreateResourceIdentifier();
-            }
             
             TreePtr<Permission> permission;
-            if( auto inst = TreePtr<Instance>::DynamicCast(o) )            
+            if( auto inst = TreePtr<Instance>::DynamicCast(r) )            
 				inst->type = CreateTypeNode(D, 0, &permission);	
 			else
 				(void)CreateTypeNode(D, 0, &permission);
             ASSERT( permission );
-            o->permission = permission;
+            r->permission = permission;
 
-            o->initialiser = MakeTreeNode<Uninitialised> ();
+            r->initialiser = MakeTreeNode<Uninitialised> ();
 
-            return o;
+            return r;
         }
 
         TreePtr<Parameter> CreateParameterNode(clang::Scope *S, clang::Declarator &D)
@@ -628,12 +631,12 @@ private:
             clang::IdentifierInfo *ID = D.getIdentifier();
             if (ID)
             {
-                param->identifier = CreateResourceIdentifier(ID);
+                param->identifier = CreateAssetIdentifier(ID);
                 ident_track.Add(ID, param, S);
             }
             else
             {
-                param->identifier = CreateResourceIdentifier();
+                param->identifier = CreateAssetIdentifier();
             }
             param->type = type;
             param->initialiser = MakeTreeNode<Uninitialised> ();
@@ -705,23 +708,16 @@ private:
                     D.getIdentifier(), recurse);
         }
 
-        TreePtr<Declaration> CreateDeclaration(clang::Scope *S,
+        TreePtr<Declaration> CreateDeclarationNode(clang::Scope *S,
                 clang::Declarator &D, TreePtr<AccessSpec> a = TreePtr<
                         AccessSpec> ())
         {
             const clang::DeclSpec &DS = D.getDeclSpec();
             TreePtr<Declaration> d;
             if (DS.getStorageClassSpec() == clang::DeclSpec::SCS_typedef)
-            {
-                TreePtr<Typedef> t = CreateTypedefNode(S, D);
-                TRACE();
-                d = t;
-            }
+                d = CreateTypedefNode(S, D);
             else
-            {
-                TreePtr<Instance> o = CreateInstanceNode(S, D, a);
-                d = o;
-            }
+                d = CreateResourceNode(S, D, a);
 
             return d;
         }
@@ -769,7 +765,7 @@ private:
             if (!d)
             {
 				TRACE("Created decl: ")(d)("\n");
-                d = CreateDeclaration(S, D); // make a new one
+                d = CreateDeclarationNode(S, D); // make a new one
                 IssueDeclaration(S, d);
             }
             
@@ -1479,7 +1475,7 @@ private:
     {
         //const clang::DeclSpec &DS = D.getDeclSpec();
         //TRACE("Element %p\n", Init);
-        TreePtr<Declaration> d = CreateDeclaration( S, D, ConvertAccess( AS ) );
+        TreePtr<Declaration> d = CreateDeclarationNode( S, D, ConvertAccess( AS ) );
         TreePtr<Instance> o = DynamicTreePtrCast<Instance>(d);
 
         if( BitfieldWidth )
@@ -1889,7 +1885,7 @@ private:
         TreePtr<Enumeration> en( DynamicTreePtrCast<Enumeration>(d) );
 		auto er = MakeTreeNode<Enumerator>();
         all_decls->members.insert(er);
-        er->identifier = CreateResourceIdentifier(Id);
+        er->identifier = CreateAssetIdentifier(Id);
         er->permission = MakeTreeNode<Const>(); // static const member need not consume storage!!
         er->type = en->identifier;//CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
         if( Val )
