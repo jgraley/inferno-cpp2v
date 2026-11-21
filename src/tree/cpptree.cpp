@@ -1352,6 +1352,7 @@ string Resource::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
     if( !policy.rendering_definitions )
     {
 		Append( ls, RenderAccessSpec(renderer, sub_policy) );
+		Append( ls, RenderDominant(renderer, sub_policy) );
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
 	}
     
@@ -1389,6 +1390,12 @@ string Resource::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 		ls.push_back( renderer->DoRender(&initialiser, Production::DIRECT_INIT, sub_policy) );
 
 	return Join( ls, " " ) + (policy.rendering_definitions?"\n":"");
+}
+
+
+list<string> Resource::RenderDominant( VN::RendererInterface *, Policy) const
+{
+	return {};
 }
 
 
@@ -1492,14 +1499,10 @@ string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy 
 	// Instance::GetMyProduction()
 	string s = GetRenderImpl( renderer, policy );
 		
-	// Pre-restrict if the incoming pointer is not some kind of Declaration. This catches cases
-	// like Stuff terminus, where the parser won't have enough information to determine whether
-	// we have Local, Global, Member etc. TODO reduce these by keeping a scope stack just like the parser.
+	// TODO either fix accomodations for both () and ; or remove the need for them
 	if( !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
 	{
-		s = "⨶" + 
-		    RenderNodeTypeName() + 
-		    "(" +
+		s =  "(" +
 		    s;
 		// Technically the ; is not requried if we mean a parameter, but will always be OK because a param 
 		// is an acceptable decl. But not after a compound.
@@ -1518,6 +1521,18 @@ bool Instance::ShouldSplitInstance( Policy ) const
 	// By default for Instance, split a function but not a data object. There are overrides, 
 	// and a more general default in Declaration.
     return !!DynamicTreePtrCast<Callable>( type );
+}
+
+
+list<string> Instance::RenderDominant( VN::RendererInterface *renderer, Policy policy ) const
+{
+	// Dominate the decl if the incoming pointer is not some kind of Declaration. This catches cases
+	// like Stuff terminus, where the parser won't have enough information to determine whether
+	// we have Local, Global, Member etc. TODO reduce these by keeping a scope stack just like the parser.
+	if( !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
+		return { renderer->DoRenderSignifier(this, policy) };
+	else
+		return {};
 }
 
 
@@ -1544,9 +1559,7 @@ TreePtr<Node> Instance::OnType( TreePtr<Node> type_, Location )
 
 Syntax::Token Instance::GetSignifierToken() const
 {
-	// Disable because there isn't really a single token in the Instance
-	// syntax that we can attach the node to. But see #902 qualifier teeing TODO
-	return Syntax::GetSignifierToken();
+	return YY::VNLangParser::token::TOK_INSTANCE_SIGN; 
 }
 
 //////////////////////////// Global //////////////////////////////
@@ -1772,13 +1785,6 @@ list<string> Enumerator::RenderMiddlePart( VN::RendererInterface *renderer, Poli
 
 //////////////////////////// Temporary //////////////////////////////
 
-list<string> Temporary::RenderDeclSpecPre( VN::RendererInterface *, Policy policy ) const 
-{ 
-	if( policy.permit_inherited_keyword )
-		return { "/*temp*/" }; // Effecively inherited, we just add a hint in a comment
-	
-	throw RefuseDueLocal(); 			
-}
 
 //////////////////////////// Base //////////////////////////////
 

@@ -61,12 +61,6 @@ string Module::GetKeyword( Policy ) const
 	return "sc_module";
 }
 
-
-any Module::GetStartingScopeContext() const 
-{ 
-	return (TreePtr<CPPTree::AccessSpec>)MakeTreeNode<CPPTree::Private>(); 
-}   
-
 //////////////////////////// Interface ///////////////////////////////
 
 string Interface::GetLoweredIdOrMacroName() const 
@@ -79,12 +73,6 @@ string Interface::GetKeyword( Policy ) const
 {
 	return "sc_interface";
 }
-
-
-any Interface::GetStartingScopeContext() const 
-{ 
-	return (TreePtr<CPPTree::AccessSpec>)MakeTreeNode<CPPTree::Private>(); 
-} 
 
 //////////////////////////// Wait ///////////////////////////////
 

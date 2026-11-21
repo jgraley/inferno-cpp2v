@@ -451,7 +451,7 @@ TreePtr<Node> VNLangActions::ApplyQualifiers( TreePtr<Node> node, const list<Qua
 {
 	for( const QualifierData &q : quals )
 	{
-		if( q.cat == QualCat::NODE )
+		if( q.cat == QualCat::QUALIFIER_NODE )
 		{
 			if( auto vq = TreePtr<CPPTree::Dispatch>::DynamicCast(q.node) )
 				node = node->OnDispatch(vq, any_cast<YY::VNLangParser::location_type>(loc));
@@ -468,9 +468,27 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Synta
 		"\nparams list, explicit scope node or pre-restriction to a declaration node type";			
 	
 	const QualifierData *q_static = nullptr;
+	TreePtr<CPPTree::Instance> instance;
 	for( const QualifierData &q : quals )
-		if( q.cat == QualCat::STATIC )
+	{
+		switch(q.cat)
+		{
+			case QualCat::STATIC:
 			q_static = &q;
+			break;
+			
+			case QualCat::DOMINANT_NODE:
+			instance = q.node;
+			instance->initialiser = MakeTreeNode<CPPTree::Uninitialised>(); // Could we do this in a Resource constructor? TODO
+			break;
+			
+			default:
+			break;
+		}
+	}
+	
+	if( instance )
+		return instance;
 
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon();	
@@ -481,9 +499,7 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Synta
 	
 	// Get whichever kind of declaration is allowed in the current scope. This can throw
 	// for a range of reasons!
-	TreePtr<CPPTree::Instance> instance = spg->GetDeclarationNode(middle_loc, !!q_static);
-		
-	return instance;
+	return spg->GetDeclarationNode(middle_loc, !!q_static);		
 }
 
 
@@ -614,7 +630,7 @@ Declarators::CVQuals VNLangActions::ExtractCVQuals( list<QualifierData> &quals, 
 		const QualifierData &q = *it;
 		switch( q.cat )
 		{
-		case QualCat::NODE:
+		case QualCat::QUALIFIER_NODE:
 			if( TreePtr<CPPTree::Permission>::DynamicCast(q.node) )	// Add dispatch here
 			{
 				if( got_const )
@@ -1054,3 +1070,9 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Trouble: explicit nodes ⯁MyNode have optional ⦅...itemisation...⦆ making long-form
 
 // DESIGNATED_STMT: split out DESIGNATED_STAR and give same prec as STAR, RESTRICTED_STAR
+
+// TODO:
+// get accomodations to produce the () and ; so that we don't get them when we don't need them
+// move dominator to just before the type
+// merge dominator syntax into Resource, Asset - these will use Dominator to provide their node. Middle part to be nothing or identifier respectively.
+// Remove pre-restriction syntax entirely

@@ -106,7 +106,8 @@ public:
 enum class QualCat
 {
 	UNDEFINED, 
-	NODE, // See the node itself
+	QUALIFIER_NODE, // See the node itself
+	DOMINANT_NODE,
 	STATIC,
 	TYPEDEF
 };
@@ -130,8 +131,10 @@ struct QualifierData : Traceable
 				return "STATIC";
 			case QualCat::TYPEDEF:
 				return "TYPEDEF";
-			case QualCat::NODE:
+			case QualCat::QUALIFIER_NODE:
 				return Trace(node);
+			case QualCat::DOMINANT_NODE:
+				return Trace(node)+"! ";
 			case QualCat::UNDEFINED:
 				ASSERTFAIL();
 		}
@@ -145,7 +148,8 @@ struct QualifierData : Traceable
 				return "static";
 			case QualCat::TYPEDEF:
 				return "typedef";
-			case QualCat::NODE:
+			case QualCat::QUALIFIER_NODE:
+			case QualCat::DOMINANT_NODE:
 				return Traceable::TypeIdName( *node );
 			case QualCat::UNDEFINED:
 				ASSERTFAIL();

@@ -661,6 +661,7 @@ struct Resource : virtual AdvanceDecl
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
 	virtual string GetRenderImpl( VN::RendererInterface *renderer, Policy policy );
+	virtual list<string> RenderDominant( VN::RendererInterface *renderer, Policy policy ) const;
 	// Extras like static, virtual, const come before the type (techically among them, but we don't support that)
 	virtual list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const;
 	// Extras like override, final, const come after declarator
@@ -722,6 +723,7 @@ struct Instance : Asset
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
 	bool ShouldSplitInstance( Policy policy ) const override;	
+	list<string> RenderDominant( VN::RendererInterface *renderer, Policy policy ) const override;
 	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;
 	TreePtr<Node> OnType( TreePtr<Node> type, Location loc ) override;
 	Token GetSignifierToken() const override;
@@ -848,8 +850,6 @@ struct Enumerator : Instance
 struct Temporary : Instance
 {
     NODE_FUNCTIONS_FINAL
-    
-	list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const override;	
 };
 
 

@@ -10,7 +10,10 @@
 namespace SCTree {
 
 /** Base for all SystemC nodes, permitting detection of SystemC dialect eg for rendering */
-struct SCNode : virtual Node {}; 
+struct SCNode : virtual Node 
+{
+	NODE_FUNCTIONS
+}; 
 
 /// Anything derived from this renders like a record
 struct SCRecord : virtual SCNode,
@@ -48,7 +51,6 @@ struct Module : SCRecord
     
     string GetLoweredIdOrMacroName() const override;
     string GetKeyword( Policy ) const override;	
-  	any GetStartingScopeContext() const override;     	
 };
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 
@@ -59,7 +61,6 @@ struct Interface : SCRecord
     
     string GetLoweredIdOrMacroName() const override;
     string GetKeyword( Policy ) const override;	      
-  	any GetStartingScopeContext() const override; 
 };
 
 /** SystemC interface construct. Not exactly sure whether/how I will use 
