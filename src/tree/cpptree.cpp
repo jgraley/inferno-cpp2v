@@ -480,9 +480,8 @@ TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, Location l
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
 			"static is not supported at code unit level (TODO).");
-	auto instance = MakeTreeNode<CPPTree::Global>(); 
-	instance->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
-	return instance;
+
+	return MakeTreeNode<CPPTree::Global>(); 
 }
 
 //////////////////////////// Uncombable ///////////////////////////////
@@ -1311,7 +1310,8 @@ TreePtr<Node> View::OnPermission( TreePtr<Node> c, Location )
 
 //////////////////////////// Resource //////////////////////////////
 
-Resource::Resource() :
+Resource::Resource() :   	
+   	initialiser( MakeTreeNode<CPPTree::Uninitialised>() ),
    	permission( MakeTreeNode<CPPTree::NonConst>() )
 {
 }   	
@@ -1950,9 +1950,8 @@ TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, Loca
 		throw YY::VNLangParser::syntax_error(
 				any_cast<YY::VNLangParser::location_type>(loc),
 				"static is not allowed for parameters.");
-	auto instance = MakeTreeNode<CPPTree::Parameter>();
-	instance->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
-	return instance;
+	
+	return MakeTreeNode<CPPTree::Parameter>();
 }
 
 
@@ -2467,10 +2466,9 @@ void Record::UpdateContext( TreePtr<Node> node, any &context, Location loc )
 	
 TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, Location) const
 {	
-	TreePtr<Instance> instance;
 	if( static_keyword_specified )
 	{
-		instance = MakeTreeNode<CPPTree::Global>(); 
+		return MakeTreeNode<CPPTree::Global>(); 
 	}
 	else
 	{
@@ -2479,10 +2477,8 @@ TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, Location) co
 		// Note: the access spec set here can be overridden by UpdateCurrentAccess()
 		//memb->access = any_cast<TreePtr<AccessSpec>>(context); // Don't duplicate the subtree - we want coupling behaviour		
 		memb->dispatch = MakeTreeNode<CPPTree::NonVirtual>();	
-		instance = memb;
+		return memb;
 	}
-	instance->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
-	return instance;
 }
 
 //////////////////////////// Union ///////////////////////////////
@@ -2543,8 +2539,6 @@ TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, Locatio
 	
 	// Enumerators are always const
 	er->permission = MakeTreeNode<CPPTree::Const>(); 
-
-	er->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
 	
 	return er;
 }
@@ -3060,14 +3054,10 @@ TreePtr<Node> SequentialScope::OnStatements( list<TreePtr<Node>> statements_, Lo
 
 TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, Location) const
 {
-	TreePtr<Instance> instance;
 	if( static_keyword_specified )
-		instance = MakeTreeNode<CPPTree::Global>(); 
+		return MakeTreeNode<CPPTree::Global>(); 
 	else
-		instance = MakeTreeNode<CPPTree::Local>(); 	
-
-	instance->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
-	return instance;
+		return MakeTreeNode<CPPTree::Local>(); 	
 }
 
 //////////////////////////// Compound ///////////////////////////////

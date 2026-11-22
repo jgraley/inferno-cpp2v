@@ -468,7 +468,6 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Synta
 		"\nparams list, explicit scope node or pre-restriction to a declaration node type";			
 	
 	const QualifierData *q_static = nullptr;
-	TreePtr<CPPTree::Instance> instance;
 	for( const QualifierData &q : quals )
 	{
 		switch(q.cat)
@@ -478,17 +477,13 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Synta
 			break;
 			
 			case QualCat::DOMINANT_NODE:
-			instance = q.node;
-			instance->initialiser = MakeTreeNode<CPPTree::Uninitialised>(); // Could we do this in a Resource constructor? TODO
+			return q.node; // TODO not dealing with possible static
 			break;
 			
 			default:
 			break;
 		}
-	}
-	
-	if( instance )
-		return instance;
+	}	
 
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon();	
@@ -1074,7 +1069,7 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // TODO:
 // Consider initialising Resource::initialiser to Uninitialised in constructor - makes things simpler
 // Static must be implemented as a polymorphic call on the resource itself, causing evolution into Global (for example) - CURRENTLY A BUG
-// get accomodations to produce the () and ; so that we don't get them when we don't need them
+// get accomodations to produce the () and ; so that we don't get them when we don't need them (auto renderer only)
 // move dominator to just before the type
 // merge dominator syntax into Resource, Asset - these will use Dominator to provide their node. Middle part to be nothing or identifier respectively.
 // Remove pre-restriction syntax entirely
