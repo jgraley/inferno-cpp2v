@@ -1341,7 +1341,7 @@ string Resource::GetRender( VN::RendererInterface *renderer, Production, Policy 
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
 	}
     
-	Append( ls, RenderDominant(renderer, sub_policy) );
+	Append( ls, RenderDominant(renderer, sub_policy, id_policy) );
 	Append( ls, RenderMiddlePart(renderer, sub_policy, id_policy) );
 
     if( !policy.rendering_definitions )
@@ -1379,12 +1379,6 @@ string Resource::GetRender( VN::RendererInterface *renderer, Production, Policy 
 }
 
 
-list<string> Resource::RenderDominant( VN::RendererInterface *, Policy) const
-{
-	return {};
-}
-
-
 list<string> Resource::RenderDeclSpecPre( VN::RendererInterface *, Policy ) const 
 { 
 	return {}; 
@@ -1409,9 +1403,15 @@ bool Resource::ShouldSplitInstance( Policy ) const
 }
 
 
-list<string> Resource::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy ) const
+list<string> Resource::RenderDominant( VN::RendererInterface *renderer, Policy policy, Policy) const
 {
 	return { renderer->DoRenderSignifier(this, policy) };
+}
+
+
+list<string> Resource::RenderMiddlePart( VN::RendererInterface *, Policy, Policy ) const
+{
+	return {};
 }
 
 
@@ -1436,10 +1436,9 @@ Syntax::Token Resource::GetSignifierToken() const
 
 //////////////////////////// Asset //////////////////////////////
 
-list<string> Asset::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+list<string> Asset::RenderMiddlePart( VN::RendererInterface *renderer, Policy, Policy id_policy ) const
 {
-	return { renderer->DoRenderSignifier(this, policy), 
-		     renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) };
+	return { renderer->DoRender( &identifier, Production::PRIMARY_EXPR, id_policy ) };
 }
 
 
@@ -1479,7 +1478,7 @@ bool Instance::ShouldSplitInstance( Policy ) const
 }
 
 
-list<string> Instance::RenderDominant( VN::RendererInterface *renderer, Policy policy ) const
+list<string> Instance::RenderDominant( VN::RendererInterface *renderer, Policy policy, Policy ) const
 {
 	// Dominate the decl if the incoming pointer is not some kind of Declaration. This catches cases
 	// like Stuff terminus, where the parser won't have enough information to determine whether
@@ -1646,10 +1645,8 @@ void XStructor::OnInScope( shared_ptr<VN::ScopeGnomon> spg, Location loc )
 
 //////////////////////////// Constructor //////////////////////////////
 
-list<string> Constructor::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+list<string> Constructor::RenderDominant( VN::RendererInterface *renderer, Policy policy, Policy id_policy) const
 {
-	ASSERT(record_id);
-	list<string> ls;
 	string s;
 
 	if( id_policy.resolve_identifier_scope )
@@ -1664,6 +1661,15 @@ list<string> Constructor::RenderMiddlePart( VN::RendererInterface *renderer, Pol
 	// Absolutely no scope resolving this time
 	s += renderer->DoRender( &record_id, Production::SPACE_SEP_STMT_DECL, local_id_policy );		
 	
+	return {s};
+}
+
+
+list<string> Constructor::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+{
+	ASSERT(record_id);
+	list<string> ls;
+	
 	// Gives us the parameterisation
 	policy.context = make_shared<any>(); // No access specs here
 		
@@ -1671,7 +1677,7 @@ list<string> Constructor::RenderMiddlePart( VN::RendererInterface *renderer, Pol
     for( auto &p : const_cast<Constructor *>(this)->params )	
 		lsp.push_back( renderer->DoRender( &p, Production::BARE_STMT_DECL, policy ) );       
 
-	s += Join( lsp, ", ", "(", ")" );
+	string s = Join( lsp, ", ", "(", ")" );
 	
 	// Required for resolved constructors - allows to tie directly to constructor usages
 	ls.push_back( s );
@@ -1704,9 +1710,9 @@ TreePtr<Node> Constructor::OnParams( list<TreePtr<Node>> params_, Location )
 
 //////////////////////////// Destructor //////////////////////////////
 
-list<string> Destructor::RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const
+list<string> Destructor::RenderDominant( VN::RendererInterface *renderer, Policy policy, Policy id_policy) const
 {
-	ASSERT(record_id);
+	// Suppress rendering of dominant: syntax is unambiguous
 	string s;
 
 	if( id_policy.resolve_identifier_scope )
@@ -1721,9 +1727,17 @@ list<string> Destructor::RenderMiddlePart( VN::RendererInterface *renderer, Poli
 	
 	// Absolutely no scope resolving this time
 	s += renderer->DoRender( &record_id, Production::SPACE_SEP_STMT_DECL, local_id_policy );		
+
+	return {s};
+}
+
+
+list<string> Destructor::RenderMiddlePart( VN::RendererInterface *, Policy, Policy ) const
+{
+	ASSERT(record_id);
 	
 	// No params or identifier (this is a resource)
-	s += "()";
+	string s = "()";
 
 	return { s };
 }

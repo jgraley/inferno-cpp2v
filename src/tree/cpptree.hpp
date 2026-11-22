@@ -660,7 +660,6 @@ struct Resource : virtual AdvanceDecl
 	Resource();
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
-	virtual list<string> RenderDominant( VN::RendererInterface *renderer, Policy policy ) const;
 	// Extras like static, virtual, const come before the type (techically among them, but we don't support that)
 	virtual list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const;
 	// Extras like override, final, const come after declarator
@@ -669,6 +668,8 @@ struct Resource : virtual AdvanceDecl
 	virtual list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy );
 
 	virtual bool ShouldSplitInstance( Policy ) const;
+
+	virtual list<string> RenderDominant( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;
 	// The main type/declarator goes here, if using declarator syntax, otherwise some 
 	// representation of the type and identifier that also disambiguates the declaration node.
 	virtual list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const;
@@ -720,7 +721,7 @@ struct Instance : Asset
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
 
 	bool ShouldSplitInstance( Policy policy ) const override;	
-	list<string> RenderDominant( VN::RendererInterface *renderer, Policy policy ) const override;
+	list<string> RenderDominant( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;
 	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;
 	TreePtr<Node> OnType( TreePtr<Node> type, Location loc ) override;
 	Token GetSignifierToken() const override;
@@ -794,6 +795,7 @@ struct Constructor : XStructor, Asset,
 
     Collection<Declaration> params; // TODO be Parameter #803
 
+	list<string> RenderDominant( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;
 	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
 	list<string> RenderInitPre( VN::RendererInterface *renderer, Policy policy ) override;
 	bool ShouldSplitInstance( Policy ) const override;
@@ -806,6 +808,7 @@ struct Destructor : XStructor, Resource // TODO should be a Resource, not Asset
 {
 	NODE_FUNCTIONS_FINAL
 
+	list<string> RenderDominant( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;
 	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;	
 	bool ShouldSplitInstance( Policy ) const override;
 };
