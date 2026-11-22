@@ -1480,33 +1480,13 @@ Syntax::Token Asset::GetSignifierToken() const
 
 Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *renderer, Policy policy) const
 { 	
-	if( !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
-		return Production::PREFIX;	
-
 	return Resource::GetMyProduction(renderer, policy);
 }
 
 
 string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {        
-	// Instances have no signifier and must rely on context to determine exact node type. If no suitable
-	// context exists, create one by wrapping in a pre-restriction. Node prod also changes, see	
-	// Instance::GetMyProduction()
-	string s = GetRenderImpl( renderer, policy );
-		
-	// TODO either fix accomodations for both () and ; or remove the need for them
-	if( !dynamic_pointer_cast<Statement>(policy.pointer_archetype) )
-	{
-		s =  "(" +
-		    s;
-		// Technically the ; is not requried if we mean a parameter, but will always be OK because a param 
-		// is an acceptable decl. But not after a compound.
-		if( !initialiser || !TreePtr<Compound>::DynamicCast(initialiser) )
-			s += ";";
-		s += ")"; 
-	}
-		
-	return s;
+	return GetRenderImpl( renderer, policy );
 }
 
 // Decide what gets split into a part that goes into the record (main line of rendering) and
