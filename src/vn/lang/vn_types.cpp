@@ -21,7 +21,7 @@ Gnomon::~Gnomon()
 }
 
 
-TreePtr<Node> ScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) 
+TreePtr<Node> ScopeGnomon::GetDeclarationNode(Syntax::Location loc) 
 {
 	throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(loc),
@@ -70,9 +70,9 @@ string RegularScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> RegularScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) 
+TreePtr<Node> RegularScopeGnomon::GetDeclarationNode(Syntax::Location loc) 
 {	
-	return scope_node->CreateDeclNode( static_keyword_specified, any_cast<YY::VNLangParser::location_type>(loc) );
+	return scope_node->CreateDeclNode( any_cast<YY::VNLangParser::location_type>(loc) );
 }
 
 
@@ -94,16 +94,9 @@ string ParameterisationScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) 
+TreePtr<Node> ParameterisationScopeGnomon::GetDeclarationNode(Syntax::Location loc) 
 {
-	if( static_keyword_specified )
-		throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc),
-				"static is not allowed for parameters.");
-
-	auto param = MakeTreeNode<CPPTree::Parameter>();
-	param->initialiser = MakeTreeNode<CPPTree::Uninitialised>();
-	return param;
+	return MakeTreeNode<CPPTree::Parameter>();
 }
 
 
@@ -119,7 +112,7 @@ string UnknownScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> UnknownScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) 
+TreePtr<Node> UnknownScopeGnomon::GetDeclarationNode(Syntax::Location loc) 
 {
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
@@ -142,7 +135,7 @@ string PrerestrictScopeGnomon::GetMessageText() const
 }
 
 
-TreePtr<Node> PrerestrictScopeGnomon::GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) 
+TreePtr<Node> PrerestrictScopeGnomon::GetDeclarationNode(Syntax::Location loc) 
 {
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"

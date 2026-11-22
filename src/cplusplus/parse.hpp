@@ -1886,7 +1886,6 @@ private:
 		auto er = MakeTreeNode<Enumerator>();
         all_decls->members.insert(er);
         er->identifier = CreateAssetIdentifier(Id);
-        er->permission = MakeTreeNode<Const>(); // static const member need not consume storage!!
         er->type = en->identifier;//CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
         if( Val )
         {

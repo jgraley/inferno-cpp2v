@@ -474,13 +474,8 @@ string CodeUnit::GetRender( VN::RendererInterface *renderer, Production surround
 }
 
 
-TreePtr<Node> CodeUnit::CreateDeclNode(bool static_keyword_specified, Location loc) const
+TreePtr<Node> CodeUnit::CreateDeclNode(Location) const
 {
-	if( static_keyword_specified )
-		throw YY::VNLangParser::syntax_error(
-			any_cast<YY::VNLangParser::location_type>(loc),
-			"static is not supported at code unit level (TODO).");
-
 	return MakeTreeNode<CPPTree::Global>(); 
 }
 
@@ -1650,6 +1645,18 @@ list<string> Member::RenderDeclSpecPre( VN::RendererInterface *renderer, Policy 
 	return { RenderDispatch(renderer, policy) };
 }
 
+
+TreePtr<Node> Member::OnStatic( Location )
+{
+	// "Evolve" into a Global node
+	auto g = MakeTreeNode<Global>();
+	g->initialiser = initialiser;
+	g->permission = permission;
+	g->identifier = identifier;
+	g->type = type;
+	return g;
+}
+
 //////////////////////////// XStructor //////////////////////////////
 
 bool XStructor::IsDeclaredAsXstructor(TreePtr<Node>) const
@@ -1767,7 +1774,27 @@ bool Destructor::ShouldSplitInstance( Policy ) const
 	return true;
 }
 
+//////////////////////////// Local //////////////////////////////
+
+TreePtr<Node> Local::OnStatic( Location )
+{
+	// "Evolve" into a Global node
+	auto g = MakeTreeNode<Global>();
+	g->initialiser = initialiser;
+	g->permission = permission;
+	g->identifier = identifier;
+	g->type = type;
+	return g;
+}
+
 //////////////////////////// Enumerator //////////////////////////////
+
+Enumerator::Enumerator()
+{
+	// Enumerators are always const
+	permission = MakeTreeNode<CPPTree::Const>();
+}
+
 
 Syntax::Production Enumerator::GetMyProduction(const VN::RendererInterface *, Policy) const
 { 
@@ -1944,13 +1971,8 @@ string CallableParams::GetRenderTypeSpec( VN::RendererInterface *renderer, Polic
 }
 
 
-TreePtr<Node> CallableParams::CreateDeclNode(bool static_keyword_specified, Location loc) const
+TreePtr<Node> CallableParams::CreateDeclNode(Location) const
 {
-	if( static_keyword_specified )
-		throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc),
-				"static is not allowed for parameters.");
-	
 	return MakeTreeNode<CPPTree::Parameter>();
 }
 
@@ -2464,21 +2486,9 @@ void Record::UpdateContext( TreePtr<Node> node, any &context, Location loc )
 }	
 	
 	
-TreePtr<Node> Record::CreateDeclNode(bool static_keyword_specified, Location) const
+TreePtr<Node> Record::CreateDeclNode(Location) const
 {	
-	if( static_keyword_specified )
-	{
-		return MakeTreeNode<CPPTree::Global>(); 
-	}
-	else
-	{
-		auto memb = MakeTreeNode<CPPTree::Member>();
-		// Use the currently stored access spec
-		// Note: the access spec set here can be overridden by UpdateCurrentAccess()
-		//memb->access = any_cast<TreePtr<AccessSpec>>(context); // Don't duplicate the subtree - we want coupling behaviour		
-		memb->dispatch = MakeTreeNode<CPPTree::NonVirtual>();	
-		return memb;
-	}
+	return MakeTreeNode<CPPTree::Member>();
 }
 
 //////////////////////////// Union ///////////////////////////////
@@ -2525,21 +2535,14 @@ Syntax::Token Enumeration::GetSignifierToken() const
 
 
 
-TreePtr<Node> Enumeration::CreateDeclNode(bool static_keyword_specified, Location loc) const
+TreePtr<Node> Enumeration::CreateDeclNode(Location) const
 {
-	if( static_keyword_specified )
-		throw YY::VNLangParser::syntax_error(
-				any_cast<YY::VNLangParser::location_type>(loc),
-				"static is not allowed for enumerators.");
 	auto er = MakeTreeNode<Enumerator>(); 
 	
 	// Whatever we're called, that's the type of our enumerations. Would still be true if we're given
 	// explicit underlying type.
-	er->type = identifier;
-	
-	// Enumerators are always const
-	er->permission = MakeTreeNode<CPPTree::Const>(); 
-	
+	er->type = identifier; 
+		
 	return er;
 }
 
@@ -3052,12 +3055,9 @@ TreePtr<Node> SequentialScope::OnStatements( list<TreePtr<Node>> statements_, Lo
 }
 
 
-TreePtr<Node> SequentialScope::CreateDeclNode(bool static_keyword_specified, Location) const
+TreePtr<Node> SequentialScope::CreateDeclNode(Location) const
 {
-	if( static_keyword_specified )
-		return MakeTreeNode<CPPTree::Global>(); 
-	else
-		return MakeTreeNode<CPPTree::Local>(); 	
+	return MakeTreeNode<CPPTree::Local>(); 	
 }
 
 //////////////////////////// Compound ///////////////////////////////

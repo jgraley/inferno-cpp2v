@@ -42,7 +42,7 @@ class ScopeGnomon : public Gnomon
 {
 public:	
 	virtual string GetMessageText() const = 0;	
-	virtual TreePtr<Node> GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified);
+	virtual TreePtr<Node> GetDeclarationNode(Syntax::Location loc);
 	virtual void UpdateContext(Syntax::Location loc, TreePtr<Node> node);
 };
 
@@ -64,7 +64,7 @@ class RegularScopeGnomon : public ContextScopeGnomon
 public:	
 	RegularScopeGnomon( TreePtr<Node> scope_node_ );
 	string GetMessageText() const override;
-	TreePtr<Node> GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) override;
+	TreePtr<Node> GetDeclarationNode(Syntax::Location loc) override;
 	void UpdateContext(Syntax::Location loc, TreePtr<Node> update_node) override;
 	TreePtr<Node> GetNode() const;
 
@@ -76,7 +76,7 @@ class ParameterisationScopeGnomon : public ScopeGnomon
 {
 public:	
 	string GetMessageText() const override;
-	TreePtr<Node> GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) override;
+	TreePtr<Node> GetDeclarationNode(Syntax::Location loc) override;
 };
 
 
@@ -85,7 +85,7 @@ class UnknownScopeGnomon : public ScopeGnomon
 public:	
 	UnknownScopeGnomon(string reason_);
 	string GetMessageText() const override;
-	TreePtr<Node> GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) override;
+	TreePtr<Node> GetDeclarationNode(Syntax::Location loc) override;
 
 	const string reason;
 };
@@ -96,7 +96,7 @@ class PrerestrictScopeGnomon : public ContextScopeGnomon
 public:	
 	PrerestrictScopeGnomon( TreePtr<Node> node_ );
 	string GetMessageText() const override;
-	TreePtr<Node> GetDeclarationNode(Syntax::Location loc, bool static_keyword_specified) override;
+	TreePtr<Node> GetDeclarationNode(Syntax::Location loc) override;
 	TreePtr<Node> GetNode() const;
 
 	TreePtr<Node> node;

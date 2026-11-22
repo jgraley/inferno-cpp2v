@@ -426,9 +426,23 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( list<QualifierData> quals, TreePt
 	}
 			
 	const QualifierData *q_typedef = nullptr;
+	const QualifierData *q_static = nullptr;
 	for( const QualifierData &q : quals )
-		if( q.cat == QualCat::TYPEDEF )
-			q_typedef = &q;
+	{
+		switch( q.cat )
+		{
+			case QualCat::TYPEDEF:
+				q_typedef = &q;
+				break;
+				
+			case QualCat::STATIC:
+				q_static = &q;
+				break;
+				
+			default:
+				break;
+		}
+	}
 
 	TreePtr<Node> node;
 	if( q_typedef )
@@ -438,11 +452,13 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( list<QualifierData> quals, TreePt
 
 	if( shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon() )
 		node->OnInScope(spg, middle_loc);
+	if( q_static )
+		node = node->OnStatic(q_static->loc);
 	node = node->OnIdentifier(declarator_result.leaf, any_cast<YY::VNLangParser::location_type>(decl_loc));
 	node = node->OnType(declarator_result.type_view, any_cast<YY::VNLangParser::location_type>(middle_loc));
 	node = node->OnPermission(declarator_result.cv_quals_view.permission, any_cast<YY::VNLangParser::location_type>(middle_loc)); 
 	node = ApplyQualifiers(node, quals, middle_loc); // must do this here since declarator reduce ate up some quals
-
+	
 	return node;
 }
 
@@ -466,16 +482,10 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Synta
 	string note = 
 		"\nNote: scope may be a surrounding code unit, compound, struct/class body,"
 		"\nparams list, explicit scope node or pre-restriction to a declaration node type";			
-	
-	const QualifierData *q_static = nullptr;
 	for( const QualifierData &q : quals )
 	{
 		switch(q.cat)
 		{
-			case QualCat::STATIC:
-			q_static = &q;
-			break;
-			
 			case QualCat::DOMINANT_NODE:
 			return q.node; // TODO not dealing with possible static
 			break;
@@ -485,16 +495,17 @@ TreePtr<Node> VNLangActions::OnInstance( const list<QualifierData> &quals, Synta
 		}
 	}	
 
+	// If we get here there was no dominator.
 	// We'll create one of a range of final nodes, all subclassing Instance, based on the current scope for declarations
 	shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon();	
 	if( !spg ) 
 		throw YY::VNLangParser::syntax_error(
 			any_cast<YY::VNLangParser::location_type>(middle_loc),
 			"Cannot disambiguate declaration because no surrounding scope." + note );
-	
+		
 	// Get whichever kind of declaration is allowed in the current scope. This can throw
 	// for a range of reasons!
-	return spg->GetDeclarationNode(middle_loc, !!q_static);		
+	return spg->GetDeclarationNode(middle_loc);			
 }
 
 
@@ -502,7 +513,7 @@ TreePtr<Node> VNLangActions::OnEnumerator( Syntax::Location loc )
 {
 	shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon();	
 	ASSERT( spg );
-	return spg->GetDeclarationNode(loc, false);
+	return spg->GetDeclarationNode(loc);
 }
 
 

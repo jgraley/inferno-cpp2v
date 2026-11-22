@@ -226,7 +226,14 @@ TreePtr<Node> Syntax::OnPermission( TreePtr<Node>, Location loc )
 TreePtr<Node> Syntax::OnDispatch( TreePtr<Node>, Location loc )
 {
 	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
-		MyBestErrName() + " does not expect virtual (implement OnVirtual()).");
+		MyBestErrName() + " does not expect virtual (implement OnDispatch()).");
+}
+
+
+TreePtr<Node> Syntax::OnStatic( Location loc )
+{
+	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
+		MyBestErrName() + " does not expect static (implement OnStatic()).");
 }
 
 
@@ -353,8 +360,8 @@ void Syntax::UpdateContext( TreePtr<Node>, any &context, Location )
 }	
 
 
-TreePtr<Node> Syntax::CreateDeclNode(bool, Location loc) const
+TreePtr<Node> Syntax::CreateDeclNode(Location loc) const
 {
 	throw YY::VNLangParser::syntax_error( any_cast<YY::VNLangParser::location_type>(loc),
-		MyBestErrName() + " cannot act as a scope for declarations (implement CreateDeclNode()).");	
+		MyBestErrName() + " cannot act as a scope for declarations (implement CreateDeclNode() or provide explicit dominator).");	
 }

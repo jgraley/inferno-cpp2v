@@ -219,6 +219,7 @@ public:
 	virtual TreePtr<Node> OnIdentifier( TreePtr<Node> id, Location loc );
 	virtual TreePtr<Node> OnPermission( TreePtr<Node> c, Location loc );
 	virtual TreePtr<Node> OnDispatch( TreePtr<Node> d, Location loc );
+	virtual TreePtr<Node> OnStatic( Location loc );
 	virtual TreePtr<Node> OnBases( list<TreePtr<Node>> bases, Location loc );
 	virtual TreePtr<Node> OnMembers( list<TreePtr<Node>> members, Location loc );
 	virtual TreePtr<Node> OnStatements( list<TreePtr<Node>> statements, Location loc );
@@ -238,7 +239,7 @@ public:
 	
 	virtual any GetStartingScopeContext() const;    
 	virtual void UpdateContext( TreePtr<Node> node, any &context, Location loc );	
-	virtual TreePtr<Node> CreateDeclNode(bool static_keyword_specified, Location loc) const; 
+	virtual TreePtr<Node> CreateDeclNode(Location loc) const; 
 	virtual TreePtr<Node> TreePtrThis() = 0; 
 };
 
