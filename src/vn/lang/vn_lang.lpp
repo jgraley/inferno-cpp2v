@@ -117,7 +117,6 @@ char|short|int|long|signed|unsigned|float|double { return YY::VNLangParser::make
 {unicode_name}	{ return recogniser->OnUnquotedLexeme(wstr(), location()); }
 
 ⯁{node_name} 	{ return recogniser->OnExplicitLexeme(wstr(), location()); }
-⨶{node_name} 	{ return recogniser->OnPrerestrictLexeme(wstr(), location()); }
 ⊛{node_name} 	{ return recogniser->OnIdByNameLexeme(wstr(), location()); }
 ⧇{node_name} 	{ return recogniser->OnIdBuilderLexeme(wstr(), location()); }
 

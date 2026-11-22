@@ -100,16 +100,6 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnExplicitLexeme(wstring text, S
 }
 
 
-YY::VNLangParser::symbol_type VNLangRecogniser::OnPrerestrictLexeme(wstring text, Syntax::Location loc) const
-{
-	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
-	Syntax::Token token_kind = node->GetPrerestrictToken();		
-	return YY::VNLangParser::symbol_type( any_cast<YY::VNLangParser::token::token_kind_type>(token_kind), 
-	                                      std::move(node), 
-	                                      any_cast<YY::VNLangParser::location_type>(loc) );		
-}
-
-
 YY::VNLangParser::symbol_type VNLangRecogniser::OnIdByNameLexeme(wstring text, Syntax::Location loc) const
 {
 	TreePtr<Node> node = CreateNodeFromName( ToASCII(text.substr(1)), loc );
@@ -168,15 +158,6 @@ YY::VNLangParser::symbol_type VNLangRecogniser::OnAnyNodeLexeme(Syntax::Location
 	{
 		return YY::VNLangParser::make_ANY_NODE_IN_PARAMS(any_cast<YY::VNLangParser::location_type>(loc));		
 	}
-	else if( auto pspg = dynamic_pointer_cast<const PrerestrictScopeGnomon>(spg) )
-	{		
-		if( TreePtr<LabelDeclaration>::DynamicCast( pspg->GetNode() ) ) // Must restrict to LabelDeclaration for a label 
-			return YY::VNLangParser::make_ANY_NODE_IN_COMPOUND(any_cast<YY::VNLangParser::location_type>(loc));
-		else if( TreePtr<Declaration>::DynamicCast( pspg->GetNode() ) ) // Other decls are taken to allow access specs
-			{ return YY::VNLangParser::make_ANY_NODE_IN_RECORD(any_cast<YY::VNLangParser::location_type>(loc)); }
-		else 
-			return YY::VNLangParser::make_ANY_NODE_IN_OTHER(any_cast<YY::VNLangParser::location_type>(loc));
-	}		
 	else
 	{
 		return YY::VNLangParser::make_ANY_NODE_IN_OTHER(any_cast<YY::VNLangParser::location_type>(loc));

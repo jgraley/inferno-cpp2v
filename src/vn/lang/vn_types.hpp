@@ -91,18 +91,6 @@ public:
 };
 
 
-class PrerestrictScopeGnomon : public ContextScopeGnomon
-{
-public:	
-	PrerestrictScopeGnomon( TreePtr<Node> node_ );
-	string GetMessageText() const override;
-	TreePtr<Node> GetDeclarationNode(Syntax::Location loc) override;
-	TreePtr<Node> GetNode() const;
-
-	TreePtr<Node> node;
-};
-
-
 enum class QualCat
 {
 	UNDEFINED, 

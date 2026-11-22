@@ -52,7 +52,6 @@ struct Qualifier : Property
 	string GetRender( VN::RendererInterface *renderer, Production surround_prod, Policy policy ) override;    	
 	Token GetSignifierToken() const override;
 	Token GetExplicitToken() const override;
-	Token GetPrerestrictToken() const override;
 };
 
 
@@ -132,7 +131,6 @@ struct Type : virtual Node
 	bool IsType() const override;
 
 	Token GetExplicitToken() const override;
-	Token GetPrerestrictToken() const override;
 	Token GetIdByNameToken() const override;
 	Token GetIdBuilderToken() const override;
 	Token GetSignifierToken() const override;
@@ -153,7 +151,6 @@ struct Declaration : virtual Statement
 	// TODO move into AccessDecl
 	virtual list<string> ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bool force, VN::RendererInterface *renderer, Policy policy ) const;
 	Token GetExplicitToken() const;
-	Token GetPrerestrictToken() const override;
 };
 
 
@@ -516,7 +513,6 @@ struct MemberInitialiser : Statement // TODO not a Statement, just virtual Node 
 	Production GetMyProductionTerminal() const override;
 	string GetRender( VN::RendererInterface *renderer, Production production, Policy policy ) override;	
 	Token GetExplicitToken() const override;
-	Token GetPrerestrictToken() const override;
 };
 
 
@@ -921,7 +917,6 @@ struct LabelDeclaration : Declaration, //TODO commonize with Case and Default
 
 	Token GetSignifierToken() const { return Declaration::GetSignifierToken(); }
 	Token GetExplicitToken() const override;
-	Token GetPrerestrictToken() const override;
 };
 
 //////////////////////////// Built-in Types ////////////////////////////

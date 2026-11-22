@@ -58,12 +58,6 @@ Syntax::Token Qualifier::GetExplicitToken() const
 	return YY::VNLangParser::token::TOK_EXPLICIT_QUAL;
 }
 
-
-Syntax::Token Qualifier::GetPrerestrictToken() const
-{
-	return YY::VNLangParser::token::TOK_PRERESTRICT_QUAL;
-}
-
 //////////////////////////// Initialiser ///////////////////////////////
 
 Syntax::Production Initialiser::GetMyProductionTerminal() const
@@ -218,12 +212,6 @@ Syntax::Token Type::GetExplicitToken() const
 }
 
 
-Syntax::Token Type::GetPrerestrictToken() const
-{
-	return YY::VNLangParser::token::TOK_PRERESTRICT_TYPE;
-}
-
-
 Syntax::Token Type::GetIdByNameToken() const
 {
 	return YY::VNLangParser::token::TOK_ID_BY_NAME_TYPE;	
@@ -337,12 +325,6 @@ list<string> Declaration::ApplyAndRenderAccessSpec( TreePtr<Node> new_access, bo
 Syntax::Token Declaration::GetExplicitToken() const
 {
 	return YY::VNLangParser::token::TOK_EXPLICIT_DECL;
-}
-
-
-Syntax::Token Declaration::GetPrerestrictToken() const
-{
-	return YY::VNLangParser::token::TOK_PRERESTRICT_DECL;
 }
 
 //////////////////////////// AdvanceDecl ///////////////////////////////
@@ -1184,12 +1166,6 @@ Syntax::Token MemberInitialiser::GetExplicitToken() const
 	return YY::VNLangParser::token::TOK_EXPLICIT_MEMB_INIT;
 }
 
-
-Syntax::Token MemberInitialiser::GetPrerestrictToken() const
-{
-	return YY::VNLangParser::token::TOK_PRERESTRICT_MEMB_INIT;
-}
-
 //////////////////////////// MembInitSeq ///////////////////////////////
 
 list<string> MembInitSeq::RenderMemberInits( VN::RendererInterface *renderer, Policy policy )
@@ -1879,13 +1855,6 @@ Syntax::Token LabelDeclaration::GetExplicitToken() const
 {
 	// LabelDeclaration parses more like a statemant etc so override Declaration::GetExplicitToken()
 	return YY::VNLangParser::token::TOK_EXPLICIT_STMT;
-}
-
-
-Syntax::Token LabelDeclaration::GetPrerestrictToken() const
-{
-	// LabelDeclaration parses more like a statement etc so override Declaration::GetPrerestrictToken()
-	return YY::VNLangParser::token::TOK_PRERESTRICT_NORMAL;
 }
 
 //////////////////////////// Callable //////////////////////////////

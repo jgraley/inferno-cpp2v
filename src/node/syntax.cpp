@@ -161,12 +161,6 @@ Syntax::Token Syntax::GetExplicitToken() const
 }
 
 
-Syntax::Token Syntax::GetPrerestrictToken() const
-{
-	return YY::VNLangParser::token::TOK_PRERESTRICT_NORMAL;	
-}
-
-
 Syntax::Token Syntax::GetIdByNameToken() const
 {
 	return YY::VNLangParser::token::TOK_ID_BY_NAME_NORMAL;	

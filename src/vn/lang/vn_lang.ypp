@@ -107,7 +107,6 @@
 	POINTER_IS_OP							    _("⮎")
 	BUILD_SIZE_OP							    _("🄽")
 	STRINGIZE_OP							    _("§")
-	PRERESTRICT_OP						        _("⨶")
 	TYPE_INDICATOR						        _("⍑")
 	CODE_UNIT 							        _("∞")
 	RESOLUTION_OP 						        _("::")
@@ -151,11 +150,7 @@
 <TreePtr<Node>>	EXPLICIT_STMT			_("explicit statement node")
 <TreePtr<Node>>	EXPLICIT_QUAL			_("explicit qualifier node")
 <TreePtr<Node>>	EXPLICIT_MEMB_INIT		_("explicit member initialiser node name")
-<TreePtr<Node>>	PRERESTRICT_NORMAL		_("statement/expression pre-restriction")
-<TreePtr<Node>>	PRERESTRICT_TYPE		_("type pre-restriction")
-<TreePtr<Node>>	PRERESTRICT_DECL		_("declaration pre-restriction")
-<TreePtr<Node>>	PRERESTRICT_QUAL		_("qualifier pre-restriction")
-<TreePtr<Node>>	PRERESTRICT_MEMB_INIT	_("member init pre-restriction")
+
 <TreePtr<Node>>	ID_BY_NAME_NORMAL		_("instance identifier by name")
 <TreePtr<Node>>	ID_BY_NAME_TYPE			_("type identifier by name")
 <TreePtr<Node>>	ID_BUILDER_NORMAL		_("instance identifier builder")
@@ -246,7 +241,6 @@ stmt_high
 %type <VN::QualifierData> 			qualifier qualifier_nw
 %type <list<VN::QualifierData>>		qualifiers instance_pre 
 %type <multiset<string>>			type_specifier_seq
-%type <shared_ptr<VN::PrerestrictScopeGnomon>>         prerestrict_decl_start
 
 // Solve the dangling-else amiguity by giving the "else" token a higher priority than the "if" token
 // In the rule, we must set the no-else rule to the "if" priority using %prec. Then, the TOKEN
@@ -355,7 +349,6 @@ compound_prefix : compound_primary
 				|  						     stuff_op_scope compound_prefix	{ $$ = vn->OnStuff($2, nullptr, VN::Limit()); }
 				|                    restricted_stuff_scope compound_prefix { $$ = vn->OnStuff($2, $1, VN::Limit()); }
 				|                         depth_stuff_scope compound_prefix { $$ = vn->OnStuff($2, nullptr, $1); }
-				|                        PRERESTRICT_NORMAL compound_prefix { $$ = vn->OnRestrict($1, @1, $2, @2); }
 
 compound_primary	: compound_scope '}'                					{ $$ = $1->scope_node; } 
 					| compound_scope statements '}'    		 				{ $$ = $1->scope_node->OnStatements($2, @2); }
@@ -529,7 +522,6 @@ param_prefix	: param_primary
 				| 		        GREEN_GRASS_OP param_prefix	{ $$ = vn->OnGrass($2); }
 				| 		         POINTER_IS_OP param_prefix	{ $$ = vn->OnPointerIs($2); }
 				| 	         	   NEGATION_OP param_prefix	{ $$ = vn->OnNegation($2); }
-				|           PRERESTRICT_NORMAL param_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 				| vn_disloc_prefix
                          
 param_primary	: vn_primary              
@@ -646,8 +638,6 @@ stmt_prefix		: stmt_parens
 				| 						     GREEN_GRASS_OP stmt_prefix	{ $$ = vn->OnGrass($2); }
 				| 						      POINTER_IS_OP stmt_prefix	{ $$ = vn->OnPointerIs($2); }
 				| 					         	NEGATION_OP	stmt_prefix	{ $$ = vn->OnNegation($2); }
-				|                        PRERESTRICT_NORMAL stmt_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-				|        		     prerestrict_decl_start stmt_prefix	{ $$ = vn->OnRestrict($1->node, @1, $2, @2); } // TODO not some decl syntax?
 //				| vn_disloc_prefix
 						
 stmt_parens		: '(' sing_stmt_boot ')'					{ $$ = $2; }
@@ -770,8 +760,6 @@ expr_prefix : expr_postfix
 			| 						     GREEN_GRASS_OP expr_prefix	{ $$ = vn->OnGrass($2); }
 			| 						      POINTER_IS_OP expr_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
-			|                        PRERESTRICT_NORMAL expr_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
-			|                PRERESTRICT_MEMB_INIT memb_init_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			| vn_disloc_prefix 
 			
 // Postfix operators are treated like method calls, operand is regarded as object
@@ -797,9 +785,7 @@ expr_primary: id_extras
 			| vn_primary
 			| '(' expression_boot ')'                       			{ $$ = $2; }
 			| vn_any_node
-			
-prerestrict_decl_start : PRERESTRICT_DECL     				    { $$ = make_shared<VN::PrerestrictScopeGnomon>($1); 
-                                                                  vn->AddGnomon($$); }		
+		
 stmt_expr_scope	: STMT_EXPR_SIGN '{'							{ $$ = make_shared<VN::RegularScopeGnomon>($1); 
 																  vn->AddGnomon($$); }
 			
@@ -846,7 +832,6 @@ id_prefix	: id_parens
  			| 						     GREEN_GRASS_OP id_prefix	{ $$ = vn->OnGrass($2); }
 			| 						      POINTER_IS_OP id_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 					         	NEGATION_OP	id_prefix	{ $$ = vn->OnNegation($2); }
-			|                        PRERESTRICT_NORMAL id_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); } // Note: we could recognise PRERESTRICT_ID if this casues conflicts
 
 id_parens	: id_primary
 			| vn_any_node
@@ -920,7 +905,6 @@ type_prefix : type_postfix
 			| 						         GREEN_GRASS_OP type_prefix	{ $$ = vn->OnGrass($2); }
 			| 							      POINTER_IS_OP type_prefix	{ $$ = vn->OnPointerIs($2); }
 			| 							        NEGATION_OP type_prefix	{ $$ = vn->OnNegation($2); }
-			|                     		   PRERESTRICT_TYPE type_prefix	{ $$ = vn->OnRestrict($1, @1, $2, @2); }
 			|                          		   TYPE_INDICATOR typalised { $$ = $2; }
 
 // Things that are not obviously types, and have to be indicated as such using ⍑

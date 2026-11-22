@@ -208,7 +208,6 @@ public:
 
 	virtual Token GetSignifierToken() const;
 	virtual Token GetExplicitToken() const;
-	virtual Token GetPrerestrictToken() const;
 	virtual Token GetIdByNameToken() const;
 	virtual Token GetIdBuilderToken() const;
 

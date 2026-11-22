@@ -57,7 +57,6 @@ public:
 	YY::VNLangParser::symbol_type OnUnquotedLexeme(string text, Syntax::Location loc) const;
 	YY::VNLangParser::symbol_type OnUnquotedLexeme(wstring text, Syntax::Location loc) const;
 	YY::VNLangParser::symbol_type OnExplicitLexeme(wstring text, Syntax::Location loc) const;
-	YY::VNLangParser::symbol_type OnPrerestrictLexeme(wstring text, Syntax::Location loc) const;
 	YY::VNLangParser::symbol_type OnIdByNameLexeme(wstring text, Syntax::Location loc) const;
 	YY::VNLangParser::symbol_type OnIdBuilderLexeme(wstring text, Syntax::Location loc) const;
 	YY::VNLangParser::symbol_type OnTransformLexeme(wstring text, Syntax::Location loc) const;
