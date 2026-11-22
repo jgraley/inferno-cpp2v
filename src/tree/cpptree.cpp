@@ -1338,10 +1338,10 @@ string Resource::GetRender( VN::RendererInterface *renderer, Production, Policy 
     if( !policy.rendering_definitions )
     {
 		Append( ls, RenderAccessSpec(renderer, sub_policy) );
-		Append( ls, RenderDominant(renderer, sub_policy) );
 		Append( ls, RenderDeclSpecPre(renderer, sub_policy) );
 	}
     
+	Append( ls, RenderDominant(renderer, sub_policy) );
 	Append( ls, RenderMiddlePart(renderer, sub_policy, id_policy) );
 
     if( !policy.rendering_definitions )

@@ -422,7 +422,7 @@ assign_init		: expression
 				| stmt_parens
 
 pre_decl		: qualifiers		
-				| INSTANCE_SIGN qualifiers								{ $$ = $2; $$.push_back( VN::QualifierData(@$, VN::QualCat::DOMINANT_NODE, $1) ); }
+				| qualifiers INSTANCE_SIGN								{ $$ = $1; $$.push_back( VN::QualifierData(@$, VN::QualCat::DOMINANT_NODE, $2) ); }
 				| INSTANCE_SIGN 										{ $$.push_back( VN::QualifierData(@$, VN::QualCat::DOMINANT_NODE, $1) ); }
 
 memb_inits	: memb_inits ',' memb_init_element							{ $$ = $1; $$.push_back($3); }
