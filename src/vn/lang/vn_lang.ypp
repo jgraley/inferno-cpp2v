@@ -244,7 +244,7 @@ stmt_high
 %type <list<TreePtr<Node>>>			semicolon_args parameters parameterisation map_args arguments
 %type <list<TreePtr<Node>>>			bases memb_inits
 %type <VN::QualifierData> 			qualifier qualifier_nw
-%type <list<VN::QualifierData>>		qualifiers pre_decl 
+%type <list<VN::QualifierData>>		qualifiers instance_pre 
 %type <multiset<string>>			type_specifier_seq
 %type <shared_ptr<VN::PrerestrictScopeGnomon>>         prerestrict_decl_start
 
@@ -401,18 +401,18 @@ bare_initialiser: C_ASSIGN assign_init									{ $$ = $2; }
 // Note: C++ grammar allows to go directly into declarator, but we don't since we want to resolve "real" declarators 
 // immediately, and don't want to invoke that mechanism for things that turn out to be something other than a prototype.
 // Use of strict declarators with DESIGNATED_CURRENT_RECORD_ID is for constructors. See See #919.
-prototype_param	: type_for_declarator declarator						{ $$ = vn->OnDeclaratorDecl({}, $1, @1, $2, @2); }	
-				| pre_decl type_for_declarator declarator				{ $$ = vn->OnDeclaratorDecl($1, $2, @2, $3, @3); } // eg const int a	
-				| type_for_declarator qualifiers declarator				{ $$ = vn->OnDeclaratorDecl($2, $1, @1, $3, @3); } // eg int const a 	
-				| pre_decl type_for_declarator qualifiers declarator	{ $$ = vn->OnDeclaratorDecl($1+$3, $2, @2, $4, @4); } 
+prototype_param	: type_for_declarator declarator							{ $$ = vn->OnDeclaratorDecl({}, $1, @1, $2, @2); }	
+				| instance_pre type_for_declarator declarator				{ $$ = vn->OnDeclaratorDecl($1, $2, @2, $3, @3); } // eg const int a	
+				| type_for_declarator qualifiers declarator					{ $$ = vn->OnDeclaratorDecl($2, $1, @1, $3, @3); } // eg int const a 	
+				| instance_pre type_for_declarator qualifiers declarator	{ $$ = vn->OnDeclaratorDecl($1+$3, $2, @2, $4, @4); } 
 				
-prototype_np	: DESIGNATED_CURRENT_RECORD_ID st_declarator						{ $$ = vn->OnDeclaratorDecl({}, $1, @1, $2, @2); }	
-				| pre_decl DESIGNATED_CURRENT_RECORD_ID st_declarator				{ $$ = vn->OnDeclaratorDecl($1, $2, @2, $3, @3); } // eg const int a	
-				| DESIGNATED_CURRENT_RECORD_ID qualifiers st_declarator				{ $$ = vn->OnDeclaratorDecl($2, $1, @1, $3, @3); } // eg int const a 	
-				| pre_decl DESIGNATED_CURRENT_RECORD_ID qualifiers st_declarator	{ $$ = vn->OnDeclaratorDecl($1+$3, $2, @2, $4, @4); } 
+prototype_np	: DESIGNATED_CURRENT_RECORD_ID st_declarator							{ $$ = vn->OnDeclaratorDecl({}, $1, @1, $2, @2); }	
+				| instance_pre DESIGNATED_CURRENT_RECORD_ID st_declarator				{ $$ = vn->OnDeclaratorDecl($1, $2, @2, $3, @3); } // eg const int a	
+				| DESIGNATED_CURRENT_RECORD_ID qualifiers st_declarator					{ $$ = vn->OnDeclaratorDecl($2, $1, @1, $3, @3); } // eg int const a 	
+				| instance_pre DESIGNATED_CURRENT_RECORD_ID qualifiers st_declarator	{ $$ = vn->OnDeclaratorDecl($1+$3, $2, @2, $4, @4); } 
 				| DESIGNATED_CURRENT_RECORD_ID parameterisation id_primary				{ $$ = vn->OnXStructorDecl(true, @$)->OnParams($2, @2)->OnIdentifier($3, @3); }
-				| '~' DESIGNATED_CURRENT_RECORD_ID '(' ')'				{ $$ = vn->OnXStructorDecl(true, @$); }
-				| qualifiers '~' DESIGNATED_CURRENT_RECORD_ID '(' ')'	{ $$ = vn->OnXStructorDecl(true, @$); $$ = vn->ApplyQualifiers($$, $1, @1); }
+				| '~' DESIGNATED_CURRENT_RECORD_ID '(' ')'								{ $$ = vn->OnXStructorDecl(true, @$); }
+				| qualifiers '~' DESIGNATED_CURRENT_RECORD_ID '(' ')'					{ $$ = vn->OnXStructorDecl(true, @$); $$ = vn->ApplyQualifiers($$, $1, @1); }
 				| ASSET_SIGN declaring_asset_id								{ $1->OnInScope(vn->TryGetTopScopeGnomon(), @1); $$ = $1->OnIdentifier($2, @2); } // TODO quals on RESOURCE/ASSET
 				| RESOURCE_SIGN 											{ $1->OnInScope(vn->TryGetTopScopeGnomon(), @1); $$ = $1; }
 
@@ -421,7 +421,7 @@ assign_init		: expression
 				| '{' arguments '}'      								{ $$ = vn->OnArrayInitialiser()->OnArgsList($2, @2); }               
 				| stmt_parens
 
-pre_decl		: qualifiers		
+instance_pre	: qualifiers		
 				| qualifiers INSTANCE_SIGN								{ $$ = $1; $$.push_back( VN::QualifierData(@$, VN::QualCat::DOMINANT_NODE, $2) ); }
 				| INSTANCE_SIGN 										{ $$.push_back( VN::QualifierData(@$, VN::QualCat::DOMINANT_NODE, $1) ); }
 

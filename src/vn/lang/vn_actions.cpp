@@ -426,17 +426,12 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( list<QualifierData> quals, TreePt
 	}
 			
 	const QualifierData *q_typedef = nullptr;
-	const QualifierData *q_static = nullptr;
 	for( const QualifierData &q : quals )
 	{
 		switch( q.cat )
 		{
 			case QualCat::TYPEDEF:
 				q_typedef = &q;
-				break;
-				
-			case QualCat::STATIC:
-				q_static = &q;
 				break;
 				
 			default:
@@ -452,8 +447,6 @@ TreePtr<Node> VNLangActions::OnDeclaratorDecl( list<QualifierData> quals, TreePt
 
 	if( shared_ptr<ScopeGnomon> spg = TryGetTopScopeGnomon() )
 		node->OnInScope(spg, middle_loc);
-	if( q_static )
-		node = node->OnStatic(q_static->loc);
 	node = node->OnIdentifier(declarator_result.leaf, any_cast<YY::VNLangParser::location_type>(decl_loc));
 	node = node->OnType(declarator_result.type_view, any_cast<YY::VNLangParser::location_type>(middle_loc));
 	node = node->OnPermission(declarator_result.cv_quals_view.permission, any_cast<YY::VNLangParser::location_type>(middle_loc)); 
@@ -467,11 +460,20 @@ TreePtr<Node> VNLangActions::ApplyQualifiers( TreePtr<Node> node, const list<Qua
 {
 	for( const QualifierData &q : quals )
 	{
-		if( q.cat == QualCat::QUALIFIER_NODE )
+		switch( q.cat )
 		{
-			if( auto vq = TreePtr<CPPTree::Dispatch>::DynamicCast(q.node) )
-				node = node->OnDispatch(vq, any_cast<YY::VNLangParser::location_type>(loc));
-		}						
+			case QualCat::QUALIFIER_NODE:		
+			if( auto vq = TreePtr<CPPTree::Dispatch>::DynamicCast(q.node) ) // eg virtual
+				node = node->OnDispatch(vq, any_cast<YY::VNLangParser::location_type>(q.loc));
+			break;
+			
+			case QualCat::STATIC:
+				node = node->OnStatic(q.loc);
+			break;
+			
+			default:
+			break;
+		}	
 	}
 	return node;
 }
@@ -1078,6 +1080,4 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // DESIGNATED_STMT: split out DESIGNATED_STAR and give same prec as STAR, RESTRICTED_STAR
 
 // TODO:
-// move dominator to just before the type
-// merge dominator syntax into Resource, Asset - these will use Dominator to provide their node. Middle part to be nothing or identifier respectively.
 // Remove pre-restriction syntax entirely
