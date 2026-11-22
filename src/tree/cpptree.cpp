@@ -633,7 +633,7 @@ string AssetIdentifier::GetRender( VN::RendererInterface *renderer, Production, 
 
 Syntax::Token AssetIdentifier::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_NORMAL_ID_SIGN;
+	return YY::VNLangParser::token::TOK_ASSET_ID_SIGN;
 }
 
 //////////////////////////// SpecificAssetIdentifier //////////////////////////////
@@ -1790,7 +1790,7 @@ Syntax::Production LabelIdentifier::GetMyProductionTerminal() const
 
 Syntax::Token LabelIdentifier::GetSignifierToken() const
 {
-	return YY::VNLangParser::token::TOK_NORMAL_ID_SIGN;
+	return YY::VNLangParser::token::TOK_LABEL_ID_SIGN;
 }
 
 //////////////////////////// SpecificLabelIdentifier //////////////////////////////
