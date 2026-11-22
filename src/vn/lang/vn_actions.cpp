@@ -1078,7 +1078,6 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // DESIGNATED_STMT: split out DESIGNATED_STAR and give same prec as STAR, RESTRICTED_STAR
 
 // TODO:
-// get accomodations to produce the () and ; so that we don't get them when we don't need them (auto renderer only)
 // move dominator to just before the type
 // merge dominator syntax into Resource, Asset - these will use Dominator to provide their node. Middle part to be nothing or identifier respectively.
 // Remove pre-restriction syntax entirely

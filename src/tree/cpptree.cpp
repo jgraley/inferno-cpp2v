@@ -1326,15 +1326,6 @@ Syntax::Production Resource::GetMyProduction(const VN::RendererInterface *, Poli
 
 
 string Resource::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
-{        
-	// Resources have a signifier (keyword or short-form explicit) in the middle part
-	// (see Resource::RenderMiddlePart()) so won't need a pre-restriction to establish 
-	// exact node type.
-	return GetRenderImpl( renderer, policy );
-}
-		
-			
-string Resource::GetRenderImpl( VN::RendererInterface *renderer, Policy policy )
 {
 	list<string> ls;
 
@@ -1477,17 +1468,6 @@ Syntax::Token Asset::GetSignifierToken() const
 }
 
 //////////////////////////// Instance //////////////////////////////
-
-Syntax::Production Instance::GetMyProduction(const VN::RendererInterface *renderer, Policy policy) const
-{ 	
-	return Resource::GetMyProduction(renderer, policy);
-}
-
-
-string Instance::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
-{        
-	return GetRenderImpl( renderer, policy );
-}
 
 // Decide what gets split into a part that goes into the record (main line of rendering) and
 // a part that goes separately (definitions get appended at end of code unit).

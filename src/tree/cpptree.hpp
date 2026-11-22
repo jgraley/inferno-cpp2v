@@ -660,7 +660,6 @@ struct Resource : virtual AdvanceDecl
 	Resource();
 	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
 	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
-	virtual string GetRenderImpl( VN::RendererInterface *renderer, Policy policy );
 	virtual list<string> RenderDominant( VN::RendererInterface *renderer, Policy policy ) const;
 	// Extras like static, virtual, const come before the type (techically among them, but we don't support that)
 	virtual list<string> RenderDeclSpecPre( VN::RendererInterface *renderer, Policy policy ) const;
@@ -720,8 +719,6 @@ struct Instance : Asset
     // Note: the order here determines the ordering of declarations in rendered code
     TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
 
-	Production GetMyProduction(const VN::RendererInterface *, Policy policy) const override;    
-	string GetRender( VN::RendererInterface *renderer, Production, Policy policy ) override;
 	bool ShouldSplitInstance( Policy policy ) const override;	
 	list<string> RenderDominant( VN::RendererInterface *renderer, Policy policy ) const override;
 	list<string> RenderMiddlePart( VN::RendererInterface *renderer, Policy policy, Policy id_policy ) const override;
