@@ -138,13 +138,14 @@
 <string>    NEW_ASCII_NAME 					_("ASCII name")
 <wstring>   NEW_UNICODE_NAME 				_("Unicode name")
 <const ANDBlock *>	NODE_NAMESPACE			_("scope resolving name")
-<TreePtr<Node>>	DESIGNATED_STMT		_("designated statement")
-<TreePtr<Node>>	DESIGNATED_EXPR		_("designated expression")
+<TreePtr<Node>>	DESIGNATED_STMT			_("designated statement")
+<TreePtr<Node>>	DESIGNATED_EXPR			_("designated expression")
+<TreePtr<Node>>	DESIGNATED_STAR			_("designated ★")
 <TreePtr<Node>>	DESIGNATED_TYPE			_("designated type")
 <TreePtr<Node>>	DESIGNATED_CURRENT_RECORD_ID _("current record")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier")
 <TreePtr<Node>>	DESIGNATED_ACCESS		_("designated access spec")
-<TreePtr<Node>>	EXPLICIT_EXPR		_("explicit expression node")
+<TreePtr<Node>>	EXPLICIT_EXPR			_("explicit expression node")
 <TreePtr<Node>>	EXPLICIT_TYPE			_("explicit type node")
 <TreePtr<Node>>	EXPLICIT_DECL			_("explicit declaration node")
 <TreePtr<Node>>	EXPLICIT_STMT			_("explicit statement node")
@@ -198,7 +199,7 @@ stmt_high
 %type <TreePtr<Node>> 				type_entry type_specified type_primary type_postfix type_prefix type_vn_prim 
 %type <TreePtr<Node>> 				type_clause type_conjunction
 %type <TreePtr<Node>> 				unified_element unified_clause unified_conj unified_prefix 
-%type <TreePtr<Node>> 				arrival 
+%type <TreePtr<Node>> 				arrival star
 %type <TreePtr<Node>> 				stmt_primary stmt_parens stmt_prefix statement bare_statement statement_nca control_stmt_sign       
 %type <TreePtr<Node>> 				declaration declaration_na
 %type <TreePtr<Node>> 				declaration_np
@@ -272,15 +273,12 @@ stmt_high
 
 vnscript 		: commands 								{ vn->OnVNScript($1); }
      
-// This is to make the ➜ optional on last command
 commands        : sep_commands								{ $$ = $1; }
-//				| sep_commands COMPOSITION_OP					{ $$ = $1; }
 				
-// The ➜ turns patterns into commands. 
-sep_commands 	: sep_commands script_command		{ $$ = $1; $$.push_back($2); }	
-				| script_command								{ $$.push_back($1); }
+sep_commands 	: sep_commands script_command				{ $$ = $1; $$.push_back($2); }	
+				| script_command							{ $$.push_back($1); }
 				| sep_commands DESIGNATE_COMMAND designation_command	{ $$ = $1; recogniser->AddGnomon($3); }	
-				| DESIGNATE_COMMAND designation_command							{ recogniser->AddGnomon($2); }
+				| DESIGNATE_COMMAND designation_command					{ recogniser->AddGnomon($2); }
 			
 // Add more commands here
 script_command	: ENGINE_COMMAND unified_clause   		 	{ $$ = make_shared<VN::EngineCommand>($2, @1); }
@@ -289,6 +287,7 @@ script_command	: ENGINE_COMMAND unified_clause   		 	{ $$ = make_shared<VN::Engi
 // or here
 designation_command	: new_vn_name sing_stmt_element	 	{ $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_STMT); }
 					| new_vn_name expression_element	{ $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_EXPR); }
+					| new_vn_name star					{ $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_STAR); }
 					| new_vn_name type_entry			{ $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
 					| new_vn_name qualifier_node		{ $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
 					| new_vn_name ACC_NODE_KEYWORD	 	{ $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_ACCESS); }
@@ -315,6 +314,7 @@ item		: item VN_SUB_SEP unified_element		{ $$ = $1; $$.nodes.push_back($3); $$.l
 
 unified_element	: sing_stmt_element
 				| expression_element
+				| star			
 				| type_entry
 				| qualifier_node		
 				| PREPROCESSOR_ID_SIGN	
@@ -389,7 +389,8 @@ bare_decl_param	: prototype_param
 initialiser		: compound
 					
 bare_initialiser: C_ASSIGN assign_init									{ $$ = $2; } 
-				| DESIGNATED_EXPR		
+				| DESIGNATED_EXPR	
+				| DESIGNATED_STAR	
 				| INIT_SIGN							
 			
 // Note: C++ grammar allows to go directly into declarator, but we don't since we want to resolve "real" declarators 
@@ -425,7 +426,7 @@ memb_inits	: memb_inits ',' memb_init_element							{ $$ = $1; $$.push_back($3);
 memb_init_boot	: memb_init_element
 
 memb_init_element: memb_init_prefix
-				| STAR													{ $$ = vn->OnStar(nullptr); }	
+				| star
 				| 					   RESTRICTED_STAR memb_init_prefix { $$ = vn->OnStar($2); }
 
 memb_init_prefix: memb_init_postfix
@@ -440,12 +441,13 @@ memb_init_postfix	: memb_init_primary
 memb_init_primary	: '(' memb_init_boot ')'                          			{ $$ = $2; }
 					| DELTA_COMPARE_OP memb_init_boot DELTA_REPLACE_OP memb_init_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
 					| mi_full_explicit_start itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
-					| DESIGNATED_EXPR // for unrestricted Star without ; only
+					| DESIGNATED_STAR
 					| vn_any_node
 
-// TODO try and use addet_id_x for this. First need to tighten up memb_init_primary, i.e. have a separate designation for star without ;                 
+// TODO try and use asset_id_primary for this. But asset_id_primary goes to vn_primary and thence to an expressional DELTA
 mi_id				: DESIGNATED_EXPR
 					| vn_any_node
+//					| asset_id_primary
                      
 mi_full_explicit_start 	: EXPLICIT_MEMB_INIT						{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
@@ -517,7 +519,7 @@ parameters		: param_element								{ $$.push_back($1); }
 				| parameters ',' param_element				{ $$ = $1; $$.push_back($3); }			
 		
 param_element	: parameter
-				| STAR									  	{ $$ = vn->OnStar(nullptr); }	
+				| star
 				| 			  	  RESTRICTED_STAR parameter { $$ = vn->OnStar($2); }
 
 parameter   	: bare_decl_param   
@@ -548,12 +550,12 @@ bases			: base_element                                          	{ $$.push_back(
 				| bases ',' base_element									{ $$ = $1; $$.push_back($3); } 
       
 base_element	: base      
-				| STAR													{ $$ = vn->OnStar(nullptr); }	
+				| star
 				| 					               RESTRICTED_STAR base { $$ = vn->OnStar($2); }
 
 base			: type_specified										{ $$ = vn->OnBase($1); } 
 				| vn_any_node											{ $$ = $1; }
-				| DESIGNATED_EXPR       				  				// To match a designated Star
+				| DESIGNATED_STAR       				  			
 				| access_extras type_specified							{ $$ = vn->OnBase($1, $2, @$); }
                                                                                                                                                          				                      				                        
 //////////////////////////////// ACCESS ////////////////////////////////////                                  
@@ -583,7 +585,7 @@ enumerators		: enum_element												{ $$.push_back($1); }
 				| enumerators ',' enum_element 								{ $$ = $1; $$.push_back($3); }
 
 enum_element	: enumerator
-				| STAR										  	   			{ $$ = vn->OnStar(nullptr); }	
+				| star
 				|              	         RESTRICTED_STAR enumerator 		{ $$ = vn->OnStar($2); }
 
 enumerator		: prototype_enumerator
@@ -596,7 +598,7 @@ prototype_enumerator 	: declaring_asset_id 									{ $$ = vn->OnEnumerator(@1)-
 
 // Not a contradiction in terms. This is for syntactiacally singular but dislocated productions.
 sing_stmt_element: sing_stmt_clause
-				 | STAR ';'										     { $$ = vn->OnStar(nullptr); } // statemental intention
+				 | star ';'											 // statemental intention
 				 | 					RESTRICTED_STAR sing_stmt_clause { $$ = vn->OnStar($2); }
 
 sing_stmt_boot	: sing_stmt_clause 
@@ -624,7 +626,7 @@ statements		: statement_element											            { $$ = {$1}; }
 				| statement_element statements											{ $$ = $2; $$.push_front($1); }
 
 statement_element: statement_clause
-				| STAR ';'										{ $$ = vn->OnStar(nullptr); }				
+				| star ';'										
 				| 				 RESTRICTED_STAR statement_clause { $$ = vn->OnStar($2); }
 
 statement_clause: statement_conj
@@ -693,7 +695,6 @@ semicolon_args	: expression												{ $$.push_back($1); }
 // Wouldn't need Star/_element here if designated star<Statemental> had a ; and usages of the
 // designation in statemental productions didn't. TODO
 expression_element: expression_clause
-				 | STAR											      { $$ = vn->OnStar(nullptr); } // expressional intention			
 				 | 					RESTRICTED_STAR expression_clause { $$ = vn->OnStar($2); }
 
 expression_boot	: expression_clause 
@@ -853,7 +854,7 @@ asset_id_primary: asset_id_extras
 
 asset_id_extras	: expr_full_explicit_start itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 				| ASSET_ID_SIGN	  			
-				| LABEL_ID_SIGN	  												// TODO doesn't belong here
+				| LABEL_ID_SIGN	  												// TODO this is needed - are these symbol misnamed? as in, they include label id?
 				| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } 
 				| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 				| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
@@ -870,12 +871,12 @@ map_args		: map_arg_element								{ $$.push_back($1); }
 				| map_args ',' map_arg_element					{ $$ = $1; $$.push_back($3); }			
 		
 map_arg_element	: map_arg		
-				| STAR											{ $$ = vn->OnStar(nullptr); }	
+				| star	
+				| DESIGNATED_STAR
 				|                       RESTRICTED_STAR map_arg { $$ = vn->OnStar($2); }
 							
 map_arg			: asset_id_prefix MAP_ARG_OP expr_no_comma_op			{ $$ = vn->OnIdValuePair()->OnArgsList({$1, $3}, @$); }
 				| vn_any_node
-				| DESIGNATED_EXPR
 								
 arguments		: argument_element								{ $$.push_back($1); }
 				| arguments ',' argument_element				{ $$ = $1; $$.push_back($3); }			
@@ -934,7 +935,7 @@ type_vn_prim: type_id
 			| type_full_explicit_start itemisation								 { $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DELTA_COMPARE_OP type_boot DELTA_REPLACE_OP type_boot DELTA_END_OP { $$ = vn->OnDelta($2, $4); }
 			| TRANSFORM_NAME_TYPE OPEN_VN unified_clause CLOSE_VN 				 { $$ = vn->OnTransform($1, @1, $3, @3); }
-//			| star OPEN_VN type_boot CLOSE_VN									 { $$ = vn->OnStar($3); } // probably needs to be typalised to avoid conflict with wildcarded access spec
+// TODO restricted star on types, probably needs to be typalised to avoid conflict with wildcarded access spec
 
 type_id 	: DESIGNATED_TYPE     						
 			| ID_BY_NAME_TYPE OPEN_VN STRING_LITERAL CLOSE_VN					 { $$ = vn->OnIdByName($1, @1, $3, @3); } 
@@ -959,6 +960,7 @@ vn_disloc_prefix:  						        stuff_op_scope unified_prefix { $$ = vn->OnStuf
 				|                            depth_stuff_scope unified_prefix { $$ = vn->OnStuff($2, nullptr, $1); }
 
 vn_primary 		: DESIGNATED_EXPR
+				| DESIGNATED_STAR
 				| DELTA_COMPARE_OP expression_boot DELTA_REPLACE_OP expression_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
 				| TRANSFORM_NAME_NORMAL OPEN_VN unified_clause CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 
@@ -1009,5 +1011,8 @@ depth_stuff_scope		: RESTRICTED_STUFF stuff_depth STUFF_END  	{ $$ = $2; vn->Add
 
 // This one dips into ASCII/C because VN doesn't otherwise need equality/inequality operators
 stuff_depth				: C_ASSIGN INTEGRAL_LITERAL					{ $$ = VN::Limit{ $1, @1, $2, @2 }; }
+
+star				 	: STAR											      { $$ = vn->OnStar(nullptr); } 
+
 
 %%
