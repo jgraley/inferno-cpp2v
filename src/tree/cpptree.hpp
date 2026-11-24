@@ -880,6 +880,7 @@ struct LabelIdentifier : Identifier,
     virtual string GetColour() const { return Identifier::GetColour(); } // Identifier wins
 	Production GetMyProductionTerminal() const override;    
 	Token GetSignifierToken() const override;
+	Token GetExplicitToken() const override;
 };
 
 

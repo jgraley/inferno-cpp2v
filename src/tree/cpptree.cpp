@@ -1793,6 +1793,13 @@ Syntax::Token LabelIdentifier::GetSignifierToken() const
 	return YY::VNLangParser::token::TOK_LABEL_ID_SIGN;
 }
 
+
+Syntax::Token LabelIdentifier::GetExplicitToken() const
+{
+	return YY::VNLangParser::token::TOK_EXPLICIT_LABEL_ID;
+}
+
+
 //////////////////////////// SpecificLabelIdentifier //////////////////////////////
 
 Syntax::Production SpecificLabelIdentifier::GetMyProductionTerminal() const

@@ -140,18 +140,19 @@
 <const ANDBlock *>	NODE_NAMESPACE			_("scope resolving name")
 <TreePtr<Node>>	DESIGNATED_STMT			_("designated statement")
 <TreePtr<Node>>	DESIGNATED_EXPR			_("designated expression")
+<TreePtr<Node>>	DESIGNATED_LABEL_ID		_("designated label identifier")
 <TreePtr<Node>>	DESIGNATED_STAR			_("designated ★")
 <TreePtr<Node>>	DESIGNATED_TYPE			_("designated type")
 <TreePtr<Node>>	DESIGNATED_CURRENT_RECORD_ID _("current record")
 <TreePtr<Node>>	DESIGNATED_QUAL			_("designated qualifier")
 <TreePtr<Node>>	DESIGNATED_ACCESS		_("designated access spec")
-<TreePtr<Node>>	EXPLICIT_EXPR			_("explicit expression node")
+<TreePtr<Node>>	EXPLICIT_NODE			_("explicit expression node")
 <TreePtr<Node>>	EXPLICIT_TYPE			_("explicit type node")
 <TreePtr<Node>>	EXPLICIT_DECL			_("explicit declaration node")
 <TreePtr<Node>>	EXPLICIT_STMT			_("explicit statement node")
 <TreePtr<Node>>	EXPLICIT_QUAL			_("explicit qualifier node")
 <TreePtr<Node>>	EXPLICIT_MEMB_INIT		_("explicit member initialiser node name")
-
+<TreePtr<Node>>	EXPLICIT_LABEL_ID		_("explicit label identifier")
 <TreePtr<Node>>	ID_BY_NAME_NORMAL		_("instance identifier by name")
 <TreePtr<Node>>	ID_BY_NAME_TYPE			_("type identifier by name")
 <TreePtr<Node>>	ID_BUILDER_NORMAL		_("instance identifier builder")
@@ -223,6 +224,7 @@ stmt_high
 %type <TreePtr<Node>> 				map_arg_element map_arg 
 %type <TreePtr<Node>> 				argument_element argument
 %type <TreePtr<Node>> 				expression_boot expression_element expression_clause expression_conj generalised_expr
+%type <TreePtr<Node>> 				label_id_primary
 %type <wstring> 					new_vn_name
 %type <list<shared_ptr<VN::Command>>>	commands sep_commands  
 %type <list<shared_ptr<VN::Command>>>	sing_stmt_commands expression_commands
@@ -234,7 +236,7 @@ stmt_high
 %type <shared_ptr<VN::Gnomon>>		stuff_op_scope
 %type <shared_ptr<VN::Gnomon>>		params_scope 
 %type <shared_ptr<VN::RegularScopeGnomon>>		code_unit_scope compound_scope  stmt_expr_scope
-%type <VN::NodeAndGnomon>			expr_full_explicit_start type_full_explicit_start decl_full_explicit_start stmt_full_explicit_start qual_full_explicit_start mi_full_explicit_start
+%type <VN::NodeAndGnomon>			node_full_explicit_start type_full_explicit_start decl_full_explicit_start stmt_full_explicit_start qual_full_explicit_start mi_full_explicit_start label_id_full_explicit_start
 %type <VN::NodeAndGnomon>			record_scope enum_scope
 %type <list<TreePtr<Node>>>			statements  
 %type <list<TreePtr<Node>>>			enumerators
@@ -287,6 +289,7 @@ script_command	: ENGINE_COMMAND unified_clause   		 	{ $$ = make_shared<VN::Engi
 // or here
 designation_command	: new_vn_name sing_stmt_element	 	{ $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_STMT); }
 					| new_vn_name expression_element	{ $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_EXPR); }
+					| new_vn_name label_id_primary		{ $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_EXPR); }
 					| new_vn_name star					{ $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_STAR); }
 					| new_vn_name type_entry			{ $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_TYPE); }
 					| new_vn_name qualifier_node		{ $$ = make_shared<VN::DesignationGnomon>($1, $2, YY::VNLangParser::token::TOK_DESIGNATED_QUAL); }
@@ -821,7 +824,9 @@ declaring_st_asset_id	: asset_id_primary
                                                                                  MakeTreeNode<CPPTree::AssetIdentifier>(), 
                                                                                  YY::VNLangParser::token::TOK_DESIGNATED_STMT)); }
 
-declaring_label_id	: asset_id_primary
+declaring_label_id	: label_id_primary	  		
+					| vn_primary
+					| label_id_full_explicit_start itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
                     | new_vn_name			{ recogniser->AddGnomon(
                                               make_shared<VN::DesignationGnomon>($1, 
                                                                                  MakeTreeNode<CPPTree::LabelIdentifier>(), 
@@ -852,13 +857,16 @@ asset_id_parens	: asset_id_primary
 asset_id_primary: asset_id_extras
 				| vn_primary
 
-asset_id_extras	: expr_full_explicit_start itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
+asset_id_extras	: node_full_explicit_start itemisation							{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 				| ASSET_ID_SIGN	  			
-				| LABEL_ID_SIGN	  												// TODO this is needed - are these symbol misnamed? as in, they include label id?
 				| ID_BY_NAME_NORMAL OPEN_VN STRING_LITERAL CLOSE_VN				{ $$ = vn->OnIdByName($1, @1, $3, @3); } 
 				| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 		{ $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 				| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 				| ID_BUILDER_NORMAL OPEN_VN VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
+			
+//////////////////////////////// ASSET IDENTIFIERS ////////////////////////////////////         
+			
+label_id_primary: LABEL_ID_SIGN
 			
 //////////////////////////////// ARGUMENTS ////////////////////////////////////         
 			
@@ -961,6 +969,7 @@ vn_disloc_prefix:  						        stuff_op_scope unified_prefix { $$ = vn->OnStuf
 
 vn_primary 		: DESIGNATED_EXPR
 				| DESIGNATED_STAR
+				| DESIGNATED_LABEL_ID
 				| DELTA_COMPARE_OP expression_boot DELTA_REPLACE_OP expression_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
 				| TRANSFORM_NAME_NORMAL OPEN_VN unified_clause CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 
@@ -997,7 +1006,10 @@ qual_full_explicit_start : EXPLICIT_QUAL									{ $$ = vn->MakeScopeGnomonForNo
 
 //////////////////////////////////////// RECOGNISER GLUE /////////////////////////////////////////////
 
-expr_full_explicit_start : EXPLICIT_EXPR							{ $$ = vn->MakeScopeGnomonForNode($1); 
+node_full_explicit_start : EXPLICIT_NODE							{ $$ = vn->MakeScopeGnomonForNode($1); 
+																	  vn->AddGnomon($$.gnomon); }
+
+label_id_full_explicit_start : EXPLICIT_LABEL_ID					{ $$ = vn->MakeScopeGnomonForNode($1); 
 																	  vn->AddGnomon($$.gnomon); }
 
 new_vn_name		: NEW_UNICODE_NAME    						
