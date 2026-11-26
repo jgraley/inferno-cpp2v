@@ -195,6 +195,7 @@ stmt_high
 %type <TreePtr<Node>> 				expr_mul_etc expr_shift expr_bitwise_and expr_bitwise_or expr_bitwise_xor  
 %type <TreePtr<Node>> 				expr_comma_op expr_no_comma_op expression 
 %type <TreePtr<Node>> 				asset_id_primary asset_id_boot asset_id_clause asset_id_conj asset_id_prefix asset_id_postfix asset_id_parens asset_id_extras
+%type <TreePtr<Node>> 				any_id_prefix
 %type <TreePtr<Node>> 			    access_wildcard access_primary
 %type <TreePtr<Node>> 				argumentation
 %type <TreePtr<Node>> 				type_entry type_specified type_primary type_postfix type_prefix type_vn_prim 
@@ -212,14 +213,14 @@ stmt_high
 %type <TreePtr<Node>> 				type_for_declarator 
 %type <TreePtr<Node>> 				declarator declarator_prefix declarator_postfix declarator_primary
 %type <TreePtr<Node>> 				st_declarator st_declarator_prefix st_declarator_postfix st_declarator_primary
-%type <TreePtr<Node>> 				typalised type_id 
+%type <TreePtr<Node>> 				typalised type_id_primary 
 %type <TreePtr<Node>> 				ab_type ab_declarator ab_declarator_prefix ab_declarator_postfix 
 %type <TreePtr<Node>> 				record access_extras access qualifier_node
 %type <TreePtr<Node>> 				base_element base
 %type <TreePtr<Node>> 				enum_node enum restricted_stuff_scope
 %type <TreePtr<Node>>				memb_init_boot memb_init_element memb_init_prefix memb_init_postfix memb_init_primary mi_id
 %type <TreePtr<Node>> 				enumerator enum_element prototype_enumerator
-%type <TreePtr<Node>> 				declaring_type_id declaring_asset_id declaring_st_asset_id declaring_label_id
+%type <TreePtr<Node>> 				declaring_type_id_primary declaring_asset_id declaring_st_asset_id declaring_label_id
 %type <TreePtr<Node>> 				statement_element statement_clause statement_conj
 %type <TreePtr<Node>> 				map_arg_element map_arg 
 %type <TreePtr<Node>> 				argument_element argument
@@ -545,7 +546,7 @@ record			: record_scope '{' statements '}'						{ $$ = $1.node->OnMembers($3, @3
 				| record_scope '{' '}'			 						{ $$ = $1.node; }
 				| record_scope ':' bases '{' '}'						{ $$ = $1.node->OnBases($3, @3); }
              
-record_scope    : RECORD_KEYWORD declaring_type_id        				{ $$ = { $1->OnIdentifier($2, @2),  
+record_scope    : RECORD_KEYWORD declaring_type_id_primary        				{ $$ = { $1->OnIdentifier($2, @2),  
 																	             vn->MakeRecordScopeGnomon($1) }; 
 																		  vn->AddGnomon($$.gnomon); } 
 																			                                                  
@@ -578,7 +579,7 @@ access_extras	: ACC_NODE_KEYWORD
 enum			: enum_scope '{' enumerators '}'		 					{ $$ = $1.node->OnMembers( $3, @3 ); }
 				| enum_scope '{' '}'		 								{ $$ = $1.node; }
              
-enum_scope      : enum_node declaring_type_id       							{ $$ = { $1->OnIdentifier($2, @2), 
+enum_scope      : enum_node declaring_type_id_primary       							{ $$ = { $1->OnIdentifier($2, @2), 
 																		                 vn->MakeRecordScopeGnomon($1) }; 
 																				  vn->AddGnomon($$.gnomon); } 
 																			  
@@ -771,8 +772,7 @@ expr_prefix : expr_postfix
 			| 					         	NEGATION_OP	expr_prefix	{ $$ = vn->OnNegation($2); }
 			|                		      BUILD_SIZE_OP stmt_prefix { $$ = vn->OnBuildSize($2); } 
 			|                	          BUILD_SIZE_OP expr_prefix { $$ = vn->OnBuildSize($2); } 
-			|                          STRINGIZE_OP asset_id_prefix { $$ = vn->OnStringize($2); } 
-			|                        		   STRINGIZE_OP type_id { $$ = vn->OnStringize($2); } 
+			|                            STRINGIZE_OP any_id_prefix { $$ = vn->OnStringize($2); } 
 			| vn_disloc_prefix 
 			
 // Postfix operators are treated like method calls, operand is regarded as object
@@ -805,7 +805,7 @@ stmt_expr_scope	: STMT_EXPR_SIGN '{'							{ $$ = make_shared<VN::RegularScopeGn
 //////////////////////////////// DECLARING IDS ////////////////////////////////////                 
 // Identifiers to use in C declaring constructs. We can designate here.
 
-declaring_type_id	: type_specified		
+declaring_type_id_primary	: type_specified		
                     | new_vn_name			{ recogniser->AddGnomon(
                                               make_shared<VN::DesignationGnomon>($1, 
                                                                                  MakeTreeNode<CPPTree::TypeIdentifier>(), 
@@ -826,7 +826,6 @@ declaring_st_asset_id	: asset_id_primary
 
 declaring_label_id	: label_id_primary	  		
 					| vn_primary
-					| label_id_full_explicit_start itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
                     | new_vn_name			{ recogniser->AddGnomon(
                                               make_shared<VN::DesignationGnomon>($1, 
                                                                                  MakeTreeNode<CPPTree::LabelIdentifier>(), 
@@ -864,9 +863,15 @@ asset_id_extras	: node_full_explicit_start itemisation							{ $$ = vn->FinishEx
 				| ID_BUILDER_NORMAL OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN	{ $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
 				| ID_BUILDER_NORMAL OPEN_VN VN_SEP item CLOSE_VN 				{ $$ = vn->OnBuildId($1, @1, wstring(), @3, $4); }
 			
-//////////////////////////////// ASSET IDENTIFIERS ////////////////////////////////////         
+any_id_prefix	: asset_id_prefix	
+				| type_id_primary
+				| label_id_primary
+			
+//////////////////////////////// LABEL IDENTIFIERS ////////////////////////////////////         
 			
 label_id_primary: LABEL_ID_SIGN
+				| DESIGNATED_LABEL_ID
+				| label_id_full_explicit_start itemisation						{ $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			
 //////////////////////////////// ARGUMENTS ////////////////////////////////////         
 			
@@ -939,13 +944,13 @@ type_primary: type_vn_prim
             | TYPE_W_ARGS_SIGN parameterisation									{ $$ = $1->OnParams($2, @2); }		
 			| type_specifier_seq 												{ $$ = vn->OnTypeSpecifierSeq($1, @1); }				
 			
-type_vn_prim: type_id
+type_vn_prim: type_id_primary
 			| type_full_explicit_start itemisation								 { $$ = vn->FinishExplicitNode($1.node, @1, $2); }
 			| DELTA_COMPARE_OP type_boot DELTA_REPLACE_OP type_boot DELTA_END_OP { $$ = vn->OnDelta($2, $4); }
 			| TRANSFORM_NAME_TYPE OPEN_VN unified_clause CLOSE_VN 				 { $$ = vn->OnTransform($1, @1, $3, @3); }
 // TODO restricted star on types, probably needs to be typalised to avoid conflict with wildcarded access spec
 
-type_id 	: DESIGNATED_TYPE     						
+type_id_primary 	: DESIGNATED_TYPE     						
 			| ID_BY_NAME_TYPE OPEN_VN STRING_LITERAL CLOSE_VN					 { $$ = vn->OnIdByName($1, @1, $3, @3); } 
 			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP CLOSE_VN 			 { $$ = vn->OnBuildId($1, @1, $3, @3, VN::Item{}); }
 			| ID_BUILDER_TYPE OPEN_VN STRING_LITERAL VN_SEP item CLOSE_VN 		 { $$ = vn->OnBuildId($1, @1, $3, @3, $5); }
@@ -969,7 +974,6 @@ vn_disloc_prefix:  						        stuff_op_scope unified_prefix { $$ = vn->OnStuf
 
 vn_primary 		: DESIGNATED_EXPR
 				| DESIGNATED_STAR
-				| DESIGNATED_LABEL_ID
 				| DELTA_COMPARE_OP expression_boot DELTA_REPLACE_OP expression_boot DELTA_END_OP	{ $$ = vn->OnDelta($2, $4); } 
 				| TRANSFORM_NAME_NORMAL OPEN_VN unified_clause CLOSE_VN	{ $$ = vn->OnTransform($1, @1, $3, @3); }
 
