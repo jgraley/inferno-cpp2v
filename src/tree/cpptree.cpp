@@ -3298,8 +3298,10 @@ Syntax::Production Do::GetMyProductionTerminal() const
 
 string Do::GetRender( VN::RendererInterface *renderer, Production, Policy policy )
 {
-	return renderer->DoRenderSignifier(this, policy) + "\n" +
-		   renderer->DoRender( &body, Production::STMT_DECL_LOW, policy ) +
+	return renderer->DoRenderSignifier(this, policy) + 
+			"\n" +
+		   renderer->DoRender( &body, Production::BOOT, policy ) + // #950 do...while boots the parser
+		   " " + // Space-sep construct
 		   "while( " +
 		   renderer->DoRender( &condition, Production::BOTTOM_EXPR, policy ) +
 		   " )" ;

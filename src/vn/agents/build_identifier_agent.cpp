@@ -24,7 +24,6 @@ TreePtr<Node> BuildIdentifierAgent::BuildNewSubtree(const SCREngine *acting_engi
 string BuildIdentifierAgent::GetNewName(const SCREngine *acting_engine)
 {
     INDENT("B");
-    TRACE("Begin SoftMakeIdentifier recurse for \"")(format)("\"\n");
     list<string> ls;
     bool all_same = true;
     for( TreePtrInterface &source : sources )
@@ -33,29 +32,22 @@ string BuildIdentifierAgent::GetNewName(const SCREngine *acting_engine)
         // We have a child identifier - let replace algorithm run in the expectation it will
         // get subsitituted with a SpecificIdentifier from the original program tree
         PatternLink source_plink(&source);
-        TreePtr<Node> new_identifier = source_plink.GetChildAgent()->BuildForBuildersAnalysis(source_plink, acting_engine);
+		TRACE("Begin SoftMakeIdentifier recurse for \"")(format)("\"\n");
+        TreePtr<Node> param = source_plink.GetChildAgent()->BuildForBuildersAnalysis(source_plink, acting_engine);
         TRACE("End SoftMakeIdentifier recurse\n");
-        ASSERT( new_identifier );
-        TreePtr<SpecificIdentifier> si = DynamicTreePtrCast<SpecificIdentifier>( new_identifier );
-        ASSERT( si )("BuildIdentifier: ")(*new_identifier)(" should be a kind of SpecificIdentifier (format is %s)", format.c_str());
-        string s = si->GetIdentifierName();
-        if( !ls.empty() )
-            all_same = all_same && (s == ls.back());
+        ASSERT( param );
+        string s;
+        if( auto si = DynamicTreePtrCast<SpecificIdentifier>( param ) )
+		    s = si->GetIdentifierName();
+		else if( auto ss = DynamicTreePtrCast<SpecificString>( param ) )
+			s = ss->GetString();
+		else
+			ASSERT(false)("Unacceptable parameter to BuildIdentifierAgent: ")(param);
+		   
         ls.push_back( s );
     }
 
-	// Empty format string gives default behaviour
-    if( format.empty() )
-    {		
-		// Optional functionality: when every identifier has the same name, just return that
-		// name. Handy for "merging" operations.
-		if( ls.empty() )
-			return "unnamed"; // TODO caps for labels
-		else if( all_same )
-			return ls.front();  
-		else
-			return Join( ls, "_" );
-	}	
+    ASSERT( !format.empty() ); // Format string is now required - so can be understood as similar to printf
 
     // Use sprintf to build a new identifier based on the found one. Obviously %s
     // becomes the old identifier's name.

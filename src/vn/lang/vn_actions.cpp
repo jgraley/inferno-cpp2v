@@ -900,40 +900,23 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 
 // Consider c-style scoping of designations (eg for macros?)
 
-// Parsing 016-RaiseSCDeltaCount.vn reveals a mis-render - the identifier should be rendered 
-// with some kind of "real identifier node" syntax (and its name hint)
-
-
-// Productions using ⦅ ⦆: 
-// - Try again at TypeOf->TypeIs etc
-// - AFTER adding C mixture, try using () and making things look like printf etc
-
 // Try c-style cast again, this time at a strictly lower precedence than the other prefix ops, per https://alx71hub.github.io/hcb/#statement
 // Depends on whether we allow () on types. Not C, but avoids heavy reliance on designations
 
 // NOTE ON CONSTRUCTORS
-// Since VN uses "bound" C++, we will always need to specify which of possibly overloaded constructors we are
-// referring to when constructing. So pure C++ is basically not possible here. 
+// Since VN uses "resolved" C++, we will always need to specify which of possibly overloaded constructors we are
+// referring to when constructing. So pure C++ is basically not possible here. Constructors are therefore
+// Assets, not Resources
 
 // Note: comma operator can stay in: C-productions that use commas are all expressional and come in at norm_no_comma_op
 
 // Renaming of productions and nodes 
 // - Use eg https://alx71hub.github.io/hcb/#statement to rename everything in line with C++ grammar terminology. 
 // - There are other interesting things here, like assign and ?: are not merged, ?: is higher and some RValue-like cases go straight to ?:, excluding assign - reproduce in parser and renderer, don't accept what C++ doesn't!
-// - I think norm_/normal can become expr_
 // - Labels will need their own "stuff" I think, otherwise it will be too hard to disambiguate with things like : and && hanging around
 // Organisation: stuff from the C++ BNF
-
-// Can we generally differentiate between VN syntax that takes the place of C syntax eg ⯁ and that doesn't eg all the VN operators?
-// Could ⯁ use () instead of ⦅ ⦆?
-
-// The VN parse tree avoids couplings by the use of designations. But couplings can re-create stem context. So, a VN source file
-// has a simple structure: start at stem, stem -> search, stem -> replace. One ambiguity is designations that are only used in
-// entirely in search or entirely in replace context. Maybe designations could qualify themselves to be search-side or replace 
-// side by borrowing ▲ and ⯈ symbols. A pain to render though.
  
-// Review the dispatch-specifiers and const on the node methods for rendering
-
+// NOTE only: no action planned 
 // MAYBE Move conj and disj back to original precidences. The lowered precs require two syntaxes, statement and expression. So we can
 // get confused by eg { return x; ∧ goto y; } (=new form) versus { (return x;) ∧ (goto y;); } - or maybe we use the former and it's not confusing...
 // No, don't. If we only have VN unops at high prec, we can build separate columns of them for incompatible primary
@@ -941,15 +924,11 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // and all cases are covered. But if we want ∧ we need all 4 forms of P/Q_pre ∧ P/Q_pre and some of these it's unclear
 // whether the expression is a P or a Q. It's better to put these at low prec even if we need more than one set.
 
-// A pattern emerges in the CPPTree GetRender() functions: we are using VN-render policy to prevent the render from depending on a 
+// NOTE A pattern emerges in the CPPTree GetRender() functions: we are using VN-render policy to prevent the render from depending on a 
 // direct analysis of child nodes - this works because VN-renders are patterns and could have special nodes in between (and
 // we never attempt to analyse special nodes for their "true" type because it can be ambiguous.
 
 // Agents inherit from nodes so Agent::GetAgentRender() can just be GetRender(). Simplify the call sites.
-
-// Node::GetRender() could implement the explicit render.
-
-// Check 093-DetectSuperLoop, we have a label definition ‽:; and then goto ‽ even though a coupling would seem to be needed, but we didn't get a designation.
 
 // C fold-in: 
 // things like OnPrefixOperator() should take an actual parser token not a string
@@ -984,8 +963,6 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // so you need a pocket for parameters. Is this to be shared with class members? Find out...
 
 // Do something about destructors, try them out in pattern and x
-
-// Putting arrivals on compound or expression causes conflicts, need to look at symmetry
  
 // According to https://alx71hub.github.io/hcb/#assignment-expression, the RHS of Syntax::Location assignment
 // operator including = is actual an initialiser. That might reduce pressure in the grammar
@@ -1078,6 +1055,8 @@ TreePtr<Node> CPPTree::Permission::GetDefaultNode(TreePtr<Node>) const
 // Trouble: explicit nodes ⯁MyNode have optional ⦅...itemisation...⦆ making long-form
 
 // DESIGNATED_STMT: split out DESIGNATED_STAR and give same prec as STAR, RESTRICTED_STAR
+
+// NOTE: Compounds are significant in VN lang: {} implies something, () doesn't
 
 // TODO:
 // Remove pre-restriction syntax entirely

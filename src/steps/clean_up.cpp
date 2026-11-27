@@ -214,7 +214,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     auto post = MakePatternNode<StarAgent, Statement>();
     auto s_labelid1 = MakePatternNode<LabelIdentifier>();
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
-    auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
+    auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("%s_%s");
     auto l_s_orrule = MakePatternNode<DisjunctionAgent, LabelIdentifier>();
     
     l_s_orrule->disjuncts = (s_labelid1, s_labelid2);
@@ -267,7 +267,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     auto post = MakePatternNode<StarAgent, Statement>();
     auto s_labelid1 = MakePatternNode<LabelIdentifier>();
     auto s_labelid2 = MakePatternNode<LabelIdentifier>();
-    auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>();
+    auto r_labelid = MakePatternNode<BuildSpecificLabelIdentifierAgent>("%s_%s");
     auto l_s_orrule = MakePatternNode<DisjunctionAgent, LabelIdentifier>();
     auto identifier = MakePatternNode<AssetIdentifier>();
     auto s_goto = MakePatternNode<Goto>();

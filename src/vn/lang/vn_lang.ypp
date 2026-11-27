@@ -682,8 +682,7 @@ statement_nca	: bare_statement ';'
 
 bare_statement	: SIMPLE_STMT_SIGN										
 				| SIMPLE_STMT_SIGN expression							{ $$ = $1->OnArgsList({$2}, @2); }
-				| DO_KEYWORD statement WHILE_KEYWORD '(' expression_boot ')'	{ $$ = $1->OnBody($2, @2)->OnArgsList({$5}, @5); } // TODO a While node is gobbled up here
-				// TODO shouldn't need sing_stmt in C syntax, try expr_element
+				| DO_KEYWORD sing_stmt_boot WHILE_KEYWORD '(' expression_boot ')'	{ $$ = $1->OnBody($2, @2)->OnArgsList({$5}, @5); } // TODO a While node is gobbled up here
 				| expression 											
 
 control_stmt_sign 	: CONTROL_STMT_SIGN
